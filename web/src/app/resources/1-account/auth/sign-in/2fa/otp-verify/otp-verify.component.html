@@ -1,0 +1,68 @@
+<!-- Header with Back Button + Logo + Language -->
+<div class="flex items-center justify-between mb-4 relative">
+    <button type="button" mat-icon-button (click)="onBack()"
+            class="text-slate-500 hover:text-slate-700">
+        <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
+    </button>
+    <img class="h-11 sm:h-12 w-auto object-contain" src="/images/logo/NexTask.png" alt="NexTask" />
+    <languages></languages>
+</div>
+
+<!-- Channel Badge & Title -->
+<div class="flex flex-col items-center pt-2 pb-4 text-center">
+    <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+        <mat-icon *ngIf="selectedChannel === 'email'" svgIcon="mdi:email" class="icon-size-8 text-slate-700 dark:text-slate-200"></mat-icon>
+        <mat-icon *ngIf="selectedChannel === 'phone'" svgIcon="mdi:phone" class="icon-size-8 text-slate-700 dark:text-slate-200"></mat-icon>
+        <mat-icon *ngIf="selectedChannel === 'authenticator'" svgIcon="google-authenticator-colored" class="icon-size-8"></mat-icon>
+    </div>
+
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
+        {{ (selectedChannel === 'email' ? 'អ៊ីមែល' : (selectedChannel === 'phone' ? 'លេខទូរស័ព្ទ' : 'Google Authenticator')) | transloco }}
+    </h2>
+
+    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        {{ (selectedChannel === 'email' ? 'សូមបញ្ចូលលេខកូដដែលផ្ញើទៅអ៊ីមែល' : (selectedChannel === 'phone' ? 'សូមបញ្ចូលលេខកូដដែលផ្ញើទៅលេខទូរស័ព្ទ' : 'សូមបញ្ចូលលេខកូដ ៦ខ្ទង់ពីកម្មវិធី Google Authenticator')) | transloco }}
+    </p>
+    <p class="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 mt-0.5" *ngIf="selectedChannel !== 'authenticator' && displayDestination">
+        {{ displayDestination }}
+    </p>
+</div>
+
+<!-- OTP Inputs Row -->
+<div class="otp-inputs-container my-4">
+    <div class="otp-inputs-row">
+        <input class="otp-input" [class.has-value]="numStr1" #otpInput1 [value]="numStr1" (keydown)="onKeyDown(1, $event)" maxlength="1" [disabled]="otpFailed" (paste)="onOtpPaste($event)" (input)="onOtpInput(1, $event)" />
+        <input class="otp-input" [class.has-value]="numStr2" #otpInput2 [value]="numStr2" (keydown)="onKeyDown(2, $event)" maxlength="1" [disabled]="otpFailed" (paste)="onOtpPaste($event)" (input)="onOtpInput(2, $event)" />
+        <input class="otp-input" [class.has-value]="numStr3" #otpInput3 [value]="numStr3" (keydown)="onKeyDown(3, $event)" maxlength="1" [disabled]="otpFailed" (paste)="onOtpPaste($event)" (input)="onOtpInput(3, $event)" />
+        <input class="otp-input" [class.has-value]="numStr4" #otpInput4 [value]="numStr4" (keydown)="onKeyDown(4, $event)" maxlength="1" [disabled]="otpFailed" (paste)="onOtpPaste($event)" (input)="onOtpInput(4, $event)" />
+        <input class="otp-input" [class.has-value]="numStr5" #otpInput5 [value]="numStr5" (keydown)="onKeyDown(5, $event)" maxlength="1" [disabled]="otpFailed" (paste)="onOtpPaste($event)" (input)="onOtpInput(5, $event)" />
+        <input class="otp-input" [class.has-value]="numStr6" #otpInput6 [value]="numStr6" (keydown)="onKeyDown(6, $event)" maxlength="1" [disabled]="otpFailed" (paste)="onOtpPaste($event)" (input)="onOtpInput(6, $event)" />
+    </div>
+</div>
+
+<!-- Timer / Resend OTP -->
+<div class="flex justify-center mb-4 text-xs sm:text-sm font-medium" *ngIf="selectedChannel !== 'authenticator'">
+    <span *ngIf="remainingTime > 0 && !otpFailed" class="text-slate-400 dark:text-slate-500 underline opacity-60 pointer-events-none select-none">
+        {{ 'ផ្ញើ OTP ម្ដងទៀត' | transloco }} ({{ remainingTime }})
+    </span>
+    <a *ngIf="remainingTime === 0 || otpFailed" (click)="onResend()" class="text-primary cursor-pointer underline hover:opacity-80">
+        {{ 'ផ្ញើ OTP ម្ដងទៀត' | transloco }}
+    </a>
+</div>
+
+<!-- Actions -->
+<div class="flex flex-col gap-3 pb-6">
+    <!-- Submit Verify Button -->
+    <button mat-flat-button class="helper-mat-button-md w-full !h-11 bg-primary text-white rounded-lg font-medium shadow-md transition-all hover:opacity-95"
+            [disabled]="!canSubmit || isOtpLoading || otpFailed" (click)="onVerify()">
+        <span *ngIf="!isOtpLoading">{{ 'ផ្ទៀងផ្ទាត់' | transloco }}</span>
+        <mat-progress-spinner *ngIf="isOtpLoading" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+
+    <!-- Switch Channel / Method Link -->
+    <div class="text-center">
+        <a (click)="onChangeChannel()" class="text-xs text-primary font-medium cursor-pointer underline hover:opacity-80">
+            {{ 'ជ្រើសរើសវិធីផ្សេងទៀត' | transloco }}
+        </a>
+    </div>
+</div>

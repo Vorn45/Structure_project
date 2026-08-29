@@ -1,0 +1,140 @@
+<div class="telegram-center-dialog">
+    <div class="telegram-center-dialog__header">
+        @if (step() === 'instructions') {
+            <button
+                mat-icon-button
+                type="button"
+                class="telegram-center-dialog__back"
+                (click)="goBackToConditions()"
+            >
+                <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
+            </button>
+        } @else {
+            <span class="telegram-center-dialog__header-spacer" aria-hidden="true"></span>
+        }
+
+        <h2 class="telegram-center-dialog__title">
+            {{ 'TelegramConnect.Title' | transloco }}
+        </h2>
+
+        <button
+            mat-icon-button
+            mat-dialog-close
+            type="button"
+            class="telegram-center-dialog__close"
+        >
+            <mat-icon svgIcon="mdi:close"></mat-icon>
+        </button>
+    </div>
+
+    <div class="telegram-center-dialog__body">
+        <div class="telegram-center-dialog__art">
+            <img [src]="illustrationSrc()" alt="" class="telegram-center-dialog__illustration" />
+        </div>
+
+        <div class="telegram-center-dialog__content">
+            @if (step() === 'conditions') {
+                <p class="telegram-center-dialog__section-title">
+                    {{ 'TelegramConnect.ConditionsTitle' | transloco }}
+                </p>
+
+                <ul class="telegram-center-dialog__conditions-list">
+                    <li class="telegram-center-dialog__condition">
+                        <span class="telegram-center-dialog__condition-icon">
+                            <mat-icon svgIcon="logos:telegram"></mat-icon>
+                        </span>
+                        <span class="telegram-center-dialog__condition-text">
+                            {{ 'TelegramConnect.ConditionAccount' | transloco }}
+                        </span>
+                    </li>
+
+                    <li class="telegram-center-dialog__condition">
+                        <span class="telegram-center-dialog__condition-icon">
+                            <mat-icon svgIcon="mdi:phone-outline"></mat-icon>
+                        </span>
+                        <span class="telegram-center-dialog__condition-text">
+                            {{ 'TelegramConnect.ConditionPhone' | transloco }}
+                        </span>
+                    </li>
+
+                    <li class="telegram-center-dialog__condition">
+                        <span class="telegram-center-dialog__condition-icon">
+                            <mat-icon svgIcon="mdi:at"></mat-icon>
+                        </span>
+                        <span class="telegram-center-dialog__condition-text">
+                            {{ 'TelegramConnect.ConditionUsername' | transloco }}
+                        </span>
+                    </li>
+                </ul>
+
+                <div class="telegram-center-dialog__actions">
+                    <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        class="telegram-center-dialog__primary-btn"
+                        (click)="goToInstructions()"
+                    >
+                        {{ 'TelegramConnect.Next' | transloco }}
+                    </button>
+                </div>
+            } @else {
+                <p class="telegram-center-dialog__section-title">
+                    {{ 'TelegramConnect.StepsTitle' | transloco }}
+                </p>
+
+                <ul class="telegram-center-dialog__conditions-list">
+                    <li class="telegram-center-dialog__condition">
+                        <span class="telegram-center-dialog__condition-icon">
+                            <mat-icon svgIcon="mdi:cursor-default-click-outline"></mat-icon>
+                        </span>
+                        <span class="telegram-center-dialog__condition-text">
+                            {{ 'TelegramConnect.StepOpen' | transloco }}
+                        </span>
+                    </li>
+
+                    <li class="telegram-center-dialog__condition">
+                        <span class="telegram-center-dialog__condition-icon">
+                            <mat-icon svgIcon="logos:telegram"></mat-icon>
+                        </span>
+                        <span class="telegram-center-dialog__condition-text">
+                            {{ 'TelegramConnect.StepStart' | transloco }}
+                        </span>
+                    </li>
+
+                    <li class="telegram-center-dialog__condition">
+                        <span class="telegram-center-dialog__condition-icon">
+                            <mat-icon svgIcon="mdi:check-decagram-outline"></mat-icon>
+                        </span>
+                        <span class="telegram-center-dialog__condition-text">
+                            {{ 'TelegramConnect.StepConfirm' | transloco }}
+                        </span>
+                    </li>
+                </ul>
+
+                <div class="telegram-center-dialog__actions">
+                    <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        class="telegram-center-dialog__primary-btn"
+                        [disabled]="isLoading() || isPolling()"
+                        (click)="startConnect()"
+                    >
+                        @if (isLoading() || isPolling()) {
+                            <mat-progress-spinner [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                        } @else {
+                            {{ 'TelegramConnect.Start' | transloco }}
+                        }
+                    </button>
+
+                    @if (isPolling()) {
+                        <p class="telegram-center-dialog__waiting">
+                            {{ 'TelegramConnect.Waiting' | transloco }}
+                        </p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

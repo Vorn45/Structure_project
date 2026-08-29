@@ -1,0 +1,103 @@
+<div class="lock-wrap-backdrop">
+<div class="lock-wrap">
+    <div class="lock-card">
+
+        <!-- STEP: ENTER PASSCODE -->
+        <ng-container *ngIf="step() === 'passcode'">
+            <div class="lock-card__head">
+                <mat-icon class="lock-card__illustration text-primary" svgIcon="lock-screen-illustration"></mat-icon>
+                <h2 class="lock-card__title">
+                    {{ 'Lock.PasscodeTitle' | transloco }}
+                </h2>
+                <p class="lock-card__subtitle">
+                    {{ 'Lock.PasscodeSubtitle' | transloco }}
+                </p>
+            </div>
+
+            <form [formGroup]="form" class="md-form-field-appearance-outline lock-form" (keyup.enter)="unlock()">
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                    <mat-label>{{ 'Lock.Passcode' | transloco }}</mat-label>
+                    <mat-icon matPrefix class="mat-icon-6" svgIcon="mdi:lock"></mat-icon>
+                    <input matInput [type]="hidePasscode() ? 'password' : 'text'" formControlName="passcode" autocomplete="current-password" />
+                    <button type="button" mat-icon-button matSuffix (click)="hidePasscode.set(!hidePasscode())">
+                        <mat-icon class="mat-icon-6" [svgIcon]="hidePasscode() ? 'mdi:eye' : 'mdi:eye-off'"></mat-icon>
+                    </button>
+                </mat-form-field>
+
+                <div *ngIf="wrongPasscode()" class="lock-error">
+                    <mat-icon class="icon-size-5" svgIcon="mdi:alert-circle"></mat-icon>
+                    <span>{{ 'Lock.IncorrectPasscode' | transloco }}</span>
+                </div>
+            </form>
+
+            <div class="lock-links">
+                <a (click)="forgotPasscode()">{{ 'Lock.ForgotPasscode' | transloco }}</a>
+                <a (click)="signOutInstead()">{{ 'Lock.SignOut' | transloco }}</a>
+            </div>
+
+            <button mat-flat-button class="lock-submit" color="primary" [disabled]="form.invalid || isVerifying()" (click)="unlock()">
+                <span *ngIf="!isVerifying()">{{ 'Lock.Unlock' | transloco }}</span>
+                <mat-progress-spinner *ngIf="isVerifying()" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+            </button>
+        </ng-container>
+
+        <!-- STEP: OTP VERIFY (forgot passcode, or storage was tampered with) -->
+        <ng-container *ngIf="step() === 'otp'">
+            <div class="lock-card__head">
+                <h2 class="lock-card__title">
+                    {{ 'Lock.VerifyEmailTitle' | transloco }}
+                </h2>
+                <p class="lock-card__subtitle">
+                    {{ 'Lock.VerifyEmailSubtitle' | transloco }}
+                </p>
+            </div>
+
+            <otp-code #otpComp [type]="'2fa'" [email]="email()" [isDialog]="true" (success)="onOtpSuccess($event)"></otp-code>
+
+            <button mat-flat-button class="lock-submit" color="primary"
+                [disabled]="!otpComp?.canSubmit || otpComp?.isLoading || otpComp?.otpFailed" (click)="otpComp?.verify()">
+                <span *ngIf="!otpComp?.isLoading">{{ 'Lock.Verify' | transloco }}</span>
+                <mat-progress-spinner *ngIf="otpComp?.isLoading" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+            </button>
+
+            <div class="lock-links lock-links--center">
+                <a (click)="signOutInstead()">{{ 'Lock.SignOutInstead' | transloco }}</a>
+            </div>
+        </ng-container>
+
+        <!-- STEP: SET NEW PASSCODE -->
+        <ng-container *ngIf="step() === 'reset'">
+            <div class="lock-card__head">
+                <h2 class="lock-card__title">
+                    {{ 'Lock.SetNewPasscodeTitle' | transloco }}
+                </h2>
+            </div>
+
+            <form [formGroup]="resetForm" class="md-form-field-appearance-outline lock-form" (keyup.enter)="confirmReset()">
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                    <mat-label>{{ 'Lock.NewPasscode' | transloco }}</mat-label>
+                    <mat-icon matPrefix class="mat-icon-6" svgIcon="mdi:lock"></mat-icon>
+                    <input matInput type="password" formControlName="newPasscode" autocomplete="new-password" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                    <mat-label>{{ 'Lock.ConfirmPasscode' | transloco }}</mat-label>
+                    <mat-icon matPrefix class="mat-icon-6" svgIcon="mdi:lock-check"></mat-icon>
+                    <input matInput type="password" formControlName="confirmPasscode" autocomplete="new-password" />
+                </mat-form-field>
+
+                <div *ngIf="resetPasscodeDoNotMatch()" class="lock-error">
+                    <mat-icon class="icon-size-5" svgIcon="mdi:alert-circle"></mat-icon>
+                    <span>{{ 'Lock.PasscodesDoNotMatch' | transloco }}</span>
+                </div>
+            </form>
+
+            <button mat-flat-button class="lock-submit" color="primary" [disabled]="resetForm.invalid || isVerifying()" (click)="confirmReset()">
+                <span *ngIf="!isVerifying()">{{ 'Lock.Confirm' | transloco }}</span>
+                <mat-progress-spinner *ngIf="isVerifying()" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+            </button>
+        </ng-container>
+
+    </div>
+</div>
+</div>

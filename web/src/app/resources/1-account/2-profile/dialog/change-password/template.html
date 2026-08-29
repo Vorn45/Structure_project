@@ -1,0 +1,232 @@
+<div mat-dialog-title
+    class="w-full relative flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900">
+    <span
+        class="w-full text-center text-2xl font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'ChangePassword.Title' | transloco }}</span>
+    <button *ngIf="step() === 'new'" type="button" mat-icon-button
+        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full"
+        (click)="openGeneratePasswordDialog()" [matTooltip]="'ChangePassword.GeneratePasswordTooltip' | transloco">
+        <mat-icon svgIcon="mdi:creation-outline" class="icon-size-6 text-primary"></mat-icon>
+    </button>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="true" [closeOnClick]="false" (buttonClick)="onBack()"></shared-side-dialog-close-button>
+
+<mat-dialog-content
+    class="flex flex-col items-center gap-8 bg-white dark:bg-slate-900 font-kantumruy !overflow-x-hidden">
+    <ng-container *ngIf="step() === 'current'">
+        <div class="flex w-full flex-col items-center gap-8">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="flex size-24 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <mat-icon class="icon-size-14 text-slate-900 dark:text-slate-100" svgIcon="mdi:lock" />
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <h2 class="text-[24px] leading-8 font-medium font-kantumruy text-slate-900 dark:text-slate-100">
+                        {{ 'ChangePassword.EnterCurrentPassword' | transloco }}
+                    </h2>
+                </div>
+            </div>
+
+            <form [formGroup]="currentPasswordForm" (ngSubmit)="verifyCurrentPassword()"
+                class="flex w-full flex-col gap-4 md-form-field-appearance-outline">
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>{{ 'Auth.Common.Password' | transloco }}</mat-label>
+                    <input matInput formControlName="currentPassword"
+                        [type]="hideCurrentPassword() ? 'password' : 'text'" autocomplete="current-password" />
+                    <mat-icon matPrefix class="icon-size-6 px-3" svgIcon="mdi:lock"></mat-icon>
+                    <button type="button" mat-icon-button matSuffix class="mr-3"
+                        (click)="hideCurrentPassword.set(!hideCurrentPassword())">
+                        <mat-icon class="icon-size-5"
+                            [svgIcon]="hideCurrentPassword() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" />
+                    </button>
+                </mat-form-field>
+
+                <div class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 whitespace-nowrap">
+                    <mat-icon class="icon-size-5 shrink-0 text-slate-400" svgIcon="mdi:history"></mat-icon>
+                    <span *ngIf="!isLastChangeLoading(); else lastChangeLoading">
+                        {{ passwordLastChangeLabel() }}
+                    </span>
+                    <ng-template #lastChangeLoading>
+                        <mat-progress-spinner [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+                    </ng-template>
+                </div>
+
+                <div class="flex items-center gap-3 text-amber-500 dark:text-amber-400 px-4 whitespace-nowrap">
+                    <mat-icon class="icon-size-5 shrink-0 text-amber-500" svgIcon="mdi:alert-circle-outline"></mat-icon>
+                    <span>
+                        {{ 'ChangePassword.MonthlyReminder' | transloco }}
+                    </span>
+                </div>
+
+                <button type="button"
+                    class="self-end text-primary dark:text-primary-400 underline underline-offset-4 hover:opacity-80 transition-opacity"
+                    (click)="forgotPassword()">
+                    {{ 'Auth.Sign-In.ForgotPassword' | transloco }}
+                </button>
+            </form>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="step() === 'new'">
+        <div class="flex w-full flex-col items-center gap-8">
+            <!-- Top Section -->
+            <div class="flex flex-col items-center gap-2">
+                <div class="flex size-24 items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-full">
+                    <mat-icon class="icon-size-14 text-slate-900 dark:text-slate-100" svgIcon="mdi:lock" />
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <h2 class="text-[24px] leading-8 font-medium text-slate-900 dark:text-slate-100">
+                        {{ 'ChangePassword.EnterNewPassword' | transloco }}
+                    </h2>
+                    <p class="text-lg text-slate-500 dark:text-slate-400 text-center">
+                        {{ 'ChangePassword.ConfirmToContinue' | transloco }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="w-full flex flex-col gap-4">
+
+                <!-- Password Form -->
+                <form [formGroup]="form" (ngSubmit)="changePassword()"
+                    class="flex flex-col gap-4 md-form-field-appearance-outline">
+
+                    <!-- New Password -->
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>{{ 'ChangePassword.NewPassword' | transloco }}</mat-label>
+                        <input matInput formControlName="newPassword" [type]="hideNewPassword() ? 'password' : 'text'"
+                            autocomplete="new-password" (keydown.enter)="changePassword()" />
+                        <mat-icon matPrefix class="icon-size-6 px-3" svgIcon="mdi:lock"></mat-icon>
+                        <button type="button" mat-icon-button matSuffix class="mr-3"
+                            (click)="hideNewPassword.set(!hideNewPassword())">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="hideNewPassword() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" />
+                        </button>
+                    </mat-form-field>
+
+                    <!-- Confirm Password -->
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>{{ 'ChangePassword.ConfirmPassword' | transloco }}</mat-label>
+                        <input matInput formControlName="confirmPassword"
+                            [type]="hideConfirmPassword() ? 'password' : 'text'" autocomplete="new-password"
+                            (keydown.enter)="changePassword()" />
+                        <mat-icon matPrefix class="icon-size-6 px-3" svgIcon="mdi:lock-check"></mat-icon>
+                        <button type="button" mat-icon-button matSuffix class="mr-3"
+                            (click)="hideConfirmPassword.set(!hideConfirmPassword())">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="hideConfirmPassword() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" />
+                        </button>
+                    </mat-form-field>
+
+                </form>
+
+                <!-- Password Strength Indicator -->
+                <div class="flex justify-between gap-4">
+                    <div class="h-1.5 rounded-full w-full transition-colors duration-300"
+                        [ngClass]="passwordStrength() >= 1 ? 'bg-red-500' : 'bg-gray-300 dark:bg-slate-700'">
+                    </div>
+                    <div class="h-1.5 rounded-full w-full transition-colors duration-300"
+                        [ngClass]="passwordStrength() >= 2 ? 'bg-amber-500' : 'bg-gray-300 dark:bg-slate-700'">
+                    </div>
+                    <div class="h-1.5 rounded-full w-full transition-colors duration-300"
+                        [ngClass]="passwordStrength() >= 4 ? 'bg-green-500' : 'bg-gray-300 dark:bg-slate-700'">
+                    </div>
+                </div>
+
+                <!-- Password Requirements -->
+                <div class="flex flex-col px-3 gap-4">
+
+                    <div class="flex gap-4 items-center text-start">
+                        <mat-icon [svgIcon]="passwordLengthValid() ? 'mdi:check-circle-outline' : 'mdi:progress-check'"
+                            [ngClass]="passwordLengthValid() ? 'text-green-500' : 'text-slate-500 dark:text-slate-400'">
+                        </mat-icon>
+                        <span
+                            [ngClass]="passwordLengthValid() ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'">
+                            {{ 'ChangePassword.MinLength' | transloco }}
+                        </span>
+                    </div>
+
+                    <div class="flex gap-4 items-center text-start">
+                        <mat-icon
+                            [svgIcon]="passwordLowercaseValid() ? 'mdi:check-circle-outline' : 'mdi:progress-check'"
+                            [ngClass]="passwordLowercaseValid() ? 'text-green-500' : 'text-slate-500 dark:text-slate-400'">
+                        </mat-icon>
+                        <span
+                            [ngClass]="passwordLowercaseValid() ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'">
+                            {{ 'ChangePassword.LowerCase' | transloco }}
+                        </span>
+                    </div>
+
+                    <div class="flex gap-4 items-center text-start">
+                        <mat-icon
+                            [svgIcon]="passwordUppercaseValid() ? 'mdi:check-circle-outline' : 'mdi:progress-check'"
+                            [ngClass]="passwordUppercaseValid() ? 'text-green-500' : 'text-slate-500 dark:text-slate-400'">
+                        </mat-icon>
+                        <span
+                            [ngClass]="passwordUppercaseValid() ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'">
+                            {{ 'ChangePassword.UpperCase' | transloco }}
+                        </span>
+                    </div>
+
+                    <div class="flex gap-4 items-center text-start">
+                        <mat-icon
+                            [svgIcon]="passwordSpecialCharValid() ? 'mdi:check-circle-outline' : 'mdi:progress-check'"
+                            [ngClass]="passwordSpecialCharValid() ? 'text-green-500' : 'text-slate-500 dark:text-slate-400'">
+                        </mat-icon>
+                        <span
+                            [ngClass]="passwordSpecialCharValid() ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'">
+                            {{ 'ChangePassword.SpecialChars' | transloco }}
+                        </span>
+                    </div>
+
+                    <div *ngIf="passwordsDoNotMatch()" class="flex gap-4 items-center text-start">
+                        <mat-icon svgIcon="mdi:close-circle-outline" class="text-red-500"></mat-icon>
+                        <span class="text-slate-900 dark:text-slate-100">
+                            {{ 'ChangePassword.PasswordsDoNotMatch' | transloco }}
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- OTP Step -->
+    <ng-container *ngIf="step() === 'otp'">
+        <otp-code #otpComp [type]="'resetPassword'" [email]="email()" [isDialog]="true" (success)="onOtpSuccess($event)"></otp-code>
+    </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions
+    class="flex items-center justify-end border-t border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 px-4 py-3">
+    <button *ngIf="step() === 'current'" type="button"
+        class="px-6 h-10 flex items-center justify-center bg-primary disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="verifyCurrentPassword()" [disabled]="currentPasswordForm.invalid || isVerifying()">
+        <span *ngIf="!isVerifying()"
+            [style.color]="(currentPasswordForm.invalid || isVerifying()) ? '#94a3b8' : '#ffffff'">
+            {{ 'Auth.Common.Next' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isVerifying()" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+
+    <button *ngIf="step() === 'otp'" type="button"
+        class="px-6 h-10 flex items-center justify-center bg-primary disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="otpComp?.verify()" [disabled]="!otpComp?.canSubmit || otpComp?.isLoading || otpComp?.otpFailed">
+        <span *ngIf="!otpComp?.isLoading"
+            [style.color]="(!otpComp?.canSubmit || otpComp?.isLoading || otpComp?.otpFailed) ? '#94a3b8' : '#ffffff'">
+            {{ 'Auth.Common.Next' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="otpComp?.isLoading" [diameter]="24"
+            [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+
+    <button *ngIf="step() === 'new'" type="button"
+        class="px-6 h-10 flex items-center justify-center bg-primary disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="changePassword()" [disabled]="!isFormValid()">
+        <span *ngIf="!isLoading()" [style.color]="!isFormValid() ? '#94a3b8' : '#ffffff'">
+            {{ 'Lock.Confirm' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isLoading()" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+</mat-dialog-actions>

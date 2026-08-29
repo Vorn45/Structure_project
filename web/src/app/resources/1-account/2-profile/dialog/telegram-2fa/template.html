@@ -1,0 +1,35 @@
+<div
+    mat-dialog-title
+    class="m-0 flex h-14 min-h-14 max-h-14 w-full items-center justify-center border-b border-slate-200 bg-white !py-0 font-kantumruy dark:border-slate-700 dark:bg-slate-900"
+>
+    <span class="w-full text-center text-xl font-medium text-slate-500 dark:text-slate-400">
+        {{ 'TelegramConnect.TwoFactorTitle' | transloco }}
+    </span>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="true"></shared-side-dialog-close-button>
+
+<mat-dialog-content class="flex-1 !m-0 !p-0 bg-white font-kantumruy dark:bg-slate-900">
+    <div class="flex items-center gap-3 px-4 py-4">
+        <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+            <mat-icon class="icon-size-7" svgIcon="logos:telegram"></mat-icon>
+        </div>
+
+        <div class="flex min-w-0 flex-1 flex-col">
+            <span class="text-sm text-slate-500 dark:text-slate-400">
+                {{ 'TelegramConnect.Account' | transloco }}
+            </span>
+            <span class="truncate text-lg font-medium text-slate-900 dark:text-slate-100">
+                {{ linked() ? ('@' + (telegramUsername() || '')) : ('TelegramConnect.NotLinked' | transloco) }}
+            </span>
+        </div>
+
+        <div class="flex shrink-0 items-center">
+            @if (isLoading()) {
+                <mat-progress-spinner [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+            } @else {
+                <mat-slide-toggle [checked]="enabled()" (change)="handleToggle($event)"></mat-slide-toggle>
+            }
+        </div>
+    </div>
+</mat-dialog-content>

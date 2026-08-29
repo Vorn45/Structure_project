@@ -1,0 +1,18 @@
+deploy:
+  stage: deploy:dev
+  variables:
+    PROJECT_NAME: pms
+    SERVICE_TYPE: api
+    SERVICE_NAMESPACE: ${PROJECT_NAME}/${SERVICE_TYPE}
+    ENABLED_BUILD: 'true'
+    IP_ADDRESS: '217.15.164.171'
+  environment:
+    name: 'CamCyber/${PROJECT_NAME}/Development'
+  only:
+    # - /^v-.*-release$/
+    - dev
+  before_script:
+    - source "${CAMCYBER_UAT2_ENVIRONMENT}"
+  script:
+    - echo $CI_COMMIT_REF_NAME
+    - bash -e scripts/deploy.sh

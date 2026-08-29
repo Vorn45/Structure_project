@@ -1,0 +1,12 @@
+.mat-mdc-dialog-content.mdc-dialog__content{
+    max-height: 100vh !important;
+    padding: 2rem !important;
+}
+
+::ng-deep .md-form-field-appearance-outline {
+    .mat-mdc-form-field.mat-form-field-appearance-outline {
+        .mat-mdc-form-field-subscript-wrapper {
+            height: 0px !important;
+        }
+    }
+}

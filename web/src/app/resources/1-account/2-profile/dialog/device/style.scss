@@ -1,0 +1,91 @@
+:host ::ng-deep .mat-mdc-dialog-content {
+    padding-top: 0 !important;
+}
+
+.device-detail-summary {
+    min-height: 94px;
+    gap: 16px;
+    margin: 0 16px;
+    padding: 12px 8px;
+}
+
+.device-detail-image {
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    min-height: 56px;
+}
+
+.device-list {
+    padding-right: 16px;
+    padding-left: 16px;
+}
+
+.device-row {
+    min-height: 88px;
+    gap: 16px;
+    padding: 12px 8px;
+}
+
+.device-list-image {
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    min-height: 56px;
+}
+
+.device-name {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+}
+
+.device-meta,
+.device-meta > span {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+}
+
+.device-status {
+    height: 24px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+}
+
+.device-chevron {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 24px !important;
+}
+
+.device-sign-out {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.device-sign-out-icon {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 20px !important;
+}
+
+.activity-heading {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+.activity-dot {
+    width: 6px;
+    min-width: 6px;
+    height: 6px;
+    min-height: 6px;
+}
+
+.activity-text {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+}

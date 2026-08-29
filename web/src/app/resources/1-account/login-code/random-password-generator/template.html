@@ -1,0 +1,81 @@
+<ng-container>
+    <div class="flex flex-col w-full h-[520px] p-3 md-form-field-appearance-outline">
+        <!-- Back Button -->
+        <div class="flex justify-between items-center">
+            <button mat-icon-button type="button" (click)="closeDialog()"
+                class="absolute top-6 left-6 hover:bg-slate-50 rounded-full w-9 h-9 flex items-center justify-center">
+                <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <div class="flex flex-col justify-center items-center mt-6">
+            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-[#f3f4f5]">
+                <!-- <mat-icon class="icon-size-[50px] text-black" svgIcon="mdi:star"></mat-icon> -->
+                <img src="images/placeholder/stars2.png" alt="Random Password" class="w-12 h-12">
+            </div>
+            <span class="text-3xl font-medium mt-2">{{ 'RandomPasswordGenerator.Title' | transloco }}</span>
+            <!-- <span class="font-normal text-sm text-center text-gray-500">បង្កើតពាក្យសម្ងាត់ដែលមានសុវត្ថិភាព</span> -->
+        </div>
+
+        <!-- Password Display Field -->
+        <mat-form-field appearance="outline" class="w-full mt-4 sm-form-field-appearance-outline">
+            <mat-icon matPrefix svgIcon="mdi:lock" class="text-slate-500"></mat-icon>
+            <input matInput [value]="generatedPassword" readonly class="text-[20px] text-slate-900 font-medium" />
+            <mat-label>{{ 'Auth.Common.Password' | transloco }}</mat-label>
+            <button mat-icon-button matSuffix type="button" (click)="generatePassword()" [class.opacity-70]="isLoading">
+                <mat-icon svgIcon="mdi:refresh" [class.animate-spin]="isLoading"></mat-icon>
+            </button>
+            <button mat-icon-button matSuffix type="button" (click)="copyPassword()">
+                <mat-icon svgIcon="mdi:content-copy"></mat-icon>
+            </button>
+        </mat-form-field>
+
+        <div class="p-3">
+            <!-- Password Length Control -->
+            <div class="flex flex-col">
+                <div class="flex justify-between items-center">
+                    <label class="text-lg font-medium text-gray-700 my-1">{{ 'RandomPasswordGenerator.LengthLabel' | transloco }}</label>
+                    <span class="text-lg font-bold text-primary-600">{{ passwordLength }}</span>
+                </div>
+                <input type="range" min="1" max="18" [value]="passwordLength" (input)="onLengthChange($event)"
+                    class="w-full" [class.accent-gray-500]="passwordLength <= 6"
+                    [class.accent-primary-600]="passwordLength > 6" />
+                <div class="flex justify-between text-sm ml-1 mr-1">
+                    <span class="">1</span>
+                    <span class="">6</span>
+                    <span class="">12</span>
+                    <span class="">18</span>
+                </div>
+            </div>
+
+            <!-- Password Rules Section -->
+            <div class="flex flex-col gap-1">
+                <div class="option-row">
+                    <span class="text-lg">{{ 'RandomPasswordGenerator.Uppercase' | transloco }}</span>
+                    <mat-checkbox class="checkbox-shift" [(ngModel)]="includeUppercase" color="primary"
+                        disabled></mat-checkbox>
+                </div>
+                <div class="option-row -mt-4">
+                    <span class="text-lg">{{ 'RandomPasswordGenerator.Lowercase' | transloco }}</span>
+                    <mat-checkbox class="checkbox-shift" [(ngModel)]="includeLowercase" color="primary"
+                        disabled></mat-checkbox>
+                </div>
+                <div class="option-row -mt-4">
+                    <span class="text-lg">{{ 'RandomPasswordGenerator.Numbers' | transloco }}</span>
+                    <mat-checkbox class="checkbox-shift" [(ngModel)]="includeNumbers" color="primary"
+                        disabled></mat-checkbox>
+                </div>
+                <div class="option-row -mt-4">
+                    <span class="text-lg">{{ 'RandomPasswordGenerator.Symbols' | transloco }}</span>
+                    <mat-checkbox class="checkbox-shift" [(ngModel)]="includeSymbols" color="primary"
+                        disabled></mat-checkbox>
+                </div>
+            </div>
+        </div>
+        <!-- Primary Action Button -->
+        <button class="helper-mat-button-md w-full" mat-flat-button color="primary" (click)="generateAndUsePassword()">
+            <span>{{ 'RandomPasswordGenerator.CopyAndUse' | transloco }}</span>
+        </button>
+    </div>
+</ng-container>

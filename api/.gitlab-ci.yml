@@ -1,0 +1,19 @@
+image:
+  name: gitlab.camcyber.com:5050/camcyber/registry/node:v20-alpine
+  pull_policy: always
+
+
+stages:
+  - audit
+  - build:dev
+  - build:uat
+  - build:production
+  - deploy:dev
+  - deploy:uat
+  - deploy:production
+
+include:
+
+  - local: 'pipelines/dev.gitlab-ci.yml'
+    rules:
+      - if: '$CI_COMMIT_BRANCH == "dev"'

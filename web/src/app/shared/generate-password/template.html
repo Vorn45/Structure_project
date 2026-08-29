@@ -1,0 +1,104 @@
+<div mat-dialog-title
+    class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900">
+    <span
+        class="w-full text-center text-2xl font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'Shared.GeneratePassword.ChangePassword' | transloco }}</span>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="true"></shared-side-dialog-close-button>
+
+<mat-dialog-content
+    class="flex flex-col items-center gap-1.5 bg-white dark:bg-slate-900 font-kantumruy !overflow-x-hidden px-6 md:px-8 pb-4">
+
+    <!-- Circular Badge Header -->
+    <div class="flex flex-col items-center gap-1 mt-1 text-center">
+        <div class="flex size-20 items-center justify-center bg-slate-100 dark:bg-white/5 rounded-full">
+            <mat-icon class="icon-size-12 text-slate-900 dark:text-slate-200" svgIcon="mdi:creation" />
+        </div>
+        <span
+            class="text-[22px] leading-7 font-medium font-kantumruy text-slate-900 dark:text-slate-100 mt-1">{{ 'RandomPasswordGenerator.Title' | transloco }}</span>
+    </div>
+
+    <!-- Password Input Box (Remove border, text 20px) -->
+    <div
+        class="w-full mt-1.5 relative flex items-center justify-between rounded-xl border border-slate-200 dark:border-white/10 p-3 pr-1">
+        <span
+            class="text-[20px] font-medium font-mono text-slate-900 dark:text-slate-100 select-all truncate pr-20 pl-1">{{
+            password() }}</span>
+        <div class="flex items-center gap-1 absolute right-2 top-1/2 -translate-y-1/2">
+            <button type="button" mat-icon-button
+                class="text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/10 rounded-full"
+                (click)="generatePassword()">
+                <mat-icon class="icon-size-5" svgIcon="mdi:reload"></mat-icon>
+            </button>
+            <button type="button" mat-icon-button
+                class="text-slate-400 hover:bg-slate-200/60 dark:hover:bg-white/10 rounded-full"
+                (click)="copyPassword()">
+                <mat-icon class="icon-size-5"
+                    [svgIcon]="isPasswordCopied() ? 'mdi:clipboard-check-multiple' : 'mdi:content-copy'"
+                    [class.text-emerald-500]="isPasswordCopied()"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Length Slider (min 6 to 18, static bar for 1-6) -->
+    <div class="w-full mt-1.5 flex flex-col gap-0.5">
+        <div class="flex justify-between items-center w-full px-[12px]">
+            <span
+                class="text-[15px] font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'RandomPasswordGenerator.LengthLabel' | transloco }}</span>
+            <span class="text-xl font-medium text-slate-900 dark:text-slate-200">{{ length() }}</span>
+        </div>
+        <div class="flex items-center w-full gap-0 h-6 px-[12px]">
+            <!-- Static bar for 1 to 6 range -->
+            <div class="w-[29.4%] flex items-center">
+                <div class="h-[4px] w-full bg-slate-200 dark:bg-slate-700 rounded-l-full"></div>
+            </div>
+            <!-- Interactive Slider from 6 to 18 -->
+            <mat-slider class="flex-1" [min]="6" [max]="18" [step]="1" color="primary">
+                <input matSliderThumb [value]="length()" (input)="sliderChange($event)">
+            </mat-slider>
+        </div>
+        <div class="flex text-sm text-slate-500 dark:text-slate-500 relative w-full px-[12px] font-kantumruy">
+            <span>1</span>
+            <span class="absolute left-[29.4%] -translate-x-1/2">6</span>
+            <span class="absolute left-[64.7%] -translate-x-1/2">12</span>
+            <span class="absolute right-[12px]">18</span>
+        </div>
+    </div>
+
+    <!-- Options Checkbox List (Disabled) -->
+    <div class="w-full mt-1 flex flex-col gap-0.5">
+        <div class="flex items-center justify-between py-0 px-[12px]">
+            <span
+                class="text-[15px] leading-[24px] font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'RandomPasswordGenerator.Uppercase' | transloco }}</span>
+            <mat-checkbox class="m-0" [ngModel]="upper()" [disabled]="true"></mat-checkbox>
+        </div>
+        <div class="flex items-center justify-between py-0 px-[12px]">
+            <span
+                class="text-[15px] leading-[24px] font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'RandomPasswordGenerator.Lowercase' | transloco }}</span>
+            <mat-checkbox class="m-0" [ngModel]="lower()" [disabled]="true"></mat-checkbox>
+        </div>
+        <div class="flex items-center justify-between py-0 px-[12px]">
+            <span
+                class="text-[15px] leading-[24px] font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'RandomPasswordGenerator.Numbers' | transloco }}</span>
+            <mat-checkbox class="m-0" [ngModel]="number()" [disabled]="true"></mat-checkbox>
+        </div>
+        <div class="flex items-center justify-between py-0 px-[12px]">
+            <span
+                class="text-[15px] leading-[24px] font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'RandomPasswordGenerator.Symbols' | transloco }}</span>
+            <mat-checkbox class="m-0" [ngModel]="symbol()" [disabled]="true"></mat-checkbox>
+        </div>
+    </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions
+    class="flex items-center justify-end border-t border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 px-4 py-3">
+    <button type="button"
+        class="px-6 h-10 flex items-center justify-center bg-primary disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="onUsePassword()" [disabled]="!password() || isLoading()">
+        <span *ngIf="!isLoading()" [style.color]="(!password() || isLoading()) ? '#94a3b8' : '#ffffff'">
+            {{ 'RandomPasswordGenerator.CopyAndUse' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isLoading()" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+</mat-dialog-actions>

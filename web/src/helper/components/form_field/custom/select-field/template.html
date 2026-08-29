@@ -1,0 +1,158 @@
+<!-- Outline style (matches mat-form-field appearance="outline") -->
+@if (appearance === "outline") {
+    <div
+        class="w-full h-14 relative border border-slate-300 rounded-xl flex items-center cursor-pointer px-4 group"
+        (click)="openSelect()"
+        [class.opacity-50]="disabled"
+        [class.cursor-not-allowed]="disabled"
+    >
+        <!-- Floating label -->
+        <span class="absolute -top-[11px] left-3 bg-white px-1 text-xs text-slate-500">
+            {{ currentLang === "en" ? label : labelKh }}
+        </span>
+        <!-- Icon -->
+        <mat-icon [svgIcon]="icon" class="mr-3 text-slate-500 icon-size-5"></mat-icon>
+        <!-- Value / Placeholder -->
+        <span
+            class="flex-1 text-base"
+            [ngClass]="{ 'text-slate-900': selectedItem, 'text-[#94A3B8]': !selectedItem }"
+        >
+            {{ displayValue || "" }}
+        </span>
+        <!-- Arrow -->
+        <mat-icon svgIcon="mdi:menu-down" class="text-slate-500"></mat-icon>
+        <!-- Hidden mat-select -->
+        <mat-select
+            #selectField
+            [(ngModel)]="value"
+            [disabled]="disabled"
+            [panelClass]="allowSearch ? 'select-panel-with-search' : ''"
+            (selectionChange)="onSelectionChanged($event.value)"
+            (openedChange)="!$event && onPanelClosed()"
+            class="absolute inset-0 opacity-0 cursor-pointer"
+        >
+            @if (allowSearch) {
+                <div class="p-4 mb-2 sticky top-0 bg-white z-10 border-b">
+                    <input
+                        type="text"
+                        [(ngModel)]="searchTerm"
+                        [ngModelOptions]="{ standalone: true }"
+                        (click)="$event.stopPropagation()"
+                        [placeholder]="
+                            currentLang === 'en' ? searchPlaceholder : searchPlaceholderKh
+                        "
+                        title="search"
+                        class="w-full px-3 py-2 border rounded-md outline-none focus:border-primary"
+                    />
+                </div>
+            }
+            @for (option of filteredOptions; track option) {
+                <mat-option class="text-lg" [value]="option[valueField]">
+                    {{ getOptionDisplay(option) }}
+                </mat-option>
+            }
+            @if (allowCreate && (!options || options.length <= 4) && !searchTerm.trim()) {
+                <mat-option disabled class="text-lg">
+                    <mat-icon svgIcon="mdi:information" class="mr-2"></mat-icon>
+                    {{ currentLang === "en" ? createNewText : createNewTextKh }}
+                </mat-option>
+            }
+            @if (allowCreate && searchTerm.trim() && filteredOptions.length <= 4) {
+                <mat-option class="text-lg text-primary font-medium" [value]="searchTerm.trim()">
+                    <mat-icon svgIcon="mdi:plus-circle" class="mr-2 text-primary"></mat-icon>
+                    {{
+                        currentLang === "en"
+                            ? 'Create "' + searchTerm.trim() + '"'
+                            : 'បង្កើត "' + searchTerm.trim() + '"'
+                    }}
+                </mat-option>
+            }
+            @if (!allowCreate && allowSearch && searchTerm.trim() && filteredOptions.length === 0) {
+                <div disabled class="h-12 flex items-center justify-center px-4">
+                    <span class="w-full text-center">
+                        {{ currentLang === "en" ? "No results found" : "រកមិនឃើញ" }}
+                    </span>
+                </div>
+            }
+        </mat-select>
+    </div>
+}
+
+<!-- Default style (border-bottom, used elsewhere) -->
+@if (appearance !== "outline") {
+    <div
+        class="w-full h-16 flex items-center border-b cursor-pointer relative group"
+        (click)="openSelect()"
+        [class.opacity-50]="disabled"
+        [class.cursor-not-allowed]="disabled"
+    >
+        <!-- Icon -->
+        <div class="min-w-12 h-12 flex items-center justify-center">
+            <mat-icon [svgIcon]="icon" class="group-hover:text-primary"></mat-icon>
+        </div>
+        <!-- Placeholder/Value -->
+        <span
+            class="text-lg group-hover:text-primary group-hover:font-medium"
+            [ngClass]="{ 'text-slate-900': selectedItem, 'text-[#94A3B8]': !selectedItem }"
+        >
+            {{ displayValue || placeholderText }}
+        </span>
+        <!-- Arrow -->
+        <div class="min-w-12 h-12 flex items-center justify-center ml-auto">
+            <mat-icon svgIcon="mdi:menu-down" class="group-hover:text-primary"></mat-icon>
+        </div>
+        <mat-select
+            #selectField
+            [(ngModel)]="value"
+            [disabled]="disabled"
+            [panelClass]="allowSearch ? 'select-panel-with-search' : ''"
+            (selectionChange)="onSelectionChanged($event.value)"
+            (openedChange)="!$event && onPanelClosed()"
+            class="absolute inset-0 opacity-0 cursor-pointer"
+        >
+            @if (allowSearch) {
+                <div class="p-4 mb-2 sticky top-0 bg-white z-10 border-b">
+                    <input
+                        type="text"
+                        [(ngModel)]="searchTerm"
+                        [ngModelOptions]="{ standalone: true }"
+                        (click)="$event.stopPropagation()"
+                        [placeholder]="
+                            currentLang === 'en' ? searchPlaceholder : searchPlaceholderKh
+                        "
+                        title="search"
+                        class="w-full px-3 py-2 border rounded-md outline-none focus:border-primary"
+                    />
+                </div>
+            }
+            @for (option of filteredOptions; track option) {
+                <mat-option class="text-lg" [value]="option[valueField]">
+                    {{ getOptionDisplay(option) }}
+                </mat-option>
+            }
+            @if (allowCreate && (!options || options.length <= 4) && !searchTerm.trim()) {
+                <mat-option disabled class="text-lg">
+                    <mat-icon svgIcon="mdi:information" class="mr-2"></mat-icon>
+                    {{ currentLang === "en" ? createNewText : createNewTextKh }}
+                </mat-option>
+            }
+            @if (allowCreate && searchTerm.trim() && filteredOptions.length <= 4) {
+                <mat-option class="text-lg text-primary font-medium" [value]="searchTerm.trim()">
+                    <mat-icon svgIcon="mdi:plus-circle" class="mr-2 text-primary"></mat-icon>
+                    {{
+                        currentLang === "en"
+                            ? 'Create "' + searchTerm.trim() + '"'
+                            : 'បង្កើត "' + searchTerm.trim() + '"'
+                    }}
+                </mat-option>
+            }
+            @if (!allowCreate && allowSearch && searchTerm.trim() && filteredOptions.length === 0) {
+                <div disabled class="h-12 flex items-center justify-center px-4">
+                    <span class="w-full text-center">
+                        {{ currentLang === "en" ? "No results found" : "រកមិនឃើញ" }}
+                    </span>
+                </div>
+            }
+        </mat-select>
+    </div>
+}

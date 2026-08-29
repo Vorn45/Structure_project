@@ -1,0 +1,86 @@
+<div
+    class="w-full flex justify-between items-start py-2 cursor-pointer relative"
+    (click)="!isEditing ? onToggleEdit() : null"
+>
+    <!-- Body -->
+    <div class="w-full flex items-start gap-2 pl-4 group">
+        <!-- Icon -->
+        <div
+            class="min-w-10 h-10 flex items-center justify-center group-hover:bg-primary rounded-full"
+            [ngClass]="isEditing ? 'bg-primary-100' : 'bg-[#f3f4f5]'"
+        >
+            <mat-icon
+                [svgIcon]="icon"
+                class="icon-size-6 group-hover:text-white"
+                [ngClass]="isEditing ? 'text-primary' : 'text-slate-500'"
+            >
+            </mat-icon>
+        </div>
+
+        <!-- Content -->
+        <div class="w-full mr-14 flex flex-col items-start justify-center">
+            <!-- Label Text -->
+            <span class="text-sm leading-4 text-slate-500 group-hover:text-slate-900">
+                {{ label }}
+                @if (required) {
+                    <span class="text-sm leading-4 text-warn-500">*</span>
+                }
+            </span>
+
+            <!-- Input Text -->
+            <ng-container>
+                <!-- View Mode -->
+                <span
+                    *ngIf="!isEditing"
+                    class="w-full text-lg leading-6 group-hover:text-primary group-hover:font-medium"
+                    [ngClass]="formControl?.value ? 'text-slate-900' : 'text-[#94A3B8]'"
+                >
+                    {{ formControl?.value || placeholder }}
+                </span>
+
+                <!-- Edit Mode -->
+                <input
+                    *ngIf="isEditing"
+                    #editInput
+                    matInput
+                    type="text"
+                    [formControl]="formControl"
+                    (keydown)="onKeyDown($event)"
+                    [class]="
+                        'w-full text-lg leading-6 focus:outline-none ' +
+                        (hasError
+                            ? 'text-warn-500 focus:text-warn-500'
+                            : 'text-slate-900 focus:text-primary')
+                    "
+                />
+            </ng-container>
+
+            <!-- Error Text -->
+            @if (hasError) {
+                <div class="text-md leading-5 text-warn-500">
+                    {{ errorMessage }}
+                </div>
+            }
+        </div>
+
+        <div
+            *ngIf="!isEditing"
+            class="min-w-10 h-10 flex items-center justify-center mr-2 opacity-0 group-hover:opacity-100"
+        >
+            <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-6" />
+        </div>
+    </div>
+
+    <!-- Save Icon -->
+    <div
+        *ngIf="isEditing"
+        class="absolute top-1 right-0 min-w-12 h-12 flex items-center justify-center mr-1 rounded-full cursor-pointer group"
+        (click)="onToggleEdit(); $event.stopPropagation()"
+    >
+        <div
+            class="min-w-10 h-10 flex items-center justify-center rounded-full group-hover:bg-success-100"
+        >
+            <mat-icon svgIcon="mdi:check" class="icon-size-6 group-hover:text-success"></mat-icon>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,144 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+}
+
+:host ::ng-deep .mat-mdc-dialog-title {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+:host ::ng-deep .mat-mdc-dialog-content {
+    padding: 12px 24px 24px 24px !important;
+    margin: 0 !important;
+}
+
+/* Allow dialog container to show floating elements outside */
+:host ::ng-deep .mdc-dialog__surface {
+    overflow: visible !important;
+}
+
+:host ::ng-deep .mat-mdc-dialog-container {
+    overflow: visible !important;
+}
+
+::ng-deep .md-form-field-appearance-outline {
+    .mat-mdc-form-field.mat-form-field-appearance-outline {
+        .mat-mdc-form-field-subscript-wrapper {
+            height: 0px !important;
+        }
+    }
+}
+
+:host-context(.dark) {
+    background: #0f172a;
+
+    ::ng-deep .mat-mdc-dialog-content {
+        background: #0f172a !important;
+    }
+}
+
+/* OTP overrides to match otp-verify component */
+:host ::ng-deep otp-code {
+    .flex.justify-center.gap-3 {
+        gap: 0.625rem !important;
+    }
+
+    .custom-input {
+        width: 3rem !important;
+        height: 3rem !important;
+        font-weight: 600 !important;
+        border: 2px solid #e2e8f0 !important;
+        border-radius: 0.5rem !important;
+        background-color: #f8fafc !important;
+        color: #1e293b !important;
+        caret-color: var(--helper-primary) !important;
+        outline: none !important;
+        transition: all 0.2s ease-in-out !important;
+
+        &:focus,
+        &.has-value {
+            border-color: var(--helper-primary) !important;
+            color: var(--helper-primary) !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(var(--helper-primary-rgb), 0.15) !important;
+        }
+    }
+
+    h2.text-2xl {
+        font-size: 22px !important;
+        line-height: 1.6 !important;
+        font-weight: 500 !important;
+    }
+
+    p.text-sm {
+        font-size: 16px !important;
+        line-height: 1.7 !important;
+    }
+
+    .icon-size-10 {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 44px !important;
+    }
+
+    .mb-6 {
+        display: flex !important;
+        justify-content: center !important;
+        margin: 0 0 16px !important;
+        color: #1e293b !important;
+        line-height: 24px !important;
+
+        span, button {
+            line-height: 24px !important;
+            font-weight: 400 !important;
+        }
+
+        > span.pointer-events-none {
+            text-decoration: underline !important;
+        }
+
+        > button.text-primary {
+            color: var(--helper-primary) !important;
+        }
+    }
+
+    /* Hide the specific OTP failed text inside this dialog */
+    .text-red-500.mt-4 {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    :host ::ng-deep otp-code {
+        .flex.justify-center.gap-3 {
+            gap: 0.375rem !important;
+        }
+
+        .custom-input {
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+            max-width: 2.75rem !important;
+            max-height: 2.75rem !important;
+        }
+    }
+}
+
+:host-context(.dark) ::ng-deep {
+    otp-code .custom-input {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+        caret-color: var(--helper-primary) !important;
+
+        &:focus,
+        &.has-value {
+            border-color: var(--helper-primary) !important;
+            color: var(--helper-primary) !important;
+            background-color: #0f172a !important;
+            box-shadow: 0 0 0 3px rgba(var(--helper-primary-rgb), 0.25) !important;
+        }
+    }
+}

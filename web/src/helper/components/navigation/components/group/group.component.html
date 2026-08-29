@@ -1,0 +1,37 @@
+@for (item of item.children; track trackByFn($index, item)) {
+    <!-- Skip the hidden items -->
+    @if ((item.hidden && !item.hidden(item)) || !item.hidden) {
+        <!-- Basic -->
+        @if (item.type === 'basic') {
+            <helper-navigation-basic-item
+                [item]="item"
+                [name]="name"
+            ></helper-navigation-basic-item>
+        }
+
+        <!-- Collapsable -->
+        @if (item.type === 'collapsable') {
+            <helper-navigation-collapsable-item
+                [item]="item"
+                [name]="name"
+                [autoCollapse]="autoCollapse"
+            ></helper-navigation-collapsable-item>
+        }
+
+        <!-- Divider -->
+        @if (item.type === 'divider') {
+            <helper-navigation-divider-item
+                [item]="item"
+                [name]="name"
+            ></helper-navigation-divider-item>
+        }
+
+        <!-- Group -->
+        @if (item.type === 'group') {
+            <helper-navigation-group-item
+                [item]="item"
+                [name]="name"
+            ></helper-navigation-group-item>
+        }
+    }
+}

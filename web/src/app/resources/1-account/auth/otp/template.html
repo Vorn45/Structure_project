@@ -1,0 +1,88 @@
+<ng-container>
+    <div class="flex flex-col w-[24rem]">
+
+        <!-- Action -->
+        <div class="h-12 flex justify-between items-center">
+
+            <!-- return button -->
+            <button mat-icon-button [routerLink]="['/auth/sign-in']" mat-icon-button>
+                <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
+            </button>
+
+            <!-- Language --> 
+            <languages></languages>
+        </div>
+
+
+        <!-- Header -->
+        <div class="flex flex-col justify-center items-center">
+            <div class="flex items-center justify-center w-24 h-24 rounded-full bg-[#f3f4f5]">
+                <mat-icon class="icon-size-[50px] text-black" [svgIcon]="'mat_solid:password'"></mat-icon>
+            </div>
+            <div class="text-center">
+                    <span class="text-3xl leading-12 font-medium"> {{ 'លេខកូដ' | transloco }} </span>
+                    <p class="text-md text-slate-500"> {{ 'សូមបញ្ចូលលេខកូដដែលផ្ញើទៅ' | transloco }} </p>
+                    <p class="text-md leading-5"> {{ email }} </p>
+                    <p class="text-base leading-7"> {{ 'ពេលវេលានៅសល់ ៖' | transloco }} <span class="text-slate-900 font-medium">{{ formatTime(remainingTime) }}</span> </p>
+            </div>
+            <div class="text-center font-medium text-wrap text-sm sm:text-lg">
+
+            </div>
+        </div>
+
+        <!-- OTP -->
+        <div class="w-full flex flex-grow flex-col justify-center my-16">
+        <div class="w-full flex justify-between">
+            <input class="custom-input  " #input1 [(ngModel)]="numStr1" (keydown)="keyDownHandler1($event)"
+                    [maxlength]="6" [disabled]="otpFailed" (paste)="onPaste($event)" (input)="onOtpInput(1, $event)" />
+            <input class="custom-input" #input2 [(ngModel)]="numStr2" (keydown)="keyDownHandler2($event)"
+                    [maxlength]="6" [disabled]="otpFailed" (paste)="onPaste($event)" (input)="onOtpInput(2, $event)" />
+            <input class="custom-input" #input3 [(ngModel)]="numStr3" (keydown)="keyDownHandler3($event)"
+                    [maxlength]="6" [disabled]="otpFailed" (paste)="onPaste($event)" (input)="onOtpInput(3, $event)" />
+            <input class="custom-input" #input4 [(ngModel)]="numStr4" (keydown)="keyDownHandler4($event)"
+                    [maxlength]="6" [disabled]="otpFailed" (paste)="onPaste($event)" (input)="onOtpInput(4, $event)" />
+            <input class="custom-input" #input5 [(ngModel)]="numStr5" (keydown)="keyDownHandler5($event)"
+                    [maxlength]="6" [disabled]="otpFailed" (paste)="onPaste($event)" (input)="onOtpInput(5, $event)" />
+            <input class="custom-input" #input6 [(ngModel)]="numStr6" (keydown)="keyDownHandler6($event)"
+                    [maxlength]="6" [disabled]="otpFailed" (paste)="onPaste($event)" (input)="onOtpInput(6, $event)" />
+        </div>
+
+            <div *ngIf="otpFailed" class="text-red-500 text-sm font-semibold mt-2">
+                OTP បានផុតកំណត់ ឬមិនត្រឹមត្រូវ។ សូមស្នើសុំយក OTP ថ្មី។
+            </div>
+        </div>
+
+
+        <!-- Action -->
+        <div class="w-full flex flex-col gap-2 justify-center">
+
+            <!-- Submit Button -->
+            <button class="helper-mat-button-md w-full" mat-flat-button [color]="'primary'"
+                [disabled]="!canSubmit || isLoading || otpFailed" (click)="verify()">
+                <span *ngIf=" !isLoading "> {{ 'ផ្ទៀងផ្ទាត់' | transloco }} </span>
+                <mat-progress-spinner *ngIf=" isLoading " [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            </button>
+
+            <div class="flex justify-center font-medium">
+                <button
+                    type="button"
+                    class="text-base underline font-medium border-none bg-transparent flex items-center justify-center min-h-[24px] transition-colors"
+                    [ngClass]="(reSendOtp || otpFailed) && !isResending ? 'cursor-pointer text-primary-600 hover:opacity-80' : 'cursor-not-allowed text-slate-400 opacity-50'"
+                    [disabled]="(!reSendOtp && !otpFailed) || isResending"
+                    (click)="resendOtp()"
+                >
+                    <span *ngIf="!isResending">
+                        {{ 'ផ្ញើ OTP ម្តងទៀត' | transloco }}
+                    </span>
+                    <mat-progress-spinner
+                        *ngIf="isResending"
+                        [diameter]="20"
+                        [mode]="'indeterminate'"
+                    ></mat-progress-spinner>
+                </button>
+            </div>
+        </div>
+    </div>
+
+ 
+</ng-container>

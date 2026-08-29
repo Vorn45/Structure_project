@@ -1,0 +1,27 @@
+<div #container class="container-section w-full h-full">
+    <div class="header-img-view bg-custom min-h-14 max-h-14 py-2 px-5">
+        <div class="flex flex-1 items-center font-medium">
+            <mat-icon class="text-white" svgIcon="feather:image"></mat-icon>
+            <div class="flex items-center ml-1.5">
+                <span class="text-lg text-white -mb-0.5">{{file.title}}</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <mat-icon class="text-white cursor-pointer" svgIcon="mat_outline:file_download" (click)="downloadImage()" />
+            <mat-icon [matDialogClose]="true" class="text-white cursor-pointer" svgIcon="mat_solid:close" />
+        </div>
+    </div>
+    <div class="body-img-view pt-14">
+        <img [style.height.px]="imgHeight" [style.width.px]="imgWidth" class="mx-auto" [src]="file.url" alt="invalid">
+    </div>
+    <div class="flex absolute left-1/2 transform -translate-x-1/2 z-10 bottom-3 h-11 bg-custom-gray rounded-full">
+        <div class="min-w-30 flex items-center justify-between px-4 pt-1.5 gap-6">
+            <button (click)="zoomOut()" [disabled]="!canZoomOut">
+                <mat-icon class="text-white" svgIcon="mat_solid:horizontal_rule"></mat-icon>
+            </button>
+            <button (click)="zoomIn()" [disabled]="!canZoomIn">
+                <mat-icon class="text-white" svgIcon="feather:plus"></mat-icon>
+            </button>
+        </div>
+    </div>
+</div>

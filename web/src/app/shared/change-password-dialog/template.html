@@ -1,0 +1,41 @@
+<div mat-dialog-title class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 bg-white dark:bg-slate-900">
+    <span class="w-full text-center text-2xl font-medium text-slate-500 dark:text-slate-400">
+        {{ 'Shared.GeneratePassword.ChangePassword' | transloco }}
+    </span>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="true"></shared-side-dialog-close-button>
+
+<mat-dialog-content class="flex flex-col items-center gap-8 bg-white dark:bg-slate-900">
+
+    <!-- New password for: data.kh_name -->
+    <!-- <span *ngIf="data?.kh_name" class="w-full text-center text-slate-500">
+        {{ (current_lang === 'en' ? 'For ' : 'សម្រាប់ ') + data.kh_name }}
+    </span> -->
+
+    <!-- Password Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="w-full md-form-field-appearance-outline pt-2">
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'ChangePassword.NewPassword' | transloco }}</mat-label>
+            <input matInput formControlName="newPassword"
+                [type]="hidePassword() ? 'password' : 'text'"
+                autocomplete="new-password"
+                (keydown.enter)="submit()"
+            />
+            <mat-icon matPrefix class="icon-size-6" svgIcon="mdi:lock"></mat-icon>
+            <button type="button" mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())">
+                <mat-icon class="icon-size-5" [svgIcon]="hidePassword() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'"/>
+            </button>
+        </mat-form-field>
+    </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex items-center justify-end pt-4">
+    <button class="!bg-primary" mat-flat-button (click)="submit()" [disabled]="form.invalid || isLoading()">
+        <span *ngIf="!isLoading()" class="text-white">
+            {{ 'Common.Update' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isLoading()" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+</mat-dialog-actions>

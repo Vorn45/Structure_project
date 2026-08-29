@@ -1,0 +1,87 @@
+// qr-code-skeleton.component.scss
+.qr-skeleton-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .qr-code-wrapper {
+        position: relative;
+        display: inline-block;
+
+        .qr-code-skeleton {
+            width: 16rem; // 256px
+            height: 16rem; // 256px
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+            background-size: 200% 200%;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            position: relative;
+            animation: shimmer 2s ease-in-out infinite;
+
+            .corner-indicator {
+                position: absolute;
+                width: 1rem;
+                height: 1rem;
+                opacity: 0.3;
+
+                &.top-left {
+                    top: 0.5rem;
+                    left: 0.5rem;
+                    border-left: 2px solid #9ca3af;
+                    border-top: 2px solid #9ca3af;
+                }
+
+                &.top-right {
+                    top: 0.5rem;
+                    right: 0.5rem;
+                    border-right: 2px solid #9ca3af;
+                    border-top: 2px solid #9ca3af;
+                }
+
+                &.bottom-left {
+                    bottom: 0.5rem;
+                    left: 0.5rem;
+                    border-left: 2px solid #9ca3af;
+                    border-bottom: 2px solid #9ca3af;
+                }
+
+                &.bottom-right {
+                    bottom: 0.5rem;
+                    right: 0.5rem;
+                    border-right: 2px solid #9ca3af;
+                    border-bottom: 2px solid #9ca3af;
+                }
+            }
+        }
+
+        .logo-skeleton {
+            position: absolute;
+            width: 3rem; // 48px
+            height: 4rem; // 64px
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #d1d5db 0%, #e4e7ed 50%, #fefeff 100%);
+            background-size: 200% 200%;
+            border-radius: 0.375rem;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: shimmer 2s ease-in-out infinite 0.5s;
+        }
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 200%;
+    }
+
+    50% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 200% 200%;
+    }
+}

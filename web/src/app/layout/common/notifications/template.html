@@ -1,0 +1,183 @@
+<!-- Notifications toggle -->
+<button mat-icon-button (click)="openPanel()" #notificationsOrigin class="bg-slate-100 dark:bg-white/5">
+    @if (unreadCount > 0) {
+    <span class="absolute left-0 right-0 top-0 flex h-3 items-center justify-center">
+        <span
+            class="ml-4 mt-2.5 flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-xs font-medium text-indigo-50"
+            [ngClass]="badgeClass">
+            {{ unreadCountLabel }}
+        </span>
+    </span>
+    }
+    <mat-icon class="icon-size-6" [svgIcon]="'mdi:bell-outline'"></mat-icon>
+</button>
+
+<!-- Notifications panel -->
+<ng-template #notificationsPanel>
+    <div
+        class="fixed inset-0 flex flex-col overflow-hidden bg-card shadow-2xl ring-1 ring-black/5 dark:ring-white/10 sm:static sm:inset-auto sm:w-[26rem] sm:min-w-[26rem] sm:rounded-2xl sm:min-h-20 dark:bg-[#111827]"
+        [ngClass]="panelHeightClass">
+
+        <!-- Header: tabs + mark-all-read -->
+        <div class="flex min-h-14 h-14 shrink-0 items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pl-2 pr-3 py-2 sm:px-3">
+            <div class="flex items-center gap-1.5">
+                <button type="button" mat-icon-button (click)="closePanel()" class="sm:hidden"
+                    [matTooltip]="'Common.Back' | transloco" [attr.aria-label]="'Common.Back' | transloco">
+                    <mat-icon class="icon-size-6" svgIcon="mdi:arrow-left"></mat-icon>
+                </button>
+                <div class="flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-white/5 p-1">
+                    <button type="button" (click)="setTab('all')"
+                        class="h-8 rounded-lg px-3 text-[14px] font-medium transition-colors"
+                        [ngClass]="activeTab === 'all'
+                            ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-slate-100 shadow-sm'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'">
+                        ទាំងអស់
+                    </button>
+                    <button type="button" (click)="setTab('unread')"
+                        class="h-8 rounded-lg px-3 text-[14px] font-medium transition-colors"
+                        [ngClass]="activeTab === 'unread'
+                            ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-slate-100 shadow-sm'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'">
+                        មិនទាន់អាន
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1">
+                <button type="button" mat-icon-button [matMenuTriggerFor]="notificationsMenu"
+                    [matTooltip]="'NotificationPanel.More' | transloco">
+                    <mat-icon class="icon-size-6" [svgIcon]="'mdi:dots-horizontal'"></mat-icon>
+                </button>
+            </div>
+
+            <mat-menu #notificationsMenu="matMenu" [xPosition]="'before'">
+                <button type="button" mat-menu-item (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+                    <mat-icon [svgIcon]="'mdi:check-all'"></mat-icon>
+                    <span>{{ 'NotificationPanel.MarkAllRead' | transloco }}</span>
+                </button>
+                <button type="button" mat-menu-item (click)="openSettings()">
+                    <mat-icon [svgIcon]="'mdi:cog-outline'"></mat-icon>
+                    <span>{{ 'NotificationPanel.Settings' | transloco }}</span>
+                </button>
+                <button type="button" mat-menu-item class="group-chats-wallpaper-trigger" [matMenuTriggerFor]="wallpaperMenu">
+                    <mat-icon [svgIcon]="'mdi:wallpaper'"></mat-icon>
+                    <span>{{ 'ChatSetting.wallpaper' | transloco }}</span>
+                </button>
+                <mat-menu #wallpaperMenu="matMenu" xPosition="before" class="group-chats-wallpaper-menu" [hasBackdrop]="true">
+                    <div class="px-3 py-2" (click)="$event.stopPropagation()">
+                        <chat-wallpaper></chat-wallpaper>
+                    </div>
+                </mat-menu>
+                <button type="button" mat-menu-item (click)="openFullScreen()">
+                    <mat-icon [svgIcon]="'mdi:arrow-expand'"></mat-icon>
+                    <span>{{ 'NotificationPanel.FullScreen' | transloco }}</span>
+                </button>
+            </mat-menu>
+        </div>
+
+        <!-- List -->
+        <div #notificationsList class="relative flex flex-auto flex-col divide-y divide-slate-100 dark:divide-white/5 hide-scrollbar overflow-y-auto"
+            (scroll)="onListScroll($event)">
+            <!-- Skeleton rows: only the very first page load for the active tab, before
+                 anything has arrived — avoids the "no notifications" empty state flashing
+                 in ahead of real data on the initial fetch / tab switch. -->
+            @if (isInitialLoading) {
+            @for (row of skeletonRows; track row) {
+            <div class="flex flex-col px-4 py-3" aria-hidden="true">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="h-3 w-16 animate-pulse rounded bg-slate-200 dark:bg-white/10"></span>
+                    <span class="h-3 w-10 animate-pulse rounded bg-slate-200 dark:bg-white/10"></span>
+                </div>
+                <span class="mt-1.5 h-4 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-white/10"></span>
+                <div class="mt-1.5 flex items-center justify-between gap-2">
+                    <span class="h-3 w-1/2 animate-pulse rounded bg-slate-200 dark:bg-white/10"></span>
+                    <span class="h-5 w-5 shrink-0 animate-pulse rounded-full bg-slate-200 dark:bg-white/10"></span>
+                </div>
+            </div>
+            }
+            }
+            @for (group of filteredNotificationGroups; track group.key) {
+            <div class="group flex cursor-pointer flex-col px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04]"
+                (click)="onGroupClick(group)">
+
+                <!-- Top line: project label + time -->
+                <div class="flex items-center justify-between gap-2">
+                    <span class="truncate text-[12px] font-medium text-slate-400 dark:text-slate-500">
+                        {{ projectLabel(group.latest) }}
+                    </span>
+                    <span class="shrink-0 text-[13px]"
+                        [ngClass]="group.unreadCount > 0
+                            ? 'font-medium text-primary'
+                            : 'font-normal text-slate-500'">
+                        {{ formatTime(group.latest.created_at) }}
+                    </span>
+                </div>
+
+                <!-- Task name -->
+                <div class="mt-0.5 truncate text-[15px] font-medium dark:text-slate-100"
+                    [ngClass]="group.unreadCount > 0 ? 'text-slate-900' : 'text-slate-800'">
+                    {{ taskTitle(group.latest) }}
+                </div>
+
+                <!-- Message + unread/stack badge -->
+                <div class="mt-0.5 flex items-center justify-between gap-2">
+                    <span class="min-w-0 flex-1 flex items-center gap-1 truncate text-[13px] text-slate-500 dark:text-slate-400">
+                        <span class="truncate">{{ lastMessagePrefix(group.latest) }}</span>
+                        @if (hasLastMessageValue(group.latest)) {
+                            @let rating = lastMessageRating(group.latest);
+                            @if (rating !== null) {
+                                <span class="inline-flex shrink-0 items-center gap-px" aria-hidden="true">
+                                    @for (star of [1, 2, 3, 4, 5]; track star) {
+                                        <mat-icon class="icon-size-4"
+                                            [ngClass]="star <= rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'"
+                                            [svgIcon]="star <= rating ? 'mdi:star' : 'mdi:star-outline'"></mat-icon>
+                                    }
+                                </span>
+                            } @else {
+                                @let valueIcon = lastMessageValueIcon(group.latest);
+                                @if (valueIcon.img) {
+                                    <img [src]="valueIcon.img" alt="" class="h-3.5 w-3.5 shrink-0 object-contain" />
+                                } @else if (valueIcon.icon) {
+                                    <mat-icon class="icon-size-4 shrink-0" [ngClass]="valueIcon.color"
+                                        [svgIcon]="valueIcon.icon"></mat-icon>
+                                }
+                            }
+                            @if (rating === null) {
+                                <span class="shrink-0 truncate">{{ lastMessageValueText(group.latest) }}</span>
+                            }
+                        }
+                    </span>
+                    @if (group.unreadCount > 0) {
+                    <span
+                        class="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-white">
+                        {{ group.unreadCount }}
+                    </span>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- Infinite scroll loading indicator -->
+            @if (!isInitialLoading && (activeTab === 'unread' ? isLoadingMoreUnread : isLoadingMore)) {
+            <div class="flex justify-center py-3">
+                <span class="block h-2 w-20 rounded bg-slate-200 dark:bg-white/10 animate-pulse"></span>
+            </div>
+            }
+
+            <!-- No notifications -->
+            @if (!isInitialLoading && !filteredNotificationGroups.length) {
+            <div class="flex flex-auto flex-col items-center justify-center px-8 py-12 sm:justify-start">
+                <div class="flex h-14 w-14 flex-0 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20">
+                    <mat-icon class="text-primary" [svgIcon]="'mdi:bell-outline'"></mat-icon>
+                </div>
+                <div class="mt-5 text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+                    គ្មានការជូនដំណឹង
+                </div>
+                <div class="mt-1 w-full max-w-60 text-center text-md text-slate-500 dark:text-slate-400">
+                    ការជូនដំណឹងថ្មីៗនឹងបង្ហាញនៅទីនេះ
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</ng-template>

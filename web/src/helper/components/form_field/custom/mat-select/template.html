@@ -1,0 +1,125 @@
+<mat-form-field [appearance]="appearance" [subscriptSizing]="subscriptSizing" class="w-full custom-select-wrapper">
+    <!-- Prefix Icon -->
+    @if (icon) {
+        <mat-icon matPrefix [svgIcon]="icon" class="custom-select-prefix-icon"></mat-icon>
+    }
+
+    <!-- Label -->
+    <mat-label>{{ currentLabel }}</mat-label>
+
+    <!-- Select Field -->
+    <mat-select
+        #selectField
+        [(ngModel)]="value"
+        [disabled]="isDisabled"
+        [multiple]="multiple"
+        [placeholder]="currentPlaceholder"
+        [errorStateMatcher]="errorStateMatcher"
+        [panelClass]="[allowSearch ? 'select-panel-with-search' : '', showAvatar ? 'select-panel-with-avatar' : '']"
+        (selectionChange)="onSelectionChanged($event.value)"
+        (openedChange)="!$event && onPanelClosed()"
+    >
+        <!-- Custom Trigger: avatar chips for people pickers -->
+        @if (showAvatar) {
+            <mat-select-trigger>
+                @if (selectedOptions.length) {
+                    <span class="flex items-center gap-3 flex-wrap">
+                        @for (option of selectedOptions; track option) {
+                            <span class="flex items-center gap-1.5">
+                                <img [src]="getOptionImage(option) || 'images/placeholder/avatar.jpg'"
+                                    (error)="onOptionImgError($event)"
+                                    class="w-6 h-6 rounded-full object-cover shrink-0 bg-slate-100 dark:bg-white/10" />
+                                <span class="text-[15px] truncate">{{ getOptionDisplay(option) }}</span>
+                                <mat-icon svgIcon="mdi:close"
+                                    class="icon-size-4 text-slate-400 hover:text-red-500 cursor-pointer shrink-0"
+                                    (click)="removeOption($event, option)"></mat-icon>
+                            </span>
+                        }
+                    </span>
+                }
+            </mat-select-trigger>
+        }
+
+        <!-- Search Input (only if allowSearch is true) -->
+        @if (allowSearch) {
+            <div
+                class="p-3 sticky md:top-0 -top-2 bg-white dark:bg-slate-800 z-20 border-b dark:border-slate-700"
+            >
+                <div class="relative flex items-center">
+                    <mat-icon svgIcon="mdi:magnify" class="absolute left-2.5 icon-size-5 text-slate-400 dark:text-slate-500 pointer-events-none"></mat-icon>
+                    <input
+                        type="text"
+                        [(ngModel)]="searchTerm"
+                        [ngModelOptions]="{ standalone: true }"
+                        (click)="$event.stopPropagation()"
+                        [placeholder]="currentSearchPlaceholder"
+                        class="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 rounded-md outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                </div>
+            </div>
+        }
+
+        <!-- Options -->
+        @for (option of filteredOptions; track option) {
+            <mat-option [value]="getOptionValue(option)">
+                @if (showAvatar) {
+                    <span class="flex items-center gap-2.5 w-full">
+                        <img [src]="getOptionImage(option) || 'images/placeholder/avatar.jpg'"
+                            (error)="onOptionImgError($event)"
+                            class="w-7 h-7 rounded-full object-cover shrink-0 bg-slate-100 dark:bg-white/10" />
+                        <span class="text-[16px] truncate flex-1">{{ getOptionDisplay(option) }}</span>
+                        @if (isOptionSelected(option)) {
+                            <mat-icon svgIcon="mdi:check" class="icon-size-5 text-primary shrink-0"></mat-icon>
+                        }
+                    </span>
+                } @else {
+                    <span class="text-[16px]">
+                        {{ getOptionDisplay(option) }}
+                    </span>
+                }
+            </mat-option>
+        }
+
+        <!-- Create New Option -->
+        @if (showCreateOption) {
+            <mat-option class="text-primary font-medium" (click)="onCreateNew()">
+                <mat-icon svgIcon="mdi:plus-circle" class="mr-2"></mat-icon>
+                <span>
+                    {{
+                        activeLang === "en"
+                            ? 'Create "' + searchTerm.trim() + '"'
+                            : 'បង្កើត "' + searchTerm.trim() + '"'
+                    }}
+                </span>
+            </mat-option>
+        }
+
+        <!-- No Results Message -->
+        @if (showNoResults) {
+            <div class="px-4 py-3 text-center text-gray-500">
+                {{ activeLang === "en" ? "No results found" : "រកមិនឃើញ" }}
+            </div>
+        }
+
+        <!-- Info Message (when create is enabled and no data) -->
+        @if (allowCreate && (!options || options.length === 0) && !searchTerm.trim()) {
+            <div class="px-4 py-3 text-center text-gray-500 flex items-center justify-center gap-2">
+                <mat-icon svgIcon="mdi:information"></mat-icon>
+                <span>{{ activeLang === "en" ? createNewText : createNewTextKh }}</span>
+            </div>
+        }
+    </mat-select>
+
+    <!-- Custom Suffix: Show Spinner when loading, otherwise show custom arrow -->
+    @if (loading) {
+        <mat-spinner matSuffix diameter="24" class="mx-3"> </mat-spinner>
+    }
+
+    <!-- Custom Arrow (only shown when not loading) -->
+    @if (!loading) {
+        <mat-icon matSuffix class="select-arrow" svgIcon="mdi:menu-down"> </mat-icon>
+    }
+
+    <!-- Validation Error -->
+    <form-validation-error [control]="ngControl?.control" />
+</mat-form-field>

@@ -1,0 +1,9 @@
+---
+- hosts: camcyber_prod
+  gather_facts: no
+  any_errors_fatal: no
+  debugger: on_failed
+  no_log: true
+  become: yes
+  roles:
+    - prod

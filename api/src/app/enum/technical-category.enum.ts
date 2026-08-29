@@ -1,0 +1,40 @@
+export enum TechnicalCategoryEnum {
+    SCOPE = 16,
+    BUSINESS_REQUIREMENT = 1,
+    TECHNICAL_REQUIREMENT = 2,
+    TECHNOLOGY = 3,
+    MOCKUP = 4,
+    DATABASE = 5,
+    DEPLOYMENT = 6,
+    QA = 7,
+    QC = 8,
+    TESTING = 9,
+    FILE_SERVICE = 10,
+    VERIFY_SERVICE = 11,
+    AI_SERVICE = 12,
+    NOTIFICATION_SERVICE = 13,
+    REPORT_SERVICE = 14,
+    PAYMENT_SERVICE = 15,
+}
+
+export const TECHNICAL_CATEGORY_NAME: Record<
+    TechnicalCategoryEnum,
+    { name_en: string; name_kh: string; code: string }
+> = {
+    [TechnicalCategoryEnum.SCOPE]: { name_en: 'Scope', name_kh: 'ទំហំការងារ', code: 'SCOPE' },
+    [TechnicalCategoryEnum.BUSINESS_REQUIREMENT]: { name_en: 'Business Requirement', name_kh: 'តម្រូវការប្រើប្រាស់', code: 'BUSINESS_REQUIREMENT' },
+    [TechnicalCategoryEnum.TECHNICAL_REQUIREMENT]: { name_en: 'Technical Requirement', name_kh: 'តម្រូវការបច្ចេកទេស', code: 'TECHNICAL_REQUIREMENT' },
+    [TechnicalCategoryEnum.TECHNOLOGY]: { name_en: 'Technology', name_kh: 'បច្ចេកវិទ្យា', code: 'TECHNOLOGY' },
+    [TechnicalCategoryEnum.MOCKUP]: { name_en: 'Mockup', name_kh: 'ប្លងកម្មវិធី', code: 'MOCKUP' },
+    [TechnicalCategoryEnum.DATABASE]: { name_en: 'Database', name_kh: 'មូលដ្ឋានទិន្នន័យ', code: 'DATABASE' },
+    [TechnicalCategoryEnum.DEPLOYMENT]: { name_en: 'Deployment', name_kh: 'ដំណើរការកម្មវិធី', code: 'DEPLOYMENT' },
+    [TechnicalCategoryEnum.QA]: { name_en: 'Quality Assurance (QA)', name_kh: 'ធានាគុណភាព (QA)', code: 'QA' },
+    [TechnicalCategoryEnum.QC]: { name_en: 'Quality Control (QC)', name_kh: 'ត្រួតពិនិត្យគុណភាព (QC)', code: 'QC' },
+    [TechnicalCategoryEnum.TESTING]: { name_en: 'Testing', name_kh: 'ការធ្វើតេស្ត', code: 'TESTING' },
+    [TechnicalCategoryEnum.FILE_SERVICE]: { name_en: 'File Service', name_kh: 'ថ្នាលឯកសារ', code: 'FILE_SERVICE' },
+    [TechnicalCategoryEnum.VERIFY_SERVICE]: { name_en: 'Verify Service', name_kh: 'ថ្នាលបញ្ជាក់ទិន្នន័យ', code: 'VERIFY_SERVICE' },
+    [TechnicalCategoryEnum.AI_SERVICE]: { name_en: 'AI Service', name_kh: 'ថ្នាលបញ្ញាសិប្បនិម្មិត', code: 'AI_SERVICE' },
+    [TechnicalCategoryEnum.NOTIFICATION_SERVICE]: { name_en: 'Notification Service', name_kh: 'ថ្នាលជូនដំណឹង', code: 'NOTIFICATION_SERVICE' },
+    [TechnicalCategoryEnum.REPORT_SERVICE]: { name_en: 'Report Service', name_kh: 'ថ្នាលរបាយការណ៍', code: 'REPORT_SERVICE' },
+    [TechnicalCategoryEnum.PAYMENT_SERVICE]: { name_en: 'Payment Service', name_kh: 'ថ្នាលទូទាត់ប្រាក់', code: 'PAYMENT_SERVICE' },
+};

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>NexTask</title>
+    <meta charset="utf-8" />
+    <meta name="description"
+        content="PMS" />
+    <meta name="keywords"
+        content="PMS" />
+    <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+
+    <base href="/" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/logo/plan_logo.png" id="app-favicon" />
+
+    <!-- Fonts -->
+    <link href="fonts/Moul/Moul.css" rel="stylesheet" />
+    <link href="fonts/Siemreap/Siemreap.css" rel="stylesheet" />
+    <link href="fonts/KantumruyPro/KantumruyPro.css" rel="stylesheet" />
+    <link href="fonts/inter/inter.css" rel="stylesheet" />
+
+    <!-- Icon fonts -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <!-- Splash screen styles -->
+    <link href="styles/splash-screen.css" rel="stylesheet" />
+
+    <!-- Telegram Mini App SDK. Populates window.Telegram.WebApp when the page is
+         opened inside a Telegram client; inert in a normal browser. Must be
+         loaded from telegram.org — it cannot be bundled. -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+    <!-- Splash screen -->
+    <helper-splash-screen>
+        <img src="images/logo/plan_logo.png" alt="PMS Logo" id="app-splash-logo" />
+        <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+    </helper-splash-screen>
+
+    <!-- Apply the last-known organization's branding (logo/color) to the splash
+         screen and favicon before Angular boots, using the cached JWT so
+         returning users don't see a flash of the generic app branding. -->
+    <script>
+        (function () {
+            try {
+                var token = localStorage.getItem('accessToken');
+                if (!token) return;
+
+                var parts = token.split('.');
+                if (parts.length < 2) return;
+
+                var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                while (b64.length % 4) b64 += '=';
+                var payload = JSON.parse(atob(b64));
+                var user = payload && payload.user;
+                if (!user || !user.roles) return;
+
+                var roles = Array.isArray(user.roles) ? user.roles : Object.values(user.roles);
+                var preferredRoleId = parseInt(localStorage.getItem('preferredRoleId'), 10);
+                var activeRole =
+                    roles.find(function (r) { return r.id === preferredRoleId; }) ||
+                    roles.find(function (r) { return r.id === user.is_active; }) ||
+                    roles.find(function (r) { return r.is_default; });
+
+                var organization = activeRole && activeRole.organization;
+                if (!organization) return;
+
+                var logo = organization.logo;
+                if (logo && logo.uri && logo.file_domain) {
+                    var logoUrl = logo.file_domain.replace(/\/+$/, '') + '/' + String(logo.uri).replace(/^\/+/, '');
+                    var splashImg = document.getElementById('app-splash-logo');
+                    if (splashImg) splashImg.src = logoUrl;
+                    var favicon = document.getElementById('app-favicon');
+                    if (favicon) favicon.href = logoUrl;
+                }
+
+                if (organization.primary_color) {
+                    document.documentElement.style.setProperty('--org-splash-primary', organization.primary_color);
+                }
+            } catch (e) {
+                // Malformed/expired cached token — fall back to default branding
+            }
+        })();
+    </script>
+
+    <!-- App root -->
+    <app-root></app-root>
+</body>
+
+</html>

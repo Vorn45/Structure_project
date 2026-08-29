@@ -1,0 +1,35 @@
+<div matRipple [matRippleColor]="'rgba(0, 0, 0, 0.1)'"
+    class="lg:hidden fixed bottom-0 inset-x-0 z-40 flex flex-col w-full bg-primary shadow-lg border-t border-white/10 print:hidden pb-[var(--app-safe-area-bottom,env(safe-area-inset-bottom,0px))] transition-transform duration-200 ease-out"
+    [class.translate-y-full]="hidden">
+    <div class="flex h-[var(--mobile-bottom-nav-height,48px)] w-full items-stretch">
+        <ng-container *ngFor="let item of bottomNavItems">
+            <a *ngIf="item.link" [routerLink]="item.link" [queryParams]="item.queryParams"
+                routerLinkActive #rla="routerLinkActive" [routerLinkActiveOptions]="{ exact: item.exactMatch ?? false }"
+                class="relative flex flex-1 flex-col items-center justify-center gap-0.5 text-on-primary transition-all duration-150 active:scale-95">
+                <mat-icon [svgIcon]="item.icon" class="text-on-primary transition-opacity duration-150" style="width:24px;height:24px;min-width:24px;min-height:24px;font-size:24px;line-height:24px"
+                    [ngClass]="rla.isActive ? 'opacity-100' : 'opacity-60'"></mat-icon>
+                <span *ngIf="showLabels" class="text-xs leading-none"
+                    [ngClass]="rla.isActive ? 'opacity-100 font-medium' : 'opacity-70 font-normal'">
+                    {{ item.title | transloco }}
+                </span>
+            </a>
+
+            <!-- Items with sub-links (e.g. Report) open them in a sheet instead of navigating directly -->
+            <button *ngIf="!item.link" type="button" (click)="openChildren(item)"
+                class="relative flex flex-1 flex-col items-center justify-center gap-0.5 text-on-primary transition-all duration-150 active:scale-95">
+                <mat-icon [svgIcon]="item.icon" class="text-on-primary transition-opacity duration-150" style="width:24px;height:24px;min-width:24px;min-height:24px;font-size:24px;line-height:24px"
+                    [ngClass]="isChildActive(item) ? 'opacity-100' : 'opacity-60'"></mat-icon>
+                <span *ngIf="showLabels" class="text-xs leading-none"
+                    [ngClass]="isChildActive(item) ? 'opacity-100 font-medium' : 'opacity-70 font-normal'">
+                    {{ item.title | transloco }}
+                </span>
+            </button>
+        </ng-container>
+        <button *ngIf="hasMoreNavItems" type="button"
+            class="relative flex flex-1 flex-col items-center justify-center gap-0.5 text-on-primary transition-all duration-150 active:scale-95"
+            (click)="toggleNavigation()">
+            <mat-icon svgIcon="heroicons_outline:bars-3" class="text-on-primary opacity-60" style="width:24px;height:24px;min-width:24px;min-height:24px;font-size:24px;line-height:24px"></mat-icon>
+            <span *ngIf="showLabels" class="text-xs leading-none font-normal opacity-70">{{ 'Navigation.More' | transloco }}</span>
+        </button>
+    </div>
+</div>

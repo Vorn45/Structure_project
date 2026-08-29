@@ -1,0 +1,161 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Chat wallpapers — the pattern painted behind a conversation thread.
+/*  @
+/*  @ Global rather than component-scoped because two components wear the same classes: the message
+/*  @ thread in `task-chat-panel` and the preview swatches in the settings picker.
+/*  @
+/*  @ Class names are listed in `app/resources/2-user/2-tasks/chat-panel/chat-theme.ts` (CHAT_WALLPAPERS)
+/*  @ — add a pattern here and an entry there, in that order, or the picker offers a blank swatch.
+/*  @
+/*  @ None of these set a background-color: the chat theme's `surface` shows through, so a wallpaper
+/*  @ works over both the slate and the white look, and over dark mode (`.dark` variants below).
+/* ----------------------------------------------------------------------------------------------------- */
+
+.chat-wallpaper {
+    /* The thread scrolls, the pattern doesn't — `scroll` (the default) pins the background to the
+       element's own box rather than to the content moving inside it. */
+    background-attachment: scroll;
+}
+
+/* A user upload is sized like a wallpaper instead of repeating like a pattern. */
+.chat-wallpaper--custom {
+    background-image: var(--chat-wallpaper-image);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Keep uploaded photos readable and visually part of the dark chat surface. */
+.dark .chat-wallpaper--custom {
+    background-image:
+        linear-gradient(rgb(2 6 23 / 28%), rgb(2 6 23 / 28%)),
+        var(--chat-wallpaper-image);
+}
+
+/* Settings-picker swatches are ~24px across, where a thread-scale pattern reads as one stray dot.
+   `--preview` tightens the repeat and lifts the contrast so each option is telling at a glance;
+   the gradient wallpapers need nothing since they're sized in percentages. */
+.chat-wallpaper--preview {
+    &.chat-wallpaper--dots {
+        background-image: radial-gradient(rgb(15 23 42 / 22%) 1px, transparent 1px);
+        background-size: 6px 6px;
+    }
+
+    &.chat-wallpaper--grid {
+        background-image:
+            linear-gradient(rgb(15 23 42 / 16%) 1px, transparent 1px),
+            linear-gradient(90deg, rgb(15 23 42 / 16%) 1px, transparent 1px);
+        background-size: 8px 8px;
+    }
+
+    &.chat-wallpaper--diagonal {
+        background-image: repeating-linear-gradient(
+            45deg,
+            rgb(15 23 42 / 16%) 0,
+            rgb(15 23 42 / 16%) 1px,
+            transparent 1px,
+            transparent 5px
+        );
+    }
+}
+
+.dark .chat-wallpaper--preview {
+    &.chat-wallpaper--dots {
+        background-image: radial-gradient(rgb(255 255 255 / 28%) 1px, transparent 1px);
+    }
+
+    &.chat-wallpaper--grid {
+        background-image:
+            linear-gradient(rgb(255 255 255 / 20%) 1px, transparent 1px),
+            linear-gradient(90deg, rgb(255 255 255 / 20%) 1px, transparent 1px);
+    }
+
+    &.chat-wallpaper--diagonal {
+        background-image: repeating-linear-gradient(
+            45deg,
+            rgb(255 255 255 / 20%) 0,
+            rgb(255 255 255 / 20%) 1px,
+            transparent 1px,
+            transparent 5px
+        );
+    }
+}
+
+/* Dot grid */
+.chat-wallpaper--dots {
+    background-image: radial-gradient(rgb(15 23 42 / 10%) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+.dark .chat-wallpaper--dots {
+    background-image: radial-gradient(rgb(255 255 255 / 10%) 1px, transparent 1px);
+}
+
+/* Graph paper */
+.chat-wallpaper--grid {
+    background-image:
+        linear-gradient(rgb(15 23 42 / 6%) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(15 23 42 / 6%) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+.dark .chat-wallpaper--grid {
+    background-image:
+        linear-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(255 255 255 / 7%) 1px, transparent 1px);
+}
+
+/* Hairline diagonal stripes */
+.chat-wallpaper--diagonal {
+    background-image: repeating-linear-gradient(
+        45deg,
+        rgb(15 23 42 / 5%) 0,
+        rgb(15 23 42 / 5%) 1px,
+        transparent 1px,
+        transparent 10px
+    );
+}
+
+.dark .chat-wallpaper--diagonal {
+    background-image: repeating-linear-gradient(
+        45deg,
+        rgb(255 255 255 / 6%) 0,
+        rgb(255 255 255 / 6%) 1px,
+        transparent 1px,
+        transparent 10px
+    );
+}
+
+/* Soft brand-blue wash — sized in percentages so it fills the thread and the swatch alike */
+.chat-wallpaper--aurora {
+    background-image:
+        radial-gradient(60% 55% at 12% 8%, rgb(12 126 165 / 16%), transparent 60%),
+        radial-gradient(50% 50% at 88% 22%, rgb(99 102 241 / 14%), transparent 62%),
+        radial-gradient(65% 60% at 50% 100%, rgb(14 165 233 / 12%), transparent 60%);
+    background-repeat: no-repeat;
+}
+
+.dark .chat-wallpaper--aurora {
+    background-image:
+        radial-gradient(60% 55% at 12% 8%, rgb(12 126 165 / 26%), transparent 60%),
+        radial-gradient(50% 50% at 88% 22%, rgb(99 102 241 / 22%), transparent 62%),
+        radial-gradient(65% 60% at 50% 100%, rgb(14 165 233 / 18%), transparent 60%);
+    background-repeat: no-repeat;
+}
+
+/* Warm counterpart to Aurora */
+.chat-wallpaper--sunset {
+    background-image:
+        radial-gradient(60% 55% at 10% 10%, rgb(244 114 182 / 14%), transparent 60%),
+        radial-gradient(55% 50% at 90% 18%, rgb(251 146 60 / 16%), transparent 62%),
+        radial-gradient(65% 60% at 50% 100%, rgb(250 204 21 / 12%), transparent 60%);
+    background-repeat: no-repeat;
+}
+
+.dark .chat-wallpaper--sunset {
+    background-image:
+        radial-gradient(60% 55% at 10% 10%, rgb(244 114 182 / 22%), transparent 60%),
+        radial-gradient(55% 50% at 90% 18%, rgb(251 146 60 / 22%), transparent 62%),
+        radial-gradient(65% 60% at 50% 100%, rgb(250 204 21 / 16%), transparent 60%);
+    background-repeat: no-repeat;
+}

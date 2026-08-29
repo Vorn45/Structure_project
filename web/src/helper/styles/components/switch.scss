@@ -1,0 +1,30 @@
+.switch-medium {
+    position: relative;
+    height: 20px !important;
+    min-width: 44px !important;
+    background-color: #e2e2e2 !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 9999px;
+
+    small {
+        position: absolute;
+        width: 18px !important;
+        height: 18px !important;
+        border-radius: 50%;
+        background-color: #FFF !important;
+        top: 0 !important;
+        z-index: 99;
+        right: calc(100% - 18px) !important;
+    }
+
+    &.checked {
+        --tw-bg-opacity: 1 !important;
+        background-color: rgb(74 222 128 / var(--tw-bg-opacity)) !important;
+        border: 1px solid rgb(74 222 128 / var(--tw-bg-opacity)) !important;
+
+        small {
+            background-color: #FFF !important;
+            right: 0 !important;
+        }
+    }
+}

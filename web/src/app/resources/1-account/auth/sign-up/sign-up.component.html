@@ -1,0 +1,105 @@
+<div class="section">
+    <div class="">
+
+        <!-- Main -->
+        <div class="relative w-full px-8">
+            <!-- Action -->
+            <div class="h-8 flex justify-between items-center">
+                <!-- Back -->
+                <button [routerLink]="['/auth']" mat-icon-button class="absolute top-5 left-4 hover:bg-slate-50 rounded-full w-9 h-9 flex items-center justify-center">
+                    <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
+                </button>
+                <!-- Language -->
+                <!-- <languages></languages> -->
+            </div>
+
+            <!-- Sign Up Form -->
+            <ng-container *ngIf="isOTP === false; else otp">
+                <!-- Header -->
+                <div class="flex flex-col justify-center items-center gap-2 mb-[24px]">
+                    <div class="flex items-center justify-center w-20 h-20 rounded-full bg-[#f3f4f5]">
+                        <mat-icon class="icon-size-[50px] text-black"
+                            [svgIcon]="'mdi:account-plus-outline'"></mat-icon>
+                    </div>
+                    <span class="text-2xl leading-6 font-medium"> {{ 'Sign-Up' | transloco }} </span>
+                    <span class="font-normal pl-2 text-lg text-center text-gray-500">សូមញ្ចូលឈ្មោះភាសាខ្មែរ, លេខទូរស័ព្ទ <br/>និងជ្រើសរើសក្រុម អ.ម.ត, គ្រឺះស្ថានសិក្សារបស់អ្នក</span>
+                </div>
+
+                <!-- Form Section -->
+                <form class="custom-form mt-3" [formGroup]="signUpForm" #signUpNgForm="ngForm">
+                    <!-- Name Field -->
+                    <div class="form-field">
+                        <div class="input-container">
+                            <input matInput [formControlName]="'name'" id="name" placeholder=" "  class="pl-13"/>
+                            <label for="name" class=" text-slate-500">{{ 'Name' | transloco }} *</label>
+                            <mat-icon class="prefix-icon text-slate-500" [svgIcon]="'mdi:account'"></mat-icon>
+                        </div>
+                        <div class="error-message" *ngIf="signUpForm.get('name')?.invalid && signUpForm.get('name')?.touched">
+                        {{ 'Name-Require' | transloco }}
+                        </div>
+                    </div>
+
+                    <!-- Phone Field -->
+                    <div class="form-field">
+                        <div class="input-container">
+                            <input matInput [formControlName]="'phone'" id="phone" placeholder=" "  class="pl-13"/>
+                            <label for="phone" class=" text-slate-500">{{ 'Phone' | transloco }} *</label>
+                            <mat-icon class="prefix-icon text-slate-500" [svgIcon]="'mdi:phone'"></mat-icon>
+                        </div>
+                        <div class="error-message" *ngIf="signUpForm.get('phone')?.hasError('required')&& (signUpForm.get('phone')?.touched || signUpForm.get('phone')?.dirty)">
+                        {{ 'Phone-Require' | transloco }}
+                        </div>
+                        <div class="error-message" *ngIf="signUpForm.get('phone')?.hasError('pattern')">
+                        {{ 'Phone-Pattern' | transloco }}
+                        </div>
+                        <div class="error-message" *ngIf="signUpForm.get('phone')?.hasError('phoneExists')">
+                        លេខទូរស័ព្ទបានចុះឈ្មោះរួចហើយ
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-field">
+                        <div class="input-container">
+                            <mat-select [formControlName]="'group_id'" id="group-select" placeholder=" " class="pl-13">
+                                <mat-option *ngFor="let group of groups" [value]="group.id">
+                                {{ group.name }}
+                                </mat-option>
+                            </mat-select>
+                            <label for="group-select">{{ 'Group' | transloco }}</label>
+                            <mat-icon class="prefix-icon text-slate-500" [svgIcon]="'mdi:flag-variant'"></mat-icon>
+                        </div>
+                        <div class="error-message" *ngIf="signUpForm.get('group_id')?.hasError('required')">
+                            {{ 'Group is required' | transloco }}
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <div class="input-container">
+                            <mat-select [formControlName]="'school_id'" id="school-select" placeholder=" " class="pl-13">
+                                <mat-option *ngFor="let school of filteredSchools" [value]="school.id">
+                                {{ school.name_in_khmer }} ({{school.abbre}})
+                                </mat-option>
+                            </mat-select>
+                            <label for="school-select">{{ 'Navigation.School' | transloco }}</label>
+                            <mat-icon class="prefix-icon text-slate-500" [svgIcon]="'mdi:building'"></mat-icon>
+                        </div>
+                        <div class="error-message" *ngIf="signUpForm.get('school_id')?.hasError('required') && (signUpForm.get('school_id')?.touched)">
+                            សូមជ្រើសរើសគ្រឹះស្ថានសិក្សា
+                        </div>
+                    </div>
+                    <button class="helper-mat-button-md w-full" mat-flat-button [color]="'primary'"
+                         (click)="signUp()">
+                        <span *ngIf="!signUpForm.disabled"> {{ 'Next' | transloco }} </span>
+                        <mat-progress-spinner *ngIf="signUpForm.disabled" [diameter]="24" [mode]="'indeterminate'" />
+                    </button>
+                </form>
+
+            </ng-container>
+
+            <!-- OTP Section -->
+            <ng-template #otp>
+                <otp></otp>
+            </ng-template>
+        </div>
+    </div>
+</div>

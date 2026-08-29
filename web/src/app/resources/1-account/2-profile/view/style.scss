@@ -1,0 +1,15 @@
+::ng-deep .side-dialog .mat-mdc-dialog-container,
+::ng-deep .side-dialog .mdc-dialog__container,
+::ng-deep .side-dialog .mat-mdc-dialog-surface {
+    padding: 0 !important;
+}
+
+.mat-mdc-dialog-content.mdc-dialog__content {
+    max-height: 100vh !important;
+    padding: 0 !important;
+}
+
+.mdc-tooltip__surface {
+    font-size: 14px !important;
+    padding: 6px 8px !important;
+}

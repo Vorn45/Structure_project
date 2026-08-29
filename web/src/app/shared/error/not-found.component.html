@@ -1,0 +1,12 @@
+<div class="w-full h-[100dvh] flex flex-col justify-center items-center">
+    <div class="w-full max-w-[500px]">
+        <img class="w-full" src="images/apps/404.png" />
+    </div>
+    <div class="-mt-8 text-center text-4xl font-extrabold leading-tight tracking-tight md:text-7xl md:leading-none">
+        Oops... 404!
+    </div>
+    <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
+        The page you requested could not be found.
+    </div>
+    <button [routerLink]="['/redirect']" class="mt-8 h-12 min-h-12 max-h-12" mat-flat-button color="primary">Return Home</button>
+</div>

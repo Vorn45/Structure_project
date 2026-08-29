@@ -1,0 +1,9 @@
+sonarcheck:
+  image: gitlab.camcyber.com:5050/camcyber/registry/security:latest
+  stage: script:check
+  variables:
+    SONAR_TOKEN: ${SONAR_TOKEN}
+  script:
+    - bash -e metric.sh
+  only:
+    - develop

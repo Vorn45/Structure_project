@@ -1,0 +1,62 @@
+<div mat-dialog-title class="w-full flex justify-between items-center border-b border-slate-200">
+    <span class="w-full text-2xl font-medium text-slate-900">{{ 'Shared.GeneratePassword.ChangePassword' | transloco }}</span>
+    <button [mat-dialog-close]="false" mat-icon-button class="text-slate-500">
+        <mat-icon svgIcon="heroicons_outline:x-mark"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content>
+    <div class="bg-orange-100 border-l-4 border-orange-500 text-slate-900 p-4" role="alert">
+        <p class="font-bold">{{ 'Shared.Password.Important' | transloco }}</p>
+        <p>{{ 'Shared.Password.LoginHint' | transloco }}</p>
+    </div>
+    <br>
+    <form [formGroup]="form" class="md-form-field-appearance-outline">
+        <!-- New Password Field -->
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'ChangePassword.NewPassword' | transloco }}</mat-label>
+            <input matInput formControlName="newPassword" type="password" [placeholder]="'ChangePassword.EnterNewPassword' | transloco"
+                #newPasswordField>
+            <button mat-icon-button type="button" (click)="togglePasswordVisibility(newPasswordField)" matSuffix>
+                <mat-icon class="icon-size-5" *ngIf="newPasswordField.type === 'password'"
+                    [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                <mat-icon class="icon-size-5" *ngIf="newPasswordField.type === 'text'"
+                    [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+            </button>
+            <mat-error *ngIf="form.get('newPassword')?.hasError('required') && form.get('newPassword')?.touched">
+                {{ 'Shared.Password.NewPasswordRequired' | transloco }}
+            </mat-error>
+            <mat-error *ngIf="form.get('newPassword')?.hasError('minlength')">
+                {{ 'Shared.Password.MinLength' | transloco }}
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Confirm Password Field -->
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'ChangePassword.ConfirmPassword' | transloco }}</mat-label>
+            <input matInput formControlName="confirmPassword" type="password" [placeholder]="'ChangePassword.ConfirmPassword' | transloco"
+                #confirmPasswordField>
+            <button mat-icon-button type="button" (click)="togglePasswordVisibility(confirmPasswordField)" matSuffix>
+                <mat-icon class="icon-size-5" *ngIf="confirmPasswordField.type === 'password'"
+                    [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                <mat-icon class="icon-size-5" *ngIf="confirmPasswordField.type === 'text'"
+                    [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+            </button>
+            <mat-error
+                *ngIf="form.get('confirmPassword')?.hasError('required') && form.get('confirmPassword')?.touched">
+                {{ 'Shared.Password.ConfirmPasswordRequired' | transloco }}
+            </mat-error>
+            <mat-error *ngIf="form.hasError('passwordMismatch')">
+                {{ 'ChangePassword.PasswordsDoNotMatch' | transloco }}
+            </mat-error>
+        </mat-form-field>
+    </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex items-center justify-end">
+    <button class="bg-blue-900" mat-flat-button (click)="submit()" [disabled]="form.invalid || saving">
+        <span *ngIf="!saving" class="text-white">{{ 'Common.Save' | transloco }}</span>
+        <mat-progress-spinner *ngIf="saving" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+</mat-dialog-actions>

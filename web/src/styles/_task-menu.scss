@@ -1,0 +1,251 @@
+/* =============================================================================
+   Task filter/row dropdown menus.
+
+   `mat-menu` renders in a CDK overlay outside every component, so these rules
+   have to escape view encapsulation — hence `::ng-deep`, which publishes them
+   globally as soon as an importing component is loaded. Kept here as a partial
+   so a page that shows these menus without the project work board on screen
+   (e.g. the org-admin home member-tasks dialog) still styles them identically.
+
+   Import with `@import '../../../../../styles/task-menu';` from a component's
+   style.scss — path depth varies, so count carefully.
+   ========================================================================== */
+
+/* The app-wide Material override sets `.mat-mdc-menu-content { padding: 0 }`
+   (helper/styles/overrides/angular-material.scss), so a menu's first item sits
+   flush against the panel's top edge while a following `mat-divider` — which
+   carries `margin: 8px 0` — makes the bottom look padded. Restore symmetric
+   padding for the dialogs' kebab menus only, matching that divider spacing. */
+::ng-deep .dialog-more-menu .mat-mdc-menu-content {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+/* ================= Overlay menus (global) ================= */
+::ng-deep .task-menu.mat-mdc-menu-panel {
+    border-radius: 0;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    border: 1px solid #eef0f2;
+    overflow: hidden;
+}
+::ng-deep body.dark .task-menu.mat-mdc-menu-panel {
+    background: #111827;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+::ng-deep .task-menu--search.mat-mdc-menu-panel {
+    min-width: 11rem;
+    max-width: 13rem;
+    border-radius: 0;
+}
+::ng-deep .task-menu--status.mat-mdc-menu-panel {
+    min-width: 8rem;
+    max-width: 8rem;
+}
+::ng-deep .task-menu--search .mat-mdc-menu-content,
+::ng-deep .task-menu--search .task-menu-list,
+::ng-deep .task-menu--search .mat-mdc-menu-item {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+::ng-deep .task-menu--search .mat-mdc-menu-item {
+    min-width: 0;
+    overflow: hidden;
+    padding-left: 1rem !important;
+    padding-right: 1.25rem !important;
+}
+
+::ng-deep .task-menu--search .task-opt-text {
+    max-width: 6.5rem;
+}
+
+/* Org-admin home's own assignee/reporter/project search menus only (member-tasks
+   widget, tasks-by-status drill-down) — tighter left inset than the rest of the
+   app's task menus, which keep the wider default above. */
+::ng-deep .task-menu--home-compact .mat-mdc-menu-item {
+    padding-left: 0.75rem !important;
+    padding-right: 0.625rem !important;
+}
+::ng-deep .task-menu--home-compact .task-menu-search {
+    padding: 0.875rem 0.75rem !important;
+}
+
+::ng-deep .task-menu .task-menu-search {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 1.125rem 1rem;
+    border-bottom: 1px solid #eef0f2;
+
+    input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        background: transparent;
+        @apply text-lg;
+        color: #0f172a;
+        font-family: "Kantumruy Pro", sans-serif;
+        &::placeholder { color: #94a3b8; }
+    }
+}
+::ng-deep body.dark .task-menu .task-menu-search {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    input { color: #f1f5f9; }
+}
+::ng-deep .task-menu .task-menu-list {
+    max-height: 15rem;
+    overflow-y: auto;
+    padding-top: 0.25rem;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+::ng-deep .task-menu .task-opt {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    .task-opt-text {
+        flex: 1;
+        min-width: 0;
+        @apply text-lg;
+        color: #334155;
+        font-family: "Kantumruy Pro", sans-serif;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    &.is-selected {
+        background: rgba(var(--helper-primary-rgb), 0.08);
+        .task-opt-text { color: var(--helper-primary); }
+    }
+    &.is-selected:hover { background: rgba(var(--helper-primary-rgb), 0.14); }
+}
+::ng-deep .task-menu .task-check { color: var(--helper-primary); }
+::ng-deep body.dark .task-menu .task-opt {
+    .task-opt-text { color: #cbd5e1; }
+    &:hover { background: rgba(255, 255, 255, 0.04); }
+    &.is-selected {
+        background: rgba(var(--helper-primary-rgb), 0.8);
+        .task-opt-text { color: #fff; }
+    }
+    &.is-selected:hover { background: rgba(var(--helper-primary-rgb), 0.9); }
+}
+::ng-deep body.dark .task-menu .task-check { color: #fff; }
+
+::ng-deep .task-menu .task-opt--project {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+::ng-deep .task-menu .task-proj-row {
+    display: grid;
+    grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
+    align-items: center;
+    column-gap: 0.875rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    .task-opt-text {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    /* The leading image is a project logo in the filter menus and a person's avatar
+       in the assignee/reporter row menus — both sit in the grid's first column, so
+       neither carries its own margin. */
+    .task-logo,
+    .task-avatar,
+    .task-check,
+    /* Material gives every direct-child icon a 16px right margin; inside this
+       grid the column-gap already does the spacing, so zero it or the label
+       gets pushed far off its icon. */
+    .mat-icon,
+    img {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .task-check {
+        justify-self: end;
+    }
+}
+
+/* type menu: square image tile (no rounded corners) */
+::ng-deep .task-menu .task-opt--type { gap: 0; }
+/* scoped under .task-opt--type so this margin outranks `.task-opt img { margin-right: 0 }` */
+::ng-deep .task-menu .task-opt--type .task-badge {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0;
+    object-fit: contain;
+    margin-right: 0.75rem;
+}
+::ng-deep .task-menu .task-logo {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    object-fit: contain;
+    background: #fff;
+    margin-right: 0.875rem;
+}
+
+/* scoped under .task-opt so this margin outranks `.task-opt img { margin-right: 0 }` */
+::ng-deep .task-menu .task-opt .task-avatar { margin-right: 0.75rem; }
+
+::ng-deep .task-menu--sort .task-opt .mat-icon,
+::ng-deep .task-menu--sort .task-opt .task-opt-text,
+::ng-deep .task-menu--sort .task-opt .task-check,
+::ng-deep .task-menu--sort .mat-mdc-menu-submenu-icon {
+    color: var(--helper-primary);
+}
+/* Selected direction uses the active theme's primary color. */
+::ng-deep .task-menu--sort .task-opt.is-selected {
+    background: rgba(var(--helper-primary-rgb), 0.08);
+}
+::ng-deep .task-menu--sort .task-opt.is-selected:hover {
+    background: rgba(var(--helper-primary-rgb), 0.14);
+}
+::ng-deep body.dark .task-menu--sort .task-opt .mat-icon,
+::ng-deep body.dark .task-menu--sort .task-opt .task-opt-text,
+::ng-deep body.dark .task-menu--sort .task-opt .task-check,
+::ng-deep body.dark .task-menu--sort .mat-mdc-menu-submenu-icon {
+    color: var(--helper-primary-300);
+}
+::ng-deep body.dark .task-menu--sort .task-opt.is-selected {
+    background: rgba(var(--helper-primary-rgb), 0.8);
+    .mat-icon,
+    .task-opt-text,
+    .task-check { color: #fff; }
+}
+::ng-deep body.dark .task-menu--sort .task-opt.is-selected:hover {
+    background: rgba(var(--helper-primary-rgb), 0.9);
+}
+::ng-deep .task-menu--sort .task-dir-row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    .task-opt-text { flex: 1; }
+}
+
+/* ── Arrow-key cursor ────────────────────────────────────────────────────────
+   Material's own focus layer is rgba(0,0,0,.04), so while arrowing through a menu
+   you can't tell where you are. Mark it with the primary accent instead: the tint says "cursor", the
+   primary fill still says "chosen", and the two read as different things.
+   `.mat-mdc-menu-item` is in the chain purely to match the specificity of the
+   `--sort .is-selected:hover` rules above, which this must outrank.            */
+::ng-deep .task-menu .task-opt.mat-mdc-menu-item.cdk-keyboard-focused {
+    background: rgba(var(--helper-primary-rgb), 0.08);
+    box-shadow: inset 3px 0 0 var(--helper-primary);
+}
+::ng-deep body.dark .task-menu .task-opt.mat-mdc-menu-item.cdk-keyboard-focused {
+    background: rgba(var(--helper-primary-300-rgb), 0.14);
+    box-shadow: inset 3px 0 0 var(--helper-primary-300);
+}
+::ng-deep body.dark .task-menu .task-opt.is-selected.mat-mdc-menu-item.cdk-keyboard-focused {
+    background: rgba(var(--helper-primary-rgb), 0.8);
+    box-shadow: inset 3px 0 0 #fff;
+}

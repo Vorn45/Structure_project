@@ -1,0 +1,55 @@
+<div class="relative w-full min-h-[100dvh]"> <!-- Full-height dialog wrapper -->
+
+    <!-- Header -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <div class="flex items-center gap-2">
+            <mat-icon svgIcon="mdi:information" class="text-gray-800"></mat-icon>
+            <h2 class="text-[18px] font-medium text-gray-800">អំពីប្រព័ន្ធ</h2>
+        </div>
+        <button mat-icon-button (click)="closeDialog()">
+            <mat-icon svgIcon="mdi:close" class="text-gray-400 hover:text-gray-600"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Main content area -->
+    <div mat-dialog-content class="p-6 flex-1 overflow-y-auto min-h-0">
+        <div>
+            <p class="text-gray-700 font-medium text-[14px] mb-2">
+                ប្រព័ន្ឋសមាគមសិស្ស-និស្សិត អ.ម.ត ២ - អ.ម.ត ចិន ត្រូវបានអភិវឌ្ឍឡើងដើម្បី ៖
+            </p>
+            <ul class="list-disc pl-6 text-gray-700 text-[12px]">
+                <li class="text-[13px]">ជួយសម្រួលការចុះឈ្មោះ និងការចូលប្រើប្រាស់ប្រព័ន្ធ</li>
+                <li class="text-[13px]">បង្កើនប្រសិទ្ធភាពនៃការគ្រប់គ្រងទិន្នន័យ</li>
+            </ul>
+
+            <div class="mt-4">
+                <p class="text-gray-700 font-medium text-[14px] mb-2">មុខងារសំខាន់ៗ ៖</p>
+                <ul class="list-disc pl-6 text-gray-700 text-[12px] space-y-1">
+                    <li class="text-[13px]">ចុះឈ្មោះសិស្ស-និស្សិតថ្មី</li>
+                    <li class="text-[13px]">បញ្ជីសិស្ស-និស្សិត</li>
+                    <li class="text-[13px]">ការដាក់ពាក្យអាហារូបករណ៍</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+        <div class="absolute bottom-0 left-0 right-0 flex-shrink-0 w-full py-1 px-6 flex flex-col items-center justify-center border-t border-gray-100 bg-white">
+            <!-- Logo and title -->
+            <div class="flex items-center gap-1 mb-3">
+                <img src="images/logo/AMT.png" alt="Logo" class="w-10 h-10 object-contain" />
+                <div class="text-center">
+                    <p class="font-semibold text-[14px] text-blue-900 mr-1">សមាគមសិស្ស-និស្សិត</p>
+                    <p class="font-semibold text-[14px] text-blue-900">អ.ម.ត ២ - អ.ម.ត ចិន</p>
+                </div>
+            </div>
+             <!-- Separate line -->
+            <div class="w-[45%] border-t border-gray-300 my-1"></div>
+
+            <!-- Version info -->
+            <div class="text-center text-xs text-gray-500">
+                <p class="text-[12px] text-slate-800 opacity-50 mb-1">ជំនាន់ {{ appVersion }}</p>
+                <p class="text-[12px]">© 2025 រក្សាសិទ្ធិដោយ សមាគមសិស្ស-និស្សិត អ.ម.ត ក្រុម២ | អ.ម.ត ចិន</p>
+            </div>
+        </div>
+</div>

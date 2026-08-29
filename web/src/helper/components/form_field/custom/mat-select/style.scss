@@ -1,0 +1,44 @@
+// Hide the default mat-select arrow
+.custom-select-wrapper {
+    ::ng-deep .mat-mdc-select-arrow-wrapper {
+        display: none !important;
+    }
+}
+
+// Style the custom arrow
+.select-arrow {
+    transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+// Rotate arrow when select is open
+.custom-select-wrapper.mat-focused .select-arrow {
+    transform: rotate(-90deg);
+}
+::ng-deep.mat-mdc-select-min-line{
+    overflow: visible !important;
+    @apply leading-7 #{'!important'}
+}
+::ng-deep.mat-mdc-select-value-text{
+    overflow: visible !important;
+}
+::ng-deep.mat-mdc-select-value{
+    overflow-y: visible !important;
+    overflow-x: hidden !important; 
+}
+
+::ng-deep .select-panel-with-search {
+  padding-top: 0 !important; /* reset default */
+}
+
+::ng-deep .select-panel-with-search .mat-mdc-select-panel {
+  padding-top: 56px !important; /* space for search */
+}
+
+::ng-deep .select-panel-with-avatar .mat-mdc-option {
+  min-height: 52px;
+}
+
+// Avatar options act as their own selection indicator; hide the default checkbox.
+::ng-deep .select-panel-with-avatar .mat-mdc-option .mat-pseudo-checkbox {
+  display: none !important;
+}

@@ -1,0 +1,83 @@
+<!-- Trigger -->
+<button
+    #triggerButton
+    type="button"
+    class="cs-trigger"
+    [class.cs-trigger-selected]="hasValue"
+    [class.cs-trigger-open]="isOpen"
+    [disabled]="isDisabled"
+    cdkOverlayOrigin
+    #origin="cdkOverlayOrigin"
+    role="combobox"
+    aria-haspopup="listbox"
+    [attr.aria-expanded]="isOpen"
+    [attr.aria-label]="ariaLabel || currentPlaceholder"
+    (click)="toggle()"
+    (keydown)="onTriggerKeydown($event)"
+>
+    @if (icon) {
+        <mat-icon class="cs-icon" [svgIcon]="icon"></mat-icon>
+    }
+
+    <span class="cs-value" [class.cs-value-placeholder]="!hasValue">
+        {{ hasValue ? selectedLabel : currentPlaceholder }}
+    </span>
+
+    @if (loading) {
+        <mat-spinner class="cs-spinner" [diameter]="18"></mat-spinner>
+    } @else {
+        <mat-icon class="cs-arrow" svgIcon="mdi:menu-down"></mat-icon>
+    }
+</button>
+
+<!-- Panel -->
+<ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="origin"
+    [cdkConnectedOverlayOpen]="isOpen"
+    [cdkConnectedOverlayWidth]="panelWidth || triggerWidth"
+    [cdkConnectedOverlayPositions]="positions"
+    [cdkConnectedOverlayHasBackdrop]="true"
+    cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+    (backdropClick)="close()"
+    (detach)="close()"
+>
+    <div #panel class="cs-panel" tabindex="-1" (keydown)="onPanelKeydown($event)">
+        @if (allowSearch) {
+            <div class="cs-search">
+                <mat-icon class="cs-search-icon" svgIcon="heroicons_outline:magnifying-glass"></mat-icon>
+                <input
+                    #searchInput
+                    type="text"
+                    class="cs-search-input"
+                    [placeholder]="currentSearchPlaceholder"
+                    [value]="searchTerm"
+                    (input)="onSearch($event)"
+                />
+            </div>
+        }
+
+        <ul class="cs-options" role="listbox">
+            @for (option of filteredOptions; track $index; let i = $index) {
+                <li
+                    class="cs-option"
+                    [class.cs-option-active]="i === activeIndex"
+                    [class.cs-option-selected]="isSelected(option)"
+                    [attr.data-option-index]="i"
+                    role="option"
+                    [attr.aria-selected]="isSelected(option)"
+                    (mouseenter)="activeIndex = i"
+                    (click)="select(option)"
+                >
+                    <span class="truncate">{{ optionLabelOf(option) }}</span>
+
+                    @if (isSelected(option)) {
+                        <mat-icon class="cs-check" svgIcon="mdi:check"></mat-icon>
+                    }
+                </li>
+            } @empty {
+                <li class="cs-empty">{{ currentEmptyText }}</li>
+            }
+        </ul>
+    </div>
+</ng-template>

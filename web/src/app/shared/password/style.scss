@@ -1,0 +1,16 @@
+.mat-mdc-dialog-content.mdc-dialog__content {
+    max-height: 85vh !important;
+}
+
+::ng-deep .md-form-field-appearance-outline {
+    .mdc-text-field--outlined.mdc-text-field--disabled .mdc-floating-label,
+    .mdc-text-field--outlined.mdc-text-field--disabled
+        .mdc-floating-label--float-above {
+        color: var(--mdc-outlined-text-field-label-text-color);
+    }
+}
+
+input[disabled] {
+    opacity: 1;
+    -webkit-text-fill-color: var(--mdc-outlined-text-field-input-text-color);
+}

@@ -1,0 +1,380 @@
+<div mat-dialog-title
+    class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900 relative px-4">
+    <span class="w-full text-center text-2xl font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'ProfileView.Title' | transloco }}</span>
+
+    <!-- Top Right 3-Dots Menu -->
+    <button mat-icon-button [matMenuTriggerFor]="topRoleMenu"
+        class="absolute right-3 top-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+        <mat-icon svgIcon="feather:more-vertical"></mat-icon>
+    </button>
+    <mat-menu #topRoleMenu="matMenu" xPosition="before"
+        class="!rounded-none !shadow-none border border-slate-200 dark:border-slate-800 py-1">
+        <!-- Account actions (Edit / Settings / Security) - mobile only, shown inline on sm: and up -->
+        <button mat-menu-item (click)="updateProfile()" class="sm:hidden !h-12 !min-h-12">
+            <div class="flex items-center gap-3">
+                <mat-icon svgIcon="mdi:pencil-outline"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="truncate text-[16px] text-slate-900 dark:text-slate-100">
+                    {{ 'ProfileView.EditAccountInfo' | transloco }}
+                </span>
+            </div>
+        </button>
+
+        <button mat-menu-item (click)="settingDialog()" class="sm:hidden !h-12 !min-h-12">
+            <div class="flex items-center gap-3">
+                <mat-icon svgIcon="mdi:cog-outline"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="truncate text-[16px] text-slate-900 dark:text-slate-100">
+                    {{ 'ProfileView.Settings' | transloco }}
+                </span>
+            </div>
+        </button>
+
+        <button mat-menu-item (click)="securityDialog()" class="sm:hidden !h-12 !min-h-12">
+            <div class="flex items-center gap-3">
+                <mat-icon svgIcon="mdi:shield-outline"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="truncate text-[16px] text-slate-900 dark:text-slate-100">
+                    {{ 'ProfileSecurity.Title' | transloco }}
+                </span>
+            </div>
+        </button>
+
+        <mat-divider class="sm:hidden my-1 border-slate-200 dark:border-slate-800"></mat-divider>
+
+        <!-- 1. My Work (ការងារខ្ញុំ) -->
+        <button mat-menu-item (click)="activeTab = 'my-work'; switchToPersonalWorkspace()" class="!h-12 !min-h-12">
+            <div class="flex items-center gap-3">
+                <mat-icon svgIcon="mdi:account-outline"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="truncate text-[16px]"
+                    [ngClass]="isPersonalWorkspaceActive ? 'font-medium text-blue-900 dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'">
+                    {{ 'ProfileView.MyWork' | transloco }}
+                </span>
+                <mat-icon *ngIf="isPersonalWorkspaceActive"
+                    class="text-blue-900 dark:text-blue-300 shrink-0 !w-5 !h-5 ml-auto !mr-0 !m-0"
+                    svgIcon="feather:check"></mat-icon>
+            </div>
+        </button>
+
+        <!-- 2. Org Work (ការងារអង្គភាព) -->
+        <button mat-menu-item (click)="activeTab = 'unit-work'; openUnderConstruction(translate('ProfileView.OrgWork'))"
+            class="!h-12 !min-h-12">
+            <div class="flex items-center gap-3">
+                <mat-icon svgIcon="heroicons_outline:building-office-2"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="truncate text-[16px] text-slate-900 dark:text-slate-100">
+                    {{ 'ProfileView.OrgWork' | transloco }}
+                </span>
+            </div>
+        </button>
+
+        <!-- 3. Super Admin (អភិបាលប្រព័ន្ធ) -->
+        <ng-container *ngIf="systemRoles.length">
+            <button *ngFor="let sRole of systemRoles" mat-menu-item (click)="onSelectDisplay(sRole)"
+                class="!h-12 !min-h-12">
+                <div class="flex items-center gap-3">
+                    <mat-icon svgIcon="mdi:star-outline"
+                        class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                    <span class="truncate text-[16px]"
+                        [ngClass]="sRole.isActive ? 'font-medium text-blue-900 dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'">
+                        {{ sRole.title }}
+                    </span>
+                    <mat-icon *ngIf="sRole.isActive"
+                        class="text-blue-900 dark:text-blue-300 shrink-0 !w-5 !h-5 ml-auto !mr-0 !m-0"
+                        svgIcon="feather:check"></mat-icon>
+                </div>
+            </button>
+        </ng-container>
+
+        <mat-divider class="my-1 border-slate-200 dark:border-slate-800"></mat-divider>
+
+        <!-- 4. Personal Report (របាយការណ៍ផ្ទាល់ខ្លួន) -->
+        <button mat-menu-item (click)="openMyWorkReport()" class="!h-12 !min-h-12">
+            <div class="flex items-center gap-3">
+                <mat-icon svgIcon="heroicons_outline:chart-bar"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="truncate text-[16px] text-slate-900 dark:text-slate-100">
+                    {{ 'ProfileView.PersonalReport' | transloco }}
+                </span>
+            </div>
+        </button>
+
+        <mat-divider class="my-1 border-slate-200 dark:border-slate-800"></mat-divider>
+
+        <!-- 5. Report Bug (រាយការណ៍បញ្ហា) -->
+        <button mat-menu-item (click)="reportBugDialog()" class="!h-12 !min-h-12">
+            <div class="flex items-center gap-3">
+                <mat-icon svgIcon="mdi:bug-outline"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="truncate text-[16px] text-slate-900 dark:text-slate-100">
+                    {{ 'ReportBug.Report' | transloco }}
+                </span>
+            </div>
+        </button>
+    </mat-menu>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="false"></shared-side-dialog-close-button>
+
+<mat-dialog-content class="w-full !p-0 overflow-y-auto flex-1 pb-4">
+    <!-- Cover Image -->
+    <div
+        class="relative w-full h-48 group flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
+        <img [src]="getImageUrl(user?.cover, 'cover')" alt="cover" class="w-full h-full object-cover" />
+        <div
+            class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity">
+            <mat-icon class="icon-size-12 text-white" svgIcon="mdi:upload"></mat-icon>
+        </div>
+        <input type="file" accept="image/*" (change)="openCroppedDialog($event, 2/1, 'cover')"
+            class="absolute inset-0 opacity-0 cursor-pointer" />
+    </div>
+
+    <!-- Profile Header (Avatar, Info & Action Buttons) -->
+    <div class="flex items-start justify-between px-6 -mt-12 relative z-10 gap-4">
+        <!-- Left: Avatar + User Info -->
+        <div class="flex items-start gap-4 min-w-0 flex-1">
+            <!-- Profile Image -->
+            <div
+                class="relative size-24 shrink-0 rounded-full group flex items-center justify-center border-4 border-white dark:border-slate-900 bg-white shadow-sm">
+                <img [src]="getImageUrl(user?.avatar, 'avatar')" alt="Profile Picture"
+                    class="size-full rounded-full object-cover transition duration-300"
+                    [class.opacity-40]="isAvatarUpdating" />
+
+                <!-- Loading Spinner Overlay -->
+                <div *ngIf="isAvatarUpdating"
+                    class="absolute inset-0 z-10 flex items-center justify-center rounded-full bg-gray-500/50 backdrop-blur-[1px]">
+                    <mat-progress-spinner diameter="34" mode="indeterminate"></mat-progress-spinner>
+                </div>
+
+                <!-- Upload Icon Overlay -->
+                <div *ngIf="!isAvatarUpdating"
+                    class="absolute inset-0 rounded-full flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    (click)="uploadProfileDialog()">
+                    <mat-icon class="!w-7 !h-7 text-white" svgIcon="mdi:upload"></mat-icon>
+                </div>
+                <!-- Verification Badge -->
+                <div *ngIf="!isAvatarUpdating"
+                    class="absolute -bottom-0.5 -right-0.5 size-7 bg-amber-500 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">
+                    <mat-icon svgIcon="mdi:shield-check" class="text-white !w-4 !h-4"></mat-icon>
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="flex flex-col min-w-0 pt-[52px] flex-1">
+                <!-- Main Text (KH Name) - 24px font size, 32px line height -->
+                <span class="text-[24px] leading-[32px] font-medium text-slate-900 dark:text-white truncate">
+                    {{ user?.kh_name || ('ProfileView.DefaultUserName' | transloco) }}
+                </span>
+                <!-- Sub Text (EN Name + Gender) - 16px font size, 24px line height, text-slate-900 -->
+                <div class="flex items-center gap-1.5 text-[16px] leading-[24px] text-slate-900 dark:text-slate-100">
+                    <span class="truncate tracking-wide font-normal text-slate-900 dark:text-slate-100">{{
+                        user?.en_name?.toUpperCase() }}</span>
+                    <ng-container *ngIf="user?.gender">
+                        <mat-icon *ngIf="user.gender === 'male' || user.gender === 'M'" svgIcon="mdi:gender-male"
+                            class="icon-size-4 !w-4 !h-4 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+                        <mat-icon *ngIf="user.gender === 'female' || user.gender === 'F'" svgIcon="mdi:gender-female"
+                            class="icon-size-4 !w-4 !h-4 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+                    </ng-container>
+                    <a *ngIf="user?.telegram_username" [href]="'https://t.me/' + user?.telegram_username"
+                        target="_blank" rel="noopener noreferrer"
+                        class="text-blue-500 font-light hover:text-blue-600 hover:underline cursor-pointer transition-all ml-1.5 text-[14px]"
+                        [matTooltip]="'ProfileView.OpenTelegram' | transloco"
+                        (click)="$event.stopPropagation()">
+                        {{ '@' + user?.telegram_username }}
+                    </a>
+                </div>
+                <!-- Additional Info (Phone & Email) - 12px font size, 24px line height, 16px icons (text-slate-500) -->
+                <div
+                    class="flex flex-row flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] leading-[24px] text-slate-500 dark:text-slate-400 overflow-hidden">
+                    <ng-container *ngIf="user?.phone">
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <mat-icon svgIcon="mdi:phone-outline"
+                                class="icon-size-4 !w-4 !h-4 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+                            <span class="font-normal text-[12px] text-slate-500 dark:text-slate-400">{{ user?.phone
+                                }}</span>
+                        </div>
+                    </ng-container>
+                    <span *ngIf="user?.phone && user?.email"
+                        class="shrink-0 text-slate-500 dark:text-slate-400">•</span>
+                    <ng-container *ngIf="user?.email">
+                        <div class="flex items-center gap-1.5 min-w-0 truncate">
+                            <mat-icon svgIcon="mdi:email-outline"
+                                class="icon-size-4 !w-4 !h-4 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+                            <span class="truncate font-normal text-[12px] text-slate-500 dark:text-slate-400">{{
+                                user?.email }}</span>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Action Buttons -->
+        <div class="hidden sm:flex items-center gap-1 shrink-0 pt-[52px]">
+            <button mat-icon-button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                (click)="updateProfile()"
+                [matTooltip]="'ProfileView.EditAccountInfo' | transloco">
+                <mat-icon svgIcon="mdi:pencil-outline" class="!w-5 !h-5"></mat-icon>
+            </button>
+            <button mat-icon-button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                (click)="settingDialog()" [matTooltip]="'ProfileView.Settings' | transloco">
+                <mat-icon svgIcon="mdi:cog-outline" class="!w-5 !h-5"></mat-icon>
+            </button>
+            <button mat-icon-button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                (click)="securityDialog()" [matTooltip]="'ProfileSecurity.Title' | transloco">
+                <mat-icon svgIcon="mdi:shield-outline" class="!w-5 !h-5"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <mat-divider class="mt-4 mb-1 border-slate-200 dark:border-slate-700"></mat-divider>
+
+    <!-- Roles List -->
+    <div class="flex flex-col">
+        <ng-container *ngIf="isLoadingRoles">
+            <p class="px-6 pt-4 pb-3">
+                <span class="block h-4 w-24 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+            </p>
+            <div *ngFor="let skeleton of skeletons" class="flex items-center gap-3 px-6 py-3">
+                <span class="h-10 w-10 shrink-0 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                <div class="flex-1 min-w-0 flex flex-col gap-y-1.5">
+                    <span class="block h-4 w-2/3 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                    <span class="block h-3 w-1/3 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                </div>
+            </div>
+        </ng-container>
+
+        <p *ngIf="!isLoadingRoles && !displayGroups.length"
+            class="px-6 py-8 text-center text-[14px] text-slate-500 dark:text-slate-400">
+            {{ 'Common.No_Role' | transloco }}
+        </p>
+
+        <ng-container *ngIf="!isLoadingRoles">
+            <ng-container *ngFor="let group of displayGroups; let firstGroup = first; trackBy: trackGroup">
+                <mat-divider *ngIf="!firstGroup" class="my-0 border-slate-200 dark:border-slate-700"></mat-divider>
+                <p *ngIf="group.header"
+                    class="px-6 pt-4 pb-3 text-[18px] font-medium text-slate-500 dark:text-slate-400">
+                    {{ group.header }}
+                </p>
+                <ng-container *ngFor="let item of group.items; trackBy: trackRole">
+                    <div (click)="onSelectDisplay(item)"
+                        class="group flex items-center gap-3 px-6 py-3 transition-colors duration-200"
+                        [ngClass]="item.isActive ? 'bg-slate-200 dark:bg-slate-700' : 'cursor-pointer hover:bg-slate-100 dark:hover:bg-white/5'">
+                        <div class="relative shrink-0">
+                            <ng-container *ngIf="item.logo; else roleIcon">
+                                <img [src]="item.logo" alt="logo"
+                                    class="h-10 w-10 rounded-full object-contain bg-white border border-slate-200 dark:border-slate-600" />
+                                <span *ngIf="item.badgeImage || item.badgeIcon"
+                                    class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center overflow-hidden"
+                                    [ngClass]="item.badgeBgClass || 'bg-white border border-slate-200 dark:bg-slate-700 dark:border-slate-600'">
+                                    <img *ngIf="item.badgeImage; else badgeIconTpl" [src]="item.badgeImage" alt="avatar"
+                                        class="h-full w-full object-cover" />
+                                    <ng-template #badgeIconTpl>
+                                        <mat-icon
+                                            [ngClass]="[item.badgeSize || 'icon-size-3', item.badgeColor || 'text-slate-500']"
+                                            [svgIcon]="item.badgeIcon"></mat-icon>
+                                    </ng-template>
+                                </span>
+                            </ng-container>
+                            <ng-template #roleIcon>
+                                <span
+                                    class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                    <mat-icon class="icon-size-6"
+                                        [ngClass]="item.badgeColor || 'text-slate-500 dark:text-slate-300'"
+                                        [svgIcon]="item.icon || 'mdi:account-circle'"></mat-icon>
+                                </span>
+                            </ng-template>
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col gap-y-1 leading-tight">
+                            <p class="truncate text-[16px]"
+                                [ngClass]="item.isActive ? 'font-medium text-blue-900 dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'">
+                                {{ item.title }}
+                            </p>
+                            <p *ngIf="item.subtitle" class="truncate text-[12px] transition-colors duration-200"
+                                [ngClass]="item.isActive ? 'text-blue-900 dark:text-blue-300' : 'text-slate-500 dark:text-slate-400'">
+                                {{ item.subtitle }}
+                            </p>
+                        </div>
+                        <div class="shrink-0 flex items-center justify-center w-9 min-w-[36px]">
+                            <ng-container *ngIf="item.isActive; else nonActiveTpl">
+                                <mat-icon class="text-blue-900 dark:text-blue-300 shrink-0"
+                                    svgIcon="feather:check"></mat-icon>
+                            </ng-container>
+                            <ng-template #nonActiveTpl>
+                                <span *ngIf="item.switchedAt && !menuTrigger.menuOpen"
+                                    class="text-[15px] font-normal text-slate-400 dark:text-slate-400 font-kantumruy w-9 text-center block group-hover:hidden">
+                                    {{ item.switchedAt | timeAgo }}
+                                </span>
+                                <button type="button" #menuTrigger="matMenuTrigger"
+                                    [matMenuTriggerFor]="orgRowMenu" [matMenuTriggerData]="{ item: item }"
+                                    (click)="$event.stopPropagation()"
+                                    class="items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 shrink-0 size-8 !p-0 rounded-full aspect-square bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors cursor-pointer border-0 outline-none"
+                                    [ngClass]="menuTrigger.menuOpen ? 'flex' : 'hidden group-hover:flex'">
+                                    <mat-icon svgIcon="feather:more-vertical" class="!w-4 !h-4"></mat-icon>
+                                </button>
+                            </ng-template>
+                        </div>
+                    </div>
+                </ng-container>
+                <div *ngIf="group.hiddenCount > 0" (click)="openOrgDialog(group.key)"
+                    class="flex items-center gap-3 px-6 py-3 cursor-pointer transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-white/5">
+                    <div
+                        class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
+                        <mat-icon svgIcon="feather:more-horizontal" class="icon-size-5"></mat-icon>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[16px] font-medium text-slate-700 dark:text-slate-300">
+                            +{{ group.hiddenCount }} {{ 'ProfileView.OrgCountSuffix' | transloco }}
+                        </p>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+</mat-dialog-content>
+
+<!-- Bottom Footer -->
+<div
+    class="w-full flex items-center gap-3 p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+    <button type="button" (click)="openCreateOrganization()"
+        class="flex-1 h-11 px-4 rounded-xl font-medium text-[15px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] transition-all duration-200 active:scale-[0.98]">
+        <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
+        <span>{{ 'ProfileView.CreateNewOrg' | transloco }}</span>
+    </button>
+    <button type="button" (click)="signOut()"
+        class="flex-1 h-11 px-4 rounded-xl font-medium text-[15px] flex items-center justify-center gap-2 text-[#ef4444] bg-white border border-[#ef4444] dark:bg-slate-900 transition-all duration-200 active:scale-[0.98]">
+        <mat-icon svgIcon="mdi:logout" class="!w-5 !h-5 !text-[#ef4444] shrink-0"></mat-icon>
+        <span>{{ 'Lock.SignOut' | transloco }}</span>
+    </button>
+</div>
+
+<!-- Row Context Menu -->
+<mat-menu #orgRowMenu="matMenu" xPosition="before"
+    class="!rounded-lg !p-0 overflow-hidden border border-slate-200 dark:border-slate-800">
+    <ng-template matMenuContent let-item="item">
+        <button mat-menu-item (click)="onSelectDisplay(item)" class="!h-11 !min-h-11">
+            <div
+                class="flex items-center gap-3 text-[15px] font-normal text-slate-800 dark:text-slate-100 font-kantumruy">
+                <mat-icon svgIcon="mdi:login"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span>{{ 'OrganizationSwitch.SwitchTo' | transloco }}</span>
+            </div>
+        </button>
+
+        <button mat-menu-item (click)="openAboutOrg(item)" class="!h-11 !min-h-11">
+            <div
+                class="flex items-center gap-3 text-[15px] font-normal text-slate-800 dark:text-slate-100 font-kantumruy">
+                <mat-icon svgIcon="mdi:information-outline"
+                    class="text-slate-600 dark:text-slate-300 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span>{{ 'OrganizationSwitch.About' | transloco }}</span>
+            </div>
+        </button>
+
+        <button mat-menu-item (click)="leaveOrg(item)" class="!h-11 !min-h-11">
+            <div class="flex items-center gap-3 text-[15px] font-normal text-red-500 font-kantumruy">
+                <mat-icon svgIcon="mdi:exit-run" class="!text-red-500 !w-5 !h-5 !mr-0 !m-0 shrink-0"></mat-icon>
+                <span class="text-red-500">{{ 'LeaveOrg.Leave' | transloco }}</span>
+            </div>
+        </button>
+    </ng-template>
+</mat-menu>

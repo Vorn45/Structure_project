@@ -1,0 +1,196 @@
+<div mat-dialog-title
+    class="w-full relative flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900">
+    <span class="w-full text-center text-2xl font-medium font-kantumruy text-slate-500 dark:text-slate-400">
+        {{ 'LocalPasscode.Title' | transloco }}
+    </span>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="true" [closeOnClick]="false" (buttonClick)="onBack()"></shared-side-dialog-close-button>
+
+<mat-dialog-content class="flex flex-col items-center gap-8 bg-white dark:bg-slate-900 font-kantumruy !overflow-x-hidden !p-4">
+
+    <!-- STEP: OVERVIEW -->
+    <ng-container *ngIf="step() === 'overview'">
+        <div class="flex w-full flex-col items-center gap-8">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="flex size-24 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <mat-icon class="icon-size-14 text-slate-900 dark:text-slate-100" svgIcon="mdi:lock-outline" />
+                </div>
+                <h2 class="text-[24px] leading-8 font-medium font-kantumruy text-slate-900 dark:text-slate-100">
+                    {{ 'LocalPasscode.Title' | transloco }}
+                </h2>
+                <p class="text-lg text-slate-500 dark:text-slate-400 text-center">
+                    {{ 'LocalPasscode.Subtitle' | transloco }}
+                </p>
+            </div>
+
+            <div class="w-full flex flex-col gap-3">
+                <div *ngIf="isEnabled()" class="flex flex-col gap-3 w-full md-form-field-appearance-outline">
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>{{ 'LocalPasscode.AutoLockAfter' | transloco }}</mat-label>
+                        <mat-select [value]="selectedIdleTimeout()" (selectionChange)="onIdleTimeoutChange($event.value)">
+                            <mat-option *ngFor="let opt of idleOptions" [value]="opt.value">
+                                {{ current_lang === 'en' ? opt.labelEn : opt.labelKh }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <button type="button" *ngIf="!isEnabled()"
+                    class="w-full h-11 flex items-center justify-center bg-primary font-kantumruy font-medium text-base text-white rounded-md transition-colors"
+                    (click)="startSetup()">
+                    {{ 'LocalPasscode.EnablePasscode' | transloco }}
+                </button>
+
+                <button type="button" *ngIf="isEnabled()"
+                    class="w-full h-11 flex items-center justify-center border border-red-200 text-red-500 font-kantumruy font-medium text-base rounded-md transition-colors hover:bg-red-50 dark:border-red-500/30 dark:hover:bg-red-500/10"
+                    (click)="startDisable()">
+                    {{ 'LocalPasscode.DisablePasscode' | transloco }}
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- STEP: VERIFY (re-enter current passcode before changing anything) -->
+    <ng-container *ngIf="step() === 'verify'">
+        <div class="flex w-full flex-col items-center gap-8">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="flex size-24 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <mat-icon class="icon-size-14 text-slate-900 dark:text-slate-100" svgIcon="mdi:lock-outline" />
+                </div>
+                <h2 class="text-[24px] leading-8 font-medium text-slate-900 dark:text-slate-100">
+                    {{ 'LocalPasscode.EnterCurrentPasscode' | transloco }}
+                </h2>
+            </div>
+
+            <form [formGroup]="verifyForm" (ngSubmit)="confirmVerify()" class="w-full flex flex-col gap-4 md-form-field-appearance-outline">
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>{{ 'LocalPasscode.Passcode' | transloco }}</mat-label>
+                    <input matInput formControlName="passcode" [type]="hideVerify() ? 'password' : 'text'" autocomplete="current-password" />
+                    <mat-icon matPrefix class="icon-size-6 px-3" svgIcon="mdi:lock"></mat-icon>
+                    <button type="button" mat-icon-button matSuffix class="mr-3" (click)="hideVerify.set(!hideVerify())">
+                        <mat-icon class="icon-size-5" [svgIcon]="hideVerify() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" />
+                    </button>
+                </mat-form-field>
+            </form>
+        </div>
+    </ng-container>
+
+    <!-- STEP: SET NEW PASSCODE -->
+    <ng-container *ngIf="step() === 'set'">
+        <div class="flex w-full flex-col items-center gap-8">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="flex size-24 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <mat-icon class="icon-size-14 text-slate-900 dark:text-slate-100" svgIcon="mdi:lock" />
+                </div>
+                <h2 class="text-[24px] leading-8 font-medium text-slate-900 dark:text-slate-100">
+                    {{ 'LocalPasscode.SetPasscodeTitle' | transloco }}
+                </h2>
+            </div>
+
+            <form [formGroup]="setForm" (ngSubmit)="goToConfirm()" class="w-full flex flex-col gap-4 md-form-field-appearance-outline">
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>{{ 'LocalPasscode.Passcode' | transloco }}</mat-label>
+                    <input matInput formControlName="passcode" [type]="hideSet() ? 'password' : 'text'" autocomplete="new-password" />
+                    <mat-icon matPrefix class="icon-size-6 px-3" svgIcon="mdi:lock"></mat-icon>
+                    <button type="button" mat-icon-button matSuffix class="mr-3" (click)="hideSet.set(!hideSet())">
+                        <mat-icon class="icon-size-5" [svgIcon]="hideSet() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" />
+                    </button>
+                </mat-form-field>
+            </form>
+        </div>
+    </ng-container>
+
+    <!-- STEP: CONFIRM PASSCODE -->
+    <ng-container *ngIf="step() === 'confirm'">
+        <div class="flex w-full flex-col items-center gap-8">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="flex size-24 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <mat-icon class="icon-size-14 text-slate-900 dark:text-slate-100" svgIcon="mdi:lock-check" />
+                </div>
+                <h2 class="text-[24px] leading-8 font-medium text-slate-900 dark:text-slate-100">
+                    {{ 'LocalPasscode.ConfirmPasscode' | transloco }}
+                </h2>
+            </div>
+
+            <form [formGroup]="confirmForm" (ngSubmit)="confirmAndSave()" class="w-full flex flex-col gap-4 md-form-field-appearance-outline">
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>{{ 'LocalPasscode.ConfirmPasscode' | transloco }}</mat-label>
+                    <input matInput formControlName="passcode" [type]="hideConfirm() ? 'password' : 'text'" autocomplete="new-password" />
+                    <mat-icon matPrefix class="icon-size-6 px-3" svgIcon="mdi:lock-check"></mat-icon>
+                    <button type="button" mat-icon-button matSuffix class="mr-3" (click)="hideConfirm.set(!hideConfirm())">
+                        <mat-icon class="icon-size-5" [svgIcon]="hideConfirm() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" />
+                    </button>
+                </mat-form-field>
+
+                <div *ngIf="passcodesDoNotMatch()" class="flex gap-3 items-center text-red-500 px-1">
+                    <mat-icon class="icon-size-5" svgIcon="mdi:close-circle-outline"></mat-icon>
+                    <span>{{ 'Lock.PasscodesDoNotMatch' | transloco }}</span>
+                </div>
+            </form>
+        </div>
+    </ng-container>
+
+    <!-- STEP: DISABLE (verify current passcode) -->
+    <ng-container *ngIf="step() === 'disable'">
+        <div class="flex w-full flex-col items-center gap-8">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="flex size-24 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <mat-icon class="icon-size-14 text-slate-900 dark:text-slate-100" svgIcon="mdi:lock-open-outline" />
+                </div>
+                <h2 class="text-[24px] leading-8 font-medium text-slate-900 dark:text-slate-100">
+                    {{ 'LocalPasscode.EnterPasscodeToDisable' | transloco }}
+                </h2>
+            </div>
+
+            <form [formGroup]="disableForm" (ngSubmit)="confirmDisable()" class="w-full flex flex-col gap-4 md-form-field-appearance-outline">
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>{{ 'LocalPasscode.Passcode' | transloco }}</mat-label>
+                    <input matInput formControlName="passcode" [type]="hideDisable() ? 'password' : 'text'" autocomplete="current-password" />
+                    <mat-icon matPrefix class="icon-size-6 px-3" svgIcon="mdi:lock"></mat-icon>
+                    <button type="button" mat-icon-button matSuffix class="mr-3" (click)="hideDisable.set(!hideDisable())">
+                        <mat-icon class="icon-size-5" [svgIcon]="hideDisable() ? 'mdi:eye-outline' : 'mdi:eye-off-outline'" />
+                    </button>
+                </mat-form-field>
+            </form>
+        </div>
+    </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex items-center justify-end border-t border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 px-4 py-3">
+    <button *ngIf="step() === 'verify'" type="button"
+        class="px-6 h-10 flex items-center justify-center bg-primary disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="confirmVerify()" [disabled]="verifyForm.invalid || isSaving()">
+        <span *ngIf="!isSaving()" [style.color]="verifyForm.invalid ? '#94a3b8' : '#ffffff'">
+            {{ 'LocalPasscode.Continue' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isSaving()" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+    </button>
+
+    <button *ngIf="step() === 'set'" type="button"
+        class="px-6 h-10 flex items-center justify-center bg-primary disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="goToConfirm()" [disabled]="setForm.invalid">
+        <span [style.color]="setForm.invalid ? '#94a3b8' : '#ffffff'">
+            {{ 'Auth.Common.Next' | transloco }}
+        </span>
+    </button>
+
+    <button *ngIf="step() === 'confirm'" type="button"
+        class="px-6 h-10 flex items-center justify-center bg-primary disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="confirmAndSave()" [disabled]="confirmForm.invalid || isSaving()">
+        <span *ngIf="!isSaving()" [style.color]="confirmForm.invalid ? '#94a3b8' : '#ffffff'">
+            {{ 'Lock.Confirm' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isSaving()" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+    </button>
+
+    <button *ngIf="step() === 'disable'" type="button"
+        class="px-6 h-10 flex items-center justify-center bg-red-500 disabled:bg-[#e2e8f0] font-kantumruy font-medium text-base rounded-md transition-colors"
+        (click)="confirmDisable()" [disabled]="disableForm.invalid || isSaving()">
+        <span *ngIf="!isSaving()" [style.color]="disableForm.invalid ? '#94a3b8' : '#ffffff'">
+            {{ 'LocalPasscode.Disable' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isSaving()" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+    </button>
+</mat-dialog-actions>

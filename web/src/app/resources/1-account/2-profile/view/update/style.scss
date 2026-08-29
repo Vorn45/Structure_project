@@ -1,0 +1,13 @@
+.mat-mdc-dialog-content.mdc-dialog__content{
+    max-height: 100vh !important;
+}
+
+::ng-deep.radio{
+    .mat-mdc-radio-button.mat-accent{
+        @apply p-1.5 rounded-xl border #{'!important'};
+    }
+}
+
+::ng-deep .mat-mdc-form-field-icon-prefix {
+    padding: 0px !important;
+}

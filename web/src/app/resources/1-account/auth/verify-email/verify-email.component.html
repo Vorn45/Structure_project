@@ -1,0 +1,60 @@
+<div class="section">
+    <div class="container">
+        <div class="relative w-full px-3 h-[400px]">
+            <!-- Action -->
+            <div class="h-8 flex justify-between items-center">
+                <!-- Back -->
+                <button (click)="isOTP ? navigateBack() : navigateToSignIn()" mat-icon-button class="absolute top-[18px] left-4 hover:bg-slate-50 rounded-full w-9 h-9 flex items-center justify-center">
+                    <mat-icon mat-icon-button svgIcon="mdi:arrow-left"></mat-icon>
+                </button>
+                <!-- Language -->
+                <!-- <languages></languages> -->
+            </div>
+
+            <!-- Email Form -->
+            <ng-container *ngIf="!isOTP; else otp">
+                <!-- Header -->
+                <div class="flex flex-col justify-center items-center gap-4">
+                    <div class="flex items-center justify-center w-22 h-22 rounded-full bg-[#f3f4f5]">
+                        <mat-icon class="icon-size-[60px] text-black"
+                            svgIcon="mdi:lock-reset"></mat-icon>
+                    </div>
+                    <span class="text-3xl leading-6 font-medium"> កំណត់ពាក្យសម្ងាត់ឡើងវិញ </span>
+                </div>
+
+                <!-- Form -->
+                <form class="w-full flex flex-col items-end justify-end h-full" [formGroup]="emailForm" #emailFormNgForm="ngForm">
+                    <!-- Username Field -->
+                    <div class="form-field w-full h-full flex items-center">
+                        <div class="input-container w-full relative">
+                            <input matInput [formControlName]="'email'" id="email" placeholder=" " class="pl-13"/>
+                            <label for="email">{{ 'Email' | transloco }}</label>
+                            <mat-icon class="prefix-icon text-slate-500" [svgIcon]="'mdi:email-outline'"></mat-icon>
+                        </div>
+                        <div class="error-message absolute bottom-[100px]"
+                            *ngIf="emailForm.get('email')?.hasError('required') && (emailForm.get('email')?.touched || emailForm.get('email')?.dirty)">
+                        សូមបញ្ចូលអ៊ីមែលរបស់អ្នក
+                        </div>
+                        <div class="error-message absolute bottom-[100px]"
+                            *ngIf="emailForm.get('email')?.hasError('pattern') && (emailForm.get('email')?.touched || emailForm.get('email')?.dirty)">
+                        សូមបញ្ចូលអ៊ីមែលរបស់អ្នកឲបានត្រឹមត្រូវ
+                        </div>
+
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button class="helper-mat-button-md w-full" mat-flat-button color="primary"
+                            [disabled]="emailForm.disabled" (click)="sendOtp()">
+                        <span *ngIf="!emailForm.disabled">{{ 'Next' | transloco }}</span>
+                        <mat-progress-spinner *ngIf="emailForm.disabled" [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+                    </button>
+                </form>
+            </ng-container>
+
+            <!-- OTP Section -->
+            <ng-template #otp>
+                <otp></otp>
+            </ng-template>
+        </div>
+    </div>
+</div>

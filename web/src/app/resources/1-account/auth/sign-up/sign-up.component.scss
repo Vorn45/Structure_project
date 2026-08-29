@@ -1,0 +1,164 @@
+.section {
+    width: 100dvw;
+    height: 100dvh;
+    overflow: auto;
+
+        /* Medium Screens (Tablets) */
+        @media (max-width: 960px) {
+            .content {
+                max-width: 400px;
+                padding: 1.5rem 0rem;
+            }
+        }
+
+        /* Small Screens (Mobile) */
+        @media (max-width: 640px) {
+            .content {
+                background-color: transparent;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+        .mat-form-field-appearance-outline .mat-form-field-wrapper {
+            margin-bottom: -1.25em; /* Adjust this value as needed */
+        }
+    .compact-field {
+        margin-bottom: 0.1rem !important;
+    }
+
+}
+:host ::ng-deep .mat-form-field {
+  margin-bottom: 0.1rem; /* Reduced from default (1.25rem or 16px) */
+}
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  gap: 21px;
+}
+
+.form-field {
+  position: relative;
+}
+
+.input-container {
+  position: relative;
+  margin-top: 0rem;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #b1c5ca;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.2s;
+  display: flex ;
+  justify-content: center;
+  align-items: center;
+}
+
+.input-container input:focus {
+  outline: none;
+  border-color: #3f51b5;
+}
+
+.input-container label {
+  position: absolute;
+  left: 2.5rem; /* Match icon padding */
+  top: 12px;
+  color: #788082;
+  font-size: 1rem;
+  transition: all 0.2s;
+  pointer-events: none;
+  background: white;
+  padding: 0 0.25rem;
+}
+
+.input-container input:focus + label,
+.input-container input:not(:placeholder-shown) + label {
+  top: -0.5rem;
+  left: 1.75rem;
+  font-size: 0.75rem;
+  color: #3f51b5;
+}
+
+.prefix-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.suffix-icon {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  padding-left: 1rem;
+  position: absolute;
+  bottom: -18px;
+}
+
+.input-container mat-select {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #b1c5ca;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.input-container .mat-select-trigger {
+  height: auto !important;
+  min-height: 3rem;
+}
+
+.input-container .mat-select-value-text {
+  position: relative;
+  top: -1px;
+}
+
+.input-container mat-select:focus {
+  outline: none;
+  border-color: #3f51b5;
+}
+
+/* Fix for floating label with mat-select */
+.input-container mat-select.mat-select-empty + label,
+.input-container mat-select:not(.mat-select-empty) + label {
+  position: absolute;
+  left: 2.5rem;
+  top: 1rem;
+  color: #b1c5ca;
+  font-size: 1rem;
+  transition: all 0.2s;
+  pointer-events: none;
+  background: white;
+  padding: 0 0.25rem;
+}
+
+.input-container mat-select:focus + label,
+.input-container mat-select:not(.mat-select-empty) + label {
+  top: -0.5rem;
+  left: 1.75rem;
+  font-size: 0.75rem;
+  color: #3f51b5;
+}
+
+/* Adjust dropdown panel styling */
+.mat-select-panel {
+  margin-top: 0.5rem !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}

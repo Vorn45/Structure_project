@@ -1,0 +1,139 @@
+
+<button
+    type="button"
+    mat-icon-button
+    [title]="'Common.Close' | transloco"
+    [attr.aria-label]="'Common.Close' | transloco"
+    (click)="close()"
+    class="side-dialog-close-button group"
+>
+    <mat-icon svgIcon="mdi:close" class="ml-2" />
+</button>
+
+<!-- ! prefixes are needed to beat Material's own mat-dialog-title rules (display/padding/margin). -->
+<div mat-dialog-title class="relative !flex !h-14 !w-full !items-center !justify-between !border-b !border-slate-200 !px-12 md:!px-5 dark:!border-slate-700">
+    <span class="w-full text-center text-2xl font-medium text-slate-500 dark:text-slate-300">{{ 'Switch-Role' | transloco }}</span>
+</div>
+
+<mat-dialog-content class="user-switch-role-body relative mt-2 !p-0">
+        <main>
+            <ng-container *ngIf="isLoading">
+                <!-- Mirrors the geometry of a real row (h-10 avatar, two text lines, trailing check) so nothing shifts when the roles land. -->
+                <p class="px-5 pt-3 pb-1">
+                    <span class="block h-4 w-24 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                </p>
+                <div
+                    *ngFor="let skeleton of skeletons"
+                    class="flex items-center gap-3 px-5 py-3"
+                    aria-hidden="true"
+                >
+                    <span class="h-10 w-10 shrink-0 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                    <div class="flex-1 min-w-0 flex flex-col gap-y-1.5 leading-tight">
+                        <span class="block h-4 w-2/3 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                        <span class="block h-3 w-1/3 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                    </div>
+                    <span class="h-6 w-6 shrink-0 rounded-full bg-slate-100 dark:bg-white/5 animate-pulse"></span>
+                </div>
+            </ng-container>
+
+            <p
+                *ngIf="!isLoading && !displayGroups.length"
+                class="px-5 py-8 text-center text-[14px] text-slate-500 dark:text-slate-400"
+            >
+                {{ 'Common.No_Role' | transloco }}
+            </p>
+
+            <ng-container *ngIf="!isLoading">
+            <ng-container *ngFor="let group of displayGroups; let firstGroup = first; trackBy: trackGroup">
+                <mat-divider *ngIf="!firstGroup" class="my-0 !border-slate-200 dark:!border-slate-700"></mat-divider>
+                <p
+                    *ngIf="group.header"
+                    class="px-5 pt-3 pb-1 text-[16px] font-semibold text-slate-500 dark:text-slate-400"
+                >
+                    {{ group.header }}
+                </p>
+                <ng-container *ngFor="let item of group.items; trackBy: trackRole">
+                    <!-- Dark hover is a white overlay, not a slate shade: --helper-bg-dialog is #1e293b in
+                         dark mode, which is exactly slate-800, so dark:hover:bg-slate-800 was invisible. -->
+                    <div
+                        (click)="onSelectDisplay(item)"
+                        class="flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors duration-200"
+                        [ngClass]="item.isActive
+                            ? 'bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600'
+                            : 'hover:bg-slate-100 dark:hover:bg-white/5'"
+                    >
+                        <div class="relative shrink-0">
+                            <ng-container *ngIf="item.logo; else roleIcon">
+                                <img
+                                    [src]="item.logo"
+                                    alt="logo"
+                                    class="h-10 w-10 rounded-full object-contain bg-white border border-slate-200 dark:border-slate-600"
+                                />
+                                <span
+                                    *ngIf="item.badgeImage || item.badgeIcon"
+                                    class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center overflow-hidden"
+                                    [ngClass]="item.badgeBgClass || 'bg-white border border-slate-200 dark:bg-slate-700 dark:border-slate-600'"
+                                >
+                                    <img
+                                        *ngIf="item.badgeImage; else badgeIconTpl"
+                                        [src]="item.badgeImage"
+                                        alt="avatar"
+                                        class="h-full w-full object-cover"
+                                    />
+                                    <ng-template #badgeIconTpl>
+                                        <mat-icon
+                                            [ngClass]="[item.badgeSize || 'icon-size-3', item.badgeColor || 'text-slate-500']"
+                                            [svgIcon]="item.badgeIcon"
+                                        ></mat-icon>
+                                    </ng-template>
+                                </span>
+                            </ng-container>
+                            <ng-template #roleIcon>
+                                <span class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                    <mat-icon
+                                        class="icon-size-6"
+                                        [ngClass]="item.badgeColor || 'text-slate-500 dark:text-slate-300'"
+                                        [svgIcon]="item.icon || 'mdi:account-circle'"
+                                    ></mat-icon>
+                                </span>
+                            </ng-template>
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col gap-y-1 leading-tight">
+                            <p class="truncate text-[16px]" [ngClass]="item.isActive ? 'font-medium text-blue-900 dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'">
+                                {{ item.title }}
+                            </p>
+                            <p *ngIf="item.subtitle" class="truncate text-[12px] transition-colors duration-200" [ngClass]="item.isActive ? 'text-blue-900 dark:text-blue-300' : 'text-slate-500 dark:text-slate-400'">
+                                {{ item.subtitle }}
+                            </p>
+                        </div>
+                        <div class="shrink-0 flex items-center justify-end min-w-[36px]">
+                            <ng-container *ngIf="item.isActive; else dateTpl">
+                                <mat-icon
+                                    class="text-blue-900 dark:text-blue-300 shrink-0"
+                                    svgIcon="feather:check"
+                                ></mat-icon>
+                            </ng-container>
+                            <ng-template #dateTpl>
+                                <span *ngIf="item.switchedAt" class="text-[15px] font-normal text-slate-400 dark:text-slate-400">
+                                    {{ item.switchedAt | timeAgo }}
+                                </span>
+                            </ng-template>
+                        </div>
+                    </div>
+                </ng-container>
+                <div *ngIf="group.hiddenCount > 0"
+                    (click)="openOrgDialog(group.key)"
+                    class="flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-white/5">
+                    <div class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
+                        <mat-icon svgIcon="feather:more-horizontal" class="icon-size-5"></mat-icon>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[16px] font-medium text-slate-700 dark:text-slate-300">
+                            +{{ group.hiddenCount }} អង្គភាព
+                        </p>
+                    </div>
+                </div>
+            </ng-container>
+            </ng-container>
+        </main>
+</mat-dialog-content>

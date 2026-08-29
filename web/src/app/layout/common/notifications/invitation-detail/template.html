@@ -1,0 +1,108 @@
+<div class="flex flex-col font-kantumruy relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden max-h-[85vh]">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between py-2">
+        <span class="text-[18px] leading-7 font-medium text-slate-900 dark:text-slate-100">អញ្ជើញ</span>
+        <button mat-icon-button mat-dialog-close class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="flex flex-col items-center justify-center py-20">
+        <mat-progress-spinner [diameter]="32" mode="indeterminate"></mat-progress-spinner>
+    </div>
+
+    <!-- Load error -->
+    <div *ngIf="!loading && loadError" class="flex flex-col items-center text-center py-16">
+        <mat-icon svgIcon="mdi:link-off" class="icon-size-10 text-red-400 mb-3"></mat-icon>
+        <span class="text-slate-500 dark:text-slate-400">មិនអាចផ្ទុកការអញ្ជើញនេះបានទេ</span>
+    </div>
+
+    <ng-container *ngIf="!loading && !loadError && invitation as inv">
+
+        <!-- Org summary -->
+        <div class="flex items-start gap-3 pb-4">
+            <img
+                [src]="organizationLogoUrl()"
+                (error)="onAvatarError($event)"
+                class="w-11 h-11 rounded-full object-cover bg-slate-100 dark:bg-slate-800 shrink-0"
+                alt=""
+            />
+            <div class="flex flex-col min-w-0">
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="text-[15px] leading-6 font-medium text-slate-800 dark:text-slate-100 truncate">
+                        {{ organizationName }}
+                    </span>
+                    <mat-icon *ngIf="inv.is_admin" svgIcon="mdi:star" class="icon-size-4 text-amber-400 shrink-0"></mat-icon>
+                </div>
+                <span *ngIf="subtitle" class="text-[13px] leading-5 text-slate-400 dark:text-slate-500 truncate">
+                    {{ subtitle }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Projects -->
+        <div class="pb-2">
+            <span class="text-[14px] leading-6 font-medium text-slate-700 dark:text-slate-300">គម្រោង</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto flex flex-col gap-1 pb-2" *ngIf="inv.projects.length">
+            <div
+                *ngFor="let project of inv.projects"
+                class="flex items-center gap-3 py-2"
+            >
+                <img
+                    [src]="projectAvatarUrl(project)"
+                    (error)="onAvatarError($event)"
+                    class="w-9 h-9 rounded-full object-cover bg-slate-100 dark:bg-slate-800 shrink-0"
+                    alt=""
+                />
+                <div class="flex flex-col min-w-0 flex-1">
+                    <span class="text-[14px] leading-5 text-slate-800 dark:text-slate-100 truncate">
+                        {{ project.name_kh || project.name_en }}
+                    </span>
+                    <span class="text-[12px] leading-4 text-slate-400 dark:text-slate-500">{{ project.name_en }}</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0 text-slate-400 dark:text-slate-500">
+                    <mat-icon svgIcon="mdi:account-outline" class="icon-size-4"></mat-icon>
+                    <span class="text-[12px] leading-4">{{ roleLabel(project) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pb-4 text-[13px] text-slate-400" *ngIf="!inv.projects.length">
+            មិនមានគម្រោងភ្ជាប់ជាមួយការអញ្ជើញនេះទេ
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 py-2 border-t border-slate-100 dark:border-slate-800" *ngIf="isPending">
+            <button
+                mat-stroked-button
+                class="flex-1 !h-11 !rounded-xl !border-red-300 !text-red-500 font-kantumruy !font-medium text-[15px]"
+                [disabled]="accepting || declining"
+                (click)="decline()"
+            >
+                <span *ngIf="!declining">បដិសេធ</span>
+                <mat-progress-spinner *ngIf="declining" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+            </button>
+            <button
+                mat-flat-button
+                class="flex-1 !h-11 !rounded-xl bg-teal-500 hover:bg-teal-600 !text-white font-kantumruy !font-medium text-[15px]"
+                [disabled]="accepting || declining"
+                (click)="accept()"
+            >
+                <span *ngIf="!accepting">យល់ព្រម</span>
+                <mat-progress-spinner *ngIf="accepting" [diameter]="20" mode="indeterminate"></mat-progress-spinner>
+            </button>
+        </div>
+
+        <!-- Already resolved -->
+        <div class="py-2 border-t border-slate-100 dark:border-slate-800 text-center" *ngIf="!isPending">
+            <span class="text-[14px] leading-5">
+                <span *ngIf="statusInviteeName" class="font-bold text-slate-700 dark:text-slate-200">{{ statusInviteeName }} </span>
+                <span [ngClass]="statusColorClass">{{ statusMessage }}</span>
+            </span>
+        </div>
+    </ng-container>
+</div>

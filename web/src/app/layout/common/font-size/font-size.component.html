@@ -1,0 +1,20 @@
+<!-- Segmented switch: Small / Medium / Large / Super big -->
+<div
+    class="inline-flex items-center gap-0.5 p-0.5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+>
+    @for (option of options; track option) {
+        <button
+            type="button"
+            (click)="setFontSize(option.value)"
+            [matTooltip]="option.label_en + ' (' + option.pixels + ')'"
+            class="flex items-center justify-center w-8 h-8 rounded-full leading-none transition-colors duration-200"
+            [ngClass]="
+                fontSize === option.value
+                    ? 'bg-primary/10 shadow-sm !text-primary'
+                    : '!text-gray-500 dark:!text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            "
+        >
+            <span class="font-semibold" [ngClass]="option.size">{{ option.glyph }}</span>
+        </button>
+    }
+</div>

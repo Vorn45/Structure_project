@@ -1,0 +1,77 @@
+<div mat-dialog-title class="authenticator-header">
+    <span>Google Authenticator</span>
+</div>
+
+<shared-side-dialog-close-button
+    [isReturn]="true"
+    [closeOnClick]="false"
+    (buttonClick)="back()"
+></shared-side-dialog-close-button>
+
+<mat-dialog-content class="authenticator-content font-kantumruy">
+    @if (step() === 'overview') {
+        <div class="account-row">
+            <div class="account-icon">
+                <mat-icon svgIcon="google-authenticator-colored"></mat-icon>
+            </div>
+            <div class="account-copy">
+                <span class="account-label">{{ 'GoogleAuthenticator2FA.Email' | transloco }}</span>
+                <span class="account-value">{{ email }}</span>
+            </div>
+            <div class="account-action">
+                @if (isLoading()) {
+                    <mat-progress-spinner [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+                } @else {
+                    <mat-slide-toggle [checked]="enabled()" (change)="handleToggle($event)"></mat-slide-toggle>
+                }
+            </div>
+        </div>
+    } @else {
+        <div class="setup-page">
+            <p class="setup-instruction">
+                {{ 'GoogleAuthenticator2FA.SetupInstruction' | transloco }}
+            </p>
+
+            <div class="qr-panel">
+                @if (qrCode()) {
+                    <img [src]="qrCode()" [attr.alt]="'GoogleAuthenticator2FA.QrCodeAlt' | transloco" />
+                } @else {
+                    <mat-progress-spinner [diameter]="48" mode="indeterminate"></mat-progress-spinner>
+                }
+            </div>
+
+            <p class="otp-label">{{ 'GoogleAuthenticator2FA.EnterCode' | transloco }}</p>
+            <div class="otp-row">
+                @for (digit of otp(); track $index) {
+                    <input
+                        #otpInput
+                        class="otp-input"
+                        inputmode="numeric"
+                        maxlength="1"
+                        [value]="digit"
+                        [disabled]="isLoading()"
+                        [class.has-value]="digit"
+                        [attr.aria-label]="'GoogleAuthenticator2FA.DigitAriaLabel' | transloco: { n: $index + 1 }"
+                        (input)="onOtpInput($index, $event)"
+                        (keydown)="onOtpKeyDown($index, $event)"
+                        (paste)="onOtpPaste($event)"
+                    />
+                }
+            </div>
+
+            <button
+                mat-flat-button
+                [color]="'primary'"
+                class="verify-button"
+                [disabled]="!canSubmit || isLoading()"
+                (click)="verify()"
+            >
+                @if (isLoading()) {
+                    <mat-progress-spinner [diameter]="24" mode="indeterminate"></mat-progress-spinner>
+                } @else {
+                    <span>{{ 'Auth.Common.Verify' | transloco }}</span>
+                }
+            </button>
+        </div>
+    }
+</mat-dialog-content>

@@ -1,0 +1,81 @@
+<div class="w-full flex flex-col justify-center">
+    <!-- STEP 1: LOGIN FORM -->
+    <ng-container *ngIf="currentStep === 'login'">
+        <!-- Logo + Language -->
+        <div class="flex items-center justify-between mb-4">
+            <img class="h-11 sm:h-12 w-auto object-contain" src="/images/logo/NexTask.png" alt="NexTask" />
+            <languages></languages>
+        </div>
+
+        <!-- Header -->
+        <div class="flex flex-col justify-center items-center gap-1.5 mb-5 text-center">
+            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800">
+                <mat-icon class="icon-size-10 text-slate-700 dark:text-slate-200" svgIcon="mdi:account-circle"></mat-icon>
+            </div>
+            <span class="text-2xl font-bold text-slate-800 dark:text-white"> {{ 'Auth.Sign-In.Title' | transloco }} </span>
+            <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400"
+                [innerHTML]="'សូមបញ្ចូលលេខទូរស័ព្ទ ឬអ៊ីមែល <br> និងពាក្យសម្ងាត់របស់លោកអ្នក' | transloco">
+            </span>
+        </div>
+
+        <!-- Form -->
+        <form [formGroup]="form" class="flex flex-col gap-3">
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>{{ 'Auth.Sign-In.Username' | transloco }}</mat-label>
+                <mat-icon matPrefix class="mat-icon-5 text-slate-400 mr-2" [svgIcon]="'mdi:account'"></mat-icon>
+                <input matInput [formControlName]="'username'">
+                <mat-error *ngIf="form.get('username')?.hasError('required')">
+                    {{ 'Auth.Sign-In.Username-Require' | transloco }}
+                </mat-error>
+                <mat-error *ngIf="form.get('username')?.hasError('pattern')">
+                    {{ 'Auth.Sign-In.Username-Pattern' | transloco }}
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>{{ 'Auth.Sign-In.Password' | transloco }}</mat-label>
+                <mat-icon matPrefix class="mat-icon-5 text-slate-400 mr-2" [svgIcon]="'mdi:lock'"></mat-icon>
+                <input matInput type="password" [formControlName]="'password'" #passwordField>
+                <button matSuffix mat-icon-button type="button"
+                        (click)="passwordField.type === 'password' ? (passwordField.type = 'text') : (passwordField.type = 'password')">
+                    <mat-icon class="mat-icon-5 text-slate-400" [svgIcon]="passwordField.type === 'password' ? 'mdi:eye' : 'mdi:eye-off'"></mat-icon>
+                </button>
+                <mat-error *ngIf="form.get('password')?.hasError('required')">
+                    {{ 'Auth.Sign-In.Password-Require' | transloco }}
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Submit Button -->
+            <button mat-flat-button class="w-full h-11 bg-primary text-white rounded-lg font-medium shadow-md transition-all hover:opacity-95 mt-1"
+                    [disabled]="form.disabled" (click)="signIn()">
+                <span *ngIf="!form.disabled"> {{ 'Auth.Sign-In.Action' | transloco }} </span>
+                <mat-progress-spinner *ngIf="form.disabled" [diameter]="24" [mode]="'indeterminate'" />
+            </button>
+        </form>
+    </ng-container>
+
+    <!-- STEP 2: 2FA SELECTION COMPONENT -->
+    <app-select-2fa *ngIf="currentStep === 'select-2fa'"
+        [availableChannels]="availableChannels"
+        [isOtpLoading]="isOtpLoading"
+        [userEmail]="userEmail"
+        [userPhone]="userPhone"
+        (channelSelected)="selectChannel($event)"
+        (backToLogin)="goToStep('login')">
+    </app-select-2fa>
+
+    <!-- STEP 3: OTP VERIFY COMPONENT -->
+    <app-otp-verify *ngIf="currentStep === 'otp'"
+        [selectedChannel]="selectedChannel"
+        [displayDestination]="displayDestination"
+        [isOtpLoading]="isOtpLoading"
+        [remainingTime]="remainingTime"
+        [resendDisabled]="resendDisabled"
+        [reSendOtp]="reSendOtp"
+        [otpFailed]="otpFailed"
+        (submitOtp)="verifyOtp($event)"
+        (resendOtp)="resendOtp()"
+        (changeChannel)="goToStep('select-2fa')"
+        (backStep)="goToStep('select-2fa')">
+    </app-otp-verify>
+</div>

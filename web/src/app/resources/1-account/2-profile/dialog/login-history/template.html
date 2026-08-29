@@ -1,0 +1,82 @@
+<div
+    mat-dialog-title
+    class="m-0 flex h-14 min-h-14 max-h-14 w-full items-center justify-center border-b border-slate-200 bg-white !py-0 font-kantumruy dark:border-slate-700 dark:bg-slate-900"
+>
+    <span class="w-full text-center text-xl font-medium text-slate-500 dark:text-slate-400">
+        {{ 'ProfileSecurity.LoginHistory' | transloco }}
+    </span>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="true"></shared-side-dialog-close-button>
+
+<mat-dialog-content class="flex-1 !m-0 !p-0 bg-white font-kantumruy dark:bg-slate-900">
+    <div class="history-section border-b border-slate-200 dark:border-slate-700">
+        <h3 class="history-heading text-slate-900 dark:text-slate-100">
+            {{ 'ProfileSecurity.Devices' | transloco }}
+        </h3>
+    </div>
+
+    @if (isLoading()) {
+        <div class="flex min-h-48 items-center justify-center">
+            <mat-progress-spinner
+                [diameter]="36"
+                mode="indeterminate"
+            ></mat-progress-spinner>
+        </div>
+    } @else if (hasLoadError()) {
+        <div class="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
+            <mat-icon
+                class="icon-size-10 text-slate-500 dark:text-slate-500"
+                svgIcon="mdi:alert-circle-outline"
+            ></mat-icon>
+            <p class="text-slate-500 dark:text-slate-500">
+                {{ 'LoginHistory.LoadError' | transloco }}
+            </p>
+            <button
+                type="button"
+                class="rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-900 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+                (click)="loadHistory()"
+            >
+                {{ 'ProfilePasskey.Retry' | transloco }}
+            </button>
+        </div>
+    } @else if (historyItems().length === 0) {
+        <div class="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
+            <mat-icon
+                class="icon-size-10 text-slate-500 dark:text-slate-500"
+                svgIcon="mdi:history"
+            ></mat-icon>
+            <p class="text-slate-500 dark:text-slate-500">
+                {{ 'LoginHistory.Empty' | transloco }}
+            </p>
+        </div>
+    } @else {
+        <div class="history-list divide-y divide-slate-200 border-b border-slate-200 dark:divide-slate-700 dark:border-slate-700">
+            @for (item of historyItems(); track item.id) {
+                <div class="history-row flex items-center">
+                    <mat-icon
+                        class="history-icon shrink-0 text-slate-500 dark:text-slate-500"
+                        [svgIcon]="item.icon"
+                    ></mat-icon>
+
+                    <div class="min-w-0 flex-1">
+                        <div class="history-ip truncate text-slate-900 dark:text-slate-100">
+                            {{ item.ip }}
+                        </div>
+                        <div class="history-meta truncate text-slate-500 dark:text-slate-400">
+                            {{ item.platform }} • {{ item.location }}
+                        </div>
+                    </div>
+
+                    <div
+                        class="history-time shrink-0 text-slate-500 dark:text-slate-400"
+                        [matTooltip]="item.dateTime"
+                        matTooltipPosition="above"
+                    >
+                        {{ item.timeAgo }}
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</mat-dialog-content>

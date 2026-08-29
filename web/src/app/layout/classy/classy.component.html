@@ -1,0 +1,71 @@
+<!-- Loading bar -->
+<helper-loading-bar></helper-loading-bar>
+
+<!-- Navigation -->
+<helper-navigation
+    class="dark z-999 min-w-0 print:hidden bg-primary"
+    [appearance]="'compact'"
+    [mode]="isScreenSmall ? 'over' : 'side'"
+    [name]="'mainNavigation'"
+    [navigations]="navigations"
+    [opened]="!isScreenSmall"
+>
+    <!-- Navigation header hook -->
+    <ng-container helperNavigationContentHeader>
+        <div class="flex justify-center p-4">
+            <!-- Logo -->
+            <img
+                class="h-20 w-20"
+                src="images/logo/payment_logo.png"
+                alt="img"
+            />
+        </div>
+    </ng-container>
+    <!-- Navigation footer hook -->
+    <ng-container helperNavigationContentFooter>
+        <div class="p-2 text-[14px] opacity-20">
+            {{ "Version" | transloco }} {{ appVersion }}
+        </div>
+    </ng-container>
+</helper-navigation>
+
+<!-- Wrapper -->
+<div class="flex w-full min-h-screen flex-col">
+    <!-- Header -->
+    <div
+        *ngIf="!isPersonalWorkspace"
+        class="bg-card sticky top-0 z-49 flex h-14 w-full flex-0 items-center pl-2 md:pl-4 pr-4 shadow dark:border-b dark:shadow-none print:hidden"
+    >
+        <!-- Navigation toggle button -->
+        <button
+            class="block lg:hidden mt-1"
+            mat-icon-button
+            (click)="toggleNavigation('mainNavigation')"
+        >
+            <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+        </button>
+        <span class="text-2xl text-slate-900 font-medium">
+            {{ "Role.Admin" | transloco }}</span
+        >
+        <!-- Components -->
+        <div class="h-12 ml-auto flex items-center space-x-0.5 sm:space-x-2">
+            <scheme></scheme>
+            
+            <notifications></notifications>
+            <languages
+                [class.hidden]="role.name === 'អ្នកប្រើប្រាស់'"
+                [class.block]="role.name !== 'អ្នកប្រើប្រាស់'"
+            ></languages>
+            <helper-fullscreen class="hidden md:block"></helper-fullscreen>
+            <user></user>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-grow">
+        @if (true) {
+            <router-outlet></router-outlet>
+        }
+    </div>
+</div>
+

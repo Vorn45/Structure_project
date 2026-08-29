@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - Light Background</title>
+    
+    <!-- Professional Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            /* Changed to pure white for report screenshots */
+            background-color: #ffffff;
+            margin: 0;
+            padding: 40px;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        .diagram-container {
+            width: 100%;
+            max-width: 1400px;
+            overflow-x: auto;
+        }
+
+        /* 
+         * Custom CSS overrides for dashed borders around layers
+         */
+        .cluster rect {
+            fill: transparent !important;
+            stroke: #cbd5e1 !important; /* Lighter gray for white background */
+            stroke-width: 2px !important;
+            stroke-dasharray: 12, 10 !important;
+            rx: 12px !important; /* Rounded corners */
+        }
+        
+        /* Make edge text (labels on lines) readable on white background */
+        .edgeLabel {
+            background-color: #ffffff !important;
+            color: #475569 !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="diagram-container">
+        
+        <!-- Mermaid Diagram -->
+        <div class="mermaid">
+            flowchart TB
+                %% Define Card Styles for each node (Kept dark for high contrast against white)
+                classDef frontNode fill:#1f1b24,stroke:#db2777,stroke-width:2px,color:#fff,rx:8,ry:8
+                classDef apiNode fill:#1a252c,stroke:#0284c7,stroke-width:2px,color:#fff,rx:8,ry:8
+                classDef resNode fill:#1e293b,stroke:#2563eb,stroke-width:2px,color:#fff,rx:8,ry:8
+                classDef svcNode fill:#2e1065,stroke:#7c3aed,stroke-width:2px,color:#fff,rx:8,ry:8
+                classDef domNode fill:#431407,stroke:#ea580c,stroke-width:2px,color:#fff,rx:8,ry:8
+                classDef datNode fill:#052e16,stroke:#16a34a,stroke-width:2px,color:#fff,rx:8,ry:8
+                classDef extNode fill:#27272a,stroke:#71717a,stroke-width:2px,color:#fff,rx:8,ry:8
+
+                %% 1. FRONTEND LAYER (Font size increased to 24px)
+                subgraph Frontend["<span style='color:#db2777;font-weight:700;font-size:24px;letter-spacing:-0.5px;'>Frontend Layer: Angular Web App</span>"]
+                    direction LR
+                    UI["<b>Role-Based UI</b><br/><span style='color:#cbd5e1;font-size:11px'>Pages & Layouts</span>"]:::frontNode
+                    AUTH_UI["<b>Auth Module</b><br/><span style='color:#cbd5e1;font-size:11px'>Sign in, OTP, Google, Telegram</span>"]:::frontNode
+                    MEMBER_UI["<b>Member Area</b><br/><span style='color:#cbd5e1;font-size:11px'>Home, Tasks, Activities, Projects</span>"]:::frontNode
+                    ORG_UI["<b>Org Admin Area</b><br/><span style='color:#cbd5e1;font-size:11px'>Projects, Members, Settings</span>"]:::frontNode
+                    SUP_UI["<b>Super Admin Area</b><br/><span style='color:#cbd5e1;font-size:11px'>Dash, Projects, Users, Orgs</span>"]:::frontNode
+                    SHARED_UI["<b>Shared Components</b><br/><span style='color:#cbd5e1;font-size:11px'>Dialogs, Uploads, Skeletons</span>"]:::frontNode
+                    CORE_UI["<b>Core Services</b><br/><span style='color:#cbd5e1;font-size:11px'>Auth, Guards, Socket</span>"]:::frontNode
+                end
+
+                %% 2. API / ROUTING LAYER (Font size increased to 24px)
+                subgraph ApiEntry["<span style='color:#0284c7;font-weight:700;font-size:24px;letter-spacing:-0.5px;'>API Entry & Routing Layer: NestJS</span>"]
+                    direction LR
+                    APP["<b>AppModule</b><br/><span style='color:#cbd5e1;font-size:11px'>Root Module</span>"]:::apiNode
+                    ROUTER["<b>RouterModule</b><br/><span style='color:#cbd5e1;font-size:11px'>/auth, /user, /org, /admin</span>"]:::apiNode
+                    MIDDLEWARE["<b>JWT Middleware</b><br/><span style='color:#cbd5e1;font-size:11px'>Request Auth</span>"]:::apiNode
+                    GUARDS["<b>Access Guards</b><br/><span style='color:#cbd5e1;font-size:11px'>Role Protection</span>"]:::apiNode
+                    INTERCEPTORS["<b>Interceptors</b><br/><span style='color:#cbd5e1;font-size:11px'>Logging, snake_case</span>"]:::apiNode
+                end
+
+                %% 3. RESOURCE LAYER (Font size increased to 24px)
+                subgraph ResourceLayer["<span style='color:#2563eb;font-weight:700;font-size:24px;letter-spacing:-0.5px;'>Resource / Controller Layer</span>"]
+                    direction LR
+                    AUTH_API["<b>Auth API</b><br/><span style='color:#cbd5e1;font-size:11px'>Account Control</span>"]:::resNode
+                    USER_API["<b>Member API</b><br/><span style='color:#cbd5e1;font-size:11px'>User requests</span>"]:::resNode
+                    ORG_API["<b>Org Admin API</b><br/><span style='color:#cbd5e1;font-size:11px'>Org management</span>"]:::resNode
+                    SUP_API["<b>Super Admin API</b><br/><span style='color:#cbd5e1;font-size:11px'>System scope</span>"]:::resNode
+                    SHARED_API["<b>Shared API</b><br/><span style='color:#cbd5e1;font-size:11px'>Setup, Task, Meeting</span>"]:::resNode
+                end
+
+                %% 4. SERVICE LAYER (Font size increased to 24px)
+                subgraph ServiceLayer["<span style='color:#7c3aed;font-weight:700;font-size:24px;letter-spacing:-0.5px;'>Business Service Layer</span>"]
+                    direction LR
+                    USER_SVC["<b>User Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Role & User</span>"]:::svcNode
+                    PROJECT_SVC["<b>Project Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Info, Chat, Stats, Team</span>"]:::svcNode
+                    TASK_SVC["<b>Task Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Create, Detail, Manage</span>"]:::svcNode
+                    ACTIVITY_SVC["<b>Activity Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Plan, Recent</span>"]:::svcNode
+                    ORG_SVC["<b>Org Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Access & Member</span>"]:::svcNode
+                    REPORT_SVC["<b>Report Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Performance</span>"]:::svcNode
+                    TECH_SVC["<b>Tech Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Checklist, Mockup</span>"]:::svcNode
+                    OTP_SVC["<b>OTP Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Auth Session</span>"]:::svcNode
+                    FILE_SVC["<b>File Svcs</b><br/><span style='color:#cbd5e1;font-size:11px'>Handling</span>"]:::svcNode
+                    REALTIME_SVC["<b>Realtime</b><br/><span style='color:#cbd5e1;font-size:11px'>Socket Gateway</span>"]:::svcNode
+                end
+
+                %% 5. DOMAIN LAYER (Font size increased to 24px)
+                subgraph DomainLayer["<span style='color:#ea580c;font-weight:700;font-size:24px;letter-spacing:-0.5px;'>Domain Model Layer: TypeORM Entities</span>"]
+                    direction LR
+                    USER_DOMAIN["<b>User Domain</b><br/><span style='color:#cbd5e1;font-size:11px'>User, Role, Session</span>"]:::domNode
+                    ORG_DOMAIN["<b>Org Domain</b><br/><span style='color:#cbd5e1;font-size:11px'>Organization, Position</span>"]:::domNode
+                    PROJECT_DOMAIN["<b>Project Domain</b><br/><span style='color:#cbd5e1;font-size:11px'>Project, Milestone, Epic</span>"]:::domNode
+                    TASK_DOMAIN["<b>Task Domain</b><br/><span style='color:#cbd5e1;font-size:11px'>Task, Assignee, Status</span>"]:::domNode
+                    ACTIVITY_DOMAIN["<b>Activity Domain</b><br/><span style='color:#cbd5e1;font-size:11px'>Activity, Attachment</span>"]:::domNode
+                    CHAT_DOMAIN["<b>Chat Domain</b><br/><span style='color:#cbd5e1;font-size:11px'>Room, Message</span>"]:::domNode
+                    REPORT_DOMAIN["<b>Report Domain</b><br/><span style='color:#cbd5e1;font-size:11px'>File, Audit, Custom Field</span>"]:::domNode
+                end
+
+                %% 6. DATA & INTEGRATION LAYER (Font size increased to 24px)
+                subgraph DataLayer["<span style='color:#16a34a;font-weight:700;font-size:24px;letter-spacing:-0.5px;'>Data Access & External Services</span>"]
+                    direction LR
+                    TYPEORM["<b>TypeORM</b><br/><span style='color:#cbd5e1;font-size:11px'>Repositories</span>"]:::datNode
+                    DB[/"<b>PostgreSQL</b><br/><span style='color:#cbd5e1;font-size:11px'>Database</span>"/]:::datNode
+                    CACHE[/"<b>Redis</b><br/><span style='color:#cbd5e1;font-size:11px'>Cache</span>"/]:::datNode
+
+                    FILE_EXTERNAL["<b>External File</b><br/><span style='color:#cbd5e1;font-size:11px'>Storage</span>"]:::extNode
+                    GOOGLE["<b>Google</b><br/><span style='color:#cbd5e1;font-size:11px'>OAuth</span>"]:::extNode
+                    TELEGRAM["<b>Telegram</b><br/><span style='color:#cbd5e1;font-size:11px'>Bot / Gateway</span>"]:::extNode
+                    SMS["<b>SMS Gateway</b><br/><span style='color:#cbd5e1;font-size:11px'>OTP</span>"]:::extNode
+                    EMAIL["<b>SMTP Email</b><br/><span style='color:#cbd5e1;font-size:11px'>Gmail</span>"]:::extNode
+                    JSREPORT["<b>JS Report</b><br/><span style='color:#cbd5e1;font-size:11px'>Service</span>"]:::extNode
+                end
+
+                %% Internal UI Connections
+                UI --> AUTH_UI & MEMBER_UI & ORG_UI & SUP_UI & SHARED_UI & CORE_UI
+
+                %% UI to API Connections
+                CORE_UI -->|JWT HTTP| ROUTER
+                CORE_UI -.->|Socket.io| REALTIME_SVC
+                AUTH_UI --> AUTH_API
+                MEMBER_UI --> USER_API
+                ORG_UI --> ORG_API
+                SUP_UI --> SUP_API
+                SHARED_UI --> SHARED_API
+
+                %% Routing Internal
+                APP --> ROUTER --> MIDDLEWARE --> GUARDS --> INTERCEPTORS --> ResourceLayer
+
+                %% API to Service Connections
+                AUTH_API --> USER_SVC & OTP_SVC
+                USER_API --> TASK_SVC & ACTIVITY_SVC & PROJECT_SVC & REPORT_SVC
+                ORG_API --> ORG_SVC & PROJECT_SVC & TASK_SVC
+                SUP_API --> USER_SVC & ORG_SVC & PROJECT_SVC & TASK_SVC
+                SHARED_API --> TASK_SVC & PROJECT_SVC & REPORT_SVC
+
+                %% Service to Domain Connections
+                USER_SVC --> USER_DOMAIN
+                ORG_SVC --> ORG_DOMAIN
+                PROJECT_SVC --> PROJECT_DOMAIN
+                TASK_SVC --> TASK_DOMAIN & CHAT_DOMAIN
+                ACTIVITY_SVC --> ACTIVITY_DOMAIN
+                REPORT_SVC --> REPORT_DOMAIN
+                TECH_SVC --> PROJECT_DOMAIN
+                OTP_SVC --> USER_DOMAIN
+                FILE_SVC --> REPORT_DOMAIN
+                REALTIME_SVC --> TASK_SVC
+
+                %% Domain to DB Connections
+                USER_DOMAIN & ORG_DOMAIN & PROJECT_DOMAIN & TASK_DOMAIN & ACTIVITY_DOMAIN & CHAT_DOMAIN & REPORT_DOMAIN --> TYPEORM
+                TYPEORM --> DB
+                ServiceLayer --> CACHE
+
+                %% External Integrations
+                FILE_SVC --> FILE_EXTERNAL
+                OTP_SVC --> SMS & EMAIL & TELEGRAM
+                AUTH_API --> GOOGLE & TELEGRAM
+                REPORT_SVC --> JSREPORT
+        </div>
+    </div>
+
+    <!-- Include Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    
+    <script>
+        // Configure Mermaid with Right-Angle lines and highly visible colors for a white background
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                fontFamily: 'Inter, sans-serif',
+                primaryTextColor: '#ffffff',     // Keeps text inside nodes white
+                lineColor: '#3b82f6',            // Medium blue for high visibility on white background
+                arrowheadColor: '#3b82f6',
+                fontSize: '13px'
+            },
+            flowchart: {
+                htmlLabels: true,
+                curve: 'stepBefore', /* Forces the 90-degree straight architectural lines */
+                nodeSpacing: 40,
+                rankSpacing: 60,
+                padding: 20
+            }
+        });
+    </script>
+</body>
+</html>

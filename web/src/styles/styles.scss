@@ -1,0 +1,337 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Import/write your custom styles here.
+/*  @ Styles from this file will override 'vendors.scss' and Helper's base styles.
+/* ----------------------------------------------------------------------------------------------------- */
+
+@import 'chat-wallpaper';
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Kantumruy Pro', sans-serif, cursive !important;
+    font-size: 1rem;
+}
+
+body {
+    touch-action: manipulation !important;
+}
+
+body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* OTP dialog backdrop and container styles */
+.otp-backdrop {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.custom-otp-dialog .mat-dialog-container,
+.custom-otp-dialog .mat-mdc-dialog-container {
+    border-radius: 12px !important;
+    padding: 0 !important;
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.25) !important;
+    overflow: visible !important;
+    background-color: #ffffff !important;
+}
+
+/* Dialogs whose content is an auth card (reset-password OTP): the card draws
+   its own surface, so the panel itself must be invisible. */
+.auth-card-dialog .mat-dialog-container,
+.auth-card-dialog .mat-mdc-dialog-container {
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+
+    .mat-mdc-dialog-surface {
+        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 12px !important;
+    }
+}
+
+.password-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.sm-form-field-appearance-outline .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+}
+
+.custom-password-dialog .mat-dialog-container,
+.custom-password-dialog .mat-mdc-dialog-container {
+    border-radius: 24px !important;
+    padding: 0 !important;
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.25) !important;
+    overflow: auto !important;
+    background-color: #fafafa !important;
+}
+
+.custom-password-dialog .mat-mdc-dialog-container {
+    --mdc-theme-surface: #ffffff;
+}
+
+/* Side dialogs that offer a "ពេញអេក្រង់" toggle: the width/height come from the
+   dialog's own config on the overlay pane, so the toggle has to override there
+   rather than inside the component. Added/removed via MatDialogRef panel class. */
+.side-dialog-fullscreen.cdk-overlay-pane {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+
+    .mat-mdc-dialog-container,
+    .mat-mdc-dialog-surface {
+        border-radius: 0 !important;
+    }
+}
+
+/* The panel backgrounds above are forced with !important, so dark mode has to
+   override them explicitly or the reset-password OTP / create-password dialogs
+   render a white surface under light text. `.dark` is set on <body>. */
+body.dark {
+    .custom-otp-dialog .mat-dialog-container,
+    .custom-otp-dialog .mat-mdc-dialog-container,
+    .custom-password-dialog .mat-dialog-container,
+    .custom-password-dialog .mat-mdc-dialog-container {
+        background-color: #1e293b !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .custom-password-dialog .mat-mdc-dialog-container {
+        --mdc-theme-surface: #1e293b;
+    }
+}
+
+.year-only-picker {
+    .mat-calendar-period-button {
+        pointer-events: none;
+    }
+
+    .mat-calendar-arrow {
+        display: none;
+    }
+}
+
+/* The picker renders in an overlay outside every component, so its dark scheme
+   can only be set from here — otherwise it opens as a white panel with white
+   text on the dark dashboard. */
+body.dark .year-only-picker.mat-datepicker-content {
+    background: #111827;
+    color: #f1f5f9;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+
+    .mat-calendar-body-cell-content,
+    .mat-calendar-period-button,
+    .mat-calendar-table-header th {
+        color: #e2e8f0;
+    }
+
+    .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover
+        > .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+        background-color: rgba(99, 102, 241, 0.15);
+    }
+}
+
+/* People-picker overlay menu ("ct-menu" — search box + selectable option list with
+   avatar/checkmark), used across task/scope assignee pickers. Like the pickers
+   above, this renders in a CDK overlay outside every component's DOM, so a
+   component-scoped stylesheet can silently fail to reach it depending on which
+   component happened to instantiate the overlay first; defining it once here
+   guarantees it always applies regardless of the triggering component. */
+.ct-menu.mat-mdc-menu-panel {
+    min-width: 0;
+    max-width: none;
+    max-height: min(16rem, calc(100vh - 24px));
+    border-radius: 0;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    border: 1px solid #eef0f2;
+    overflow: hidden;
+}
+.ct-menu .mat-mdc-menu-content {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+}
+.ct-menu .ct-menu-panel {
+    min-width: 10rem;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+}
+.ct-menu .ct-menu-search {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 1.125rem 1rem;
+    border-bottom: 1px solid #eef0f2;
+
+    input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 16px;
+        color: #0f172a;
+        font-family: 'Kantumruy Pro', sans-serif;
+        &::placeholder { color: #94a3b8; }
+    }
+}
+.ct-menu .ct-menu-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 18rem;
+    overflow-y: auto;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar { width: 0; height: 0; display: none; }
+}
+.ct-menu .ct-menu-list--people { max-height: 15rem; }
+.ct-menu .ct-menu-empty {
+    padding: 1rem;
+    text-align: center;
+    font-size: 14px;
+    color: #94a3b8;
+}
+.ct-menu .ct-opt {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 48px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+
+    &:hover { background: #f1f5f9; }
+    &.is-selected { background: #f1f5f9; }
+    &:disabled { opacity: 0.5; cursor: default; }
+}
+.ct-menu .ct-opt-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+}
+.ct-menu .ct-opt-text {
+    flex: 1;
+    max-width: 16rem;
+    font-size: 16px;
+    color: #334155;
+    font-family: 'Kantumruy Pro', sans-serif;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    order: 1;
+}
+.ct-menu .ct-opt-avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    object-fit: cover;
+    background: #f1f5f9;
+    flex-shrink: 0;
+    order: 0;
+}
+.ct-menu .ct-opt-check { color: #1e2974; flex-shrink: 0; margin-left: auto; order: 2; }
+
+body.dark {
+    .ct-menu.mat-mdc-menu-panel { border-color: rgba(255, 255, 255, 0.08); }
+    .ct-menu .ct-menu-search { border-color: rgba(255, 255, 255, 0.08); input { color: #f1f5f9; } }
+    .ct-menu .ct-opt:hover { background: rgba(255, 255, 255, 0.04); }
+    .ct-menu .ct-opt.is-selected { background: rgba(255, 255, 255, 0.04); }
+    .ct-menu .ct-opt-text { color: #cbd5e1; }
+    .ct-menu .ct-opt-check { color: #93c5fd; }
+}
+
+.full-screen-modal,
+.custom-mat-dialog-full {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+
+    .mat-mdc-dialog-container,
+    .mat-mdc-dialog-surface,
+    .mat-mdc-dialog-inner-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+    }
+}
+
+// Full-screen report configuration has a transparent dialog surface, so the
+// overlay pane also needs a dark fill when the application is in dark mode.
+body.dark .cdk-overlay-pane:has(.report-config-dialog) {
+    background-color: #1e293b;
+}
+
+// Same transparent-surface gap as above, for the personal work report
+// ("របាយការណ៍ការងារផ្ទាល់ខ្លួន") — painted in both themes (not just dark)
+// since a sizing edge case in the pane can otherwise let the page behind it
+// show through in light mode too, not only dark.
+.cdk-overlay-pane:has(.my-work-report-dialog) {
+    background-color: #ffffff;
+}
+body.dark .cdk-overlay-pane:has(.my-work-report-dialog) {
+    background-color: #111827;
+}
+
+/* Same as `.full-screen-modal` (full width, no chrome, fixed to the
+   viewport) but the panel's height follows its content instead of always
+   being forced to 100vh — used together with an opaque full-viewport
+   backdrop (see `.scope-page-list-backdrop` below) so a short list's dialog
+   can end right after its last row with zero leftover space, while the
+   backdrop guarantees nothing behind it is ever visible regardless of how
+   the panel's content height is actually measured. */
+.full-screen-modal-auto {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    width: 100vw !important;
+    height: auto !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+
+    .mat-mdc-dialog-container,
+    .mat-mdc-dialog-surface,
+    .mat-mdc-dialog-inner-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        height: auto !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+    }
+}

@@ -1,0 +1,57 @@
+<div class="dark:bg-transparent justify-between gap-4 px-3 flex flex-col w-full h-full motion-ease-spring-smooth motion-preset-fade-sm motion-duration-200">
+    <!-- form description -->
+    <div class="my-4 flex flex-col gap-2 items-center sm:pt-10">
+        <div class="bg-gray-100 w-22 h-22 flex items-center justify-center rounded-full">
+            <!-- <mat-icon class="icon-size-[60px] text-black" [svgIcon]="'mdi:login'"></mat-icon> -->
+            <img src="images/logo/payment_logo.png" class="" alt="">
+        </div>
+
+        <span class="font-normal text-xl text-center text-gray-500 leading-5"> ថ្នាលឌីជីថល </span>
+        <span class="text-xl md:text-3xl w-fit font-medium text-center leading-6"> ទូទាត់កម្រៃសេវាសាធារណៈ </span>
+        <span class="text-2xl text-center leading-5">Digital Payment Gateway</span>
+    </div>
+    <div class="flex gap-1 flex-col justify-end h-full">
+
+        <span class="w-full text-center mb-2"> ចូលប្រើប្រាស់ប្រព៏ន្ន </span>
+
+        
+        <div [routerLink]="['/auth/sign-in']" class="flex items-center justify-between px-3 py-3 gap-3 hover:cursor-pointer  border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-slate-800">
+
+            <div class="flex items-center gap-2 justify-start">
+                <mat-icon class="icon-size-12 text-[#2b52a0] dark:text-blue-300" [svgIcon]="'mdi:lock'"></mat-icon>
+                <div class="font-medium text-base text-start">
+                    ពាក្យសម្ងាត់ <br/>
+                    <span class="font-normal text-sm">ចូលប្រព័ន្ធដោយប្រើលេខទូរស័ព្ទ ឬអ៊ីមែល និង OTP</span>
+                </div>
+            </div>
+
+            <mat-icon svgIcon="mdi:chevron-right"></mat-icon>
+
+        </div>
+
+        <div (click)="openQrDialog()" class="flex justify-between hover:cursor-pointer px-3 py-3 gap-3 items-center border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-slate-800 mb-2">
+            <div class="flex items-center gap-2 justify-start">
+                <mat-icon class="icon-size-12 text-[#2b52a0] dark:text-blue-300" [svgIcon]="'mdi:qrcode'"></mat-icon>
+                <div class="font-medium text-base text-start">
+                    ស្កេន QR Code <br/>
+                    <span class="font-normal text-sm">ចូលប្រព័ន្ធដោយស្កេន QR Code</span>
+                </div>
+            </div>
+
+            <mat-icon svgIcon="mdi:chevron-right"></mat-icon>
+        </div>
+
+
+        <!-- <div class="flex items-center justify-center w-full py-2 text-gray-500">
+            <span>ឬ</span>
+        </div>
+
+        <div (click)="navigateToVerifyEmail()" class="flex px-3 py-3 gap-3 hover:cursor-pointer items-center border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-slate-800">
+            <mat-icon class="icon-size-12 text-[#2b52a0] dark:text-blue-300" [svgIcon]="'mdi:account-plus'"></mat-icon>
+            <div class="font-medium text-base text-start">
+                បង្កើតគណនី <br/>
+                <span class="font-normal text-sm">គណនីសមាជិក អ.ម.ត ថ្មី</span>
+            </div>
+        </div> -->
+    </div>
+</div>

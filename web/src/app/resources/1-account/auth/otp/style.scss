@@ -1,0 +1,29 @@
+.custom-input {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(203 213 225 / var(--tw-bg-opacity)) !important;
+  border-radius: 0.5rem;
+  max-width: 3.3rem;
+  height: 3.3rem;
+  max-height: 3.3rem;
+  text-align: center;
+  font-size: 1.5rem;
+
+  border: 2px solid transparent;
+  transition: border 0.2s ease-in-out;
+
+  @apply text-primary #{!important};
+}
+
+.custom-input:focus {
+  outline: none;
+  @apply border-primary;
+}
+
+
+@media (max-width: 640px) {
+    .custom-input {
+        max-width: 2.5rem;
+        height: 2.5rem;
+        max-height: 2.5rem;
+    }
+}

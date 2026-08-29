@@ -1,0 +1,155 @@
+<div
+    mat-dialog-title
+    class="m-0 flex h-14 min-h-14 max-h-14 w-full items-center justify-center border-b border-slate-200 bg-white !py-0 font-kantumruy dark:border-slate-700 dark:bg-slate-900"
+>
+    <span class="w-full text-center text-xl font-medium text-slate-500 dark:text-slate-400">
+        {{ 'ProfileSecurity.Devices' | transloco }}
+    </span>
+</div>
+
+<shared-side-dialog-close-button
+    [isReturn]="true"
+    [closeOnClick]="false"
+    (buttonClick)="onBack()"
+></shared-side-dialog-close-button>
+
+<mat-dialog-content class="flex-1 !m-0 !p-0 bg-white font-kantumruy dark:bg-slate-900">
+    @if (selectedDevice(); as device) {
+        <section aria-labelledby="device-detail-title">
+            <div class="device-detail-summary flex items-center border-b border-slate-200 dark:border-slate-700">
+                <img
+                    class="device-detail-image shrink-0 object-contain"
+                    [src]="device.image"
+                    [alt]="device.name"
+                />
+
+                <div class="min-w-0 flex-1">
+                    <h2 id="device-detail-title" class="device-name truncate text-slate-900 dark:text-slate-100">
+                        {{ device.name }}
+                    </h2>
+                    <p class="device-meta mt-0.5 truncate text-slate-500 dark:text-slate-500">
+                        {{ 'ProfileDevice.FirstLoginLabel' | transloco }} {{ device.firstLogin }}
+                    </p>
+                </div>
+
+                @if (device.isCurrent) {
+                    <button
+                        type="button"
+                        class="device-sign-out flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-red-500 px-3 font-normal text-red-500 transition-colors hover:shadow-md cursor-pointer dark:border-red-500 dark:text-red-500 duration-200"
+                        (click)="signOutCurrentDevice()"
+                    >
+                        <mat-icon class="device-sign-out-icon !text-current" svgIcon="mdi:logout"></mat-icon>
+                        <span>{{ 'ProfileDevice.SignOut' | transloco }}</span>
+                    </button>
+                }
+            </div>
+
+            <div class="px-4 py-4">
+                <h3 class="activity-heading text-slate-500 dark:text-slate-500">
+                    {{ 'ProfileDevice.RecentActivity' | transloco }}
+                </h3>
+
+                <div class="mt-5 divide-y divide-slate-200 border-b border-slate-200 dark:divide-slate-700 dark:border-slate-700">
+                    @for (activity of device.activities; track activity.time) {
+                        <div class="flex min-h-14 items-center gap-3 px-2 py-4">
+                            <span
+                                aria-hidden="true"
+                                class="activity-dot shrink-0 rounded-full bg-blue-500 dark:bg-blue-500"
+                            ></span>
+                            <span class="activity-text min-w-0 flex-1 text-slate-900 dark:text-slate-100">
+                                {{ activity.location }}
+                            </span>
+                            <span class="activity-text shrink-0 text-slate-500 dark:text-slate-500">
+                                {{ activity.time }}
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    } @else {
+        <section [attr.aria-label]="'ProfileDevice.DeviceListAriaLabel' | transloco">
+            @if (isLoading()) {
+                <div class="flex min-h-48 items-center justify-center">
+                    <mat-progress-spinner
+                        [diameter]="36"
+                        mode="indeterminate"
+                    ></mat-progress-spinner>
+                </div>
+            } @else if (hasLoadError()) {
+                <div class="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
+                    <mat-icon
+                        class="icon-size-10 text-slate-500 dark:text-slate-500"
+                        svgIcon="heroicons_outline:exclamation-circle"
+                    ></mat-icon>
+                    <p class="text-slate-500 dark:text-slate-500">
+                        {{ 'ProfileDevice.LoadError' | transloco }}
+                    </p>
+                    <button
+                        type="button"
+                        class="rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-900 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+                        (click)="loadDevices()"
+                    >
+                        {{ 'ProfilePasskey.Retry' | transloco }}
+                    </button>
+                </div>
+            } @else if (devices().length === 0) {
+                <div class="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
+                    <mat-icon
+                        class="icon-size-10 text-slate-500 dark:text-slate-500"
+                        svgIcon="heroicons_outline:computer-desktop"
+                    ></mat-icon>
+                    <p class="text-slate-500 dark:text-slate-500">
+                        {{ 'ProfileDevice.Empty' | transloco }}
+                    </p>
+                </div>
+            } @else {
+                <div class="device-list divide-y divide-slate-200 border-b border-slate-200 px-4 dark:divide-slate-700 dark:border-slate-700">
+                @for (device of devices(); track device.id) {
+                    <button
+                        type="button"
+                        class="device-row group flex min-h-[88px] w-full items-center gap-4 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 dark:hover:bg-slate-800/70"
+                        (click)="selectDevice(device)"
+                    >
+                        <img
+                            class="device-list-image shrink-0 object-contain"
+                            [src]="device.image"
+                            [alt]="device.name"
+                        />
+
+                        <span class="min-w-0 flex-1">
+                            <span class="device-name block truncate text-slate-900 dark:text-slate-100">
+                                {{ device.name }}
+                            </span>
+                            <span class="device-meta mt-0.5 block truncate text-slate-500 dark:text-slate-500">
+                                {{ 'ProfileDevice.LastActiveLabel' | transloco }}
+                                <span [ngClass]="device.isCurrent ? 'text-emerald-500 dark:text-emerald-400' : ''">
+                                    {{ device.lastActive }}
+                                </span>
+                            </span>
+                            <span class="device-meta mt-2 flex items-center gap-1 text-slate-500 dark:text-slate-500">
+                                <mat-icon class="icon-size-4 text-slate-500 dark:text-slate-500" svgIcon="mdi:map-marker-outline"></mat-icon>
+                                <span class="truncate">{{ device.location }}</span>
+                            </span>
+                        </span>
+
+                        <span
+                            class="device-status flex shrink-0 items-center rounded-full px-2"
+                            [ngClass]="device.isActive
+                                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300'
+                                : 'bg-red-50 text-red-500 dark:bg-red-500/15 dark:text-red-300'"
+                        >
+                            {{ (device.isActive ? 'ProfileDevice.Active' : 'ProfileDevice.Inactive') | transloco }}
+                        </span>
+
+                        <mat-icon
+                            class="device-chevron shrink-0 text-slate-500 transition-transform group-hover:translate-x-0.5 dark:text-slate-500"
+                            svgIcon="heroicons_outline:chevron-right"
+                        ></mat-icon>
+                    </button>
+                }
+                </div>
+            }
+        </section>
+    }
+</mat-dialog-content>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Performance Speed Algorithm</title>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            
+            /* Status Colors */
+            --color-blue: #3b82f6;
+            --color-green: #10b981;
+            --color-yellow: #f59e0b;
+            --color-red: #ef4444;
+            --color-gray: #64748b;
+            
+            /* Light transparency variants for badges */
+            --bg-blue: #eff6ff;
+            --bg-green: #ecfdf5;
+            --bg-yellow: #fffbeb;
+            --bg-red: #fef2f2;
+            --bg-gray: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 1. Header */
+        header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.25rem;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Utility Card Layouts */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1.25rem;
+            color: #0f172a;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* 2. Simple Formula Card */
+        .formula-card {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .formula-card h2 {
+            color: white;
+            border: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .formula-expr {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            word-wrap: break-word;
+        }
+
+        /* 3. Explanation Cards */
+        .explain-card {
+            border-left: 4px solid var(--color-blue);
+        }
+        .explain-card h3 { color: var(--color-blue); }
+        .explain-card ul { list-style: none; font-size: 0.9rem; color: var(--text-muted); }
+        .explain-card li { margin-top: 0.25rem; }
+
+        /* Tables styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-gray);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .bg-done, .bg-confirm, .bg-great, .bg-good { background-color: var(--bg-green); color: var(--color-green); }
+        .bg-review, .bg-unconfirm, .bg-medium { background-color: var(--bg-yellow); color: var(--color-yellow); }
+        .bg-expired, .bg-bad { background-color: var(--bg-red); color: var(--color-red); }
+        .bg-new, .bg-progress, .bg-reopen { background-color: var(--bg-gray); color: var(--color-gray); }
+        .bg-info { background-color: var(--bg-blue); color: var(--color-blue); }
+
+        /* 5. Weekly Example Section */
+        .week-container {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .week-header {
+            background-color: var(--bg-gray);
+            padding: 0.75rem 1rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .week-body {
+            padding: 1rem;
+            background: white;
+        }
+
+        .example-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .example-item:last-child { border-bottom: none; }
+
+        .calc-text {
+            font-family: monospace;
+            background: var(--bg-gray);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* 9. Interactive Calculator */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-grid { grid-template-columns: 1fr; }
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.65rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #fff;
+        }
+
+        .calc-result-box {
+            background: var(--bg-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .result-row.total {
+            border-top: 2px solid var(--border-color);
+            padding-top: 0.75rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>Task Performance Speed Algorithm</h1>
+            <p>Automated scoring mapped from system constraints without manual story point entries.</p>
+        </header>
+
+        <div class="formula-card">
+            <h2>The Core Formula</h2>
+            <div class="formula-expr">
+                finalScore = basePoint × priorityMultiplier × typeMultiplier × statusMultiplier
+            </div>
+        </div>
+
+        <div class="grid-4">
+            <div class="card explain-card">
+                <h3>Base Point</h3>
+                <ul>
+                    <li>Calculated via date ranges.</li>
+                    <li>Min: 1 point (1 day)</li>
+                    <li>Max: 7 points (≥7 days)</li>
+                </ul>
+            </div>
+            <div class="card explain-card">
+                <h3>Priority Multiplier</h3>
+                <ul>
+                    <li>Weights business impacts.</li>
+                    <li>Ranges from 0.8 to 2.0</li>
+                    <li>Standard baseline: Low (1.0)</li>
+                </ul>
+            </div>
+            <div class="card explain-card">
+                <h3>Type Multiplier</h3>
+                <ul>
+                    <li>Reflects technical debt & size.</li>
+                    <li>Ranges from 0.8 to 2.0</li>
+                    <li>Subtasks scale down execution metrics.</li>
+                </ul>
+            </div>
+            <div class="card explain-card">
+                <h3>Status Multiplier</h3>
+                <ul>
+                    <li>Applies lifecycle outcome.</li>
+                    <li>In-progress states = 0</li>
+                    <li>Done/Confirm = 1.0 full credit</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Configuration Reference Lookups</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Duration Base Points</h3>
+                <table>
+                    <tr><th>Duration (Days)</th><th>Base Point</th></tr>
+                    <tr><td>1 Day</td><td>1</td></tr>
+                    <tr><td>2 Days</td><td>2</td></tr>
+                    <tr><td>3 Days</td><td>3</td></tr>
+                    <tr><td>4 Days</td><td>4</td></tr>
+                    <tr><td>5 Days</td><td>5</td></tr>
+                    <tr><td>6 Days</td><td>6</td></tr>
+                    <tr><td>&ge; 7 Days</td><td>7 (Max cap)</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Priority Multipliers</h3>
+                <table>
+                    <tr><th>Priority</th><th>Multiplier</th></tr>
+                    <tr><td>Lowest</td><td>0.8</td></tr>
+                    <tr><td>Low</td><td>1.0</td></tr>
+                    <tr><td>Medium</td><td>1.2</td></tr>
+                    <tr><td>High</td><td>1.5</td></tr>
+                    <tr><td>Highest</td><td>2.0</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Task Type Multipliers</h3>
+                <table>
+                    <tr><th>Task Type</th><th>Multiplier</th></tr>
+                    <tr><td>Subtask</td><td>0.8</td></tr>
+                    <tr><td>Improvement</td><td>1.0</td></tr>
+                    <tr><td>Feature</td><td>1.2</td></tr>
+                    <tr><td>Error</td><td>1.3</td></tr>
+                    <tr><td>Main Task</td><td>1.5</td></tr>
+                    <tr><td>Key Milestone</td><td>2.0</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Status Multipliers</h3>
+                <table>
+                    <tr><th>Status State</th><th>Multiplier</th></tr>
+                    <tr><td><span class="badge bg-new">New</span> / <span class="badge bg-progress">In Progress</span> / <span class="badge bg-reopen">Re Open</span></td><td>0</td></tr>
+                    <tr><td><span class="badge bg-unconfirm">Unconfirm</span></td><td>0.2</td></tr>
+                    <tr><td><span class="badge bg-review">Request Review</span></td><td>0.3</td></tr>
+                    <tr><td><span class="badge bg-confirm">Confirm</span> / <span class="badge bg-done">Done</span></td><td>1.0</td></tr>
+                    <tr><td><span class="badge bg-expired">Expired</span></td><td>-0.5</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 500px;">
+            <h3>Monthly Target Performance Ranges</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 0.5rem;">Calculated via: <code>clamp(totalTaskPoints, 0, 120)</code></p>
+            <table>
+                <tr><th>Point Ceiling Range</th><th>Rating Score Tier</th></tr>
+                <tr><td>0 &ndash; 30</td><td><span class="badge bg-bad">Bad</span></td></tr>
+                <tr><td>31 &ndash; 70</td><td><span class="badge bg-medium">Medium</span></td></tr>
+                <tr><td>71 &ndash; 100</td><td><span class="badge bg-good">Good</span></td></tr>
+                <tr><td>101 &ndash; 120</td><td><span class="badge bg-great">Great</span></td></tr>
+            </table>
+        </div>
+
+        <h2>Simulated Production Month Example</h2>
+        <div class="card">
+            <div class="week-container">
+                <div class="week-header"><span>Week 1</span> <span class="badge bg-info">+12.12 pts</span></div>
+                <div class="week-body">
+                    <div class="example-item"><strong>Task A:</strong> Feature, High, 5 days, <span class="badge bg-done">Done</span> &rarr; <span class="calc-text">5 × 1.5 × 1.2 × 1.0 = 9.00</span></div>
+                    <div class="example-item"><strong>Task B:</strong> Error, Medium, 2 days, <span class="badge bg-confirm">Confirm</span> &rarr; <span class="calc-text">2 × 1.2 × 1.3 × 1.0 = 3.12</span></div>
+                </div>
+            </div>
+
+            <div class="week-container">
+                <div class="week-header"><span>Week 2</span> <span class="badge bg-info">+21.90 pts</span></div>
+                <div class="week-body">
+                    <div class="example-item"><strong>Task C:</strong> Main Task, Highest, 7 days, <span class="badge bg-done">Done</span> &rarr; <span class="calc-text">7 × 2.0 × 1.5 × 1.0 = 21.00</span></div>
+                    <div class="example-item"><strong>Task D:</strong> Improvement, Low, 3 days, <span class="badge bg-review">Request Review</span> &rarr; <span class="calc-text">3 × 1.0 × 1.0 × 0.3 = 0.90</span></div>
+                </div>
+            </div>
+
+            <div class="week-container">
+                <div class="week-header"><span>Week 3</span> <span class="badge bg-expired">-12.08 pts</span></div>
+                <div class="week-body">
+                    <div class="example-item"><strong>Task E:</strong> Key Milestone, Highest, 7 days, <span class="badge bg-expired">Expired</span> &rarr; <span class="calc-text">7 × 2.0 × 2.0 × -0.5 = -14.00</span></div>
+                    <div class="example-item"><strong>Task F:</strong> Subtask, Medium, 2 days, <span class="badge bg-done">Done</span> &rarr; <span class="calc-text">2 × 1.2 × 0.8 × 1.0 = 1.92</span></div>
+                </div>
+            </div>
+
+            <div class="week-container">
+                <div class="week-header"><span>Week 4</span> <span class="badge bg-info">+1.44 pts</span></div>
+                <div class="week-body">
+                    <div class="example-item"><strong>Task G:</strong> Feature, High, 4 days, <span class="badge bg-unconfirm">Unconfirm</span> &rarr; <span class="calc-text">4 × 1.5 × 1.2 × 0.2 = 1.44</span></div>
+                    <div class="example-item"><strong>Task H:</strong> Error, Highest, 1 day, <span class="badge bg-reopen">Re Open</span> &rarr; <span class="calc-text">1 × 2.0 × 1.3 × 0 = 0.00</span></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <strong>Monthly Pipeline Aggregation:</strong><br>
+                    <span class="calc-text">12.12 + 21.90 - 12.08 + 1.44 = 23.38 raw score</span>
+                </div>
+                <div style="text-align: right;">
+                    <div>Clamped Monthly Score: <strong>23.38</strong></div>
+                    <div>Final Monthly Rating Status: <span class="badge bg-bad">Bad</span></div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Variables Analysis Matrices</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Status Matrix Isolation</h3>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 0.5rem;">Baseline: Feature, High, 5 Days (Base Calculation: 5 × 1.5 × 1.2 = 9)</p>
+                <table>
+                    <tr><th>Variable State Variant</th><th>Calculation Output Formula</th><th>Score Output</th></tr>
+                    <tr><td>New / In Progress / Re Open</td><td>9 × 0</td><td><strong>0</strong></td></tr>
+                    <tr><td>Request Review</td><td>9 × 0.3</td><td><strong>2.7</strong></td></tr>
+                    <tr><td>Confirm / Done</td><td>9 × 1.0</td><td><strong>9</strong></td></tr>
+                    <tr><td>Unconfirm</td><td>9 × 0.2</td><td><strong>1.8</strong></td></tr>
+                    <tr><td>Expired</td><td>9 × -0.5</td><td><strong style="color:var(--color-red)">-4.5</strong></td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Priority Matrix Isolation</h3>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 0.5rem;">Baseline: Feature, 5 Days, Done Status</p>
+                <table>
+                    <tr><th>Variable State Variant</th><th>Calculation Output Formula</th><th>Score Output</th></tr>
+                    <tr><td>Lowest</td><td>5 × 0.8 × 1.2 × 1</td><td><strong>4.8</strong></td></tr>
+                    <tr><td>Low</td><td>5 × 1.0 × 1.2 × 1</td><td><strong>6</strong></td></tr>
+                    <tr><td>Medium</td><td>5 × 1.2 × 1.2 × 1</td><td><strong>7.2</strong></td></tr>
+                    <tr><td>High</td><td>5 × 1.5 × 1.2 × 1</td><td><strong>9</strong></td></tr>
+                    <tr><td>Highest</td><td>5 × 2.0 × 1.2 × 1</td><td><strong>12</strong></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 600px;">
+            <h3>Task Type Matrix Isolation</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 0.5rem;">Baseline: High, 5 Days, Done Status</p>
+            <table>
+                <tr><th>Variable State Variant</th><th>Calculation Output Formula</th><th>Score Output</th></tr>
+                <tr><td>Subtask</td><td>5 × 1.5 × 0.8 × 1</td><td><strong>6</strong></td></tr>
+                <tr><td>Improvement</td><td>5 × 1.5 × 1.0 × 1</td><td><strong>7.5</strong></td></tr>
+                <tr><td>Feature</td><td>5 × 1.5 × 1.2 × 1</td><td><strong>9</strong></td></tr>
+                <tr><td>Error</td><td>5 × 1.5 × 1.3 × 1</td><td><strong>9.75</strong></td></tr>
+                <tr><td>Main Task</td><td>5 × 1.5 × 1.5 × 1</td><td><strong>11.25</strong></td></tr>
+                <tr><td>Key Milestone</td><td>5 × 1.5 × 2.0 × 1</td><td><strong>15</strong></td></tr>
+            </table>
+        </div>
+
+        <h2>Interactive Algorithm Calculator Sandbox</h2>
+        <div class="card">
+            <div class="calculator-grid">
+                <div>
+                    <div class="form-group">
+                        <label for="inputDuration">Task Logged Duration (Days)</label>
+                        <input type="number" id="inputDuration" value="5" min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="selectPriority">Priority Classification Matrix</label>
+                        <select id="selectPriority">
+                            <option value="0.8">Lowest (0.8)</option>
+                            <option value="1.0">Low (1.0)</option>
+                            <option value="1.2">Medium (1.2)</option>
+                            <option value="1.5" selected>High (1.5)</option>
+                            <option value="2.0">Highest (2.0)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="selectType">Task Structural Classification Type</label>
+                        <select id="selectType">
+                            <option value="0.8">Subtask (0.8)</option>
+                            <option value="1.0">Improvement (1.0)</option>
+                            <option value="1.2" selected>Feature (1.2)</option>
+                            <option value="1.3">Error (1.3)</option>
+                            <option value="1.5">Main Task (1.5)</option>
+                            <option value="2.0">Key Milestone (2.0)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="selectStatus">Task Workspace Board Status</label>
+                        <select id="selectStatus">
+                            <option value="0">New (0.0)</option>
+                            <option value="0">In Progress (0.0)</option>
+                            <option value="0.3">Request Review (0.3)</option>
+                            <option value="1.0" selected>Confirm (1.0)</option>
+                            <option value="1.0">Done (1.0)</option>
+                            <option value="0.2">Unconfirm (0.2)</option>
+                            <option value="0">Re Open (0.0)</option>
+                            <option value="-0.5">Expired (-0.5)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="calc-result-box">
+                        <div class="result-row">
+                            <span>Computed Step Base Point:</span>
+                            <span id="resBase" class="calc-text">5</span>
+                        </div>
+                        <div class="result-row">
+                            <span>Priority Multiplier Weighted Value:</span>
+                            <span id="resPriority" class="calc-text">1.5</span>
+                        </div>
+                        <div class="result-row">
+                            <span>Structural Type Multiplier Weighted Value:</span>
+                            <span id="resType" class="calc-text">1.2</span>
+                        </div>
+                        <div class="result-row">
+                            <span>Applied Board Status Multiplier:</span>
+                            <span id="resStatus" class="calc-text">1.0</span>
+                        </div>
+                        <div class="result-row total">
+                            <span>Final Evaluated Score:</span>
+                            <span id="resTotal">9.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Node selectors mapped from standard document element mappings
+        const inputDuration = document.getElementById('inputDuration');
+        const selectPriority = document.getElementById('selectPriority');
+        const selectType = document.getElementById('selectType');
+        const selectStatus = document.getElementById('selectStatus');
+
+        const resBase = document.getElementById('resBase');
+        const resPriority = document.getElementById('resPriority');
+        const resType = document.getElementById('resType');
+        const resStatus = document.getElementById('resStatus');
+        const resTotal = document.getElementById('resTotal');
+
+        /**
+         * Core Engine Evaluation Loop Function
+         * Evaluates execution steps mapped from business constraint parameters
+         */
+        function evaluateAlgorithmPipeline() {
+            // Step 1: Capture value parameters safely and handle defaults cleanly
+            let days = parseInt(inputDuration.value) || 1;
+            
+            // Step 2: Implement boundary cap limit constraints (min 1, max 7)
+            let basePoint = Math.min(Math.max(days, 1), 7);
+            
+            // Step 3: Extract multiplier float scales parsed from input options
+            let priorityMult = parseFloat(selectPriority.value);
+            let typeMult = parseFloat(selectType.value);
+            let statusMult = parseFloat(selectStatus.value);
+
+            // Step 4: Execute formula combination pipeline
+            let finalTaskScore = basePoint * priorityMult * typeMult * statusMult;
+
+            // Step 5: Update display UI metrics
+            resBase.textContent = basePoint;
+            resPriority.textContent = priorityMult.toFixed(1);
+            resType.textContent = typeMult.toFixed(1);
+            resStatus.textContent = statusMult.toFixed(1);
+            
+            // Format floating math points precisely avoiding standard precision bugs
+            resTotal.textContent = parseFloat(finalTaskScore.toFixed(4));
+        }
+
+        // Bind interactive event listeners for auto evaluation on input changes
+        [inputDuration, selectPriority, selectType, selectStatus].forEach(element => {
+            element.addEventListener('input', evaluateAlgorithmPipeline);
+        });
+
+        // Initialize state engine on page frame ready status
+        evaluateAlgorithmPipeline();
+    </script>
+</body>
+</html>

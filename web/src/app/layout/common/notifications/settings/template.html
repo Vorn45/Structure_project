@@ -1,0 +1,87 @@
+<shared-side-dialog-close-button></shared-side-dialog-close-button>
+
+<div
+    class="relative min-h-14 max-h-14 flex gap-2 px-12 md:px-3 justify-center items-center border-b border-gray-300 dark:border-gray-700"
+>
+    <span class="font-medium text-center text-slate-500 text-2xl">
+        {{ titleKey | transloco }}
+    </span>
+
+    <mat-icon
+        class="absolute right-4 icon-size-6 text-slate-400"
+        [matTooltip]="'NotificationSettings.Info' | transloco"
+        svgIcon="mdi:information-outline"
+    ></mat-icon>
+</div>
+
+<div class="p-4 flex flex-col gap-4 ">
+    <!-- Master switch -->
+    <div class="border rounded-xl ">
+        <ng-container *ngTemplateOutlet="settingRow; context: { item: master }"></ng-container>
+    </div>
+
+    <!-- Sound -->
+    <div class="border rounded-xl ">
+        <ng-container *ngTemplateOutlet="settingRow; context: { item: sound }"></ng-container>
+    </div>
+
+    <!-- Delivery channels -->
+    <div class="border rounded-xl">
+        <div class="px-3 py-2 text-xl text-slate-500 font-medium">
+            {{ "NotificationSettings.Channels" | transloco }}
+        </div>
+
+        <div class="divide-y">
+            @for (channel of channels; track channel.field) {
+                <ng-container *ngTemplateOutlet="settingRow; context: { item: channel }"></ng-container>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Switch row -->
+<ng-template #settingRow let-item="item">
+    <div class="flex gap-3 py-3.5 px-3 items-center" [ngClass]="{ 'opacity-50': item.disabled }">
+        <mat-icon class="icon-size-6 text-slate-500" [svgIcon]="item.icon"></mat-icon>
+
+        <span class="flex-1 text-lg truncate">{{ item.labelKey | transloco }}</span>
+
+        <button
+            type="button"
+            role="switch"
+            [disabled]="item.disabled"
+            [attr.aria-checked]="isOn(item)"
+            [attr.aria-label]="item.labelKey | transloco"
+            (click)="toggle(item)"
+            class="relative h-5 w-10 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed"
+            [ngClass]="isOn(item) ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'"
+        >
+            <span
+                class="absolute top-[3px] h-3.5 w-3.5 rounded-full shadow-sm transition-all"
+                [ngClass]="isOn(item) ? 'left-[23px] bg-white' : 'left-[3px] bg-slate-500 dark:bg-slate-400'"
+            ></span>
+        </button>
+
+        @if (item.hintKey) {
+            <span class="w-12 shrink-0 text-right text-md text-slate-400">
+                {{ item.hintKey | transloco }}
+            </span>
+        } @else if (item.muteField) {
+            <button
+                type="button"
+                [disabled]="item.disabled"
+                [matTooltip]="'NotificationMute.Title' | transloco"
+                (click)="openMute(item)"
+                class="w-12 shrink-0 flex justify-end text-md text-slate-400 hover:text-primary disabled:cursor-not-allowed"
+            >
+                @if (muteHint(item)) {
+                    {{ muteHint(item) }}
+                } @else {
+                    <mat-icon class="icon-size-4 text-slate-400" svgIcon="mdi:clock-outline"></mat-icon>
+                }
+            </button>
+        } @else {
+            <span class="w-12 shrink-0"></span>
+        }
+    </div>
+</ng-template>

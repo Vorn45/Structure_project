@@ -1,0 +1,69 @@
+<ng-container>
+    <!-- Header -->
+    <div class="flex flex-col items-center text-center font-kantumruy mt-2">
+        <div class="w-20 h-20 rounded-full bg-[#f3f4f5] dark:bg-slate-800 flex items-center justify-center mb-3">
+            <mat-icon *ngIf="isPhoneNumber(email)" svgIcon="mdi:phone" class="icon-size-10 text-slate-800 dark:text-slate-100"></mat-icon>
+            <mat-icon *ngIf="!isPhoneNumber(email)" svgIcon="mdi:email" class="icon-size-10 text-slate-800 dark:text-slate-100"></mat-icon>
+        </div>
+        <h2 class="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-1">
+            {{ (isPhoneNumber(email) ? 'Auth.Sign-Up.Phone' : 'Auth.Common.Email') | transloco }}
+        </h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+            {{ (isPhoneNumber(email) ? 'Auth.Common.CodeSentToPhone' : 'Auth.Common.CodeSentToEmail') | transloco }}
+        </p>
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mt-0.5 mb-6" *ngIf="email">
+            {{ email }}
+        </p>
+    </div>
+
+    <!-- OTP -->
+    <div class="flex flex-col items-center w-full mb-4">
+        <div class="flex justify-center gap-3">
+            <input class="custom-input" [ngClass]="{'has-value': numStr1}" #input1 [(ngModel)]="numStr1"
+                (keydown)="keyDownHandler1($event)" [maxlength]="6"
+                [disabled]="otpFailed" (paste)="onPaste($event, 1)" (input)="onOtpInput(1, $event)" />
+            <input class="custom-input" [ngClass]="{'has-value': numStr2}" #input2 [(ngModel)]="numStr2"
+                (keydown)="keyDownHandler2($event)" [maxlength]="6"
+                [disabled]="otpFailed" (paste)="onPaste($event, 2)" (input)="onOtpInput(2, $event)" />
+            <input class="custom-input" [ngClass]="{'has-value': numStr3}" #input3 [(ngModel)]="numStr3"
+                (keydown)="keyDownHandler3($event)" [maxlength]="6"
+                [disabled]="otpFailed" (paste)="onPaste($event, 3)" (input)="onOtpInput(3, $event)" />
+            <input class="custom-input" [ngClass]="{'has-value': numStr4}" #input4 [(ngModel)]="numStr4"
+                (keydown)="keyDownHandler4($event)" [maxlength]="6"
+                [disabled]="otpFailed" (paste)="onPaste($event, 4)" (input)="onOtpInput(4, $event)" />
+            <input class="custom-input" [ngClass]="{'has-value': numStr5}" #input5 [(ngModel)]="numStr5"
+                (keydown)="keyDownHandler5($event)" [maxlength]="6"
+                [disabled]="otpFailed" (paste)="onPaste($event, 5)" (input)="onOtpInput(5, $event)" />
+            <input class="custom-input" [ngClass]="{'has-value': numStr6}" #input6 [(ngModel)]="numStr6"
+                (keydown)="keyDownHandler6($event)" [maxlength]="6"
+                [disabled]="otpFailed" (paste)="onPaste($event, 6)" (input)="onOtpInput(6, $event)" />
+        </div>
+
+        <div *ngIf="otpFailed" class="text-red-500 text-sm font-medium font-kantumruy mt-4 text-center">
+            {{ 'Auth.Common.OtpExpiredOrInvalid' | transloco }}
+        </div>
+    </div>
+
+    <!-- Resend OTP / Timer -->
+    <div class="flex justify-center mb-6 text-base font-medium font-kantumruy">
+        <span *ngIf="remainingTime > 0 && !otpFailed" class="text-slate-400 dark:text-slate-500 text-base font-medium opacity-60 pointer-events-none select-none">
+            {{ 'Auth.Common.ResendOtp' | transloco }} ({{ remainingTime }})
+        </span>
+        <button type="button" *ngIf="remainingTime === 0 || otpFailed" (click)="resendOtp()" [disabled]="isResending"
+            class="text-primary text-base font-medium cursor-pointer underline hover:opacity-80 disabled:opacity-50">
+            <span *ngIf="!isResending">{{ 'Auth.Common.ResendOtp' | transloco }}</span>
+            <mat-progress-spinner *ngIf="isResending" [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
+        </button>
+    </div>
+
+    <!-- Action -->
+    <div class="flex flex-col items-center gap-6 w-full mb-4 font-kantumruy">
+        <div *ngIf="!isDialog" class="w-full flex justify-center mt-2">
+            <button type="button" (click)="verify()" [disabled]="!canSubmit || isLoading || otpFailed"
+                class="w-full h-12 bg-primary hover:opacity-90 disabled:bg-slate-300 text-white disabled:text-slate-400 font-kantumruy font-medium text-base rounded-xl transition-colors flex items-center justify-center">
+                <span *ngIf="!isLoading">{{ 'Auth.Common.Verify' | transloco }}</span>
+                <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            </button>
+        </div>
+    </div>
+</ng-container>

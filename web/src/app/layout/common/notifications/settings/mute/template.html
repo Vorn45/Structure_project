@@ -1,0 +1,62 @@
+<div mat-dialog-title class="w-full flex items-center justify-center pr-10 sm:pr-2 font-kantumruy">
+    <span class="text-2xl font-medium text-slate-500">
+        @if (data.channelKey) {
+            {{ "NotificationMute.TitleFrom" | transloco: { channel: (data.channelKey | transloco) } }}
+        } @else {
+            {{ "NotificationMute.Title" | transloco }}
+        }
+    </span>
+
+    <button [mat-dialog-close]="false" class="absolute right-2" mat-icon-button type="button">
+        <mat-icon svgIcon="mdi:close" class="group-hover:text-red-500" />
+    </button>
+</div>
+
+<mat-dialog-content class="font-kantumruy">
+    <!-- Duration -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 pb-4">
+        @for (duration of durations; track duration.key) {
+            <div
+                class="w-full min-h-12 flex items-center justify-center cursor-pointer border rounded-lg relative px-3"
+                [ngClass]="selected === duration.key ? 'border-primary-500 bg-primary-500/10' : 'border-slate-300'"
+                (click)="select(duration.key)"
+            >
+                <span
+                    class="text-center"
+                    [ngClass]="selected === duration.key ? 'text-primary font-medium' : 'text-slate-900 font-normal'"
+                >
+                    {{ duration.labelKey | transloco }}
+                </span>
+                @if (selected === duration.key) {
+                    <mat-icon class="ml-1 icon-size-5 text-primary" svgIcon="mdi:check" />
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Mute until -->
+    @if (selected === "until") {
+        <div class="md-form-field-appearance-outline">
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label class="pl-0">{{ "NotificationMute.Date" | transloco }}</mat-label>
+                <input
+                    matInput
+                    [matDatepicker]="untilPicker"
+                    [formControl]="untilCtrl"
+                    readonly
+                    (click)="untilPicker.open()"
+                    [placeholder]="'NotificationMute.SelectDate' | transloco"
+                />
+                <mat-datepicker-toggle matPrefix [for]="untilPicker"></mat-datepicker-toggle>
+                <mat-datepicker #untilPicker></mat-datepicker>
+                <form-validation-error [control]="untilCtrl" />
+            </mat-form-field>
+        </div>
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex items-center justify-end">
+    <button class="bg-primary" mat-flat-button (click)="submit()" [disabled]="invalid">
+        <span class="text-white">{{ "NotificationMute.Submit" | transloco }}</span>
+    </button>
+</mat-dialog-actions>

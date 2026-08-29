@@ -1,0 +1,127 @@
+@use '../auth-card' as auth;
+
+// `:host` itself is left bare (no position/sizing) — layout.component.scss's
+// global `router-outlet + * { position: relative; width: 100%; flex: 1 1 auto; }`
+// rule (unscoped, ViewEncapsulation.None) targets this host directly, since
+// it's the element right after <router-outlet> in EmptyLayoutComponent, and
+// kept winning the cascade even against `!important` overrides here. Rather
+// than fight that selector, centering is done on `.lock-wrap` instead, which
+// that rule never touches.
+:host {
+    display: block;
+}
+
+.lock-wrap-backdrop {
+    // `position: fixed` instead of relying on `min-height: 100dvh` + ancestor
+    // height: this route has no dedicated layout wrapper (unlike /auth, whose
+    // AuthLayoutComponent already provides one), so the ancestor chain here
+    // is a couple of unstyled `flex-col` divs with no height of their own —
+    // a min-height alone wouldn't reliably center against the viewport.
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background: #f8fafc;
+
+    body.dark & {
+        background: auth.$dark-canvas;
+    }
+}
+
+.lock-wrap {
+    @include auth.auth-wrap;
+}
+
+.lock-card {
+    @include auth.auth-card;
+    padding-top: 32px;
+    padding-bottom: 24px;
+}
+
+.lock-card__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.lock-card__illustration {
+    width: 140px;
+    height: 140px;
+    font-size: 140px;
+    margin-bottom: 4px;
+}
+
+.lock-card__title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #0f172a;
+    margin: 0;
+
+    body.dark & {
+        color: auth.$dark-text;
+    }
+}
+
+.lock-card__subtitle {
+    font-size: 15px;
+    color: #64748b;
+    margin: 0;
+
+    body.dark & {
+        color: auth.$dark-muted;
+    }
+}
+
+.lock-form {
+    @include auth.auth-form;
+}
+
+.lock-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ef4444;
+    font-size: 14px;
+    margin-top: -8px;
+
+    body.dark & {
+        color: #f87171;
+    }
+}
+
+.lock-links {
+    display: flex;
+    justify-content: space-between;
+    margin: 16px 0 22px;
+
+    &--center {
+        justify-content: center;
+    }
+
+    > a {
+        font-size: 15px;
+        color: #1c2978;
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+            opacity: 0.85;
+        }
+
+        body.dark & {
+            color: auth.$dark-accent;
+        }
+    }
+}
+
+.lock-submit.mat-mdc-button-base {
+    @include auth.auth-submit;
+    margin-bottom: 24px;
+}

@@ -1,0 +1,37 @@
+:host ::ng-deep .mat-mdc-dialog-content {
+    padding-top: 0 !important;
+}
+
+.history-section {
+    min-height: 58px;
+    margin: 0 16px;
+    padding: 18px 8px 12px;
+}
+
+.history-list {
+    margin: 0 16px;
+}
+
+.history-row {
+    min-height: 56px;
+    gap: 14px;
+    padding: 8px;
+}
+
+.history-icon {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 22px !important;
+}
+
+.history-ip {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+}
+
+.history-meta {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+}

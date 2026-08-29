@@ -1,0 +1,166 @@
+:host {
+    display: block;
+}
+
+.telegram-center-dialog {
+    &__header {
+        display: grid;
+        grid-template-columns: 2.5rem 1fr 2.5rem;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    &__header-spacer {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    &__title {
+        margin: 0;
+        text-align: center;
+        font-size: 1.25rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: rgb(51 65 85);
+    }
+
+    &__back,
+    &__close {
+        color: rgb(100 116 139);
+    }
+
+    &__body {
+        display: flex;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    &__art,
+    &__content {
+        flex: 1 1 50%;
+        min-width: 0;
+    }
+
+    &__art {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__illustration {
+        width: 100%;
+        max-width: 16rem;
+        height: auto;
+        object-fit: contain;
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__section-title {
+        margin: 0 0 1.25rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        line-height: 1.55;
+        color: rgb(51 65 85);
+    }
+
+    &__conditions-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.125rem;
+        flex: 1;
+    }
+
+    &__condition {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.875rem;
+    }
+
+    &__condition-icon {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--helper-primary) 12%, white);
+
+        mat-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            font-size: 1.25rem;
+            color: var(--helper-primary);
+        }
+    }
+
+    &__condition-text {
+        flex: 1;
+        min-width: 0;
+        padding-top: 0.3rem;
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        color: rgb(51 65 85);
+    }
+
+    &__actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    &__primary-btn {
+        width: 100%;
+    }
+
+    &__waiting {
+        margin: 0;
+        text-align: center;
+        font-size: 0.8125rem;
+        color: rgb(100 116 139);
+    }
+}
+
+:host-context(.dark) {
+    .telegram-center-dialog {
+        &__title,
+        &__section-title,
+        &__condition-text {
+            color: rgb(226 232 240);
+        }
+
+        &__condition-icon {
+            background: color-mix(in srgb, var(--helper-primary) 22%, rgb(30 41 59));
+
+            mat-icon {
+                color: var(--helper-primary);
+            }
+        }
+
+        &__waiting {
+            color: rgb(148 163 184);
+        }
+    }
+}
+
+@media (max-width: 639px) {
+    .telegram-center-dialog {
+        &__body {
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        &__illustration {
+            max-width: 12rem;
+            margin: 0 auto;
+        }
+    }
+}

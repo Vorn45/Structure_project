@@ -1,0 +1,63 @@
+helper-card {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+
+    /* Flippable */
+    &.helper-card-flippable {
+        border-radius: 0;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        transition: transform 1s;
+        perspective: 600px;
+        background: transparent;
+        @apply shadow-none;
+
+        &.helper-card-face-back {
+            .helper-card-front {
+                visibility: hidden;
+                opacity: 0;
+                transform: rotateY(180deg);
+            }
+
+            .helper-card-back {
+                visibility: visible;
+                opacity: 1;
+                transform: rotateY(360deg);
+            }
+        }
+
+        .helper-card-front,
+        .helper-card-back {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            z-index: 10;
+            transition:
+                transform 0.5s ease-out 0s,
+                visibility 0s ease-in 0.2s,
+                opacity 0s ease-in 0.2s;
+            backface-visibility: hidden;
+        }
+
+        .helper-card-front {
+            position: relative;
+            opacity: 1;
+            visibility: visible;
+            transform: rotateY(0deg);
+            overflow: hidden;
+        }
+
+        .helper-card-back {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: rotateY(180deg);
+            overflow: hidden auto;
+        }
+    }
+}

@@ -1,0 +1,60 @@
+<div class="p-4 relative rounded-md">
+    <div class="flex items-center cursor-pointer absolute top-3 right-3">
+        <button [mat-dialog-close]="false" mat-icon-button>
+            <mat-icon svgIcon="heroicons_outline:x-mark" />
+        </button>
+    </div>
+    <h2 class="text-xl w-full font-semibold text-center">
+        {{ 'qr-login.title' | transloco }}
+    </h2>
+    <div class="flex justify-center flex-col sm:flex-row mt-4 items-center">
+        <ng-container *ngIf="!isLoading(); else loading">
+            <div class="relative qrbox min-w-[210px] min-h-[210px] max-w-[210px] max-h-[210px]">
+                <img [src]="qrCode()" alt="QR Code" class="min-w-[210px] min-h-[210px] max-w-[210px] max-h-[210px] object-contain">
+                <img src="images/logo/mlmupc_2.png"
+                    class="size-12 h-16 absolute right-1/2 top-1/2 translate-x-1/2 -translate-y-1/2 aspect-square object-cover w-16">
+
+                <!-- <div class="absolute top-[-15px] right-[-15px] w-[8px] h-[74px] bg-[#0f83c6]"></div>
+                <div class="absolute top-[-15px] right-[-15px] w-[74px] h-[8px] bg-[#0f83c6]"></div>
+
+                <div class="absolute top-[-15px] left-[-15px] w-[8px] h-[74px] bg-[#0f83c6]"></div>
+                <div class="absolute top-[-15px] left-[-15px] w-[74px] h-[8px] bg-[#0f83c6]"></div>
+
+                <div class="absolute bottom-[-15px] right-[-15px] w-[8px] h-[74px] bg-[#0f83c6]"></div>
+                <div class="absolute bottom-[-15px] right-[-15px] w-[74px] h-[8px] bg-[#0f83c6]"></div>
+
+                <div class="absolute bottom-[-15px] left-[-15px] w-[8px] h-[74px] bg-[#0f83c6]"></div>
+                <div class="absolute bottom-[-15px] left-[-15px] w-[74px] h-[8px] bg-[#0f83c6]"></div> -->
+            </div>
+        </ng-container>
+        <ng-template #loading>
+            <shared-qr-code-skeleton />
+        </ng-template>
+        <div class="flex flex-col gap-y-3 pl-4 ml-2">
+            <span class="mb-2 font-medium text-md">
+                {{ 'qr-login.instructions.title' | transloco }}
+            </span>
+            <span class="text-base">
+                {{ 'qr-login.instructions.step1' | transloco }}
+            </span>
+            <span class="text-base">
+                {{ 'qr-login.instructions.step2' | transloco }}
+            </span>
+            <span class="text-base">
+                {{ 'qr-login.instructions.step3' | transloco }}
+            </span>
+            <span class="text-base">
+                {{ 'qr-login.instructions.step4' | transloco }}
+            </span>
+            <span class="text-base">
+                {{ 'qr-login.instructions.step5' | transloco }}
+            </span>
+            <div class="self-end text-base">
+                {{ 'qr-login.note' | transloco }}
+            </div>
+        </div>
+    </div>
+    <div class="flex items-center justify-start pl-[80px]" *ngIf="!isLoading()">
+        <span class="text-2xl font-extralight text-[#0f83c6]">{{ displayTime() }}</span>
+    </div>
+</div>

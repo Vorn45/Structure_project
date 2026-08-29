@@ -1,0 +1,112 @@
+/* Variables */
+:root {
+    --helper-navigation-thin-width: 64px;
+}
+
+helper-navigation {
+    /* Thin appearance overrides — icon-only rail, narrower than compact */
+    &.helper-navigation-appearance-thin {
+        width: var(--helper-navigation-thin-width);
+        min-width: var(--helper-navigation-thin-width);
+        max-width: var(--helper-navigation-thin-width);
+
+        /* Left positioned */
+        &.helper-navigation-position-left {
+            /* Side mode */
+            &.helper-navigation-mode-side {
+                margin-left: calc(
+                    var(--helper-navigation-thin-width) * -1
+                );
+            }
+
+            /* Opened */
+            &.helper-navigation-opened {
+                margin-left: 0;
+            }
+        }
+
+        /* Right positioned */
+        &.helper-navigation-position-right {
+            /* Side mode */
+            &.helper-navigation-mode-side {
+                margin-right: calc(
+                    var(--helper-navigation-thin-width) * -1
+                );
+            }
+
+            /* Opened */
+            &.helper-navigation-opened {
+                margin-right: 0;
+            }
+
+            /* Aside wrapper */
+            .helper-navigation-aside-wrapper {
+                left: auto;
+                right: var(--helper-navigation-thin-width);
+            }
+        }
+
+        /* Wrapper */
+        .helper-navigation-wrapper {
+            /* Content */
+            .helper-navigation-content {
+                > helper-navigation-aside-item,
+                > helper-navigation-basic-item {
+                    .helper-navigation-item-wrapper {
+                        margin: 4px 8px 0 8px;
+
+                        .helper-navigation-item {
+                            flex-direction: column;
+                            justify-content: center;
+                            padding: 10px;
+                            border-radius: 6px;
+
+                            .helper-navigation-item-icon {
+                                margin-right: 0;
+                            }
+
+                            /* No labels in the thin rail — icon only */
+                            .helper-navigation-item-title-wrapper {
+                                display: none !important;
+                            }
+
+                            .helper-navigation-item-badge {
+                                position: absolute;
+                                top: 6px;
+                                right: 6px;
+                            }
+                        }
+                    }
+
+                    > helper-navigation-collapsable-item {
+                        display: none;
+                    }
+
+                    > helper-navigation-group-item {
+                        > .helper-navigation-item-wrapper {
+                            display: none;
+                        }
+                    }
+                }
+
+                /* Collapsable items with children are hidden in the rail;
+                   use an 'aside' item instead so children stay reachable
+                   via the flyout panel. */
+                > helper-navigation-collapsable-item {
+                    display: none;
+                }
+
+                > helper-navigation-group-item {
+                    > .helper-navigation-item-wrapper {
+                        display: none;
+                    }
+                }
+            }
+        }
+
+        /* Aside wrapper */
+        .helper-navigation-aside-wrapper {
+            left: var(--helper-navigation-thin-width);
+        }
+    }
+}

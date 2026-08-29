@@ -1,0 +1,255 @@
+
+$auth-card-width   : 480px;
+$auth-card-padding : 22px;
+
+// ----------------------------------------------------------------------------
+// Dark palette
+// ----------------------------------------------------------------------------
+// Tuned to the NexTask mark rather than a neutral grey ramp: the canvas is a
+// near-black navy, surfaces are blue-tinted, and the hairlines/accents borrow
+// the logo's blue. Inputs sit *below* the card instead of above it, so the card
+// reads as the lit surface.
+$dark-canvas   : #070c18;
+$dark-canvas-2 : #0d1730;
+$dark-surface  : #101a2e;
+$dark-sunken   : #0a1220;
+$dark-hairline : rgba(148, 178, 255, 0.12);
+$dark-text     : #e6edf8;
+$dark-muted    : #8fa0bf;
+$dark-accent   : #4c8dff;
+
+// Host element: centres the card in the viewport regardless of how the
+// surrounding auth layout is laid out.
+@mixin auth-host {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100dvh;
+    padding: 24px 16px;
+    box-sizing: border-box;
+}
+
+@mixin auth-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    max-width: $auth-card-width;
+    margin: 0 auto;
+}
+
+// Each screen's card is as tall as its own content — the two auth pages share
+// the chrome, not a height.
+@mixin auth-card {
+    background: #ffffff;
+    border: 1px solid #e8eaef;
+    border-radius: 12px;
+    // Less padding on top than the sides: the logo artwork carries its own
+    // transparent margin, so a full 22px there reads as a gap.
+    padding: 8px $auth-card-padding 0;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px rgba(15, 23, 42, 0.07);
+
+    body.dark & {
+        background: $dark-surface;
+        border-color: $dark-hairline;
+        // A hairline of light along the top edge reads as the card catching the
+        // page glow, which keeps it from looking like a flat grey rectangle.
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+}
+
+@mixin auth-card-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+
+    > img {
+        height: 120px;
+        width: auto;
+        margin: -26px 0;
+        body.dark & {
+            content: url('/images/logo/nextask-dark.png');
+            height: 42px;
+            margin: 6px 0 20px;
+        }
+    }
+
+    > languages {
+        position: absolute;
+        right: -8px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+// Material outline fields softened into the rounded, lightly filled field of
+// the design.
+@mixin auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+
+        &:has(mat-error) {
+            display: block;
+            padding: 0;
+        }
+    }
+    .mat-mdc-form-field-error-wrapper {
+        padding-bottom: 0 !important;
+    }
+
+    mat-form-field:has(.mat-mdc-form-field-subscript-wrapper mat-error) {
+        margin-bottom: -16px;
+    }
+
+    .mat-mdc-text-field-wrapper {
+        background-color: #fbfcfd;
+        border-radius: 8px;
+    }
+
+    .mdc-notched-outline__leading {
+        border-radius: 8px 0 0 8px;
+        width: 12px;
+    }
+
+    .mdc-notched-outline__trailing {
+        border-radius: 0 8px 8px 0;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+        border-color: #e3e6ec;
+    }
+
+    .mat-mdc-form-field-icon-prefix > .mat-icon {
+        color: #4b5563;
+        padding-right: 8px;
+    }
+
+    .mat-mdc-form-field-icon-suffix .mat-icon {
+        color: #6b7280;
+    }
+
+    body.dark & {
+        .mat-mdc-text-field-wrapper {
+            background-color: $dark-sunken;
+        }
+
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+            border-color: $dark-hairline;
+        }
+
+        // Focus picks up the logo blue rather than Material's default.
+        .mat-focused {
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+                border-color: $dark-accent;
+            }
+        }
+
+        .mat-mdc-form-field-icon-prefix > .mat-icon,
+        .mat-mdc-form-field-icon-suffix .mat-icon {
+            color: $dark-muted;
+        }
+
+        input.mat-mdc-input-element {
+            color: $dark-text;
+            caret-color: $dark-accent;
+        }
+    }
+}
+
+@mixin auth-submit {
+    width: 100%;
+    height: 46px;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+@mixin auth-links {
+    display: flex;
+    align-items: stretch;
+    margin: 10px (-$auth-card-padding) 0;
+    background: #f5f6f8;
+    border-top: 1px solid #e8eaef;
+
+    > a {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 11px 6px;
+        color: #1c2978;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        span {
+            font-size: inherit;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        mat-icon {
+            flex: 0 0 auto;
+            color: #1c2978;
+        }
+
+        &:hover {
+            background-color: #eceef2;
+        }
+    }
+
+    // Full-bleed dividers: they run the whole height of the bar.
+    > span {
+        width: 1px;
+        background-color: #e5e7eb;
+    }
+
+    @media (max-width: 640px) {
+        > a {
+            gap: 4px;
+        }
+    }
+
+    // Sunk below the card so the bar reads as a base the card sits on.
+    body.dark & {
+        background: $dark-sunken;
+        border-top-color: $dark-hairline;
+
+        > a {
+            color: $dark-muted;
+
+            mat-icon {
+                color: $dark-muted;
+            }
+
+            &:hover {
+                background-color: rgba(76, 141, 255, 0.08);
+                color: $dark-accent;
+
+                mat-icon {
+                    color: $dark-accent;
+                }
+            }
+        }
+
+        > span {
+            background-color: $dark-hairline;
+        }
+    }
+}

@@ -1,0 +1,33 @@
+deploy:
+  stage: deploy:dev
+  variables:
+    STAGE: dev
+    API_BASE_URL  : https://pms-api.dev.camcyber.com/api
+    FILE_BASE_URL : https://file-v4-api.uat.camcyber.com
+    SOCKET_URL    : https://pms-api.dev.camcyber.com
+    SSO_AUTH_URL  : https://sso.dev.camcyber.com/realms/auth
+    SSO_CLIENT_ID : pms
+    VERSION       : 1.0.0
+    # RecaptchaSiteKey: 6Le3dNIoAAAAAHnbjHGdpgEA_L4VKPRVm2pLhMtw
+    # SOCKET_URL: ""
+    PROJECT_NAME: PMS
+    SERVICE_TYPE: web
+    SERVICE_NAMESPACE: ${PROJECT_NAME}/${SERVICE_TYPE}
+    ENABLED_BUILD: 'true'
+    IP_ADDRESS: '217.15.164.171'
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-v2
+    paths:
+      - node_modules/
+  only:
+    - dev
+  before_script:
+    - rm -f package-lock.json
+    - npm install
+    - npm run build --$STAGE
+    - source "${CAMCYBER_UAT2_ENVIRONMENT}"
+  script:
+    - bash -e scripts/deploy.sh
+  # after_script:
+  #   - source "${KCE_ENVIRONMENT}"
+  #   - bash -e scripts/notify/telegram.sh $CI_JOB_STATUS

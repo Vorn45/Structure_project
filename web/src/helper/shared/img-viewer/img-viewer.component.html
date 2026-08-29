@@ -1,0 +1,82 @@
+<div #container class="container-section w-full h-full" (click)="closeOnOverlayClick($event)">
+    <!-- Header -->
+    <div class="header-img-view bg-custom min-h-14 max-h-14 py-2 px-5">
+        <div class="flex flex-1 items-center font-medium">
+            <mat-icon class="text-white" svgIcon="mdi:image"></mat-icon>
+            <div class="flex items-center ml-1.5">
+                <span class="text-lg text-white -mb-0.5">{{file.title}}</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div *ngIf="files.length > 1" class="flex items-center gap-1 text-white">
+                <button type="button" [disabled]="!canGoPrevious" (click)="previousFile()" class="flex items-center disabled:opacity-40">
+                    <mat-icon class="text-white" svgIcon="mdi:chevron-left"></mat-icon>
+                </button>
+                <span class="min-w-10 text-center text-sm tabular-nums">{{ fileIndex + 1 }}/{{ files.length }}</span>
+                <button type="button" [disabled]="!canGoNext" (click)="nextFile()" class="flex items-center disabled:opacity-40">
+                    <mat-icon class="text-white" svgIcon="mdi:chevron-right"></mat-icon>
+                </button>
+            </div>
+            <a mat-menu-item (click)="downloadImage()">
+                <mat-icon class="text-white cursor-pointer mt-1" svgIcon="mat_outline:file_download" />
+            </a>
+            <mat-icon [matDialogClose]="true" class="text-white cursor-pointer" svgIcon="mat_solid:close" />
+        </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div *ngIf="isLoading" class="absolute w-full h-full flex justify-center items-center">
+        <mat-progress-spinner class="text-white" [diameter]="48" [mode]="'indeterminate'" />
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="hasError && !isLoading" class="absolute w-full h-full flex flex-col justify-center items-center gap-2 text-white">
+        <mat-icon svgIcon="feather:image" class="opacity-60"></mat-icon>
+        <span>Failed to load image</span>
+    </div>
+
+    <!-- Image Viewer -->
+    <div
+        #bodyView
+        class="body-img-view pt-14"
+        *ngIf="!isLoading && !hasError"
+        [class.grabbing]="isDragging"
+        [class.grab]="!isDragging && zoom > fitZoom"
+        (wheel)="onWheel($event)"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerUp($event)"
+        (dblclick)="onDoubleClick($event)"
+        (dragstart)="$event.preventDefault()">
+        <img
+            [style.height.px]="imgHeight"
+            [style.width.px]="imgWidth"
+            [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) rotate(' + rotation + 'deg)'"
+            class="viewer-img"
+            [src]="file.url"
+            alt="invalid"
+            draggable="false">
+    </div>
+
+    <!-- Footer -->
+    <div *ngIf="!isLoading && !hasError" class="viewer-controls flex absolute left-1/2 transform -translate-x-1/2 z-10 bottom-3 h-11 bg-custom-gray rounded-full">
+        <div class="flex items-center justify-between px-4 gap-4">
+            <button (click)="rotateLeft()" matTooltip="Rotate left">
+                <mat-icon class="text-white" svgIcon="mdi:rotate-counter-clockwise"></mat-icon>
+            </button>
+            <button (click)="zoomOut()" [disabled]="!canZoomOut">
+                <mat-icon class="text-white" svgIcon="mdi:minus"></mat-icon>
+            </button>
+            <span class="text-white text-[14px] min-w-12 text-center select-none cursor-pointer" (click)="resetZoom()">
+                {{zoomPercentage}}%
+            </span>
+            <button (click)="zoomIn()" [disabled]="!canZoomIn">
+                <mat-icon class="text-white" svgIcon="mdi:plus"></mat-icon>
+            </button>
+            <button (click)="rotateRight()" matTooltip="Rotate right">
+                <mat-icon class="text-white" svgIcon="mdi:rotate-clockwise"></mat-icon>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+<!-- Header with Back Button + Logo + Language -->
+<div class="flex items-center justify-between mb-4 relative">
+    <button type="button" mat-icon-button (click)="onBack()"
+            class="text-slate-500 hover:text-slate-700">
+        <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
+    </button>
+    <img class="h-11 sm:h-12 w-auto object-contain" src="/images/logo/NexTask.png" alt="NexTask" />
+    <languages></languages>
+</div>
+
+<!-- Body Title & Icon -->
+<div class="flex flex-col items-center pt-2 pb-6 text-center">
+    <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+        <mat-icon svgIcon="mdi:shield-lock" class="icon-size-8 text-slate-700 dark:text-slate-200"></mat-icon>
+    </div>
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
+        {{ 'ផ្ទៀងផ្ទាត់សុវត្ថិភាពគណនី (2FA)' | transloco }}
+    </h2>
+    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        {{ 'សូមជ្រើសរើសវិធីទទួលលេខកូដសម្ងាត់' | transloco }}
+    </p>
+</div>
+
+<!-- Channels Options List -->
+<div class="flex flex-col gap-3 pb-6">
+    <!-- Email Option -->
+    <button type="button" *ngIf="availableChannels.includes('email')" (click)="selectChannel('email')"
+            class="channel-card">
+        <div class="flex items-center gap-3">
+            <mat-icon svgIcon="mdi:email" class="channel-icon icon-size-6"></mat-icon>
+            <span class="text-base font-normal">{{ 'តាមអ៊ីមែល' | transloco }}</span>
+        </div>
+        <mat-icon svgIcon="mdi:chevron-right" class="channel-arrow"></mat-icon>
+    </button>
+
+    <!-- Phone Option -->
+    <button type="button" *ngIf="availableChannels.includes('phone')" (click)="selectChannel('phone')"
+            class="channel-card">
+        <div class="flex items-center gap-3">
+            <mat-icon svgIcon="mdi:phone" class="channel-icon icon-size-6"></mat-icon>
+            <span class="text-base font-normal">{{ 'តាមលេខទូរស័ព្ទ' | transloco }}</span>
+        </div>
+        <mat-icon svgIcon="mdi:chevron-right" class="channel-arrow"></mat-icon>
+    </button>
+
+    <!-- Google Authenticator Option -->
+    <button type="button" *ngIf="availableChannels.includes('authenticator')" (click)="selectChannel('authenticator')"
+            class="channel-card">
+        <div class="flex items-center gap-3">
+            <mat-icon svgIcon="google-authenticator-colored" class="icon-size-6"></mat-icon>
+            <span class="text-base font-normal">{{ 'កម្មវិធី Google Authenticator' | transloco }}</span>
+        </div>
+        <mat-icon svgIcon="mdi:chevron-right" class="channel-arrow"></mat-icon>
+    </button>
+</div>

@@ -1,0 +1,85 @@
+<helper-loading-bar></helper-loading-bar>
+
+
+
+<helper-navigation class="dark z-999 min-w-0 print:hidden bg-primary dark:bg-dialog" [appearance]="'thin'"
+    [mode]="isScreenSmall ? 'over' : 'side'" [name]="'mainNavigation'" [navigations]="navigations"
+    [opened]="!isScreenSmall">
+
+    <ng-container helperNavigationContentHeader>
+        <div class="flex flex-col items-center justify-center py-3">
+
+            <div class="relative">
+                <img class="h-8 w-8 object-contain rounded-full"
+                    [src]="isSuperAdmin ? 'images/logo/default_logo.png' : (orgLogo || 'images/logo/default_logo.png')"
+                    alt="img" />
+
+                @if (isOrgAdmin) {
+                <mat-icon
+                    class="icon-size-3 absolute -bottom-0.5 -right-0.5 rounded-full bg-white text-amber-500 shadow ring-1 ring-white dark:bg-gray-800 dark:ring-gray-800 dark:text-amber-400"
+                    [svgIcon]="'mdi:star'" matTooltip="រដ្ធបាល"></mat-icon>
+                }
+            </div>
+
+        </div>
+    </ng-container>
+    <ng-container helperNavigationContentFooter>
+        <div class="p-2 text-center text-[10px] opacity-20">
+            {{ appVersion }}
+        </div>
+    </ng-container>
+</helper-navigation>
+
+<!-- Personal workspace renders no header row, so the shell is pinned to the exact
+     viewport height there; every other role keeps min-h-screen unchanged. -->
+<!-- While the chrome is tucked away both reserve vars drop to 0 so the page below grows into
+     the space it vacated — otherwise sliding the header/nav out would just leave blank strips,
+     since every page sizes itself as `100dvh - header - bottom-reserved`. -->
+<div class="flex w-full min-w-0 flex-col bg-white dark:bg-[#111827] lg:bg-transparent"
+    [ngClass]="isPersonalWorkspace ? 'h-screen overflow-hidden' : 'min-h-screen'"
+    [style.--layout-header-height]="isPersonalWorkspace || chrome.hidden() ? '0px' : '3.5rem'"
+    [style.--layout-bottom-reserved]="chrome.hidden() ? '0px' : null">
+    <div *ngIf="!isPersonalWorkspace"
+        class="bg-card sticky top-0 z-49 flex w-full flex-0 items-center pl-2 lg:pl-4 pr-4 shadow dark:border-b dark:shadow-none print:hidden overflow-hidden transition-[height] duration-200 ease-out lg:!h-14"
+        [ngClass]="chrome.hidden() ? 'h-0' : 'h-14'">
+        <button class="!flex !h-10 !w-10 !p-0 !items-center !justify-center lg:hidden mr-2" mat-icon-button
+            (click)="toggleNavigation('mainNavigation')">
+            <span class="relative flex h-8 w-8 items-center justify-center">
+                <img class="h-8 w-8 object-contain rounded-full"
+                    [src]="isSuperAdmin ? 'images/logo/default_logo.png' : (orgLogo || 'images/logo/default_logo.png')"
+                    alt="img" />
+                @if (isOrgAdmin) {
+                <mat-icon
+                    class="icon-size-3 absolute -bottom-0.5 -right-0.5 rounded-full bg-black text-amber-500 shadow ring-1 ring-white dark:bg-gray-800 dark:ring-gray-800 dark:text-amber-400"
+                    [svgIcon]="'mdi:star'" matTooltip="រដ្ធបាល"></mat-icon>
+                }
+            </span>
+        </button>
+        <!-- role -->
+        <div class="text-lg font-medium flex items-center gap-2 min-w-0 flex-1">
+            <span class="truncate">{{ headerRoleLabel }}</span>
+            <!-- @if (headerRoleIcon) {
+            <mat-icon class="icon-size-6 text-amber-500" [svgIcon]="headerRoleIcon"></mat-icon>
+            } -->
+        </div>
+
+        <!-- Components -->
+        <div class="h-12 ml-auto flex items-center space-x-0.5 sm:space-x-2 shrink-0">
+
+            <notifications badgeClass="bg-red-600"></notifications>
+            <user></user>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="min-w-0"
+        [ngClass]="isPersonalWorkspace ? 'flex-1 min-h-0 overflow-hidden pb-[var(--layout-bottom-reserved,0px)] lg:pb-0' : 'flex-grow pb-[var(--layout-bottom-reserved,0px)] lg:pb-0'">
+        @if (true) {
+        <router-outlet></router-outlet>
+        }
+    </div>
+
+    <!-- Mobile bottom nav -->
+    <mobile-bottom-nav [navigations]="navigations" [showMore]="!isPersonalWorkspace"
+        [hidden]="chrome.hidden()"></mobile-bottom-nav>
+</div>

@@ -1,0 +1,78 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+:host ::ng-deep {
+
+    /* ── Checkbox custom styling ── */
+    .mat-mdc-checkbox {
+        height: auto !important;
+        display: inline-flex !important;
+        margin-right: -10px !important;
+        /* Align background box with right edge */
+
+        .mat-mdc-checkbox-touch-target,
+        .mdc-checkbox__native-control {
+            width: 40px !important;
+            height: 40px !important;
+        }
+
+        .mdc-checkbox__background {
+            width: 20px !important;
+            height: 20px !important;
+            border-radius: 4px !important;
+        }
+
+        .mdc-checkbox__native-control:enabled:not(:checked)~.mdc-checkbox__background {
+            border: 2px solid #a1a1aa !important;
+            background-color: transparent !important;
+        }
+
+        .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background {
+            background-color: #94a3b8 !important;
+            border: 2px solid #94a3b8 !important;
+        }
+
+        .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__checkmark {
+            stroke: #ffffff !important;
+            stroke-width: 3px !important;
+        }
+
+
+    }
+
+    /* ── Slider custom styling ── */
+    .mat-mdc-slider {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        width: 100% !important;
+
+        /* Slider active track (left of thumb) */
+        .mdc-slider__track--active_segment {
+            border-color: var(--helper-primary) !important;
+        }
+
+        /* Slider inactive track (right of thumb) */
+        .mdc-slider__track--inactive_segment {
+            background-color: #334155 !important;
+            opacity: 0.8 !important;
+        }
+
+        /* Slider thumb/handle */
+        .mdc-slider__thumb-knob {
+            background-color: #ffffff !important;
+            border: 2px solid var(--helper-primary) !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Hide the default focus ring and ripple background */
+        .mdc-slider__thumb::before {
+            display: none !important;
+        }
+    }
+
+    .spinner-white circle {
+        stroke: #ffffff !important;
+    }
+}

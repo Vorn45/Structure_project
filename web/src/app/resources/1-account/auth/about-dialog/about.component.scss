@@ -1,0 +1,6 @@
+::ng-deep .mat-dialog-container {
+  padding: 0 !important;
+  height: 90vh; // or 100vh if you want full screen
+  display: flex;
+  flex-direction: column;
+}

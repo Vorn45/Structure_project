@@ -1,0 +1,102 @@
+<div
+    class="w-full flex justify-between items-start py-2 cursor-pointer relative"
+    (click)="!isEditing ? onToggleEdit() : openDatepicker()"
+>
+    <div class="w-full flex items-start gap-2 pl-4 group">
+        <!-- Icon -->
+        <div
+            class="min-w-10 h-10 flex items-center justify-center group-hover:bg-primary rounded-full"
+            [ngClass]="isEditing ? 'bg-primary-100' : 'bg-[#f3f4f5]'"
+        >
+            <mat-icon
+                [svgIcon]="icon"
+                class="icon-size-6 group-hover:text-white"
+                [ngClass]="isEditing ? 'text-primary' : 'text-slate-500'"
+            >
+            </mat-icon>
+        </div>
+
+        <!-- Label + Value/Input -->
+        <div class="w-full flex flex-col items-start justify-center">
+            <!-- Label Text -->
+            <span class="text-sm leading-4 text-slate-500 group-hover:text-slate-900">
+                {{ label }}
+                @if (required) {
+                    <span class="text-sm leading-4 text-warn-500">*</span>
+                }
+            </span>
+
+            <!-- View Mode -->
+            <span
+                *ngIf="!isEditing"
+                class="w-full text-lg leading-6 group-hover:text-primary group-hover:font-medium"
+                [ngClass]="formControl?.value ? 'text-slate-900' : 'text-[#94A3B8]'"
+            >
+                {{
+                    formControl?.value ? formatDate(formControl?.value, current_lang) : placeholder
+                }}
+            </span>
+
+            <!-- Edit Mode - Just show the value -->
+            <div *ngIf="isEditing" class="flex items-center gap-1">
+                <span
+                    class="text-lg leading-6 group-hover:text-primary"
+                    [ngClass]="formControl?.value ? 'text-slate-900' : 'text-[#94A3B8]'"
+                >
+                    {{
+                        formControl?.value
+                            ? formatDate(formControl?.value, current_lang)
+                            : activePlaceholder
+                    }}
+                </span>
+
+                <mat-icon
+                    svgIcon="mdi:calendar"
+                    class="icon-size-5 group-hover:text-primary"
+                ></mat-icon>
+
+                <!-- Hidden datepicker -->
+                <mat-form-field
+                    appearance="outline"
+                    style="opacity: 0; position: absolute; pointer-events: none"
+                >
+                    <input
+                        matInput
+                        [matDatepicker]="picker"
+                        [formControl]="formControl"
+                        (dateChange)="onDateSelected()"
+                        placeholder="Select date"
+                    />
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker
+                        #picker
+                        startView="month"
+                        (monthSelected)="picker.open()"
+                        panelClass="custom-datepicker-panel"
+                    >
+                    </mat-datepicker>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div
+            *ngIf="!isEditing"
+            class="min-w-10 h-10 flex items-center justify-center mr-2 opacity-0 group-hover:opacity-100"
+        >
+            <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-6"></mat-icon>
+        </div>
+    </div>
+
+    <!-- Close/Exit Edit Icon -->
+    <div
+        *ngIf="isEditing"
+        class="absolute top-1 right-1 min-w-12 h-12 flex items-center justify-center rounded-full cursor-pointer group"
+        (click)="onToggleEdit(); $event.stopPropagation()"
+    >
+        <div
+            class="min-w-10 h-10 flex items-center justify-center rounded-full group-hover:bg-warn-100"
+        >
+            <mat-icon svgIcon="mdi:close" class="icon-size-6 group-hover:text-warn"></mat-icon>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+# vars file
+  
+# Docker
+tmp_file: docker-compose.yml
+container_name: nextask_web_prod
+publish_port: 2511
+container_port: 80
+
+API_BASE_URL  : https://app-api.nextask.digital/api
+FILE_BASE_URL : https://file-v4-api.uat.camcyber.com
+SOCKET_URL    : https://app-api.nextask.digital
+VERSION       : 1.0.0
+
+

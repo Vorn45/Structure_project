@@ -1,0 +1,69 @@
+<div class="rp-otp-card">
+
+    <!-- Back + Logo + Language -->
+    <div class="rp-otp-card__head">
+        <button type="button" class="rp-otp-card__back" (click)="closeDialog()" aria-label="Back">
+            <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
+        </button>
+        <img src="/images/logo/NexTask.png" alt="NexTask" />
+        <languages></languages>
+    </div>
+
+    <!-- Icon -->
+    <div class="rp-otp-icon">
+        <mat-icon svgIcon="mdi:email"></mat-icon>
+    </div>
+
+    <!-- Title + destination -->
+    <h1 class="rp-otp-title">{{ 'Auth.Common.Email' | transloco }}</h1>
+    <p class="rp-otp-desc">{{ 'Auth.Common.CodeSentToEmail' | transloco }}</p>
+    <p class="rp-otp-email">{{ email }}</p>
+
+    <!-- Code -->
+    <div class="rp-otp-inputs">
+        <input class="rp-otp-input" #input1 [(ngModel)]="numStr1" (keydown)="keyDownHandler1($event); onOtpKeydown($event)" (input)="onOtpInput(1, $event)" (paste)="onPaste($event)" [maxlength]="1" inputmode="numeric" />
+        <input class="rp-otp-input" #input2 [(ngModel)]="numStr2" (keydown)="keyDownHandler2($event); onOtpKeydown($event)" (input)="onOtpInput(2, $event)" (paste)="onPaste($event)" [maxlength]="1" inputmode="numeric" />
+        <input class="rp-otp-input" #input3 [(ngModel)]="numStr3" (keydown)="keyDownHandler3($event); onOtpKeydown($event)" (input)="onOtpInput(3, $event)" (paste)="onPaste($event)" [maxlength]="1" inputmode="numeric" />
+        <input class="rp-otp-input" #input4 [(ngModel)]="numStr4" (keydown)="keyDownHandler4($event); onOtpKeydown($event)" (input)="onOtpInput(4, $event)" (paste)="onPaste($event)" [maxlength]="1" inputmode="numeric" />
+        <input class="rp-otp-input" #input5 [(ngModel)]="numStr5" (keydown)="keyDownHandler5($event); onOtpKeydown($event)" (input)="onOtpInput(5, $event)" (paste)="onPaste($event)" [maxlength]="1" inputmode="numeric" />
+        <input class="rp-otp-input" #input6 [(ngModel)]="numStr6" (keydown)="keyDownHandler6($event); onOtpKeydown($event)" (input)="onOtpInput(6, $event)" (paste)="onPaste($event)" [maxlength]="1" inputmode="numeric" />
+    </div>
+
+    <!-- Error after the code expired or was rejected -->
+    <p *ngIf="otpFailed" class="rp-otp-error">
+        {{ 'Auth.Common.OtpExpiredOrInvalid' | transloco }}
+    </p>
+
+    <!-- Resend, with the countdown until it unlocks -->
+    <div class="rp-otp-resend">
+        <a [class.is-disabled]="!reSendOtp && !otpFailed" (click)="(reSendOtp || otpFailed) && resendOtp()">
+            {{ 'Auth.Common.ResendOtp' | transloco }}<ng-container *ngIf="remainingTime > 0"> ({{ remainingTime }})</ng-container>
+        </a>
+    </div>
+
+    <!-- Submit -->
+    <button class="rp-otp-submit" mat-flat-button [color]="'primary'"
+            [disabled]="!canSubmit || isLoading || otpFailed" (click)="verify()">
+        <span *ngIf="!isLoading">{{ 'Auth.Common.Verify' | transloco }}</span>
+        <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+
+    <!-- Bottom links -->
+    <div class="rp-otp-links">
+        <a href="mailto:admin@geekdigital.com">
+            <mat-icon class="icon-size-5" svgIcon="mdi:help-circle-outline"></mat-icon>
+            <span>{{ 'Auth.Common.NeedHelp' | transloco }}</span>
+        </a>
+        <span></span>
+        <a href="tel:0964172183">
+            <mat-icon class="icon-size-5" svgIcon="mdi:phone-outline"></mat-icon>
+            <span>{{ 'Auth.Common.Contact' | transloco }}</span>
+        </a>
+        <span></span>
+        <a (click)="openAboutDialog()">
+            <mat-icon class="icon-size-5" svgIcon="mdi:information-outline"></mat-icon>
+            <span>{{ 'Auth.Common.About' | transloco }}</span>
+        </a>
+    </div>
+
+</div>

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Builds
+dist/
+*/dist/
+.angular/
+*/.angular/
+out-tsc/
+*/out-tsc/
+
+# Environment files
+.env
+api/.env
+web/.env
+!.env.example
+!api/.env.example
+!web/.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS & IDE
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Temp
+*.ps1

@@ -1,0 +1,228 @@
+// Reset-password OTP step
+// Rendered inside a MatDialog, but wearing the same card as sign-in and
+// reset-password — surface, header (logo + language switch), submit button and
+// bottom link bar all come from _auth-card.scss.
+@use '../../auth-card' as auth;
+
+.rp-otp-card {
+    @include auth.auth-card;
+}
+
+.rp-otp-card__head {
+    @include auth.auth-card-head;
+}
+
+// Pinned so it does not push the logo off the optical centre of the header.
+.rp-otp-card__back {
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: #4b5563;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #f3f4f6;
+    }
+
+    mat-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 30px;
+        color: inherit;
+    }
+}
+
+.rp-otp-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin: 6px auto 18px;
+    border-radius: 50%;
+    background: #f3f4f5;
+
+    mat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 40px;
+        color: #1f2937;
+    }
+}
+
+.rp-otp-title {
+    margin: 0;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: #0f172a;
+}
+
+.rp-otp-desc {
+    margin: 6px 0 0;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #6b7280;
+}
+
+.rp-otp-email {
+    margin: 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.rp-otp-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 22px 0 0;
+}
+
+.rp-otp-input {
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1c2978;
+    background-color: #fbfcfd;
+    border: 2px solid #e3e6ec;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+        border-color: #1c2978;
+        box-shadow: 0 0 0 3px rgba(28, 41, 120, 0.1);
+    }
+
+    &:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+    }
+}
+
+.rp-otp-error {
+    margin: 10px 0 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #ef4444;
+}
+
+.rp-otp-resend {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0 14px;
+
+    a {
+        font-size: 13px;
+        color: #1c2978;
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+            opacity: 0.85;
+        }
+
+        // Locked until the countdown runs out.
+        &.is-disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+            pointer-events: none;
+            text-decoration: none;
+        }
+    }
+}
+
+.rp-otp-submit.mat-mdc-button-base {
+    @include auth.auth-submit;
+}
+
+.rp-otp-links {
+    @include auth.auth-links;
+}
+
+// Dark mode — card-specific pieces only; the shared chrome brings its own.
+// ViewEncapsulation.None, so scope through the <body> scheme class.
+body.dark {
+    .rp-otp-card__back {
+        color: #cbd5e1;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+    }
+
+    .rp-otp-icon {
+        background: rgba(255, 255, 255, 0.08);
+
+        mat-icon {
+            color: #e2e8f0;
+        }
+    }
+
+    .rp-otp-title {
+        color: #f1f5f9;
+    }
+
+    .rp-otp-desc {
+        color: #94a3b8;
+    }
+
+    .rp-otp-email {
+        color: #cbd5e1;
+    }
+
+    .rp-otp-input {
+        background-color: #111827;
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #f1f5f9;
+
+        &:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        &:disabled {
+            background-color: #0f172a;
+            color: #64748b;
+        }
+    }
+
+    .rp-otp-resend a {
+        color: #93c5fd;
+
+        &.is-disabled {
+            color: #64748b;
+        }
+    }
+}
+
+@media (max-width: 640px) {
+    .rp-otp-title {
+        font-size: 20px;
+    }
+
+    .rp-otp-inputs {
+        gap: 8px;
+    }
+
+    .rp-otp-input {
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+    }
+}

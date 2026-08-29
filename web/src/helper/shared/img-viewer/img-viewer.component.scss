@@ -1,0 +1,56 @@
+.container-section {
+    position: relative;
+    width: 100%;
+    height: 100dvh !important;
+    overflow: hidden;
+
+    .header-img-view {
+        width: 100%;
+        position: absolute !important;
+        top: 0;
+        z-index: 20 !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .body-img-view {
+        position: relative;
+        overflow: hidden; // panning replaces native scroll; hidden avoids scrollbar fighting with drag
+        width: 100dvw;
+        height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: none; // let us fully own wheel/touch gestures for zoom & pan
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+
+        .viewer-img {
+            max-width: none;
+            max-height: none;
+            transition: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+
+        &.grab {
+            cursor: grab;
+        }
+
+        &.grabbing {
+            cursor: grabbing;
+        }
+    }
+}
+
+.bg-custom {
+    background-color: rgba(0, 0, 0, 0.72);
+}
+
+.bg-custom-gray {
+    background-color: rgba(12, 12, 12, 0.7);
+}

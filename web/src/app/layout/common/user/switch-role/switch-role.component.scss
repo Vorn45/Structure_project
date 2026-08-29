@@ -1,0 +1,11 @@
+// Everything else on this dialog is Tailwind utilities in the template.
+// This rule stays here because ::-webkit-scrollbar has no stock Tailwind utility.
+.user-switch-role-body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.mat-mdc-dialog-content.mdc-dialog__content {
+    padding: 0 !important;
+    max-height: 100vh !important;
+}

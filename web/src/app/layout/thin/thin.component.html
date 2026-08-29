@@ -1,0 +1,48 @@
+<helper-loading-bar></helper-loading-bar>
+
+
+
+<helper-navigation class="dark z-999 min-w-0 print:hidden bg-primary dark:bg-dialog" [appearance]="'thin'"
+    [mode]="isScreenSmall ? 'over' : 'side'" [name]="'mainNavigation'" [navigations]="navigations"
+    [opened]="!isScreenSmall">
+
+    <ng-container helperNavigationContentHeader>
+        <div class="flex flex-col items-center justify-center py-3">
+
+            <div class="relative">
+                <img class="h-8 w-8 object-contain rounded-full"
+                    [src]="isSuperAdmin ? 'images/logo/plan_logo.png' : (orgLogo || 'images/logo/plan_logo.png')"
+                    alt="img" />
+
+                @if (isOrgAdmin) {
+                <mat-icon
+                    class="icon-size-3 absolute -bottom-0.5 -right-0.5 rounded-full bg-white text-amber-500 shadow ring-1 ring-white dark:bg-gray-800 dark:ring-gray-800 dark:text-amber-400"
+                    [svgIcon]="'mdi:star'" matTooltip="រដ្ធបាល"></mat-icon>
+                }
+            </div>
+
+        </div>
+    </ng-container>
+    <ng-container helperNavigationContentFooter>
+        <div class="flex flex-col items-center gap-1 py-2 text-white">
+
+            <notifications badgeClass="bg-red-600" panelHeightClass="sm:h-[98dvh] sm:max-h-[98dvh]" [panelOffsetX]="60"
+                [panelOffsetY]="8"></notifications>
+            <user [menuYPosition]="'above'" [menuXPosition]="'after'"></user>
+        </div>
+    </ng-container>
+</helper-navigation>
+
+<!-- This shell has no header row, so only the bottom nav's reserve is released on hide. -->
+<div class="flex w-full min-w-0 min-h-screen flex-col bg-white dark:bg-[#111827] lg:bg-transparent"
+    style="--layout-header-height: 0px" [style.--layout-bottom-reserved]="chrome.hidden() ? '0px' : null">
+    <!-- Content -->
+    <div class="flex-grow min-w-0 pb-[var(--layout-bottom-reserved,0px)] lg:pb-0">
+        @if (true) {
+        <router-outlet></router-outlet>
+        }
+    </div>
+
+    <!-- Mobile bottom nav -->
+    <mobile-bottom-nav [navigations]="navigations" [forceMore]="true" [hidden]="chrome.hidden()"></mobile-bottom-nav>
+</div>

@@ -1,0 +1,27 @@
+.red-snackbar {
+    background: #B9110D !important;
+    color: white !important;
+}
+
+.green-snackbar {
+    background-color: #098609 !important;
+    color: white !important;
+}
+
+.mat-mdc-snack-bar-container {
+    border-radius: 0.7rem !important;
+
+    .mdc-snackbar__surface {
+        background-color: transparent !important;
+        border-radius: 0.7rem !important;
+    }
+
+    .mat-mdc-snack-bar-label.mdc-snackbar__label {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        font-size: 1rem !important;
+    }
+}

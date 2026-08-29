@@ -1,0 +1,106 @@
+<div mat-dialog-title class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900">
+    <span class="w-full text-center text-2xl font-medium font-kantumruy text-slate-500 dark:text-slate-400">{{ 'User.Update' | transloco }}</span>
+</div>
+
+<shared-side-dialog-close-button [isReturn]="true"></shared-side-dialog-close-button>
+
+<mat-dialog-content class="bg-white dark:bg-slate-900 font-kantumruy">
+    <form [formGroup]="form" class="md-form-field-appearance-outline flex flex-col">
+        <div class="flex justify-center pb-4">
+            <div
+                class="relative w-[120px] h-[120px] rounded-full overflow-visible border border-gray-300 dark:border-white/10 flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                (click)="selectAvatarFile()">
+                <img class="w-full h-full object-cover rounded-full bg-slate-100 dark:bg-white/10 transition duration-300"
+                    [class.opacity-40]="isLoading || isAvatarUpdating"
+                    [src]="src" alt="User Avatar">
+
+                <div
+                    *ngIf="isLoading || isAvatarUpdating"
+                    class="absolute inset-0 z-10 flex items-center justify-center rounded-full bg-gray-500/50 backdrop-blur-[1px]"
+                >
+                    <mat-progress-spinner
+                        diameter="34"
+                        mode="indeterminate"
+                    ></mat-progress-spinner>
+                </div>
+
+                <div *ngIf="!isLoading && !isAvatarUpdating" class="absolute bottom-1 right-1 flex items-center justify-center border rounded-full border-primary p-1 bg-slate-100 dark:bg-slate-800">
+                    <mat-icon class="icon-size-5 text-primary" svgIcon="mdi:camera"></mat-icon>
+                </div>
+            </div>
+        </div>
+
+        <span class="text-slate-500 dark:text-slate-400 text-xl h-14 flex items-center font-medium">
+            {{ 'Common.Personal' | transloco }}
+        </span>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'Common.Name_KH' | transloco }}</mat-label>
+            <input matInput formControlName="kh_name">
+            <mat-icon
+                matPrefix
+                class="icon-size-6"
+                svgIcon="mdi:rename"
+                [ngClass]="form.get('kh_name')?.invalid && form.get('kh_name')?.touched ? 'text-red-500' : ''">
+            </mat-icon>
+            <form-validation-error [control]="form.get('kh_name')" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'Common.Name_EN' | transloco }}</mat-label>
+            <input matInput formControlName="en_name" (input)="onEnInput($event)">
+            <mat-icon
+                matPrefix
+                class="icon-size-6"
+                svgIcon="mdi:rename"
+                [ngClass]="form.get('en_name')?.invalid && form.get('en_name')?.touched ? 'text-red-500' : ''">
+            </mat-icon>
+            <form-validation-error [control]="form.get('en_name')" patternType="en" />
+        </mat-form-field>
+
+        <!-- <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Telegram Username</mat-label>
+            <input matInput formControlName="telegram_username">
+            <mat-icon
+                matPrefix
+                class="icon-size-6"
+                svgIcon="mdi:at"
+                [ngClass]="form.get('telegram_username')?.invalid && form.get('telegram_username')?.touched ? 'text-red-500' : ''">
+            </mat-icon>
+            <form-validation-error [control]="form.get('telegram_username')" />
+        </mat-form-field> -->
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'Common.Phone' | transloco }}</mat-label>
+            <input matInput formControlName="phone">
+            <mat-icon
+                matPrefix
+                class="icon-size-6"
+                svgIcon="mdi:phone"
+                [ngClass]="form.get('phone')?.invalid && form.get('phone')?.touched ? 'text-red-500' : ''">
+            </mat-icon>
+            <form-validation-error [control]="form.get('phone')" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'Common.Email' | transloco }}</mat-label>
+            <input matInput formControlName="email" type="email">
+            <mat-icon
+                matPrefix
+                class="icon-size-6"
+                svgIcon="mdi:email"
+                [ngClass]="form.get('email')?.invalid && form.get('email')?.touched ? 'text-red-500' : ''">
+            </mat-icon>
+            <form-validation-error [control]="form.get('email')" />
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex items-center justify-end border-t border-slate-200 dark:border-white/10">
+    <button class="bg-blue-900" mat-flat-button (click)="submit()" [disabled]="form.invalid || isLoading">
+        <span *ngIf="!isLoading" class="text-white">
+            {{ 'Common.Update' | transloco }}
+        </span>
+        <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+    </button>
+</mat-dialog-actions>
