@@ -82,10 +82,61 @@ export class UserRoleService {
         const roles = await this.getRoles(userId);
         if (roles.length) return roles;
 
-        const role = await this.roleRepo.findOne({ where: { slug: 'user' } });
-        if (!role) return roles;
+        let role = await this.roleRepo.findOne({ where: { slug: 'superadmin' } });
+        if (!role) {
+            const defaultRoles = [
+                {
+                    name_kh: 'អភិបាលប្រព័ន្ធ',
+                    name_en: 'Super Administrator',
+                    slug: 'superadmin',
+                    icon: 'crown',
+                    color: 'purple',
+                },
+                {
+                    name_kh: 'អ្នកគ្រប់គ្រងអង្គភាព',
+                    name_en: 'Organization Admin',
+                    slug: 'org_admin',
+                    icon: 'building',
+                    color: 'green',
+                },
+                {
+                    name_kh: 'អ្នកប្រើប្រាស់',
+                    name_en: 'User',
+                    slug: 'user',
+                    icon: 'user',
+                    color: 'blue',
+                },
+                {
+                    name_kh: 'កន្លែងធ្វើការផ្ទាល់ខ្លួន',
+                    name_en: 'Personal Workspace',
+                    slug: 'personal_workspace',
+                    icon: 'user-circle',
+                    color: 'teal',
+                },
+            ];
+            for (const r of defaultRoles) {
+                const found = await this.roleRepo.findOne({
+                    where: { slug: r.slug },
+                });
+                if (!found) {
+                    await this.roleRepo.save(this.roleRepo.create(r));
+                }
+            }
+            role = await this.roleRepo.findOne({
+                where: { slug: 'superadmin' },
+            });
+        }
+
+        const fallbackRole =
+            role || (await this.roleRepo.findOne({ where: { slug: 'user' } }));
+        if (!fallbackRole) return roles;
+
         const existing = await this.userRoleRepo.findOne({
-            where: { user_id: userId, role_id: role.id, organization_id: IsNull() },
+            where: {
+                user_id: userId,
+                role_id: fallbackRole.id,
+                organization_id: IsNull(),
+            },
             withDeleted: true,
         });
 
@@ -96,7 +147,7 @@ export class UserRoleService {
         } else {
             await this.userRoleRepo.save({
                 user_id: userId,
-                role_id: role.id,
+                role_id: fallbackRole.id,
                 organization_id: null,
                 is_default: true,
             });
