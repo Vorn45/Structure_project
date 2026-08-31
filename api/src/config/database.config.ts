@@ -27,8 +27,8 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     password: appConfig.DATABASE.PASSWORD,
     database: appConfig.DATABASE.NAME,
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-    synchronize: appConfig.DATABASE.SYNCHRONIZE, // Disable in production
-    // synchronize: false
+    synchronize: true,
+    autoLoadEntities: true,
     extra: {
         // JIT compilation only pays off on long-running analytical queries.
         // This app's queries are OLTP-style (many small, join-heavy lookups)
