@@ -126,12 +126,20 @@ export const appConfig = {
         FROM: process.env.SES_FROM_EMAIL?.trim() || '',
     },
     DATABASE: {
+        URL: process.env.DATABASE_URL || process.env.DB_URL || '',
         HOST: process.env.DB_HOST,
         PORT: toNumber(process.env.DB_PORT, 5432),
         USERNAME: process.env.DB_USERNAME,
         PASSWORD: process.env.DB_PASSWORD,
         NAME: process.env.DB_NAME ?? process.env.DB_DATABASE,
         SYNCHRONIZE: (process.env.DB_SYNCHRONIZE ?? 'true') === 'true',
+        SSL:
+            (process.env.DB_SSL ?? 'false') === 'true' ||
+            Boolean(
+                (process.env.DATABASE_URL || process.env.DB_URL || '').includes(
+                    'render.com',
+                ),
+            ),
     },
     REDIS: {
         HOST: process.env.REDIS_HOST ?? 'localhost',

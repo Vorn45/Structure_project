@@ -1,6 +1,6 @@
 import * as readline from 'readline';
 import { DataSource } from 'typeorm';
-import { typeOrmConfig } from 'src/config/database.config';
+import { typeOrmConfig, ENTITY_SCHEMAS } from 'src/config/database.config';
 import { DataSourceOptions } from 'typeorm';
 import { PermissionSeeder } from './seed/user/permission.seed';
 import { RolePermissionSeeder } from './seed/user/role-permission.seed';
@@ -10,8 +10,6 @@ import { UserSessionLogSeeder } from './seed/user/user-session-log.seed';
 import { UserSessionSeeder } from './seed/user/user-session.seed';
 import { UserSeeder } from './seed/user/user.seed';
 import { UserRoleSeeder } from './seed/user/user_role.seed';
-
-const ENTITY_SCHEMAS = ['user'];
 
 function confirm(question: string): Promise<boolean> {
     if (process.argv.includes('--yes') || process.argv.includes('-y')) {

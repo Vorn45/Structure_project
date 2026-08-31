@@ -1,11 +1,9 @@
 import * as readline from 'readline';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { typeOrmConfig } from 'src/config/database.config';
+import { typeOrmConfig, ENTITY_SCHEMAS } from 'src/config/database.config';
 import { appConfig } from 'src/app.config';
 
 const ALLOWED_ENVS = ['development', 'local', 'dev'];
-
-const ENTITY_SCHEMAS = ['user'];
 
 function ask(question: string): Promise<string> {
     const rl = readline.createInterface({

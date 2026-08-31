@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { appConfig } from 'src/app.config';
 
-const ENTITY_SCHEMAS = [
+export const ENTITY_SCHEMAS = [
     'activity',
     'application',
     'audit',
@@ -21,11 +21,23 @@ const ENTITY_SCHEMAS = [
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
     type: 'postgres',
-    host: appConfig.DATABASE.HOST,
-    port: appConfig.DATABASE.PORT,
-    username: appConfig.DATABASE.USERNAME,
-    password: appConfig.DATABASE.PASSWORD,
-    database: appConfig.DATABASE.NAME,
+    ...(appConfig.DATABASE.URL
+        ? {
+              url: appConfig.DATABASE.URL,
+              ssl: appConfig.DATABASE.SSL
+                  ? { rejectUnauthorized: false }
+                  : false,
+          }
+        : {
+              host: appConfig.DATABASE.HOST,
+              port: appConfig.DATABASE.PORT,
+              username: appConfig.DATABASE.USERNAME,
+              password: appConfig.DATABASE.PASSWORD,
+              database: appConfig.DATABASE.NAME,
+              ...(appConfig.DATABASE.SSL
+                  ? { ssl: { rejectUnauthorized: false } }
+                  : {}),
+          }),
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
     synchronize: true,
     autoLoadEntities: true,

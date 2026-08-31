@@ -24,6 +24,7 @@
     "migration:run": "echo \"Migrations are disabled. Use npm run seeder.\"",
     "migration:revert": "echo \"Migrations are disabled. Use npm run seeder.\"",
     "migrate": "ts-node -r tsconfig-paths/register src/database/migrate.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/database/seeder.ts",
     "seeder": "ts-node -r tsconfig-paths/register src/database/seeder.ts",
     "backfill:project-file-folder-ids": "ts-node -r tsconfig-paths/register src/database/backfill-project-file-folder-ids.ts",
     "backfill:organization-catalog-defaults": "ts-node -r tsconfig-paths/register src/database/backfill-organization-catalog-defaults.ts",
