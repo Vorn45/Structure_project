@@ -19,6 +19,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Notify Telegram Push Event
+        if: github.event_name == 'push'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: html
+          disable_web_page_preview: true
+          message: |
+            <b>${{ github.actor }}</b> pushed to branch <a href="${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}">${{ github.ref_name }}</a> of ${{ github.event.repository.name }}
+            📦 1 commit(s) — <a href="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}">Compare changes</a>
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -48,15 +60,9 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           format: html
+          disable_web_page_preview: true
           message: |
-            <b>✅ CI/CD Build Succeeded!</b>
-
-            <b>Repository:</b> <code>${{ github.repository }}</code>
-            <b>Branch:</b> <code>${{ github.ref_name }}</code>
-            <b>Author:</b> ${{ github.actor }}
-            <b>Workflow:</b> ${{ github.workflow }}
-
-            <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Run Details</a>
+            ${{ github.event.repository.name }}: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>passed</b>
 
       - name: Notify Telegram on Failure
         if: failure()
@@ -65,11 +71,6 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           format: html
+          disable_web_page_preview: true
           message: |
-            <b>❌ CI/CD Build Failed!</b>
-
-            <b>Repository:</b> <code>${{ github.repository }}</code>
-            <b>Branch:</b> <code>${{ github.ref_name }}</code>
-            <b>Author:</b> ${{ github.actor }}
-
-            <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">Check Error Logs</a>
+            ${{ github.event.repository.name }}: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>failed</b>
