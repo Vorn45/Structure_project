@@ -40,3 +40,9 @@ npm start
 - **Passkeys (WebAuthn / FIDO2)**: Hardware security keys & biometric login.
 - **Local Screen Lock**: 6-digit passcode lock guard.
 - **Session & Device Management**: Active token tracking and session revocation.
+
+---
+
+## 🤖 CI/CD & Automation
+- **GitHub Actions**: Automated API & Web build validation on push and pull requests.
+- **Telegram Bot Notifications**: Real-time push events and pipeline pass/fail alerts.
