@@ -1,0 +1,77 @@
+name: CI/CD Pipeline & Notification
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - dev
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install & Build API
+        run: |
+          cd api
+          npm ci
+          npm run build
+
+      - name: Install & Build Web
+        run: |
+          cd web
+          npm ci
+          npm run build
+        env:
+          API_BASE_URL: "https://structure-project.onrender.com/api"
+          FILE_BASE_URL: "https://file-v4-api.uat.camcyber.com"
+          SOCKET_URL: "https://structure-project.onrender.com"
+          GOOGLE_CLIENT_ID: "54356070191-kacqa35o9tefnughhdgi5b6jkhshso2c.apps.googleusercontent.com"
+
+      - name: Notify Telegram on Success
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: markdown
+          message: |
+            ✅ *CI/CD Build Succeeded!*
+            
+            *Repository:* `${{ github.repository }}`
+            *Branch:* `${{ github.ref_name }}`
+            *Commit:* `${{ github.event.head_commit.message }}`
+            *Author:* `${{ github.actor }}`
+            *Workflow:* `${{ github.workflow }}`
+            
+            [View Run Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+      - name: Notify Telegram on Failure
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: markdown
+          message: |
+            ❌ *CI/CD Build Failed!*
+            
+            *Repository:* `${{ github.repository }}`
+            *Branch:* `${{ github.ref_name }}`
+            *Commit:* `${{ github.event.head_commit.message }}`
+            *Author:* `${{ github.actor }}`
+            
+            [Check Error Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
