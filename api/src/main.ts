@@ -1,4 +1,4 @@
-﻿import { NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger, ValidationPipe } from '@nestjs/common';
@@ -24,11 +24,17 @@ async function bootstrap() {
         app.set('trust proxy', trustProxy);
     }
 
-    // Enable CORS for Next.js frontend
+    // Enable CORS for frontend
     app.enableCors({
-        origin: [...appConfig.CORS.ORIGINS],
-        methods: 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS',
+        origin: [
+            'https://structure-project-ten.vercel.app',
+            'http://localhost:4200',
+            'http://localhost:4002',
+            ...appConfig.CORS.ORIGINS,
+        ],
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
+        allowedHeaders: 'Content-Type, Accept, Authorization',
     });
 
     app.useBodyParser('json', { limit: '1024mb' });

@@ -240,6 +240,7 @@ export const appConfig = {
             'http://localhost:3000',
             'http://localhost:4444',
             'https://app.nextask.digital',
+            'https://structure-project-ten.vercel.app',
         ],
     },
 } as const;
