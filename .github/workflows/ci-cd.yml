@@ -47,17 +47,16 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
+          format: html
           message: |
-            ✅ *CI/CD Build Succeeded!*
-            
-            *Repository:* `${{ github.repository }}`
-            *Branch:* `${{ github.ref_name }}`
-            *Commit:* `${{ github.event.head_commit.message }}`
-            *Author:* `${{ github.actor }}`
-            *Workflow:* `${{ github.workflow }}`
-            
-            [View Run Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            <b>✅ CI/CD Build Succeeded!</b>
+
+            <b>Repository:</b> <code>${{ github.repository }}</code>
+            <b>Branch:</b> <code>${{ github.ref_name }}</code>
+            <b>Author:</b> ${{ github.actor }}
+            <b>Workflow:</b> ${{ github.workflow }}
+
+            <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Run Details</a>
 
       - name: Notify Telegram on Failure
         if: failure()
@@ -65,13 +64,12 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
+          format: html
           message: |
-            ❌ *CI/CD Build Failed!*
-            
-            *Repository:* `${{ github.repository }}`
-            *Branch:* `${{ github.ref_name }}`
-            *Commit:* `${{ github.event.head_commit.message }}`
-            *Author:* `${{ github.actor }}`
-            
-            [Check Error Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            <b>❌ CI/CD Build Failed!</b>
+
+            <b>Repository:</b> <code>${{ github.repository }}</code>
+            <b>Branch:</b> <code>${{ github.ref_name }}</code>
+            <b>Author:</b> ${{ github.actor }}
+
+            <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">Check Error Logs</a>
