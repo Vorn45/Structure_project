@@ -28,6 +28,9 @@ jobs:
 
       - name: Build Web
         run: npm run build
+        env:
+          API_BASE_URL: "https://api.example.com"
+          FILE_BASE_URL: "https://files.example.com"
 
   api-check:
     runs-on: ubuntu-latest
