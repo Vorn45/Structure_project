@@ -10,26 +10,49 @@ on:
     branches:
       - main
       - master
+      - dev
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Record Start Time
+        id: start_time
+        run: echo "start_epoch=$(date +%s)" >> "$GITHUB_OUTPUT"
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # ----------------------------------------------------
+      # TOPIC 1: Push Event
+      # ----------------------------------------------------
       - name: Notify Telegram Push Event
         if: github.event_name == 'push'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message_thread_id: ${{ secrets.TELEGRAM_PUSH_THREAD_ID }}
           format: html
           disable_web_page_preview: true
           message: |
             <b>${{ github.actor }}</b> pushed to branch <a href="${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}">${{ github.ref_name }}</a> of ${{ github.event.repository.name }}
-            📦 1 commit(s) — <a href="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}">Compare changes</a>
+            📦 1 commit(s) — <a href="${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}">Compare changes</a>
+
+      # ----------------------------------------------------
+      # TOPIC 2: Pipeline Event (Started / Running)
+      # ----------------------------------------------------
+      - name: Notify Telegram Pipeline Running
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message_thread_id: ${{ secrets.TELEGRAM_PIPELINE_THREAD_ID }}
+          format: html
+          disable_web_page_preview: true
+          message: |
+            <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} <b>running</b> in 00:00
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -53,24 +76,43 @@ jobs:
           SOCKET_URL: "https://structure-project.onrender.com"
           GOOGLE_CLIENT_ID: "54356070191-kacqa35o9tefnughhdgi5b6jkhshso2c.apps.googleusercontent.com"
 
+      - name: Calculate Duration
+        if: always()
+        id: duration
+        run: |
+          end_epoch=$(date +%s)
+          start_epoch=${{ steps.start_time.outputs.start_epoch }}
+          diff=$((end_epoch - start_epoch))
+          mins=$(printf "%02d" $((diff / 60)))
+          secs=$(printf "%02d" $((diff % 60)))
+          echo "formatted=${mins}:${secs}" >> "$GITHUB_OUTPUT"
+
+      # ----------------------------------------------------
+      # TOPIC 2: Pipeline Event (Passed / Success)
+      # ----------------------------------------------------
       - name: Notify Telegram on Success
         if: success()
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message_thread_id: ${{ secrets.TELEGRAM_PIPELINE_THREAD_ID }}
           format: html
           disable_web_page_preview: true
           message: |
-            ${{ github.event.repository.name }}: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>passed</b>
+            <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>passed</b> in ${{ steps.duration.outputs.formatted }}
 
+      # ----------------------------------------------------
+      # TOPIC 2: Pipeline Event (Failed)
+      # ----------------------------------------------------
       - name: Notify Telegram on Failure
         if: failure()
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message_thread_id: ${{ secrets.TELEGRAM_PIPELINE_THREAD_ID }}
           format: html
           disable_web_page_preview: true
           message: |
-            ${{ github.event.repository.name }}: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>failed</b>
+            <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>failed</b> in ${{ steps.duration.outputs.formatted }}
