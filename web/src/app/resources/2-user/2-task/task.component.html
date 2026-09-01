@@ -1,0 +1,323 @@
+<div class="flex flex-col flex-auto min-w-0 bg-slate-50/50 dark:bg-slate-900/50 p-6 sm:p-8">
+    <!-- Header & Controls -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                My Tasks
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Manage, organize, and track your daily priorities and project tasks.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- View Mode Switcher -->
+            <div class="flex items-center bg-white dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700 shadow-sm">
+                <button
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+                    [ngClass]="viewMode() === 'list' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'"
+                    (click)="viewMode.set('list')"
+                >
+                    <mat-icon svgIcon="mdi:view-list" class="icon-size-4"></mat-icon>
+                    <span>List</span>
+                </button>
+                <button
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+                    [ngClass]="viewMode() === 'kanban' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'"
+                    (click)="viewMode.set('kanban')"
+                >
+                    <mat-icon svgIcon="mdi:view-column" class="icon-size-4"></mat-icon>
+                    <span>Kanban</span>
+                </button>
+            </div>
+
+            <!-- New Task Button -->
+            <button
+                mat-flat-button
+                color="primary"
+                class="rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                (click)="openCreateModal()"
+            >
+                <mat-icon svgIcon="mdi:plus"></mat-icon>
+                <span>New Task</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Tabs & Search Bar -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+        <!-- Status Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="activeStatus() === 'all' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+                (click)="setStatusFilter('all')"
+            >
+                All ({{ counts().all }})
+            </button>
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="activeStatus() === 'todo' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+                (click)="setStatusFilter('todo')"
+            >
+                Todo ({{ counts().todo }})
+            </button>
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="activeStatus() === 'in_progress' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+                (click)="setStatusFilter('in_progress')"
+            >
+                In Progress ({{ counts().in_progress }})
+            </button>
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="activeStatus() === 'in_review' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+                (click)="setStatusFilter('in_review')"
+            >
+                In Review ({{ counts().in_review }})
+            </button>
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="activeStatus() === 'done' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+                (click)="setStatusFilter('done')"
+            >
+                Done ({{ counts().done }})
+            </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative min-w-[240px]">
+            <input
+                type="text"
+                placeholder="Search tasks..."
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearchChange()"
+                class="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-900 dark:text-white"
+            />
+            <mat-icon svgIcon="mdi:magnify" class="icon-size-4 absolute left-3 top-2.5 text-slate-400"></mat-icon>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="loading()" class="flex justify-center items-center py-24">
+        <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+
+    <!-- Content: List View -->
+    <div *ngIf="!loading() && viewMode() === 'list'" class="space-y-3">
+        <div *ngIf="tasks().length === 0" class="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8">
+            <mat-icon svgIcon="mdi:clipboard-text-outline" class="icon-size-12 text-slate-300 dark:text-slate-600 mb-3"></mat-icon>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">No tasks found</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Try adjusting your filters or create a new task.</p>
+        </div>
+
+        <div
+            *ngFor="let task of tasks()"
+            class="group rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+            <div class="flex items-start gap-3 min-w-0">
+                <!-- Checkbox status toggle -->
+                <button
+                    class="w-5 h-5 rounded-md border mt-0.5 flex items-center justify-center transition-colors flex-shrink-0"
+                    [ngClass]="task.status === 'done' ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 dark:border-slate-600 hover:border-indigo-500'"
+                    (click)="updateTaskStatus(task, task.status === 'done' ? 'todo' : 'done')"
+                >
+                    <mat-icon *ngIf="task.status === 'done'" svgIcon="mdi:check" class="icon-size-3.5"></mat-icon>
+                </button>
+
+                <div class="min-w-0">
+                    <h3
+                        class="text-sm font-bold text-slate-900 dark:text-white truncate"
+                        [ngClass]="task.status === 'done' ? 'line-through text-slate-400 dark:text-slate-500' : ''"
+                    >
+                        {{ task.title }}
+                    </h3>
+                    <p *ngIf="task.description" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                        {{ task.description }}
+                    </p>
+
+                    <div class="flex items-center flex-wrap gap-2 mt-2">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-md" [ngClass]="getPriorityClass(task.priority)">
+                            {{ task.priority | uppercase }}
+                        </span>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-md border" [ngClass]="getStatusClass(task.status)">
+                            {{ task.status | titlecase }}
+                        </span>
+                        <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                            {{ task.project_name }}
+                        </span>
+                        <span *ngIf="task.due_date" class="text-xs text-slate-500 flex items-center gap-1">
+                            <mat-icon svgIcon="mdi:calendar-outline" class="icon-size-3.5"></mat-icon>
+                            Due {{ task.due_date | date:'mediumDate' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Menu -->
+            <div class="flex items-center gap-2 self-end sm:self-center">
+                <button
+                    mat-icon-button
+                    [matMenuTriggerFor]="statusMenu"
+                    matTooltip="Change Status"
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                    <mat-icon svgIcon="mdi:dots-vertical"></mat-icon>
+                </button>
+
+                <mat-menu #statusMenu="matMenu">
+                    <button mat-menu-item (click)="updateTaskStatus(task, 'todo')">
+                        <mat-icon svgIcon="mdi:checkbox-blank-outline"></mat-icon>
+                        <span>Mark as Todo</span>
+                    </button>
+                    <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')">
+                        <mat-icon svgIcon="mdi:progress-clock"></mat-icon>
+                        <span>Mark In Progress</span>
+                    </button>
+                    <button mat-menu-item (click)="updateTaskStatus(task, 'in_review')">
+                        <mat-icon svgIcon="mdi:eye-outline"></mat-icon>
+                        <span>Mark In Review</span>
+                    </button>
+                    <button mat-menu-item (click)="updateTaskStatus(task, 'done')">
+                        <mat-icon svgIcon="mdi:check-circle-outline"></mat-icon>
+                        <span>Mark as Done</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item (click)="deleteTask(task.id)" class="text-rose-600">
+                        <mat-icon svgIcon="mdi:trash-can-outline" class="text-rose-600"></mat-icon>
+                        <span>Delete Task</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content: Kanban View -->
+    <div *ngIf="!loading() && viewMode() === 'kanban'" class="grid grid-cols-1 md:grid-cols-4 gap-5 items-start">
+        <!-- Columns: Todo, In Progress, In Review, Done -->
+        <ng-container *ngFor="let col of [
+            { key: 'todo', label: 'To Do', color: 'border-slate-300' },
+            { key: 'in_progress', label: 'In Progress', color: 'border-blue-400' },
+            { key: 'in_review', label: 'In Review', color: 'border-purple-400' },
+            { key: 'done', label: 'Done', color: 'border-emerald-400' }
+        ]">
+            <div class="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-800/40 p-4 space-y-3 min-h-[400px]">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        {{ col.label }}
+                    </h3>
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 shadow-xs">
+                        {{ getTasksByColumn(col.key).length }}
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    <div
+                        *ngFor="let task of getTasksByColumn(col.key)"
+                        class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm hover:shadow-md transition-all space-y-2.5"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-md" [ngClass]="getPriorityClass(task.priority)">
+                                {{ task.priority | uppercase }}
+                            </span>
+                            <button
+                                mat-icon-button
+                                class="w-6 h-6 leading-none text-slate-400"
+                                [matMenuTriggerFor]="cardMenu"
+                            >
+                                <mat-icon svgIcon="mdi:dots-horizontal" class="icon-size-4"></mat-icon>
+                            </button>
+                            <mat-menu #cardMenu="matMenu">
+                                <button mat-menu-item (click)="updateTaskStatus(task, 'todo')">To Do</button>
+                                <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')">In Progress</button>
+                                <button mat-menu-item (click)="updateTaskStatus(task, 'in_review')">In Review</button>
+                                <button mat-menu-item (click)="updateTaskStatus(task, 'done')">Done</button>
+                                <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="deleteTask(task.id)" class="text-rose-600">Delete</button>
+                            </mat-menu>
+                        </div>
+
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                            {{ task.title }}
+                        </h4>
+
+                        <p *ngIf="task.description" class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                            {{ task.description }}
+                        </p>
+
+                        <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
+                            <span>{{ task.project_name }}</span>
+                            <span *ngIf="task.due_date">{{ task.due_date | date:'MMM d' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div
+        *ngIf="showCreateModal()"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+    >
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-lg w-full p-6 space-y-5">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Create New Task</h3>
+                <button mat-icon-button (click)="closeCreateModal()" class="text-slate-400">
+                    <mat-icon svgIcon="mdi:close"></mat-icon>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Task Title *</label>
+                    <input
+                        type="text"
+                        [(ngModel)]="newTaskTitle"
+                        placeholder="e.g. Implement feature X"
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Description</label>
+                    <textarea
+                        [(ngModel)]="newTaskDescription"
+                        rows="3"
+                        placeholder="Add additional task details..."
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+                    ></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Priority</label>
+                        <select
+                            [(ngModel)]="newTaskPriority"
+                            class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                        >
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">Due Date</label>
+                        <input
+                            type="date"
+                            [(ngModel)]="newTaskDueDate"
+                            class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+                <button mat-stroked-button (click)="closeCreateModal()" class="rounded-xl">Cancel</button>
+                <button mat-flat-button color="primary" (click)="submitNewTask()" class="rounded-xl">Create Task</button>
+            </div>
+        </div>
+    </div>
+</div>

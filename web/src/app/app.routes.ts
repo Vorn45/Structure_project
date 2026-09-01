@@ -59,6 +59,10 @@ export const appRoutes: Route[] = [
                 path: 'profile',
                 loadChildren: () => import('app/resources/1-account/2-profile/route'),
             },
+            {
+                path: 'member',
+                loadChildren: () => import('app/resources/2-user/user.routes'),
+            },
             { path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/shared/error/not-found.routes') },
             { path: '**', redirectTo: '/redirect' },
         ],

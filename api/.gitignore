@@ -61,5 +61,6 @@ dist
 .webpack
 .serverless/**/*.zip
 docker-compose.yml
+/postgres_data
 
 CLAUDE.md

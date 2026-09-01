@@ -1,0 +1,150 @@
+<div class="flex flex-col flex-auto min-w-0 bg-slate-50/50 dark:bg-slate-900/50 p-6 sm:p-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Projects & Plans
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                View assigned project plans, track delivery milestones, and collaborate with your team.
+            </p>
+        </div>
+
+        <button
+            mat-stroked-button
+            class="rounded-xl border-slate-200 dark:border-slate-700 self-start sm:self-auto"
+            (click)="loadPlans()"
+        >
+            <mat-icon svgIcon="mdi:refresh"></mat-icon>
+            <span>Refresh</span>
+        </button>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
+        <!-- Status Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="statusFilter() === 'all' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
+                (click)="filterByStatus('all')"
+            >
+                All Projects
+            </button>
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="statusFilter() === 'active' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
+                (click)="filterByStatus('active')"
+            >
+                Active
+            </button>
+            <button
+                class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
+                [ngClass]="statusFilter() === 'completed' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
+                (click)="filterByStatus('completed')"
+            >
+                Completed
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative min-w-[240px]">
+            <input
+                type="text"
+                placeholder="Search projects..."
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearchChange()"
+                class="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+            />
+            <mat-icon svgIcon="mdi:magnify" class="icon-size-4 absolute left-3 top-2.5 text-slate-400"></mat-icon>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="loading()" class="flex justify-center items-center py-24">
+        <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+
+    <!-- Project Cards Grid -->
+    <div *ngIf="!loading()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngIf="plans().length === 0" class="col-span-full text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8">
+            <mat-icon svgIcon="mdi:folder-outline" class="icon-size-12 text-slate-300 dark:text-slate-600 mb-3"></mat-icon>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">No projects found</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">You are not currently assigned to any project matching the search criteria.</p>
+        </div>
+
+        <div
+            *ngFor="let plan of plans()"
+            class="group rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-6 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between"
+        >
+            <div class="space-y-4">
+                <!-- Top Badge & Code -->
+                <div class="flex items-center justify-between">
+                    <span class="text-2xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-1 rounded-lg">
+                        {{ plan.code }}
+                    </span>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full border" [ngClass]="getStatusClass(plan.status)">
+                        {{ plan.status | titlecase }}
+                    </span>
+                </div>
+
+                <!-- Title & Description -->
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {{ plan.name }}
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                        {{ plan.description }}
+                    </p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="space-y-1.5 pt-2">
+                    <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <span>Tasks Completed</span>
+                        <span>{{ plan.completed_tasks }} / {{ plan.total_tasks }} ({{ plan.progress }}%)</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                            class="h-full bg-indigo-600 dark:bg-indigo-500 rounded-full transition-all duration-500"
+                            [style.width.%]="plan.progress"
+                        ></div>
+                    </div>
+                </div>
+
+                <!-- Team Members Stack -->
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Team</span>
+                    <div class="flex items-center -space-x-2">
+                        <div
+                            *ngFor="let member of plan.members | slice:0:3"
+                            class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-white dark:border-slate-800 flex items-center justify-center text-2xs font-bold text-slate-700 dark:text-slate-200"
+                            [matTooltip]="member.name + ' (' + member.role + ')'"
+                        >
+                            {{ member.name.charAt(0) }}
+                        </div>
+                        <div
+                            *ngIf="plan.members.length > 3"
+                            class="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-2 border-white dark:border-slate-800 flex items-center justify-center text-2xs font-bold"
+                        >
+                            +{{ plan.members.length - 3 }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Tasks Action -->
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+                <button
+                    mat-flat-button
+                    color="primary"
+                    class="w-full rounded-xl"
+                    (click)="viewProjectTasks(plan.id)"
+                >
+                    <mat-icon svgIcon="mdi:format-list-checks"></mat-icon>
+                    <span>View Project Tasks</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

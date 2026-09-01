@@ -9,6 +9,7 @@ import { PasskeyLoginModule } from './resources/1-account/1-auth/1-login/6-passk
 import { SsoLoginModule } from './resources/1-account/1-auth/1-login/7-sso/sso-login.module';
 import { ForgetPasswordModule } from './resources/1-account/1-auth/2-forgot-password/forget-password.module';
 import { SignUpModule } from './resources/1-account/1-auth/3-signup/signup.module';
+import { UserModule } from './resources/2-user/user.module';
 
 export const appRoutes: Routes = [
     {
@@ -29,4 +30,9 @@ export const appRoutes: Routes = [
         path: 'account',
         module: AccountModule,
     },
+    {
+        path: 'user',
+        module: UserModule,
+    },
 ];
+

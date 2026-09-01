@@ -23,6 +23,7 @@ import { TelegramExceptionFilter } from './app/common/filters/telegram-exception
 import { JwtMiddleware } from './app/common/middlewares/jwt.middleware';
 import { AuthModule } from './app/resources/1-account/1-auth/auth.module';
 import { AccountModule } from './app/resources/1-account/2-profile/account.module';
+import { UserModule } from './app/resources/2-user/user.module';
 import { SharedModule } from './app/shared/shared.module';
 import { typeOrmConfig } from './config/database.config';
 
@@ -38,6 +39,7 @@ import { typeOrmConfig } from './config/database.config';
         SharedModule,
         AuthModule,
         AccountModule,
+        UserModule,
         RouterModule.register(appRoutes),
     ],
     controllers: [AppController],
