@@ -124,11 +124,20 @@ export class TaskSocketService {
     private readonly _projectRooms = new Map<string, number>();
     private readonly _organizationRooms = new Map<string, number>();
 
-    private _connect(): Socket {
+    private _connect(): Socket | null {
+        if (this._socket?.connected) return this._socket;
+        const token = this._auth.accessToken;
+        if (!token) return null;
+
         if (this._socket) return this._socket;
+
         const socket = io(`${this._base()}/realtime`, {
             transports: ['websocket'],
-            auth: { token: this._auth.accessToken },
+            auth: { token },
+            reconnection: true,
+            reconnectionAttempts: 2,
+            reconnectionDelay: 10000,
+            timeout: 5000,
         });
         socket.on('task:updated', (payload: TaskUpdated) => this._tasks.next(payload));
         socket.on('chat:unread', (payload: ChatUnread) => this._chatUnread.next(payload));
@@ -156,10 +165,21 @@ export class TaskSocketService {
             this._projectRooms.forEach((_count, id) => socket.emit('project:join', id));
             this._organizationRooms.forEach((_count, id) => socket.emit('organization:join', id));
         });
-        socket.on('connect_error', (err) => console.warn('[realtime] connect_error', err?.message || err));
+        socket.on('connect_error', (err) => {
+            console.warn('[realtime] connect_error', err?.message || err);
+            socket.disconnect();
+        });
         socket.on('disconnect', (reason) => console.debug('[realtime] disconnected', reason));
         this._socket = socket;
         return socket;
+    }
+
+    /** Disconnect socket on logout or when not needed */
+    disconnect(): void {
+        if (this._socket) {
+            this._socket.disconnect();
+            this._socket = null;
+        }
     }
 
     /** Subscribe to a project board's live task events (create / status / edit). */
@@ -168,9 +188,8 @@ export class TaskSocketService {
         if (!id) return;
         const next = (this._projectRooms.get(id) ?? 0) + 1;
         this._projectRooms.set(id, next);
-        // Only the first subscriber needs to tell the server to join the room.
-        if (next === 1) this._connect().emit('project:join', id);
-        else this._connect();
+        const sock = this._connect();
+        if (next === 1 && sock) sock.emit('project:join', id);
     }
 
     leaveProject(projectId: string | number): void {
@@ -190,8 +209,8 @@ export class TaskSocketService {
         if (!id) return;
         const next = (this._organizationRooms.get(id) ?? 0) + 1;
         this._organizationRooms.set(id, next);
-        if (next === 1) this._connect().emit('organization:join', id);
-        else this._connect();
+        const sock = this._connect();
+        if (next === 1 && sock) sock.emit('organization:join', id);
     }
 
     leaveOrganization(organizationId: string | number): void {
@@ -262,7 +281,7 @@ export class TaskSocketService {
     }
     sendTyping(roomId: string, state: 'text' | 'file' | null): void {
         if (!roomId) return;
-        this._connect().emit('chat:typing', { room_id: roomId, state });
+        this._connect()?.emit('chat:typing', { room_id: roomId, state });
     }
     /** Fires when an MCP agent acts on a task in a room the current user belongs to. */
     agentActivityUpdates(): Observable<AgentActivity> {

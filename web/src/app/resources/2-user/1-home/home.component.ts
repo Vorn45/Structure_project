@@ -12,6 +12,11 @@ import QRCode from 'qrcode';
 import { DigitalCardDialogComponent } from './digital-card-dialog/digital-card-dialog.component';
 import { AttendanceDialogComponent } from './attendance-dialog/attendance-dialog.component';
 import { PayrollDialogComponent } from './payroll-dialog/payroll-dialog.component';
+import { CreateProjectDialogComponent } from './create-project-dialog/create-project-dialog.component';
+import { ActiveProjectsDialogComponent } from './active-projects-dialog/active-projects-dialog.component';
+import { CreateMeetingDialogComponent } from './create-meeting-dialog/create-meeting-dialog.component';
+import { HelpSupportDialogComponent } from './help-support-dialog/help-support-dialog.component';
+import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { HomeOverviewData, UserHomeService } from './home.service';
 
 @Component({
@@ -63,23 +68,45 @@ export class UserHomeComponent implements OnInit {
     }
 
     openAttendanceDialog(): void {
-        this._matDialog.open(AttendanceDialogComponent, {
-            data: {
-                user: this.currentUser() || this.overview()?.user,
-            },
-            maxWidth: '95vw',
-            width: '640px',
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this.currentUser() || this.overview()?.user,
         });
+        this._matDialog.open(AttendanceDialogComponent, dialogConfig);
     }
 
     openPayrollDialog(): void {
-        this._matDialog.open(PayrollDialogComponent, {
-            data: {
-                user: this.currentUser() || this.overview()?.user,
-            },
-            maxWidth: '95vw',
-            width: '640px',
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this.currentUser() || this.overview()?.user,
         });
+        this._matDialog.open(PayrollDialogComponent, dialogConfig);
+    }
+
+    openCreateProjectSideDialog(): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this.currentUser() || this.overview()?.user,
+        });
+        this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
+    }
+
+    openActiveProjectsSideDialog(): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this.currentUser() || this.overview()?.user,
+        });
+        this._matDialog.open(ActiveProjectsDialogComponent, dialogConfig);
+    }
+
+    openCreateMeetingSideDialog(): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this.currentUser() || this.overview()?.user,
+        });
+        this._matDialog.open(CreateMeetingDialogComponent, dialogConfig);
+    }
+
+    openHelpSupportSideDialog(): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this.currentUser() || this.overview()?.user,
+        });
+        this._matDialog.open(HelpSupportDialogComponent, dialogConfig);
     }
 
     async generateMemberQrCode(): Promise<void> {
@@ -105,7 +132,8 @@ export class UserHomeComponent implements OnInit {
         private readonly _userService: UserService,
         private readonly _router: Router,
         private readonly _matDialog: MatDialog,
-    ) {}
+        private readonly _dialogConfigService: DialogConfigService,
+    ) { }
 
     ngOnInit(): void {
         this.currentUser.set(this._userService.getUser());
