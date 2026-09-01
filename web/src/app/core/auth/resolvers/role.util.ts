@@ -25,13 +25,12 @@ export const getRoleDefaultUrl = (roleName?: string): string => {
 
         case RoleEnum.USER:
         case 'member':
+        case 'user':
         case 'អ្នកប្រើប្រាស់':
-            return '/member/tasks';
+            return '/member/home';
         case RoleEnum.PERSONAL_WORKSPACE:
         case 'កន្លែងធ្វើការផ្ទាល់ខ្លួន':
-            // Matches personalWorkspaceNavigation's "ការងារ" link exactly (?view=list),
-            // so it's highlighted as active immediately on landing.
-            return '/member/tasks?view=list';
+            return '/member/home';
         default:
             return '/org-admin/home';
     }

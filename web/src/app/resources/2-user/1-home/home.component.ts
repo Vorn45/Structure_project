@@ -1,10 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterModule } from '@angular/router';
+import { UserService } from 'app/core/user/user.service';
+import { User } from 'app/core/user/user.types';
+import QRCode from 'qrcode';
+import { DigitalCardDialogComponent } from './digital-card-dialog/digital-card-dialog.component';
 import { HomeOverviewData, UserHomeService } from './home.service';
 
 @Component({
@@ -17,19 +22,78 @@ import { HomeOverviewData, UserHomeService } from './home.service';
         MatButtonModule,
         MatTooltipModule,
         MatProgressSpinnerModule,
+        MatDialogModule,
     ],
     templateUrl: './home.component.html',
 })
 export class UserHomeComponent implements OnInit {
     loading = signal<boolean>(true);
     overview = signal<HomeOverviewData | null>(null);
+    currentUser = signal<User | null>(null);
+    activeFilter = signal<string>('all');
+    cardSide = signal<'front' | 'back'>('front');
+    qrCodeDataUrl = signal<string>('');
+
+    toggleCardSide(): void {
+        this.cardSide.update((s) => (s === 'front' ? 'back' : 'front'));
+    }
+
+    setCardSide(side: 'front' | 'back'): void {
+        this.cardSide.set(side);
+    }
+
+    scrollCards(direction: 'left' | 'right'): void {
+        const el = document.getElementById('statCardTrack');
+        if (el) {
+            const scrollAmount = direction === 'left' ? -400 : 400;
+            el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    }
+
+    openDigitalCardDialog(): void {
+        this._matDialog.open(DigitalCardDialogComponent, {
+            data: {
+                user: this.currentUser() || this.overview()?.user,
+                avatarUrl: this.getAvatarUrl(),
+            },
+            maxWidth: '95vw',
+        });
+    }
+
+    async generateMemberQrCode(): Promise<void> {
+        try {
+            const user = this.currentUser() || this.overview()?.user;
+            const payload = `WMS-MEMBER:${user?.id || '2026'}:${user?.phone || '087600064'}`;
+            const qr = await QRCode.toDataURL(payload, {
+                width: 160,
+                margin: 0,
+                color: {
+                    dark: '#0f284e',
+                    light: '#ffffff',
+                },
+            });
+            this.qrCodeDataUrl.set(qr);
+        } catch {
+            // fallback
+        }
+    }
 
     constructor(
         private readonly _homeService: UserHomeService,
+        private readonly _userService: UserService,
         private readonly _router: Router,
+        private readonly _matDialog: MatDialog,
     ) {}
 
     ngOnInit(): void {
+        this.currentUser.set(this._userService.getUser());
+        this._userService.user$.subscribe((u) => {
+            if (u) {
+                this.currentUser.set(u);
+                this.generateMemberQrCode();
+            }
+        });
+        this.generateMemberQrCode();
         this.loadOverview();
     }
 
@@ -47,9 +111,29 @@ export class UserHomeComponent implements OnInit {
         });
     }
 
+    getAvatarUrl(): string {
+        const user = this.currentUser();
+        if (user?.avatar?.uri && user?.avatar?.file_domain) {
+            return user.avatar.file_domain.replace(/\/+$/, '') + '/' + user.avatar.uri.replace(/^\/+/, '');
+        }
+        return '/images/placeholder/avatar.jpg';
+    }
+
+    getCoverUrl(): string {
+        const user: any = this.currentUser();
+        if (user?.cover?.uri && user?.cover?.file_domain) {
+            return user.cover.file_domain.replace(/\/+$/, '') + '/' + user.cover.uri.replace(/^\/+/, '');
+        }
+        return '/images/placeholder/cover.jpg';
+    }
+
+    setFilter(filter: string): void {
+        this.activeFilter.set(filter);
+    }
+
     navigateToTasks(statusFilter?: string): void {
         this._router.navigate(['/member/tasks'], {
-            queryParams: statusFilter ? { status: statusFilter } : {},
+            queryParams: statusFilter && statusFilter !== 'all' ? { status: statusFilter } : {},
         });
     }
 
@@ -57,15 +141,98 @@ export class UserHomeComponent implements OnInit {
         this._router.navigate(['/member/projects']);
     }
 
-    getStatusClass(status: string): string {
-        switch (status) {
+    navigateToReports(): void {
+        this._router.navigate(['/member/reports']);
+    }
+
+    navigateToSettings(): void {
+        this._router.navigate(['/profile']);
+    }
+
+    getFilteredTasks() {
+        const tasks = this.overview()?.recent_tasks || [];
+        const filter = this.activeFilter();
+        if (filter === 'all') return tasks;
+        if (filter === 'today') return tasks;
+        if (filter === 'urgent') return tasks.filter((t) => t.priority === 'urgent' || t.priority === 'high');
+        if (filter === 'pending') return tasks.filter((t) => t.status === 'pending' || t.status === 'new' || t.status === 'todo');
+        if (filter === 'todo') return tasks.filter((t) => t.status === 'todo' || t.status === 'unconfirmed');
+        if (filter === 'in_progress') return tasks.filter((t) => t.status === 'in_progress');
+        if (filter === 'in_review' || filter === 'review') return tasks.filter((t) => t.status === 'in_review' || t.status === 'review');
+        if (filter === 'reopened') return tasks.filter((t) => t.status === 'reopened');
+        if (filter === 'done' || filter === 'completed') return tasks.filter((t) => t.status === 'completed' || t.status === 'done');
+        return tasks;
+    }
+
+    getStatusLabel(status: string): string {
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'pending':
+                return 'ថ្មី';
+            case 'confirmed':
+                return 'បញ្ជាក់';
+            case 'todo':
+            case 'unconfirmed':
+                return 'មិនបញ្ជាក់';
+            case 'in_progress':
+                return 'កំពុងធ្វើ';
+            case 'in_review':
+            case 'review':
+                return 'ស្នើសុំពិនិត្យ';
+            case 'reopened':
+                return 'បើកឡើងវិញ';
             case 'completed':
             case 'done':
-                return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40';
+                return 'បញ្ចប់';
+            default:
+                return status || 'មិនបញ្ជាក់';
+        }
+    }
+
+    getStatusIcon(status: string): string {
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'pending':
+                return 'mdi:clipboard-text-outline';
+            case 'confirmed':
+                return 'mdi:clipboard-check-outline';
+            case 'todo':
+            case 'unconfirmed':
+                return 'mdi:clipboard-minus-outline';
             case 'in_progress':
-                return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800/40';
+                return 'mdi:progress-clock';
             case 'in_review':
-                return 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800/40';
+            case 'review':
+                return 'mdi:magnify';
+            case 'reopened':
+                return 'mdi:refresh';
+            case 'completed':
+            case 'done':
+                return 'mdi:check-circle';
+            default:
+                return 'mdi:clipboard-outline';
+        }
+    }
+
+    getStatusClass(status: string): string {
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'pending':
+            case 'confirmed':
+                return 'bg-blue-50/80 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200 dark:border-blue-800/40';
+            case 'todo':
+            case 'unconfirmed':
+                return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+            case 'in_progress':
+                return 'bg-amber-50/80 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-800/40';
+            case 'in_review':
+            case 'review':
+                return 'bg-blue-50/80 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200 dark:border-blue-800/40';
+            case 'reopened':
+                return 'bg-amber-50/80 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-800/40';
+            case 'completed':
+            case 'done':
+                return 'bg-emerald-50/80 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40';
             default:
                 return 'bg-slate-50 text-slate-700 dark:bg-slate-800/60 dark:text-slate-300 border-slate-200 dark:border-slate-700';
         }

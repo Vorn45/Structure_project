@@ -159,13 +159,13 @@ const orgAdminNavigation: HelperNavigationItem[] = [
 ];
 
 const memberNavigation: HelperNavigationItem[] = [
-    // {
-    //     id: 'home',
-    //     title: 'ទំព័រដើម',
-    //     type: 'basic',
-    //     icon: 'mdi:home',
-    //     link: '/member/home',
-    // },
+    {
+        id: 'home',
+        title: 'Navigation.Home',
+        type: 'basic',
+        icon: 'mdi:home',
+        link: '/member/home',
+    },
     {
         id: 'tasks',
         title: 'Navigation.Tasks',
@@ -221,6 +221,13 @@ const memberNavigation: HelperNavigationItem[] = [
 
 
 const personalWorkspaceNavigation: HelperNavigationItem[] = [
+    {
+        id: 'home',
+        title: 'Navigation.Home',
+        type: 'basic',
+        icon: 'mdi:home',
+        link: '/member/home',
+    },
     {
         id: 'tasks',
         title: 'Navigation.Tasks',
