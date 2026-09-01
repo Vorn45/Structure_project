@@ -24,6 +24,14 @@ export default [
                 component: AuthSignInComponent
             },
             {
+                path: 'forgot-password',
+                loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+            },
+            {
+                path: 'reset-password',
+                loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+            },
+            {
                 path: 'otp',
                 component: AuthOTPForResetPasswordComponent
             }

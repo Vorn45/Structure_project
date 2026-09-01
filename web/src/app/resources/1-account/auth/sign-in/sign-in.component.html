@@ -3,7 +3,7 @@
     <ng-container *ngIf="currentStep === 'login'">
         <!-- Logo + Language -->
         <div class="flex items-center justify-between mb-4">
-            <img class="h-11 sm:h-12 w-auto object-contain" src="/images/logo/NexTask.png" alt="NexTask" />
+            <img class="h-16 sm:h-20 w-auto object-contain" src="/images/logo/NexTask.png" alt="Logo" />
             <languages></languages>
         </div>
 
@@ -44,6 +44,14 @@
                     {{ 'Auth.Sign-In.Password-Require' | transloco }}
                 </mat-error>
             </mat-form-field>
+
+            <!-- Forgot Password Link -->
+            <div class="flex justify-end -mt-1 mb-1">
+                <a class="text-xs sm:text-sm font-medium text-primary hover:underline transition-colors cursor-pointer"
+                   [routerLink]="['/auth/forgot-password']">
+                    {{ 'Auth.Sign-In.ForgotPassword' | transloco }}
+                </a>
+            </div>
 
             <!-- Submit Button -->
             <button mat-flat-button class="w-full h-11 bg-primary text-white rounded-lg font-medium shadow-md transition-all hover:opacity-95 mt-1"
