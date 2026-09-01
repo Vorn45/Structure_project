@@ -112,10 +112,19 @@ export class UserHomeComponent implements OnInit {
     async generateMemberQrCode(): Promise<void> {
         try {
             const user = this.currentUser() || this.overview()?.user;
-            const payload = `WMS-MEMBER:${user?.id || '2026'}:${user?.phone || '087600064'}`;
-            const qr = await QRCode.toDataURL(payload, {
-                width: 160,
+            const nameKh = (user as any)?.name_kh || (user as any)?.kh_name || 'ចេង ច័ន្ទបញ្ញា';
+            const nameEn = (user as any)?.name_en || (user as any)?.en_name || 'Cheng Chanpanha';
+            const phone = user?.phone || '087600064';
+            const email = user?.email || 'Chanpanhacheng@gmail.com';
+            const id = user?.id || '2';
+
+            const origin = window.location.origin;
+            const verifyUrl = `${origin}/#/verify/member?id=${id}&code=${phone}&name_kh=${encodeURIComponent(nameKh)}&name_en=${encodeURIComponent(nameEn)}&phone=${phone}&email=${encodeURIComponent(email)}`;
+
+            const qr = await QRCode.toDataURL(verifyUrl, {
+                width: 220,
                 margin: 0,
+                errorCorrectionLevel: 'M',
                 color: {
                     dark: '#0f284e',
                     light: '#ffffff',
@@ -125,6 +134,20 @@ export class UserHomeComponent implements OnInit {
         } catch {
             // fallback
         }
+    }
+
+    openVerificationPage(): void {
+        const user = this.currentUser() || this.overview()?.user;
+        const nameKh = (user as any)?.name_kh || (user as any)?.kh_name || 'ចេង ច័ន្ទបញ្ញា';
+        const nameEn = (user as any)?.name_en || (user as any)?.en_name || 'Cheng Chanpanha';
+        const phone = user?.phone || '087600064';
+        const email = user?.email || 'Chanpanhacheng@gmail.com';
+        const id = user?.id || '2';
+
+        window.open(
+            `/#/verify/member?id=${id}&code=${phone}&name_kh=${encodeURIComponent(nameKh)}&name_en=${encodeURIComponent(nameEn)}&phone=${phone}&email=${encodeURIComponent(email)}`,
+            '_blank',
+        );
     }
 
     constructor(

@@ -35,6 +35,20 @@ export const appRoutes: Route[] = [
         component: LayoutComponent,
     },
     {
+        path: 'verify',
+        component: LayoutComponent,
+        data: { layout: 'empty' },
+        children: [
+            {
+                path: 'member',
+                loadComponent: () =>
+                    import(
+                        'app/resources/3-public/member-verify/member-verify.component'
+                    ).then((m) => m.MemberVerifyComponent),
+            },
+        ],
+    },
+    {
         path: 'auth',
         canActivate: [NoAuthGuard],
         component: LayoutComponent,
