@@ -31,7 +31,7 @@ const toList = (value: string | undefined): string[] =>
 export const appConfig = {
     APP: {
         ENV: nodeEnv,
-        SYSTEM_NAME: process.env.SYSTEM_NAME?.trim() || 'NexTask',
+        SYSTEM_NAME: process.env.SYSTEM_NAME?.trim() || 'WMS | System',
         ENV_LABEL: process.env.ENVIRONMENT?.trim() || nodeEnv.toUpperCase(),
         PORT: toNumber(process.env.PORT, 3000),
         GLOBAL_PREFIX: process.env.GLOBAL_PREFIX ?? 'api',

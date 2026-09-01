@@ -23,21 +23,21 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     type: 'postgres',
     ...(appConfig.DATABASE.URL
         ? {
-              url: appConfig.DATABASE.URL,
-              ssl: appConfig.DATABASE.SSL
-                  ? { rejectUnauthorized: false }
-                  : false,
-          }
+            url: appConfig.DATABASE.URL,
+            ssl: appConfig.DATABASE.SSL
+                ? { rejectUnauthorized: false }
+                : false,
+        }
         : {
-              host: appConfig.DATABASE.HOST,
-              port: appConfig.DATABASE.PORT,
-              username: appConfig.DATABASE.USERNAME,
-              password: appConfig.DATABASE.PASSWORD,
-              database: appConfig.DATABASE.NAME,
-              ...(appConfig.DATABASE.SSL
-                  ? { ssl: { rejectUnauthorized: false } }
-                  : {}),
-          }),
+            host: appConfig.DATABASE.HOST,
+            port: appConfig.DATABASE.PORT,
+            username: appConfig.DATABASE.USERNAME,
+            password: appConfig.DATABASE.PASSWORD,
+            database: appConfig.DATABASE.NAME,
+            ...(appConfig.DATABASE.SSL
+                ? { ssl: { rejectUnauthorized: false } }
+                : {}),
+        }),
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
     synchronize: true,
     autoLoadEntities: true,
