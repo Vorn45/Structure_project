@@ -10,6 +10,8 @@ import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
 import QRCode from 'qrcode';
 import { DigitalCardDialogComponent } from './digital-card-dialog/digital-card-dialog.component';
+import { AttendanceDialogComponent } from './attendance-dialog/attendance-dialog.component';
+import { PayrollDialogComponent } from './payroll-dialog/payroll-dialog.component';
 import { HomeOverviewData, UserHomeService } from './home.service';
 
 @Component({
@@ -57,6 +59,26 @@ export class UserHomeComponent implements OnInit {
                 avatarUrl: this.getAvatarUrl(),
             },
             maxWidth: '95vw',
+        });
+    }
+
+    openAttendanceDialog(): void {
+        this._matDialog.open(AttendanceDialogComponent, {
+            data: {
+                user: this.currentUser() || this.overview()?.user,
+            },
+            maxWidth: '95vw',
+            width: '640px',
+        });
+    }
+
+    openPayrollDialog(): void {
+        this._matDialog.open(PayrollDialogComponent, {
+            data: {
+                user: this.currentUser() || this.overview()?.user,
+            },
+            maxWidth: '95vw',
+            width: '640px',
         });
     }
 

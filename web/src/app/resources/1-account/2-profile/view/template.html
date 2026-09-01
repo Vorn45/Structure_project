@@ -209,22 +209,7 @@
             </div>
         </div>
 
-        <!-- Right: Action Buttons -->
-        <div class="hidden sm:flex items-center gap-1 shrink-0 pt-[52px]">
-            <button mat-icon-button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                (click)="updateProfile()"
-                [matTooltip]="'ProfileView.EditAccountInfo' | transloco">
-                <mat-icon svgIcon="mdi:pencil-outline" class="!w-5 !h-5"></mat-icon>
-            </button>
-            <button mat-icon-button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                (click)="settingDialog()" [matTooltip]="'ProfileView.Settings' | transloco">
-                <mat-icon svgIcon="mdi:cog-outline" class="!w-5 !h-5"></mat-icon>
-            </button>
-            <button mat-icon-button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                (click)="securityDialog()" [matTooltip]="'ProfileSecurity.Title' | transloco">
-                <mat-icon svgIcon="mdi:shield-outline" class="!w-5 !h-5"></mat-icon>
-            </button>
-        </div>
+        <!-- Right: Action Buttons (Removed) -->
     </div>
 
     <mat-divider class="mt-4 mb-1 border-slate-200 dark:border-slate-700"></mat-divider>

@@ -53,24 +53,7 @@
                     </div>
                 </div>
 
-                <!-- Right Action Buttons (✏️ Edit, ⚙️ Settings, 🛡️ Security) - ONLY these 3 icons have tooltips -->
-                <div class="flex items-center justify-center sm:justify-end gap-1 pt-2 sm:pt-0 sm:pb-2">
-                    <button mat-icon-button
-                        class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
-                        (click)="navigateToSettings()" matTooltip="កែប្រែព័ត៌មានគណនី">
-                        <mat-icon svgIcon="mdi:pencil" class="icon-size-6"></mat-icon>
-                    </button>
-                    <button mat-icon-button
-                        class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
-                        (click)="navigateToSettings()" matTooltip="ការកំណត់ប្រព័ន្ធ">
-                        <mat-icon svgIcon="mdi:cog" class="icon-size-6"></mat-icon>
-                    </button>
-                    <button mat-icon-button
-                        class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
-                        (click)="navigateToSettings()" matTooltip="សុវត្ថិភាពគណនី">
-                        <mat-icon svgIcon="mdi:shield-check" class="icon-size-6"></mat-icon>
-                    </button>
-                </div>
+
             </div>
         </div>
     </div>
@@ -461,39 +444,61 @@
         </div>
 
         <!-- ===================================================================== -->
-        <!-- 4. 4 QUICK ACTION ICONS (No tooltips needed as titles are visible)    -->
+        <!-- 4. QUICK ACTION SERVICES GRID (សម្រង់វត្តមាន, ប្រាក់បៀវត្ស & សេវាសំខាន់ៗ)   -->
         <!-- ===================================================================== -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-normal">
-            <!-- 1. បង្កើតគម្រោង -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 font-normal">
+            <!-- 1. សម្រង់វត្តមាន -->
+            <div (click)="openAttendanceDialog()"
+                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-emerald-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
+                <mat-icon svgIcon="mdi:calendar-check"
+                    class="icon-size-8 text-emerald-600 dark:text-emerald-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">សម្រង់វត្តមាន</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">ម៉ោងធ្វើការ</p>
+            </div>
+
+            <!-- 2. ប្រាក់បៀវត្ស -->
+            <div (click)="openPayrollDialog()"
+                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-blue-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
+                <mat-icon svgIcon="mdi:cash-multiple"
+                    class="icon-size-8 text-blue-600 dark:text-blue-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">ប្រាក់បៀវត្ស</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">ប័ណ្ណបៀវត្ស</p>
+            </div>
+
+            <!-- 3. បង្កើតគម្រោង -->
             <div (click)="navigateToProjects()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 text-center shadow-xs hover:shadow-sm hover:border-primary transition-all duration-200 flex flex-col items-center justify-center select-none">
+                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-primary transition-all duration-200 flex flex-col items-center justify-center select-none">
                 <mat-icon svgIcon="mdi:plus-circle"
-                    class="icon-size-8 text-blue-600 dark:text-blue-400 mb-2.5 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[16px] font-normal text-slate-800 dark:text-white leading-tight">បង្កើតគម្រោង</h3>
+                    class="icon-size-8 text-blue-600 dark:text-blue-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">បង្កើតគម្រោង</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">គម្រោងថ្មី</p>
             </div>
 
-            <!-- 2. គម្រោងសកម្ម -->
+            <!-- 4. គម្រោងសកម្ម -->
             <div (click)="navigateToProjects()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 text-center shadow-xs hover:shadow-sm hover:border-emerald-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
+                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-teal-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
                 <mat-icon svgIcon="mdi:view-grid-outline"
-                    class="icon-size-8 text-emerald-600 dark:text-emerald-400 mb-2.5 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[16px] font-normal text-slate-800 dark:text-white leading-tight">គម្រោងសកម្ម</h3>
+                    class="icon-size-8 text-teal-600 dark:text-teal-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">គម្រោងសកម្ម</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">តាមដានគម្រោង</p>
             </div>
 
-            <!-- 3. ប្រជុំតាមវីដេអូ -->
+            <!-- 5. ប្រជុំតាមវីដេអូ -->
             <div (click)="navigateToTasks()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 text-center shadow-xs hover:shadow-sm hover:border-purple-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
+                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-purple-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
                 <mat-icon svgIcon="mdi:video-vintage"
-                    class="icon-size-8 text-purple-600 dark:text-purple-400 mb-2.5 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[16px] font-normal text-slate-800 dark:text-white leading-tight">ប្រជុំតាមវីដេអូ</h3>
+                    class="icon-size-8 text-purple-600 dark:text-purple-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">ប្រជុំតាមវីដេអូ</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">បន្ទប់ប្រជុំ</p>
             </div>
 
-            <!-- 4. ជំនួយ ឬ បញ្ហា -->
+            <!-- 6. ជំនួយ ឬ បញ្ហា -->
             <div (click)="navigateToSettings()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 text-center shadow-xs hover:shadow-sm hover:border-amber-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
+                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-amber-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
                 <mat-icon svgIcon="mdi:help-circle-outline"
-                    class="icon-size-8 text-amber-600 dark:text-amber-400 mb-2.5 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[16px] font-normal text-slate-800 dark:text-white leading-tight">ជំនួយ ឬ បញ្ហា</h3>
+                    class="icon-size-8 text-amber-600 dark:text-amber-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">ជំនួយ ឬ បញ្ហា</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">មជ្ឈមណ្ឌលជំនួយ</p>
             </div>
         </div>
 
