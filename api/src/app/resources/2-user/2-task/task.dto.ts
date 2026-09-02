@@ -1,10 +1,15 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export enum TaskStatusEnum {
-    TODO = 'todo',
+    NEW = 'new',
+    CONFIRMED = 'confirmed',
+    UNCONFIRMED = 'unconfirmed',
     IN_PROGRESS = 'in_progress',
     IN_REVIEW = 'in_review',
+    REOPENED = 'reopened',
     DONE = 'done',
+    // Compatibility aliases
+    TODO = 'unconfirmed',
 }
 
 export enum TaskPriorityEnum {

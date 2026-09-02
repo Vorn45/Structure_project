@@ -1,15 +1,33 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { env } from 'envs/env';
 import { Observable } from 'rxjs';
 
+export type TaskStatus =
+    | 'new'
+    | 'pending'
+    | 'confirmed'
+    | 'unconfirmed'
+    | 'todo'
+    | 'in_progress'
+    | 'in_review'
+    | 'review'
+    | 'reopened'
+    | 'done'
+    | 'completed'
+    | string;
+
 export interface TaskItem {
     id: number;
+    code?: string;
     title: string;
     description: string;
-    status: 'todo' | 'in_progress' | 'in_review' | 'done';
+    module?: string;
+    status: TaskStatus;
     priority: 'low' | 'medium' | 'high' | 'urgent';
     progress: number;
+    comments_count?: number;
+    attachments_count?: number;
     due_date: string | null;
     project_id: string;
     project_name: string;
@@ -32,10 +50,14 @@ export interface TaskListResponse {
         offset: number;
         counts: {
             all: number;
-            todo: number;
-            in_progress: number;
-            in_review: number;
-            done: number;
+            new?: number;
+            confirmed?: number;
+            unconfirmed?: number;
+            in_progress?: number;
+            in_review?: number;
+            reopened?: number;
+            done?: number;
+            todo?: number;
         };
     };
 }
@@ -47,8 +69,22 @@ export class UserTaskService {
     constructor(private readonly _http: HttpClient) {}
 
     getTasks(params?: { search?: string; status?: string; priority?: string; project_id?: string }): Observable<TaskListResponse> {
+        let httpParams = new HttpParams();
+        if (params?.search && params.search.trim()) {
+            httpParams = httpParams.set('search', params.search.trim());
+        }
+        if (params?.status && params.status !== 'all') {
+            httpParams = httpParams.set('status', params.status);
+        }
+        if (params?.priority && params.priority !== 'all') {
+            httpParams = httpParams.set('priority', params.priority);
+        }
+        if (params?.project_id) {
+            httpParams = httpParams.set('project_id', params.project_id);
+        }
+
         return this._http.get<TaskListResponse>(this.baseUrl, {
-            params: params as Record<string, string>,
+            params: httpParams,
             withCredentials: true,
         });
     }

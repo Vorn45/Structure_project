@@ -1,598 +1,613 @@
 <div
-    class="flex flex-col flex-auto min-w-0 bg-slate-50/60 dark:bg-slate-900/60 p-4 sm:p-6 space-y-6 w-full font-normal text-[16px]">
+    class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border"
+    style="min-height: 100vh;">
 
-    <!-- ========================================================================= -->
-    <!-- 1. TOP PROFILE COVER BANNER (First Image Design)                          -->
-    <!-- ========================================================================= -->
+    <!-- ===== FRAMED CONTENT CONTAINER ===== -->
     <div
-        class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm bg-white dark:bg-slate-800">
-        <!-- Landscape Cover Photo -->
-        <div class="relative w-full h-48 sm:h-60 md:h-72 overflow-hidden bg-slate-900">
-            <img [src]="getCoverUrl()" alt="Profile Cover" class="w-full h-full object-cover" />
-        </div>
+        class="flex flex-col flex-1 min-w-0 space-y-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+        style="min-height: calc(100vh - 2rem);">
 
-        <!-- Dedicated White Background Card with Generous Padding -->
-        <div class="bg-white dark:bg-slate-800 px-6 sm:px-8 pb-6 pt-0">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <!-- Left: Overlapping Avatar + Clean User Info on White -->
-                <div class="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
-                    <!-- Circular Avatar (Only this overlaps the cover) -->
-                    <div class="relative -mt-16 sm:-mt-20 shrink-0 z-20">
-                        <div
-                            class="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-white dark:border-slate-800 bg-white dark:bg-slate-700 shadow-xl overflow-hidden flex items-center justify-center">
-                            <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
-                        </div>
-                        <!-- Orange/Amber Verified Badge -->
-                        <div class="absolute bottom-1 right-1 w-7 h-7 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-md border-2 border-white dark:border-slate-800 cursor-pointer"
-                            matTooltip="គណនីបានផ្ទៀងផ្ទាត់">
-                            <mat-icon svgIcon="mdi:check-decagram" class="icon-size-6 text-amber-500"></mat-icon>
-                        </div>
-                    </div>
-
-                    <!-- Names & Contacts (16px and Normal Font) -->
-                    <div class="pt-2 sm:pt-4 sm:pb-1">
-                        <h1 class="text-2xl sm:text-3xl font-medium text-slate-900 dark:text-white tracking-tight">
-                            {{ currentUser()?.kh_name || overview()?.user?.name_kh || 'ចេង ច័ន្ទបញ្ញា' }}
-                        </h1>
-                        <p
-                            class="text-[16px] font-normal uppercase tracking-wider text-slate-600 dark:text-slate-400 mt-0.5">
-                            {{ currentUser()?.en_name || overview()?.user?.name_en || 'CHENG CHANPANHA' }}
-                        </p>
-                        <div
-                            class="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 text-[16px] text-slate-600 dark:text-slate-300 mt-2 font-normal">
-                            <span class="flex items-center gap-1.5">
-                                <mat-icon svgIcon="mdi:phone" class="icon-size-4.5 text-slate-400"></mat-icon>
-                                <span>{{ currentUser()?.phone || '087600064' }}</span>
-                            </span>
-                            <span class="text-slate-300 dark:text-slate-600">•</span>
-                            <span class="flex items-center gap-1.5">
-                                <mat-icon svgIcon="mdi:email" class="icon-size-4.5 text-slate-400"></mat-icon>
-                                <span>{{ currentUser()?.email || 'Chanpanhacheng@gmail.com' }}</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- 2. MY TASKS FILTER CARDS (ការងារខ្ញុំ - Naked Clean Icons)                 -->
-    <!-- ========================================================================= -->
-    <div class="space-y-2.5 font-normal">
-        <h2 class="text-[17px] font-normal text-slate-800 dark:text-white px-0.5">
-            ការងារខ្ញុំ
-        </h2>
-
+        <!-- ========================================================================= -->
+        <!-- 1. TOP PROFILE COVER BANNER (First Image Design)                          -->
+        <!-- ========================================================================= -->
         <div
-            class="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-
-            <!-- 1. ថ្មី -->
-            <div
-                class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
-                <div class="flex items-center gap-2">
-                    <mat-icon svgIcon="mdi:clipboard-text-outline"
-                        class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0"></mat-icon>
-                    <span>ថ្មី</span>
-                </div>
-                <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                    <span>{{ overview()?.metrics?.pending_tasks || 4 }}</span>
-                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </div>
+            class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm bg-white dark:bg-slate-800">
+            <!-- Landscape Cover Photo -->
+            <div class="relative w-full h-48 sm:h-60 md:h-72 overflow-hidden bg-slate-900">
+                <img [src]="getCoverUrl()" alt="Profile Cover" class="w-full h-full object-cover" />
             </div>
 
-            <!-- 2. បញ្ជាក់ -->
-            <div
-                class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
-                <div class="flex items-center gap-2">
-                    <mat-icon svgIcon="mdi:clipboard-check-outline"
-                        class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0"></mat-icon>
-                    <span>បញ្ជាក់</span>
-                </div>
-                <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                    <span>{{ overview()?.metrics?.completed_tasks || 3 }}</span>
-                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </div>
-            </div>
-
-            <!-- 3. មិនបញ្ជាក់ -->
-            <div
-                class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[135px] sm:min-w-[145px] select-none">
-                <div class="flex items-center gap-2">
-                    <mat-icon svgIcon="mdi:clipboard-minus-outline"
-                        class="icon-size-4.5 text-slate-600 dark:text-slate-400 shrink-0"></mat-icon>
-                    <span>មិនបញ្ជាក់</span>
-                </div>
-                <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                    <span>{{ overview()?.metrics?.pending_tasks || 4 }}</span>
-                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </div>
-            </div>
-
-            <!-- 4. កំពុងធ្វើ -->
-            <div
-                class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[130px] sm:min-w-[140px] select-none">
-                <div class="flex items-center gap-2">
-                    <mat-icon svgIcon="mdi:progress-clock" class="icon-size-4.5 text-amber-500 shrink-0"></mat-icon>
-                    <span>កំពុងធ្វើ</span>
-                </div>
-                <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                    <span>{{ overview()?.metrics?.in_progress_tasks || 5 }}</span>
-                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </div>
-            </div>
-
-            <!-- 5. ស្នើសុំពិនិត្យ -->
-            <div
-                class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[140px] sm:min-w-[155px] select-none">
-                <div class="flex items-center gap-2">
-                    <mat-icon svgIcon="mdi:magnify" class="icon-size-4.5 text-blue-500 shrink-0"></mat-icon>
-                    <span>ស្នើសុំពិនិត្យ</span>
-                </div>
-                <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                    <span>2</span>
-                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </div>
-            </div>
-
-            <!-- 6. បើកឡើងវិញ -->
-            <div
-                class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[135px] sm:min-w-[145px] select-none">
-                <div class="flex items-center gap-2">
-                    <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5 text-amber-500 shrink-0"></mat-icon>
-                    <span>បើកឡើងវិញ</span>
-                </div>
-                <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                    <span>1</span>
-                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </div>
-            </div>
-
-            <!-- 7. បញ្ចប់ -->
-            <div
-                class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
-                <div class="flex items-center gap-2">
-                    <mat-icon svgIcon="mdi:check-circle" class="icon-size-4.5 text-emerald-500 shrink-0"></mat-icon>
-                    <span>បញ្ចប់</span>
-                </div>
-                <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                    <span>{{ overview()?.metrics?.completed_tasks || 3 }}</span>
-                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Loading Spinner -->
-    <div *ngIf="loading()" class="flex justify-center items-center py-20">
-        <mat-progress-spinner mode="indeterminate" diameter="44"></mat-progress-spinner>
-    </div>
-
-    <div *ngIf="!loading() && overview()" class="space-y-6">
-
-        <!-- ===================================================================== -->
-        <!-- 3. SCROLLABLE STAT & DIGITAL CARDS ROW (Hidden Scrollbar)              -->
-        <!-- ===================================================================== -->
-        <div class="relative group/carousel font-normal">
-
-            <!-- Section Title -->
-            <div class="mb-3 px-0.5">
-                <h2 class="text-[17px] font-normal text-slate-800 dark:text-white">
-                    ព័ត៌មាន និង ស្ថិតិ
-                </h2>
-            </div>
-
-            <!-- Scrollable Cards Track (Invisible Scrollbar) -->
-            <div id="statCardTrack"
-                class="flex items-stretch gap-5 overflow-x-auto scroll-smooth pb-1 pt-0.5 snap-x snap-mandatory scroll-p-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-
-                <!-- 1. កាតឌីជីថល (Digital Card - Exact Match with Reference Color Palette) [FIRST] -->
-                <div (click)="toggleCardSide()"
-                    class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer [perspective:1000px] min-h-[195px] sm:min-h-[205px] select-none">
-                    <!-- 3D Card Inner Wrapper (Flips smoothly on click) -->
-                    <div class="relative w-full h-full duration-500 [transform-style:preserve-3d] transition-transform ease-out rounded-xl shadow-md"
-                        [ngClass]="cardSide() === 'back' ? '[transform:rotateY(180deg)]' : ''">
-
-                        <!-- ================= FRONT FACE (Exact Prussian Navy Design from Image) ================= -->
-                        <div
-                            class="absolute inset-0 w-full h-full [backface-visibility:hidden] rounded-xl overflow-hidden p-6 flex flex-col justify-center items-center text-center bg-[#0f284e] text-white border border-[#1b3d6e] relative">
-                            <!-- Subtle geometric background watermark -->
-                            <div class="absolute -right-6 -bottom-6 text-[#244c80]/25 pointer-events-none">
-                                <mat-icon svgIcon="mdi:hexagon-multiple-outline" class="icon-size-28"></mat-icon>
+            <!-- Dedicated White Background Card with Generous Padding -->
+            <div class="bg-white dark:bg-slate-800 px-6 sm:px-8 pb-6 pt-0">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <!-- Left: Overlapping Avatar + Clean User Info on White -->
+                    <div class="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
+                        <!-- Circular Avatar (Only this overlaps the cover) -->
+                        <div class="relative -mt-16 sm:-mt-20 shrink-0 z-20">
+                            <div
+                                class="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-white dark:border-slate-800 bg-white dark:bg-slate-700 shadow-xl overflow-hidden flex items-center justify-center">
+                                <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
                             </div>
-
-                            <!-- Center Branding (Increased Sizes) -->
-                            <div class="relative z-10 space-y-2 my-auto">
-                                <div
-                                    class="w-14 h-14 mx-auto rounded-2xl bg-[#1b3d6e]/60 border border-[#3b73b5]/50 flex items-center justify-center mb-3 shadow-md">
-                                    <mat-icon svgIcon="mdi:hexagon-slice-6"
-                                        class="icon-size-9 text-[#5ea2eb]"></mat-icon>
-                                </div>
-                                <h3
-                                    class="text-2xl sm:text-3xl font-medium tracking-widest text-white uppercase leading-tight">
-                                    WMS | SYSTEM
-                                </h3>
-                                <p
-                                    class="text-[13px] sm:text-[14px] text-[#8cb9eb] tracking-widest uppercase font-medium mt-1">
-                                    DIGITAL MEMBER IDENTITY
-                                </p>
+                            <!-- Orange/Amber Verified Badge -->
+                            <div class="absolute bottom-1 right-1 w-7 h-7 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-md border-2 border-white dark:border-slate-800 cursor-pointer"
+                                matTooltip="គណនីបានផ្ទៀងផ្ទាត់">
+                                <mat-icon svgIcon="mdi:check-decagram" class="icon-size-6 text-amber-500"></mat-icon>
                             </div>
                         </div>
 
-                        <!-- ================= BACK FACE (Exact Two-Tone Curved Arc Design from Image) ================= -->
-                        <div
-                            class="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-xl overflow-hidden flex bg-[#2d62a3] text-white border border-[#1b3d6e]">
-
-                            <!-- Left White Section with Subtle Curve -->
+                        <!-- Names & Contacts (16px and Normal Font) -->
+                        <div class="pt-2 sm:pt-4 sm:pb-1">
+                            <h1 class="text-2xl sm:text-3xl font-medium text-slate-900 dark:text-white tracking-tight">
+                                {{ currentUser()?.kh_name || overview()?.user?.name_kh || 'ចេង ច័ន្ទបញ្ញា' }}
+                            </h1>
+                            <p
+                                class="text-[16px] font-normal uppercase tracking-wider text-slate-600 dark:text-slate-400 mt-0.5">
+                                {{ currentUser()?.en_name || overview()?.user?.name_en || 'CHENG CHANPANHA' }}
+                            </p>
                             <div
-                                class="w-[42%] bg-white p-3.5 flex flex-col items-center justify-between text-slate-800 relative z-10 rounded-r-[36px] shadow-md border-r border-slate-100">
-                                <!-- Top Avatar / Logo (Increased Size) -->
-                                <div
-                                    class="w-13 h-13 rounded-full border-2 border-[#2d62a3] overflow-hidden bg-white shadow-xs shrink-0">
-                                    <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
-                                </div>
-
-                                <!-- Real Scannable QR Code -->
-                                <div
-                                    class="w-[72px] h-[72px] bg-white p-0.5 shrink-0 flex items-center justify-center rounded-lg shadow-2xs">
-                                    <img *ngIf="qrCodeDataUrl()" [src]="qrCodeDataUrl()" alt="Member QR Code"
-                                        class="w-full h-full object-contain" />
-                                    <mat-icon *ngIf="!qrCodeDataUrl()" svgIcon="mdi:qrcode"
-                                        class="icon-size-14 text-[#0f284e]"></mat-icon>
-                                </div>
+                                class="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 text-[16px] text-slate-600 dark:text-slate-300 mt-2 font-normal">
+                                <span class="flex items-center gap-1.5">
+                                    <mat-icon svgIcon="mdi:phone" class="icon-size-4.5 text-slate-400"></mat-icon>
+                                    <span>{{ currentUser()?.phone || '087600064' }}</span>
+                                </span>
+                                <span class="text-slate-300 dark:text-slate-600">•</span>
+                                <span class="flex items-center gap-1.5">
+                                    <mat-icon svgIcon="mdi:email" class="icon-size-4.5 text-slate-400"></mat-icon>
+                                    <span>{{ currentUser()?.email || 'Chanpanhacheng@gmail.com' }}</span>
+                                </span>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Right Blue Information Section -->
-                            <div class="w-[58%] p-4 flex flex-col justify-between space-y-2 text-white relative z-10">
-                                <div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- 2. MY TASKS FILTER CARDS (ការងារខ្ញុំ - Naked Clean Icons)                 -->
+        <!-- ========================================================================= -->
+        <div class="space-y-2.5 font-normal">
+            <h2 class="text-[17px] font-normal text-slate-800 dark:text-white px-0.5">
+                ការងារខ្ញុំ
+            </h2>
+
+            <div
+                class="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+
+                <!-- 1. ថ្មី -->
+                <div
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:clipboard-text-outline"
+                            class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0"></mat-icon>
+                        <span>ថ្មី</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
+                        <span>{{ overview()?.metrics?.pending_tasks || 4 }}</span>
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    </div>
+                </div>
+
+                <!-- 2. បញ្ជាក់ -->
+                <div
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:clipboard-check-outline"
+                            class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0"></mat-icon>
+                        <span>បញ្ជាក់</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
+                        <span>{{ overview()?.metrics?.completed_tasks || 3 }}</span>
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    </div>
+                </div>
+
+                <!-- 3. មិនបញ្ជាក់ -->
+                <div
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[135px] sm:min-w-[145px] select-none">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:clipboard-minus-outline"
+                            class="icon-size-4.5 text-slate-600 dark:text-slate-400 shrink-0"></mat-icon>
+                        <span>មិនបញ្ជាក់</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
+                        <span>{{ overview()?.metrics?.pending_tasks || 4 }}</span>
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    </div>
+                </div>
+
+                <!-- 4. កំពុងធ្វើ -->
+                <div
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[130px] sm:min-w-[140px] select-none">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:progress-clock" class="icon-size-4.5 text-amber-500 shrink-0"></mat-icon>
+                        <span>កំពុងធ្វើ</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
+                        <span>{{ overview()?.metrics?.in_progress_tasks || 5 }}</span>
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    </div>
+                </div>
+
+                <!-- 5. ស្នើសុំពិនិត្យ -->
+                <div
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[140px] sm:min-w-[155px] select-none">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:magnify" class="icon-size-4.5 text-blue-500 shrink-0"></mat-icon>
+                        <span>ស្នើសុំពិនិត្យ</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
+                        <span>2</span>
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    </div>
+                </div>
+
+                <!-- 6. បើកឡើងវិញ -->
+                <div
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[135px] sm:min-w-[145px] select-none">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5 text-amber-500 shrink-0"></mat-icon>
+                        <span>បើកឡើងវិញ</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
+                        <span>1</span>
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    </div>
+                </div>
+
+                <!-- 7. បញ្ចប់ -->
+                <div
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:check-circle" class="icon-size-4.5 text-emerald-500 shrink-0"></mat-icon>
+                        <span>បញ្ចប់</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
+                        <span>{{ overview()?.metrics?.completed_tasks || 3 }}</span>
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="loading()" class="flex justify-center items-center py-20">
+            <mat-progress-spinner mode="indeterminate" diameter="44"></mat-progress-spinner>
+        </div>
+
+        <div *ngIf="!loading() && overview()" class="space-y-6">
+
+            <!-- ===================================================================== -->
+            <!-- 3. SCROLLABLE STAT & DIGITAL CARDS ROW (Hidden Scrollbar)              -->
+            <!-- ===================================================================== -->
+            <div class="relative group/carousel font-normal">
+
+                <!-- Section Title -->
+                <div class="mb-3 px-0.5">
+                    <h2 class="text-[17px] font-normal text-slate-800 dark:text-white">
+                        ព័ត៌មាន និង ស្ថិតិ
+                    </h2>
+                </div>
+
+                <!-- Scrollable Cards Track (Invisible Scrollbar) -->
+                <div id="statCardTrack"
+                    class="flex items-stretch gap-5 overflow-x-auto scroll-smooth pb-1 pt-0.5 snap-x snap-mandatory scroll-p-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+
+                    <!-- 1. កាតឌីជីថល (Digital Card - Exact Match with Reference Color Palette) [FIRST] -->
+                    <div (click)="toggleCardSide()"
+                        class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer [perspective:1000px] min-h-[195px] sm:min-h-[205px] select-none">
+                        <!-- 3D Card Inner Wrapper (Flips smoothly on click) -->
+                        <div class="relative w-full h-full duration-500 [transform-style:preserve-3d] transition-transform ease-out rounded-xl shadow-md"
+                            [ngClass]="cardSide() === 'back' ? '[transform:rotateY(180deg)]' : ''">
+
+                            <!-- ================= FRONT FACE (Exact Prussian Navy Design from Image) ================= -->
+                            <div
+                                class="absolute inset-0 w-full h-full [backface-visibility:hidden] rounded-xl overflow-hidden p-6 flex flex-col justify-center items-center text-center bg-[#0f284e] text-white border border-[#1b3d6e] relative">
+                                <!-- Subtle geometric background watermark -->
+                                <div class="absolute -right-6 -bottom-6 text-[#244c80]/25 pointer-events-none">
+                                    <mat-icon svgIcon="mdi:hexagon-multiple-outline" class="icon-size-28"></mat-icon>
+                                </div>
+
+                                <!-- Center Branding (Increased Sizes) -->
+                                <div class="relative z-10 space-y-2 my-auto">
+                                    <div
+                                        class="w-14 h-14 mx-auto rounded-2xl bg-[#1b3d6e]/60 border border-[#3b73b5]/50 flex items-center justify-center mb-3 shadow-md">
+                                        <mat-icon svgIcon="mdi:hexagon-slice-6"
+                                            class="icon-size-9 text-[#5ea2eb]"></mat-icon>
+                                    </div>
                                     <h3
-                                        class="text-[16px] sm:text-[17px] font-medium text-white truncate leading-tight">
-                                        {{ currentUser()?.kh_name || overview()?.user?.name_kh || 'ចេង ច័ន្ទបញ្ញា' }}
+                                        class="text-2xl sm:text-3xl font-medium tracking-widest text-white uppercase leading-tight">
+                                        WMS | SYSTEM
                                     </h3>
-                                    <p class="text-[12px] text-blue-100 uppercase tracking-wider truncate mt-0.5">
-                                        {{ currentUser()?.en_name || overview()?.user?.name_en || 'CHENG CHANPANHA' }}
+                                    <p
+                                        class="text-[13px] sm:text-[14px] text-[#8cb9eb] tracking-widest uppercase font-medium mt-1">
+                                        DIGITAL MEMBER IDENTITY
                                     </p>
                                 </div>
+                            </div>
 
-                                <!-- Contact Info Lines -->
-                                <div class="space-y-1.5 text-[12px] text-blue-100">
-                                    <div class="flex items-center gap-2 truncate">
-                                        <mat-icon svgIcon="mdi:phone"
-                                            class="icon-size-4 text-blue-200 shrink-0"></mat-icon>
-                                        <span class="truncate">{{ currentUser()?.phone || '087600064' }}</span>
+                            <!-- ================= BACK FACE (Exact Two-Tone Curved Arc Design from Image) ================= -->
+                            <div
+                                class="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-xl overflow-hidden flex bg-[#2d62a3] text-white border border-[#1b3d6e]">
+
+                                <!-- Left White Section with Subtle Curve -->
+                                <div
+                                    class="w-[42%] bg-white p-3.5 flex flex-col items-center justify-between text-slate-800 relative z-10 rounded-r-[36px] shadow-md border-r border-slate-100">
+                                    <!-- Top Avatar / Logo (Increased Size) -->
+                                    <div
+                                        class="w-13 h-13 rounded-full border-2 border-[#2d62a3] overflow-hidden bg-white shadow-xs shrink-0">
+                                        <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
                                     </div>
-                                    <div class="flex items-center gap-2 truncate">
-                                        <mat-icon svgIcon="mdi:email"
-                                            class="icon-size-4 text-blue-200 shrink-0"></mat-icon>
-                                        <span class="truncate">{{ currentUser()?.email || 'Chanpanhacheng@gmail.com'
-                                            }}</span>
+
+                                    <!-- Real Scannable QR Code -->
+                                    <div
+                                        class="w-[72px] h-[72px] bg-white p-0.5 shrink-0 flex items-center justify-center rounded-lg shadow-2xs">
+                                        <img *ngIf="qrCodeDataUrl()" [src]="qrCodeDataUrl()" alt="Member QR Code"
+                                            class="w-full h-full object-contain" />
+                                        <mat-icon *ngIf="!qrCodeDataUrl()" svgIcon="mdi:qrcode"
+                                            class="icon-size-14 text-[#0f284e]"></mat-icon>
                                     </div>
                                 </div>
 
-                                <!-- Bottom Status -->
+                                <!-- Right Blue Information Section -->
                                 <div
-                                    class="pt-2 border-t border-white/20 flex items-center justify-between text-[11px] text-blue-200">
-                                    <span class="flex items-center gap-1 text-emerald-300">
-                                        <mat-icon svgIcon="mdi:check-decagram" class="icon-size-4"></mat-icon>
-                                        <span>សុពលភាពសកម្ម</span>
+                                    class="w-[58%] p-4 flex flex-col justify-between space-y-2 text-white relative z-10">
+                                    <div>
+                                        <h3
+                                            class="text-[16px] sm:text-[17px] font-medium text-white truncate leading-tight">
+                                            {{ currentUser()?.kh_name || overview()?.user?.name_kh || 'ចេង ច័ន្ទបញ្ញា'
+                                            }}
+                                        </h3>
+                                        <p class="text-[12px] text-blue-100 uppercase tracking-wider truncate mt-0.5">
+                                            {{ currentUser()?.en_name || overview()?.user?.name_en || 'CHENG CHANPANHA'
+                                            }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Contact Info Lines -->
+                                    <div class="space-y-1.5 text-[12px] text-blue-100">
+                                        <div class="flex items-center gap-2 truncate">
+                                            <mat-icon svgIcon="mdi:phone"
+                                                class="icon-size-4 text-blue-200 shrink-0"></mat-icon>
+                                            <span class="truncate">{{ currentUser()?.phone || '087600064' }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 truncate">
+                                            <mat-icon svgIcon="mdi:email"
+                                                class="icon-size-4 text-blue-200 shrink-0"></mat-icon>
+                                            <span class="truncate">{{ currentUser()?.email || 'Chanpanhacheng@gmail.com'
+                                                }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bottom Status -->
+                                    <div
+                                        class="pt-2 border-t border-white/20 flex items-center justify-between text-[11px] text-blue-200">
+                                        <span class="flex items-center gap-1 text-emerald-300">
+                                            <mat-icon svgIcon="mdi:check-decagram" class="icon-size-4"></mat-icon>
+                                            <span>សុពលភាពសកម្ម</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 2. ស្ថិតិការងារសរុប -->
+                    <div (click)="navigateToTasks('all')"
+                        class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-blue-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span
+                                    class="text-[13px] font-normal tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-md">
+                                    ស្ថិតិការងារ
+                                </span>
+                                <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
+                                    ការងារសរុប
+                                </h2>
+                            </div>
+                            <mat-icon svgIcon="mdi:format-list-checks"
+                                class="icon-size-8 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform"></mat-icon>
+                        </div>
+
+                        <!-- Mini Statistical Sparkline Trend -->
+                        <div class="h-8 w-full my-1 overflow-hidden pointer-events-none">
+                            <svg class="w-full h-full overflow-visible" viewBox="0 0 100 24" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="sparkline-task" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
+                                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 0,18 C 20,22 35,6 55,14 C 75,20 85,4 100,8 L 100,24 L 0,24 Z"
+                                    fill="url(#sparkline-task)" />
+                                <path d="M 0,18 C 20,22 35,6 55,14 C 75,20 85,4 100,8" fill="none" stroke="#2563eb"
+                                    stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                        </div>
+
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span class="text-3xl sm:text-4xl font-normal text-slate-900 dark:text-white">
+                                {{ overview()?.metrics?.total_tasks || 0 }}
+                            </span>
+                            <span
+                                class="text-[15px] text-blue-600 dark:text-blue-400 font-normal flex items-center gap-1">
+                                <span>មើលទាំងអស់</span>
+                                <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4.5"></mat-icon>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 3. ការងារកំពុងដំណើរការ -->
+                    <div (click)="navigateToTasks('in_progress')"
+                        class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-blue-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span
+                                    class="text-[13px] font-normal tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-md">
+                                    ការងារ
+                                </span>
+                                <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
+                                    កំពុងអនុវត្ត
+                                </h2>
+                            </div>
+                            <mat-icon svgIcon="mdi:progress-clock"
+                                class="icon-size-8 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform"></mat-icon>
+                        </div>
+
+                        <!-- Mini Statistical Sparkline Trend -->
+                        <div class="h-8 w-full my-1 overflow-hidden pointer-events-none">
+                            <svg class="w-full h-full overflow-visible" viewBox="0 0 100 24" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="sparkline-progress" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.25" />
+                                        <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.0" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 0,20 C 25,8 45,22 70,6 C 85,12 95,4 100,6 L 100,24 L 0,24 Z"
+                                    fill="url(#sparkline-progress)" />
+                                <path d="M 0,20 C 25,8 45,22 70,6 C 85,12 95,4 100,6" fill="none" stroke="#0284c7"
+                                    stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                        </div>
+
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span class="text-3xl sm:text-4xl font-normal text-blue-600 dark:text-blue-400">
+                                {{ overview()?.metrics?.in_progress_tasks || 0 }}
+                            </span>
+                            <span
+                                class="text-[15px] text-blue-600 dark:text-blue-400 font-normal flex items-center gap-1">
+                                <span>ភារកិច្ចសកម្ម</span>
+                                <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4.5"></mat-icon>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 4. គម្រោងសកម្ម (Projects) -->
+                    <div (click)="navigateToProjects()"
+                        class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-blue-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span
+                                    class="text-[13px] font-normal tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-md">
+                                    គម្រោង
+                                </span>
+                                <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
+                                    គម្រោងសកម្ម
+                                </h2>
+                            </div>
+                            <mat-icon svgIcon="mdi:folder-star-outline"
+                                class="icon-size-8 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform"></mat-icon>
+                        </div>
+
+                        <!-- Mini Statistical Sparkline Trend -->
+                        <div class="h-8 w-full my-1 overflow-hidden pointer-events-none">
+                            <svg class="w-full h-full overflow-visible" viewBox="0 0 100 24" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="sparkline-proj" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
+                                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 0,14 C 20,24 40,6 65,18 C 80,8 90,14 100,4 L 100,24 L 0,24 Z"
+                                    fill="url(#sparkline-proj)" />
+                                <path d="M 0,14 C 20,24 40,6 65,18 C 80,8 90,14 100,4" fill="none" stroke="#2563eb"
+                                    stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                        </div>
+
+                        <div class="flex items-baseline justify-between mt-1">
+                            <span class="text-3xl sm:text-4xl font-normal text-blue-600 dark:text-blue-400">
+                                {{ overview()?.active_projects?.length || 0 }}
+                            </span>
+                            <span
+                                class="text-[15px] text-blue-600 dark:text-blue-400 font-normal flex items-center gap-1">
+                                <span>ពិនិត្យគម្រោង</span>
+                                <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4.5"></mat-icon>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 5. របាយការណ៍ និងលទ្ធផលសម្រេចបាន (Reports) -->
+                    <div (click)="navigateToReports()"
+                        class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-emerald-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span
+                                    class="text-[13px] font-normal tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-indigo-950/40 px-2.5 py-1 rounded-md">
+                                    របាយការណ៍
+                                </span>
+                                <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
+                                    លទ្ធផលសម្រេច
+                                </h2>
+                            </div>
+                            <mat-icon svgIcon="mdi:file-chart-outline"
+                                class="icon-size-8 text-emerald-500 group-hover:scale-110 transition-transform"></mat-icon>
+                        </div>
+
+                        <div>
+                            <div class="flex items-baseline justify-between mt-4 mb-2.5">
+                                <span class="text-3xl sm:text-4xl font-normal text-emerald-600 dark:text-emerald-400">
+                                    {{ overview()?.metrics?.completion_rate || 0 }}%
+                                </span>
+                                <span class="text-[15px] text-emerald-600 dark:text-emerald-400 font-normal">
+                                    {{ overview()?.metrics?.completed_tasks || 0 }} ភារកិច្ច
+                                </span>
+                            </div>
+                            <!-- Mini progress bar -->
+                            <div class="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                                    [style.width.%]="overview()?.metrics?.completion_rate || 0"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ===================================================================== -->
+            <!-- 4. QUICK ACTION SERVICES GRID (សម្រង់វត្តមាន, ប្រាក់បៀវត្ស & សេវាសំខាន់ៗ)   -->
+            <!-- ===================================================================== -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3.5 font-normal">
+                <!-- 1. សម្រង់វត្តមាន -->
+                <div (click)="openAttendanceDialog()"
+                    class="group cursor-pointer p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-700/40 transition-all duration-200 flex flex-col items-center justify-center text-center select-none">
+                    <mat-icon svgIcon="mdi:calendar-check"
+                        class="icon-size-8 text-emerald-600 dark:text-emerald-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                    <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
+                        សម្រង់វត្តមាន</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">ម៉ោងធ្វើការ</p>
+                </div>
+
+                <!-- 2. ប្រាក់បៀវត្ស -->
+                <div (click)="openPayrollDialog()"
+                    class="group cursor-pointer p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-700/40 transition-all duration-200 flex flex-col items-center justify-center text-center select-none">
+                    <mat-icon svgIcon="mdi:cash-multiple"
+                        class="icon-size-8 text-blue-600 dark:text-blue-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                    <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
+                        ប្រាក់បៀវត្ស</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">ប័ណ្ណបៀវត្ស</p>
+                </div>
+
+                <!-- 3. បង្កើតគម្រោង -->
+                <div (click)="openCreateProjectSideDialog()"
+                    class="group cursor-pointer p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-700/40 transition-all duration-200 flex flex-col items-center justify-center text-center select-none">
+                    <mat-icon svgIcon="mdi:plus-circle"
+                        class="icon-size-8 text-blue-600 dark:text-blue-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                    <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
+                        បង្កើតគម្រោង</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">គម្រោងថ្មី</p>
+                </div>
+
+                <!-- 4. គម្រោងសកម្ម -->
+                <div (click)="openActiveProjectsSideDialog()"
+                    class="group cursor-pointer p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-700/40 transition-all duration-200 flex flex-col items-center justify-center text-center select-none">
+                    <mat-icon svgIcon="mdi:view-grid-outline"
+                        class="icon-size-8 text-teal-600 dark:text-teal-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                    <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
+                        គម្រោងសកម្ម</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">តាមដានគម្រោង</p>
+                </div>
+
+                <!-- 5. បង្កើតអង្គប្រជំុ -->
+                <div (click)="openCreateMeetingSideDialog()"
+                    class="group cursor-pointer p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-700/40 transition-all duration-200 flex flex-col items-center justify-center text-center select-none">
+                    <mat-icon svgIcon="mdi:video-vintage"
+                        class="icon-size-8 text-purple-600 dark:text-purple-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                    <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
+                        បង្កើតអង្គប្រជំុ</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">បន្ទប់ប្រជុំ</p>
+                </div>
+
+                <!-- 6. ជំនួយ ឬ បញ្ហា -->
+                <div (click)="openHelpSupportSideDialog()"
+                    class="group cursor-pointer p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-700/40 transition-all duration-200 flex flex-col items-center justify-center text-center select-none">
+                    <mat-icon svgIcon="mdi:help-circle-outline"
+                        class="icon-size-8 text-amber-600 dark:text-amber-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
+                    <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
+                        ជំនួយ ឬ
+                        បញ្ហា</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">មជ្ឈមណ្ឌលជំនួយ</p>
+                </div>
+            </div>
+
+            <!-- ===================================================================== -->
+            <!-- 5. TASK LIST SECTION                                                  -->
+            <!-- ===================================================================== -->
+            <div
+                class="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs font-normal">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h3 class="text-[17px] font-normal text-slate-800 dark:text-white">
+                            បញ្ជីការងារដែលបានចាត់តាំង
+                        </h3>
+                        <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            បង្ហាញការងារតាមការជ្រើសរើស
+                        </p>
+                    </div>
+                    <button mat-button color="primary" class="text-[15px] font-normal" (click)="navigateToTasks()">
+                        មើលទាំងអស់
+                    </button>
+                </div>
+
+                <div *ngIf="getFilteredTasks().length === 0" class="text-center py-12 text-slate-400">
+                    <mat-icon svgIcon="mdi:clipboard-text-outline"
+                        class="icon-size-12 mx-auto mb-2 text-slate-300"></mat-icon>
+                    <p class="text-[16px] font-normal">មិនមានការងារក្នុងផ្នែកនេះទេ</p>
+                </div>
+
+                <div class="space-y-2.5">
+                    <div *ngFor="let task of getFilteredTasks()" (click)="navigateToTasks()"
+                        class="cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-800 hover:border-blue-200 dark:hover:border-blue-800/60 hover:shadow-xs transition-all gap-3">
+                        <div class="flex items-start gap-3 min-w-0">
+                            <div class="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
+                                [ngClass]="task.status === 'completed' || task.status === 'done' ? 'bg-emerald-500' : 'bg-blue-500'">
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="text-[16px] font-normal text-slate-900 dark:text-white truncate">
+                                    {{ task.title }}
+                                </h4>
+                                <div class="flex items-center gap-2.5 mt-1">
+                                    <span class="text-[14px] text-slate-500 dark:text-slate-400 font-normal">
+                                        {{ task.project_name }}
+                                    </span>
+                                    <span class="text-slate-300 dark:text-slate-600">•</span>
+                                    <span class="text-[13px] px-2 py-0.5 rounded font-normal"
+                                        [ngClass]="getPriorityClass(task.priority)">
+                                        {{ task.priority | titlecase }}
                                     </span>
                                 </div>
                             </div>
-
                         </div>
 
-                    </div>
-                </div>
-
-                <!-- 2. ស្ថិតិការងារសរុប -->
-                <div (click)="navigateToTasks('all')"
-                    class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-blue-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <span
-                                class="text-[13px] font-normal tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-md">
-                                ស្ថិតិការងារ
-                            </span>
-                            <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
-                                ការងារសរុប
-                            </h2>
-                        </div>
-                        <mat-icon svgIcon="mdi:format-list-checks"
-                            class="icon-size-8 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform"></mat-icon>
-                    </div>
-
-                    <!-- Mini Statistical Sparkline Trend -->
-                    <div class="h-8 w-full my-1 overflow-hidden pointer-events-none">
-                        <svg class="w-full h-full overflow-visible" viewBox="0 0 100 24" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="sparkline-task" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
-                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M 0,18 C 20,22 35,6 55,14 C 75,20 85,4 100,8 L 100,24 L 0,24 Z"
-                                fill="url(#sparkline-task)" />
-                            <path d="M 0,18 C 20,22 35,6 55,14 C 75,20 85,4 100,8" fill="none" stroke="#2563eb"
-                                stroke-width="2" stroke-linecap="round" />
-                        </svg>
-                    </div>
-
-                    <div class="flex items-baseline justify-between mt-1">
-                        <span class="text-3xl sm:text-4xl font-normal text-slate-900 dark:text-white">
-                            {{ overview()?.metrics?.total_tasks || 0 }}
-                        </span>
-                        <span class="text-[15px] text-blue-600 dark:text-blue-400 font-normal flex items-center gap-1">
-                            <span>មើលទាំងអស់</span>
-                            <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4.5"></mat-icon>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- 3. ការងារកំពុងដំណើរការ -->
-                <div (click)="navigateToTasks('in_progress')"
-                    class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-blue-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <span
-                                class="text-[13px] font-normal tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-md">
-                                ការងារ
-                            </span>
-                            <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
-                                កំពុងអនុវត្ត
-                            </h2>
-                        </div>
-                        <mat-icon svgIcon="mdi:progress-clock"
-                            class="icon-size-8 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform"></mat-icon>
-                    </div>
-
-                    <!-- Mini Statistical Sparkline Trend -->
-                    <div class="h-8 w-full my-1 overflow-hidden pointer-events-none">
-                        <svg class="w-full h-full overflow-visible" viewBox="0 0 100 24" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="sparkline-progress" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.25" />
-                                    <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M 0,20 C 25,8 45,22 70,6 C 85,12 95,4 100,6 L 100,24 L 0,24 Z"
-                                fill="url(#sparkline-progress)" />
-                            <path d="M 0,20 C 25,8 45,22 70,6 C 85,12 95,4 100,6" fill="none" stroke="#0284c7"
-                                stroke-width="2" stroke-linecap="round" />
-                        </svg>
-                    </div>
-
-                    <div class="flex items-baseline justify-between mt-1">
-                        <span class="text-3xl sm:text-4xl font-normal text-blue-600 dark:text-blue-400">
-                            {{ overview()?.metrics?.in_progress_tasks || 0 }}
-                        </span>
-                        <span class="text-[15px] text-blue-600 dark:text-blue-400 font-normal flex items-center gap-1">
-                            <span>ភារកិច្ចសកម្ម</span>
-                            <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4.5"></mat-icon>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- 4. គម្រោងសកម្ម (Projects) -->
-                <div (click)="navigateToProjects()"
-                    class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-blue-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <span
-                                class="text-[13px] font-normal tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded-md">
-                                គម្រោង
-                            </span>
-                            <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
-                                គម្រោងសកម្ម
-                            </h2>
-                        </div>
-                        <mat-icon svgIcon="mdi:folder-star-outline"
-                            class="icon-size-8 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform"></mat-icon>
-                    </div>
-
-                    <!-- Mini Statistical Sparkline Trend -->
-                    <div class="h-8 w-full my-1 overflow-hidden pointer-events-none">
-                        <svg class="w-full h-full overflow-visible" viewBox="0 0 100 24" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="sparkline-proj" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
-                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M 0,14 C 20,24 40,6 65,18 C 80,8 90,14 100,4 L 100,24 L 0,24 Z"
-                                fill="url(#sparkline-proj)" />
-                            <path d="M 0,14 C 20,24 40,6 65,18 C 80,8 90,14 100,4" fill="none" stroke="#2563eb"
-                                stroke-width="2" stroke-linecap="round" />
-                        </svg>
-                    </div>
-
-                    <div class="flex items-baseline justify-between mt-1">
-                        <span class="text-3xl sm:text-4xl font-normal text-blue-600 dark:text-blue-400">
-                            {{ overview()?.active_projects?.length || 0 }}
-                        </span>
-                        <span class="text-[15px] text-blue-600 dark:text-blue-400 font-normal flex items-center gap-1">
-                            <span>ពិនិត្យគម្រោង</span>
-                            <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4.5"></mat-icon>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- 5. របាយការណ៍ និងលទ្ធផលសម្រេចបាន (Reports) -->
-                <div (click)="navigateToReports()"
-                    class="shrink-0 w-[350px] sm:w-[390px] snap-start group cursor-pointer relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-sm hover:border-emerald-500/60 transition-all duration-200 flex flex-col justify-between min-h-[195px] sm:min-h-[205px]">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <span
-                                class="text-[13px] font-normal tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-indigo-950/40 px-2.5 py-1 rounded-md">
-                                របាយការណ៍
-                            </span>
-                            <h2 class="text-[17px] font-normal text-slate-800 dark:text-white mt-2.5">
-                                លទ្ធផលសម្រេច
-                            </h2>
-                        </div>
-                        <mat-icon svgIcon="mdi:file-chart-outline"
-                            class="icon-size-8 text-emerald-500 group-hover:scale-110 transition-transform"></mat-icon>
-                    </div>
-
-                    <div>
-                        <div class="flex items-baseline justify-between mt-4 mb-2.5">
-                            <span class="text-3xl sm:text-4xl font-normal text-emerald-600 dark:text-emerald-400">
-                                {{ overview()?.metrics?.completion_rate || 0 }}%
-                            </span>
-                            <span class="text-[15px] text-emerald-600 dark:text-emerald-400 font-normal">
-                                {{ overview()?.metrics?.completed_tasks || 0 }} ភារកិច្ច
-                            </span>
-                        </div>
-                        <!-- Mini progress bar -->
-                        <div class="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                                [style.width.%]="overview()?.metrics?.completion_rate || 0"></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ===================================================================== -->
-        <!-- 4. QUICK ACTION SERVICES GRID (សម្រង់វត្តមាន, ប្រាក់បៀវត្ស & សេវាសំខាន់ៗ)   -->
-        <!-- ===================================================================== -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 font-normal">
-            <!-- 1. សម្រង់វត្តមាន -->
-            <div (click)="openAttendanceDialog()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-emerald-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
-                <mat-icon svgIcon="mdi:calendar-check"
-                    class="icon-size-8 text-emerald-600 dark:text-emerald-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
-                    សម្រង់វត្តមាន</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">ម៉ោងធ្វើការ</p>
-            </div>
-
-            <!-- 2. ប្រាក់បៀវត្ស -->
-            <div (click)="openPayrollDialog()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-blue-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
-                <mat-icon svgIcon="mdi:cash-multiple"
-                    class="icon-size-8 text-blue-600 dark:text-blue-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
-                    ប្រាក់បៀវត្ស</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">ប័ណ្ណបៀវត្ស</p>
-            </div>
-
-            <!-- 3. បង្កើតគម្រោង -->
-            <div (click)="openCreateProjectSideDialog()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-primary transition-all duration-200 flex flex-col items-center justify-center select-none">
-                <mat-icon svgIcon="mdi:plus-circle"
-                    class="icon-size-8 text-blue-600 dark:text-blue-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
-                    បង្កើតគម្រោង</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">គម្រោងថ្មី</p>
-            </div>
-
-            <!-- 4. គម្រោងសកម្ម -->
-            <div (click)="openActiveProjectsSideDialog()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-teal-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
-                <mat-icon svgIcon="mdi:view-grid-outline"
-                    class="icon-size-8 text-teal-600 dark:text-teal-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
-                    គម្រោងសកម្ម</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">តាមដានគម្រោង</p>
-            </div>
-
-            <!-- 5. បង្កើតអង្គប្រជំុ -->
-            <div (click)="openCreateMeetingSideDialog()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-purple-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
-                <mat-icon svgIcon="mdi:video-vintage"
-                    class="icon-size-8 text-purple-600 dark:text-purple-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">
-                    បង្កើតអង្គប្រជំុ</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">បន្ទប់ប្រជុំ</p>
-            </div>
-
-            <!-- 6. ជំនួយ ឬ បញ្ហា -->
-            <div (click)="openHelpSupportSideDialog()"
-                class="group cursor-pointer rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-4 text-center shadow-2xs hover:shadow-xs hover:border-amber-500 transition-all duration-200 flex flex-col items-center justify-center select-none">
-                <mat-icon svgIcon="mdi:help-circle-outline"
-                    class="icon-size-8 text-amber-600 dark:text-amber-400 mb-2 group-hover:scale-110 transition-transform"></mat-icon>
-                <h3 class="text-[15px] sm:text-[16px] font-normal text-slate-800 dark:text-white leading-tight">ជំនួយ ឬ
-                    បញ្ហា</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">មជ្ឈមណ្ឌលជំនួយ</p>
-            </div>
-        </div>
-
-        <!-- ===================================================================== -->
-        <!-- 5. TASK LIST SECTION                                                  -->
-        <!-- ===================================================================== -->
-        <div
-            class="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-xs font-normal">
-            <div class="flex items-center justify-between mb-5">
-                <div>
-                    <h3 class="text-[17px] font-normal text-slate-800 dark:text-white">
-                        បញ្ជីការងារដែលបានចាត់តាំង
-                    </h3>
-                    <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        បង្ហាញការងារតាមការជ្រើសរើស
-                    </p>
-                </div>
-                <button mat-button color="primary" class="text-[15px] font-normal" (click)="navigateToTasks()">
-                    មើលទាំងអស់
-                </button>
-            </div>
-
-            <div *ngIf="getFilteredTasks().length === 0" class="text-center py-12 text-slate-400">
-                <mat-icon svgIcon="mdi:clipboard-text-outline"
-                    class="icon-size-12 mx-auto mb-2 text-slate-300"></mat-icon>
-                <p class="text-[16px] font-normal">មិនមានការងារក្នុងផ្នែកនេះទេ</p>
-            </div>
-
-            <div class="space-y-2.5">
-                <div *ngFor="let task of getFilteredTasks()"
-                    class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-slate-100 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/40 hover:bg-slate-100/80 dark:hover:bg-slate-900/80 transition-colors gap-3">
-                    <div class="flex items-start gap-3 min-w-0">
-                        <div class="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
-                            [ngClass]="task.status === 'completed' || task.status === 'done' ? 'bg-emerald-500' : 'bg-blue-500'">
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="text-[16px] font-normal text-slate-900 dark:text-white truncate">
-                                {{ task.title }}
-                            </h4>
-                            <div class="flex items-center gap-2.5 mt-1">
-                                <span class="text-[14px] text-slate-500 dark:text-slate-400 font-normal">
-                                    {{ task.project_name }}
-                                </span>
-                                <span class="text-slate-300 dark:text-slate-600">•</span>
-                                <span class="text-[13px] px-2 py-0.5 rounded font-normal"
-                                    [ngClass]="getPriorityClass(task.priority)">
-                                    {{ task.priority | titlecase }}
-                                </span>
+                        <div class="flex items-center gap-4 self-end sm:self-center">
+                            <!-- Progress -->
+                            <div class="w-24 hidden sm:block">
+                                <div class="flex justify-between text-[13px] text-slate-500 mb-1">
+                                    <span>វឌ្ឍនភាព</span>
+                                    <span>{{ task.progress }}%</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary rounded-full transition-all"
+                                        [style.width.%]="task.progress"></div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="flex items-center gap-4 self-end sm:self-center">
-                        <!-- Progress -->
-                        <div class="w-24 hidden sm:block">
-                            <div class="flex justify-between text-[13px] text-slate-500 mb-1">
-                                <span>វឌ្ឍនភាព</span>
-                                <span>{{ task.progress }}%</span>
-                            </div>
-                            <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div class="h-full bg-primary rounded-full transition-all"
-                                    [style.width.%]="task.progress"></div>
-                            </div>
+                            <!-- Clean Khmer Status Badge -->
+                            <span
+                                class="inline-flex items-center gap-1.5 text-[13px] font-normal px-2.5 py-0.5 rounded-md border select-none"
+                                [ngClass]="getStatusClass(task.status)">
+                                <mat-icon [svgIcon]="getStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
+                                <span>{{ getStatusLabel(task.status) }}</span>
+                            </span>
                         </div>
-
-                        <!-- Clean Khmer Status Badge -->
-                        <span
-                            class="inline-flex items-center gap-1.5 text-[13px] font-normal px-2.5 py-0.5 rounded-md border select-none"
-                            [ngClass]="getStatusClass(task.status)">
-                            <mat-icon [svgIcon]="getStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
-                            <span>{{ getStatusLabel(task.status) }}</span>
-                        </span>
                     </div>
                 </div>
             </div>
+
         </div>
 
     </div>

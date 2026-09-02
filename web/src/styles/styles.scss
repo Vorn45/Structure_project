@@ -42,6 +42,18 @@ body::-webkit-scrollbar {
     height: 0 !important;
 }
 
+/* Universal scrollbar-none utility */
+.scrollbar-none,
+.kanban-scroll-container {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    &::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+}
+
 /* OTP dialog backdrop and container styles */
 .otp-backdrop {
     background-color: rgba(0, 0, 0, 0.5) !important;

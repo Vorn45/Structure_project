@@ -8,11 +8,15 @@ import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateT
 // In-memory / mock store to serve user task operations
 export interface TaskItem {
     id: number;
+    code?: string;
     title: string;
     description: string;
+    module?: string;
     status: TaskStatusEnum;
     priority: TaskPriorityEnum;
     progress: number;
+    comments_count?: number;
+    attachments_count?: number;
     due_date: string | null;
     project_id: string;
     project_name: string;
@@ -28,58 +32,146 @@ export interface TaskItem {
 const INITIAL_TASKS: TaskItem[] = [
     {
         id: 1,
-        title: 'Design high-fidelity UI components for User Module',
-        description: 'Create modular Angular components matching the design system and Tailwind tokens.',
-        status: TaskStatusEnum.IN_PROGRESS,
+        code: '#PMS-675',
+        module: 'Org Admin | Structure',
+        title: 'Org Admin | Structure | Department',
+        description: 'Manage departmental structures, permissions, and organizational units in core hierarchy.',
+        status: TaskStatusEnum.IN_REVIEW,
         priority: TaskPriorityEnum.HIGH,
-        progress: 65,
-        due_date: new Date(Date.now() + 86400000 * 3).toISOString(),
+        progress: 85,
+        comments_count: 1,
+        attachments_count: 2,
+        due_date: new Date(Date.now() + 86400000 * 6).toISOString(),
         project_id: 'proj-001',
-        project_name: 'PMS Architecture',
-        assignee: { id: 1, name: 'Current User', avatar: null },
-        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        project_name: 'Core System Structure',
+        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 2,
-        title: 'Implement Refresh Token rotation & Cookie security',
-        description: 'Enhance token rotation security with token family invalidation on reuse.',
+        code: '#PMS-671',
+        module: 'Project | Folder',
+        title: 'Project | Folder | Drag & Drop',
+        description: 'Implement intuitive drag and drop folder organization for project documents.',
         status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.URGENT,
+        priority: TaskPriorityEnum.HIGH,
         progress: 100,
-        due_date: new Date(Date.now() - 86400000).toISOString(),
+        comments_count: 0,
+        attachments_count: 2,
+        due_date: new Date(Date.now() - 86400000 * 2).toISOString(),
         project_id: 'proj-001',
-        project_name: 'PMS Architecture',
-        assignee: { id: 1, name: 'Current User', avatar: null },
-        created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
+        project_name: 'Document Management',
+        assignee: { id: 2, name: 'Sokha Meng', avatar: null },
+        created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 3,
-        title: 'Set up Telegram 2FA Bot Webhook Notifications',
-        description: 'Ensure Telegram bot properly notifies users upon task assignments and status updates.',
-        status: TaskStatusEnum.TODO,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 0,
-        due_date: new Date(Date.now() + 86400000 * 5).toISOString(),
-        project_id: 'proj-002',
-        project_name: 'Notification Service',
-        assignee: { id: 1, name: 'Current User', avatar: null },
-        created_at: new Date().toISOString(),
+        code: '#PMS-670',
+        module: 'Project | Folder',
+        title: 'Project | Folder | Cannot Scroll PDF',
+        description: 'Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.',
+        status: TaskStatusEnum.CONFIRMED,
+        priority: TaskPriorityEnum.URGENT,
+        progress: 100,
+        comments_count: 5,
+        attachments_count: 1,
+        due_date: new Date(Date.now() - 86400000 * 3).toISOString(),
+        project_id: 'proj-001',
+        project_name: 'Document Management',
+        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 4,
-        title: 'Configure automated CI/CD pipeline and test suites',
-        description: 'Configure GitHub Actions pipeline for linting, testing, and deployment.',
-        status: TaskStatusEnum.IN_REVIEW,
+        code: '#PMS-574',
+        module: 'My Work | Profile',
+        title: 'My Work | Profile | Missing Cover',
+        description: 'Provide fallback default cover gradient when user cover photo URL is empty or unverified.',
+        status: TaskStatusEnum.REOPENED,
+        priority: TaskPriorityEnum.URGENT,
+        progress: 40,
+        comments_count: 3,
+        attachments_count: 1,
+        due_date: new Date(Date.now() - 86400000 * 5).toISOString(),
+        project_id: 'proj-002',
+        project_name: 'User Experience',
+        assignee: { id: 3, name: 'Ratha Vuth', avatar: null },
+        created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
+        updated_at: new Date().toISOString(),
+    },
+    {
+        id: 5,
+        code: '#PMS-554',
+        module: 'Security Settings',
+        title: 'Security setting UI improvements',
+        description: 'Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.',
+        status: TaskStatusEnum.NEW,
+        priority: TaskPriorityEnum.HIGH,
+        progress: 10,
+        comments_count: 4,
+        attachments_count: 1,
+        due_date: new Date(Date.now() - 86400000 * 6).toISOString(),
+        project_id: 'proj-002',
+        project_name: 'Security Hub',
+        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
+        updated_at: new Date().toISOString(),
+    },
+    {
+        id: 6,
+        code: '#PMS-532',
+        module: 'User | Report',
+        title: 'User | Report | Progress Compare',
+        description: 'Render interactive comparison charts comparing weekly member work hours and sprint deliverables.',
+        status: TaskStatusEnum.IN_PROGRESS,
         priority: TaskPriorityEnum.MEDIUM,
-        progress: 90,
-        due_date: new Date(Date.now() + 86400000 * 1).toISOString(),
+        progress: 55,
+        comments_count: 0,
+        attachments_count: 1,
+        due_date: new Date(Date.now() + 86400000 * 4).toISOString(),
+        project_id: 'proj-003',
+        project_name: 'Analytics & Reporting',
+        assignee: { id: 2, name: 'Sokha Meng', avatar: null },
+        created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
+        updated_at: new Date().toISOString(),
+    },
+    {
+        id: 7,
+        code: '#PMS-531',
+        module: 'User | Report',
+        title: 'User | Report | Progress',
+        description: 'Real-time sync of task milestone updates and aggregated department productivity scorecards.',
+        status: TaskStatusEnum.CONFIRMED,
+        priority: TaskPriorityEnum.MEDIUM,
+        progress: 88,
+        comments_count: 19,
+        attachments_count: 1,
+        due_date: new Date(Date.now() + 86400000 * 2).toISOString(),
+        project_id: 'proj-003',
+        project_name: 'Analytics & Reporting',
+        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
+        updated_at: new Date().toISOString(),
+    },
+    {
+        id: 8,
+        code: '#PMS-513',
+        module: 'Profile | Switch Org',
+        title: 'Profile | Switch Org | Exit Org',
+        description: 'Provide safe confirmation step and revoke tenant session when member switches workspace.',
+        status: TaskStatusEnum.UNCONFIRMED,
+        priority: TaskPriorityEnum.LOW,
+        progress: 0,
+        comments_count: 10,
+        attachments_count: 0,
+        due_date: new Date(Date.now() + 86400000 * 8).toISOString(),
         project_id: 'proj-001',
-        project_name: 'PMS Architecture',
-        assignee: { id: 1, name: 'Current User', avatar: null },
-        created_at: new Date(Date.now() - 86400000).toISOString(),
+        project_name: 'Core System Structure',
+        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
     },
 ];
@@ -91,8 +183,8 @@ export class TaskService {
     async getTasks(user: UserPayload, query: QueryTasksDto) {
         let list = [...this.tasks];
 
-        if (query.search) {
-            const s = query.search.toLowerCase();
+        if (query.search && query.search !== 'undefined' && query.search !== 'null' && query.search.trim()) {
+            const s = query.search.trim().toLowerCase();
             list = list.filter(
                 (t) =>
                     t.title.toLowerCase().includes(s) ||
@@ -100,15 +192,15 @@ export class TaskService {
             );
         }
 
-        if (query.status && query.status !== 'all') {
+        if (query.status && query.status !== 'all' && query.status !== 'undefined' && query.status !== 'null') {
             list = list.filter((t) => t.status === query.status);
         }
 
-        if (query.priority && query.priority !== 'all') {
+        if (query.priority && query.priority !== 'all' && query.priority !== 'undefined' && query.priority !== 'null') {
             list = list.filter((t) => t.priority === query.priority);
         }
 
-        if (query.project_id) {
+        if (query.project_id && query.project_id !== 'undefined' && query.project_id !== 'null') {
             list = list.filter((t) => t.project_id === query.project_id);
         }
 
@@ -126,10 +218,13 @@ export class TaskService {
                 offset,
                 counts: {
                     all: this.tasks.length,
-                    todo: this.tasks.filter((t) => t.status === TaskStatusEnum.TODO).length,
+                    new: this.tasks.filter((t) => t.status === TaskStatusEnum.NEW || (t.status as any) === 'pending').length,
+                    confirmed: this.tasks.filter((t) => t.status === TaskStatusEnum.CONFIRMED).length,
+                    unconfirmed: this.tasks.filter((t) => t.status === TaskStatusEnum.UNCONFIRMED || (t.status as any) === 'todo').length,
                     in_progress: this.tasks.filter((t) => t.status === TaskStatusEnum.IN_PROGRESS).length,
-                    in_review: this.tasks.filter((t) => t.status === TaskStatusEnum.IN_REVIEW).length,
-                    done: this.tasks.filter((t) => t.status === TaskStatusEnum.DONE).length,
+                    in_review: this.tasks.filter((t) => t.status === TaskStatusEnum.IN_REVIEW || (t.status as any) === 'review').length,
+                    reopened: this.tasks.filter((t) => t.status === TaskStatusEnum.REOPENED).length,
+                    done: this.tasks.filter((t) => t.status === TaskStatusEnum.DONE || (t.status as any) === 'completed').length,
                 },
             },
         };
@@ -151,14 +246,18 @@ export class TaskService {
     async createTask(user: UserPayload, dto: CreateTaskDto) {
         const newTask: TaskItem = {
             id: Date.now(),
+            code: `#PMS-${Math.floor(100 + Math.random() * 900)}`,
             title: dto.title,
             description: dto.description || '',
+            module: 'Core System',
             status: dto.status || TaskStatusEnum.TODO,
             priority: dto.priority || TaskPriorityEnum.MEDIUM,
             progress: 0,
+            comments_count: 0,
+            attachments_count: 0,
             due_date: dto.due_date || null,
             project_id: dto.project_id || 'proj-001',
-            project_name: 'General Project',
+            project_name: 'Core System Structure',
             assignee: {
                 id: user.id,
                 name: user.name_en || user.name_kh || 'User',
