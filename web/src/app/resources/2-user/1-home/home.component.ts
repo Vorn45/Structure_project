@@ -187,6 +187,16 @@ export class UserHomeComponent implements OnInit {
         return '/images/placeholder/cover.jpg';
     }
 
+    getLogoUrl(): string {
+        const user = this.currentUser();
+        const role = user?.roles?.find((r) => r.is_default) || user?.roles?.[0];
+        const logo = role?.organization?.logo;
+        if (logo?.uri && logo?.file_domain) {
+            return `${logo.file_domain.replace(/\/+$/, '')}/${logo.uri.replace(/^\/+/, '')}`;
+        }
+        return 'images/logo/plan_logo.png';
+    }
+
     setFilter(filter: string): void {
         this.activeFilter.set(filter);
     }

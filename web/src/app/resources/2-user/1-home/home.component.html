@@ -1,10 +1,8 @@
-<div
-    class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border"
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border"
     style="min-height: 100vh;">
 
     <!-- ===== FRAMED CONTENT CONTAINER ===== -->
-    <div
-        class="flex flex-col flex-1 min-w-0 space-y-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+    <div class="flex flex-col flex-1 min-w-0 space-y-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
         style="min-height: calc(100vh - 2rem);">
 
         <!-- ========================================================================= -->
@@ -203,27 +201,81 @@
                             [ngClass]="cardSide() === 'back' ? '[transform:rotateY(180deg)]' : ''">
 
                             <!-- ================= FRONT FACE (Exact Prussian Navy Design from Image) ================= -->
+                            <!-- ================= FRONT FACE (Executive Prussian Navy with Traditional Kbach Khmer Layer) ================= -->
                             <div
                                 class="absolute inset-0 w-full h-full [backface-visibility:hidden] rounded-xl overflow-hidden p-6 flex flex-col justify-center items-center text-center bg-[#0f284e] text-white border border-[#1b3d6e] relative">
-                                <!-- Subtle geometric background watermark -->
-                                <div class="absolute -right-6 -bottom-6 text-[#244c80]/25 pointer-events-none">
-                                    <mat-icon svgIcon="mdi:hexagon-multiple-outline" class="icon-size-28"></mat-icon>
+                                
+                                <!-- Kbach Khmer Background Ornamental & Watermark Layer -->
+                                <div class="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+                                    <!-- Inset Fine Blue Border -->
+                                    <div class="absolute inset-2.5 sm:inset-3 border border-[#3b73b5]/25 rounded-lg pointer-events-none">
+                                        <!-- 4 Micro Diamond Accents -->
+                                        <div class="absolute -top-1 -left-1 w-2 h-2 rotate-45 bg-[#5ea2eb]/40"></div>
+                                        <div class="absolute -top-1 -right-1 w-2 h-2 rotate-45 bg-[#5ea2eb]/40"></div>
+                                        <div class="absolute -bottom-1 -left-1 w-2 h-2 rotate-45 bg-[#5ea2eb]/40"></div>
+                                        <div class="absolute -bottom-1 -right-1 w-2 h-2 rotate-45 bg-[#5ea2eb]/40"></div>
+                                    </div>
+
+                                    <!-- Traditional Corner Kbach Khmer (ក្បាច់ភ្ញីទេស ៤ ជ្រុង) -->
+                                    <!-- Top-Left Corner -->
+                                    <svg class="absolute top-2 left-2 w-11 h-11 opacity-40 text-[#5ea2eb]" viewBox="0 0 44 44" fill="none">
+                                        <path d="M3,3 L24,3 C24,9 20,13 15,14 C21,17 24,21 24,27 C19,24 16,21 15,22 C13,27 9,31 3,31 L3,3 Z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                                        <path d="M3,11 C8,11 11,8 11,3" stroke="currentColor" stroke-width="0.9" />
+                                        <circle cx="5" cy="5" r="1.2" fill="currentColor" />
+                                    </svg>
+
+                                    <!-- Top-Right Corner -->
+                                    <svg class="absolute top-2 right-2 w-11 h-11 opacity-40 text-[#5ea2eb] [transform:scaleX(-1)]" viewBox="0 0 44 44" fill="none">
+                                        <path d="M3,3 L24,3 C24,9 20,13 15,14 C21,17 24,21 24,27 C19,24 16,21 15,22 C13,27 9,31 3,31 L3,3 Z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                                        <path d="M3,11 C8,11 11,8 11,3" stroke="currentColor" stroke-width="0.9" />
+                                        <circle cx="5" cy="5" r="1.2" fill="currentColor" />
+                                    </svg>
+
+                                    <!-- Bottom-Left Corner -->
+                                    <svg class="absolute bottom-2 left-2 w-11 h-11 opacity-40 text-[#5ea2eb] [transform:scaleY(-1)]" viewBox="0 0 44 44" fill="none">
+                                        <path d="M3,3 L24,3 C24,9 20,13 15,14 C21,17 24,21 24,27 C19,24 16,21 15,22 C13,27 9,31 3,31 L3,3 Z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                                        <path d="M3,11 C8,11 11,8 11,3" stroke="currentColor" stroke-width="0.9" />
+                                        <circle cx="5" cy="5" r="1.2" fill="currentColor" />
+                                    </svg>
+
+                                    <!-- Bottom-Right Corner -->
+                                    <svg class="absolute bottom-2 right-2 w-11 h-11 opacity-40 text-[#5ea2eb] [transform:scale(-1,-1)]" viewBox="0 0 44 44" fill="none">
+                                        <path d="M3,3 L24,3 C24,9 20,13 15,14 C21,17 24,21 24,27 C19,24 16,21 15,22 C13,27 9,31 3,31 L3,3 Z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                                        <path d="M3,11 C8,11 11,8 11,3" stroke="currentColor" stroke-width="0.9" />
+                                        <circle cx="5" cy="5" r="1.2" fill="currentColor" />
+                                    </svg>
+
+                                    <!-- Center Traditional Lotus Rosette Watermark (ក្បាច់ផ្កាចន្ទន៍) -->
+                                    <svg class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.08] text-[#5ea2eb]" viewBox="0 0 200 200" fill="none">
+                                        <circle cx="100" cy="100" r="88" stroke="currentColor" stroke-width="1" stroke-dasharray="4,4" />
+                                        <circle cx="100" cy="100" r="74" stroke="currentColor" stroke-width="0.8" />
+                                        <circle cx="100" cy="100" r="30" stroke="currentColor" stroke-width="1.2" />
+                                        <g stroke="currentColor" stroke-width="1.2" fill="currentColor" fill-opacity="0.12">
+                                            <path d="M100,22 C88,52 88,70 100,70 C112,70 112,52 100,22 Z" />
+                                            <path d="M100,178 C88,148 88,130 100,130 C112,130 112,148 100,178 Z" />
+                                            <path d="M22,100 C52,88 70,88 70,100 C70,112 52,112 22,100 Z" />
+                                            <path d="M178,100 C148,88 130,88 130,100 C130,112 148,112 178,100 Z" />
+                                            <path d="M45,45 C68,66 78,76 86,86 C76,78 66,68 45,45 Z" />
+                                            <path d="M155,45 C132,66 122,76 114,86 C124,78 134,68 155,45 Z" />
+                                            <path d="M45,155 C68,134 78,124 86,114 C76,122 66,132 45,155 Z" />
+                                            <path d="M155,155 C132,134 122,124 114,114 C124,122 134,132 155,155 Z" />
+                                        </g>
+                                    </svg>
                                 </div>
 
-                                <!-- Center Branding (Increased Sizes) -->
-                                <div class="relative z-10 space-y-2 my-auto">
-                                    <div
-                                        class="w-14 h-14 mx-auto rounded-2xl bg-[#1b3d6e]/60 border border-[#3b73b5]/50 flex items-center justify-center mb-3 shadow-md">
-                                        <mat-icon svgIcon="mdi:hexagon-slice-6"
-                                            class="icon-size-9 text-[#5ea2eb]"></mat-icon>
+                                <!-- Center Branding (Logo, Name, and Identity Title) -->
+                                <div class="relative z-10 space-y-1.5 my-auto">
+                                    <div class="w-12 h-12 sm:w-13 sm:h-13 mx-auto flex items-center justify-center mb-1.5">
+                                        <img [src]="getLogoUrl()" alt="Logo" class="w-full h-full object-contain" />
                                     </div>
                                     <h3
-                                        class="text-2xl sm:text-3xl font-medium tracking-widest text-white uppercase leading-tight">
-                                        WMS | SYSTEM
+                                        class="text-[14px] sm:text-[16px] text-white leading-relaxed tracking-wide font-['Moul']"
+                                        style="font-family: 'Moul', serif;">
+                                        ប្រព័ន្ធឌីជីថលគ្រប់គ្រងការងារស្នូល
                                     </h3>
                                     <p
-                                        class="text-[13px] sm:text-[14px] text-[#8cb9eb] tracking-widest uppercase font-medium mt-1">
-                                        DIGITAL MEMBER IDENTITY
+                                        class="text-[15px] sm:text-[17px] text-[#a4c9f7] tracking-wide font-medium mt-1">
+                                        ប័ណ្ណសម្គាល់ខ្លួន
                                     </p>
                                 </div>
                             </div>
