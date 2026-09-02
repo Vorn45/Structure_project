@@ -72,7 +72,7 @@ export interface DigitalCardDialogData {
                     <div class="absolute right-6 top-6 text-blue-400/15">
                         <mat-icon svgIcon="mdi:hexagon-multiple-outline" class="icon-size-20"></mat-icon>
                     </div>
-
+            
                     <!-- Top Row: Chip & Official Badge -->
                     <div class="flex items-center justify-between relative z-10">
                         <div class="flex items-center gap-2.5">

@@ -334,7 +334,8 @@
         "ReportProductivity": "Productivity",
         "ReportTask": "Task",
         "Tasks": "Tasks",
-        "Activity": "Activity",
+        "Activity": "Plan",
+        "Plan": "Plan",
         "Kanban": "Kanban",
         "Calendar": "Calendar",
         "More": "More"

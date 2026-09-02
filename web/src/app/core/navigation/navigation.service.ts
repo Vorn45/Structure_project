@@ -48,11 +48,20 @@ export class NavigationService {
 
     /** Deep-clones the raw items, resolving each `title` translation key into display text. */
     private _translate(items: HelperNavigationItem[]): HelperNavigationItem[] {
-        return items.map((item) => ({
-            ...item,
-            title: item.title ? this._transloco.translate(item.title) : item.title,
-            children: item.children ? this._translate(item.children) : item.children,
-        }));
+        return items.map((item) => {
+            let title = item.title;
+            if (item.id === 'activity' || item.title === 'Navigation.Activity' || item.title === 'Navigation.Plan') {
+                const isEnglish = this._transloco.getActiveLang() === 'en';
+                title = isEnglish ? 'Plan' : 'ផែនការ';
+            } else if (item.title) {
+                title = this._transloco.translate(item.title);
+            }
+            return {
+                ...item,
+                title,
+                children: item.children ? this._translate(item.children) : item.children,
+            };
+        });
     }
 }
 

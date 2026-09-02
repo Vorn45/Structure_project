@@ -19,9 +19,7 @@ export default [
     {
         path: 'activity',
         loadComponent: () =>
-            import('./3-activity/activity.component').then(
-                (m) => m.UserActivityComponent
-            ),
+            import('./4-plan/plan.component').then((m) => m.UserPlanComponent),
     },
     {
         path: 'projects',

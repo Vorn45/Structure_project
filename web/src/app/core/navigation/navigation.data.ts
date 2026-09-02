@@ -175,7 +175,7 @@ const memberNavigation: HelperNavigationItem[] = [
     },
     {
         id: 'activity',
-        title: 'Navigation.Activity',
+        title: 'Navigation.Plan',
         type: 'basic',
         icon: 'mdi:lightning-bolt',
         link: '/member/activity',

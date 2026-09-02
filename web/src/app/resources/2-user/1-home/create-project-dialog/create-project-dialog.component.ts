@@ -503,7 +503,7 @@ export class CreateProjectDialogComponent implements OnInit {
         }
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void { }
 
     createProject(): void {
         if (!this.projectName.trim()) return;
