@@ -136,19 +136,6 @@ export class UserHomeComponent implements OnInit {
         }
     }
 
-    openVerificationPage(): void {
-        const user = this.currentUser() || this.overview()?.user;
-        const nameKh = (user as any)?.name_kh || (user as any)?.kh_name || 'ចេង ច័ន្ទបញ្ញា';
-        const nameEn = (user as any)?.name_en || (user as any)?.en_name || 'Cheng Chanpanha';
-        const phone = user?.phone || '087600064';
-        const email = user?.email || 'Chanpanhacheng@gmail.com';
-        const id = user?.id || '2';
-
-        window.open(
-            `/#/verify/member?id=${id}&code=${phone}&name_kh=${encodeURIComponent(nameKh)}&name_en=${encodeURIComponent(nameEn)}&phone=${phone}&email=${encodeURIComponent(email)}`,
-            '_blank',
-        );
-    }
 
     constructor(
         private readonly _homeService: UserHomeService,

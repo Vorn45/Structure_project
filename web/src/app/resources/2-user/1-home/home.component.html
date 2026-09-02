@@ -235,10 +235,9 @@
                                     <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
                                 </div>
 
-                                <!-- Real Scannable & Clickable QR Code (Opens Verification Website) -->
-                                <div (click)="openVerificationPage(); $event.stopPropagation()"
-                                    matTooltip="ចុចដើម្បីបើកមើលទំព័រផ្ទៀងផ្ទាត់ (Scan / Open Verification Page)"
-                                    class="w-[72px] h-[72px] bg-white p-0.5 shrink-0 flex items-center justify-center cursor-pointer rounded-lg hover:ring-2 hover:ring-blue-500 transition-all shadow-2xs">
+                                <!-- Real Scannable QR Code -->
+                                <div
+                                    class="w-[72px] h-[72px] bg-white p-0.5 shrink-0 flex items-center justify-center rounded-lg shadow-2xs">
                                     <img *ngIf="qrCodeDataUrl()" [src]="qrCodeDataUrl()" alt="Member QR Code"
                                         class="w-full h-full object-contain" />
                                     <mat-icon *ngIf="!qrCodeDataUrl()" svgIcon="mdi:qrcode"
