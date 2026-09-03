@@ -1,105 +1,232 @@
-<div
-    class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border"
-    style="min-height: 100vh;">
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border"
+    style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
 
     <!-- ===== FRAMED CONTENT CONTAINER ===== -->
-    <div
-        class="flex flex-col flex-1 min-w-0 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+    <div class="flex flex-col flex-1 min-w-0 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
         style="min-height: calc(100vh - 2rem);">
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Activity Feed
-                </h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Real-time chronological timeline of your actions, task assignments, and security events.
-                </p>
+
+        <!-- 1. TOP NAVBAR / HEADER -->
+        <div class="flex items-center justify-between gap-4 mb-5">
+            <!-- Left: Home Icon, Title, and Count Pill -->
+            <div class="flex items-center gap-3 shrink-0">
+                <button (click)="navigateHome()"
+                    class="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center cursor-pointer"
+                    [matTooltip]="'ទំព័រដើម (Home)'">
+                    <mat-icon svgIcon="mdi:home-outline"
+                        class="icon-size-5 text-slate-500 dark:text-slate-400"></mat-icon>
+                </button>
+
+                <span class="text-[17px] font-medium text-slate-800 dark:text-white">ផែនការ</span>
+
+                <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    {{ currentTasks().length }}
+                </span>
             </div>
 
-            <button mat-stroked-button class="rounded-xl border-slate-200 dark:border-slate-700 self-start sm:self-auto"
-                (click)="loadActivities()">
-                <mat-icon svgIcon="mdi:refresh"></mat-icon>
-                <span>Refresh</span>
-            </button>
-        </div>
-
-        <!-- Filter Pills -->
-        <div class="flex items-center gap-2 mb-8 overflow-x-auto pb-2 sm:pb-0">
-            <button class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
-                [ngClass]="selectedType() === 'all' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
-                (click)="filterByType('all')">
-                All Activity
-            </button>
-            <button class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
-                [ngClass]="selectedType() === 'task' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
-                (click)="filterByType('task')">
-                Tasks
-            </button>
-            <button class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
-                [ngClass]="selectedType() === 'project' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
-                (click)="filterByType('project')">
-                Projects
-            </button>
-            <button class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border whitespace-nowrap"
-                [ngClass]="selectedType() === 'security' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
-                (click)="filterByType('security')">
-                Security
-            </button>
-        </div>
-
-        <!-- Loading Spinner -->
-        <div *ngIf="loading()" class="flex justify-center items-center py-24">
-            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-        </div>
-
-        <!-- Activity Timeline -->
-        <div *ngIf="!loading()" class="max-w-3xl">
-            <div *ngIf="activities().length === 0"
-                class="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8">
-                <mat-icon svgIcon="mdi:history" class="icon-size-12 text-slate-300 dark:text-slate-600 mb-3"></mat-icon>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">No activity found</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">There are no events recorded matching the
-                    selected filter.</p>
+            <!-- Center: Project Title (Centered, Clean font-medium without icon) -->
+            <div class="flex-1 flex items-center justify-center px-4 min-w-0">
+                <button type="button" (click)="openSelectProjectPlanDialog()"
+                    class="text-center bg-transparent border-none p-0 cursor-pointer hover:text-blue-600 transition-colors max-w-full"
+                    [matTooltip]="'ចុចដើម្បីជ្រើសរើស ឬ ប្ដូរផែនការគម្រោង'">
+                    <span class="text-[17px] font-medium text-slate-800 dark:text-slate-100 truncate"
+                        style="font-family: 'Kantumruy Pro', sans-serif;">
+                        {{ currentProject().name }}
+                    </span>
+                </button>
             </div>
 
+            <!-- Right: Add Plan Action Button & 3-Dot More Button -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" (click)="openAddPlanDialog()"
+                    class="flex items-center gap-1.5 h-10 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-normal text-[16px] transition-all cursor-pointer">
+                    <mat-icon svgIcon="mdi:plus" class="icon-size-5 text-slate-600 dark:text-slate-300"></mat-icon>
+                    <span>បន្ថែមផែនការ</span>
+                </button>
+
+                <!-- 3-Dot More Options Button -->
+                <button type="button" [matMenuTriggerFor]="morePlanMenu"
+                    class="w-10 h-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer"
+                    [matTooltip]="'ជម្រើសបន្ថែម (More options)'">
+                    <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-5"></mat-icon>
+                </button>
+
+                <!-- More Options Menu -->
+                <mat-menu #morePlanMenu="matMenu" class="!rounded-xl font-kantumruy">
+                    <!-- 1. ផែនការគម្រោង (With Hover Submenu) -->
+                    <button mat-menu-item [matMenuTriggerFor]="planProjectSubMenu" class="!text-[15px]">
+                        <mat-icon svgIcon="mdi:calendar-multiselect" class="icon-size-5 mr-2 text-indigo-600"></mat-icon>
+                        <span>ផែនការគម្រោង</span>
+                    </button>
+
+                    <!-- 2. ព័ត៌មានគម្រោង -->
+                    <button mat-menu-item (click)="navigateToProjects()" class="!text-[15px]">
+                        <mat-icon svgIcon="mdi:information-outline" class="icon-size-5 mr-2 text-blue-600"></mat-icon>
+                        <span>ព័ត៌មានគម្រោង</span>
+                    </button>
+                </mat-menu>
+
+                <!-- Submenu 1: ផែនការគម្រោង -->
+                <mat-menu #planProjectSubMenu="matMenu" class="!rounded-xl font-kantumruy">
+                    <!-- គម្រោងមានស្រាប់ (With Hover Submenu) -->
+                    <button mat-menu-item [matMenuTriggerFor]="existingPlanProjectsMenu" class="!text-[15px]">
+                        <mat-icon svgIcon="mdi:folder-outline" class="icon-size-5 mr-2 text-blue-600"></mat-icon>
+                        <span>គម្រោងមានស្រាប់</span>
+                    </button>
+
+                    <!-- បង្កើតថ្មី -->
+                    <button mat-menu-item (click)="openSelectProjectPlanDialog('create')" class="!text-[15px]">
+                        <mat-icon svgIcon="mdi:plus-circle-outline" class="icon-size-5 mr-2 text-emerald-600"></mat-icon>
+                        <span>បង្កើតថ្មី</span>
+                    </button>
+                </mat-menu>
+
+                <!-- Submenu 2: បញ្ជីគម្រោងមានស្រាប់ (List on Hover) -->
+                <mat-menu #existingPlanProjectsMenu="matMenu" class="!rounded-xl font-kantumruy !min-w-[320px]">
+                    <button *ngFor="let p of projectOptions()" mat-menu-item (click)="currentProject.set(p)" class="!text-[15px] !h-11 !px-4">
+                        <div class="flex items-center justify-between w-full gap-4">
+                            <span class="whitespace-nowrap" [ngClass]="currentProject().id === p.id ? 'font-medium text-indigo-600' : 'text-slate-700 dark:text-slate-200'">
+                                {{ p.name }}
+                            </span>
+                            <mat-icon *ngIf="currentProject().id === p.id" svgIcon="mdi:check" class="icon-size-4.5 text-indigo-600 shrink-0"></mat-icon>
+                        </div>
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- AGILE PROJECT MANAGEMENT PLAN GANTT TIMELINE (EXACT TEMPLATE)              -->
+        <!-- ========================================================================= -->
+        <div class="flex-1 flex flex-col space-y-6">
+
+            <!-- Gantt Chart Container (Horizontal Scrollable) -->
             <div
-                class="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
-                <div *ngFor="let item of activities()" class="relative flex items-start gap-4 group">
-                    <!-- Timeline Marker Icon -->
-                    <div class="absolute -left-6 top-1 w-5 h-5 rounded-full ring-4 ring-slate-50 dark:ring-slate-900 flex items-center justify-center shadow-xs"
-                        [ngClass]="getIconClass(item.type)">
-                        <mat-icon [svgIcon]="item.icon" class="icon-size-3"></mat-icon>
+                class="w-full overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
+                <div class="min-w-[1300px] select-none">
+
+                    <!-- Header Row 1: Left column spacer + Quarters -->
+                    <div class="flex border-b border-white dark:border-slate-800 h-9">
+                        <!-- Left Top Corner -->
+                        <div
+                            class="w-[340px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] px-3.5 py-1 font-medium text-slate-900 dark:text-purple-100 uppercase tracking-wider text-[13px] leading-tight flex flex-col justify-center border-r border-white dark:border-slate-800">
+                            <span>ពិពណ៌នាកិច្ចការគម្រោង</span>
+                        </div>
+
+                        <!-- Quarters -->
+                        <div class="flex-1 flex">
+                            <div *ngFor="let q of quarters"
+                                class="h-full flex items-center justify-center text-center font-medium tracking-wider text-[13px] border-r border-white dark:border-slate-800 uppercase"
+                                [ngClass]="q.bgClass" [style.flex]="q.weeksCount">
+                                {{ q.name }}
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Event Card -->
+                    <!-- Header Row 2: Months -->
+                    <div class="flex border-b border-white dark:border-slate-800 h-8">
+                        <div
+                            class="w-[340px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] border-r border-white dark:border-slate-800">
+                        </div>
+                        <div class="flex-1 flex">
+                            <div *ngFor="let m of months"
+                                class="h-full flex items-center justify-center text-center font-medium text-[12px] uppercase tracking-wider border-r border-white dark:border-slate-800"
+                                [ngClass]="m.bgClass" [style.flex]="m.weeksCount">
+                                {{ m.name }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Header Row 3: Week Numbers (14 through 40) -->
                     <div
-                        class="flex-1 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-4 sm:p-5 shadow-xs hover:shadow-md transition-all">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-white">
-                                {{ item.title }}
-                            </h4>
-                            <span class="text-xs text-slate-400 dark:text-slate-500">
-                                {{ item.created_at | date:'medium' }}
-                            </span>
+                        class="flex border-b-2 border-slate-300 dark:border-slate-700 bg-[#e2e8f0] dark:bg-slate-800 h-7">
+                        <div
+                            class="w-[340px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] border-r border-white dark:border-slate-800">
                         </div>
-
-                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            {{ item.description }}
-                        </p>
-
-                        <div *ngIf="item.target"
-                            class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-700/60 flex items-center gap-2">
-                            <span class="text-2xs font-bold uppercase tracking-wider text-slate-400">Target</span>
-                            <span
-                                class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-0.5 rounded-md">
-                                {{ item.target.name }}
-                            </span>
+                        <div class="flex-1 flex">
+                            <div *ngFor="let week of weeks"
+                                class="flex-1 h-full flex items-center justify-center text-center font-medium text-[12px] border-r border-white dark:border-slate-700 relative"
+                                [ngClass]="week === currentWeek ? 'bg-red-500 text-white font-bold' : 'text-slate-800 dark:text-slate-200'">
+                                <span>{{ week }}</span>
+                                <span *ngIf="week === currentWeek"
+                                    class="ml-1 text-[9px] bg-white text-red-600 px-1 py-0.2 rounded-xs font-black uppercase tracking-tighter">NOW</span>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Task Rows -->
+                    <div class="divide-y divide-white dark:divide-slate-800">
+                        <div *ngFor="let task of currentTasks(); let i = index"
+                            class="flex items-stretch h-10 hover:brightness-98 dark:hover:brightness-105 transition-colors">
+
+                            <!-- Left Task Name Column (16px Normal Font) -->
+                            <div
+                                class="w-[340px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] px-4 py-1 font-normal text-[16px] text-slate-900 dark:text-slate-100 truncate border-r border-white dark:border-slate-800 flex items-center justify-between group/row leading-tight">
+                                <span class="truncate pr-2" [title]="task.name">{{ task.name }}</span>
+                                <button type="button" (click)="deleteAgileTask(task.id, $event)"
+                                    class="opacity-0 group-hover/row:opacity-100 text-slate-400 hover:text-red-600 transition-opacity p-0.5 rounded cursor-pointer shrink-0"
+                                    [matTooltip]="'លុបដំណាក់កាលនេះ'">
+                                    <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                                </button>
+                            </div>
+
+                            <!-- Right Gantt Grid Columns (27 weeks) with Floating Iteration Bars -->
+                            <div class="flex-1 relative flex items-center bg-slate-100/70 dark:bg-slate-800/40">
+
+                                <!-- Background Week Columns Grid Lines -->
+                                <div class="absolute inset-0 flex pointer-events-none">
+                                    <div *ngFor="let week of weeks"
+                                        class="flex-1 border-r border-white dark:border-slate-800/80"></div>
+                                </div>
+
+                                <!-- Current Week "NOW" Indicator Vertical Line -->
+                                <div class="absolute top-0 bottom-0 pointer-events-none z-20 border-l-2 border-red-500/80"
+                                    [style.left.%]="getSegmentLeftPercent(currentWeek)"></div>
+
+                                <!-- Timeline Segment Bars -->
+                                <div class="w-full h-full relative flex items-center px-0.5">
+                                    <ng-container *ngFor="let seg of task.segments">
+                                        <div class="absolute h-7 rounded-[3px] flex items-center justify-center font-medium text-[12px] shadow-2xs transition-transform hover:scale-y-110 cursor-pointer overflow-hidden z-10"
+                                            [ngClass]="getIterationColor(seg.iteration)"
+                                            [style.left.%]="getSegmentLeftPercent(seg.startWeek)"
+                                            [style.width.%]="getSegmentWidthPercent(seg.durationWeeks)"
+                                            [matTooltip]="task.name + ' - វដ្តទី ' + seg.iteration + ' (សប្តាហ៍ទី ' + seg.startWeek + ', រយៈពេល ' + seg.durationWeeks + 'W)'">
+                                            <span *ngIf="seg.label"
+                                                class="truncate px-1 tracking-tight text-white drop-shadow-xs font-semibold">
+                                                {{ seg.label }}
+                                            </span>
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Legend matching Reference (Clean, No TemplateLAB) -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 px-2">
+                <!-- Iteration Legends (Khmer) -->
+                <div
+                    class="flex flex-wrap items-center gap-8 text-[14px] font-medium tracking-wider text-slate-900 dark:text-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-14 h-7 rounded-[3px] bg-[#f59e0b] shadow-xs"></div>
+                        <span>វដ្តទី ១ (Iteration 1)</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-14 h-7 rounded-[3px] bg-[#f43f5e] shadow-xs"></div>
+                        <span>វដ្តទី ២ (Iteration 2)</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-14 h-7 rounded-[3px] bg-[#581c87] shadow-xs"></div>
+                        <span>វដ្តទី ៣ (Iteration 3)</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
+        </div>
+
+    </div>
 </div>

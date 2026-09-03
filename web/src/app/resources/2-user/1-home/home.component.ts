@@ -243,7 +243,7 @@ export class UserHomeComponent implements OnInit {
                 return 'បញ្ជាក់';
             case 'todo':
             case 'unconfirmed':
-                return 'មិនបញ្ជាក់';
+                return 'មិនទាន់ធ្វើ';
             case 'in_progress':
                 return 'កំពុងធ្វើ';
             case 'in_review':
@@ -263,24 +263,24 @@ export class UserHomeComponent implements OnInit {
         switch (status?.toLowerCase()) {
             case 'new':
             case 'pending':
-                return 'mdi:clipboard-text-outline';
+                return 'mdi:plus-circle-outline';
             case 'confirmed':
-                return 'mdi:clipboard-check-outline';
+                return 'mdi:checkbox-marked-circle-outline';
             case 'todo':
             case 'unconfirmed':
-                return 'mdi:clipboard-minus-outline';
+                return 'mdi:clock-outline';
             case 'in_progress':
-                return 'mdi:progress-clock';
+                return 'mdi:clock-outline';
             case 'in_review':
             case 'review':
-                return 'mdi:magnify';
+                return 'mdi:eye-outline';
             case 'reopened':
                 return 'mdi:refresh';
             case 'completed':
             case 'done':
-                return 'mdi:check-circle';
+                return 'mdi:check-circle-outline';
             default:
-                return 'mdi:clipboard-outline';
+                return 'mdi:clock-outline';
         }
     }
 

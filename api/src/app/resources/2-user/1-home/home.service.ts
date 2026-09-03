@@ -70,6 +70,15 @@ export class HomeService {
                         project_name: 'PMS Upgrade V2',
                     },
                     {
+                        id: 104,
+                        title: 'Setup Notification & Realtime WebSocket Gateway',
+                        status: 'new',
+                        priority: 'high',
+                        due_date: new Date(Date.now() + 86400000 * 7).toISOString(),
+                        progress: 0,
+                        project_name: 'PMS Upgrade V2',
+                    },
+                    {
                         id: 103,
                         title: 'Design Member Portal UI Components',
                         status: 'completed',

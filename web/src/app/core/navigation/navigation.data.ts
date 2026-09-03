@@ -190,31 +190,9 @@ const memberNavigation: HelperNavigationItem[] = [
     {
         id: 'report',
         title: 'Navigation.Report',
-        type: 'aside',
+        type: 'basic',
         icon: 'mdi:chart-box',
-        children: [
-            {
-                id: 'report.general',
-                title: 'Navigation.ReportGeneral',
-                type: 'basic',
-                icon: 'mdi:bar-chart',
-                link: '/member/report/general',
-            },
-            {
-                id: 'report.progress',
-                title: 'Navigation.ReportProgress',
-                type: 'basic',
-                icon: 'mdi:progress-check',
-                link: '/member/report/progress',
-            },
-            {
-                id: 'report.productivity',
-                title: 'Navigation.ReportProductivity',
-                type: 'basic',
-                icon: 'mdi:clock-check-outline',
-                link: '/member/report/productivity',
-            },
-        ],
+        link: '/member/report',
     },
 ];
 

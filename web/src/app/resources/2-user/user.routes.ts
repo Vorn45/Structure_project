@@ -19,11 +19,16 @@ export default [
     {
         path: 'activity',
         loadComponent: () =>
-            import('./4-plan/plan.component').then((m) => m.UserPlanComponent),
+            import('./3-activity/activity.component').then((m) => m.UserActivityComponent),
     },
     {
         path: 'projects',
         loadComponent: () =>
             import('./4-plan/plan.component').then((m) => m.UserPlanComponent),
+    },
+    {
+        path: 'report',
+        loadComponent: () =>
+            import('./5-report/report.component').then((m) => m.UserReportComponent),
     },
 ] as Routes;

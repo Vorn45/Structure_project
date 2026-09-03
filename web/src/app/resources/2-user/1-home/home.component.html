@@ -636,7 +636,11 @@
                         class="cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-800 hover:border-blue-200 dark:hover:border-blue-800/60 hover:shadow-xs transition-all gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div class="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
-                                [ngClass]="task.status === 'completed' || task.status === 'done' ? 'bg-emerald-500' : 'bg-blue-500'">
+                                [ngClass]="{
+                                    'bg-emerald-500': task.status === 'completed' || task.status === 'done',
+                                    'bg-amber-500': task.status === 'in_progress',
+                                    'bg-blue-500': task.status === 'new' || task.status === 'pending' || task.status === 'todo'
+                                }">
                             </div>
                             <div class="min-w-0">
                                 <h4 class="text-[16px] font-normal text-slate-900 dark:text-white truncate">
@@ -655,12 +659,12 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-4 self-end sm:self-center">
-                            <!-- Progress -->
-                            <div class="w-24 hidden sm:block">
+                        <div class="flex items-center gap-5 self-end sm:self-center shrink-0">
+                            <!-- Progress Bar -->
+                            <div class="w-28 hidden sm:block">
                                 <div class="flex justify-between text-[13px] text-slate-500 mb-1">
                                     <span>វឌ្ឍនភាព</span>
-                                    <span>{{ task.progress }}%</span>
+                                    <span class="font-medium">{{ task.progress }}%</span>
                                 </div>
                                 <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                     <div class="h-full bg-primary rounded-full transition-all"
@@ -668,9 +672,9 @@
                                 </div>
                             </div>
 
-                            <!-- Clean Khmer Status Badge -->
+                            <!-- Uniform Khmer Status Badge -->
                             <span
-                                class="inline-flex items-center gap-1.5 text-[13px] font-normal px-2.5 py-0.5 rounded-md border select-none"
+                                class="inline-flex items-center justify-center gap-1.5 text-[13px] font-normal w-24 py-1 rounded-lg border select-none shrink-0 text-center"
                                 [ngClass]="getStatusClass(task.status)">
                                 <mat-icon [svgIcon]="getStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
                                 <span>{{ getStatusLabel(task.status) }}</span>

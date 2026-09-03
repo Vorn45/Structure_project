@@ -6,14 +6,29 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
-import { AgilePlanTask } from './plan.component';
+import { AgilePlanTask } from './activity.component';
+
+export interface AddPlanProjectOption {
+    id: string;
+    code: string;
+    name: string;
+}
 
 export interface AddPlanDialogData {
     currentWeek: number;
     startWeek: number;
     totalWeeks: number;
     weeks: number[];
+    projects?: AddPlanProjectOption[];
+    selectedProjectId?: string;
+    selectedProjectName?: string;
 }
+
+const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
+    { id: '1', code: 'PMS-V2', name: 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា (PMS)' },
+    { id: '2', code: 'WMS-HR', name: 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន និងបុគ្គលិក (WMS)' },
+    { id: '3', code: 'E-GOV', name: 'ប្រព័ន្ធច្រកចេញចូលតែមួយ (E-Gov Portal)' },
+];
 
 @Component({
     selector: 'app-add-plan-dialog',
@@ -60,13 +75,28 @@ export interface AddPlanDialogData {
                                 បង្កើត និង រៀបចំកាលវិភាគការងារ
                             </h3>
                             <p class="text-[14px] text-blue-200/90 mt-1.5 leading-normal">
-                                កំណត់ដំណាក់កាលការងារ វដ្ត Iteration និងរយៈពេលសប្តាហ៍អនុវត្ត
+                                កំណត់គម្រោង ដំណាក់កាលការងារ វដ្ត Iteration និងរយៈពេលសប្តាហ៍អនុវត្ត
                             </p>
                         </div>
                     </div>
 
                     <!-- Form Inputs -->
                     <div class="space-y-5 text-[16px] font-kantumruy">
+
+                        <!-- 0. Project Selector (ជ្រើសរើសគម្រោង) -->
+                        <div>
+                            <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
+                                គម្រោង (Project) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <select [(ngModel)]="selectedProjectId" (ngModelChange)="onProjectChange($event)"
+                                    class="w-full px-4 py-3 text-[16px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                                    <option *ngFor="let p of projectList" [value]="p.id">
+                                        [{{ p.code }}] {{ p.name }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
                         
                         <!-- 1. Task Name -->
                         <div>
@@ -93,7 +123,7 @@ export interface AddPlanDialogData {
                                         ? 'border-[#f59e0b] bg-[#f59e0b]/10 text-[#d97706] ring-2 ring-[#f59e0b]/30'
                                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'">
                                     <span class="w-3 h-3 rounded-full bg-[#f59e0b]"></span>
-                                    <span>Iteration #1</span>
+                                    <span>វដ្តទី ១</span>
                                 </button>
 
                                 <button type="button" (click)="iteration = 2"
@@ -102,7 +132,7 @@ export interface AddPlanDialogData {
                                         ? 'border-[#f43f5e] bg-[#f43f5e]/10 text-[#e11d48] ring-2 ring-[#f43f5e]/30'
                                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'">
                                     <span class="w-3 h-3 rounded-full bg-[#f43f5e]"></span>
-                                    <span>Iteration #2</span>
+                                    <span>វដ្តទី ២</span>
                                 </button>
 
                                 <button type="button" (click)="iteration = 3"
@@ -111,7 +141,7 @@ export interface AddPlanDialogData {
                                         ? 'border-[#581c87] bg-[#581c87]/10 text-[#581c87] dark:text-purple-300 ring-2 ring-[#581c87]/30'
                                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'">
                                     <span class="w-3 h-3 rounded-full bg-[#581c87]"></span>
-                                    <span>Iteration #3</span>
+                                    <span>វដ្តទី ៣</span>
                                 </button>
                             </div>
                         </div>
@@ -160,7 +190,7 @@ export interface AddPlanDialogData {
                                     <span>{{ durationWeeks > 1 ? durationWeeks + 'W' : '' }}</span>
                                 </div>
                                 <span class="text-[15px] font-normal text-slate-700 dark:text-slate-300">
-                                    ចាប់ពីសប្តាហ៍ទី {{ startWeek }} ដល់ {{ +startWeek + +durationWeeks - 1 }} (សរុប {{ durationWeeks }} សប្តាហ៍)
+                                    [{{ selectedProjectCode }}] ចាប់ពីសប្តាហ៍ទី {{ startWeek }} ដល់ {{ +startWeek + +durationWeeks - 1 }} (សរុប {{ durationWeeks }} សប្តាហ៍)
                                 </span>
                             </div>
                         </div>
@@ -193,12 +223,36 @@ export class AddPlanDialogComponent {
     startWeek = 14;
     durationWeeks = 3;
 
+    projectList: AddPlanProjectOption[] = DEFAULT_PROJECT_OPTIONS;
+    selectedProjectId = '1';
+    selectedProjectCode = 'PMS-V2';
+    selectedProjectName = 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា (PMS)';
+
     constructor(
         private readonly _dialogRef: MatDialogRef<AddPlanDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public readonly data: AddPlanDialogData,
     ) {
         if (data?.currentWeek) {
             this.startWeek = data.currentWeek;
+        }
+        if (data?.projects && data.projects.length > 0) {
+            this.projectList = data.projects;
+        }
+        if (data?.selectedProjectId) {
+            this.selectedProjectId = data.selectedProjectId;
+            const found = this.projectList.find((p) => p.id === data.selectedProjectId);
+            if (found) {
+                this.selectedProjectCode = found.code;
+                this.selectedProjectName = found.name;
+            }
+        }
+    }
+
+    onProjectChange(projectId: string): void {
+        const found = this.projectList.find((p) => p.id === projectId);
+        if (found) {
+            this.selectedProjectCode = found.code;
+            this.selectedProjectName = found.name;
         }
     }
 
