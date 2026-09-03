@@ -19,13 +19,20 @@
     rsync -avz -e"ssh -o StrictHostKeyChecking=no -i /builds/{{ ci_project_path }}/.ssh/id_rsa" --delete /builds/{{ ci_project_path }}/dist/ root@{{ ip_address }}:/app/{{ project_name }}/{{ service_type }}/{{ stage }}/dist/
   delegate_to: localhost
 
+- name: Copy Nginx configuration to remote server
+  shell: >
+    rsync -avz -e"ssh -o StrictHostKeyChecking=no -i /builds/{{ ci_project_path }}/.ssh/id_rsa" /builds/{{ ci_project_path }}/default.conf root@{{ ip_address }}:/app/{{ project_name }}/{{ service_type }}/{{ stage }}/default.conf
+  delegate_to: localhost
+
 - name: Ensure Nginx Docker container is present
   docker_container:
     name: nextask_web_prod
-    image: nginx:latest
+    image: nginx:alpine
     state: started
+    recreate: yes
     ports:
       - "2511:80"
     volumes:
       - /app/{{ project_name }}/{{ service_type }}/{{ stage }}/dist/:/usr/share/nginx/html
+      - /app/{{ project_name }}/{{ service_type }}/{{ stage }}/default.conf:/etc/nginx/conf.d/default.conf:ro
     restart_policy: unless-stopped

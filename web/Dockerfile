@@ -21,10 +21,8 @@ COPY ./ /usr/app
 RUN npm run build --prod
 
 # Stage 2
-FROM nginx:1.15.8-alpine
+FROM nginx:alpine
 
-# Remove these lines if the files don't exist or are not necessary
-# COPY --from=node /usr/app/default.conf /etc/nginx/conf.d/default.conf
-# COPY --from=node /usr/app/nginx-status /usr/share/nginx/html/nginx-status
+COPY --from=node /usr/app/default.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=node /usr/app/dist /usr/share/nginx/html
