@@ -827,10 +827,27 @@ export class UserTaskComponent implements OnInit {
         return `${months} ខែមុន`;
     }
 
+    private saveChatToStorage(taskId: number, msgs: TaskChatMessage[]): void {
+        try {
+            const cacheKey = `wfm_task_chat_${taskId}`;
+            localStorage.setItem(cacheKey, JSON.stringify(msgs));
+        } catch (e) {}
+    }
+
+    private loadChatFromStorage(taskId: number): TaskChatMessage[] | null {
+        try {
+            const cacheKey = `wfm_task_chat_${taskId}`;
+            const raw = localStorage.getItem(cacheKey);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return null;
+    }
+
     appendChatMessage(taskId: number, message: TaskChatMessage): void {
         this.chatMessages.update((msgs) => {
             const updated = [...msgs, message];
             this.taskChatHistoryMap.set(taskId, updated);
+            this.saveChatToStorage(taskId, updated);
             return updated;
         });
     }
@@ -840,9 +857,10 @@ export class UserTaskComponent implements OnInit {
         this.selectedTask.set(task);
         this.showChatRoom.set(true);
 
-        const cached = this.taskChatHistoryMap.get(task.id);
+        const cached = this.taskChatHistoryMap.get(task.id) || this.loadChatFromStorage(task.id);
         if (cached && cached.length > 0) {
             this.chatMessages.set([...cached]);
+            this.taskChatHistoryMap.set(task.id, cached);
         } else {
             const reporterName = task.reporter?.name || 'Leng sokchhay';
             const reporterAvatar = task.reporter?.avatar || '/images/placeholder/avatar.jpg';
@@ -892,6 +910,7 @@ export class UserTaskComponent implements OnInit {
 
                     this.chatMessages.set(mapped);
                     this.taskChatHistoryMap.set(task.id, mapped);
+                    this.saveChatToStorage(task.id, mapped);
                 }
             },
             error: () => {},
@@ -916,7 +935,7 @@ export class UserTaskComponent implements OnInit {
             id: Date.now(),
             sender_name: user?.kh_name || user?.en_name || 'អ្នក (You)',
             sender_avatar: userAvatar,
-            text: text || (attachments.length === 1 ? `បានផ្ញើឯកសារ ${attachments[0].name}` : `បានផ្ញើឯកសារភ្ជាប់ ${attachments.length} ឯកសារ`),
+            text: text || (attachments.length > 0 ? 'បានផ្ញើឯកសារ' : ''),
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             is_self: true,
             attachments: attachments.length > 0 ? [...attachments] : undefined,
@@ -929,7 +948,12 @@ export class UserTaskComponent implements OnInit {
                 currentTask.attachments_count = (currentTask.attachments_count || 0) + attachments.length;
             }
             this._taskService.createTaskComment(currentTask.id, { text: msg.text, attachments }).subscribe({
-                next: () => {},
+                next: () => {
+                    // Update task in the main list
+                    this.tasks.update((items) =>
+                        items.map((t) => (t.id === currentTask.id ? { ...t, comments_count: currentTask.comments_count, attachments_count: currentTask.attachments_count } : t))
+                    );
+                },
                 error: (err) => console.error('Failed to sync comment with server', err),
             });
         }
@@ -952,13 +976,23 @@ export class UserTaskComponent implements OnInit {
     }
 
     downloadFile(file: TaskAttachment): void {
-        if (file.url && file.url.startsWith('data:')) {
+        if (file.url && (file.url.startsWith('data:') || file.url.startsWith('blob:'))) {
             const link = document.createElement('a');
             link.href = file.url;
             link.download = file.name;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        } else if (file.textContent) {
+            const blob = new Blob([file.textContent], { type: file.type || 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         } else if (file.url && file.url.startsWith('http')) {
             window.open(file.url, '_blank');
         } else {

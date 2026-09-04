@@ -3,9 +3,9 @@ import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 // ======================================= >> Code Starts Here << ========================== //
 export class CreateTaskCommentDto {
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    text: string;
+    text?: string;
 
     @IsOptional()
     @IsArray()
@@ -14,5 +14,7 @@ export class CreateTaskCommentDto {
         size: string;
         type?: string;
         url?: string;
+        isImage?: boolean;
+        textContent?: string;
     }>;
 }

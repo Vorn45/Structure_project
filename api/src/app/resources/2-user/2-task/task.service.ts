@@ -2,6 +2,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 import { User } from 'src/app/model/user/users.entity';
@@ -229,11 +231,57 @@ const INITIAL_TASKS: TaskItem[] = [
 @Injectable()
 export class TaskService {
     private tasks: TaskItem[] = [...INITIAL_TASKS];
+    private readonly storeFilePath = path.join(process.cwd(), 'storage', 'tasks_data_store.json');
 
     constructor(
         @InjectRepository(User)
         private readonly _userRepo: Repository<User>,
-    ) {}
+    ) {
+        this.loadFromDisk();
+    }
+
+    private loadFromDisk(): void {
+        try {
+            if (fs.existsSync(this.storeFilePath)) {
+                const raw = fs.readFileSync(this.storeFilePath, 'utf8');
+                const data = JSON.parse(raw);
+                if (data && Array.isArray(data.tasks) && data.tasks.length > 0) {
+                    this.tasks = data.tasks;
+                }
+                if (data && data.comments && typeof data.comments === 'object') {
+                    for (const [k, v] of Object.entries(data.comments)) {
+                        const numKey = Number(k);
+                        if (!isNaN(numKey) && Array.isArray(v)) {
+                            this.taskComments.set(numKey, v as any[]);
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load tasks from disk store:', e);
+        }
+    }
+
+    private saveToDisk(): void {
+        try {
+            const dir = path.dirname(this.storeFilePath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            const commentsObj: Record<number, any[]> = {};
+            for (const [k, v] of this.taskComments.entries()) {
+                commentsObj[k] = v;
+            }
+            const data = {
+                tasks: this.tasks,
+                comments: commentsObj,
+                updated_at: new Date().toISOString(),
+            };
+            fs.writeFileSync(this.storeFilePath, JSON.stringify(data, null, 2), 'utf8');
+        } catch (e) {
+            console.error('Failed to save tasks to disk store:', e);
+        }
+    }
 
     getRawTasks(): TaskItem[] {
         return this.tasks;
@@ -440,6 +488,7 @@ export class TaskService {
         };
 
         this.tasks.unshift(newTask);
+        this.saveToDisk();
 
         return {
             status_code: 201,
@@ -598,6 +647,7 @@ export class TaskService {
         updated.comments_count = comments.length;
 
         this.tasks[index] = updated;
+        this.saveToDisk();
 
         return {
             status_code: 200,
@@ -613,6 +663,7 @@ export class TaskService {
         }
 
         this.tasks.splice(index, 1);
+        this.saveToDisk();
 
         return {
             status_code: 200,
@@ -719,7 +770,7 @@ export class TaskService {
             sender_id: user.id,
             sender_name: user.name_kh || user.name_en || 'អ្នកប្រើប្រាស់ (User)',
             sender_avatar: (user.avatar as any)?.uri || '/images/placeholder/avatar.jpg',
-            text: text.trim(),
+            text: (text || '').trim(),
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
             is_self: true,
             is_system: false,
@@ -735,6 +786,7 @@ export class TaskService {
             task.attachments_count = (task.attachments_count || 0) + attachments.length;
         }
         task.updated_at = new Date().toISOString();
+        this.saveToDisk();
 
         return {
             status_code: 201,

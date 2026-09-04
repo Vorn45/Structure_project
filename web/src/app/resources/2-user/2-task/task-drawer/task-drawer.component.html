@@ -248,7 +248,7 @@
                         </div>
 
                         <!-- Text bubble -->
-                        <div *ngIf="msg.text" class="p-3 rounded-2xl text-[15px] leading-relaxed shadow-2xs"
+                        <div *ngIf="msg.text && msg.text.trim()" class="p-3 rounded-2xl text-[15px] leading-relaxed shadow-2xs"
                             [ngClass]="msg.is_self ? 'bg-blue-600 text-white rounded-tr-xs' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 rounded-tl-xs'">
                             {{ msg.text }}
                         </div>
@@ -421,7 +421,7 @@
                     <mat-icon svgIcon="mdi:upload" class="icon-size-4"></mat-icon>
                     <span>បញ្ចូលឯកសារ</span>
                 </button>
-                <input type="file" #fileInputTab multiple (change)="onFileInputChange($event)" class="hidden"
+                <input type="file" #fileInputTab multiple (change)="onFileInputChange($event, true)" class="hidden"
                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" />
             </div>
 

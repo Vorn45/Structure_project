@@ -317,70 +317,94 @@ export class TaskDrawerComponent {
         this.dragCounter = 0;
         this.isDraggingFile.set(false);
         if (event.dataTransfer?.files?.length) this.handleIncomingFiles(event.dataTransfer.files);
-    }
-
-    onFileInputChange(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        if (input?.files?.length) {
-            this.handleIncomingFiles(input.files);
-            input.value = '';
         }
-    }
 
-    onInputPaste(event: ClipboardEvent): void {
-        const items = event.clipboardData?.items;
-        if (!items) return;
-        const files: File[] = [];
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].kind === 'file') {
-                const file = items[i].getAsFile();
-                if (file) files.push(file);
+        onFileInputChange(event: Event, autoSubmit = false): void {
+            const input = event.target as HTMLInputElement;
+            if (input?.files?.length) {
+                this.handleIncomingFiles(input.files, autoSubmit);
+                input.value = '';
             }
         }
-        if (files.length > 0) this.handleIncomingFiles(files);
-    }
 
-    handleIncomingFiles(fileList: FileList | File[]): void {
-        const filesArray = Array.from(fileList);
-        for (const file of filesArray) {
-            const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/i.test(file.name);
-            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-            const isText = file.type.startsWith('text/') || /\.(txt|json|csv|md|js|ts|html|xml|sql|log)$/i.test(file.name);
-            const sizeStr = this.formatFileSize(file.size);
-            const blobUrl = URL.createObjectURL(file);
-
-            if (isImage) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.pendingAttachments.update((prev) => [
-                        ...prev,
-                        { name: file.name, size: sizeStr, type: file.type, url: e.target?.result as string, isImage: true, fileBlob: file },
-                    ]);
-                };
-                reader.readAsDataURL(file);
-            } else if (isPdf) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.pendingAttachments.update((prev) => [
-                        ...prev,
-                        { name: file.name, size: sizeStr, type: 'application/pdf', url: (e.target?.result as string) || blobUrl, isImage: false, fileBlob: file },
-                    ]);
-                };
-                reader.readAsDataURL(file);
-            } else if (isText) {
-                file.text().then((content) => {
-                    this.pendingAttachments.update((prev) => [
-                        ...prev,
-                        { name: file.name, size: sizeStr, type: file.type || 'text/plain', url: blobUrl, isImage: false, textContent: content, fileBlob: file },
-                    ]);
-                }).catch(() => {});
-            } else {
-                this.pendingAttachments.update((prev) => [
-                    ...prev,
-                    { name: file.name, size: sizeStr, type: file.type || 'application/octet-stream', url: blobUrl, isImage: false, fileBlob: file },
-                ]);
+        onInputPaste(event: ClipboardEvent): void {
+            const items = event.clipboardData?.items;
+            if (!items) return;
+            const files: File[] = [];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file') {
+                    const file = items[i].getAsFile();
+                    if (file) files.push(file);
+                }
             }
+            if (files.length > 0) this.handleIncomingFiles(files);
         }
+
+        handleIncomingFiles(fileList: FileList | File[], autoSubmit = false): void {
+            const filesArray = Array.from(fileList);
+            const processedAttachments: TaskAttachment[] = [];
+            let remaining = filesArray.length;
+
+            const checkDone = () => {
+                if (remaining === 0) {
+                    if (autoSubmit && processedAttachments.length > 0) {
+                        this.sendMessage.emit({ text: 'បានផ្ញើឯកសារ', attachments: processedAttachments });
+                    } else if (processedAttachments.length > 0) {
+                        this.pendingAttachments.update((prev) => [...prev, ...processedAttachments]);
+                    }
+                }
+            };
+
+            for (const file of filesArray) {
+                const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/i.test(file.name);
+                const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+                const isText = file.type.startsWith('text/') || /\.(txt|json|csv|md|js|ts|html|xml|sql|log)$/i.test(file.name);
+                const sizeStr = this.formatFileSize(file.size);
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = (e.target?.result as string) || '';
+                    const item: TaskAttachment = {
+                        name: file.name,
+                        size: sizeStr,
+                        type: file.type || (isPdf ? 'application/pdf' : isImage ? 'image/png' : 'application/octet-stream'),
+                        url: dataUrl,
+                        isImage: isImage,
+                        fileBlob: file,
+                    };
+
+                    if (isText) {
+                        file.text().then((txt) => {
+                            item.textContent = txt;
+                            processedAttachments.push(item);
+                            remaining--;
+                            checkDone();
+                        }).catch(() => {
+                            processedAttachments.push(item);
+                            remaining--;
+                            checkDone();
+                        });
+                    } else {
+                        processedAttachments.push(item);
+                        remaining--;
+                        checkDone();
+                    }
+                };
+                reader.onerror = () => {
+                    const blobUrl = URL.createObjectURL(file);
+                    processedAttachments.push({
+                        name: file.name,
+                        size: sizeStr,
+                        type: file.type || 'application/octet-stream',
+                        url: blobUrl,
+                        isImage: isImage,
+                        fileBlob: file,
+                    });
+                    remaining--;
+                    checkDone();
+                };
+                reader.readAsDataURL(file);
+            }
     }
 
     removePendingAttachment(index: number): void {

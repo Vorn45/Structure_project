@@ -18,4 +18,11 @@ export class UploadTaskAttachmentDto {
     @IsOptional()
     @IsString()
     url?: string;
+
+    @IsOptional()
+    isImage?: boolean;
+
+    @IsOptional()
+    @IsString()
+    textContent?: string;
 }
