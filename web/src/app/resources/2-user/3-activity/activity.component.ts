@@ -8,7 +8,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
+import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
+import { UserPlanService } from '../4-plan/plan.service';
+import { ActivityItem, UserActivityService } from './activity.service';
 import { AddPlanDialogComponent } from './add-plan-dialog.component';
 import { CreateProjectDialogComponent } from './create-project-dialog.component';
 import { ProjectPlanOption, SelectProjectPlanDialogComponent } from './select-project-plan-dialog.component';
@@ -138,16 +141,138 @@ export class UserActivityComponent implements OnInit {
         { name: 'កញ្ញា', startWeek: 36, weeksCount: 5, bgClass: 'bg-[#0369a1] text-white' },
     ];
 
+    recentActivities = signal<ActivityItem[]>([]);
+
     constructor(
         private readonly _router: Router,
         private readonly _matDialog: MatDialog,
         private readonly _dialogConfigService: DialogConfigService,
+        private readonly _planService: UserPlanService,
+        private readonly _activityService: UserActivityService,
+        private readonly _userService: UserService,
     ) {}
 
-    ngOnInit(): void {}
+    private get currentUserId(): string {
+        return String(this._userService.getUser()?.id || this._userService.user?.id || 'default');
+    }
+
+    ngOnInit(): void {
+        this.loadFromStorage();
+        this.loadRoadmapFromApi();
+        this.loadActivities();
+    }
+
+    private loadFromStorage(): void {
+        try {
+            const uid = this.currentUserId;
+            const storedProjects = localStorage.getItem(`wfm_activity_projects_${uid}`);
+            if (storedProjects) {
+                const parsed = JSON.parse(storedProjects);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    this.projectOptions.set(parsed);
+                }
+            }
+
+            const storedTasks = localStorage.getItem(`wfm_activity_tasks_map_${uid}`);
+            if (storedTasks) {
+                const parsed = JSON.parse(storedTasks);
+                if (parsed && typeof parsed === 'object') {
+                    this.projectTasksMap.set(parsed);
+                }
+            }
+
+            const storedCurId = localStorage.getItem(`wfm_activity_current_project_id_${uid}`);
+            if (storedCurId) {
+                const found = this.projectOptions().find((p) => String(p.id) === String(storedCurId));
+                if (found) {
+                    this.currentProject.set(found);
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load from localStorage', e);
+        }
+    }
+
+    private saveToStorage(): void {
+        try {
+            const uid = this.currentUserId;
+            localStorage.setItem(`wfm_activity_projects_${uid}`, JSON.stringify(this.projectOptions()));
+            localStorage.setItem(`wfm_activity_tasks_map_${uid}`, JSON.stringify(this.projectTasksMap()));
+            localStorage.setItem(`wfm_activity_current_project_id_${uid}`, this.currentProject()?.id || '1');
+        } catch (e) {
+            console.error('Failed to save to localStorage', e);
+        }
+    }
+
+    loadRoadmapFromApi(): void {
+        this._activityService.getRoadmap().subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    const { projects, tasksMap } = res.data;
+                    if (projects && projects.length > 0) {
+                        this.projectOptions.update((existing) => {
+                            const existingIds = new Set(existing.map((e) => String(e.id)));
+                            const additions = projects.filter((p) => !existingIds.has(String(p.id)));
+                            return [...existing, ...additions];
+                        });
+                    }
+                    if (tasksMap) {
+                        this.projectTasksMap.update((existing) => ({
+                            ...tasksMap,
+                            ...existing,
+                        }));
+                    }
+                    this.saveToStorage();
+                }
+            },
+            error: () => {
+                // Fallback to plan service if roadmap endpoint fails
+                this.loadProjectsFromApi();
+            },
+        });
+    }
+
+    loadProjectsFromApi(): void {
+        this._planService.getPlans().subscribe({
+            next: (res) => {
+                if (res?.data?.results?.length) {
+                    const apiProjects: ProjectPlanOption[] = res.data.results.map((p) => ({
+                        id: String(p.id),
+                        code: p.code,
+                        name: p.name,
+                        description: p.description,
+                        tasksCount: p.total_tasks || 0,
+                    }));
+
+                    // Merge with existing while avoiding duplicates
+                    this.projectOptions.update((existing) => {
+                        const existingIds = new Set(existing.map((e) => String(e.id)));
+                        const additions = apiProjects.filter((ap) => !existingIds.has(String(ap.id)));
+                        return [...existing, ...additions];
+                    });
+                    this.saveToStorage();
+                }
+            },
+            error: () => {
+                // Fallback to local defaults if API is offline
+            },
+        });
+    }
+
+    loadActivities(): void {
+        this._activityService.getActivities().subscribe({
+            next: (res) => {
+                if (res?.data?.results) {
+                    this.recentActivities.set(res.data.results);
+                }
+            },
+            error: () => {},
+        });
+    }
 
     selectProject(p: ProjectPlanOption): void {
         this.currentProject.set(p);
+        this.saveToStorage();
     }
 
     openCreateNewProjectDialog(): void {
@@ -169,14 +294,29 @@ export class UserActivityComponent implements OnInit {
                     ],
                 }));
                 this.currentProject.set(newProject);
+                this.saveToStorage();
+
+                // Persist new plan to backend Roadmap API
+                this._activityService
+                    .createRoadmapProject({
+                        id: newProject.id,
+                        code: newProject.code,
+                        name: newProject.name,
+                        description: newProject.description,
+                    })
+                    .subscribe({
+                        next: () => {},
+                        error: () => {},
+                    });
             }
         });
     }
 
     openSelectProjectPlanDialog(tab: 'existing' | 'create' = 'existing'): void {
+        const currentP = this.currentProject() || this.projectOptions()[0];
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             projects: this.projectOptions(),
-            selectedProjectId: this.currentProject().id,
+            selectedProjectId: currentP?.id || '1',
             activeTab: tab,
         });
 
@@ -185,7 +325,7 @@ export class UserActivityComponent implements OnInit {
         dialogRef.afterClosed().subscribe((selected?: ProjectPlanOption) => {
             if (selected) {
                 // If it's a new project option not yet in the list, add it
-                if (!this.projectOptions().some((p) => p.id === selected.id)) {
+                if (!this.projectOptions().some((p) => String(p.id) === String(selected.id))) {
                     this.projectOptions.update((list) => [selected, ...list]);
                     this.projectTasksMap.update((map) => ({
                         ...map,
@@ -197,28 +337,51 @@ export class UserActivityComponent implements OnInit {
                             },
                         ],
                     }));
+
+                    // Persist to backend Roadmap API
+                    this._activityService
+                        .createRoadmapProject({
+                            id: selected.id,
+                            code: selected.code,
+                            name: selected.name,
+                            description: selected.description,
+                        })
+                        .subscribe({
+                            next: () => {},
+                            error: () => {},
+                        });
                 }
                 this.currentProject.set(selected);
+                this.saveToStorage();
             }
         });
     }
 
     openAddPlanDialog(): void {
+        const currentP = this.currentProject() || this.projectOptions()[0];
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             currentWeek: this.currentWeek,
             startWeek: this.startWeek,
             totalWeeks: this.totalWeeks,
             weeks: this.weeks,
             projects: this.projectOptions(),
-            selectedProjectId: this.currentProject().id,
-            selectedProjectName: this.currentProject().name,
+            selectedProjectId: currentP?.id || '1',
+            selectedProjectName: currentP?.name || '',
         });
 
         const dialogRef = this._matDialog.open(AddPlanDialogComponent, dialogConfig);
 
-        dialogRef.afterClosed().subscribe((newTask: AgilePlanTask | null) => {
-            if (newTask) {
-                const pId = this.currentProject().id;
+        dialogRef.afterClosed().subscribe((result: any) => {
+            if (result) {
+                const newTask: AgilePlanTask = result.task || result;
+                const pId = String(result.projectId || currentP?.id || '1');
+
+                // If user selected a different project in the dialog, switch to it
+                const targetProject = this.projectOptions().find((p) => String(p.id) === pId);
+                if (targetProject && targetProject.id !== this.currentProject()?.id) {
+                    this.currentProject.set(targetProject);
+                }
+
                 this.projectTasksMap.update((map) => {
                     const currentList = map[pId] || [];
                     return {
@@ -226,19 +389,50 @@ export class UserActivityComponent implements OnInit {
                         [pId]: [newTask, ...currentList],
                     };
                 });
+
+                // Update project task count
+                this.projectOptions.update((list) =>
+                    list.map((p) =>
+                        String(p.id) === pId
+                            ? { ...p, tasksCount: this.projectTasksMap()[pId]?.length || p.tasksCount || 0 }
+                            : p
+                    )
+                );
+
+                this.saveToStorage();
+
+                // Persist to backend API
+                this._activityService
+                    .createRoadmapTask({
+                        id: newTask.id,
+                        project_id: pId,
+                        name: newTask.name,
+                        segments: newTask.segments,
+                    })
+                    .subscribe({
+                        next: () => {},
+                        error: () => {},
+                    });
             }
         });
     }
 
     deleteAgileTask(taskId: string, event: MouseEvent): void {
         event.stopPropagation();
-        const pId = this.currentProject().id;
+        const pId = this.currentProject()?.id || '1';
         this.projectTasksMap.update((map) => {
             const currentList = map[pId] || [];
             return {
                 ...map,
                 [pId]: currentList.filter((t) => t.id !== taskId),
             };
+        });
+        this.saveToStorage();
+
+        // Delete from backend API
+        this._activityService.deleteRoadmapTask(taskId, pId).subscribe({
+            next: () => {},
+            error: () => {},
         });
     }
 

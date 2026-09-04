@@ -106,6 +106,7 @@ const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
                             <input
                                 type="text"
                                 [(ngModel)]="taskName"
+                                (keyup.enter)="submit()"
                                 placeholder="ឧ. បង្កើតប្រព័ន្ធសុវត្ថិភាព និងផ្ទៀងផ្ទាត់ទិន្នន័យ..."
                                 class="w-full px-4 py-3 text-[16px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                             />
@@ -154,8 +155,8 @@ const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
                                 </label>
                                 <select [(ngModel)]="startWeek"
                                     class="w-full px-4 py-3 text-[16px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                                    <option *ngFor="let w of data.weeks" [value]="w">
-                                        សប្តាហ៍ទី {{ w }} {{ w === data.currentWeek ? '(បច្ចុប្បន្ន / NOW)' : '' }}
+                                    <option *ngFor="let w of weeksList" [value]="w">
+                                        សប្តាហ៍ទី {{ w }} {{ w === currentWeekNum ? '(បច្ចុប្បន្ន / NOW)' : '' }}
                                     </option>
                                 </select>
                             </div>
@@ -222,6 +223,8 @@ export class AddPlanDialogComponent {
     iteration: 1 | 2 | 3 = 1;
     startWeek = 14;
     durationWeeks = 3;
+    currentWeekNum = 36;
+    weeksList: number[] = Array.from({ length: 27 }, (_, i) => 14 + i);
 
     projectList: AddPlanProjectOption[] = DEFAULT_PROJECT_OPTIONS;
     selectedProjectId = '1';
@@ -233,14 +236,18 @@ export class AddPlanDialogComponent {
         @Inject(MAT_DIALOG_DATA) public readonly data: AddPlanDialogData,
     ) {
         if (data?.currentWeek) {
+            this.currentWeekNum = data.currentWeek;
             this.startWeek = data.currentWeek;
+        }
+        if (data?.weeks && Array.isArray(data.weeks) && data.weeks.length > 0) {
+            this.weeksList = data.weeks;
         }
         if (data?.projects && data.projects.length > 0) {
             this.projectList = data.projects;
         }
         if (data?.selectedProjectId) {
-            this.selectedProjectId = data.selectedProjectId;
-            const found = this.projectList.find((p) => p.id === data.selectedProjectId);
+            this.selectedProjectId = String(data.selectedProjectId);
+            const found = this.projectList.find((p) => String(p.id) === String(data.selectedProjectId));
             if (found) {
                 this.selectedProjectCode = found.code;
                 this.selectedProjectName = found.name;
@@ -249,7 +256,7 @@ export class AddPlanDialogComponent {
     }
 
     onProjectChange(projectId: string): void {
-        const found = this.projectList.find((p) => p.id === projectId);
+        const found = this.projectList.find((p) => String(p.id) === String(projectId));
         if (found) {
             this.selectedProjectCode = found.code;
             this.selectedProjectName = found.name;
@@ -257,13 +264,15 @@ export class AddPlanDialogComponent {
     }
 
     getPreviewColor(): string {
-        switch (this.iteration) {
+        switch (Number(this.iteration)) {
             case 1:
                 return 'bg-[#f59e0b]';
             case 2:
                 return 'bg-[#f43f5e]';
             case 3:
                 return 'bg-[#581c87]';
+            default:
+                return 'bg-[#f59e0b]';
         }
     }
 
@@ -276,12 +285,13 @@ export class AddPlanDialogComponent {
 
         const duration = Number(this.durationWeeks) || 1;
         const start = Number(this.startWeek) || 14;
+        const iter = (Number(this.iteration) || 1) as 1 | 2 | 3;
         const newTask: AgilePlanTask = {
             id: `task-${Date.now()}`,
             name: this.taskName.trim(),
             segments: [
                 {
-                    iteration: this.iteration,
+                    iteration: iter,
                     startWeek: start,
                     durationWeeks: duration,
                     label: duration > 1 ? `${duration}W` : undefined,
@@ -289,6 +299,9 @@ export class AddPlanDialogComponent {
             ],
         };
 
-        this._dialogRef.close(newTask);
+        this._dialogRef.close({
+            task: newTask,
+            projectId: this.selectedProjectId,
+        });
     }
 }

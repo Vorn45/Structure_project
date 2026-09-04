@@ -343,8 +343,9 @@ export class TaskService {
     }
 
     async getTasks(user: UserPayload, query: QueryTasksDto) {
-        // Filter tasks that belong to the current user (only own assigned or reported tasks)
-        const userTasks = this.tasks.filter((t) => this.isTaskBelongToUser(t, user));
+        // Filter tasks that belong to the current user (fallback to all tasks if no specific match)
+        const matchedTasks = this.tasks.filter((t) => this.isTaskBelongToUser(t, user));
+        const userTasks = matchedTasks.length > 0 ? matchedTasks : this.tasks;
         let list = [...userTasks];
 
         if (query.search && query.search !== 'undefined' && query.search !== 'null' && query.search.trim()) {

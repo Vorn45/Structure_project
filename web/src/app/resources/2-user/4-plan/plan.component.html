@@ -245,9 +245,9 @@
                 <!-- Right: Action Buttons (+, Chat, Mail, 3-Dot) -->
                 <div class="flex items-center gap-2">
                     <!-- Blue + Button -->
-                    <button type="button"
+                    <button type="button" (click)="openAddPlanDialog(proj)"
                         class="w-8 h-8 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white flex items-center justify-center cursor-pointer shadow-xs transition-colors"
-                        [matTooltip]="'បង្កើតការងារថ្មី'">
+                        [matTooltip]="'បន្ថែមផែនការ (Add Plan)'">
                         <mat-icon svgIcon="mdi:plus" class="icon-size-4.5"></mat-icon>
                     </button>
 

@@ -102,7 +102,7 @@ export class PlanService {
     }
 
     async getPlanById(user: UserPayload, id: string) {
-        const plan = PROJECTS.find((p) => p.id === id || p.code === id);
+        const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }

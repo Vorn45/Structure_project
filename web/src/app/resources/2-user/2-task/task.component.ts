@@ -283,9 +283,11 @@ export class UserTaskComponent implements OnInit {
             })
             .subscribe({
                 next: (res) => {
-                    const filtered = (res.data.results || []).filter((t) => this.isTaskBelongToCurrentUser(t));
-                    this.tasks.set(filtered);
-                    this.computeCounts(filtered, res.data.counts);
+                    const results = res.data.results || [];
+                    const userSpecific = results.filter((t) => this.isTaskBelongToCurrentUser(t));
+                    const finalTasks = userSpecific.length > 0 ? userSpecific : results;
+                    this.tasks.set(finalTasks);
+                    this.computeCounts(finalTasks, res.data.counts);
                     this.loading.set(false);
                 },
                 error: (err) => {
