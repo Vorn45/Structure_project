@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // ===========================================================================>> Custom Library
 import { CommonModule } from 'src/app/common/common.module';
 import { User } from 'src/app/model/user/users.entity';
+import { TaskStore } from 'src/app/model/user/task-store.entity';
 
 // Controllers
 import { HomeController } from './1-home/home.controller';
@@ -44,7 +45,7 @@ import { ReportService } from './5-report/report.service';
     imports: [
         HttpModule,
         CommonModule,
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([User, TaskStore]),
     ],
     controllers: [
         HomeController,

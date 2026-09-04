@@ -7,6 +7,7 @@ import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 import { User } from 'src/app/model/user/users.entity';
+import { TaskStore } from 'src/app/model/user/task-store.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateTaskDto } from './task.dto';
 
@@ -248,8 +249,41 @@ export class TaskService {
     constructor(
         @InjectRepository(User)
         private readonly _userRepo: Repository<User>,
+        @InjectRepository(TaskStore)
+        private readonly _taskStoreRepo: Repository<TaskStore>,
     ) {
         this.loadFromDisk();
+        this.initDbStore();
+    }
+
+    private async initDbStore(): Promise<void> {
+        try {
+            const dbStore = await this._taskStoreRepo.findOne({ where: { key: 'default_tasks_store' } });
+            if (dbStore) {
+                if (Array.isArray(dbStore.tasks) && dbStore.tasks.length > 0) {
+                    this.tasks = dbStore.tasks;
+                }
+                if (dbStore.comments && typeof dbStore.comments === 'object') {
+                    for (const [k, v] of Object.entries(dbStore.comments)) {
+                        const numKey = Number(k);
+                        if (!isNaN(numKey) && Array.isArray(v)) {
+                            this.taskComments.set(numKey, v as any[]);
+                        }
+                    }
+                }
+            } else {
+                await this.saveToDb();
+            }
+        } catch (err) {
+            console.warn('Could not load task store from DB, falling back to disk:', err);
+        }
+
+        // Ensure all loaded tasks have default comment threads seeded
+        for (const task of this.tasks) {
+            if (!this.taskComments.has(task.id) || (this.taskComments.get(task.id)?.length || 0) === 0) {
+                this.ensureTaskComments(task.id);
+            }
+        }
     }
 
     private ensureTaskComments(taskId: number): Array<{
@@ -295,7 +329,7 @@ export class TaskService {
                 },
             ];
             this.taskComments.set(taskId, comments);
-            this.saveToDisk();
+            this.saveStore();
         }
         return comments;
     }
@@ -328,6 +362,11 @@ export class TaskService {
         }
     }
 
+    private saveStore(): void {
+        this.saveToDisk();
+        this.saveToDb().catch(() => {});
+    }
+
     private saveToDisk(): void {
         try {
             const dir = path.dirname(this.storeFilePath);
@@ -346,6 +385,29 @@ export class TaskService {
             fs.writeFileSync(this.storeFilePath, JSON.stringify(data, null, 2), 'utf8');
         } catch (e) {
             console.error('Failed to save tasks to disk store:', e);
+        }
+    }
+
+    private async saveToDb(): Promise<void> {
+        try {
+            const commentsObj: Record<number, any[]> = {};
+            for (const [k, v] of this.taskComments.entries()) {
+                commentsObj[k] = v;
+            }
+            let dbStore = await this._taskStoreRepo.findOne({ where: { key: 'default_tasks_store' } });
+            if (!dbStore) {
+                dbStore = this._taskStoreRepo.create({
+                    key: 'default_tasks_store',
+                    tasks: this.tasks,
+                    comments: commentsObj,
+                });
+            } else {
+                dbStore.tasks = this.tasks;
+                dbStore.comments = commentsObj;
+            }
+            await this._taskStoreRepo.save(dbStore);
+        } catch (err) {
+            console.error('Failed to save tasks to database:', err);
         }
     }
 
@@ -554,7 +616,7 @@ export class TaskService {
         };
 
         this.tasks.unshift(newTask);
-        this.saveToDisk();
+        this.saveStore();
 
         return {
             status_code: 201,
@@ -697,7 +759,7 @@ export class TaskService {
         updated.comments_count = comments.length;
 
         this.tasks[index] = updated;
-        this.saveToDisk();
+        this.saveStore();
 
         return {
             status_code: 200,
@@ -714,7 +776,7 @@ export class TaskService {
 
         this.tasks.splice(index, 1);
         this.taskComments.delete(id);
-        this.saveToDisk();
+        this.saveStore();
 
         return {
             status_code: 200,
@@ -793,7 +855,7 @@ export class TaskService {
             task.attachments_count = (task.attachments_count || 0) + attachments.length;
         }
         task.updated_at = new Date().toISOString();
-        this.saveToDisk();
+        this.saveStore();
 
         return {
             status_code: 201,
