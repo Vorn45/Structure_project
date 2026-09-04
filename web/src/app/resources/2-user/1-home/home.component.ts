@@ -19,6 +19,78 @@ import { HelpSupportDialogComponent } from './help-support-dialog/help-support-d
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { HomeOverviewData, UserHomeService } from './home.service';
 
+const DEFAULT_OVERVIEW_DATA: HomeOverviewData = {
+    user: {
+        id: 1,
+        name_en: 'CHENG CHANPANHA',
+        name_kh: 'ចេង ច័ន្ទបញ្ញា',
+        email: 'Chanpanhacheng@gmail.com',
+        phone: '087600064',
+        active_role_id: 1,
+        organization_id: null,
+    },
+    metrics: {
+        total_tasks: 12,
+        pending_tasks: 4,
+        in_progress_tasks: 5,
+        completed_tasks: 3,
+        overdue_tasks: 1,
+        high_priority: 2,
+        medium_priority: 7,
+        low_priority: 3,
+        completion_rate: 25,
+    },
+    recent_tasks: [
+        {
+            id: 101,
+            title: 'Complete System Architecture Review',
+            status: 'in_progress',
+            priority: 'high',
+            due_date: new Date(Date.now() + 86400000 * 2).toISOString(),
+            progress: 60,
+            project_name: 'PMS Upgrade V2',
+        },
+        {
+            id: 102,
+            title: 'Refactor Authentication & Passkey Service',
+            status: 'in_progress',
+            priority: 'medium',
+            due_date: new Date(Date.now() + 86400000 * 4).toISOString(),
+            progress: 40,
+            project_name: 'PMS Upgrade V2',
+        },
+        {
+            id: 104,
+            title: 'Setup Notification & Realtime WebSocket Gateway',
+            status: 'new',
+            priority: 'high',
+            due_date: new Date(Date.now() + 86400000 * 7).toISOString(),
+            progress: 0,
+            project_name: 'PMS Upgrade V2',
+        },
+    ],
+    active_projects: [
+        {
+            id: 'proj-001',
+            name: 'PMS Upgrade V2',
+            total_tasks: 24,
+            completed_tasks: 14,
+            progress: 58,
+            members_count: 8,
+            status: 'active',
+        },
+        {
+            id: 'proj-002',
+            name: 'Design System & UI Library',
+            total_tasks: 12,
+            completed_tasks: 9,
+            progress: 75,
+            members_count: 5,
+            status: 'active',
+        },
+    ],
+};
+
 @Component({
     selector: 'user-home',
     standalone: true,
@@ -34,8 +106,8 @@ import { HomeOverviewData, UserHomeService } from './home.service';
     templateUrl: './home.component.html',
 })
 export class UserHomeComponent implements OnInit {
-    loading = signal<boolean>(true);
-    overview = signal<HomeOverviewData | null>(null);
+    loading = signal<boolean>(false);
+    overview = signal<HomeOverviewData | null>(DEFAULT_OVERVIEW_DATA);
     currentUser = signal<User | null>(null);
     activeFilter = signal<string>('all');
     cardSide = signal<'front' | 'back'>('front');
@@ -71,7 +143,10 @@ export class UserHomeComponent implements OnInit {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this.currentUser() || this.overview()?.user,
         });
-        this._matDialog.open(AttendanceDialogComponent, dialogConfig);
+        const dialogRef = this._matDialog.open(AttendanceDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((res) => {
+            if (res) this.loadOverview();
+        });
     }
 
     openPayrollDialog(): void {
@@ -85,7 +160,12 @@ export class UserHomeComponent implements OnInit {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this.currentUser() || this.overview()?.user,
         });
-        this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
+        const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((res) => {
+            if (res?.created) {
+                this.loadOverview();
+            }
+        });
     }
 
     openActiveProjectsSideDialog(): void {
@@ -99,7 +179,12 @@ export class UserHomeComponent implements OnInit {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this.currentUser() || this.overview()?.user,
         });
-        this._matDialog.open(CreateMeetingDialogComponent, dialogConfig);
+        const dialogRef = this._matDialog.open(CreateMeetingDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((res) => {
+            if (res?.created) {
+                this.loadOverview();
+            }
+        });
     }
 
     openHelpSupportSideDialog(): void {
@@ -109,14 +194,34 @@ export class UserHomeComponent implements OnInit {
         this._matDialog.open(HelpSupportDialogComponent, dialogConfig);
     }
 
+    getUserKhName(): string {
+        const u: any = this.currentUser() || this.overview()?.user;
+        return u?.kh_name || u?.name_kh || u?.en_name || u?.name_en || '';
+    }
+
+    getUserEnName(): string {
+        const u: any = this.currentUser() || this.overview()?.user;
+        return u?.en_name || u?.name_en || '';
+    }
+
+    getUserPhone(): string {
+        const u: any = this.currentUser() || this.overview()?.user;
+        return u?.phone || '';
+    }
+
+    getUserEmail(): string {
+        const u: any = this.currentUser() || this.overview()?.user;
+        return u?.email || '';
+    }
+
     async generateMemberQrCode(): Promise<void> {
         try {
-            const user = this.currentUser() || this.overview()?.user;
-            const nameKh = (user as any)?.name_kh || (user as any)?.kh_name || 'ចេង ច័ន្ទបញ្ញា';
-            const nameEn = (user as any)?.name_en || (user as any)?.en_name || 'Cheng Chanpanha';
-            const phone = user?.phone || '087600064';
-            const email = user?.email || 'Chanpanhacheng@gmail.com';
-            const id = user?.id || '2';
+            const u: any = this.currentUser() || this.overview()?.user;
+            const nameKh = this.getUserKhName();
+            const nameEn = this.getUserEnName();
+            const phone = this.getUserPhone();
+            const email = this.getUserEmail();
+            const id = u?.id || '';
 
             const origin = window.location.origin;
             const verifyUrl = `${origin}/#/verify/member?id=${id}&code=${phone}&name_kh=${encodeURIComponent(nameKh)}&name_en=${encodeURIComponent(nameEn)}&phone=${phone}&email=${encodeURIComponent(email)}`;
@@ -146,7 +251,10 @@ export class UserHomeComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        this.currentUser.set(this._userService.getUser());
+        const initialUser = this._userService.getUser();
+        if (initialUser) {
+            this.currentUser.set(initialUser);
+        }
         this._userService.user$.subscribe((u) => {
             if (u) {
                 this.currentUser.set(u);
@@ -158,10 +266,15 @@ export class UserHomeComponent implements OnInit {
     }
 
     loadOverview(): void {
-        this.loading.set(true);
         this._homeService.getOverview().subscribe({
             next: (res) => {
-                this.overview.set(res.data);
+                if (res?.data) {
+                    this.overview.set(res.data);
+                    if (!this.currentUser() && res.data.user) {
+                        this.currentUser.set(res.data.user as any);
+                    }
+                    this.generateMemberQrCode();
+                }
                 this.loading.set(false);
             },
             error: (err) => {
@@ -172,24 +285,32 @@ export class UserHomeComponent implements OnInit {
     }
 
     getAvatarUrl(): string {
-        const user = this.currentUser();
-        if (user?.avatar?.uri && user?.avatar?.file_domain) {
-            return user.avatar.file_domain.replace(/\/+$/, '') + '/' + user.avatar.uri.replace(/^\/+/, '');
+        const user: any = this.currentUser() || this.overview()?.user;
+        const avatar = user?.avatar;
+        if (avatar?.uri && avatar?.file_domain) {
+            return `${avatar.file_domain.replace(/\/+$/, '')}/${avatar.uri.replace(/^\/+/, '')}`;
+        }
+        if (typeof avatar === 'string' && avatar.startsWith('http')) {
+            return avatar;
         }
         return '/images/placeholder/avatar.jpg';
     }
 
     getCoverUrl(): string {
-        const user: any = this.currentUser();
-        if (user?.cover?.uri && user?.cover?.file_domain) {
-            return user.cover.file_domain.replace(/\/+$/, '') + '/' + user.cover.uri.replace(/^\/+/, '');
+        const user: any = this.currentUser() || this.overview()?.user;
+        const cover = user?.cover || user?.background_file;
+        if (cover?.uri && cover?.file_domain) {
+            return `${cover.file_domain.replace(/\/+$/, '')}/${cover.uri.replace(/^\/+/, '')}`;
+        }
+        if (typeof cover === 'string' && cover.startsWith('http')) {
+            return cover;
         }
         return '/images/placeholder/cover.jpg';
     }
 
     getLogoUrl(): string {
-        const user = this.currentUser();
-        const role = user?.roles?.find((r) => r.is_default) || user?.roles?.[0];
+        const user: any = this.currentUser() || this.overview()?.user;
+        const role = user?.roles?.find((r: any) => r.is_default) || user?.roles?.[0];
         const logo = role?.organization?.logo;
         if (logo?.uri && logo?.file_domain) {
             return `${logo.file_domain.replace(/\/+$/, '')}/${logo.uri.replace(/^\/+/, '')}`;

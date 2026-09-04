@@ -115,10 +115,10 @@ export interface DigitalCardDialogData {
                             <img [src]="data.avatarUrl" alt="Avatar" class="w-full h-full object-cover rounded-full" />
                         </div>
                         <div class="text-[15px] font-medium text-slate-900 leading-tight">
-                            {{ data.user?.kh_name || data.user?.name_kh || 'ចេង ច័ន្ទបញ្ញា' }}
+                            {{ data.user?.kh_name || data.user?.name_kh || data.user?.en_name || data.user?.name_en || 'សមាជិក' }}
                         </div>
-                        <div class="text-[11px] text-slate-500 uppercase tracking-wider mt-0.5">
-                            {{ data.user?.en_name || data.user?.name_en || 'CHENG CHANPANHA' }}
+                        <div *ngIf="data.user?.en_name || data.user?.name_en" class="text-[11px] text-slate-500 uppercase tracking-wider mt-0.5">
+                            {{ data.user?.en_name || data.user?.name_en }}
                         </div>
                         <div class="mt-2.5 p-1 bg-slate-100 rounded-lg border border-slate-200 inline-flex items-center justify-center">
                             <mat-icon svgIcon="mdi:qrcode-scan" class="icon-size-6 text-slate-700"></mat-icon>
@@ -130,34 +130,34 @@ export interface DigitalCardDialogData {
                         <div class="border-b border-white/20 pb-2 flex items-center justify-between">
                             <div>
                                 <h3 class="text-base font-normal text-white uppercase tracking-wide">
-                                    {{ data.user?.kh_name || 'ចេង ច័ន្ទបញ្ញា' }}
+                                    {{ data.user?.kh_name || data.user?.name_kh || data.user?.en_name || data.user?.name_en || 'សមាជិក' }}
                                 </h3>
-                                <p class="text-xs text-blue-200">សមាជិកប្រព័ន្ធ (Core Member)</p>
+                                <p class="text-xs text-blue-200">{{ data.user?.role_name || 'សមាជិកប្រព័ន្ធ (Core Member)' }}</p>
                             </div>
                             <span class="text-[11px] px-2 py-0.5 rounded bg-white/20 text-white font-mono">
-                                #PMS-2026
+                                #ID-{{ data.user?.id || '2026' }}
                             </span>
                         </div>
 
                         <div class="space-y-1.5 text-xs text-blue-100 font-normal">
-                            <div class="flex items-center gap-2">
-                                <mat-icon svgIcon="mdi:map-marker" class="icon-size-4 text-amber-300"></mat-icon>
-                                <span class="truncate">រាជធានីភ្នំពេញ, ព្រះរាជាណាចក្រកម្ពុជា</span>
+                            <div *ngIf="data.user?.organization_name" class="flex items-center gap-2">
+                                <mat-icon svgIcon="mdi:domain" class="icon-size-4 text-amber-300"></mat-icon>
+                                <span class="truncate">{{ data.user?.organization_name }}</span>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div *ngIf="data.user?.email" class="flex items-center gap-2">
                                 <mat-icon svgIcon="mdi:email" class="icon-size-4 text-amber-300"></mat-icon>
-                                <span class="truncate">{{ data.user?.email || 'Chanpanhacheng@gmail.com' }}</span>
+                                <span class="truncate">{{ data.user?.email }}</span>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div *ngIf="data.user?.phone" class="flex items-center gap-2">
                                 <mat-icon svgIcon="mdi:phone" class="icon-size-4 text-amber-300"></mat-icon>
-                                <span>{{ data.user?.phone || '087600064' }}</span>
+                                <span>{{ data.user?.phone }}</span>
                             </div>
                         </div>
 
                         <div class="pt-1.5 border-t border-white/20 flex items-center justify-between text-[11px] text-blue-200">
                             <span class="flex items-center gap-1">
                                 <mat-icon svgIcon="mdi:shield-check" class="icon-size-3.5 text-emerald-300"></mat-icon>
-                                <span>សុពលភាព៖ 2026 - 2027</span>
+                                <span>សុពលភាព៖ សកម្ម</span>
                             </span>
                             <span>WMS SYSTEM</span>
                         </div>

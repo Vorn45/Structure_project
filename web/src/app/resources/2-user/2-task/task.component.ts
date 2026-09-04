@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,19 +12,17 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { CreateProjectDialogComponent } from '../1-home/create-project-dialog/create-project-dialog.component';
-import { TaskItem, TaskStatus, UserTaskService } from './task.service';
-
-export interface TaskChatMessage {
-    id: number;
-    sender_id?: number;
-    sender_name: string;
-    sender_avatar?: string;
-    text: string;
-    time: string;
-    is_self: boolean;
-    is_system?: boolean;
-    attachments?: Array<{ name: string; size: string }>;
-}
+import { TaskDrawerComponent } from './task-drawer/task-drawer.component';
+import { FilePreviewModalComponent } from './file-preview-modal/file-preview-modal.component';
+import {
+    TaskAttachment,
+    TaskChatMessage,
+    TaskItem,
+    TaskMember,
+    TaskPriority,
+    TaskStatus,
+} from './models/task.types';
+import { UserTaskService } from './task.service';
 
 @Component({
     selector: 'user-tasks',
@@ -39,6 +37,8 @@ export interface TaskChatMessage {
         MatProgressSpinnerModule,
         MatDialogModule,
         DragDropModule,
+        TaskDrawerComponent,
+        FilePreviewModalComponent,
     ],
     templateUrl: './task.component.html',
     styles: [
@@ -115,13 +115,53 @@ export class UserTaskComponent implements OnInit {
     activePriority = signal<string>('all');
     searchQuery = signal<string>('');
 
-
-    // Task Chat Room State
+    // Task Chat Drawer & File Modal State
     selectedTask = signal<TaskItem | null>(null);
     showChatRoom = signal<boolean>(false);
-    activeChatTab = signal<'chat' | 'details' | 'files'>('chat');
     chatMessages = signal<TaskChatMessage[]>([]);
-    newChatMessage = '';
+    previewImageModal = signal<string | null>(null);
+    previewFileModal = signal<TaskAttachment | null>(null);
+    private taskChatHistoryMap = new Map<number, TaskChatMessage[]>();
+
+    // Team Members Pool for Multi-Assignee Selection
+    teamMembers: TaskMember[] = [
+        { id: 1, name: 'Cheng Chanpanha', role: 'Frontend Lead / Developer', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop', colorClass: 'bg-blue-600', email: 'panha@gmail.com' },
+        { id: 2, name: 'Ratha Vuth', role: 'UI/UX Designer / Reporter', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop', colorClass: 'bg-emerald-600', email: 'ratha.vuth@wfm.com' },
+        { id: 3, name: 'Sokha Meng', role: 'Senior Backend Developer', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop', colorClass: 'bg-indigo-600', email: 'sokha.meng@wfm.com' },
+        { id: 4, name: 'Dara Pich', role: 'Fullstack Engineer', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', colorClass: 'bg-amber-600', email: 'dara.pich@wfm.com' },
+        { id: 5, name: 'Vannak Som', role: 'Mobile App Developer', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', colorClass: 'bg-purple-600', email: 'vannak.som@wfm.com' },
+        { id: 6, name: 'Bopha Chea', role: 'QA & Test Automation', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop', colorClass: 'bg-rose-600', email: 'bopha.chea@wfm.com' },
+        { id: 7, name: 'Sophea Keo', role: 'DevOps & Cloud Architect', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop', colorClass: 'bg-cyan-600', email: 'sophea.keo@wfm.com' },
+    ];
+
+    // Aggregated list of all files for the task (defaults + uploaded in chat)
+    allTaskFiles = computed<TaskAttachment[]>(() => {
+        const defaultFiles: TaskAttachment[] = [
+            {
+                name: 'Task_Requirement_Specification.pdf',
+                size: '2.4 MB',
+                type: 'application/pdf',
+                isImage: false,
+                url: '',
+            },
+            {
+                name: 'Design_Mockup_V2.png',
+                size: '1.8 MB',
+                type: 'image/png',
+                isImage: true,
+                url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+            },
+        ];
+
+        const chatFiles: TaskAttachment[] = [];
+        this.chatMessages().forEach((m) => {
+            if (m.attachments) {
+                chatFiles.push(...m.attachments);
+            }
+        });
+
+        return [...defaultFiles, ...chatFiles];
+    });
 
     constructor(
         private readonly _taskService: UserTaskService,
@@ -130,7 +170,7 @@ export class UserTaskComponent implements OnInit {
         private readonly _router: Router,
         private readonly _matDialog: MatDialog,
         private readonly _dialogConfigService: DialogConfigService,
-    ) { }
+    ) {}
 
     getAvatarUrl(): string {
         const user = this._userService.getUser();
@@ -216,13 +256,52 @@ export class UserTaskComponent implements OnInit {
 
     Math = Math;
 
+    formatDate(dateStr?: string | null): string {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    getTaskDateToDo(dueDateStr?: string | null, createdDateStr?: string | null): string {
+        if (dueDateStr) {
+            return this.formatDate(dueDateStr);
+        }
+        if (createdDateStr) {
+            const d = new Date(createdDateStr);
+            d.setDate(d.getDate() + 7);
+            return this.formatDate(d.toISOString());
+        }
+        return '15/09/2026';
+    }
+
+    getDaysRemainingInfo(dueDateStr?: string | null): { text: string; isOverdue: boolean; isToday: boolean; isUpcoming: boolean } {
+        if (!dueDateStr) {
+            return { text: 'សល់ 7 ថ្ងៃ', isOverdue: false, isToday: false, isUpcoming: true };
+        }
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const dueDate = new Date(dueDateStr);
+        if (isNaN(dueDate.getTime())) {
+            return { text: 'កំណត់រួចរាល់', isOverdue: false, isToday: false, isUpcoming: true };
+        }
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) {
+            return { text: 'ហួសកាលកំណត់', isOverdue: true, isToday: false, isUpcoming: false };
+        } else if (diffDays === 0) {
+            return { text: 'ថ្ងៃនេះ (Today)', isOverdue: false, isToday: true, isUpcoming: false };
+        } else {
+            return { text: `សល់ ${diffDays} ថ្ងៃ`, isOverdue: false, isToday: false, isUpcoming: true };
+        }
+    }
+
     getDaysRemaining(dueDateStr?: string): string {
-        if (!dueDateStr) return 'សល់ 851 ថ្ងៃ';
-        const due = new Date(dueDateStr).getTime();
-        const now = Date.now();
-        const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-        if (diffDays <= 0) return 'ហួសកាលកំណត់';
-        return `សល់ ${diffDays} ថ្ងៃ`;
+        return this.getDaysRemainingInfo(dueDateStr).text;
     }
 
     getActivityRate(task: TaskItem): number {
@@ -230,25 +309,11 @@ export class UserTaskComponent implements OnInit {
         return Math.min(100, Math.round((comments / 11) * 100));
     }
 
-    getTeamAvatars(task: TaskItem): Array<{ name: string; avatar: string }> {
-        return [
-            {
-                name: task.assignee?.name || 'User',
-                avatar: task.assignee?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-            },
-            {
-                name: 'Dara',
-                avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop',
-            },
-            {
-                name: 'Vannak',
-                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-            },
-            {
-                name: 'Bopha',
-                avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop',
-            },
-        ];
+    getTaskAssignees(task: TaskItem | null | undefined): TaskMember[] {
+        if (!task) return [];
+        if (task.assignees && task.assignees.length > 0) return task.assignees;
+        if (task.assignee) return [task.assignee];
+        return [{ id: 1, name: 'Cheng Chanpanha', role: 'Assignee', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop' }];
     }
 
     clearFilters(): void {
@@ -259,12 +324,190 @@ export class UserTaskComponent implements OnInit {
     }
 
     updateTaskStatus(task: TaskItem, newStatus: string): void {
-        this._taskService.updateTask(task.id, { status: newStatus as any }).subscribe({
+        const oldStatus = task.status;
+        const targetStatus = newStatus as TaskStatus;
+
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.update((t) => (t ? { ...t, status: targetStatus } : null));
+            const systemMsg: TaskChatMessage = {
+                id: Date.now(),
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `បានប្តូរស្ថានភាពពី "${this.getStatusLabel(oldStatus)}" ទៅជា "${this.getStatusLabel(targetStatus)}"`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                is_system: true,
+            };
+            this.appendChatMessage(task.id, systemMsg);
+        }
+
+        this.tasks.update((tasks) =>
+            tasks.map((t) => (t.id === task.id ? { ...t, status: targetStatus } : t))
+        );
+        this.computeCounts(this.tasks());
+
+        this._taskService.updateTask(task.id, { status: targetStatus as any }).subscribe({
             next: (res) => {
-                const updated = this.tasks().map((t) => (t.id === task.id ? res.data : t));
-                this.tasks.set(updated);
-                this.loadTasks();
+                if (res?.data) {
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.update((t) => (t ? { ...t, ...res.data } : null));
+                    }
+                    this.tasks.update((tasks) =>
+                        tasks.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
+                    );
+                    this.computeCounts(this.tasks());
+                }
             },
+            error: (err) => {
+                console.error('Failed to update task status', err);
+                if (this.selectedTask()?.id === task.id) {
+                    this.selectedTask.update((t) => (t ? { ...t, status: oldStatus } : null));
+                }
+                this.tasks.update((tasks) =>
+                    tasks.map((t) => (t.id === task.id ? { ...t, status: oldStatus } : t))
+                );
+                this.computeCounts(this.tasks());
+            },
+        });
+    }
+
+    updateTaskPriority(task: TaskItem, newPriority: string): void {
+        const oldPriority = task.priority;
+        const targetPriority = newPriority as TaskPriority;
+
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.update((t) => (t ? { ...t, priority: targetPriority } : null));
+            const systemMsg: TaskChatMessage = {
+                id: Date.now(),
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `បានប្តូរអាទិភាពពី "${this.getPriorityLabel(oldPriority)}" ទៅជា "${this.getPriorityLabel(targetPriority)}"`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                is_system: true,
+            };
+            this.appendChatMessage(task.id, systemMsg);
+        }
+
+        this.tasks.update((tasks) =>
+            tasks.map((t) => (t.id === task.id ? { ...t, priority: targetPriority } : t))
+        );
+
+        this._taskService.updateTask(task.id, { priority: targetPriority as any }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.update((t) => (t ? { ...t, ...res.data } : null));
+                    }
+                    this.tasks.update((tasks) =>
+                        tasks.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
+                    );
+                }
+            },
+            error: (err) => {
+                console.error('Failed to update task priority', err);
+                if (this.selectedTask()?.id === task.id) {
+                    this.selectedTask.update((t) => (t ? { ...t, priority: oldPriority } : null));
+                }
+                this.tasks.update((tasks) =>
+                    tasks.map((t) => (t.id === task.id ? { ...t, priority: oldPriority } : t))
+                );
+            },
+        });
+    }
+
+    updateTaskDueDate(task: TaskItem, newDateStr: string | null): void {
+        const formatted = newDateStr ? this.formatDate(newDateStr) : 'សម្អាត';
+
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.update((t) => (t ? { ...t, due_date: newDateStr } : null));
+            const systemMsg: TaskChatMessage = {
+                id: Date.now(),
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: newDateStr ? `បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ ${formatted}` : `បានសម្អាតកាលបរិច្ឆេទកំណត់`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                is_system: true,
+            };
+            this.appendChatMessage(task.id, systemMsg);
+        }
+
+        this.tasks.update((list) =>
+            list.map((t) => (t.id === task.id ? { ...t, due_date: newDateStr } : t))
+        );
+
+        this._taskService.updateTask(task.id, { due_date: newDateStr }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.update((t) => (t ? { ...t, ...res.data } : null));
+                    }
+                    this.tasks.update((list) =>
+                        list.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
+                    );
+                }
+            },
+            error: (err) => console.error('Failed to update due date', err),
+        });
+    }
+
+    toggleTaskAssignee(task: TaskItem, member: TaskMember): void {
+        const currentAssignees = this.getTaskAssignees(task);
+        const exists = currentAssignees.some(
+            (a) => a.id === member.id || a.name.toLowerCase() === member.name.toLowerCase()
+        );
+
+        let updatedAssignees: TaskMember[];
+        let actionNotice = '';
+
+        if (exists) {
+            if (currentAssignees.length <= 1) return;
+            updatedAssignees = currentAssignees.filter(
+                (a) => a.id !== member.id && a.name.toLowerCase() !== member.name.toLowerCase()
+            );
+            actionNotice = `បានដកចេញអ្នកទទួលបន្ទុក៖ "${member.name}"`;
+        } else {
+            const newMember: TaskMember = {
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar || null,
+                role: member.role || 'Assignee',
+                email: member.email || '',
+                colorClass: member.colorClass || 'bg-blue-600',
+            };
+            updatedAssignees = [...currentAssignees, newMember];
+            actionNotice = `បានបន្ថែមអ្នកទទួលបន្ទុក៖ "${member.name}"`;
+        }
+
+        const updatedTask: TaskItem = {
+            ...task,
+            assignees: updatedAssignees,
+            assignee: updatedAssignees[0],
+        };
+
+        this.tasks.update((list) => list.map((t) => (t.id === task.id ? updatedTask : t)));
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.set(updatedTask);
+        }
+
+        const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        this.appendChatMessage(task.id, {
+            id: Date.now(),
+            sender_name: 'ប្រព័ន្ធ (System)',
+            text: actionNotice,
+            time: nowTime,
+            is_self: false,
+            is_system: true,
+        });
+
+        this._taskService.updateTask(task.id, {
+            assignee: updatedTask.assignee as any,
+            assignees: updatedAssignees as any,
+        }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    this.tasks.update((list) => list.map((t) => (t.id === task.id ? { ...t, ...res.data } : t)));
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.set({ ...updatedTask, ...res.data });
+                    }
+                }
+            },
+            error: (err) => console.error('Failed to update task assignees', err),
         });
     }
 
@@ -273,12 +516,9 @@ export class UserTaskComponent implements OnInit {
         if (!task) return;
 
         const previousStatus = event.previousContainer.data;
-        if (previousStatus === targetStatus) {
-            return;
-        }
+        if (previousStatus === targetStatus) return;
 
         const originalStatus = task.status;
-        // Optimistically update status in memory immediately
         this.tasks.update((tasks) =>
             tasks.map((t) => (t.id === task.id ? { ...t, status: targetStatus as TaskStatus } : t))
         );
@@ -295,7 +535,6 @@ export class UserTaskComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Failed to update task status on drag drop', err);
-                // Revert on error
                 this.tasks.update((tasks) =>
                     tasks.map((t) => (t.id === task.id ? { ...t, status: originalStatus } : t))
                 );
@@ -339,8 +578,6 @@ export class UserTaskComponent implements OnInit {
             }
         });
     }
-
-
 
     deleteTask(id: number): void {
         if (!confirm('តើអ្នកពិតជាចង់លុបការងារនេះមែនទេ?')) return;
@@ -519,45 +756,74 @@ export class UserTaskComponent implements OnInit {
         return `${months} ខែមុន`;
     }
 
+    appendChatMessage(taskId: number, message: TaskChatMessage): void {
+        this.chatMessages.update((msgs) => {
+            const updated = [...msgs, message];
+            this.taskChatHistoryMap.set(taskId, updated);
+            return updated;
+        });
+    }
+
     openTaskChat(task: TaskItem): void {
         if (this.isDragging()) return;
         this.selectedTask.set(task);
-        this.activeChatTab.set('chat');
-        this.newChatMessage = '';
-
-        const initialMessages: TaskChatMessage[] = [
-            {
-                id: 1,
-                sender_name: 'ប្រព័ន្ធ (System)',
-                text: `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើត និងចាត់តាំងទៅកាន់ ${task.assignee?.name || 'Cheng Chanpanha'}`,
-                time: '8:30 AM',
-                is_self: false,
-                is_system: true,
-            },
-            {
-                id: 2,
-                sender_name: task.assignee?.name || 'Cheng Chanpanha',
-                sender_avatar: task.assignee?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-                text: `សួស្តីក្រុមការងារ! ខ្ញុំបានទទួលភារកិច្ច "${task.title}" រួចរាល់ហើយ កំពុងចាប់ផ្តើមត្រួតពិនិត្យ និងអនុវត្តតាមលក្ខខណ្ឌ។`,
-                time: '9:15 AM',
-                is_self: false,
-            },
-            {
-                id: 3,
-                sender_name: 'Sokha Meng',
-                sender_avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop',
-                text: `បាទ ប្រសិនបើមានចម្ងល់លើផ្នែក Design ឬ API Endpoints អាចផ្ញើសារសួរក្នុងបន្ទប់នេះបានគ្រប់ពេល។`,
-                time: '10:02 AM',
-                is_self: false,
-                attachments: (task.attachments_count || 0) > 0 ? [
-                    { name: 'Specification-Doc-v1.2.pdf', size: '2.4 MB' },
-                    { name: 'UI-Mockups-Preview.png', size: '1.1 MB' },
-                ] : undefined,
-            },
-        ];
-
-        this.chatMessages.set(initialMessages);
         this.showChatRoom.set(true);
+
+        const cached = this.taskChatHistoryMap.get(task.id);
+        if (cached && cached.length > 0) {
+            this.chatMessages.set([...cached]);
+        } else {
+            const reporterName = task.reporter?.name || 'Ratha Vuth';
+            const reporterAvatar = task.reporter?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop';
+            const assigneeName = task.assignee?.name || 'Cheng Chanpanha';
+
+            const initialMessages: TaskChatMessage[] = [
+                {
+                    id: 1,
+                    sender_name: 'ប្រព័ន្ធ (System)',
+                    text: `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`,
+                    time: '8:30 AM',
+                    is_self: false,
+                    is_system: true,
+                },
+                {
+                    id: 2,
+                    sender_name: reporterName,
+                    sender_avatar: reporterAvatar,
+                    text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task.title}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
+                    time: '8:45 AM',
+                    is_self: false,
+                },
+            ];
+            this.chatMessages.set(initialMessages);
+            this.taskChatHistoryMap.set(task.id, initialMessages);
+        }
+
+        // Fetch live comments & action history from API
+        this._taskService.getTaskComments(task.id).subscribe({
+            next: (res) => {
+                if (res?.data?.comments && res.data.comments.length > 0) {
+                    const currentUser: any = this._userService.getUser();
+                    const currentUserName = (currentUser?.name_en || currentUser?.name || currentUser?.username || '').toLowerCase().trim();
+                    const reporterName = (task.reporter?.name || 'Ratha Vuth').toLowerCase().trim();
+
+                    const mapped = (res.data.comments as TaskChatMessage[]).map((c) => {
+                        const senderName = (c.sender_name || '').toLowerCase().trim();
+                        if (c.is_system || senderName === reporterName) {
+                            return { ...c, is_self: false };
+                        }
+                        if (currentUserName && senderName && (senderName.includes(currentUserName) || currentUserName.includes(senderName))) {
+                            return { ...c, is_self: true };
+                        }
+                        return { ...c, is_self: Boolean(c.is_self && senderName !== reporterName) };
+                    });
+
+                    this.chatMessages.set(mapped);
+                    this.taskChatHistoryMap.set(task.id, mapped);
+                }
+            },
+            error: () => {},
+        });
     }
 
     closeTaskChat(): void {
@@ -565,25 +831,84 @@ export class UserTaskComponent implements OnInit {
         this.selectedTask.set(null);
     }
 
-    sendChatMessage(): void {
-        const text = this.newChatMessage.trim();
-        if (!text) return;
+    sendChatMessage(payload: { text: string; attachments: TaskAttachment[] }): void {
+        const text = payload.text.trim();
+        const attachments = payload.attachments || [];
+        if (!text && attachments.length === 0) return;
+
+        const currentTask = this.selectedTask();
+        const user = this._userService.getUser();
+        const userAvatar = this.getAvatarUrl();
 
         const msg: TaskChatMessage = {
             id: Date.now(),
-            sender_name: 'អ្នក (You)',
-            sender_avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-            text: text,
+            sender_name: user?.kh_name || user?.en_name || 'អ្នក (You)',
+            sender_avatar: userAvatar,
+            text: text || (attachments.length === 1 ? `បានផ្ញើឯកសារ ${attachments[0].name}` : `បានផ្ញើឯកសារភ្ជាប់ ${attachments.length} ឯកសារ`),
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             is_self: true,
+            attachments: attachments.length > 0 ? [...attachments] : undefined,
         };
 
-        this.chatMessages.update((msgs) => [...msgs, msg]);
-        this.newChatMessage = '';
+        if (currentTask) {
+            this.appendChatMessage(currentTask.id, msg);
+            currentTask.comments_count = (currentTask.comments_count || 0) + 1;
+            if (attachments.length > 0) {
+                currentTask.attachments_count = (currentTask.attachments_count || 0) + attachments.length;
+            }
+            this._taskService.createTaskComment(currentTask.id, { text: msg.text, attachments }).subscribe({
+                next: () => {},
+                error: (err) => console.error('Failed to sync comment with server', err),
+            });
+        }
+    }
 
-        const current = this.selectedTask();
-        if (current) {
-            current.comments_count = (current.comments_count || 0) + 1;
+    openImagePreview(url: string): void {
+        this.previewImageModal.set(url);
+    }
+
+    viewFile(file: TaskAttachment): void {
+        if (file.isImage && file.url) {
+            this.openImagePreview(file.url);
+        } else {
+            this.previewFileModal.set(file);
+        }
+    }
+
+    closeFilePreview(): void {
+        this.previewFileModal.set(null);
+    }
+
+    downloadFile(file: TaskAttachment): void {
+        if (file.url && file.url.startsWith('data:')) {
+            const link = document.createElement('a');
+            link.href = file.url;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else if (file.url && file.url.startsWith('http')) {
+            window.open(file.url, '_blank');
+        } else {
+            const dummyContent = `=====================================================
+${file.name}
+Project: ${this.selectedTask()?.project_name || 'PMS Core'}
+Task: ${this.selectedTask()?.title || 'Task Details'}
+Code: ${this.selectedTask()?.code || ('#PMS-' + this.selectedTask()?.id)}
+Generated / Downloaded At: ${new Date().toLocaleString()}
+=====================================================
+
+This is a preview export of the document "${file.name}".
+All specifications, comments, and task workflows are verified.`;
+            const blob = new Blob([dummyContent], { type: file.type || 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
     }
 

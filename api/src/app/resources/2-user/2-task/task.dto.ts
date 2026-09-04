@@ -68,6 +68,12 @@ export class CreateTaskDto {
     @IsOptional()
     @IsString()
     due_date?: string;
+
+    @IsOptional()
+    assignee?: any;
+
+    @IsOptional()
+    assignees?: any[];
 }
 
 export class UpdateTaskDto {
@@ -94,4 +100,24 @@ export class UpdateTaskDto {
     @IsOptional()
     @IsString()
     due_date?: string;
+
+    @IsOptional()
+    assignee?: any;
+
+    @IsOptional()
+    assignees?: any[];
 }
+
+export class CreateTaskCommentDto {
+    @IsString()
+    text: string;
+
+    @IsOptional()
+    attachments?: Array<{ name: string; size: string; url?: string }>;
+}
+
+export class UpdateTaskStatusDto {
+    @IsEnum(TaskStatusEnum)
+    status: TaskStatusEnum;
+}
+

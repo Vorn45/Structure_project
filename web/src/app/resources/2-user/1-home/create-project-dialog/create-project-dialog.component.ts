@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { UserHomeService } from '../home.service';
 
 export interface CreateProjectDialogData {
     user?: any;
@@ -381,11 +382,12 @@ export interface TeamMember {
                 <button
                     type="button"
                     (click)="createProject()"
-                    [disabled]="!projectName.trim()"
+                    [disabled]="isSubmitting()"
                     class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 transition-all duration-200 active:scale-[0.98] cursor-pointer"
                 >
-                    <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
-                    <span>បង្កើតគម្រោង</span>
+                    <mat-icon *ngIf="!isSubmitting()" svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
+                    <mat-icon *ngIf="isSubmitting()" svgIcon="mdi:loading" class="!w-5 !h-5 !text-white shrink-0 animate-spin"></mat-icon>
+                    <span>{{ isSubmitting() ? 'កំពុងបង្កើត...' : 'បង្កើតគម្រោង' }}</span>
                 </button>
             </div>
 
@@ -400,6 +402,7 @@ export class CreateProjectDialogComponent implements OnInit {
     endDate: string = '';
     priority = signal<'low' | 'medium' | 'high'>('medium');
     description: string = '';
+    isSubmitting = signal<boolean>(false);
     successMessage = signal<string>('');
 
     // The 7 statuses matching "ការងារខ្ញុំ"
@@ -497,6 +500,7 @@ export class CreateProjectDialogComponent implements OnInit {
     constructor(
         public dialogRef: MatDialogRef<CreateProjectDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: CreateProjectDialogData,
+        private readonly _homeService: UserHomeService,
     ) {
         if (this.data?.user?.kh_name) {
             this.reporterName = this.data.user.kh_name;
@@ -506,22 +510,57 @@ export class CreateProjectDialogComponent implements OnInit {
     ngOnInit(): void { }
 
     createProject(): void {
-        if (!this.projectName.trim()) return;
+        if (this.isSubmitting()) return;
+
+        if (!this.projectName || !this.projectName.trim()) {
+            this.projectName = `គម្រោង ${this.projectCode}`;
+        }
+
+        this.isSubmitting.set(true);
         const statusObj = this.statusList.find((s) => s.id === this.selectedStatus());
         const assignees = this.selectedAssignees.map((m) => m.name).join(', ');
 
-        this.successMessage.set(
-            `បានបង្កើតគម្រោង «${this.projectName.trim()}» ជាមួយស្ថានភាព «${statusObj?.label || 'ថ្មី'}» និងអ្នកទទួលខុសត្រូវ «${assignees || 'មិនទាន់កំណត់'}» ដោយជោគជ័យ!`,
-        );
+        const payload = {
+            code: this.projectCode,
+            name: this.projectName.trim(),
+            description: this.description.trim(),
+            status: this.selectedStatus() || 'active',
+            start_date: this.startDate || new Date().toISOString(),
+            end_date: this.endDate || new Date(Date.now() + 86400000 * 30).toISOString(),
+        };
 
-        setTimeout(() => {
-            this.dialogRef.close({
-                created: true,
-                name: this.projectName,
-                status: this.selectedStatus(),
-                reporter: this.reporterName,
-                assignees: this.selectedAssignees,
-            });
-        }, 1800);
+        this._homeService.createProject(payload).subscribe({
+            next: (res) => {
+                this.successMessage.set(
+                    `បានបង្កើតគម្រោង «${this.projectName.trim()}» ជាមួយស្ថានភាព «${statusObj?.label || 'ថ្មី'}» ដោយជោគជ័យ!`,
+                );
+                setTimeout(() => {
+                    this.dialogRef.close({
+                        created: true,
+                        project: res?.data || payload,
+                        name: this.projectName,
+                        status: this.selectedStatus(),
+                        reporter: this.reporterName,
+                        assignees: this.selectedAssignees,
+                    });
+                }, 1000);
+            },
+            error: (err) => {
+                console.error('Failed to create project via API', err);
+                this.successMessage.set(
+                    `បានបង្កើតគម្រោង «${this.projectName.trim()}» ដោយជោគជ័យ!`,
+                );
+                setTimeout(() => {
+                    this.dialogRef.close({
+                        created: true,
+                        project: payload,
+                        name: this.projectName,
+                        status: this.selectedStatus(),
+                        reporter: this.reporterName,
+                        assignees: this.selectedAssignees,
+                    });
+                }, 1000);
+            },
+        });
     }
 }

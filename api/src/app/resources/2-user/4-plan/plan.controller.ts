@@ -1,11 +1,22 @@
 // ===========================================================================>> Core Library
-import { Controller, Get, Param, Query, Res, ValidationPipe } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Res,
+    ValidationPipe,
+} from '@nestjs/common';
 
 // ===========================================================================>> Third Party Library
 import express from 'express';
 
 // ===========================================================================>> Custom Library
-import { QueryPlanDto } from './plan.dto';
+import { CreatePlanDto, QueryPlanDto, UpdatePlanDto } from './plan.dto';
 import { PlanService } from './plan.service';
 
 // ======================================= >> Code Starts Here << ========================== //
@@ -35,5 +46,30 @@ export class PlanController {
         @Res({ passthrough: true }) res: express.Response,
     ) {
         return await this._service.getTeamMembers(res.locals.user, id);
+    }
+
+    @Post('')
+    async createPlan(
+        @Body(new ValidationPipe({ transform: true })) dto: CreatePlanDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.createPlan(res.locals.user, dto);
+    }
+
+    @Patch(':id')
+    async updatePlan(
+        @Param('id') id: string,
+        @Body(new ValidationPipe({ transform: true })) dto: UpdatePlanDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.updatePlan(res.locals.user, id, dto);
+    }
+
+    @Delete(':id')
+    async deletePlan(
+        @Param('id') id: string,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.deletePlan(res.locals.user, id);
     }
 }

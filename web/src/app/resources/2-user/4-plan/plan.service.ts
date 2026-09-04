@@ -51,4 +51,22 @@ export class UserPlanService {
             withCredentials: true,
         });
     }
+
+    createPlan(payload: Partial<ProjectPlanItem>): Observable<{ status_code: number; data: ProjectPlanItem }> {
+        return this._http.post<{ status_code: number; data: ProjectPlanItem }>(this.baseUrl, payload, {
+            withCredentials: true,
+        });
+    }
+
+    updatePlan(id: string, payload: Partial<ProjectPlanItem>): Observable<{ status_code: number; data: ProjectPlanItem }> {
+        return this._http.patch<{ status_code: number; data: ProjectPlanItem }>(`${this.baseUrl}/${id}`, payload, {
+            withCredentials: true,
+        });
+    }
+
+    deletePlan(id: string): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this.baseUrl}/${id}`, {
+            withCredentials: true,
+        });
+    }
 }

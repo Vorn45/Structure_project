@@ -62,8 +62,14 @@ const PROJECTS: ProjectPlanItem[] = [
 
 @Injectable()
 export class PlanService {
+    private projects: ProjectPlanItem[] = [...PROJECTS];
+
+    getRawProjects(): ProjectPlanItem[] {
+        return this.projects;
+    }
+
     async getPlans(user: UserPayload, query: QueryPlanDto) {
-        let list = [...PROJECTS];
+        let list = [...this.projects];
 
         if (query.search) {
             const s = query.search.toLowerCase();
@@ -109,7 +115,7 @@ export class PlanService {
     }
 
     async getTeamMembers(user: UserPayload, id: string) {
-        const plan = PROJECTS.find((p) => p.id === id || p.code === id);
+        const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
@@ -122,6 +128,74 @@ export class PlanService {
                 project_name: plan.name,
                 members: plan.members,
             },
+        };
+    }
+
+    async createPlan(user: UserPayload, dto: any) {
+        const newPlan: ProjectPlanItem = {
+            id: `proj-${Date.now().toString().slice(-4)}`,
+            code: dto.code || `PMS-${Math.floor(100 + Math.random() * 900)}`,
+            name: dto.name,
+            description: dto.description || '',
+            status: dto.status || 'active',
+            progress: dto.progress || 0,
+            start_date: dto.start_date || new Date().toISOString(),
+            end_date: dto.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
+            total_tasks: 0,
+            completed_tasks: 0,
+            members: dto.members || [
+                { id: user.id, name: user.name_en || user.name_kh || 'Project Lead', role: 'Leader', avatar: null },
+            ],
+        };
+
+        this.projects.unshift(newPlan);
+
+        return {
+            status_code: 201,
+            message: 'Project plan created successfully',
+            data: newPlan,
+        };
+    }
+
+    async updatePlan(user: UserPayload, id: string, dto: any) {
+        const index = this.projects.findIndex((p) => p.id === id || p.code === id);
+        if (index === -1) {
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
+        }
+
+        const current = this.projects[index];
+        const updated: ProjectPlanItem = {
+            ...current,
+            name: dto.name ?? current.name,
+            code: dto.code ?? current.code,
+            description: dto.description ?? current.description,
+            status: dto.status ?? current.status,
+            progress: dto.progress !== undefined ? dto.progress : current.progress,
+            start_date: dto.start_date ?? current.start_date,
+            end_date: dto.end_date ?? current.end_date,
+            members: dto.members ?? current.members,
+        };
+
+        this.projects[index] = updated;
+
+        return {
+            status_code: 200,
+            message: 'Project plan updated successfully',
+            data: updated,
+        };
+    }
+
+    async deletePlan(user: UserPayload, id: string) {
+        const index = this.projects.findIndex((p) => p.id === id || p.code === id);
+        if (index === -1) {
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
+        }
+
+        this.projects.splice(index, 1);
+
+        return {
+            status_code: 200,
+            message: 'Project plan deleted successfully',
         };
     }
 }

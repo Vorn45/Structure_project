@@ -1,0 +1,191 @@
+<!-- Fullscreen PDF / File Preview Modal -->
+<div *ngIf="previewFile()" class="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-150 select-none">
+    
+    <!-- 1. Fullscreen Native PDF Viewer -->
+    <div *ngIf="isPdfFile(previewFile())" class="relative w-full h-full flex flex-col bg-slate-900 overflow-hidden">
+        
+        <!-- Floating Close Button on top-right -->
+        <button (click)="closeModal.emit()"
+            class="absolute top-3 right-4 z-50 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center shadow-xl border border-white/20 transition-all cursor-pointer backdrop-blur-sm group"
+            [matTooltip]="'បិទផ្ទាំង (Close)'">
+            <mat-icon svgIcon="mdi:close" class="icon-size-5 group-hover:scale-110 transition-transform"></mat-icon>
+        </button>
+
+        <!-- Native PDF Object / Iframe Embed (Takes 100% viewport) -->
+        <div class="flex-1 w-full h-full bg-slate-800 flex items-center justify-center overflow-hidden">
+            <iframe *ngIf="previewFile()?.url" [src]="getSafePdfUrl(previewFile()?.url)"
+                class="w-full h-full border-0 bg-slate-900" title="PDF Document Viewer">
+            </iframe>
+
+            <!-- Fallback High-Fidelity PDF Preview Container -->
+            <div *ngIf="!previewFile()?.url"
+                class="w-full h-full overflow-y-auto p-4 sm:p-8 space-y-8 bg-slate-900 select-text font-kantumruy">
+                
+                <!-- Page 1: Curriculum Vitae Specification -->
+                <div class="bg-white text-slate-900 rounded-xl shadow-2xl border border-slate-200/80 p-8 sm:p-12 max-w-3xl mx-auto space-y-6 font-kantumruy leading-normal relative">
+                    <div class="flex items-center justify-between text-xs text-slate-400 font-mono pb-2 border-b border-slate-200">
+                        <span>PMS TECHNICAL ATTACHMENT</span>
+                        <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-bold">ទំព័រ ១ នៃ ២ (Page 1 of 2)</span>
+                    </div>
+
+                    <!-- Header -->
+                    <div class="text-center space-y-1 pb-4 border-b border-slate-200">
+                        <h2 class="text-2xl font-bold text-blue-950 tracking-wide font-kantumruy">ប្រវត្តិរូបសង្ខេប (CURRICULUM VITAE)</h2>
+                        <p class="text-xs text-slate-500">ប្រព័ន្ធគ្រប់គ្រងការងារ និងគម្រោងបច្ចេកវិទ្យា (PMS Specification)</p>
+                    </div>
+
+                    <!-- Personal Information Grid -->
+                    <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+                        <table class="text-sm space-y-2 flex-1">
+                            <tbody>
+                                <tr class="leading-7">
+                                    <td class="font-bold text-slate-700 w-36">គោត្តនាម និងនាម</td>
+                                    <td class="text-slate-800">៖ ចេង ច័ន្ទបញ្ញា (CHENG CHANPANHA)</td>
+                                </tr>
+                                <tr class="leading-7">
+                                    <td class="font-bold text-slate-700">ភេទ / ថ្ងៃខែឆ្នាំកំណើត</td>
+                                    <td class="text-slate-800">៖ ប្រុស / ១៥ កក្កដា ២០០២</td>
+                                </tr>
+                                <tr class="leading-7">
+                                    <td class="font-bold text-slate-700">តួនាទី / ផ្នែក</td>
+                                    <td class="text-slate-800">៖ Frontend Developer / ប្រព័ន្ធ PMS</td>
+                                </tr>
+                                <tr class="leading-7">
+                                    <td class="font-bold text-slate-700">លេខទូរស័ព្ទ</td>
+                                    <td class="text-slate-800">៖ 012 345 678</td>
+                                </tr>
+                                <tr class="leading-7">
+                                    <td class="font-bold text-slate-700">អ៊ីមែល</td>
+                                    <td class="text-slate-800">៖ panha&#64;gmail.com</td>
+                                </tr>
+                                <tr class="leading-7">
+                                    <td class="font-bold text-slate-700">អាសយដ្ឋាន</td>
+                                    <td class="text-slate-800">៖ រាជធានីភ្នំពេញ ប្រទេសកម្ពុជា</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Photo Frame Box -->
+                        <div class="w-28 h-36 border-2 border-slate-300 rounded-md flex flex-col items-center justify-center bg-slate-50 shrink-0 text-slate-400 text-xs">
+                            <mat-icon svgIcon="mdi:account-box-outline" class="icon-size-10 text-slate-300"></mat-icon>
+                            <span>រូបថត 4x6</span>
+                        </div>
+                    </div>
+
+                    <!-- Section: Education -->
+                    <div class="space-y-2 pt-3 border-t border-slate-300">
+                        <h4 class="text-base font-bold text-slate-900">ការអប់រំ (Education)</h4>
+                        <div class="text-sm space-y-1.5 pl-2">
+                            <p class="flex justify-between"><strong>២០២២-២០២៤</strong> <span>៖ បញ្ចប់ការសិក្សាថ្នាក់វិទ្យាល័យ</span></p>
+                            <p class="flex justify-between"><strong>២០២៤-បច្ចុប្បន្ន</strong> <span>៖ កំពុងសិក្សាថ្នាក់បរិញ្ញាបត្រផ្នែកវិទ្យាសាស្ត្រកុំព្យូទ័រ</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Section: Skills -->
+                    <div class="space-y-2 pt-3 border-t border-slate-300">
+                        <h4 class="text-base font-bold text-slate-900">ជំនាញ (Skills)</h4>
+                        <div class="text-sm space-y-1.5 pl-2">
+                            <p><strong>កុំព្យូទ័រ ៖</strong> Microsoft Word, Excel, PowerPoint, Web Development</p>
+                            <p><strong>ភាសា ៖</strong> ភាសាខ្មែរ (ភាសាកំណើត), ភាសាអង់គ្លេស (កម្រិតមធ្យម)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 2: Work Experience & Task Guidelines -->
+                <div class="bg-white text-slate-900 rounded-xl shadow-2xl border border-slate-200/80 p-8 sm:p-12 max-w-3xl mx-auto space-y-6 font-kantumruy leading-normal relative">
+                    <div class="flex items-center justify-between text-xs text-slate-400 font-mono pb-2 border-b border-slate-200">
+                        <span>PMS TASK GUIDELINE SPECIFICATION</span>
+                        <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-bold">ទំព័រ ២ នៃ ២ (Page 2 of 2)</span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="text-lg font-bold text-blue-900">គោលការណ៍ណែនាំបច្ចេកទេសភារកិច្ច (Task Guidelines)</h3>
+                        <p class="text-sm text-slate-600">គម្រោង៖ {{ task()?.project_name || 'Core System' }} | កូដ៖ {{ task()?.code || '#PMS-001' }}</p>
+                    </div>
+
+                    <!-- Section: Work Experience -->
+                    <div class="space-y-3 pt-3 border-t border-slate-200">
+                        <h4 class="text-base font-bold text-slate-900">បទពិសោធន៍ការងារ និងទំនួលខុសត្រូវ (Work Experience)</h4>
+                        <ul class="text-sm space-y-2 list-disc pl-6 text-slate-700 leading-relaxed">
+                            <li><strong>ការគ្រប់គ្រងគម្រោង៖</strong> រៀបចំ និងចាត់ចែងកិច្ចការងារប្រចាំថ្ងៃតាមប្រព័ន្ធ PMS ឱ្យមានប្រសិទ្ធភាពខ្ពស់។</li>
+                            <li><strong>ទំនាក់ទំនងក្រុមការងារ៖</strong> សម្របសម្រួលជាមួយក្រុមការងារតាមបន្ទប់ពិភាក្សា (Chat Room) និងផ្ញើឯកសារភ្ជាប់ទាន់ពេលវេលា។</li>
+                            <li><strong>ការត្រួតពិនិត្យគុណភាព៖</strong> ពិនិត្យឡើងវិញនូវរាល់កិច្ចការងារ និងរាយការណ៍ជូនថ្នាក់ដឹកនាំ។</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200 text-sm text-blue-900 leading-relaxed mt-4">
+                        <strong>📌 ចំណាំ៖</strong> ឯកសារនេះត្រូវបានផ្ទៀងផ្ទាត់ និងទទួលស្គាល់ដោយប្រព័ន្ធស្វ័យប្រវត្តិ។
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Non-PDF File Preview (Binary, Text, etc.) -->
+    <div *ngIf="!isPdfFile(previewFile())" (click)="closeModal.emit()"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="relative bg-white dark:bg-slate-850 shadow-2xl border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden flex flex-col max-w-lg w-full transition-all duration-200"
+            (click)="$event.stopPropagation()">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-900">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" [ngClass]="getFileIconColor(previewFile()!.name)">
+                        <mat-icon [svgIcon]="getFileIcon(previewFile()!.name, previewFile()!.type)" class="icon-size-5"></mat-icon>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-[15px] font-semibold text-slate-900 dark:text-white truncate font-kantumruy">
+                            {{ previewFile()?.name }}
+                        </h4>
+                        <span class="text-[12px] text-slate-400">{{ previewFile()?.size }}</span>
+                    </div>
+                </div>
+                <button (click)="closeModal.emit()"
+                    class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                    <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+                </button>
+            </div>
+
+            <!-- Text preview if available -->
+            <div *ngIf="previewFile()?.textContent"
+                class="max-h-[60vh] overflow-auto p-6 bg-slate-950 text-slate-100 font-mono text-[13px] leading-relaxed whitespace-pre-wrap select-text">
+                {{ previewFile()!.textContent }}
+            </div>
+
+            <!-- Binary Download Card -->
+            <div *ngIf="!previewFile()?.textContent" class="p-6 text-center space-y-4 font-kantumruy">
+                <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center" [ngClass]="getFileIconColor(previewFile()!.name)">
+                    <mat-icon [svgIcon]="getFileIcon(previewFile()!.name, previewFile()!.type)" class="!w-10 !h-10"></mat-icon>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ previewFile()?.name }}</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ previewFile()?.size }} • {{ previewFile()?.type || 'Binary Document' }}</p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-left text-xs text-slate-600 dark:text-slate-300 space-y-1 border border-slate-200/80 dark:border-slate-700">
+                    <p>• ប្រភេទឯកសារ៖ <strong>{{ previewFile()?.name?.split('.')?.pop()?.toUpperCase() }} File</strong></p>
+                    <p>• ឯកសារនេះតម្រូវឱ្យទាញយកដើម្បីបើកក្នុងកម្មវិធី Desktop។</p>
+                </div>
+
+                <button mat-flat-button color="primary" (click)="downloadFile.emit(previewFile()!)" class="!rounded-xl !h-10 !text-sm w-full flex items-center justify-center gap-2 cursor-pointer">
+                    <mat-icon svgIcon="mdi:download" class="icon-size-4.5"></mat-icon>
+                    <span>ទាញយកឯកសារ (Download File)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Fullscreen Preview Lightbox Modal -->
+<div *ngIf="previewImage()" (click)="closeModal.emit()"
+    class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150 select-none cursor-pointer">
+    <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center" (click)="$event.stopPropagation()">
+        <button (click)="closeModal.emit()"
+            class="absolute -top-12 right-0 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer">
+            <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+        </button>
+        <img [src]="previewImage()" alt="Image Preview"
+            class="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl border border-white/10" />
+    </div>
+</div>

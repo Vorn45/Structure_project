@@ -20,11 +20,26 @@ export interface TaskItem {
     due_date: string | null;
     project_id: string;
     project_name: string;
+    reporter?: {
+        id: number;
+        name: string;
+        avatar?: string | null;
+        role?: string;
+    };
     assignee: {
         id: number;
         name: string;
         avatar?: string | null;
+        role?: string;
+        email?: string;
     };
+    assignees?: Array<{
+        id: number;
+        name: string;
+        avatar?: string | null;
+        role?: string;
+        email?: string;
+    }>;
     created_at: string;
     updated_at: string;
 }
@@ -44,7 +59,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 6).toISOString(),
         project_id: 'proj-001',
         project_name: 'Core System Structure',
-        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
+        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Assignee' },
+        assignees: [
+            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -116,7 +135,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 6).toISOString(),
         project_id: 'proj-002',
         project_name: 'Security Hub',
-        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
+        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Assignee' },
+        assignees: [
+            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -179,6 +202,10 @@ const INITIAL_TASKS: TaskItem[] = [
 @Injectable()
 export class TaskService {
     private tasks: TaskItem[] = [...INITIAL_TASKS];
+
+    getRawTasks(): TaskItem[] {
+        return this.tasks;
+    }
 
     async getTasks(user: UserPayload, query: QueryTasksDto) {
         let list = [...this.tasks];
@@ -258,10 +285,17 @@ export class TaskService {
             due_date: dto.due_date || null,
             project_id: dto.project_id || 'proj-001',
             project_name: 'Core System Structure',
-            assignee: {
+            reporter: {
                 id: user.id,
-                name: user.name_en || user.name_kh || 'User',
-                avatar: null,
+                name: user.name_en || user.name_kh || 'Ratha Vuth',
+                avatar: (user.avatar as any)?.uri || null,
+                role: 'Reporter',
+            },
+            assignee: {
+                id: 1,
+                name: 'Cheng Chanpanha',
+                avatar: '/images/placeholder/avatar.jpg',
+                role: 'Assignee',
             },
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -274,6 +308,29 @@ export class TaskService {
             message: 'Task created successfully',
             data: newTask,
         };
+    }
+
+    private getStatusLabel(status?: string): string {
+        switch (status) {
+            case 'new': return 'ថ្មី';
+            case 'confirmed': return 'បញ្ជាក់';
+            case 'unconfirmed': return 'មិនបញ្ជាក់';
+            case 'in_progress': return 'កំពុងធ្វើ';
+            case 'in_review': return 'ស្នើពិនិត្យ';
+            case 'reopened': return 'បើកឡើងវិញ';
+            case 'done': return 'បញ្ចប់';
+            default: return status || '';
+        }
+    }
+
+    private getPriorityLabel(priority?: string): string {
+        switch (priority) {
+            case 'urgent': return 'បន្ទាន់';
+            case 'high': return 'ខ្ពស់';
+            case 'medium': return 'មធ្យម';
+            case 'low': return 'ទាប';
+            default: return priority || '';
+        }
     }
 
     async updateTask(user: UserPayload, id: number, dto: UpdateTaskDto) {
@@ -293,6 +350,114 @@ export class TaskService {
             due_date: dto.due_date !== undefined ? dto.due_date : current.due_date,
             updated_at: new Date().toISOString(),
         };
+
+        // Record action history in task comments
+        let comments = this.taskComments.get(id);
+        if (!comments || comments.length === 0) {
+            comments = [
+                {
+                    id: 1,
+                    sender_id: 0,
+                    sender_name: 'ប្រព័ន្ធ (System)',
+                    sender_avatar: null,
+                    text: `ភារកិច្ច ${current.code || ('#PMS-' + current.id)} ត្រូវបានបង្កើត និងចាត់តាំងទៅកាន់ ${current.assignee?.name || 'Cheng Chanpanha'}`,
+                    time: '8:30 AM',
+                    is_self: false,
+                    is_system: true,
+                    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+                }
+            ];
+        }
+
+        const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        if (dto.status && dto.status !== current.status) {
+            comments.push({
+                id: Date.now() + 1,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `បានប្តូរស្ថានភាពពី "${this.getStatusLabel(current.status)}" ទៅជា "${this.getStatusLabel(dto.status)}"`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
+
+        if (dto.priority && dto.priority !== current.priority) {
+            comments.push({
+                id: Date.now() + 2,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `បានប្តូរអាទិភាពពី "${this.getPriorityLabel(current.priority)}" ទៅជា "${this.getPriorityLabel(dto.priority)}"`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
+
+        if (dto.due_date !== undefined && dto.due_date !== current.due_date) {
+            let formatted = 'សម្អាត';
+            if (dto.due_date) {
+                const d = new Date(dto.due_date);
+                if (!isNaN(d.getTime())) {
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    formatted = `${day}/${month}/${year}`;
+                }
+            }
+            comments.push({
+                id: Date.now() + 3,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: dto.due_date ? `បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ ${formatted}` : `បានសម្អាតកាលបរិច្ឆេទកំណត់`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
+
+        if (dto.assignees && Array.isArray(dto.assignees)) {
+            updated.assignees = dto.assignees;
+            if (dto.assignees.length > 0) {
+                updated.assignee = dto.assignees[0];
+            }
+            const names = dto.assignees.map((a: any) => a.name).join(', ');
+            comments.push({
+                id: Date.now() + 4,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ${names}`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        } else if (dto.assignee) {
+            updated.assignee = dto.assignee;
+            updated.assignees = [dto.assignee];
+            comments.push({
+                id: Date.now() + 4,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `បានចាត់តាំងភារកិច្ចទៅកាន់៖ ${dto.assignee.name}`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
+
+        this.taskComments.set(id, comments);
+        updated.comments_count = comments.length;
 
         this.tasks[index] = updated;
 
@@ -314,6 +479,112 @@ export class TaskService {
         return {
             status_code: 200,
             message: 'Task deleted successfully',
+        };
+    }
+
+    // =========================================================================
+    // TASK CHAT ROOM & COMMENTS
+    // =========================================================================
+    private taskComments: Map<number, Array<{
+        id: number;
+        sender_id: number;
+        sender_name: string;
+        sender_avatar: string | null;
+        text: string;
+        time: string;
+        is_self: boolean;
+        is_system?: boolean;
+        attachments?: Array<{ name: string; size: string; url?: string }>;
+        created_at: string;
+    }>> = new Map();
+
+    async getTaskComments(user: UserPayload, taskId: number) {
+        const task = this.tasks.find((t) => t.id === taskId);
+        if (!task) {
+            throw new NotFoundException(`Task #${taskId} not found`);
+        }
+
+        let comments = this.taskComments.get(taskId);
+        if (!comments || comments.length === 0) {
+            const reporterName = task.reporter?.name || 'Ratha Vuth';
+            const reporterAvatar = task.reporter?.avatar || '/images/placeholder/avatar.jpg';
+            const assigneeName = task.assignee?.name || 'Cheng Chanpanha';
+            const assigneeAvatar = task.assignee?.avatar || '/images/placeholder/avatar.jpg';
+
+            comments = [
+                {
+                    id: 1,
+                    sender_id: 0,
+                    sender_name: 'ប្រព័ន្ធ (System)',
+                    sender_avatar: null,
+                    text: `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`,
+                    time: '8:30 AM',
+                    is_self: false,
+                    is_system: true,
+                    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+                },
+                {
+                    id: 2,
+                    sender_id: 999,
+                    sender_name: reporterName,
+                    sender_avatar: reporterAvatar,
+                    text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task.title}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
+                    time: '8:45 AM',
+                    is_self: false,
+                    created_at: new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                },
+            ];
+            this.taskComments.set(taskId, comments);
+        }
+
+        return {
+            status_code: 200,
+            message: 'Task chat comments retrieved successfully',
+            data: {
+                task_id: taskId,
+                task_title: task.title,
+                task_status: task.status,
+                comments: comments.map((c) => ({
+                    ...c,
+                    is_self: !c.is_system && c.sender_id !== 0 && c.sender_id !== 999 && c.sender_id === user.id,
+                })),
+            },
+        };
+    }
+
+    async createTaskComment(user: UserPayload, taskId: number, text: string, attachments?: any[]) {
+        const task = this.tasks.find((t) => t.id === taskId);
+        if (!task) {
+            throw new NotFoundException(`Task #${taskId} not found`);
+        }
+
+        let comments = this.taskComments.get(taskId) || [];
+        const newComment = {
+            id: Date.now(),
+            sender_id: user.id,
+            sender_name: user.name_en || user.name_kh || 'User',
+            sender_avatar: (user.avatar as any)?.uri || '/images/placeholder/avatar.jpg',
+            text: text.trim(),
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            is_self: true,
+            is_system: false,
+            attachments: attachments || undefined,
+            created_at: new Date().toISOString(),
+        };
+
+        comments.push(newComment);
+        this.taskComments.set(taskId, comments);
+
+        task.comments_count = comments.length;
+        if (attachments && attachments.length > 0) {
+            task.attachments_count = (task.attachments_count || 0) + attachments.length;
+        }
+        task.updated_at = new Date().toISOString();
+
+        return {
+            status_code: 201,
+            message: 'Chat comment added successfully',
+            data: newComment,
         };
     }
 }

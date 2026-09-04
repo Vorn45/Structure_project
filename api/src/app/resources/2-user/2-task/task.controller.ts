@@ -53,4 +53,24 @@ export class TaskController {
     ) {
         return await this._service.deleteTask(res.locals.user, id);
     }
+
+    // =========================================================================
+    // TASK CHAT ROOM & COMMENTS (បន្ទប់ពិភាក្សាការងារ)
+    // =========================================================================
+    @Get(':id/comments')
+    async getTaskComments(
+        @Param('id', ParseIntPipe) id: number,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.getTaskComments(res.locals.user, id);
+    }
+
+    @Post(':id/comments')
+    async createTaskComment(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: { text: string; attachments?: any[] },
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.createTaskComment(res.locals.user, id, body.text, body.attachments);
+    }
 }

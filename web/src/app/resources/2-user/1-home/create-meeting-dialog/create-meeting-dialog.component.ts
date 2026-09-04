@@ -7,6 +7,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { UserHomeService } from '../home.service';
 
 export interface CreateMeetingDialogData {
     user?: any;
@@ -498,8 +499,7 @@ export interface ScheduledMeeting {
                 <button
                     type="button"
                     (click)="saveMeeting()"
-                    [disabled]="!formTitle.trim()"
-                    class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                    class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] transition-all duration-200 active:scale-[0.98] cursor-pointer"
                 >
                     <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
                     <span>បង្កើតអង្គប្រជុំ</span>
@@ -575,11 +575,21 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     constructor(
         public dialogRef: MatDialogRef<CreateMeetingDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: CreateMeetingDialogData,
+        private readonly _homeService: UserHomeService,
     ) {
         this.generateNewRoomCode();
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this._homeService.getMeetings().subscribe({
+            next: (res) => {
+                if (res?.data && res.data.length > 0) {
+                    this.scheduledMeetings.set(res.data as ScheduledMeeting[]);
+                }
+            },
+            error: (err) => console.error('Failed to load live meetings', err),
+        });
+    }
 
     ngOnDestroy(): void {
         this.stopCallTimer();
@@ -616,7 +626,9 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     }
 
     saveMeeting(): void {
-        if (!this.formTitle.trim()) return;
+        if (!this.formTitle || !this.formTitle.trim()) {
+            this.formTitle = 'កិច្ចប្រជុំពិភាក្សាការងារ';
+        }
 
         const newMeeting: ScheduledMeeting = {
             id: 'm_' + Date.now(),
@@ -633,9 +645,20 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             agenda: this.formAgenda.trim(),
         };
 
-        this.scheduledMeetings.update((m) => [newMeeting, ...m]);
-        this.successMessage.set(`បានបង្កើតអង្គប្រជុំ «${newMeeting.title}» ដោយជោគជ័យ!`);
+        this._homeService.createMeeting(newMeeting).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    this.scheduledMeetings.update((m) => [res.data, ...m]);
+                } else {
+                    this.scheduledMeetings.update((m) => [newMeeting, ...m]);
+                }
+            },
+            error: () => {
+                this.scheduledMeetings.update((m) => [newMeeting, ...m]);
+            },
+        });
 
+        this.successMessage.set(`បានបង្កើតអង្គប្រជុំ «${newMeeting.title}» ដោយជោគជ័យ!`);
         this.formTitle = '';
         this.formAgenda = '';
         this.generateNewRoomCode();

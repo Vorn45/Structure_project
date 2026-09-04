@@ -17,6 +17,8 @@ export type TaskStatus =
     | 'completed'
     | string;
 
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
 export interface TaskItem {
     id: number;
     code?: string;
@@ -24,18 +26,33 @@ export interface TaskItem {
     description: string;
     module?: string;
     status: TaskStatus;
-    priority: 'low' | 'medium' | 'high' | 'urgent';
+    priority: TaskPriority;
     progress: number;
     comments_count?: number;
     attachments_count?: number;
     due_date: string | null;
     project_id: string;
     project_name: string;
+    reporter?: {
+        id: number;
+        name: string;
+        avatar?: string | null;
+        role?: string;
+    };
     assignee: {
         id: number;
         name: string;
         avatar?: string | null;
+        role?: string;
+        email?: string;
     };
+    assignees?: Array<{
+        id: number;
+        name: string;
+        avatar?: string | null;
+        role?: string;
+        email?: string;
+    }>;
     created_at: string;
     updated_at: string;
 }
@@ -109,6 +126,18 @@ export class UserTaskService {
 
     deleteTask(id: number): Observable<{ status_code: number; message: string }> {
         return this._http.delete<{ status_code: number; message: string }>(`${this.baseUrl}/${id}`, {
+            withCredentials: true,
+        });
+    }
+
+    getTaskComments(id: number): Observable<{ status_code: number; data: { comments: any[] } }> {
+        return this._http.get<{ status_code: number; data: { comments: any[] } }>(`${this.baseUrl}/${id}/comments`, {
+            withCredentials: true,
+        });
+    }
+
+    createTaskComment(id: number, payload: { text: string; attachments?: any[] }): Observable<{ status_code: number; data: any }> {
+        return this._http.post<{ status_code: number; data: any }>(`${this.baseUrl}/${id}/comments`, payload, {
             withCredentials: true,
         });
     }

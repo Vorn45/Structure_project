@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { UserHomeService } from '../home.service';
 
 export interface AttendanceDialogData {
     user?: any;
@@ -171,11 +172,22 @@ export interface AttendanceDialogData {
 })
 export class AttendanceDialogComponent {
     todayDate = new Intl.DateTimeFormat('km-KH', { dateStyle: 'full' }).format(new Date());
+    attendance = signal<any>(null);
 
     constructor(
         public dialogRef: MatDialogRef<AttendanceDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: AttendanceDialogData,
-    ) {}
+        private readonly _homeService: UserHomeService,
+    ) {
+        this._homeService.getAttendance().subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    this.attendance.set(res.data);
+                }
+            },
+            error: (err) => console.error('Failed to load live attendance', err),
+        });
+    }
 
     close(): void {
         this.dialogRef.close();
