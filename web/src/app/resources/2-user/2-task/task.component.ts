@@ -964,7 +964,8 @@ export class UserTaskComponent implements OnInit {
     }
 
     viewFile(file: TaskAttachment): void {
-        if (file.isImage && file.url) {
+        const isImg = file.isImage || /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(file.name || '') || (file.type ? file.type.startsWith('image/') : false);
+        if (isImg && file.url) {
             this.openImagePreview(file.url);
         } else {
             this.previewFileModal.set(file);

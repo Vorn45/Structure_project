@@ -37,6 +37,18 @@ export class FilePreviewModalComponent {
         return type.includes('pdf') || name.endsWith('.pdf');
     }
 
+    isImageFile(file?: TaskAttachment | null): boolean {
+        if (!file) return false;
+        if (file.isImage) return true;
+        const name = (file.name || '').toLowerCase();
+        const type = (file.type || '').toLowerCase();
+        return (
+            type.startsWith('image/') ||
+            /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/i.test(name) ||
+            (!!file.url && file.url.startsWith('data:image/'))
+        );
+    }
+
     getFileIcon(name: string, type?: string): string {
         const lower = name.toLowerCase();
         if (lower.endsWith('.pdf') || type?.includes('pdf')) return 'mdi:file-pdf-box';
