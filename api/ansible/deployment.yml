@@ -3,7 +3,6 @@
   gather_facts: no
   any_errors_fatal: no
   debugger: on_failed
-  # no_log: true
   no_log: true
   become: yes
   roles:
