@@ -235,35 +235,31 @@ export class TaskService {
      * Check whether a task belongs to the user:
      * Either the user is assigned to the task (primary assignee or in assignees list)
      * OR the user is the reporter of the task.
+     * Matches by name/email so mock ID collisions do not cause cross-user leaks.
      */
     private isTaskBelongToUser(task: TaskItem, user?: UserPayload): boolean {
-        const userId = user?.id ?? 1;
         const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
         const userNameKh = (user?.name_kh || '').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
+        const matchUser = (target?: { name?: string; email?: string; id?: number } | null): boolean => {
+            if (!target) return false;
+            const targetName = target.name?.toLowerCase().trim();
+            if (targetName && (targetName === userNameEn || (userNameKh && targetName === userNameKh))) return true;
+            if (userEmail && target.email && target.email.toLowerCase().trim() === userEmail) return true;
+            return false;
+        };
+
         // 1. Check if user is the Reporter
-        if (task.reporter) {
-            if (task.reporter.id && task.reporter.id === userId) return true;
-            const repName = task.reporter.name?.toLowerCase().trim();
-            if (repName && (repName === userNameEn || (userNameKh && repName === userNameKh))) return true;
-        }
+        if (matchUser(task.reporter)) return true;
 
         // 2. Check if user is the Primary Assignee
-        if (task.assignee) {
-            if (task.assignee.id && task.assignee.id === userId) return true;
-            const assName = task.assignee.name?.toLowerCase().trim();
-            if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
-            if (userEmail && task.assignee.email && task.assignee.email.toLowerCase().trim() === userEmail) return true;
-        }
+        if (matchUser(task.assignee)) return true;
 
         // 3. Check if user is in the Assignees list
         if (task.assignees && Array.isArray(task.assignees)) {
             for (const ass of task.assignees) {
-                if (ass.id && ass.id === userId) return true;
-                const assName = ass.name?.toLowerCase().trim();
-                if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
-                if (userEmail && ass.email && ass.email.toLowerCase().trim() === userEmail) return true;
+                if (matchUser(ass)) return true;
             }
         }
 
@@ -602,6 +598,10 @@ export class TaskService {
             this.taskComments.set(taskId, comments);
         }
 
+        const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
+        const userNameKh = (user?.name_kh || '').toLowerCase().trim();
+        const userEmail = (user?.email || '').toLowerCase().trim();
+
         return {
             status_code: 200,
             message: 'Task chat comments retrieved successfully',
@@ -609,10 +609,22 @@ export class TaskService {
                 task_id: taskId,
                 task_title: task.title,
                 task_status: task.status,
-                comments: comments.map((c) => ({
-                    ...c,
-                    is_self: !c.is_system && c.sender_id !== 0 && c.sender_id !== 999 && c.sender_id === user.id,
-                })),
+                comments: comments.map((c) => {
+                    if (c.is_system || c.sender_id === 0) {
+                        return { ...c, is_self: false, is_system: true };
+                    }
+                    const senderName = (c.sender_name || '').toLowerCase().trim();
+                    const isSelf = Boolean(
+                        (userNameEn && (senderName === userNameEn || senderName.includes('cheng chanpanha') || userNameEn.includes(senderName))) ||
+                        (userNameKh && senderName === userNameKh) ||
+                        (userEmail && senderName === userEmail) ||
+                        (user?.id && c.sender_id === user.id)
+                    );
+                    return {
+                        ...c,
+                        is_self: isSelf,
+                    };
+                }),
             },
         };
     }

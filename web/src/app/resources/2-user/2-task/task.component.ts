@@ -210,33 +210,28 @@ export class UserTaskComponent implements OnInit {
 
     isTaskBelongToCurrentUser(task: TaskItem): boolean {
         const user = this._userService.getUser();
-        const userId = user?.id ?? 1;
         const userNameEn = (user?.en_name || user?.name || 'Cheng Chanpanha').toLowerCase().trim();
         const userNameKh = (user?.kh_name || '').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
+        const matchUser = (target?: { name?: string; email?: string } | null): boolean => {
+            if (!target) return false;
+            const targetName = target.name?.toLowerCase().trim();
+            if (targetName && (targetName === userNameEn || (userNameKh && targetName === userNameKh))) return true;
+            if (userEmail && target.email && target.email.toLowerCase().trim() === userEmail) return true;
+            return false;
+        };
+
         // 1. Check Reporter
-        if (task.reporter) {
-            if (task.reporter.id && task.reporter.id === userId) return true;
-            const repName = task.reporter.name?.toLowerCase().trim();
-            if (repName && (repName === userNameEn || (userNameKh && repName === userNameKh))) return true;
-        }
+        if (matchUser(task.reporter)) return true;
 
         // 2. Check Assignee
-        if (task.assignee) {
-            if (task.assignee.id && task.assignee.id === userId) return true;
-            const assName = task.assignee.name?.toLowerCase().trim();
-            if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
-            if (userEmail && task.assignee.email && task.assignee.email.toLowerCase().trim() === userEmail) return true;
-        }
+        if (matchUser(task.assignee)) return true;
 
         // 3. Check Assignees list
         if (task.assignees && Array.isArray(task.assignees)) {
             for (const ass of task.assignees) {
-                if (ass.id && ass.id === userId) return true;
-                const assName = ass.name?.toLowerCase().trim();
-                if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
-                if (userEmail && ass.email && ass.email.toLowerCase().trim() === userEmail) return true;
+                if (matchUser(ass)) return true;
             }
         }
 
@@ -840,18 +835,19 @@ export class UserTaskComponent implements OnInit {
             next: (res) => {
                 if (res?.data?.comments && res.data.comments.length > 0) {
                     const currentUser: any = this._userService.getUser();
-                    const currentUserName = (currentUser?.name_en || currentUser?.name || currentUser?.username || '').toLowerCase().trim();
-                    const reporterName = (task.reporter?.name || 'Ratha Vuth').toLowerCase().trim();
+                    const currentUserName = (currentUser?.en_name || currentUser?.name || currentUser?.kh_name || 'Cheng Chanpanha').toLowerCase().trim();
 
                     const mapped = (res.data.comments as TaskChatMessage[]).map((c) => {
+                        if (c.is_system) {
+                            return { ...c, is_self: false, is_system: true };
+                        }
                         const senderName = (c.sender_name || '').toLowerCase().trim();
-                        if (c.is_system || senderName === reporterName) {
-                            return { ...c, is_self: false };
-                        }
-                        if (currentUserName && senderName && (senderName.includes(currentUserName) || currentUserName.includes(senderName))) {
-                            return { ...c, is_self: true };
-                        }
-                        return { ...c, is_self: Boolean(c.is_self && senderName !== reporterName) };
+                        const isSelf = Boolean(
+                            (currentUserName && (senderName === currentUserName || senderName.includes('cheng chanpanha') || currentUserName.includes(senderName))) ||
+                            (currentUser?.id && c.sender_id === currentUser.id) ||
+                            c.is_self
+                        );
+                        return { ...c, is_self: isSelf };
                     });
 
                     this.chatMessages.set(mapped);
