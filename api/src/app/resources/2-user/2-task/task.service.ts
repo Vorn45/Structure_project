@@ -246,6 +246,8 @@ export class TaskService {
     }>>();
     private readonly storeFilePath = path.join(process.cwd(), 'storage', 'tasks_data_store.json');
 
+    private isStoreLoaded = false;
+
     constructor(
         @InjectRepository(User)
         private readonly _userRepo: Repository<User>,
@@ -256,7 +258,28 @@ export class TaskService {
         this.initDbStore();
     }
 
+    private async ensureTableExists(): Promise<void> {
+        try {
+            await this._userRepo.query(`
+                CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+                CREATE SCHEMA IF NOT EXISTS "user";
+                CREATE TABLE IF NOT EXISTS "user"."task_store" (
+                    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    "key" VARCHAR(255) NOT NULL DEFAULT 'default_tasks_store',
+                    "tasks" JSONB NULL DEFAULT '[]'::jsonb,
+                    "comments" JSONB NULL DEFAULT '{}'::jsonb,
+                    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS "IDX_task_store_key" ON "user"."task_store" ("key");
+            `);
+        } catch (e: any) {
+            console.warn('Auto table create query skipped or already exists:', e?.message || e);
+        }
+    }
+
     private async initDbStore(): Promise<void> {
+        await this.ensureTableExists();
         try {
             const dbStore = await this._taskStoreRepo.findOne({ where: { key: 'default_tasks_store' } });
             if (dbStore) {
@@ -274,6 +297,7 @@ export class TaskService {
             } else {
                 await this.saveToDb();
             }
+            this.isStoreLoaded = true;
         } catch (err) {
             console.warn('Could not load task store from DB, falling back to disk:', err);
         }
@@ -283,6 +307,12 @@ export class TaskService {
             if (!this.taskComments.has(task.id) || (this.taskComments.get(task.id)?.length || 0) === 0) {
                 this.ensureTaskComments(task.id);
             }
+        }
+    }
+
+    private async ensureStoreLoaded(): Promise<void> {
+        if (!this.isStoreLoaded) {
+            await this.initDbStore();
         }
     }
 
@@ -349,12 +379,6 @@ export class TaskService {
                             this.taskComments.set(numKey, v as any[]);
                         }
                     }
-                }
-            }
-            // Ensure all loaded tasks have default comment threads seeded
-            for (const task of this.tasks) {
-                if (!this.taskComments.has(task.id) || (this.taskComments.get(task.id)?.length || 0) === 0) {
-                    this.ensureTaskComments(task.id);
                 }
             }
         } catch (e) {
@@ -519,6 +543,7 @@ export class TaskService {
     }
 
     async getTasks(user: UserPayload, query: QueryTasksDto) {
+        await this.ensureStoreLoaded();
         // Filter tasks that belong to the current user (fallback to all tasks if no specific match)
         const matchedTasks = this.tasks.filter((t) => this.isTaskBelongToUser(t, user));
         const userTasks = matchedTasks.length > 0 ? matchedTasks : this.tasks;
@@ -572,6 +597,7 @@ export class TaskService {
     }
 
     async getTaskById(user: UserPayload, id: number) {
+        await this.ensureStoreLoaded();
         const task = this.tasks.find((t) => t.id === id);
         if (!task) {
             throw new NotFoundException(`Task #${id} not found`);
@@ -585,6 +611,7 @@ export class TaskService {
     }
 
     async createTask(user: UserPayload, dto: CreateTaskDto) {
+        await this.ensureStoreLoaded();
         const newTask: TaskItem = {
             id: Date.now(),
             code: `#PMS-${Math.floor(100 + Math.random() * 900)}`,
@@ -649,6 +676,7 @@ export class TaskService {
     }
 
     async updateTask(user: UserPayload, id: number, dto: UpdateTaskDto) {
+        await this.ensureStoreLoaded();
         const index = this.tasks.findIndex((t) => t.id === id);
         if (index === -1) {
             throw new NotFoundException(`Task #${id} not found`);
@@ -769,6 +797,7 @@ export class TaskService {
     }
 
     async deleteTask(user: UserPayload, id: number) {
+        await this.ensureStoreLoaded();
         const index = this.tasks.findIndex((t) => t.id === id);
         if (index === -1) {
             throw new NotFoundException(`Task #${id} not found`);
@@ -788,6 +817,7 @@ export class TaskService {
     // TASK CHAT ROOM & COMMENTS
     // =========================================================================
     async getTaskComments(user: UserPayload, taskId: number) {
+        await this.ensureStoreLoaded();
         const task = this.tasks.find((t) => t.id === taskId);
         if (!task) {
             throw new NotFoundException(`Task #${taskId} not found`);
@@ -828,6 +858,7 @@ export class TaskService {
     }
 
     async createTaskComment(user: UserPayload, taskId: number, text: string, attachments?: any[]) {
+        await this.ensureStoreLoaded();
         const task = this.tasks.find((t) => t.id === taskId);
         if (!task) {
             throw new NotFoundException(`Task #${taskId} not found`);
