@@ -231,6 +231,18 @@ const INITIAL_TASKS: TaskItem[] = [
 @Injectable()
 export class TaskService {
     private tasks: TaskItem[] = [...INITIAL_TASKS];
+    private taskComments = new Map<number, Array<{
+        id: number;
+        sender_id: number;
+        sender_name: string;
+        sender_avatar: string | null;
+        text: string;
+        time: string;
+        is_self: boolean;
+        is_system?: boolean;
+        attachments?: Array<{ name: string; size: string; url?: string; type?: string; isImage?: boolean; textContent?: string }>;
+        created_at: string;
+    }>>();
     private readonly storeFilePath = path.join(process.cwd(), 'storage', 'tasks_data_store.json');
 
     constructor(
@@ -238,6 +250,54 @@ export class TaskService {
         private readonly _userRepo: Repository<User>,
     ) {
         this.loadFromDisk();
+    }
+
+    private ensureTaskComments(taskId: number): Array<{
+        id: number;
+        sender_id: number;
+        sender_name: string;
+        sender_avatar: string | null;
+        text: string;
+        time: string;
+        is_self: boolean;
+        is_system?: boolean;
+        attachments?: Array<{ name: string; size: string; url?: string; type?: string; isImage?: boolean; textContent?: string }>;
+        created_at: string;
+    }> {
+        let comments = this.taskComments.get(taskId);
+        if (!comments || comments.length === 0) {
+            const task = this.tasks.find((t) => t.id === taskId);
+            const reporterName = task?.reporter?.name || 'ឡេង សុខឆាយ';
+            const reporterAvatar = task?.reporter?.avatar || '/images/placeholder/avatar.jpg';
+            const assigneeName = task?.assignee?.name || 'ចេង ច័ន្ទបញ្ញា';
+
+            comments = [
+                {
+                    id: 1,
+                    sender_id: 0,
+                    sender_name: 'ប្រព័ន្ធ (System)',
+                    sender_avatar: null,
+                    text: `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`,
+                    time: '8:30 AM',
+                    is_self: false,
+                    is_system: true,
+                    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+                },
+                {
+                    id: 2,
+                    sender_id: 999,
+                    sender_name: reporterName,
+                    sender_avatar: reporterAvatar,
+                    text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
+                    time: '8:45 AM',
+                    is_self: false,
+                    created_at: new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                },
+            ];
+            this.taskComments.set(taskId, comments);
+            this.saveToDisk();
+        }
+        return comments;
     }
 
     private loadFromDisk(): void {
@@ -255,6 +315,12 @@ export class TaskService {
                             this.taskComments.set(numKey, v as any[]);
                         }
                     }
+                }
+            }
+            // Ensure all loaded tasks have default comment threads seeded
+            for (const task of this.tasks) {
+                if (!this.taskComments.has(task.id) || (this.taskComments.get(task.id)?.length || 0) === 0) {
+                    this.ensureTaskComments(task.id);
                 }
             }
         } catch (e) {
@@ -539,23 +605,7 @@ export class TaskService {
         };
 
         // Record action history in task comments
-        let comments = this.taskComments.get(id);
-        if (!comments || comments.length === 0) {
-            comments = [
-                {
-                    id: 1,
-                    sender_id: 0,
-                    sender_name: 'ប្រព័ន្ធ (System)',
-                    sender_avatar: null,
-                    text: `ភារកិច្ច ${current.code || ('#PMS-' + current.id)} ត្រូវបានបង្កើត និងចាត់តាំងទៅកាន់ ${current.assignee?.name || 'Cheng Chanpanha'}`,
-                    time: '8:30 AM',
-                    is_self: false,
-                    is_system: true,
-                    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-                }
-            ];
-        }
-
+        const comments = this.ensureTaskComments(id);
         const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
         if (dto.status && dto.status !== current.status) {
@@ -663,6 +713,7 @@ export class TaskService {
         }
 
         this.tasks.splice(index, 1);
+        this.taskComments.delete(id);
         this.saveToDisk();
 
         return {
@@ -674,57 +725,13 @@ export class TaskService {
     // =========================================================================
     // TASK CHAT ROOM & COMMENTS
     // =========================================================================
-    private taskComments: Map<number, Array<{
-        id: number;
-        sender_id: number;
-        sender_name: string;
-        sender_avatar: string | null;
-        text: string;
-        time: string;
-        is_self: boolean;
-        is_system?: boolean;
-        attachments?: Array<{ name: string; size: string; url?: string }>;
-        created_at: string;
-    }>> = new Map();
-
     async getTaskComments(user: UserPayload, taskId: number) {
         const task = this.tasks.find((t) => t.id === taskId);
         if (!task) {
             throw new NotFoundException(`Task #${taskId} not found`);
         }
 
-        let comments = this.taskComments.get(taskId);
-        if (!comments || comments.length === 0) {
-            const reporterName = task.reporter?.name || 'ឡេង សុខឆាយ';
-            const reporterAvatar = task.reporter?.avatar || '/images/placeholder/avatar.jpg';
-            const assigneeName = task.assignee?.name || 'ចេង ច័ន្ទបញ្ញា';
-            const assigneeAvatar = task.assignee?.avatar || '/images/placeholder/avatar.jpg';
-
-            comments = [
-                {
-                    id: 1,
-                    sender_id: 0,
-                    sender_name: 'ប្រព័ន្ធ (System)',
-                    sender_avatar: null,
-                    text: `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`,
-                    time: '8:30 AM',
-                    is_self: false,
-                    is_system: true,
-                    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-                },
-                {
-                    id: 2,
-                    sender_id: 999,
-                    sender_name: reporterName,
-                    sender_avatar: reporterAvatar,
-                    text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task.title}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
-                    time: '8:45 AM',
-                    is_self: false,
-                    created_at: new Date(Date.now() - 3600000 * 3.5).toISOString(),
-                },
-            ];
-            this.taskComments.set(taskId, comments);
-        }
+        const comments = this.ensureTaskComments(taskId);
 
         const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
         const userNameKh = (user?.name_kh || 'ចេង ច័ន្ទបញ្ញា').toLowerCase().trim();
@@ -764,7 +771,7 @@ export class TaskService {
             throw new NotFoundException(`Task #${taskId} not found`);
         }
 
-        let comments = this.taskComments.get(taskId) || [];
+        const comments = this.ensureTaskComments(taskId);
         const newComment = {
             id: Date.now(),
             sender_id: user.id,

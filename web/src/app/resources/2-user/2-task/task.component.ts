@@ -908,9 +908,21 @@ export class UserTaskComponent implements OnInit {
                         return { ...c, is_self: isSelf };
                     });
 
-                    this.chatMessages.set(mapped);
-                    this.taskChatHistoryMap.set(task.id, mapped);
-                    this.saveChatToStorage(task.id, mapped);
+                    // Merge while preserving any local messages
+                    const messageMap = new Map<number | string, TaskChatMessage>();
+                    for (const m of (this.chatMessages() || [])) {
+                        const key = m.id || `${m.sender_name}_${m.text}_${m.time}`;
+                        messageMap.set(key, m);
+                    }
+                    for (const m of mapped) {
+                        const key = m.id || `${m.sender_name}_${m.text}_${m.time}`;
+                        messageMap.set(key, m);
+                    }
+                    const merged = Array.from(messageMap.values());
+
+                    this.chatMessages.set(merged);
+                    this.taskChatHistoryMap.set(task.id, merged);
+                    this.saveChatToStorage(task.id, merged);
                 }
             },
             error: () => {},
