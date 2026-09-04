@@ -81,7 +81,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 2).toISOString(),
         project_id: 'proj-001',
         project_name: 'Document Management',
-        assignee: { id: 2, name: 'Sokha Meng', avatar: null },
+        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
+        assignee: { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' },
+        assignees: [
+            { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -99,7 +103,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 3).toISOString(),
         project_id: 'proj-001',
         project_name: 'Document Management',
+        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
         assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        assignees: [
+            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -117,7 +125,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 5).toISOString(),
         project_id: 'proj-002',
         project_name: 'User Experience',
-        assignee: { id: 3, name: 'Ratha Vuth', avatar: null },
+        reporter: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Reporter' },
+        assignee: { id: 3, name: 'Ratha Vuth', avatar: null, role: 'UI/UX Designer' },
+        assignees: [
+            { id: 3, name: 'Ratha Vuth', avatar: null, role: 'UI/UX Designer' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -157,7 +169,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 4).toISOString(),
         project_id: 'proj-003',
         project_name: 'Analytics & Reporting',
-        assignee: { id: 2, name: 'Sokha Meng', avatar: null },
+        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
+        assignee: { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' },
+        assignees: [
+            { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -175,7 +191,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 2).toISOString(),
         project_id: 'proj-003',
         project_name: 'Analytics & Reporting',
+        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
         assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        assignees: [
+            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -193,7 +213,11 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 8).toISOString(),
         project_id: 'proj-001',
         project_name: 'Core System Structure',
+        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
         assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        assignees: [
+            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+        ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -207,8 +231,49 @@ export class TaskService {
         return this.tasks;
     }
 
+    /**
+     * Check whether a task belongs to the user:
+     * Either the user is assigned to the task (primary assignee or in assignees list)
+     * OR the user is the reporter of the task.
+     */
+    private isTaskBelongToUser(task: TaskItem, user?: UserPayload): boolean {
+        const userId = user?.id ?? 1;
+        const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
+        const userNameKh = (user?.name_kh || '').toLowerCase().trim();
+        const userEmail = (user?.email || '').toLowerCase().trim();
+
+        // 1. Check if user is the Reporter
+        if (task.reporter) {
+            if (task.reporter.id && task.reporter.id === userId) return true;
+            const repName = task.reporter.name?.toLowerCase().trim();
+            if (repName && (repName === userNameEn || (userNameKh && repName === userNameKh))) return true;
+        }
+
+        // 2. Check if user is the Primary Assignee
+        if (task.assignee) {
+            if (task.assignee.id && task.assignee.id === userId) return true;
+            const assName = task.assignee.name?.toLowerCase().trim();
+            if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
+            if (userEmail && task.assignee.email && task.assignee.email.toLowerCase().trim() === userEmail) return true;
+        }
+
+        // 3. Check if user is in the Assignees list
+        if (task.assignees && Array.isArray(task.assignees)) {
+            for (const ass of task.assignees) {
+                if (ass.id && ass.id === userId) return true;
+                const assName = ass.name?.toLowerCase().trim();
+                if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
+                if (userEmail && ass.email && ass.email.toLowerCase().trim() === userEmail) return true;
+            }
+        }
+
+        return false;
+    }
+
     async getTasks(user: UserPayload, query: QueryTasksDto) {
-        let list = [...this.tasks];
+        // Filter tasks that belong to the current user (only own assigned or reported tasks)
+        const userTasks = this.tasks.filter((t) => this.isTaskBelongToUser(t, user));
+        let list = [...userTasks];
 
         if (query.search && query.search !== 'undefined' && query.search !== 'null' && query.search.trim()) {
             const s = query.search.trim().toLowerCase();
@@ -244,14 +309,14 @@ export class TaskService {
                 limit,
                 offset,
                 counts: {
-                    all: this.tasks.length,
-                    new: this.tasks.filter((t) => t.status === TaskStatusEnum.NEW || (t.status as any) === 'pending').length,
-                    confirmed: this.tasks.filter((t) => t.status === TaskStatusEnum.CONFIRMED).length,
-                    unconfirmed: this.tasks.filter((t) => t.status === TaskStatusEnum.UNCONFIRMED || (t.status as any) === 'todo').length,
-                    in_progress: this.tasks.filter((t) => t.status === TaskStatusEnum.IN_PROGRESS).length,
-                    in_review: this.tasks.filter((t) => t.status === TaskStatusEnum.IN_REVIEW || (t.status as any) === 'review').length,
-                    reopened: this.tasks.filter((t) => t.status === TaskStatusEnum.REOPENED).length,
-                    done: this.tasks.filter((t) => t.status === TaskStatusEnum.DONE || (t.status as any) === 'completed').length,
+                    all: userTasks.length,
+                    new: userTasks.filter((t) => t.status === TaskStatusEnum.NEW || (t.status as any) === 'pending').length,
+                    confirmed: userTasks.filter((t) => t.status === TaskStatusEnum.CONFIRMED).length,
+                    unconfirmed: userTasks.filter((t) => t.status === TaskStatusEnum.UNCONFIRMED || (t.status as any) === 'todo').length,
+                    in_progress: userTasks.filter((t) => t.status === TaskStatusEnum.IN_PROGRESS).length,
+                    in_review: userTasks.filter((t) => t.status === TaskStatusEnum.IN_REVIEW || (t.status as any) === 'review').length,
+                    reopened: userTasks.filter((t) => t.status === TaskStatusEnum.REOPENED).length,
+                    done: userTasks.filter((t) => t.status === TaskStatusEnum.DONE || (t.status as any) === 'completed').length,
                 },
             },
         };

@@ -115,14 +115,17 @@
                 <span>•</span>
 
                 <!-- Reporter (អ្នករាយការណ៍ / អ្នកបង្កើត) -->
-                <div class="flex items-center gap-1.5" [matTooltip]="'អ្នករាយការណ៍ (Reporter)'">
-                    <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs">
-                        {{ (task()?.reporter?.name || 'Ratha Vuth').charAt(0) }}
+                <ng-container *ngIf="task()?.reporter">
+                    <div class="flex items-center gap-1.5" [matTooltip]="'អ្នករាយការណ៍ (Reporter)'">
+                        <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden">
+                            <img *ngIf="task()?.reporter?.avatar" [src]="task()!.reporter!.avatar" class="w-full h-full object-cover" />
+                            <span *ngIf="!task()?.reporter?.avatar">{{ task()?.reporter?.name?.charAt(0) }}</span>
+                        </div>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ task()?.reporter?.name }}</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-medium">Reporter</span>
                     </div>
-                    <span class="font-medium text-slate-700 dark:text-slate-300">{{ task()?.reporter?.name || 'Ratha Vuth' }}</span>
-                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-medium">Reporter</span>
-                </div>
-                <span>•</span>
+                    <span>•</span>
+                </ng-container>
 
                 <!-- Assignees (អ្នកទទួលបន្ទុក) - Interactive Button Trigger -->
                 <button [matMenuTriggerFor]="assigneeMenu"
@@ -352,13 +355,14 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Reporter Card -->
-                    <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-850">
-                        <div class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-semibold shrink-0 shadow-xs">
-                            {{ (task()?.reporter?.name || 'Ratha Vuth').charAt(0) }}
+                    <div *ngIf="task()?.reporter" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-850">
+                        <div class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-semibold shrink-0 shadow-xs overflow-hidden">
+                            <img *ngIf="task()?.reporter?.avatar" [src]="task()!.reporter!.avatar" class="w-full h-full object-cover" />
+                            <span *ngIf="!task()?.reporter?.avatar">{{ task()?.reporter?.name?.charAt(0) }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <h5 class="text-[15px] font-medium text-slate-900 dark:text-white truncate">
-                                {{ task()?.reporter?.name || 'Ratha Vuth' }}
+                                {{ task()?.reporter?.name }}
                             </h5>
                             <span class="text-[12px] text-emerald-600 dark:text-emerald-400 font-medium">អ្នករាយការណ៍ (Reporter / Creator)</span>
                         </div>

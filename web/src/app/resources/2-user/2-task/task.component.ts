@@ -208,6 +208,41 @@ export class UserTaskComponent implements OnInit {
         });
     }
 
+    isTaskBelongToCurrentUser(task: TaskItem): boolean {
+        const user = this._userService.getUser();
+        const userId = user?.id ?? 1;
+        const userNameEn = (user?.en_name || user?.name || 'Cheng Chanpanha').toLowerCase().trim();
+        const userNameKh = (user?.kh_name || '').toLowerCase().trim();
+        const userEmail = (user?.email || '').toLowerCase().trim();
+
+        // 1. Check Reporter
+        if (task.reporter) {
+            if (task.reporter.id && task.reporter.id === userId) return true;
+            const repName = task.reporter.name?.toLowerCase().trim();
+            if (repName && (repName === userNameEn || (userNameKh && repName === userNameKh))) return true;
+        }
+
+        // 2. Check Assignee
+        if (task.assignee) {
+            if (task.assignee.id && task.assignee.id === userId) return true;
+            const assName = task.assignee.name?.toLowerCase().trim();
+            if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
+            if (userEmail && task.assignee.email && task.assignee.email.toLowerCase().trim() === userEmail) return true;
+        }
+
+        // 3. Check Assignees list
+        if (task.assignees && Array.isArray(task.assignees)) {
+            for (const ass of task.assignees) {
+                if (ass.id && ass.id === userId) return true;
+                const assName = ass.name?.toLowerCase().trim();
+                if (assName && (assName === userNameEn || (userNameKh && assName === userNameKh))) return true;
+                if (userEmail && ass.email && ass.email.toLowerCase().trim() === userEmail) return true;
+            }
+        }
+
+        return false;
+    }
+
     loadTasks(): void {
         this.loading.set(true);
         this._taskService
@@ -218,8 +253,9 @@ export class UserTaskComponent implements OnInit {
             })
             .subscribe({
                 next: (res) => {
-                    this.tasks.set(res.data.results);
-                    this.computeCounts(res.data.results, res.data.counts);
+                    const filtered = (res.data.results || []).filter((t) => this.isTaskBelongToCurrentUser(t));
+                    this.tasks.set(filtered);
+                    this.computeCounts(filtered, res.data.counts);
                     this.loading.set(false);
                 },
                 error: (err) => {
