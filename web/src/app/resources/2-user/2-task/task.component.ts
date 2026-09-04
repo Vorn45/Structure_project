@@ -905,24 +905,22 @@ export class UserTaskComponent implements OnInit {
                             (currentUser?.id && c.sender_id === currentUser.id) ||
                             c.is_self
                         );
-                        return { ...c, is_self: isSelf };
+
+                        // Format time in user's local timezone if created_at exists
+                        let displayTime = c.time;
+                        if (c.created_at) {
+                            const d = new Date(c.created_at);
+                            if (!isNaN(d.getTime())) {
+                                displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                        }
+
+                        return { ...c, time: displayTime, is_self: isSelf };
                     });
 
-                    // Merge while preserving any local messages
-                    const messageMap = new Map<number | string, TaskChatMessage>();
-                    for (const m of (this.chatMessages() || [])) {
-                        const key = m.id || `${m.sender_name}_${m.text}_${m.time}`;
-                        messageMap.set(key, m);
-                    }
-                    for (const m of mapped) {
-                        const key = m.id || `${m.sender_name}_${m.text}_${m.time}`;
-                        messageMap.set(key, m);
-                    }
-                    const merged = Array.from(messageMap.values());
-
-                    this.chatMessages.set(merged);
-                    this.taskChatHistoryMap.set(task.id, merged);
-                    this.saveChatToStorage(task.id, merged);
+                    this.chatMessages.set(mapped);
+                    this.taskChatHistoryMap.set(task.id, mapped);
+                    this.saveChatToStorage(task.id, mapped);
                 }
             },
             error: () => {},
@@ -942,9 +940,10 @@ export class UserTaskComponent implements OnInit {
         const currentTask = this.selectedTask();
         const user = this._userService.getUser();
         const userAvatar = this.getAvatarUrl();
+        const tempId = Date.now();
 
         const msg: TaskChatMessage = {
-            id: Date.now(),
+            id: tempId,
             sender_name: user?.kh_name || user?.en_name || 'អ្នក (You)',
             sender_avatar: userAvatar,
             text: text || (attachments.length > 0 ? 'បានផ្ញើឯកសារ' : ''),
@@ -960,11 +959,24 @@ export class UserTaskComponent implements OnInit {
                 currentTask.attachments_count = (currentTask.attachments_count || 0) + attachments.length;
             }
             this._taskService.createTaskComment(currentTask.id, { text: msg.text, attachments }).subscribe({
-                next: () => {
+                next: (res) => {
                     // Update task in the main list
                     this.tasks.update((items) =>
                         items.map((t) => (t.id === currentTask.id ? { ...t, comments_count: currentTask.comments_count, attachments_count: currentTask.attachments_count } : t))
                     );
+
+                    // Sync server ID and timestamp to the sent message
+                    if (res?.data) {
+                        const serverComment = res.data;
+                        this.chatMessages.update((msgs) => {
+                            const updated = msgs.map((m) =>
+                                m.id === tempId ? { ...m, id: serverComment.id, created_at: serverComment.created_at } : m
+                            );
+                            this.taskChatHistoryMap.set(currentTask.id, updated);
+                            this.saveChatToStorage(currentTask.id, updated);
+                            return updated;
+                        });
+                    }
                 },
                 error: (err) => console.error('Failed to sync comment with server', err),
             });
