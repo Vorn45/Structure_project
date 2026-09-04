@@ -57,9 +57,11 @@ export class TaskDrawerComponent {
 
     getTaskAssignees(task: TaskItem | null | undefined): TaskMember[] {
         if (!task) return [];
-        if (task.assignees && task.assignees.length > 0) return task.assignees;
+        if (task.assignees !== undefined && Array.isArray(task.assignees)) {
+            return task.assignees;
+        }
         if (task.assignee) return [task.assignee];
-        return [{ id: 1, name: 'Cheng Chanpanha', role: 'Assignee', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop' }];
+        return [];
     }
 
     getAssigneeNamesLabel(task: TaskItem | null | undefined): string {
@@ -72,7 +74,35 @@ export class TaskDrawerComponent {
 
     isMemberAssigned(task: TaskItem | null | undefined, member: TaskMember): boolean {
         const assignees = this.getTaskAssignees(task);
-        return assignees.some((a) => a.id === member.id || a.name.toLowerCase() === member.name.toLowerCase());
+        return assignees.some(
+            (a) => Number(a.id) === Number(member.id) || (a.name && member.name && a.name.trim().toLowerCase() === member.name.trim().toLowerCase())
+        );
+    }
+
+    toggleAssignee(member: TaskMember, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        const currentTask = this.task();
+        if (!currentTask) return;
+        this.assigneeToggle.emit({ task: currentTask, member });
+    }
+
+    getMemberColorClass(member: TaskMember): string {
+        if (member.colorClass) return member.colorClass;
+        const colors = [
+            'bg-indigo-600',
+            'bg-blue-600',
+            'bg-emerald-600',
+            'bg-amber-600',
+            'bg-purple-600',
+            'bg-rose-600',
+            'bg-cyan-600',
+            'bg-teal-600',
+        ];
+        const id = Number(member.id) || 0;
+        return colors[id % colors.length];
     }
 
     formatDate(dateStr?: string | null): string {

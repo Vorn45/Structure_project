@@ -21,6 +21,11 @@ export class TaskController {
         return await this._service.getTasks(res.locals.user, query);
     }
 
+    @Get('members')
+    async getMembers(@Res({ passthrough: true }) res: express.Response) {
+        return await this._service.getMembers(res.locals.user);
+    }
+
     @Get(':id')
     async getTaskById(
         @Param('id', ParseIntPipe) id: number,

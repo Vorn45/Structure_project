@@ -123,16 +123,29 @@ export class UserTaskComponent implements OnInit {
     previewFileModal = signal<TaskAttachment | null>(null);
     private taskChatHistoryMap = new Map<number, TaskChatMessage[]>();
 
-    // Team Members Pool for Multi-Assignee Selection
-    teamMembers: TaskMember[] = [
-        { id: 1, name: 'Cheng Chanpanha', role: 'Frontend Lead / Developer', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop', colorClass: 'bg-blue-600', email: 'panha@gmail.com' },
-        { id: 2, name: 'Ratha Vuth', role: 'UI/UX Designer / Reporter', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop', colorClass: 'bg-emerald-600', email: 'ratha.vuth@wfm.com' },
-        { id: 3, name: 'Sokha Meng', role: 'Senior Backend Developer', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop', colorClass: 'bg-indigo-600', email: 'sokha.meng@wfm.com' },
-        { id: 4, name: 'Dara Pich', role: 'Fullstack Engineer', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', colorClass: 'bg-amber-600', email: 'dara.pich@wfm.com' },
-        { id: 5, name: 'Vannak Som', role: 'Mobile App Developer', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', colorClass: 'bg-purple-600', email: 'vannak.som@wfm.com' },
-        { id: 6, name: 'Bopha Chea', role: 'QA & Test Automation', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop', colorClass: 'bg-rose-600', email: 'bopha.chea@wfm.com' },
-        { id: 7, name: 'Sophea Keo', role: 'DevOps & Cloud Architect', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop', colorClass: 'bg-cyan-600', email: 'sophea.keo@wfm.com' },
-    ];
+    // Team Members Pool for Multi-Assignee Selection (Loaded dynamically from DB)
+    teamMembers = signal<TaskMember[]>([
+        { id: 1, name: 'កែវ វិបុល', role: 'អភិបាលប្រព័ន្ធ (Admin)', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'keovibul.tech@gmail.com' },
+        { id: 2, name: 'ស៊ុន ស្រីពេជ្រ', role: 'ប្រធានផ្នែក Frontend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'sunsreypich.dev@gmail.com' },
+        { id: 3, name: 'ជា ដារ៉ារ័ត្ន', role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'cheadararath@gmail.com' },
+        { id: 4, name: 'មុន្នី រតនៈ', role: 'វិស្វករ Fullstack', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', email: 'monyrothana.dev@gmail.com' },
+        { id: 5, name: 'អ៊ុក គឹមហុង', role: 'អ្នកបង្កើតកម្មវិធី Mobile', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-purple-600', email: 'oukkimhong.app@gmail.com' },
+        { id: 6, name: 'ផាន់ សុវណ្ណារ៉ា', role: 'ត្រួតពិនិត្យគុណភាព QA & Test', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-rose-600', email: 'sovannara.phan@gmail.com' },
+        { id: 7, name: 'អេង ពិសិដ្ឋ', role: 'វិស្វករ Cloud & DevOps', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-cyan-600', email: 'engpiseth.cloud@gmail.com' },
+        { id: 8, name: 'នួន គន្ធា', role: 'អ្នករចនា UI/UX', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-teal-600', email: 'nounkunthea.ux@gmail.com' },
+        { id: 9, name: 'តាំង ម៉េងហុង', role: 'អ្នកអភិវឌ្ឍន៍កម្មវិធី Web', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'tangmenghong@gmail.com' },
+        { id: 10, name: 'ម៉ៅ សុភ័ក្ត្រ', role: 'អ្នកគ្រប់គ្រងទិន្នន័យ Database', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'maosopheak.db@gmail.com' },
+        { id: 11, name: 'សោម វណ្ណដា', role: 'វិស្វករប្រព័ន្ធ System Engineer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', email: 'somvannda.sys@gmail.com' },
+        { id: 12, name: 'ចាន់ ឧត្តម', role: 'អ្នកអភិវឌ្ឍន៍ Backend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-purple-600', email: 'chanoudom.code@gmail.com' },
+        { id: 13, name: 'ឃុន ស្រីណែត', role: 'អ្នកអភិវឌ្ឍន៍ Frontend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-rose-600', email: 'khunsreynet.fe@gmail.com' },
+        { id: 14, name: 'ឌុច វីរៈ', role: 'អ្នកគ្រប់គ្រងហេដ្ឋារចនាសម្ព័ន្ធ DevOps', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-cyan-600', email: 'douchvirak.ops@gmail.com' },
+        { id: 15, name: 'ព្រំ ធារ៉ា', role: 'អ្នកវិភាគទិន្នន័យ Data Analyst', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-teal-600', email: 'promtheara.data@gmail.com' },
+        { id: 16, name: 'យិន លីហ្សា', role: 'អ្នករចនា UI/UX Designer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'yinliza.design@gmail.com' },
+        { id: 17, name: 'ថៃ វិសាល', role: 'វិស្វករសន្តិសុខ Security Engineer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'thaiviseth.sec@gmail.com' },
+        { id: 18, name: 'ហុង សម្បត្តិ', role: 'អ្នកគ្រប់គ្រងគម្រោង Project Manager', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'hongsambath.pm@gmail.com' },
+        { id: 19, name: 'ឡុង វិច្ឆិកា', role: 'អ្នកអភិវឌ្ឍន៍ Backend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', email: 'longvicheka.be@gmail.com' },
+        { id: 20, name: 'ឈិន ម៉ានិត', role: 'អ្នកអភិវឌ្ឍន៍ Frontend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-purple-600', email: 'chhinmanith.dev@gmail.com' },
+    ]);
 
     // Aggregated list of all files for the task (defaults + uploaded in chat)
     allTaskFiles = computed<TaskAttachment[]>(() => {
@@ -180,7 +193,19 @@ export class UserTaskComponent implements OnInit {
         return '/images/placeholder/avatar.jpg';
     }
 
+    loadTeamMembers(): void {
+        this._taskService.getMembers().subscribe({
+            next: (res) => {
+                if (res?.data && res.data.length > 0) {
+                    this.teamMembers.set(res.data);
+                }
+            },
+            error: (err) => console.error('Failed to load team members from DB', err),
+        });
+    }
+
     ngOnInit(): void {
+        this.loadTeamMembers();
         this._route.queryParams.subscribe((params) => {
             if (params['status']) {
                 this.activeStatus.set(params['status']);
@@ -211,14 +236,24 @@ export class UserTaskComponent implements OnInit {
     isTaskBelongToCurrentUser(task: TaskItem): boolean {
         const user = this._userService.getUser();
         const userNameEn = (user?.en_name || user?.name || 'Cheng Chanpanha').toLowerCase().trim();
-        const userNameKh = (user?.kh_name || '').toLowerCase().trim();
+        const userNameKh = (user?.kh_name || 'ចេង ច័ន្ទបញ្ញា').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
-        const matchUser = (target?: { name?: string; email?: string } | null): boolean => {
+        const matchUser = (target?: { name?: string; email?: string; id?: number } | null): boolean => {
             if (!target) return false;
             const targetName = target.name?.toLowerCase().trim();
-            if (targetName && (targetName === userNameEn || (userNameKh && targetName === userNameKh))) return true;
+            if (targetName) {
+                if (userNameKh && (targetName === userNameKh || targetName.includes(userNameKh) || userNameKh.includes(targetName))) return true;
+                if (userNameEn && (targetName === userNameEn || targetName.includes(userNameEn) || userNameEn.includes(targetName))) return true;
+                if (targetName.includes('ចេង ច័ន្ទបញ្ញា') || targetName.includes('cheng chanpanha')) {
+                    if (userNameEn.includes('cheng') || userNameKh.includes('ចេង')) return true;
+                }
+                if (targetName.includes('ឡេង សុខឆាយ') || targetName.includes('leng sokchhay')) {
+                    if (userNameEn.includes('leng') || userNameKh.includes('ឡេង')) return true;
+                }
+            }
             if (userEmail && target.email && target.email.toLowerCase().trim() === userEmail) return true;
+            if (user?.id && target.id && target.id === user.id) return true;
             return false;
         };
 
@@ -342,9 +377,11 @@ export class UserTaskComponent implements OnInit {
 
     getTaskAssignees(task: TaskItem | null | undefined): TaskMember[] {
         if (!task) return [];
-        if (task.assignees && task.assignees.length > 0) return task.assignees;
+        if (task.assignees !== undefined && Array.isArray(task.assignees)) {
+            return task.assignees;
+        }
         if (task.assignee) return [task.assignee];
-        return [{ id: 1, name: 'Cheng Chanpanha', role: 'Assignee', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop' }];
+        return [];
     }
 
     clearFilters(): void {
@@ -480,24 +517,25 @@ export class UserTaskComponent implements OnInit {
     toggleTaskAssignee(task: TaskItem, member: TaskMember): void {
         const currentAssignees = this.getTaskAssignees(task);
         const exists = currentAssignees.some(
-            (a) => a.id === member.id || a.name.toLowerCase() === member.name.toLowerCase()
+            (a) => Number(a.id) === Number(member.id) || (a.name && member.name && a.name.trim().toLowerCase() === member.name.trim().toLowerCase())
         );
 
         let updatedAssignees: TaskMember[];
         let actionNotice = '';
 
         if (exists) {
-            if (currentAssignees.length <= 1) return;
             updatedAssignees = currentAssignees.filter(
-                (a) => a.id !== member.id && a.name.toLowerCase() !== member.name.toLowerCase()
+                (a) => Number(a.id) !== Number(member.id) && !(a.name && member.name && a.name.trim().toLowerCase() === member.name.trim().toLowerCase())
             );
-            actionNotice = `បានដកចេញអ្នកទទួលបន្ទុក៖ "${member.name}"`;
+            actionNotice = updatedAssignees.length > 0
+                ? `បានដកចេញអ្នកទទួលបន្ទុក៖ "${member.name}"`
+                : `បានដកចេញអ្នកទទួលបន្ទុកទាំងអស់ (គ្មានអ្នកទទួលបន្ទុក)`;
         } else {
             const newMember: TaskMember = {
                 id: member.id,
                 name: member.name,
                 avatar: member.avatar || null,
-                role: member.role || 'Assignee',
+                role: member.role || 'អ្នកទទួលបន្ទុក',
                 email: member.email || '',
                 colorClass: member.colorClass || 'bg-blue-600',
             };
@@ -507,13 +545,13 @@ export class UserTaskComponent implements OnInit {
 
         const updatedTask: TaskItem = {
             ...task,
-            assignees: updatedAssignees,
-            assignee: updatedAssignees[0],
+            assignees: [...updatedAssignees],
+            assignee: updatedAssignees.length > 0 ? { ...updatedAssignees[0] } : (null as any),
         };
 
         this.tasks.update((list) => list.map((t) => (t.id === task.id ? updatedTask : t)));
         if (this.selectedTask()?.id === task.id) {
-            this.selectedTask.set(updatedTask);
+            this.selectedTask.set({ ...updatedTask });
         }
 
         const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -527,7 +565,7 @@ export class UserTaskComponent implements OnInit {
         });
 
         this._taskService.updateTask(task.id, {
-            assignee: updatedTask.assignee as any,
+            assignee: (updatedTask.assignee || null) as any,
             assignees: updatedAssignees as any,
         }).subscribe({
             next: (res) => {
@@ -804,8 +842,8 @@ export class UserTaskComponent implements OnInit {
         if (cached && cached.length > 0) {
             this.chatMessages.set([...cached]);
         } else {
-            const reporterName = task.reporter?.name || 'Ratha Vuth';
-            const reporterAvatar = task.reporter?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop';
+            const reporterName = task.reporter?.name || 'Leng sokchhay';
+            const reporterAvatar = task.reporter?.avatar || '/images/placeholder/avatar.jpg';
             const assigneeName = task.assignee?.name || 'Cheng Chanpanha';
 
             const initialMessages: TaskChatMessage[] = [

@@ -61,7 +61,7 @@ export interface VerifiedMemberData {
 
                     <!-- Right Cambodia Flag -->
                     <div class="shrink-0 flex items-center">
-                        <img src="images/flags/KH.svg" alt="Cambodia Flag" class="w-8 h-5.5 rounded-xs shadow-xs object-cover border border-white/40" />
+                        <img src="images/flags/KH.svg" alt="Cambodia Flag" class="w-13 h-8.5 rounded-sm shadow-sm object-cover border border-white/50" />
                     </div>
                 </div>
 
@@ -220,7 +220,7 @@ export interface VerifiedMemberData {
 export class MemberVerifyComponent implements OnInit {
     member = signal<VerifiedMemberData | null>(null);
 
-    constructor(private readonly _route: ActivatedRoute) {}
+    constructor(private readonly _route: ActivatedRoute) { }
 
     ngOnInit(): void {
         this._route.queryParams.subscribe((params) => {

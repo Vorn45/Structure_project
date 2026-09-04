@@ -79,11 +79,26 @@ export interface TaskListResponse {
     };
 }
 
+export interface TaskMember {
+    id: number;
+    name: string;
+    avatar?: string | null;
+    role?: string;
+    email?: string;
+    colorClass?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserTaskService {
     private readonly baseUrl = `${env.API_BASE_URL}/user/task`;
 
     constructor(private readonly _http: HttpClient) {}
+
+    getMembers(): Observable<{ status_code: number; message: string; data: TaskMember[] }> {
+        return this._http.get<{ status_code: number; message: string; data: TaskMember[] }>(`${this.baseUrl}/members`, {
+            withCredentials: true,
+        });
+    }
 
     getTasks(params?: { search?: string; status?: string; priority?: string; project_id?: string }): Observable<TaskListResponse> {
         let httpParams = new HttpParams();

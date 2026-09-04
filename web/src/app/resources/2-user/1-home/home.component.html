@@ -48,7 +48,8 @@
                                     <mat-icon svgIcon="mdi:phone" class="icon-size-4.5 text-slate-400"></mat-icon>
                                     <span>{{ getUserPhone() }}</span>
                                 </span>
-                                <span *ngIf="getUserPhone() && getUserEmail()" class="text-slate-300 dark:text-slate-600">•</span>
+                                <span *ngIf="getUserPhone() && getUserEmail()"
+                                    class="text-slate-300 dark:text-slate-600">•</span>
                                 <span *ngIf="getUserEmail()" class="flex items-center gap-1.5">
                                     <mat-icon svgIcon="mdi:email" class="icon-size-4.5 text-slate-400"></mat-icon>
                                     <span>{{ getUserEmail() }}</span>
@@ -287,7 +288,7 @@
                                 <!-- Center Branding (Logo, Name, and Identity Title) -->
                                 <div class="relative z-10 space-y-1.5 my-auto">
                                     <div
-                                        class="w-12 h-12 sm:w-13 sm:h-13 mx-auto flex items-center justify-center mb-1.5">
+                                        class="w-15 h-15 sm:w-16 sm:h-16 mx-auto flex items-center justify-center mb-1.5">
                                         <img [src]="getLogoUrl()" alt="Logo" class="w-full h-full object-contain" />
                                     </div>
                                     <h3 class="text-[14px] sm:text-[16px] text-white leading-relaxed tracking-wide font-['Moul']"
@@ -331,7 +332,8 @@
                                             class="text-[16px] sm:text-[17px] font-medium text-white truncate leading-tight">
                                             {{ getUserKhName() }}
                                         </h3>
-                                        <p *ngIf="getUserEnName()" class="text-[12px] text-blue-100 uppercase tracking-wider truncate mt-0.5">
+                                        <p *ngIf="getUserEnName()"
+                                            class="text-[12px] text-blue-100 uppercase tracking-wider truncate mt-0.5">
                                             {{ getUserEnName() }}
                                         </p>
                                     </div>
@@ -354,8 +356,8 @@
                                     <div
                                         class="pt-2 border-t border-white/20 flex items-center justify-between text-[11px] text-blue-200">
                                         <span class="flex items-center gap-1 text-emerald-300">
-                                             <mat-icon svgIcon="mdi:check-decagram" class="icon-size-4"></mat-icon>
-                                             <span>សុពលភាពសកម្ម</span>
+                                            <mat-icon svgIcon="mdi:check-decagram" class="icon-size-4"></mat-icon>
+                                            <span>សុពលភាពសកម្ម</span>
                                         </span>
                                     </div>
                                 </div>
@@ -632,8 +634,7 @@
                     <div *ngFor="let task of getFilteredTasks()" (click)="navigateToTasks()"
                         class="cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/40 hover:bg-white dark:hover:bg-slate-800 hover:border-blue-200 dark:hover:border-blue-800/60 hover:shadow-xs transition-all gap-3">
                         <div class="flex items-start gap-3 min-w-0">
-                            <div class="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
-                                [ngClass]="{
+                            <div class="w-3 h-3 rounded-full mt-1.5 flex-shrink-0" [ngClass]="{
                                     'bg-emerald-500': task.status === 'completed' || task.status === 'done',
                                     'bg-amber-500': task.status === 'in_progress',
                                     'bg-blue-500': task.status === 'new' || task.status === 'pending' || task.status === 'todo'

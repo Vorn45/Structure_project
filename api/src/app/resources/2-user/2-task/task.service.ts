@@ -1,7 +1,10 @@
 // ===========================================================================>> Core Library
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 // ===========================================================================>> Custom Library
+import { User } from 'src/app/model/user/users.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateTaskDto } from './task.dto';
 
@@ -59,10 +62,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 6).toISOString(),
         project_id: 'proj-001',
         project_name: 'Core System Structure',
-        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
-        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Assignee' },
+        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'អ្នកទទួលបន្ទុក (Assignee)' },
         assignees: [
-            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
         ],
         created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
         updated_at: new Date().toISOString(),
@@ -81,10 +84,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 2).toISOString(),
         project_id: 'proj-001',
         project_name: 'Document Management',
-        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
-        assignee: { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' },
+        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' },
         assignees: [
-            { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' }
+            { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
@@ -103,10 +106,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 3).toISOString(),
         project_id: 'proj-001',
         project_name: 'Document Management',
-        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
-        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' },
         assignees: [
-            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
@@ -125,10 +128,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 5).toISOString(),
         project_id: 'proj-002',
         project_name: 'User Experience',
-        reporter: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Reporter' },
-        assignee: { id: 3, name: 'Ratha Vuth', avatar: null, role: 'UI/UX Designer' },
+        reporter: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 4, name: 'បញ្ញា វិរៈទិត្យា', avatar: null, role: 'វិស្វករ Fullstack' },
         assignees: [
-            { id: 3, name: 'Ratha Vuth', avatar: null, role: 'UI/UX Designer' }
+            { id: 4, name: 'បញ្ញា វិរៈទិត្យា', avatar: null, role: 'វិស្វករ Fullstack' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
@@ -147,10 +150,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() - 86400000 * 6).toISOString(),
         project_id: 'proj-002',
         project_name: 'Security Hub',
-        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
-        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Assignee' },
+        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'អ្នកទទួលបន្ទុក (Assignee)' },
         assignees: [
-            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
@@ -169,10 +172,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 4).toISOString(),
         project_id: 'proj-003',
         project_name: 'Analytics & Reporting',
-        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
-        assignee: { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' },
+        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' },
         assignees: [
-            { id: 2, name: 'Sokha Meng', avatar: null, role: 'Backend Lead' }
+            { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' }
         ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
@@ -191,10 +194,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 2).toISOString(),
         project_id: 'proj-003',
         project_name: 'Analytics & Reporting',
-        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
-        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' },
         assignees: [
-            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
         ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
@@ -213,10 +216,10 @@ const INITIAL_TASKS: TaskItem[] = [
         due_date: new Date(Date.now() + 86400000 * 8).toISOString(),
         project_id: 'proj-001',
         project_name: 'Core System Structure',
-        reporter: { id: 999, name: 'Ratha Vuth', avatar: null, role: 'Reporter' },
-        assignee: { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg' },
+        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
+        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' },
         assignees: [
-            { id: 1, name: 'Cheng Chanpanha', avatar: '/images/placeholder/avatar.jpg', role: 'Frontend Lead' }
+            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
         ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
@@ -227,26 +230,99 @@ const INITIAL_TASKS: TaskItem[] = [
 export class TaskService {
     private tasks: TaskItem[] = [...INITIAL_TASKS];
 
+    constructor(
+        @InjectRepository(User)
+        private readonly _userRepo: Repository<User>,
+    ) {}
+
     getRawTasks(): TaskItem[] {
         return this.tasks;
+    }
+
+    async getMembers(user: UserPayload) {
+        let dbUsers: User[] = [];
+        try {
+            dbUsers = await this._userRepo.find({
+                relations: ['user_roles', 'user_roles.role', 'avatar_file'],
+                order: { id: 'ASC' },
+                take: 100,
+            });
+        } catch (e) {
+            console.error('Error fetching users from DB:', e);
+        }
+
+        const colors = [
+            'bg-blue-600',
+            'bg-emerald-600',
+            'bg-indigo-600',
+            'bg-amber-600',
+            'bg-purple-600',
+            'bg-rose-600',
+            'bg-cyan-600',
+            'bg-teal-600',
+        ];
+
+        const mapped = dbUsers.map((u, idx) => {
+            const roleName =
+                u.user_roles?.[0]?.role?.name_kh ||
+                u.user_roles?.[0]?.role?.name_en ||
+                u.user_roles?.[0]?.role?.slug ||
+                'សមាជិក (Member)';
+
+            let avatarUrl: string | null = null;
+            if (u.avatar_file?.uri) {
+                const domain = (u.avatar_file.file_domain || '').replace(/\/+$/, '');
+                const uri = u.avatar_file.uri.replace(/^\/+/, '');
+                avatarUrl = domain ? `${domain}/${uri}` : `/${uri}`;
+            } else if (u.telegram_photo_url) {
+                avatarUrl = u.telegram_photo_url;
+            }
+
+            return {
+                id: u.id,
+                name: u.name_kh || u.name_en || `User #${u.id}`,
+                name_kh: u.name_kh,
+                name_en: u.name_en,
+                email: u.email || '',
+                role: roleName,
+                avatar: avatarUrl,
+                colorClass: colors[idx % colors.length],
+            };
+        });
+
+        return {
+            status_code: 200,
+            message: 'Task team members retrieved successfully from DB',
+            data: mapped,
+        };
     }
 
     /**
      * Check whether a task belongs to the user:
      * Either the user is assigned to the task (primary assignee or in assignees list)
      * OR the user is the reporter of the task.
-     * Matches by name/email so mock ID collisions do not cause cross-user leaks.
+     * Matches by Khmer/English name, email, or user ID so mock ID collisions do not cause cross-user leaks.
      */
     private isTaskBelongToUser(task: TaskItem, user?: UserPayload): boolean {
         const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
-        const userNameKh = (user?.name_kh || '').toLowerCase().trim();
+        const userNameKh = (user?.name_kh || 'ចេង ច័ន្ទបញ្ញា').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
         const matchUser = (target?: { name?: string; email?: string; id?: number } | null): boolean => {
             if (!target) return false;
             const targetName = target.name?.toLowerCase().trim();
-            if (targetName && (targetName === userNameEn || (userNameKh && targetName === userNameKh))) return true;
+            if (targetName) {
+                if (userNameKh && (targetName === userNameKh || targetName.includes(userNameKh) || userNameKh.includes(targetName))) return true;
+                if (userNameEn && (targetName === userNameEn || targetName.includes(userNameEn) || userNameEn.includes(targetName))) return true;
+                if (targetName.includes('ចេង ច័ន្ទបញ្ញា') || targetName.includes('cheng chanpanha')) {
+                    if (userNameEn.includes('cheng') || userNameKh.includes('ចេង')) return true;
+                }
+                if (targetName.includes('ឡេង សុខឆាយ') || targetName.includes('leng sokchhay')) {
+                    if (userNameEn.includes('leng') || userNameKh.includes('ឡេង')) return true;
+                }
+            }
             if (userEmail && target.email && target.email.toLowerCase().trim() === userEmail) return true;
+            if (user?.id && target.id && target.id === user.id) return true;
             return false;
         };
 
@@ -567,9 +643,9 @@ export class TaskService {
 
         let comments = this.taskComments.get(taskId);
         if (!comments || comments.length === 0) {
-            const reporterName = task.reporter?.name || 'Ratha Vuth';
+            const reporterName = task.reporter?.name || 'ឡេង សុខឆាយ';
             const reporterAvatar = task.reporter?.avatar || '/images/placeholder/avatar.jpg';
-            const assigneeName = task.assignee?.name || 'Cheng Chanpanha';
+            const assigneeName = task.assignee?.name || 'ចេង ច័ន្ទបញ្ញា';
             const assigneeAvatar = task.assignee?.avatar || '/images/placeholder/avatar.jpg';
 
             comments = [
@@ -599,7 +675,7 @@ export class TaskService {
         }
 
         const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
-        const userNameKh = (user?.name_kh || '').toLowerCase().trim();
+        const userNameKh = (user?.name_kh || 'ចេង ច័ន្ទបញ្ញា').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
         return {
@@ -615,8 +691,9 @@ export class TaskService {
                     }
                     const senderName = (c.sender_name || '').toLowerCase().trim();
                     const isSelf = Boolean(
-                        (userNameEn && (senderName === userNameEn || senderName.includes('cheng chanpanha') || userNameEn.includes(senderName))) ||
-                        (userNameKh && senderName === userNameKh) ||
+                        (userNameKh && (senderName === userNameKh || senderName.includes(userNameKh) || userNameKh.includes(senderName))) ||
+                        (userNameEn && (senderName === userNameEn || senderName.includes(userNameEn) || userNameEn.includes(senderName))) ||
+                        (senderName.includes('ចេង ច័ន្ទបញ្ញា') || senderName.includes('cheng chanpanha')) ||
                         (userEmail && senderName === userEmail) ||
                         (user?.id && c.sender_id === user.id)
                     );
@@ -639,7 +716,7 @@ export class TaskService {
         const newComment = {
             id: Date.now(),
             sender_id: user.id,
-            sender_name: user.name_en || user.name_kh || 'User',
+            sender_name: user.name_kh || user.name_en || 'អ្នកប្រើប្រាស់ (User)',
             sender_avatar: (user.avatar as any)?.uri || '/images/placeholder/avatar.jpg',
             text: text.trim(),
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
