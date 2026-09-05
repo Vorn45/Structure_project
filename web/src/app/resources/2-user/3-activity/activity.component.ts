@@ -258,24 +258,29 @@ export class UserActivityComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe((newProject?: ProjectPlanOption) => {
             if (newProject) {
-                this.projectOptions.update((list) => [newProject, ...list]);
-                // Initialize empty tasks or starter task for new project
+                const pId = String(newProject.id);
+                const starterTask: AgilePlanTask = {
+                    id: `task-${Date.now()}`,
+                    name: `ដំណាក់កាលទី ១ នៃ ${newProject.name}`,
+                    segments: [{ iteration: 1, startWeek: this.currentWeek, durationWeeks: 3, label: '3W' }],
+                };
+                const projectWithCount: ProjectPlanOption = {
+                    ...newProject,
+                    id: pId,
+                    tasksCount: 1,
+                };
+
+                this.projectOptions.update((list) => [projectWithCount, ...list.filter((p) => String(p.id) !== pId)]);
                 this.projectTasksMap.update((map) => ({
                     ...map,
-                    [newProject.id]: [
-                        {
-                            id: `task-${Date.now()}`,
-                            name: `ដំណាក់កាលទី ១ នៃ ${newProject.name}`,
-                            segments: [{ iteration: 1, startWeek: this.currentWeek, durationWeeks: 3, label: '3W' }],
-                        },
-                    ],
+                    [pId]: [starterTask],
                 }));
-                this.currentProject.set(newProject);
+                this.currentProject.set(projectWithCount);
 
                 // Persist new plan to backend Roadmap API
                 this._activityService
                     .createRoadmapProject({
-                        id: newProject.id,
+                        id: pId,
                         code: newProject.code,
                         name: newProject.name,
                         description: newProject.description,
@@ -292,7 +297,7 @@ export class UserActivityComponent implements OnInit {
         const currentP = this.currentProject() || this.projectOptions()[0];
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             projects: this.projectOptions(),
-            selectedProjectId: currentP?.id || '1',
+            selectedProjectId: currentP?.id ? String(currentP.id) : '1',
             activeTab: tab,
         });
 
@@ -300,24 +305,30 @@ export class UserActivityComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe((selected?: ProjectPlanOption) => {
             if (selected) {
+                const pId = String(selected.id);
                 // If it's a new project option not yet in the list, add it
-                if (!this.projectOptions().some((p) => String(p.id) === String(selected.id))) {
-                    this.projectOptions.update((list) => [selected, ...list]);
+                if (!this.projectOptions().some((p) => String(p.id) === pId)) {
+                    const starterTask: AgilePlanTask = {
+                        id: `task-${Date.now()}`,
+                        name: `ដំណាក់កាលទី ១ នៃ ${selected.name}`,
+                        segments: [{ iteration: 1, startWeek: this.currentWeek, durationWeeks: 3, label: '3W' }],
+                    };
+                    const projectWithCount: ProjectPlanOption = {
+                        ...selected,
+                        id: pId,
+                        tasksCount: 1,
+                    };
+                    this.projectOptions.update((list) => [projectWithCount, ...list]);
                     this.projectTasksMap.update((map) => ({
                         ...map,
-                        [selected.id]: [
-                            {
-                                id: `task-${Date.now()}`,
-                                name: `ដំណាក់កាលទី ១ នៃ ${selected.name}`,
-                                segments: [{ iteration: 1, startWeek: this.currentWeek, durationWeeks: 3, label: '3W' }],
-                            },
-                        ],
+                        [pId]: [starterTask],
                     }));
+                    this.currentProject.set(projectWithCount);
 
                     // Persist to backend Roadmap API
                     this._activityService
                         .createRoadmapProject({
-                            id: selected.id,
+                            id: pId,
                             code: selected.code,
                             name: selected.name,
                             description: selected.description,
@@ -326,9 +337,12 @@ export class UserActivityComponent implements OnInit {
                             next: () => {},
                             error: () => {},
                         });
+                } else {
+                    const existing = this.projectOptions().find((p) => String(p.id) === pId);
+                    this.currentProject.set(existing || selected);
                 }
-                this.currentProject.set(selected);
-                this._activityService.selectRoadmapProject(selected.id).subscribe({
+
+                this._activityService.selectRoadmapProject(pId).subscribe({
                     next: () => {},
                     error: () => {},
                 });
@@ -338,13 +352,14 @@ export class UserActivityComponent implements OnInit {
 
     openAddPlanDialog(): void {
         const currentP = this.currentProject() || this.projectOptions()[0];
+        const currentPId = currentP?.id ? String(currentP.id) : '1';
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             currentWeek: this.currentWeek,
             startWeek: this.startWeek,
             totalWeeks: this.totalWeeks,
             weeks: this.weeks,
             projects: this.projectOptions(),
-            selectedProjectId: currentP?.id || '1',
+            selectedProjectId: currentPId,
             selectedProjectName: currentP?.name || '',
         });
 
@@ -353,19 +368,22 @@ export class UserActivityComponent implements OnInit {
         dialogRef.afterClosed().subscribe((result: any) => {
             if (result) {
                 const newTask: AgilePlanTask = result.task || result;
-                const pId = String(result.projectId || currentP?.id || '1');
+                const pId = String(result.projectId || currentPId);
 
                 // If user selected a different project in the dialog, switch to it
                 const targetProject = this.projectOptions().find((p) => String(p.id) === pId);
-                if (targetProject && targetProject.id !== this.currentProject()?.id) {
+                if (targetProject && String(targetProject.id) !== String(this.currentProject()?.id)) {
                     this.currentProject.set(targetProject);
                 }
 
+                let updatedLength = 1;
                 this.projectTasksMap.update((map) => {
                     const currentList = map[pId] || [];
+                    const nextList = [newTask, ...currentList.filter((t) => t.id !== newTask.id)];
+                    updatedLength = nextList.length;
                     return {
                         ...map,
-                        [pId]: [newTask, ...currentList],
+                        [pId]: nextList,
                     };
                 });
 
@@ -373,7 +391,7 @@ export class UserActivityComponent implements OnInit {
                 this.projectOptions.update((list) =>
                     list.map((p) =>
                         String(p.id) === pId
-                            ? { ...p, tasksCount: this.projectTasksMap()[pId]?.length || p.tasksCount || 0 }
+                            ? { ...p, tasksCount: updatedLength }
                             : p
                     )
                 );
@@ -396,19 +414,23 @@ export class UserActivityComponent implements OnInit {
 
     deleteAgileTask(taskId: string, event: MouseEvent): void {
         event.stopPropagation();
-        const pId = this.currentProject()?.id || '1';
+        const pId = String(this.currentProject()?.id || '1');
+        let remainingLength = 0;
+
         this.projectTasksMap.update((map) => {
             const currentList = map[pId] || [];
+            const nextList = currentList.filter((t) => t.id !== taskId);
+            remainingLength = nextList.length;
             return {
                 ...map,
-                [pId]: currentList.filter((t) => t.id !== taskId),
+                [pId]: nextList,
             };
         });
 
         this.projectOptions.update((list) =>
             list.map((p) =>
-                String(p.id) === String(pId)
-                    ? { ...p, tasksCount: (this.projectTasksMap()[pId] || []).length }
+                String(p.id) === pId
+                    ? { ...p, tasksCount: remainingLength }
                     : p
             )
         );

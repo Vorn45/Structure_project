@@ -251,6 +251,8 @@ export class AddPlanDialogComponent {
             if (found) {
                 this.selectedProjectCode = found.code;
                 this.selectedProjectName = found.name;
+            } else if (data?.selectedProjectName) {
+                this.selectedProjectName = data.selectedProjectName;
             }
         }
     }

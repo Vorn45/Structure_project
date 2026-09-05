@@ -20,20 +20,20 @@ export class QueryActivityDto {
 }
 
 export class CreateRoadmapSegmentDto {
-    @IsInt()
-    @Min(1)
-    @Max(52)
-    iteration: 1 | 2 | 3;
+    @IsOptional()
+    iteration?: number;
 
-    @IsInt()
-    @Min(1)
-    @Max(52)
-    startWeek: number;
+    @IsOptional()
+    startWeek?: number;
 
-    @IsInt()
-    @Min(1)
-    @Max(52)
-    durationWeeks: number;
+    @IsOptional()
+    start_week?: number;
+
+    @IsOptional()
+    durationWeeks?: number;
+
+    @IsOptional()
+    duration_weeks?: number;
 
     @IsOptional()
     @IsString()
@@ -45,9 +45,13 @@ export class CreateRoadmapTaskDto {
     @IsString()
     id?: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    project_id: string;
+    project_id?: string;
+
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 
     @IsNotEmpty()
     @IsString()
@@ -78,9 +82,13 @@ export class CreateRoadmapProjectDto {
 }
 
 export class SelectRoadmapProjectDto {
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    project_id: string;
+    project_id?: string;
+
+    @IsOptional()
+    @IsString()
+    projectId?: string;
 }
 
 export class CreateActivityDto {

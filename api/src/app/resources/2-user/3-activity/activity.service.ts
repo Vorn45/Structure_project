@@ -198,155 +198,155 @@ export class ActivityService {
                 CREATE SCHEMA IF NOT EXISTS "user";
                 CREATE TABLE IF NOT EXISTS "user"."activity_store" (
                     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                    "key" VARCHAR(255) NOT NULL DEFAULT 'default_activities_store',
-                    "projects" JSONB NULL DEFAULT '[]'::jsonb,
-                    "tasks_map" JSONB NULL DEFAULT '{}'::jsonb,
-                    "activities" JSONB NULL DEFAULT '[]'::jsonb,
-                    "selected_project_ids" JSONB NULL DEFAULT '{}'::jsonb,
-                    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-                    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-                );
-                CREATE UNIQUE INDEX IF NOT EXISTS "IDX_activity_store_key" ON "user"."activity_store" ("key");
-            `);
-        } catch (e: any) {
-            // Table or index already exists
-        }
-    }
-
-    private async initDbStore(): Promise<void> {
-        await this.ensureTableExists();
-        try {
-            const dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
-            if (dbStore) {
-                if (dbStore.projects && typeof dbStore.projects === 'object') {
-                    this.userProjectsMap = { ...this.userProjectsMap, ...dbStore.projects };
-                }
-                if (dbStore.tasks_map && typeof dbStore.tasks_map === 'object') {
-                    this.userTasksMap = { ...this.userTasksMap, ...dbStore.tasks_map };
-                }
-                if (dbStore.activities && typeof dbStore.activities === 'object') {
-                    this.userActivitiesMap = { ...this.userActivitiesMap, ...dbStore.activities };
-                }
-                if (dbStore.selected_project_ids && typeof dbStore.selected_project_ids === 'object') {
-                    this.userSelectedProjectMap = { ...this.userSelectedProjectMap, ...dbStore.selected_project_ids };
-                }
-            } else {
-                this.ensureUserData('1');
-                this.ensureUserData('2');
-                await this.saveToDb();
+                        "key" VARCHAR(255) NOT NULL DEFAULT 'default_activities_store',
+                        "projects" JSONB NULL DEFAULT '[]'::jsonb,
+                        "tasks_map" JSONB NULL DEFAULT '{}'::jsonb,
+                        "activities" JSONB NULL DEFAULT '[]'::jsonb,
+                        "selected_project_ids" JSONB NULL DEFAULT '{}'::jsonb,
+                        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+                    );
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IDX_activity_store_key" ON "user"."activity_store" ("key");
+                `);
+            } catch (e: any) {
+                // Table or index already exists
             }
-            this.isDbLoaded = true;
-        } catch (err) {
-            console.warn('Could not load activity store from DB, using memory/disk store:', err);
         }
-    }
 
-    private async ensureLoaded(): Promise<void> {
-        if (!this.isDbLoaded) {
-            await this.initDbStore();
-        }
-    }
-
-    private async saveStore(): Promise<void> {
-        this.saveToDisk();
-        await this.saveToDb();
-    }
-
-    private async saveToDb(): Promise<void> {
-        try {
-            let dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
-            if (!dbStore) {
-                dbStore = this._activityStoreRepo.create({
-                    key: 'default_activities_store',
-                    projects: this.userProjectsMap,
-                    tasks_map: this.userTasksMap,
-                    activities: this.userActivitiesMap,
-                    selected_project_ids: this.userSelectedProjectMap,
-                });
-            } else {
-                dbStore.projects = this.userProjectsMap;
-                dbStore.tasks_map = this.userTasksMap;
-                dbStore.activities = this.userActivitiesMap;
-                dbStore.selected_project_ids = this.userSelectedProjectMap;
+        private async initDbStore(): Promise<void> {
+            await this.ensureTableExists();
+            try {
+                const dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
+                if (dbStore) {
+                    if (dbStore.projects && typeof dbStore.projects === 'object') {
+                        this.userProjectsMap = { ...this.userProjectsMap, ...dbStore.projects };
+                    }
+                    if (dbStore.tasks_map && typeof dbStore.tasks_map === 'object') {
+                        this.userTasksMap = { ...this.userTasksMap, ...dbStore.tasks_map };
+                    }
+                    if (dbStore.activities && typeof dbStore.activities === 'object') {
+                        this.userActivitiesMap = { ...this.userActivitiesMap, ...dbStore.activities };
+                    }
+                    if (dbStore.selected_project_ids && typeof dbStore.selected_project_ids === 'object') {
+                        this.userSelectedProjectMap = { ...this.userSelectedProjectMap, ...dbStore.selected_project_ids };
+                    }
+                } else {
+                    this.ensureUserData('1');
+                    this.ensureUserData('2');
+                    await this.saveToDb();
+                }
+                this.isDbLoaded = true;
+            } catch (err) {
+                console.warn('Could not load activity store from DB, using memory/disk store:', err);
             }
-            await this._activityStoreRepo.save(dbStore);
-        } catch (err) {
-            console.error('Failed to save activity store to DB:', err);
         }
-    }
 
-    private ensureUserData(userId: string | number) {
-        const uId = String(userId || '1');
-        let needsSave = false;
-
-        if (!this.userProjectsMap[uId] || !Array.isArray(this.userProjectsMap[uId]) || this.userProjectsMap[uId].length === 0) {
-            this.userProjectsMap[uId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
-            needsSave = true;
+        private async ensureLoaded(): Promise<void> {
+            if (!this.isDbLoaded) {
+                await this.initDbStore();
+            }
         }
-        if (!this.userTasksMap[uId] || Object.keys(this.userTasksMap[uId]).length === 0) {
-            this.userTasksMap[uId] = {
-                '1': JSON.parse(JSON.stringify(DEFAULT_PMS_TASKS)),
-                '2': JSON.parse(JSON.stringify(DEFAULT_WMS_TASKS)),
-                '3': JSON.parse(JSON.stringify(DEFAULT_EGOV_TASKS)),
+
+        private async saveStore(): Promise<void> {
+            this.saveToDisk();
+            await this.saveToDb();
+        }
+
+        private async saveToDb(): Promise<void> {
+            try {
+                let dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
+                if (!dbStore) {
+                    dbStore = this._activityStoreRepo.create({
+                        key: 'default_activities_store',
+                        projects: this.userProjectsMap,
+                        tasks_map: this.userTasksMap,
+                        activities: this.userActivitiesMap,
+                        selected_project_ids: this.userSelectedProjectMap,
+                    });
+                } else {
+                    dbStore.projects = this.userProjectsMap;
+                    dbStore.tasks_map = this.userTasksMap;
+                    dbStore.activities = this.userActivitiesMap;
+                    dbStore.selected_project_ids = this.userSelectedProjectMap;
+                }
+                await this._activityStoreRepo.save(dbStore);
+            } catch (err) {
+                console.error('Failed to save activity store to DB:', err);
+            }
+        }
+
+        private ensureUserData(userId: string | number) {
+            const uId = String(userId || '1');
+            let needsSave = false;
+
+            if (!this.userProjectsMap[uId] || !Array.isArray(this.userProjectsMap[uId]) || this.userProjectsMap[uId].length === 0) {
+                this.userProjectsMap[uId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
+                needsSave = true;
+            }
+            if (!this.userTasksMap[uId] || Object.keys(this.userTasksMap[uId]).length === 0) {
+                this.userTasksMap[uId] = {
+                    '1': JSON.parse(JSON.stringify(DEFAULT_PMS_TASKS)),
+                    '2': JSON.parse(JSON.stringify(DEFAULT_WMS_TASKS)),
+                    '3': JSON.parse(JSON.stringify(DEFAULT_EGOV_TASKS)),
+                };
+                needsSave = true;
+            }
+            if (!this.userActivitiesMap[uId] || !Array.isArray(this.userActivitiesMap[uId]) || this.userActivitiesMap[uId].length === 0) {
+                this.userActivitiesMap[uId] = JSON.parse(JSON.stringify(ACTIVITIES));
+                needsSave = true;
+            }
+            if (!this.userSelectedProjectMap[uId]) {
+                this.userSelectedProjectMap[uId] = '1';
+                needsSave = true;
+            }
+
+            if (needsSave) {
+                this.saveStore().catch(() => {});
+            }
+        }
+
+        async getActivities(user: UserPayload, query: QueryActivityDto) {
+            await this.ensureLoaded();
+            const uId = String(user?.id || 1);
+            this.ensureUserData(uId);
+
+            let list = [...(this.userActivitiesMap[uId] || [])];
+
+            if (query.type && query.type !== 'all') {
+                list = list.filter((a) => a.type === query.type);
+            }
+
+            const limit = query.limit ? parseInt(query.limit, 10) : 20;
+            const offset = query.offset ? parseInt(query.offset, 10) : 0;
+            const paginated = list.slice(offset, offset + limit);
+
+            return {
+                status_code: 200,
+                message: 'Activities retrieved successfully',
+                data: {
+                    results: paginated,
+                    total: list.length,
+                    limit,
+                    offset,
+                },
             };
-            needsSave = true;
-        }
-        if (!this.userActivitiesMap[uId] || !Array.isArray(this.userActivitiesMap[uId]) || this.userActivitiesMap[uId].length === 0) {
-            this.userActivitiesMap[uId] = JSON.parse(JSON.stringify(ACTIVITIES));
-            needsSave = true;
-        }
-        if (!this.userSelectedProjectMap[uId]) {
-            this.userSelectedProjectMap[uId] = '1';
-            needsSave = true;
         }
 
-        if (needsSave) {
-            this.saveStore().catch(() => {});
-        }
-    }
+        async createActivity(user: UserPayload, dto: CreateActivityDto) {
+            await this.ensureLoaded();
+            const uId = String(user?.id || 1);
+            this.ensureUserData(uId);
 
-    async getActivities(user: UserPayload, query: QueryActivityDto) {
-        await this.ensureLoaded();
-        const uId = String(user?.id || 1);
-        this.ensureUserData(uId);
-
-        let list = [...(this.userActivitiesMap[uId] || [])];
-
-        if (query.type && query.type !== 'all') {
-            list = list.filter((a) => a.type === query.type);
-        }
-
-        const limit = query.limit ? parseInt(query.limit, 10) : 20;
-        const offset = query.offset ? parseInt(query.offset, 10) : 0;
-        const paginated = list.slice(offset, offset + limit);
-
-        return {
-            status_code: 200,
-            message: 'Activities retrieved successfully',
-            data: {
-                results: paginated,
-                total: list.length,
-                limit,
-                offset,
-            },
-        };
-    }
-
-    async createActivity(user: UserPayload, dto: CreateActivityDto) {
-        await this.ensureLoaded();
-        const uId = String(user?.id || 1);
-        this.ensureUserData(uId);
-
-        const item: ActivityItem = {
-            id: Date.now(),
-            action: dto.action,
-            title: dto.title,
-            description: dto.description || '',
-            type: dto.type || 'task',
-            icon: dto.icon || 'mdi:check-circle',
-            actor: {
-                id: Number(uId),
-                name: user?.name_en || user?.name_kh || 'Current User',
+            const item: ActivityItem = {
+                id: Date.now(),
+                action: dto.action,
+                title: dto.title,
+                description: dto.description || '',
+                type: dto.type || 'task',
+                icon: dto.icon || 'mdi:check-circle',
+                actor: {
+                    id: Number(uId),
+                    name: user?.name_en || user?.name_kh || 'Current User',
                 avatar: null,
             },
             created_at: new Date().toISOString(),
@@ -386,7 +386,8 @@ export class ActivityService {
         const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
-        this.userSelectedProjectMap[uId] = String(dto.project_id);
+        const targetId = String(dto.project_id || dto.projectId || '1');
+        this.userSelectedProjectMap[uId] = targetId;
         await this.saveStore();
 
         return {
@@ -420,6 +421,8 @@ export class ActivityService {
         if (!this.userProjectsMap[uId]) {
             this.userProjectsMap[uId] = [];
         }
+        // Avoid duplicate project with same id
+        this.userProjectsMap[uId] = this.userProjectsMap[uId].filter((p) => String(p.id) !== String(newProject.id));
         this.userProjectsMap[uId].unshift(newProject);
 
         if (!this.userTasksMap[uId]) {
@@ -445,11 +448,24 @@ export class ActivityService {
         const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
-        const projectId = String(dto.project_id);
+        const projectId = String(dto.project_id || dto.projectId || '1');
+        const rawSegments = Array.isArray(dto.segments) ? dto.segments : [];
+        const sanitizedSegments: AgilePlanSegment[] = rawSegments.map((s: any) => {
+            const iter = Number(s.iteration) || 1;
+            const start = Number(s.startWeek !== undefined ? s.startWeek : s.start_week) || 14;
+            const duration = Number(s.durationWeeks !== undefined ? s.durationWeeks : s.duration_weeks) || 1;
+            return {
+                iteration: (iter === 2 ? 2 : iter === 3 ? 3 : 1) as 1 | 2 | 3,
+                startWeek: start,
+                durationWeeks: duration,
+                label: s.label || (duration > 1 ? `${duration}W` : undefined),
+            };
+        });
+
         const newTask: AgilePlanTask = {
             id: dto.id || `task-${Date.now()}`,
             name: dto.name,
-            segments: dto.segments as AgilePlanSegment[],
+            segments: sanitizedSegments,
         };
 
         if (!this.userTasksMap[uId]) {
@@ -459,6 +475,8 @@ export class ActivityService {
             this.userTasksMap[uId][projectId] = [];
         }
 
+        // Avoid duplicate task with same id
+        this.userTasksMap[uId][projectId] = this.userTasksMap[uId][projectId].filter((t) => t.id !== newTask.id);
         this.userTasksMap[uId][projectId].unshift(newTask);
 
         const proj = this.userProjectsMap[uId]?.find((p) => String(p.id) === projectId);
