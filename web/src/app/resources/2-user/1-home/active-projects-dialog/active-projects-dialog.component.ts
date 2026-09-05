@@ -190,7 +190,7 @@ export class ActiveProjectsDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) public data: any,
         private readonly _router: Router,
         private readonly _homeService: UserHomeService,
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this._homeService.getActiveProjects().subscribe({

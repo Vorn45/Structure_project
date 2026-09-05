@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, effect, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -8,8 +8,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
+import * as echarts from 'echarts';
+import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
+import { CreateProjectDialogComponent } from '../1-home/create-project-dialog/create-project-dialog.component';
+import { CreateMeetingDialogComponent } from '../1-home/create-meeting-dialog/create-meeting-dialog.component';
 import { AddPlanDialogComponent } from '../3-activity/add-plan-dialog.component';
+import { ProfileViewComponent } from 'app/resources/1-account/2-profile/view/component';
 import { ProjectPlanItem, UserPlanService } from './plan.service';
 
 export interface AgilePlanSegment {
@@ -83,11 +88,11 @@ export interface ProjectActivityItem {
 
 export interface ProjectPhaseItem {
     id: string;
-    number: number;
+    number?: number;
     title: string;
     quarter: string;
     status: 'completed' | 'in_progress' | 'planned';
-    progress: number;
+    progress?: number;
     startDate: string;
     endDate: string;
     tasksCount: number;
@@ -101,15 +106,32 @@ export interface IndividualTaskItem {
     type?: 'bug' | 'feature' | 'improvement';
     status: 'review' | 'done' | 'confirmed' | 'reopened' | 'new' | 'in_progress' | 'unconfirmed' | string;
     priority: 'urgent' | 'high' | 'medium' | 'low';
-    time_ago: string;
+    due_date?: string;
+    due_days_left?: number;
+    created_at?: string;
+    time_ago?: string;
     comments_count: number;
     attachments_count: number;
+    reporter?: TaskMember;
     assignee: TaskMember;
     members: TaskMember[];
-    progress: number;
+    progress?: number;
     subtasks: ProjectSubtaskItem[];
     links: TaskLink[];
     documents: TaskDocument[];
+}
+
+export interface TaskChatMessageItem {
+    id: string;
+    sender_name: string;
+    sender_avatar?: string | null;
+    sender_initial?: string;
+    sender_bg?: string;
+    text: string;
+    time: string;
+    is_self: boolean;
+    is_system?: boolean;
+    attachments?: { name: string; size: string; type: string; url?: string; isImage?: boolean }[];
 }
 
 export interface ExtendedProjectItem extends Omit<ProjectPlanItem, 'members'> {
@@ -119,6 +141,12 @@ export interface ExtendedProjectItem extends Omit<ProjectPlanItem, 'members'> {
     activities?: ProjectActivityItem[];
     phases?: ProjectPhaseItem[];
     agileTasks?: AgilePlanTask[];
+    links?: TaskLink[];
+    priority?: 'urgent' | 'high' | 'medium' | 'low' | string;
+    category?: string;
+    budget_allocated?: number;
+    budget_spent?: number;
+    team_lead?: TaskMember;
 }
 
 export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [
@@ -315,6 +343,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'គ្រប់គ្រងរចនាសម្ព័ន្ធស្ថាប័ន និងការបែងចែកនាយកដ្ឋានក្នុងប្រព័ន្ធ PMS។',
                 priority: 'high',
                 status: 'review',
+                due_date: '2026-09-10',
+                created_at: '2026-08-25',
                 time_ago: '6 ថ្ងៃមុន',
                 comments_count: 1,
                 attachments_count: 2,
@@ -343,6 +373,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'មុខងារអូសទម្លាក់ Folder គម្រោង និងឯកសារដើម្បីផ្លាស់ប្តូរលំដាប់ដោយរលូន។',
                 priority: 'high',
                 status: 'done',
+                due_date: '2026-09-08',
+                created_at: '2026-08-22',
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 0,
                 attachments_count: 2,
@@ -371,6 +403,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'កែសម្រួលបញ្ហាមិនអាច Scroll មើលឯកសារ PDF នៅក្នុង Folder Preview Viewer។',
                 priority: 'urgent',
                 status: 'confirmed',
+                due_date: '2026-09-01',
+                created_at: '2026-08-20',
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 5,
                 attachments_count: 1,
@@ -397,6 +431,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'រូបភាព Cover ក្នុងផ្ទាំង Profile ផ្ទាល់ខ្លួនមិនបង្ហាញនៅពេល User ចូលប្រើដំបូង។',
                 priority: 'urgent',
                 status: 'reopened',
+                due_date: '2026-08-30',
+                created_at: '2026-08-18',
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 3,
                 attachments_count: 1,
@@ -421,6 +457,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'កែលម្អលើទំព័រ Security Settings ដូចជា 2FA, Session Management, និង Password Expiry។',
                 priority: 'high',
                 status: 'new',
+                due_date: '2026-08-29',
+                created_at: '2026-08-16',
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 4,
                 attachments_count: 1,
@@ -447,6 +485,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'ផ្ទាំងប្រៀបធៀបវឌ្ឍនភាពការងាររវាងខែមុន និងខែបច្ចុប្បន្នរបស់សមាជិកម្នាក់ៗ។',
                 priority: 'medium',
                 status: 'in_progress',
+                due_date: '2026-09-15',
+                created_at: '2026-08-28',
                 time_ago: '2 សប្តាហ៍មុន',
                 comments_count: 0,
                 attachments_count: 1,
@@ -474,6 +514,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'ទំព័ររបាយការណ៍សរុបវឌ្ឍនភាពបុគ្គលិក ម៉ោងបំពេញការងារ និងភាគរយសម្រេច។',
                 priority: 'medium',
                 status: 'done',
+                due_date: '2026-09-06',
+                created_at: '2026-08-15',
                 time_ago: '2 សប្តាហ៍មុន',
                 comments_count: 19,
                 attachments_count: 1,
@@ -501,6 +543,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 description: 'មុខងារប្តូរស្ថាប័នការងារ (Switch Organization) និងការចាកចេញពីស្ថាប័នដោយសុវត្ថិភាព។',
                 priority: 'low',
                 status: 'unconfirmed',
+                due_date: '2026-09-12',
+                created_at: '2026-08-14',
                 time_ago: '2 សប្តាហ៍មុន',
                 comments_count: 10,
                 attachments_count: 0,
@@ -663,7 +707,12 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
     ],
     templateUrl: './plan.component.html',
 })
-export class UserPlanComponent implements OnInit {
+export class UserPlanComponent implements OnInit, OnDestroy {
+    @ViewChild('taskDistributionChartRef') taskDistributionChartRef?: ElementRef<HTMLDivElement>;
+    @ViewChild('taskTrendChartRef') taskTrendChartRef?: ElementRef<HTMLDivElement>;
+    private _generalCharts: echarts.ECharts[] = [];
+    private _resizeListener?: () => void;
+
     loading = signal<boolean>(false);
     plans = signal<ExtendedProjectItem[]>(DEFAULT_INVITED_PROJECTS);
     searchQuery = signal<string>('');
@@ -705,7 +754,72 @@ export class UserPlanComponent implements OnInit {
         private readonly _router: Router,
         private readonly _matDialog: MatDialog,
         private readonly _dialogConfigService: DialogConfigService,
-    ) {}
+        private readonly _userService: UserService,
+    ) {
+        effect(() => {
+            const project = this.selectedProject();
+            const tab = this.projectNavTab();
+            if (project && tab === 'general') {
+                setTimeout(() => this.initGeneralCharts(), 80);
+            }
+        });
+    }
+
+    openCreateProjectModal(): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+        });
+        const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result?.created) {
+                const created = result.project;
+                if (created) {
+                    const newProj: ExtendedProjectItem = {
+                        id: String(created.id || `proj-${Date.now()}`),
+                        code: created.code || `PMS-${Math.floor(100 + Math.random() * 900)}`,
+                        name: created.name || result.name || 'គម្រោងថ្មី',
+                        description: created.description || '',
+                        status: created.status || result.status || 'active',
+                        priority: 'high',
+                        category: 'Development',
+                        budget_allocated: 50000,
+                        budget_spent: 0,
+                        total_tasks: 0,
+                        completed_tasks: 0,
+                        progress: 0,
+                        start_date: created.start_date || new Date().toISOString(),
+                        end_date: created.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
+                        team_lead: { id: 1, name: result.reporter || 'Project Lead', role: 'Leader' },
+                        members: (result.assignees || []).map((a: any, idx: number) => ({
+                            id: Number(a.id) || idx + 1,
+                            name: a.name,
+                            role: a.role || 'Member',
+                            initial: a.name ? a.name.charAt(0) : 'M',
+                            bgClass: 'bg-blue-600',
+                        })),
+                        tasks: [],
+                        phases: [],
+                        meetings: [],
+                        agileTasks: [...DEFAULT_AGILE_TASKS],
+                        links: [],
+                    };
+                    this.plans.set([newProj, ...this.plans()]);
+                    this.saveProjectChanges(newProj);
+                }
+                this.loadPlans();
+            }
+        });
+    }
+
+    openUserProfileDialog(user?: any): void {
+        const currentUser = this._userService.getUser();
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            data: user || currentUser,
+            roles: (user || currentUser)?.roles ?? [],
+            type: 'គណនី',
+        });
+        this._matDialog.open(ProfileViewComponent, dialogConfig);
+    }
 
     // Search input inside selected project tasks
     taskSearchQuery = signal<string>('');
@@ -718,17 +832,62 @@ export class UserPlanComponent implements OnInit {
     linkTypeFilter = signal<string>('all');
     copiedLinkId = signal<string | null>(null);
 
-    // Active Task for full modal / side detail view (showing members, links, documents)
+    // Active Task for full modal / side detail view (showing chat, subtasks, members, links, documents)
     activeTaskModal = signal<IndividualTaskItem | null>(null);
 
-    // Active Tab in Task Detail Modal: 'subtasks' | 'members' | 'links' | 'documents'
-    activeDetailTab = signal<'subtasks' | 'members' | 'links' | 'documents'>('subtasks');
+    // Active Tab in Task Detail Modal: 'chat' | 'subtasks' | 'members' | 'links' | 'documents'
+    activeDetailTab = signal<'chat' | 'subtasks' | 'members' | 'links' | 'documents'>('chat');
+
+    // Task Chat Room State
+    newChatMessageText = signal<string>('');
+    pendingChatAttachments = signal<{ name: string; size: string; type: string; url?: string; isImage?: boolean }[]>([]);
+    currentTaskChatMessages = signal<TaskChatMessageItem[]>([]);
+    private _taskChatMap: Map<string, TaskChatMessageItem[]> = new Map();
 
     // New item inputs
     newSubtaskTitle = signal<string>('');
     newLinkTitle = signal<string>('');
     newLinkUrl = signal<string>('');
     showAddLinkForm = signal<boolean>(false);
+
+    // Create Phase state
+    showCreatePhaseModal = signal<boolean>(false);
+    newPhaseTitle = signal<string>('');
+    newPhaseQuarter = signal<string>('ត្រីមាសទី ១ (Q1)');
+    newPhaseStartDate = signal<string>('01/10/2026');
+    newPhaseEndDate = signal<string>('31/12/2026');
+    newPhaseStatus = signal<'completed' | 'in_progress' | 'planned'>('planned');
+
+    // Create Meeting state
+    showCreateMeetingModal = signal<boolean>(false);
+    newMeetingTitle = signal<string>('');
+    newMeetingDescription = signal<string>('');
+    newMeetingPlatform = signal<'Google Meet' | 'Zoom' | 'Microsoft Teams' | 'Office'>('Google Meet');
+    newMeetingLink = signal<string>('https://meet.google.com/abc-defg-hij');
+    newMeetingDate = signal<string>('ថ្ងៃនេះ (Today)');
+    newMeetingTime = signal<string>('ម៉ោង ០២:០០ រសៀល - ០៣:០០ រសៀល');
+    newMeetingStatus = signal<'upcoming' | 'completed' | 'ongoing'>('upcoming');
+
+    // Create Member state
+    showCreateMemberModal = signal<boolean>(false);
+    newMemberName = signal<string>('');
+    newMemberRole = signal<string>('Frontend Developer');
+    newMemberEmail = signal<string>('');
+
+    // Create Link state
+    showCreateLinkModal = signal<boolean>(false);
+    newProjectLinkTitle = signal<string>('');
+    newProjectLinkUrl = signal<string>('');
+    newProjectLinkType = signal<'figma' | 'github' | 'doc' | 'external'>('figma');
+    newProjectLinkTaskCode = signal<string>('');
+
+    // Create Task state
+    showCreateTaskModal = signal<boolean>(false);
+    newTaskTitle = signal<string>('');
+    newTaskPriority = signal<'urgent' | 'high' | 'medium' | 'low'>('medium');
+    newTaskStatus = signal<string>('new');
+    newTaskDueDate = signal<string>('15/09/2026');
+    newTaskAssignee = signal<string>('');
 
     // Project counts computed
     projectCounts = computed(() => {
@@ -784,10 +943,10 @@ export class UserPlanComponent implements OnInit {
         return list;
     });
 
-    // All links flattened across all tasks for the selected project
+    // All links flattened across all tasks and project-level links for the selected project
     allProjectLinks = computed(() => {
         const proj = this.selectedProject();
-        if (!proj || !proj.tasks) return [];
+        if (!proj) return [];
         const q = this.linkSearchQuery().toLowerCase().trim();
         const filter = this.linkTypeFilter();
 
@@ -798,21 +957,44 @@ export class UserPlanComponent implements OnInit {
             type: 'figma' | 'github' | 'doc' | 'external';
             taskCode: string;
             taskTitle: string;
-            task: IndividualTaskItem;
+            task?: IndividualTaskItem;
         }[] = [];
 
-        for (const t of proj.tasks) {
-            if (t.links) {
-                for (const l of t.links) {
+        const seenIds = new Set<string>();
+
+        if (proj.links) {
+            for (const l of proj.links) {
+                if (!seenIds.has(l.id)) {
+                    seenIds.add(l.id);
                     list.push({
                         id: l.id,
                         title: l.title,
                         url: l.url,
                         type: l.type,
-                        taskCode: t.code,
-                        taskTitle: t.title,
-                        task: t,
+                        taskCode: `#${proj.code || 'PMS'}-001`,
+                        taskTitle: proj.name || 'ឯកសារគម្រោង',
                     });
+                }
+            }
+        }
+
+        if (proj.tasks) {
+            for (const t of proj.tasks) {
+                if (t.links) {
+                    for (const l of t.links) {
+                        if (!seenIds.has(l.id)) {
+                            seenIds.add(l.id);
+                            list.push({
+                                id: l.id,
+                                title: l.title,
+                                url: l.url,
+                                type: l.type,
+                                taskCode: t.code || `#${proj.code || 'PMS'}-001`,
+                                taskTitle: t.title || proj.name,
+                                task: t,
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -912,69 +1094,117 @@ export class UserPlanComponent implements OnInit {
         dialogRef.afterClosed().subscribe((result?: any) => {
             if (result) {
                 const newTask: AgilePlanTask = result.task || result;
-                if (!proj.agileTasks) {
-                    proj.agileTasks = [...DEFAULT_AGILE_TASKS];
+                const targetProj =
+                    (result.projectId && this.plans().find((p) => p.id === String(result.projectId))) || proj;
+                if (!targetProj.agileTasks) {
+                    targetProj.agileTasks = [...DEFAULT_AGILE_TASKS];
                 }
-                proj.agileTasks = [newTask, ...proj.agileTasks];
+                targetProj.agileTasks = [newTask, ...targetProj.agileTasks];
+                this.saveProjectChanges(targetProj);
             }
         });
     }
 
-    deleteAgileTask(proj: ExtendedProjectItem, taskId: string, event: Event): void {
-        event.stopPropagation();
-        if (!proj.agileTasks) {
-            proj.agileTasks = [...DEFAULT_AGILE_TASKS];
-        }
-        proj.agileTasks = proj.agileTasks.filter((t) => t.id !== taskId);
-    }
+            deleteAgileTask(proj: ExtendedProjectItem, taskId: string, event: Event): void {
+                event.stopPropagation();
+                if (!proj.agileTasks) {
+                    proj.agileTasks = [...DEFAULT_AGILE_TASKS];
+                }
+                proj.agileTasks = proj.agileTasks.filter((t) => t.id !== taskId);
+                this.saveProjectChanges(proj);
+            }
 
-    ngOnInit(): void {
-        this.loadPlans();
-    }
+            ngOnInit(): void {
+                this.loadPlans();
+            }
 
-    loadPlans(): void {
-        this.loading.set(true);
+            loadPlans(): void {
+                this.loading.set(true);
 
-        this._planService
-            .getPlans({
-                search: this.searchQuery() || undefined,
-                status: this.statusFilter() !== 'all' ? this.statusFilter() : undefined,
-            })
-            .subscribe({
-                next: (res) => {
-                    if (res?.data?.results?.length) {
-                        const items: ExtendedProjectItem[] = res.data.results.map((ap) => ({
-                            id: String(ap.id),
-                            code: ap.code,
-                            name: ap.name,
-                            description: ap.description,
-                            status: (ap.status as any) || 'active',
-                            priority: 'high',
-                            category: 'Development',
-                            budget_allocated: 50000,
-                            budget_spent: 20000,
-                            total_tasks: ap.total_tasks || 0,
-                            completed_tasks: ap.completed_tasks || 0,
-                            progress: ap.progress || 0,
-                            start_date: ap.start_date || new Date().toISOString(),
-                            end_date: ap.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
-                            team_lead: { id: 1, name: 'Project Lead', role: 'Leader' },
-                            members: ap.members || [],
-                            tasks: [],
-                            agileTasks: [...DEFAULT_AGILE_TASKS],
-                        }));
-                        this.plans.set(items);
-                    } else {
-                        this.plans.set(DEFAULT_INVITED_PROJECTS);
-                    }
-                    this.loading.set(false);
-                },
-                error: () => {
-                    this.plans.set(DEFAULT_INVITED_PROJECTS);
-                    this.loading.set(false);
-                },
-            });
-    }
+                this._planService
+                    .getPlans({
+                        search: this.searchQuery() || undefined,
+                        status: this.statusFilter() !== 'all' ? this.statusFilter() : undefined,
+                    })
+                    .subscribe({
+                        next: (res) => {
+                            if (res?.data?.results?.length) {
+                                const items: ExtendedProjectItem[] = res.data.results.map((ap) => {
+                                    const existing = DEFAULT_INVITED_PROJECTS.find(
+                                        (p) => p.id === String(ap.id) || p.code === ap.code || p.name === ap.name
+                                    );
+                                    return {
+                                        id: String(ap.id),
+                                        code: ap.code,
+                                        name: ap.name,
+                                        description: ap.description || existing?.description || '',
+                                        status: (ap.status as any) || existing?.status || 'active',
+                                        priority: (ap as any).priority || existing?.priority || 'high',
+                                        category: (ap as any).category || existing?.category || 'Development',
+                                        budget_allocated: (ap as any).budget_allocated || existing?.budget_allocated || 50000,
+                                        budget_spent: (ap as any).budget_spent || existing?.budget_spent || 20000,
+                                        total_tasks: ap.total_tasks || existing?.total_tasks || 0,
+                                        completed_tasks: ap.completed_tasks || existing?.completed_tasks || 0,
+                                        progress: ap.progress || existing?.progress || 0,
+                                        start_date: ap.start_date || existing?.start_date || new Date().toISOString(),
+                                        end_date: ap.end_date || existing?.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
+                                        team_lead: (ap as any).team_lead || existing?.team_lead || { id: 1, name: 'Project Lead', role: 'Leader' },
+                                        members: (ap as any).members?.length ? (ap as any).members : (existing?.members || []),
+                                        tasks: (ap as any).tasks?.length ? (ap as any).tasks : (existing?.tasks || []),
+                                        phases: (ap as any).phases?.length ? (ap as any).phases : (existing?.phases || []),
+                                        meetings: (ap as any).meetings?.length ? (ap as any).meetings : (existing?.meetings || []),
+                                        agileTasks: (ap as any).agileTasks?.length ? (ap as any).agileTasks : (existing?.agileTasks || [...DEFAULT_AGILE_TASKS]),
+                                        links: (ap as any).links?.length ? (ap as any).links : (existing?.links || []),
+                                    };
+                                });
+                                this.plans.set(items);
+                            } else {
+                                this.plans.set(DEFAULT_INVITED_PROJECTS);
+                            }
+                            this.loading.set(false);
+                        },
+                        error: () => {
+                            this.plans.set(DEFAULT_INVITED_PROJECTS);
+                            this.loading.set(false);
+                        },
+                    });
+            }
+
+            saveProjectChanges(proj?: ExtendedProjectItem | null): void {
+                const target = proj || this.selectedProject();
+                if (!target) return;
+
+                const updated = { ...target };
+                this.selectedProject.set(updated);
+                this.plans.update((list) => list.map((p) => (p.id === updated.id ? updated : p)));
+
+                this._planService
+                    .updatePlan(target.id, {
+                        name: target.name,
+                        code: target.code,
+                        description: target.description,
+                        status: target.status as any,
+                        progress: target.progress,
+                        start_date: target.start_date,
+                        end_date: target.end_date,
+                        total_tasks: target.tasks?.length || target.total_tasks,
+                        completed_tasks:
+                            target.tasks?.filter((t) => t.status === 'done' || t.status === 'completed').length ||
+                            target.completed_tasks,
+                        members: target.members,
+                        ...({
+                            tasks: target.tasks,
+                            phases: target.phases,
+                            meetings: target.meetings,
+                            agileTasks: target.agileTasks,
+                            links: target.links,
+                        } as any),
+                    })
+                    .subscribe({
+                        next: () => {},
+                        error: () => {},
+                    });
+            }
 
     onSearchChange(): void {
         const q = this.searchQuery().toLowerCase().trim();
@@ -999,15 +1229,126 @@ export class UserPlanComponent implements OnInit {
         this.activeTaskModal.set(null);
     }
 
+    // Open task detail & chat modal for selected project task
     openTaskModal(task: IndividualTaskItem): void {
         this.activeTaskModal.set(task);
-        this.activeDetailTab.set('subtasks');
+        this.activeDetailTab.set('chat');
         this.showAddLinkForm.set(false);
+        this.loadTaskChat(task);
     }
 
     closeTaskModal(): void {
         this.activeTaskModal.set(null);
         this.showAddLinkForm.set(false);
+        this.pendingChatAttachments.set([]);
+        this.newChatMessageText.set('');
+    }
+
+    loadTaskChat(task: IndividualTaskItem): void {
+        if (!this._taskChatMap.has(task.id)) {
+            const initialChats: TaskChatMessageItem[] = [
+                {
+                    id: `msg-${Date.now()}-1`,
+                    sender_name: 'ប្រព័ន្ធ (System)',
+                    text: `កិច្ចការ ${task.code} ត្រូវបានបង្កើតឡើងកាលពី ${task.time_ago || 'ថ្មីៗ'}`,
+                    time: task.time_ago || 'ថ្មីៗ',
+                    is_self: false,
+                    is_system: true,
+                },
+                {
+                    id: `msg-${Date.now()}-2`,
+                    sender_name: 'សុខ សុភា',
+                    sender_initial: 'S',
+                    sender_bg: 'bg-blue-600',
+                    text: `សួស្តីក្រុមការងារ! សូមពិនិត្យមើលព័ត៌មានលម្អិត និងកិច្ចការរងសម្រាប់ ${task.title} នេះផង។`,
+                    time: '១០ នាទីមុន',
+                    is_self: false,
+                    is_system: false,
+                },
+                {
+                    id: `msg-${Date.now()}-3`,
+                    sender_name: 'ចេង ច័ន្ទបញ្ញា',
+                    sender_initial: 'C',
+                    sender_bg: 'bg-blue-600',
+                    text: 'បានទទួលហើយបង! ខ្ញុំកំពុងត្រៀមអនុវត្ត និងធ្វើតេស្តតាមដំណាក់កាល។',
+                    time: '៥ នាទីមុន',
+                    is_self: false,
+                    is_system: false,
+                },
+            ];
+
+            if (task.code === '#PMS-513') {
+                initialChats.push({
+                    id: `msg-${Date.now()}-4`,
+                    sender_name: 'សុខ សុភា',
+                    sender_initial: 'S',
+                    sender_bg: 'bg-blue-600',
+                    text: 'សូមយកចិត្តទុកដាក់លើ Flow Clear Active Tokens and Cookies ពេល User Logout ដើម្បីធានាសុវត្ថិភាពទិន្នន័យ។',
+                    time: '៣ នាទីមុន',
+                    is_self: false,
+                    is_system: false,
+                });
+            }
+
+            this._taskChatMap.set(task.id, initialChats);
+        }
+
+        this.currentTaskChatMessages.set([...(this._taskChatMap.get(task.id) || [])]);
+    }
+
+    sendTaskChatMessage(task: IndividualTaskItem): void {
+        const text = this.newChatMessageText().trim();
+        const pendingAtts = [...this.pendingChatAttachments()];
+
+        if (!text && pendingAtts.length === 0) return;
+
+        const newMsg: TaskChatMessageItem = {
+            id: `msg-${Date.now()}`,
+            sender_name: 'អ្នក (ខ្ញុំ)',
+            sender_initial: 'ME',
+            sender_bg: 'bg-blue-600',
+            text: text,
+            time: 'ទើបតែផ្ញើ (Just now)',
+            is_self: true,
+            is_system: false,
+            attachments: pendingAtts.length > 0 ? pendingAtts : undefined,
+        };
+
+        const currentList = this._taskChatMap.get(task.id) || [];
+        const updatedList = [...currentList, newMsg];
+        this._taskChatMap.set(task.id, updatedList);
+        this.currentTaskChatMessages.set(updatedList);
+
+        task.comments_count = updatedList.filter((m) => !m.is_system).length;
+
+        this.newChatMessageText.set('');
+        this.pendingChatAttachments.set([]);
+    }
+
+    onChatFileSelected(event: Event, task: IndividualTaskItem): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0) return;
+
+        const files = Array.from(input.files);
+        const newAtts = files.map((f) => {
+            const isImage = f.type.startsWith('image/');
+            return {
+                name: f.name,
+                size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+                type: isImage ? 'image' : f.name.endsWith('.pdf') ? 'pdf' : f.name.endsWith('.xlsx') ? 'sheet' : 'doc',
+                url: isImage ? URL.createObjectURL(f) : undefined,
+                isImage: isImage,
+            };
+        });
+
+        this.pendingChatAttachments.set([...this.pendingChatAttachments(), ...newAtts]);
+        input.value = '';
+    }
+
+    removePendingChatAttachment(index: number): void {
+        const current = [...this.pendingChatAttachments()];
+        current.splice(index, 1);
+        this.pendingChatAttachments.set(current);
     }
 
     toggleSubtask(task: IndividualTaskItem, subtask: ProjectSubtaskItem): void {
@@ -1020,6 +1361,7 @@ export class UserPlanComponent implements OnInit {
         } else if (task.progress > 0) {
             task.status = 'in_progress';
         }
+        this.saveProjectChanges();
     }
 
     addSubtask(task: IndividualTaskItem): void {
@@ -1034,6 +1376,7 @@ export class UserPlanComponent implements OnInit {
         const total = task.subtasks.length;
         const done = task.subtasks.filter((s) => s.completed).length;
         task.progress = Math.round((done / total) * 100);
+        this.saveProjectChanges();
     }
 
     addLink(task: IndividualTaskItem): void {
@@ -1060,10 +1403,244 @@ export class UserPlanComponent implements OnInit {
         this.newLinkTitle.set('');
         this.newLinkUrl.set('');
         this.showAddLinkForm.set(false);
+        this.saveProjectChanges();
     }
 
     removeLink(task: IndividualTaskItem, linkId: string): void {
         task.links = task.links.filter((l) => l.id !== linkId);
+        this.saveProjectChanges();
+    }
+
+    openCreatePhaseModal(): void {
+        const proj = this.selectedProject();
+        const nextNum = (proj?.phases?.length || 0) + 1;
+        this.newPhaseTitle.set(`ដំណាក់កាលទី ${nextNum}៖ `);
+        this.newPhaseQuarter.set(`ត្រីមាសទី ${nextNum} (Q${nextNum})`);
+        this.newPhaseStartDate.set('01/10/2026');
+        this.newPhaseEndDate.set('31/12/2026');
+        this.newPhaseStatus.set('planned');
+        this.showCreatePhaseModal.set(true);
+    }
+
+    createPhase(): void {
+        const title = this.newPhaseTitle().trim();
+        const proj = this.selectedProject();
+        if (!title || !proj) return;
+        if (!proj.phases) proj.phases = [];
+        const newPhase: ProjectPhaseItem = {
+            id: `ph-${Date.now()}`,
+            title,
+            quarter: this.newPhaseQuarter() || 'ត្រីមាស',
+            startDate: this.newPhaseStartDate() || '01/10/2026',
+            endDate: this.newPhaseEndDate() || '31/12/2026',
+            tasksCount: 0,
+            status: this.newPhaseStatus(),
+        };
+        proj.phases.push(newPhase);
+        this.showCreatePhaseModal.set(false);
+        this.saveProjectChanges(proj);
+    }
+
+    deletePhase(phaseId: string, event: Event): void {
+        event.stopPropagation();
+        const proj = this.selectedProject();
+        if (!proj || !proj.phases) return;
+        proj.phases = proj.phases.filter((p) => p.id !== phaseId);
+        this.saveProjectChanges(proj);
+    }
+
+    openCreateMeetingModal(): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+        });
+        const dialogRef = this._matDialog.open(CreateMeetingDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.loadPlans();
+            }
+        });
+    }
+
+    createMeeting(): void {
+        const title = this.newMeetingTitle().trim();
+        const proj = this.selectedProject();
+        if (!title || !proj) return;
+        if (!proj.meetings) proj.meetings = [];
+        const newM: ProjectMeetingItem = {
+            id: `m-${Date.now()}`,
+            title,
+            description: this.newMeetingDescription().trim() || 'ការពិភាក្សា និងសម្របសម្រួលការងារគម្រោង',
+            date: this.newMeetingDate().trim() || 'ថ្ងៃនេះ',
+            time: this.newMeetingTime().trim() || 'ម៉ោង ០២:០០ រសៀល',
+            platform: this.newMeetingPlatform(),
+            link: this.newMeetingLink().trim() || 'https://meet.google.com',
+            status: this.newMeetingStatus(),
+            attendees: proj.members ? [...proj.members.slice(0, 3)] : [],
+        };
+        proj.meetings.unshift(newM);
+        this.showCreateMeetingModal.set(false);
+        this.saveProjectChanges(proj);
+    }
+
+    deleteMeeting(meetingId: string, event: Event): void {
+        event.stopPropagation();
+        const proj = this.selectedProject();
+        if (!proj || !proj.meetings) return;
+        proj.meetings = proj.meetings.filter((m) => m.id !== meetingId);
+        this.saveProjectChanges(proj);
+    }
+
+    openCreateMemberModal(): void {
+        this.newMemberName.set('');
+        this.newMemberRole.set('Frontend Developer');
+        this.newMemberEmail.set('');
+        this.showCreateMemberModal.set(true);
+    }
+
+    createMember(): void {
+        const name = this.newMemberName().trim();
+        const proj = this.selectedProject();
+        if (!name || !proj) return;
+        if (!proj.members) proj.members = [];
+        const newM: TaskMember = {
+            id: Date.now(),
+            name,
+            role: this.newMemberRole() || 'Developer',
+            email: this.newMemberEmail().trim() || undefined,
+            initial: name.charAt(0).toUpperCase(),
+            bgClass: 'bg-indigo-600',
+        };
+        proj.members.push(newM);
+        this.showCreateMemberModal.set(false);
+        this.saveProjectChanges(proj);
+    }
+
+    deleteMember(memberId: number, event: Event): void {
+        event.stopPropagation();
+        const proj = this.selectedProject();
+        if (!proj || !proj.members) return;
+        proj.members = proj.members.filter((m) => m.id !== memberId);
+        this.saveProjectChanges(proj);
+    }
+
+    openCreateLinkModal(): void {
+        const proj = this.selectedProject();
+        this.newProjectLinkTitle.set('');
+        this.newProjectLinkUrl.set('');
+        this.newProjectLinkType.set('figma');
+        this.newProjectLinkTaskCode.set(proj ? `#${proj.code}-001` : '#PMS-001');
+        this.showCreateLinkModal.set(true);
+    }
+
+    createProjectLink(): void {
+        const title = this.newProjectLinkTitle().trim();
+        let url = this.newProjectLinkUrl().trim();
+        const proj = this.selectedProject();
+        if (!title || !proj) return;
+
+        if (!url) {
+            const type = this.newProjectLinkType();
+            if (type === 'figma') url = 'https://figma.com';
+            else if (type === 'github') url = 'https://github.com';
+            else if (type === 'doc') url = 'https://notion.so';
+            else url = 'https://google.com';
+        } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+
+        if (!proj.links) {
+            proj.links = [];
+        }
+
+        const newLink: TaskLink = {
+            id: `lnk-${Date.now()}`,
+            title,
+            url,
+            type: this.newProjectLinkType(),
+            createdAt: 'ថ្ងៃនេះ',
+        };
+
+        proj.links.unshift(newLink);
+
+        if (proj.tasks && proj.tasks.length > 0) {
+            const task = proj.tasks[0];
+            if (!task.links) task.links = [];
+            task.links.unshift(newLink);
+        }
+
+        this.showCreateLinkModal.set(false);
+        this.newProjectLinkTitle.set('');
+        this.newProjectLinkUrl.set('');
+        this.saveProjectChanges(proj);
+    }
+
+    deleteProjectLink(linkId: string, event: Event): void {
+        event.stopPropagation();
+        const proj = this.selectedProject();
+        if (!proj) return;
+        if (proj.links) {
+            proj.links = proj.links.filter((l) => l.id !== linkId);
+        }
+        if (proj.tasks) {
+            for (const t of proj.tasks) {
+                if (t.links) {
+                    t.links = t.links.filter((l) => l.id !== linkId);
+                }
+            }
+        }
+        this.saveProjectChanges(proj);
+    }
+
+    openCreateTaskModal(): void {
+        this.newTaskTitle.set('');
+        this.newTaskStatus.set('new');
+        this.newTaskPriority.set('medium');
+        this.newTaskDueDate.set('');
+        this.newTaskAssignee.set('');
+        this.showCreateTaskModal.set(true);
+    }
+
+    createProjectTask(): void {
+        const title = this.newTaskTitle().trim();
+        const proj = this.selectedProject();
+        if (!title || !proj) return;
+        if (!proj.tasks) proj.tasks = [];
+        const nextNum = proj.tasks.length + 101;
+        const newTask: IndividualTaskItem = {
+            id: `tsk-${Date.now()}`,
+            code: `#${proj.code}-${nextNum}`,
+            title,
+            description: title,
+            status: this.newTaskStatus(),
+            priority: this.newTaskPriority(),
+            due_date: this.newTaskDueDate(),
+            due_days_left: 7,
+            comments_count: 0,
+            attachments_count: 0,
+            reporter: {
+                id: 1,
+                name: 'អ្នកគ្រប់គ្រង (Admin)',
+                role: 'Project Manager',
+                initial: 'A',
+                bgClass: 'bg-blue-600',
+            },
+            assignee: {
+                id: 2,
+                name: this.newTaskAssignee() || 'សមាជិកក្រុម',
+                role: 'Assignee',
+                initial: 'S',
+                bgClass: 'bg-emerald-600',
+            },
+            subtasks: [
+                { id: 'st-1', title: 'រៀបចំលក្ខខណ្ឌតម្រូវការដំបូង', completed: false },
+            ],
+            members: proj.members ? [...proj.members.slice(0, 2)] : [],
+            links: [],
+            documents: [],
+        };
+        proj.tasks.unshift(newTask);
+        this.showCreateTaskModal.set(false);
+        this.saveProjectChanges(proj);
     }
 
     triggerUploadDocument(task: IndividualTaskItem): void {
@@ -1227,6 +1804,26 @@ export class UserPlanComponent implements OnInit {
         }
     }
 
+    getPriorityLabel(priority: string): string {
+        switch (priority) {
+            case 'urgent': return 'បន្ទាន់';
+            case 'high': return 'ខ្ពស់';
+            case 'low': return 'ទាប';
+            case 'medium':
+            default: return 'មធ្យម';
+        }
+    }
+
+    getPriorityClass(priority: string): string {
+        switch (priority) {
+            case 'urgent': return 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 border-rose-200 dark:border-rose-900';
+            case 'high': return 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 border-amber-200 dark:border-amber-900';
+            case 'low': return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+            case 'medium':
+            default: return 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 border-blue-200 dark:border-blue-900';
+        }
+    }
+
     getDocIcon(type: string): string {
         switch (type) {
             case 'pdf':
@@ -1307,5 +1904,276 @@ export class UserPlanComponent implements OnInit {
                 this.copiedLinkId.set(null);
             }
         }, 2000);
+    }
+
+    formatDate(dateStr?: string | null): string {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    getTaskDateToDo(dueDateStr?: string | null, createdDateStr?: string | null): string {
+        if (dueDateStr) {
+            return this.formatDate(dueDateStr);
+        }
+        if (createdDateStr) {
+            const d = new Date(createdDateStr);
+            d.setDate(d.getDate() + 7);
+            return this.formatDate(d.toISOString());
+        }
+        return '15/09/2026';
+    }
+
+    getDaysRemainingInfo(dueDateStr?: string | null): { text: string; isOverdue: boolean; isToday: boolean; isUpcoming: boolean } {
+        if (!dueDateStr) {
+            return { text: 'សល់ 7 ថ្ងៃ', isOverdue: false, isToday: false, isUpcoming: true };
+        }
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const dueDate = new Date(dueDateStr);
+        if (isNaN(dueDate.getTime())) {
+            return { text: 'កំណត់រួចរាល់', isOverdue: false, isToday: false, isUpcoming: true };
+        }
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) {
+            return { text: 'ហួសកាលកំណត់', isOverdue: true, isToday: false, isUpcoming: false };
+        } else if (diffDays === 0) {
+            return { text: 'ថ្ងៃនេះ (Today)', isOverdue: false, isToday: true, isUpcoming: false };
+        } else {
+            return { text: `សល់ ${diffDays} ថ្ងៃ`, isOverdue: false, isToday: false, isUpcoming: true };
+        }
+    }
+
+    updateTaskStatus(task: IndividualTaskItem, status: string): void {
+        task.status = status;
+        if (status === 'done') {
+            task.progress = 100;
+        }
+        this.initGeneralCharts();
+        this.saveProjectChanges();
+    }
+
+    getTaskCountByStatus(status: 'completed' | 'in_progress' | 'review' | 'new'): number {
+        const proj = this.selectedProject();
+        if (!proj || !proj.tasks || proj.tasks.length === 0) {
+            if (status === 'completed') return 4;
+            if (status === 'in_progress') return 2;
+            if (status === 'review') return 1;
+            if (status === 'new') return 1;
+            return 0;
+        }
+        if (status === 'completed') {
+            return proj.tasks.filter((t) => t.status === 'done' || t.status === 'confirmed').length;
+        }
+        if (status === 'in_progress') {
+            return proj.tasks.filter((t) => t.status === 'in_progress').length;
+        }
+        if (status === 'review') {
+            return proj.tasks.filter((t) => t.status === 'review').length;
+        }
+        if (status === 'new') {
+            return proj.tasks.filter((t) => t.status === 'new' || t.status === 'unconfirmed' || t.status === 'reopened').length;
+        }
+        return 0;
+    }
+
+    initGeneralCharts(): void {
+        this._generalCharts.forEach((c) => c.dispose());
+        this._generalCharts = [];
+
+        const proj = this.selectedProject();
+        if (!proj) return;
+
+        const completedCount = this.getTaskCountByStatus('completed');
+        const inProgressCount = this.getTaskCountByStatus('in_progress');
+        const reviewCount = this.getTaskCountByStatus('review');
+        const newCount = this.getTaskCountByStatus('new');
+
+        // 1. Task Distribution Donut Chart
+        if (this.taskDistributionChartRef?.nativeElement) {
+            const chart = echarts.init(this.taskDistributionChartRef.nativeElement);
+            this._generalCharts.push(chart);
+
+            const option: echarts.EChartsOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c} កិច្ចការ ({d}%)',
+                    textStyle: {
+                        fontFamily: 'Kantumruy Pro',
+                        fontSize: 13,
+                    },
+                },
+                legend: {
+                    bottom: '0%',
+                    left: 'center',
+                    icon: 'circle',
+                    itemWidth: 10,
+                    itemHeight: 10,
+                    textStyle: {
+                        fontFamily: 'Kantumruy Pro',
+                        fontSize: 13,
+                        color: '#64748b',
+                    },
+                },
+                series: [
+                    {
+                        name: 'ស្ថានភាពកិច្ចការ',
+                        type: 'pie',
+                        radius: ['52%', '78%'],
+                        center: ['50%', '42%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 6,
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                        },
+                        label: {
+                            show: false,
+                            position: 'center',
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 14,
+                                fontWeight: 500,
+                                fontFamily: 'Kantumruy Pro',
+                                formatter: '{b}\n{c} ({d}%)',
+                            },
+                            scaleSize: 6,
+                        },
+                        labelLine: {
+                            show: false,
+                        },
+                        data: [
+                            { value: completedCount, name: 'បានបញ្ចប់', itemStyle: { color: '#10b981' } },
+                            { value: inProgressCount, name: 'កំពុងធ្វើ', itemStyle: { color: '#3b82f6' } },
+                            { value: reviewCount, name: 'រង់ចាំពិនិត្យ', itemStyle: { color: '#f59e0b' } },
+                            { value: newCount, name: 'ថ្មី (To-Do)', itemStyle: { color: '#8b5cf6' } },
+                        ],
+                    },
+                ],
+            };
+            chart.setOption(option);
+        }
+
+        // 2. Weekly Velocity & Progress Trend Area Chart
+        if (this.taskTrendChartRef?.nativeElement) {
+            const chart = echarts.init(this.taskTrendChartRef.nativeElement);
+            this._generalCharts.push(chart);
+
+            const option: echarts.EChartsOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985',
+                            fontFamily: 'Kantumruy Pro',
+                        },
+                    },
+                    textStyle: {
+                        fontFamily: 'Kantumruy Pro',
+                        fontSize: 13,
+                    },
+                },
+                legend: {
+                    data: ['បានបញ្ចប់', 'គ្រោងទុក'],
+                    top: '0%',
+                    right: '4%',
+                    icon: 'roundRect',
+                    textStyle: {
+                        fontFamily: 'Kantumruy Pro',
+                        fontSize: 13,
+                        color: '#64748b',
+                    },
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '15%',
+                    containLabel: true,
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['W14', 'W15', 'W16', 'W17', 'W18', 'W19', 'W20', 'W21', 'W22'],
+                        axisLine: { lineStyle: { color: '#cbd5e1' } },
+                        axisLabel: {
+                            color: '#64748b',
+                            fontFamily: 'Kantumruy Pro',
+                            fontSize: 12,
+                        },
+                    },
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        splitLine: { lineStyle: { color: '#f1f5f9' } },
+                        axisLabel: {
+                            color: '#64748b',
+                            fontFamily: 'Kantumruy Pro',
+                            fontSize: 12,
+                        },
+                    },
+                ],
+                series: [
+                    {
+                        name: 'បានបញ្ចប់',
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: { width: 3, color: '#10b981' },
+                        showSymbol: false,
+                        areaStyle: {
+                            opacity: 0.25,
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#10b981' },
+                                { offset: 1, color: 'rgba(16, 185, 129, 0)' },
+                            ]),
+                        },
+                        emphasis: { focus: 'series' },
+                        data: [1, 2, 2, 4, 5, 5, 6, 7, 8],
+                    },
+                    {
+                        name: 'គ្រោងទុក',
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: { width: 3, color: '#3b82f6', type: 'dashed' },
+                        showSymbol: false,
+                        areaStyle: {
+                            opacity: 0.15,
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#3b82f6' },
+                                { offset: 1, color: 'rgba(59, 130, 246, 0)' },
+                            ]),
+                        },
+                        emphasis: { focus: 'series' },
+                        data: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    },
+                ],
+            };
+            chart.setOption(option);
+        }
+
+        if (!this._resizeListener) {
+            this._resizeListener = () => {
+                this._generalCharts.forEach((c) => c.resize());
+            };
+            window.addEventListener('resize', this._resizeListener);
+        }
+    }
+
+    ngOnDestroy(): void {
+        this._generalCharts.forEach((c) => c.dispose());
+        if (this._resizeListener) {
+            window.removeEventListener('resize', this._resizeListener);
+        }
     }
 }

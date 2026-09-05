@@ -16,18 +16,26 @@
                     <button (click)="navigateHome()"
                         class="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center cursor-pointer"
                         [matTooltip]="'ទំព័រដើម (Home)'">
-                        <mat-icon svgIcon="mdi:home-outline" class="icon-size-5 text-slate-500 dark:text-slate-400"></mat-icon>
+                        <mat-icon svgIcon="mdi:home-outline"
+                            class="icon-size-5 text-slate-500 dark:text-slate-400"></mat-icon>
                     </button>
 
                     <span class="text-[17px] font-medium text-slate-800 dark:text-white">គម្រោងទាំងអស់</span>
 
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                         {{ filteredPlans().length }}
                     </span>
                 </div>
 
-                <!-- Right: Refresh & More Menu -->
+                <!-- Right: Create Project, Refresh & More Menu -->
                 <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" (click)="openCreateProjectModal()"
+                        class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                        <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                        <span>បង្កើតគម្រោង</span>
+                    </button>
+
                     <button type="button" (click)="loadPlans()"
                         class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer"
                         [matTooltip]="'ផ្ទុកឡើងវិញ (Refresh)'">
@@ -46,14 +54,16 @@
                             <span>គម្រោង</span>
                         </button>
                         <button mat-menu-item (click)="navigateToPlan()" class="!text-[15px]">
-                            <mat-icon svgIcon="mdi:account-outline" class="icon-size-4.5 mr-2 text-purple-600"></mat-icon>
+                            <mat-icon svgIcon="mdi:account-outline"
+                                class="icon-size-4.5 mr-2 text-purple-600"></mat-icon>
                             <span>ផែនការផ្ទាល់ខ្លួន</span>
                         </button>
                     </mat-menu>
 
                     <mat-menu #mainProjectsSubMenu="matMenu" class="!rounded-xl font-kantumruy">
                         <button mat-menu-item (click)="clearSelectedProject()" class="!text-[15px]">
-                            <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5 mr-2 text-slate-500"></mat-icon>
+                            <mat-icon svgIcon="mdi:view-grid-outline"
+                                class="icon-size-4.5 mr-2 text-slate-500"></mat-icon>
                             <span>គម្រោងទាំងអស់</span>
                         </button>
                         <button *ngFor="let p of plans()" mat-menu-item (click)="selectProject(p)" class="!text-[15px]">
@@ -72,8 +82,8 @@
                         class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                         [ngClass]="statusFilter() === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
                         <span>ទាំងអស់</span>
-                        <span class="px-1.5 py-0.2 rounded-full text-[11px] font-medium"
-                            [ngClass]="statusFilter() === 'all' ? 'bg-slate-700 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="text-[12px] font-normal"
+                            [ngClass]="statusFilter() === 'all' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
                             {{ projectCounts().all }}
                         </span>
                     </button>
@@ -82,8 +92,8 @@
                         class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                         [ngClass]="statusFilter() === 'active' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
                         <span>កំពុងដំណើរការ</span>
-                        <span class="px-1.5 py-0.2 rounded-full text-[11px] font-medium"
-                            [ngClass]="statusFilter() === 'active' ? 'bg-emerald-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="text-[12px] font-normal"
+                            [ngClass]="statusFilter() === 'active' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                             {{ projectCounts().active }}
                         </span>
                     </button>
@@ -92,8 +102,8 @@
                         class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                         [ngClass]="statusFilter() === 'planning' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
                         <span>រៀបចំផែនការ</span>
-                        <span class="px-1.5 py-0.2 rounded-full text-[11px] font-medium"
-                            [ngClass]="statusFilter() === 'planning' ? 'bg-blue-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="text-[12px] font-normal"
+                            [ngClass]="statusFilter() === 'planning' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                             {{ projectCounts().planning }}
                         </span>
                     </button>
@@ -102,8 +112,8 @@
                         class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                         [ngClass]="statusFilter() === 'on_hold' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
                         <span>ផ្អាក</span>
-                        <span class="px-1.5 py-0.2 rounded-full text-[11px] font-medium"
-                            [ngClass]="statusFilter() === 'on_hold' ? 'bg-amber-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="text-[12px] font-normal"
+                            [ngClass]="statusFilter() === 'on_hold' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                             {{ projectCounts().on_hold }}
                         </span>
                     </button>
@@ -112,8 +122,8 @@
                         class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                         [ngClass]="statusFilter() === 'completed' ? 'bg-purple-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
                         <span>បានបញ្ចប់</span>
-                        <span class="px-1.5 py-0.2 rounded-full text-[11px] font-medium"
-                            [ngClass]="statusFilter() === 'completed' ? 'bg-purple-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="text-[12px] font-normal"
+                            [ngClass]="statusFilter() === 'completed' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                             {{ projectCounts().completed }}
                         </span>
                     </button>
@@ -121,8 +131,10 @@
 
                 <!-- Search Input -->
                 <div class="relative flex items-center shrink-0">
-                    <mat-icon svgIcon="mdi:magnify" class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
-                    <input type="text" placeholder="ស្វែងរកគម្រោង..." [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); onSearchChange()"
+                    <mat-icon svgIcon="mdi:magnify"
+                        class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
+                    <input type="text" placeholder="ស្វែងរកគម្រោង..." [ngModel]="searchQuery()"
+                        (ngModelChange)="searchQuery.set($event); onSearchChange()"
                         class="w-full sm:w-60 pl-9 pr-3 py-1.5 text-[14px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
                 </div>
             </div>
@@ -133,18 +145,20 @@
             </div>
 
             <!-- Projects Grid (Compact & Proportioned Sizing) -->
-            <div *ngIf="!loading()" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy">
-                <div *ngFor="let plan of filteredPlans()"
-                    (click)="selectProject(plan)"
+            <div *ngIf="!loading()"
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy">
+                <div *ngFor="let plan of filteredPlans()" (click)="selectProject(plan)"
                     class="group relative w-full max-w-[340px] rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy">
-                    
+
                     <!-- 1. Top Khmer Decorative Line (ក្បាច់បន្ទាត់លើ) -->
                     <div class="h-1 w-full bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600"></div>
 
                     <!-- 2. Subtle Traditional Kbach Watermark (ក្បាច់ភ្ញីទេសស្រទន់) -->
-                    <div class="absolute right-0 top-1 w-24 h-24 pointer-events-none opacity-[0.04] dark:opacity-[0.08] text-blue-900 dark:text-blue-200">
+                    <div
+                        class="absolute right-0 top-1 w-24 h-24 pointer-events-none opacity-[0.04] dark:opacity-[0.08] text-blue-900 dark:text-blue-200">
                         <svg viewBox="0 0 120 120" fill="currentColor" class="w-full h-full">
-                            <path d="M60 10 C65 25 80 35 95 35 C80 45 75 60 85 75 C70 70 60 85 60 105 C60 85 50 70 35 75 C45 60 40 45 25 35 C40 35 55 25 60 10 Z" />
+                            <path
+                                d="M60 10 C65 25 80 35 95 35 C80 45 75 60 85 75 C70 70 60 85 60 105 C60 85 50 70 35 75 C45 60 40 45 25 35 C40 35 55 25 60 10 Z" />
                             <circle cx="60" cy="55" r="12" fill="none" stroke="currentColor" stroke-width="3" />
                         </svg>
                     </div>
@@ -153,12 +167,15 @@
                         <!-- Code & Status Header -->
                         <div class="flex items-center justify-between gap-2">
                             <!-- Project Code Badge -->
-                            <span class="text-[11.5px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-900/40 px-2 py-0.5 rounded-md shadow-2xs font-mono">
+                            <span
+                                class="text-[11.5px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-900/40 px-2 py-0.5 rounded-md shadow-2xs font-mono">
                                 {{ plan.code }}
                             </span>
 
                             <!-- Status Pill with Icon -->
-                            <span class="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs font-kantumruy" [ngClass]="getStatusClass(plan.status)">
+                            <span
+                                class="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs font-kantumruy"
+                                [ngClass]="getStatusClass(plan.status)">
                                 <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
                                 <span>{{ getStatusLabel(plan.status) }}</span>
                             </span>
@@ -166,16 +183,19 @@
 
                         <!-- Title & Description -->
                         <div class="space-y-0.5">
-                            <h3 class="text-[15px] font-medium text-slate-850 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate font-kantumruy">
+                            <h3
+                                class="text-[15px] font-medium text-slate-850 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate font-kantumruy">
                                 {{ plan.name }}
                             </h3>
-                            <p class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-1 font-kantumruy font-normal">
+                            <p
+                                class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-1 font-kantumruy font-normal">
                                 {{ plan.description }}
                             </p>
                         </div>
 
                         <!-- Dates with Calendar Icon -->
-                        <div class="flex items-center gap-2 text-[12px] text-slate-500 dark:text-slate-400 font-kantumruy">
+                        <div
+                            class="flex items-center gap-2 text-[12px] text-slate-500 dark:text-slate-400 font-kantumruy">
                             <mat-icon svgIcon="mdi:calendar-range" class="icon-size-3.5 text-slate-400"></mat-icon>
                             <span>{{ plan.start_date | date:'d MMM y' }} — {{ plan.end_date | date:'d MMM y' }}</span>
                         </div>
@@ -195,7 +215,8 @@
                         </div>
 
                         <!-- Members Avatar Stack -->
-                        <div *ngIf="plan.members && plan.members.length > 0" class="flex items-center gap-2 pt-0.5 font-kantumruy">
+                        <div *ngIf="plan.members && plan.members.length > 0"
+                            class="flex items-center gap-2 pt-0.5 font-kantumruy">
                             <span class="text-[12px] text-slate-400">សមាជិក៖</span>
                             <div class="flex -space-x-1.5 overflow-hidden items-center">
                                 <div *ngFor="let m of plan.members; let idx = index"
@@ -226,7 +247,8 @@
         <div *ngIf="selectedProject() as proj" class="flex flex-col flex-1 h-full min-h-[calc(100vh-2rem)]">
 
             <!-- 1. Top Bar Header -->
-            <div class="h-14 px-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0">
+            <div
+                class="h-14 px-6 sm:px-8 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0">
                 <!-- Left: Back Button & Project Title -->
                 <div class="flex items-center gap-3">
                     <button type="button" (click)="clearSelectedProject()"
@@ -241,156 +263,110 @@
                         </h2>
                     </div>
                 </div>
-
-                <!-- Right: Action Buttons (+, Chat, Mail, 3-Dot) -->
-                <div class="flex items-center gap-2">
-                    <!-- Blue + Button -->
-                    <button type="button" (click)="openAddPlanDialog(proj)"
-                        class="w-8 h-8 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white flex items-center justify-center cursor-pointer shadow-xs transition-colors"
-                        [matTooltip]="'បន្ថែមផែនការ (Add Plan)'">
-                        <mat-icon svgIcon="mdi:plus" class="icon-size-4.5"></mat-icon>
-                    </button>
-
-                    <!-- Chat Message Icon -->
-                    <button type="button"
-                        class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
-                        [matTooltip]="'សារពិភាក្សា'">
-                        <mat-icon svgIcon="mdi:comment-text-outline" class="icon-size-4.5"></mat-icon>
-                    </button>
-
-                    <!-- Mail / Notification Icon -->
-                    <button type="button"
-                        class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
-                        [matTooltip]="'ការជូនដំណឹង'">
-                        <mat-icon svgIcon="mdi:email-outline" class="icon-size-4.5"></mat-icon>
-                    </button>
-
-                    <!-- 3-Dot Options Menu -->
-                    <button type="button" [matMenuTriggerFor]="workspaceMenu"
-                        class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
-                        [matTooltip]="'ជម្រើសបន្ថែម'">
-                        <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4.5"></mat-icon>
-                    </button>
-
-                    <mat-menu #workspaceMenu="matMenu" class="!rounded-xl font-kantumruy">
-                        <button mat-menu-item [matMenuTriggerFor]="workspaceProjectsSubMenu" class="!text-[15px]">
-                            <mat-icon svgIcon="mdi:folder-outline" class="icon-size-4.5 mr-2 text-blue-600"></mat-icon>
-                            <span>គម្រោង</span>
-                        </button>
-                        <button mat-menu-item (click)="navigateToPlan()" class="!text-[15px]">
-                            <mat-icon svgIcon="mdi:account-outline" class="icon-size-4.5 mr-2 text-purple-600"></mat-icon>
-                            <span>ផែនការផ្ទាល់ខ្លួន</span>
-                        </button>
-                    </mat-menu>
-
-                    <mat-menu #workspaceProjectsSubMenu="matMenu" class="!rounded-xl font-kantumruy">
-                        <button mat-menu-item (click)="clearSelectedProject()" class="!text-[15px]">
-                            <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5 mr-2 text-slate-500"></mat-icon>
-                            <span>គម្រោងទាំងអស់</span>
-                        </button>
-                        <button *ngFor="let p of plans()" mat-menu-item (click)="selectProject(p)" class="!text-[15px]">
-                            <mat-icon svgIcon="mdi:circle-medium" class="icon-size-4.5 mr-2 text-blue-500"></mat-icon>
-                            <span>{{ p.name }}</span>
-                        </button>
-                    </mat-menu>
-                </div>
             </div>
 
             <!-- 2. Workspace Split Layout: Left Sidebar + Right Tasks Area -->
             <div class="flex flex-1 min-h-0">
 
                 <!-- Left Sidebar Navigation -->
-                <div class="w-56 shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 p-3 flex flex-col gap-1 select-none">
+                <div class="w-56 sm:w-60 shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 p-3.5 sm:p-4 flex flex-col gap-1.5 select-none font-kantumruy">
                     <!-- ! ទូទៅ -->
                     <button type="button" (click)="projectNavTab.set('general')"
-                        class="w-full h-10 px-3 rounded-xl text-[15px] font-normal flex items-center justify-between transition-colors cursor-pointer text-left"
-                        [ngClass]="projectNavTab() === 'general' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'">
+                        class="w-full h-11 px-3.5 rounded-xl text-[16px] flex items-center justify-between transition-all cursor-pointer text-left"
+                        [ngClass]="projectNavTab() === 'general' ? 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-medium shadow-2xs' : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 font-normal'">
                         <div class="flex items-center gap-3">
-                            <mat-icon svgIcon="mdi:alert-circle-outline" class="icon-size-5 text-slate-500"></mat-icon>
+                            <mat-icon svgIcon="mdi:information-outline" class="icon-size-5"
+                                [ngClass]="projectNavTab() === 'general' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'"></mat-icon>
                             <span>ទូទៅ</span>
                         </div>
                     </button>
 
                     <!-- 📊 ផែនការ (Plan / Agile Timeline) -->
                     <button type="button" (click)="projectNavTab.set('plan')"
-                        class="w-full h-10 px-3 rounded-xl text-[15px] font-normal flex items-center justify-between transition-colors cursor-pointer text-left"
-                        [ngClass]="projectNavTab() === 'plan' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'">
+                        class="w-full h-11 px-3.5 rounded-xl text-[16px] flex items-center justify-between transition-all cursor-pointer text-left"
+                        [ngClass]="projectNavTab() === 'plan' ? 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-medium shadow-2xs' : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 font-normal'">
                         <div class="flex items-center gap-3">
-                            <mat-icon svgIcon="mdi:calendar-multiselect" class="icon-size-5 text-indigo-600"></mat-icon>
+                            <mat-icon svgIcon="mdi:calendar-outline" class="icon-size-5"
+                                [ngClass]="projectNavTab() === 'plan' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'"></mat-icon>
                             <span>ផែនការ</span>
                         </div>
-                        <span class="px-2 py-0.2 rounded-full text-xs font-medium"
-                            [ngClass]="projectNavTab() === 'plan' ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' : 'bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="px-2 py-0.2 rounded-full text-[12.5px] font-medium"
+                            [ngClass]="projectNavTab() === 'plan' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
                             {{ (proj.agileTasks || DEFAULT_AGILE_TASKS).length }}
                         </span>
                     </button>
 
                     <!-- ✓= ការងារ (Tasks) -->
                     <button type="button" (click)="projectNavTab.set('tasks')"
-                        class="w-full h-10 px-3 rounded-xl text-[15px] font-normal flex items-center justify-between transition-colors cursor-pointer text-left"
-                        [ngClass]="projectNavTab() === 'tasks' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'">
+                        class="w-full h-11 px-3.5 rounded-xl text-[16px] flex items-center justify-between transition-all cursor-pointer text-left"
+                        [ngClass]="projectNavTab() === 'tasks' ? 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-medium shadow-2xs' : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 font-normal'">
                         <div class="flex items-center gap-3">
-                            <mat-icon svgIcon="mdi:format-list-checks" class="icon-size-5 text-blue-600"></mat-icon>
+                            <mat-icon svgIcon="mdi:format-list-checkbox" class="icon-size-5"
+                                [ngClass]="projectNavTab() === 'tasks' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'"></mat-icon>
                             <span>ការងារ</span>
                         </div>
-                        <span class="px-2 py-0.2 rounded-full text-xs font-medium"
-                            [ngClass]="projectNavTab() === 'tasks' ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' : 'bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="px-2 py-0.2 rounded-full text-[12.5px] font-medium"
+                            [ngClass]="projectNavTab() === 'tasks' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
                             {{ filteredProjectTasks().length }}
                         </span>
                     </button>
 
                     <!-- ⚐ ដំណាក់កាល (Phases) -->
                     <button type="button" (click)="projectNavTab.set('phases')"
-                        class="w-full h-10 px-3 rounded-xl text-[15px] font-normal flex items-center justify-between transition-colors cursor-pointer text-left"
-                        [ngClass]="projectNavTab() === 'phases' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'">
+                        class="w-full h-11 px-3.5 rounded-xl text-[16px] flex items-center justify-between transition-all cursor-pointer text-left"
+                        [ngClass]="projectNavTab() === 'phases' ? 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-medium shadow-2xs' : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 font-normal'">
                         <div class="flex items-center gap-3">
-                            <mat-icon svgIcon="mdi:flag-outline" class="icon-size-5 text-slate-500"></mat-icon>
+                            <mat-icon svgIcon="mdi:flag-outline" class="icon-size-5"
+                                [ngClass]="projectNavTab() === 'phases' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'"></mat-icon>
                             <span>ដំណាក់កាល</span>
                         </div>
-                        <span class="px-2 py-0.2 rounded-full text-xs font-medium"
-                            [ngClass]="projectNavTab() === 'phases' ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' : 'bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="px-2 py-0.2 rounded-full text-[12.5px] font-medium"
+                            [ngClass]="projectNavTab() === 'phases' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
                             {{ proj.phases?.length || 3 }}
                         </span>
                     </button>
 
                     <!-- 👥 ក្រុមការងារ (Team) -->
                     <button type="button" (click)="projectNavTab.set('team')"
-                        class="w-full h-10 px-3 rounded-xl text-[15px] font-normal flex items-center justify-between transition-colors cursor-pointer text-left"
-                        [ngClass]="projectNavTab() === 'team' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'">
+                        class="w-full h-11 px-3.5 rounded-xl text-[16px] flex items-center justify-between transition-all cursor-pointer text-left"
+                        [ngClass]="projectNavTab() === 'team' ? 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-medium shadow-2xs' : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 font-normal'">
                         <div class="flex items-center gap-3">
-                            <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-5 text-slate-500"></mat-icon>
+                            <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-5"
+                                [ngClass]="projectNavTab() === 'team' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'"></mat-icon>
                             <span>ក្រុមការងារ</span>
                         </div>
-                        <span class="px-2 py-0.2 rounded-full text-xs font-medium"
-                            [ngClass]="projectNavTab() === 'team' ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' : 'bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
-                            {{ proj.members.length }}
+                        <span class="px-2 py-0.2 rounded-full text-[12.5px] font-medium"
+                            [ngClass]="projectNavTab() === 'team' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                            {{ proj.members?.length || 0 }}
                         </span>
                     </button>
 
                     <!-- 📅 កិច្ចប្រជុំ (Meetings) -->
                     <button type="button" (click)="projectNavTab.set('meetings')"
-                        class="w-full h-10 px-3 rounded-xl text-[15px] font-normal flex items-center justify-between transition-colors cursor-pointer text-left"
-                        [ngClass]="projectNavTab() === 'meetings' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'">
+                        class="w-full h-11 px-3.5 rounded-xl text-[16px] flex items-center justify-between transition-all cursor-pointer text-left"
+                        [ngClass]="projectNavTab() === 'meetings' ? 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-medium shadow-2xs' : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 font-normal'">
                         <div class="flex items-center gap-3">
-                            <mat-icon svgIcon="mdi:calendar-outline" class="icon-size-5 text-slate-500"></mat-icon>
+                            <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-5"
+                                [ngClass]="projectNavTab() === 'meetings' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'"></mat-icon>
                             <span>កិច្ចប្រជុំ</span>
                         </div>
-                        <span class="px-2 py-0.2 rounded-full text-xs font-medium"
-                            [ngClass]="projectNavTab() === 'meetings' ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' : 'bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="px-2 py-0.2 rounded-full text-[12.5px] font-medium"
+                            [ngClass]="projectNavTab() === 'meetings' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
                             {{ proj.meetings?.length || 3 }}
                         </span>
                     </button>
 
                     <!-- 🔗 តំណភ្ជាប់ (Links) -->
                     <button type="button" (click)="projectNavTab.set('links')"
-                        class="w-full h-10 px-3 rounded-xl text-[15px] font-normal flex items-center justify-between transition-colors cursor-pointer text-left"
-                        [ngClass]="projectNavTab() === 'links' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60'">
+                        class="w-full h-11 px-3.5 rounded-xl text-[16px] flex items-center justify-between transition-all cursor-pointer text-left"
+                        [ngClass]="projectNavTab() === 'links' ? 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-medium shadow-2xs' : 'text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 font-normal'">
                         <div class="flex items-center gap-3">
-                            <mat-icon svgIcon="mdi:link-variant" class="icon-size-5 text-slate-500"></mat-icon>
+                            <mat-icon svgIcon="mdi:link-variant" class="icon-size-5"
+                                [ngClass]="projectNavTab() === 'links' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'"></mat-icon>
                             <span>តំណភ្ជាប់</span>
                         </div>
-                        <span class="px-2 py-0.2 rounded-full text-xs font-medium"
-                            [ngClass]="projectNavTab() === 'links' ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' : 'bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                        <span class="px-2 py-0.2 rounded-full text-[12.5px] font-medium"
+                            [ngClass]="projectNavTab() === 'links' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
                             {{ allProjectLinks().length }}
                         </span>
                     </button>
@@ -402,12 +378,13 @@
                     <!-- ========================================== -->
                     <!-- TAB 1: TASKS LIST & BOARD VIEW             -->
                     <!-- ========================================== -->
-                    <div *ngIf="projectNavTab() === 'tasks'" class="flex flex-col flex-1 p-5 space-y-3">
-                        
+                    <div *ngIf="projectNavTab() === 'tasks'" class="flex flex-col flex-1 px-8 sm:px-12 md:px-14 py-6 space-y-5 font-kantumruy w-full max-w-[1440px] mx-auto">
+
                         <!-- Top Controls Row (Breadcrumb, Views, Avatars, Search, Filter) -->
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700/60 pb-3">
+                        <div
+                            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700/60 pb-3.5">
                             <!-- Breadcrumb: គម្រោង › ការងារ 8 -->
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2.5">
                                 <button type="button" (click)="clearSelectedProject()"
                                     class="text-[15px] text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-normal"
                                     [matTooltip]="'ត្រឡប់ទៅបញ្ជីគម្រោងទាំងអស់'">
@@ -415,151 +392,208 @@
                                 </button>
                                 <span class="text-slate-300 dark:text-slate-600">›</span>
                                 <span class="text-[16px] font-medium text-slate-900 dark:text-white">ការងារ</span>
-                                <span class="px-2 py-0.2 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                <span
+                                    class="px-2 py-0.2 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                                     {{ filteredProjectTasks().length }}
                                 </span>
                             </div>
 
                             <!-- Right Controls: View switcher, Team Avatars, Search, Filter -->
-                            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+                            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end font-kantumruy">
                                 <!-- View Switcher [ ≡ | ⊞ ] -->
-                                <div class="inline-flex items-center bg-slate-100 dark:bg-slate-900 rounded-lg p-0.5 border border-slate-200/60 dark:border-slate-700/60">
+                                <div
+                                    class="inline-flex items-center bg-slate-100 dark:bg-slate-800/80 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
                                     <button type="button" (click)="taskViewStyle.set('list')"
-                                        class="w-7 h-7 rounded-md flex items-center justify-center transition-colors cursor-pointer"
-                                        [ngClass]="taskViewStyle() === 'list' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-2xs' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                                        [ngClass]="taskViewStyle() === 'list' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                                         [matTooltip]="'ទម្រង់បញ្ជី (List)'">
-                                        <mat-icon svgIcon="mdi:format-list-bulleted" class="icon-size-4"></mat-icon>
+                                        <mat-icon svgIcon="mdi:format-list-bulleted" class="icon-size-4.5"></mat-icon>
                                     </button>
                                     <button type="button" (click)="taskViewStyle.set('board')"
-                                        class="w-7 h-7 rounded-md flex items-center justify-center transition-colors cursor-pointer"
-                                        [ngClass]="taskViewStyle() === 'board' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-2xs' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                                        [ngClass]="taskViewStyle() === 'board' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                                         [matTooltip]="'ទម្រង់ក្ដារខៀន (Board)'">
-                                        <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4"></mat-icon>
+                                        <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5"></mat-icon>
                                     </button>
                                 </div>
 
                                 <!-- Team Avatars Pile -->
-                                <div class="flex -space-x-1.5 items-center">
+                                <div class="flex -space-x-2 items-center">
                                     <div *ngFor="let m of proj.members.slice(0, 3)"
-                                        class="w-6 h-6 rounded-full bg-blue-100 text-blue-900 font-bold text-[10px] flex items-center justify-center ring-2 ring-white dark:ring-slate-800"
+                                        class="w-8 h-8 min-w-[32px] min-h-[32px] rounded-full bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-300 font-semibold text-[13px] flex items-center justify-center ring-2 ring-white dark:ring-slate-800 shadow-2xs shrink-0"
                                         [matTooltip]="m.name + ' (' + m.role + ')'">
                                         {{ m.name.charAt(0) }}
                                     </div>
                                     <div *ngIf="proj.members.length > 3"
-                                        class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 text-[10px] font-medium flex items-center justify-center ring-2 ring-white dark:ring-slate-800">
+                                        class="w-8 h-8 min-w-[32px] min-h-[32px] rounded-full bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300 text-[12px] font-medium flex items-center justify-center ring-2 ring-white dark:ring-slate-800 shadow-2xs shrink-0">
                                         +{{ proj.members.length - 3 }}
                                     </div>
                                 </div>
 
                                 <!-- Search Input -->
                                 <div class="relative flex items-center">
-                                    <mat-icon svgIcon="mdi:magnify" class="icon-size-4 absolute left-2.5 text-slate-400 pointer-events-none"></mat-icon>
-                                    <input type="text" [placeholder]="'ការងារក្នុង ' + proj.code + '...'"
+                                    <mat-icon svgIcon="mdi:magnify"
+                                        class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
+                                    <input type="text" [placeholder]="'ស្វែងរកការងារក្នុង ' + proj.code + '...'"
                                         [ngModel]="taskSearchQuery()" (ngModelChange)="taskSearchQuery.set($event)"
-                                        class="w-44 pl-8 pr-2.5 py-1 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white placeholder-slate-400" />
+                                        class="h-10 w-56 sm:w-64 pl-9 pr-3 text-[14px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-white placeholder-slate-400 font-kantumruy" />
                                 </div>
 
                                 <!-- Filter Button -->
                                 <button type="button"
-                                    class="w-7 h-7 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer"
+                                    class="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors shadow-2xs"
                                     [matTooltip]="'ចម្រាញ់'">
-                                    <mat-icon svgIcon="mdi:tune-variant" class="icon-size-4"></mat-icon>
+                                    <mat-icon svgIcon="mdi:tune-variant" class="icon-size-4.5"></mat-icon>
+                                </button>
+
+                                <!-- Create Task Button -->
+                                <button type="button" (click)="openCreateTaskModal()"
+                                    class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                                    <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                                    <span>បង្កើតការងារ</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- LIST VIEW -->
-                        <div *ngIf="taskViewStyle() === 'list'" class="divide-y divide-slate-100 dark:divide-slate-800/80">
-                            <div *ngFor="let task of filteredProjectTasks()"
-                                (click)="openTaskModal(task)"
-                                class="py-3 px-2.5 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-750/50 rounded-lg transition-colors cursor-pointer group">
-                                
-                                <!-- Left side: [Priority Icon] [=] [#PMS-xxx] • [Task Title] -->
-                                <div class="flex items-center gap-2.5 min-w-0 pr-4 flex-1">
+                        <div *ngIf="taskViewStyle() === 'list'"
+                            class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <div *ngFor="let task of filteredProjectTasks()" (click)="openTaskModal(task)"
+                                class="group py-4 sm:py-4.5 px-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3.5 rounded-xl">
+
+                                <!-- Left Info: Priority Icon, Equal sign, Code, Title -->
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
                                     <!-- Priority Icon -->
-                                    <mat-icon [svgIcon]="getPriorityVisual(task.priority).icon"
-                                        class="icon-size-4 shrink-0"
+                                    <mat-icon [svgIcon]="getPriorityVisual(task.priority).icon" class="icon-size-5 shrink-0"
                                         [ngClass]="getPriorityVisual(task.priority).color"></mat-icon>
 
-                                    <!-- Equals icon = -->
-                                    <mat-icon svgIcon="mdi:equal" class="icon-size-3.5 text-amber-500 shrink-0"></mat-icon>
+                                    <!-- Equal sign indicator as seen in reference -->
+                                    <span class="text-amber-500 font-bold text-sm select-none shrink-0">=</span>
 
-                                    <!-- Task Code (e.g. #PMS-675) -->
-                                    <span class="text-[14px] font-medium text-slate-700 dark:text-slate-300 shrink-0 select-text">
+                                    <!-- Code -->
+                                    <span class="font-mono font-medium text-[14px] text-slate-500 dark:text-slate-400 shrink-0">
                                         {{ task.code }}
                                     </span>
 
-                                    <!-- Dot separator -->
                                     <span class="text-slate-300 dark:text-slate-600 shrink-0">•</span>
 
-                                    <!-- Task Title -->
-                                    <span class="text-[15px] font-normal text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                    <!-- Title & Module Hierarchy -->
+                                    <p
+                                        class="min-w-0 text-[16px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
                                         {{ task.title }}
-                                    </span>
+                                    </p>
                                 </div>
 
-                                <!-- Right side: [💬 count] [📎 count] [👤 Avatar] [Status Pill] [Time Ago] [⋮] -->
-                                <div class="flex items-center gap-3 sm:gap-4 shrink-0">
-                                    <!-- Comments Count -->
-                                    <div *ngIf="task.comments_count > 0" class="flex items-center gap-1 text-xs text-slate-400 min-w-[32px] justify-end">
-                                        <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5 text-slate-400"></mat-icon>
-                                        <span>{{ task.comments_count }}</span>
-                                    </div>
-                                    <div *ngIf="task.comments_count === 0" class="w-[32px]"></div>
-
-                                    <!-- Attachments Count -->
-                                    <div *ngIf="task.attachments_count > 0" class="flex items-center gap-1 text-xs text-slate-400 min-w-[30px] justify-end">
-                                        <mat-icon svgIcon="mdi:paperclip" class="icon-size-3.5 text-slate-400"></mat-icon>
-                                        <span>{{ task.attachments_count }}</span>
-                                    </div>
-                                    <div *ngIf="task.attachments_count === 0" class="w-[30px]"></div>
-
-                                    <!-- Assignee Avatar -->
-                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-2xs"
-                                        [ngClass]="task.assignee.bgClass || 'bg-slate-200 text-slate-600'"
-                                        [matTooltip]="task.assignee.name">
-                                        <ng-container *ngIf="task.assignee.initial; else defaultAvatar">
-                                            {{ task.assignee.initial }}
-                                        </ng-container>
-                                        <ng-template #defaultAvatar>
-                                            <mat-icon svgIcon="mdi:account" class="icon-size-4 text-slate-400"></mat-icon>
-                                        </ng-template>
+                                <!-- Right Meta: Date (No BG), Comments/Attachments, Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
+                                <div class="flex items-center gap-3 self-end md:self-center shrink-0 font-kantumruy">
+                                    <!-- Date to do (Fixed width for straight vertical column alignment) -->
+                                    <div class="hidden md:flex items-center gap-1.5 text-[13px] font-kantumruy font-normal w-28 shrink-0"
+                                        [ngClass]="getDaysRemainingInfo(task.due_date).isOverdue 
+                                            ? 'text-rose-600 dark:text-rose-400' 
+                                            : 'text-slate-500 dark:text-slate-400'">
+                                        <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-4 opacity-80 shrink-0"></mat-icon>
+                                        <span>{{ getTaskDateToDo(task.due_date, task.created_at) }}</span>
                                     </div>
 
-                                    <!-- Status Pill (Rounded Pill Badge with MDI Icon) -->
-                                    <span class="inline-flex items-center justify-center gap-1.5 text-[12px] font-medium px-3 py-0.5 rounded-full border whitespace-nowrap min-w-[90px] text-center"
-                                        [ngClass]="getTaskStatusClass(task.status)">
-                                        <mat-icon [svgIcon]="getTaskStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
-                                        <span>{{ getTaskStatusLabel(task.status) }}</span>
-                                    </span>
+                                    <!-- Comments & Attachments (Fixed width) -->
+                                    <div class="hidden sm:flex items-center gap-2 text-slate-400 text-[13px] w-14 shrink-0 font-kantumruy">
+                                        <span *ngIf="(task.comments_count || 0) > 0" class="flex items-center gap-1">
+                                            <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5"></mat-icon>
+                                            <span>{{ task.comments_count }}</span>
+                                        </span>
+                                        <span *ngIf="(task.attachments_count || 0) > 0" class="flex items-center gap-1">
+                                            <mat-icon svgIcon="mdi:paperclip" class="icon-size-3.5"></mat-icon>
+                                            <span>{{ task.attachments_count }}</span>
+                                        </span>
+                                    </div>
 
-                                    <!-- Time Ago (e.g. 6 ថ្ងៃមុន, 1 សប្តាហ៍មុន, 2 សប្តាហ៍មុន) -->
-                                    <span class="text-xs text-slate-400 min-w-[70px] text-right font-normal">
+                                    <!-- Assignee Avatar Stack (Fixed width) -->
+                                    <div class="w-8 shrink-0 flex items-center justify-center">
+                                        <div class="w-8 h-8 rounded-full ring-2 ring-white dark:ring-slate-800 flex items-center justify-center font-medium text-xs overflow-hidden shadow-2xs shrink-0"
+                                            [ngClass]="task.assignee.bgClass || 'bg-blue-600 text-white'"
+                                            [matTooltip]="task.assignee.name">
+                                            <img *ngIf="task.assignee.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover" />
+                                            <span *ngIf="!task.assignee.avatar && task.assignee.initial">{{ task.assignee.initial }}</span>
+                                            <mat-icon *ngIf="!task.assignee.avatar && !task.assignee.initial" svgIcon="mdi:account" class="icon-size-4.5 text-slate-400"></mat-icon>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Badge Pill matching reference buttons (Fixed width) -->
+                                    <div class="w-28 shrink-0 flex justify-center">
+                                        <button [matMenuTriggerFor]="listRowStatusMenu" (click)="$event.stopPropagation()"
+                                            class="w-full inline-flex items-center justify-center gap-1.5 text-[14px] font-medium py-1.5 px-2 rounded-xl border select-none transition-all shadow-2xs cursor-pointer"
+                                            [ngClass]="getTaskStatusClass(task.status)">
+                                            <mat-icon [svgIcon]="getTaskStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
+                                            <span>{{ getTaskStatusLabel(task.status) }}</span>
+                                        </button>
+                                    </div>
+                                    <mat-menu #listRowStatusMenu="matMenu" class="min-w-[170px] font-kantumruy">
+                                        <button mat-menu-item (click)="updateTaskStatus(task, 'new')" class="!text-[14px] flex items-center gap-2.5">
+                                            <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                                            <span>ថ្មី (New)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="updateTaskStatus(task, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                            <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
+                                            <span>បញ្ជាក់ (Confirmed)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="updateTaskStatus(task, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                            <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
+                                            <span>មិនបញ្ជាក់ (Unconfirmed)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
+                                            <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                                            <span>កំពុងធ្វើ (In Progress)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="updateTaskStatus(task, 'review')" class="!text-[14px] flex items-center gap-2.5">
+                                            <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
+                                            <span>ស្នើពិនិត្យ (In Review)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="updateTaskStatus(task, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
+                                            <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                                            <span>បើកឡើងវិញ (Reopened)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="updateTaskStatus(task, 'done')" class="!text-[14px] flex items-center gap-2.5">
+                                            <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
+                                            <span>បញ្ចប់ (Done)</span>
+                                        </button>
+                                    </mat-menu>
+
+                                    <!-- Time Ago (Fixed width) -->
+                                    <span class="text-xs text-slate-400 w-16 text-right shrink-0 font-normal">
                                         {{ task.time_ago }}
                                     </span>
 
                                     <!-- 3-Dot Options for Task -->
-                                    <button type="button" [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()"
+                                    <button type="button" [matMenuTriggerFor]="rowMenu"
+                                        (click)="$event.stopPropagation()"
                                         class="w-6 h-6 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
                                         [matTooltip]="'ជម្រើសកិច្ចការ'">
                                         <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
                                     </button>
 
                                     <mat-menu #rowMenu="matMenu" class="!rounded-xl font-kantumruy">
-                                        <button mat-menu-item (click)="openTaskModal(task); activeDetailTab.set('subtasks')">
-                                            <mat-icon svgIcon="mdi:format-list-checks" class="icon-size-4.5 mr-2 text-amber-600"></mat-icon>
+                                        <button mat-menu-item
+                                            (click)="openTaskModal(task); activeDetailTab.set('subtasks')">
+                                            <mat-icon svgIcon="mdi:format-list-checks"
+                                                class="icon-size-4.5 mr-2 text-amber-600"></mat-icon>
                                             <span>កិច្ចការរង ({{ task.subtasks.length }})</span>
                                         </button>
-                                        <button mat-menu-item (click)="openTaskModal(task); activeDetailTab.set('members')">
-                                            <mat-icon svgIcon="mdi:account-group" class="icon-size-4.5 mr-2 text-blue-600"></mat-icon>
+                                        <button mat-menu-item
+                                            (click)="openTaskModal(task); activeDetailTab.set('members')">
+                                            <mat-icon svgIcon="mdi:account-group"
+                                                class="icon-size-4.5 mr-2 text-blue-600"></mat-icon>
                                             <span>សមាជិក ({{ task.members.length }})</span>
                                         </button>
-                                        <button mat-menu-item (click)="openTaskModal(task); activeDetailTab.set('links')">
-                                            <mat-icon svgIcon="mdi:link-variant" class="icon-size-4.5 mr-2 text-blue-500"></mat-icon>
+                                        <button mat-menu-item
+                                            (click)="openTaskModal(task); activeDetailTab.set('links')">
+                                            <mat-icon svgIcon="mdi:link-variant"
+                                                class="icon-size-4.5 mr-2 text-blue-500"></mat-icon>
                                             <span>តំណភ្ជាប់ ({{ task.links.length }})</span>
                                         </button>
-                                        <button mat-menu-item (click)="openTaskModal(task); activeDetailTab.set('documents')">
-                                            <mat-icon svgIcon="mdi:file-document-outline" class="icon-size-4.5 mr-2 text-emerald-600"></mat-icon>
+                                        <button mat-menu-item
+                                            (click)="openTaskModal(task); activeDetailTab.set('documents')">
+                                            <mat-icon svgIcon="mdi:file-document-outline"
+                                                class="icon-size-4.5 mr-2 text-emerald-600"></mat-icon>
                                             <span>ឯកសារភ្ជាប់ ({{ task.documents.length }})</span>
                                         </button>
                                     </mat-menu>
@@ -569,26 +603,28 @@
                         </div>
 
                         <!-- BOARD VIEW -->
-                        <div *ngIf="taskViewStyle() === 'board'" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start pt-2">
+                        <div *ngIf="taskViewStyle() === 'board'"
+                            class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start pt-2">
                             <div *ngFor="let col of boardColumns()"
                                 class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex flex-col gap-2.5 min-h-[320px]">
                                 <!-- Column Header -->
                                 <div class="flex items-center justify-between px-1 pb-1">
                                     <div class="flex items-center gap-2">
                                         <span class="w-2 h-2 rounded-full" [ngClass]="col.dotClass"></span>
-                                        <h4 class="text-[14px] font-medium text-slate-800 dark:text-slate-200">{{ col.title }}</h4>
+                                        <h4 class="text-[14px] font-medium text-slate-800 dark:text-slate-200">{{
+                                            col.title }}</h4>
                                     </div>
-                                    <span class="px-2 py-0.2 rounded-full text-[11px] font-medium border" [ngClass]="col.badgeClass">
+                                    <span class="px-2 py-0.2 rounded-full text-[11px] font-medium border"
+                                        [ngClass]="col.badgeClass">
                                         {{ col.count }}
                                     </span>
                                 </div>
 
                                 <!-- Column Tasks Cards -->
                                 <div class="flex flex-col gap-2 flex-1">
-                                    <div *ngFor="let task of col.tasks"
-                                        (click)="openTaskModal(task)"
+                                    <div *ngFor="let task of col.tasks" (click)="openTaskModal(task)"
                                         class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 shadow-2xs hover:shadow-xs hover:border-blue-400 transition-all cursor-pointer space-y-2 group">
-                                        
+
                                         <div class="flex items-center justify-between">
                                             <span class="text-xs font-medium text-slate-700 dark:text-slate-300">
                                                 {{ task.code }}
@@ -598,19 +634,21 @@
                                                 [ngClass]="getPriorityVisual(task.priority).color"></mat-icon>
                                         </div>
 
-                                        <h5 class="text-[14px] font-normal text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                                        <h5
+                                            class="text-[14px] font-normal text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                                             {{ task.title }}
                                         </h5>
 
-                                        <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs text-slate-400">
+                                        <div
+                                            class="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs text-slate-400">
                                             <div class="flex items-center gap-2">
                                                 <span *ngIf="task.comments_count > 0" class="flex items-center gap-0.5">
                                                     <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5"></mat-icon>
-                                                    {{ task.comments_count }}
+                                                    <span>{{ task.comments_count }}</span>
                                                 </span>
                                                 <span *ngIf="task.attachments_count > 0" class="flex items-center gap-0.5">
                                                     <mat-icon svgIcon="mdi:paperclip" class="icon-size-3.5"></mat-icon>
-                                                    {{ task.attachments_count }}
+                                                    <span>{{ task.attachments_count }}</span>
                                                 </span>
                                             </div>
 
@@ -628,14 +666,14 @@
                     </div>
 
                     <!-- ========================================== -->
-                    <!-- TAB 2: PROJECT STATISTICS (ស្ថិតិ)           -->
+                    <!-- TAB: GENERAL / PROJECT STATISTICS (ស្ថិតិគម្រោង) -->
                     <!-- ========================================== -->
-                    <div *ngIf="projectNavTab() === 'general'" class="p-6 space-y-6">
-                        
+                    <div *ngIf="projectNavTab() === 'general'" class="px-6 sm:px-8 py-6 space-y-6 font-kantumruy">
+
                         <!-- Top Breadcrumb -->
                         <div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-3">
                             <button type="button" (click)="clearSelectedProject()"
-                                class="text-[15px] text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-normal">
+                                class="text-[16px] text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer bg-transparent border-none p-0 font-normal">
                                 <span>គម្រោង</span>
                             </button>
                             <span class="text-slate-300 dark:text-slate-600">›</span>
@@ -646,13 +684,13 @@
                         <div class="rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-[#0f284e] text-white p-6 shadow-sm space-y-4 font-kantumruy">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
-                                    <span class="text-xs font-bold uppercase bg-white/20 px-3 py-0.5 rounded-md text-blue-100">{{ proj.code }}</span>
-                                    <h2 class="text-2xl font-medium mt-1 text-white">{{ proj.name }}</h2>
-                                    <p class="text-sm text-blue-200/90 leading-relaxed mt-1">{{ proj.description }}</p>
+                                    <span class="text-[13px] font-bold uppercase bg-white/20 px-3 py-1 rounded-md text-blue-100">{{ proj.code }}</span>
+                                    <h2 class="text-[22px] font-medium mt-1.5 text-white">{{ proj.name }}</h2>
+                                    <p class="text-[15.5px] text-blue-200/90 leading-relaxed mt-1 font-normal">{{ proj.description }}</p>
                                 </div>
                                 <div class="text-right shrink-0">
                                     <span class="text-3xl font-bold text-white">{{ proj.progress }}%</span>
-                                    <span class="text-xs text-blue-200 block">វឌ្ឍនភាពសរុប</span>
+                                    <span class="text-[14px] text-blue-200 block mt-0.5">វឌ្ឍនភាពសរុប</span>
                                 </div>
                             </div>
 
@@ -661,63 +699,94 @@
                                     [style.width.%]="proj.progress"></div>
                             </div>
 
-                            <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between text-xs text-blue-200 gap-2">
+                            <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between text-[14.5px] text-blue-200 gap-2">
                                 <span>កាលវិភាគ៖ {{ proj.start_date | date:'MMM d, y' }} — {{ proj.end_date | date:'MMM d, y' }}</span>
-                                <span class="text-emerald-300 font-semibold flex items-center gap-1">
-                                    <mat-icon svgIcon="mdi:check-circle" class="icon-size-3.5"></mat-icon>
-                                    ស្ថានភាព៖ ដំណើរការល្អ (On Track)
+                                <span class="text-emerald-300 font-medium flex items-center gap-1.5">
+                                    <mat-icon svgIcon="mdi:check-circle" class="icon-size-4 text-emerald-300"></mat-icon>
+                                    <span>ស្ថានភាព៖ ដំណើរការល្អ (On Track)</span>
                                 </span>
                             </div>
                         </div>
 
                         <!-- 4-Card Metrics Grid -->
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-kantumruy">
                             <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 space-y-1">
-                                <span class="text-xs text-slate-400 block">កិច្ចការសរុប</span>
-                                <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ proj.tasks.length }}</p>
-                                <span class="text-[11.5px] text-emerald-600 font-medium">បានបញ្ចប់ {{ (proj.progress * proj.tasks.length / 100) | number:'1.0-0' }} កិច្ចការ</span>
+                                <span class="text-[15px] text-slate-700 dark:text-slate-300 block font-medium">កិច្ចការសរុប</span>
+                                <p class="text-[26px] font-medium text-slate-800 dark:text-white leading-tight mt-0.5">{{ (proj.tasks || []).length }}</p>
+                                <span class="text-[14px] text-emerald-600 dark:text-emerald-400 font-medium block">បានបញ្ចប់ {{ (proj.progress * (proj.tasks?.length || 8) / 100) | number:'1.0-0' }} កិច្ចការ</span>
                             </div>
 
                             <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 space-y-1">
-                                <span class="text-xs text-slate-400 block">សមាជិកក្រុមការងារ</span>
-                                <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ proj.members.length }} នាក់</p>
-                                <span class="text-[11.5px] text-blue-600 font-medium">បែងចែកការងារ ១០០%</span>
+                                <span class="text-[15px] text-slate-700 dark:text-slate-300 block font-medium">សមាជិកក្រុមការងារ</span>
+                                <p class="text-[26px] font-medium text-slate-800 dark:text-white leading-tight mt-0.5">{{ (proj.members || []).length }} នាក់</p>
+                                <span class="text-[14px] text-blue-600 dark:text-blue-400 font-medium block">បែងចែកការងារ ១០០%</span>
                             </div>
 
                             <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 space-y-1">
-                                <span class="text-xs text-slate-400 block">វដ្ត Agile Iteration</span>
-                                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">វដ្តទី ៣</p>
-                                <span class="text-[11.5px] text-slate-400 font-normal">ត្រីមាសទី ៣ (Q3)</span>
+                                <span class="text-[15px] text-slate-700 dark:text-slate-300 block font-medium">វដ្ត Agile Iteration</span>
+                                <p class="text-[26px] font-medium text-indigo-600 dark:text-indigo-400 leading-tight mt-0.5">វដ្តទី ៣</p>
+                                <span class="text-[14px] text-slate-600 dark:text-slate-400 font-medium block">ត្រីមាសទី ៣ (Q3)</span>
                             </div>
 
                             <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 space-y-1">
-                                <span class="text-xs text-slate-400 block">អត្រាសម្រេចទាន់ពេល</span>
-                                <p class="text-2xl font-bold text-emerald-600">95%</p>
-                                <span class="text-[11.5px] text-emerald-600 font-medium">គ្មានកិច្ចការកកស្ទះធ្ងន់ធ្ងរ</span>
+                                <span class="text-[15px] text-slate-700 dark:text-slate-300 block font-medium">អត្រាសម្រេចទាន់ពេល</span>
+                                <p class="text-[26px] font-medium text-emerald-600 dark:text-emerald-400 leading-tight mt-0.5">95%</p>
+                                <span class="text-[14px] text-emerald-600 dark:text-emerald-400 font-medium block">គ្មានកិច្ចការកកស្ទះធ្ងន់ធ្ងរ</span>
                             </div>
                         </div>
 
-                        <!-- Task Status Breakdown -->
-                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 space-y-4">
-                            <h3 class="text-[16px] font-medium text-slate-900 dark:text-white">ការបែងចែកស្ថានភាពកិច្ចការ (Task Distribution)</h3>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                                <div class="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
-                                    <span class="text-xs text-emerald-700 dark:text-emerald-300 font-medium">បានបញ្ចប់ (Completed)</span>
-                                    <p class="text-xl font-bold text-emerald-800 dark:text-emerald-200 mt-1">4 កិច្ចការ</p>
+                        <!-- Charts & Analytics Section with ECharts -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 font-kantumruy">
+                            <!-- Left: Task Distribution Donut EChart -->
+                            <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 space-y-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-[16.5px] font-medium text-slate-800 dark:text-white">ការបែងចែកស្ថានភាពកិច្ចការ (Task Distribution)</h3>
+                                        <p class="text-[13.5px] text-slate-500 mt-0.5">សមាមាត្រកិច្ចការតាមស្ថានភាពជាក់ស្តែង</p>
+                                    </div>
+                                    <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                        {{ (proj.tasks || []).length || 8 }} កិច្ចការ
+                                    </span>
                                 </div>
-                                <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60">
-                                    <span class="text-xs text-blue-700 dark:text-blue-300 font-medium">កំពុងធ្វើ (In Progress)</span>
-                                    <p class="text-xl font-bold text-blue-800 dark:text-blue-200 mt-1">2 កិច្ចការ</p>
+
+                                <!-- ECharts Donut Container -->
+                                <div #taskDistributionChartRef class="w-full h-64"></div>
+
+                                <!-- Mini Status Pills Grid -->
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 font-kantumruy">
+                                    <div class="p-2.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 text-center">
+                                        <span class="text-[12px] text-emerald-800 dark:text-emerald-300 font-medium block truncate">បានបញ្ចប់</span>
+                                        <p class="text-[16px] font-medium text-emerald-900 dark:text-emerald-200 mt-0.5">{{ getTaskCountByStatus('completed') }}</p>
+                                    </div>
+                                    <div class="p-2.5 rounded-lg bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-800/40 text-center">
+                                        <span class="text-[12px] text-blue-800 dark:text-blue-300 font-medium block truncate">កំពុងធ្វើ</span>
+                                        <p class="text-[16px] font-medium text-blue-900 dark:text-blue-200 mt-0.5">{{ getTaskCountByStatus('in_progress') }}</p>
+                                    </div>
+                                    <div class="p-2.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-center">
+                                        <span class="text-[12px] text-amber-800 dark:text-amber-300 font-medium block truncate">រង់ចាំពិនិត្យ</span>
+                                        <p class="text-[16px] font-medium text-amber-900 dark:text-amber-200 mt-0.5">{{ getTaskCountByStatus('review') }}</p>
+                                    </div>
+                                    <div class="p-2.5 rounded-lg bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/40 text-center">
+                                        <span class="text-[12px] text-purple-800 dark:text-purple-300 font-medium block truncate">ថ្មី (To-Do)</span>
+                                        <p class="text-[16px] font-medium text-purple-900 dark:text-purple-200 mt-0.5">{{ getTaskCountByStatus('new') }}</p>
+                                    </div>
                                 </div>
-                                <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60">
-                                    <span class="text-xs text-amber-700 dark:text-amber-300 font-medium">រង់ចាំពិនិត្យ (Review)</span>
-                                    <p class="text-xl font-bold text-amber-800 dark:text-amber-200 mt-1">1 កិច្ចការ</p>
+                            </div>
+
+                            <!-- Right: Weekly Progress & Velocity Trend Area EChart -->
+                            <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 space-y-4 shadow-2xs">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-[16.5px] font-medium text-slate-800 dark:text-white">និន្នាការវឌ្ឍនភាពការងារ (Work Progress Trend)</h3>
+                                        <p class="text-[13.5px] text-slate-500 mt-0.5">ល្បឿននៃការបំពេញកិច្ចការប្រចាំសប្តាហ៍ (Weekly Velocity)</p>
+                                    </div>
+                                    <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        +15% សប្តាហ៍នេះ
+                                    </span>
                                 </div>
-                                <div class="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60">
-                                    <span class="text-xs text-purple-700 dark:text-purple-300 font-medium">ថ្មី (To-Do / New)</span>
-                                    <p class="text-xl font-bold text-purple-800 dark:text-purple-200 mt-1">1 កិច្ចការ</p>
-                                </div>
+
+                                <!-- ECharts Trend Line Container -->
+                                <div #taskTrendChartRef class="w-full h-76"></div>
                             </div>
                         </div>
 
@@ -726,21 +795,25 @@
                     <!-- ========================================== -->
                     <!-- TAB: PLAN GANTT TIMELINE (ផែនការ)           -->
                     <!-- ========================================== -->
-                    <div *ngIf="projectNavTab() === 'plan'" class="flex-1 flex flex-col p-5 space-y-4">
+                    <div *ngIf="projectNavTab() === 'plan'" class="flex-1 flex flex-col px-6 sm:px-8 py-5 space-y-4 font-kantumruy">
                         <!-- Top Header Row -->
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700/60 pb-3">
+                        <div
+                            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700/60 pb-3">
                             <div class="flex items-center gap-2">
                                 <span class="text-[15px] text-slate-500">គម្រោង</span>
                                 <span class="text-slate-300 dark:text-slate-600">›</span>
-                                <span class="text-[16px] font-medium text-slate-900 dark:text-white">ផែនការអនុវត្តគម្រោង (Team Agile Timeline)</span>
-                                <span class="px-2 py-0.2 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                <span class="text-[16px] font-medium text-slate-900 dark:text-white">ផែនការអនុវត្តគម្រោង
+                                    (Team Agile Timeline)</span>
+                                <span
+                                    class="px-2 py-0.2 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                                     {{ (proj.agileTasks || DEFAULT_AGILE_TASKS).length }}
                                 </span>
                             </div>
 
                             <!-- Right: Team Members Stack + Add Plan Button -->
                             <div class="flex flex-wrap items-center gap-3">
-                                <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div
+                                    class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
                                     <span class="text-xs text-slate-500 font-normal">ក្រុមការងារ៖</span>
                                     <div class="flex -space-x-1.5 overflow-hidden items-center">
                                         <div *ngFor="let m of proj.members"
@@ -750,7 +823,8 @@
                                             {{ m.name.charAt(0) }}
                                         </div>
                                     </div>
-                                    <span class="text-xs text-slate-400 font-medium ml-1">({{ proj.members.length }} នាក់)</span>
+                                    <span class="text-xs text-slate-400 font-medium ml-1">({{ proj.members.length }}
+                                        នាក់)</span>
                                 </div>
 
                                 <button type="button" (click)="openAddPlanDialog(proj)"
@@ -762,11 +836,13 @@
                         </div>
 
                         <!-- Gantt Chart Container -->
-                        <div class="w-full overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xs select-none">
+                        <div
+                            class="w-full overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xs select-none">
                             <div class="min-w-[1250px]">
                                 <!-- Header Row 1: Quarters -->
                                 <div class="flex border-b border-white dark:border-slate-800 h-8.5">
-                                    <div class="w-[300px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] px-3.5 py-1 font-medium text-slate-900 dark:text-purple-100 uppercase text-[12.5px] flex items-center border-r border-white dark:border-slate-800">
+                                    <div
+                                        class="w-[300px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] px-3.5 py-1 font-medium text-slate-900 dark:text-purple-100 uppercase text-[12.5px] flex items-center border-r border-white dark:border-slate-800">
                                         <span>ពិពណ៌នាកិច្ចការគម្រោង</span>
                                     </div>
                                     <div class="flex-1 flex">
@@ -780,7 +856,9 @@
 
                                 <!-- Header Row 2: Months -->
                                 <div class="flex border-b border-white dark:border-slate-800 h-7.5">
-                                    <div class="w-[300px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] border-r border-white dark:border-slate-800"></div>
+                                    <div
+                                        class="w-[300px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] border-r border-white dark:border-slate-800">
+                                    </div>
                                     <div class="flex-1 flex">
                                         <div *ngFor="let m of months"
                                             class="h-full flex items-center justify-center text-center font-medium text-[11.5px] uppercase border-r border-white dark:border-slate-800"
@@ -791,8 +869,11 @@
                                 </div>
 
                                 <!-- Header Row 3: Week Numbers (14 through 40) -->
-                                <div class="flex border-b-2 border-slate-300 dark:border-slate-700 bg-[#e2e8f0] dark:bg-slate-800 h-7">
-                                    <div class="w-[300px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] border-r border-white dark:border-slate-800"></div>
+                                <div
+                                    class="flex border-b-2 border-slate-300 dark:border-slate-700 bg-[#e2e8f0] dark:bg-slate-800 h-7">
+                                    <div
+                                        class="w-[300px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] border-r border-white dark:border-slate-800">
+                                    </div>
                                     <div class="flex-1 flex">
                                         <div *ngFor="let week of weeks"
                                             class="flex-1 h-full flex items-center justify-center text-center font-medium text-[11px] border-r border-white dark:border-slate-700 relative"
@@ -808,19 +889,23 @@
                                 <div class="divide-y divide-white dark:divide-slate-800">
                                     <div *ngFor="let task of (proj.agileTasks || DEFAULT_AGILE_TASKS)"
                                         class="flex items-stretch h-9.5 hover:brightness-98 dark:hover:brightness-105 transition-colors">
-                                        
-                                        <div class="w-[300px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] px-3.5 py-1 font-normal text-[14px] text-slate-900 dark:text-slate-100 truncate border-r border-white dark:border-slate-800 flex items-center justify-between group/row">
+
+                                        <div
+                                            class="w-[300px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] px-3.5 py-1 font-normal text-[14px] text-slate-900 dark:text-slate-100 truncate border-r border-white dark:border-slate-800 flex items-center justify-between group/row">
                                             <span class="truncate pr-2" [title]="task.name">{{ task.name }}</span>
                                             <button type="button" (click)="deleteAgileTask(proj, task.id, $event)"
                                                 class="opacity-0 group-hover/row:opacity-100 text-slate-400 hover:text-red-600 transition-opacity p-0.5 rounded cursor-pointer shrink-0"
                                                 [matTooltip]="'លុបដំណាក់កាលនេះ'">
-                                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-3.5"></mat-icon>
+                                                <mat-icon svgIcon="mdi:trash-can-outline"
+                                                    class="icon-size-3.5"></mat-icon>
                                             </button>
                                         </div>
 
-                                        <div class="flex-1 relative flex items-center bg-slate-100/70 dark:bg-slate-800/40">
+                                        <div
+                                            class="flex-1 relative flex items-center bg-slate-100/70 dark:bg-slate-800/40">
                                             <div class="absolute inset-0 flex pointer-events-none">
-                                                <div *ngFor="let week of weeks" class="flex-1 border-r border-white dark:border-slate-800/80"></div>
+                                                <div *ngFor="let week of weeks"
+                                                    class="flex-1 border-r border-white dark:border-slate-800/80"></div>
                                             </div>
 
                                             <div class="absolute top-0 bottom-0 pointer-events-none z-20 border-l-2 border-red-500/80"
@@ -833,7 +918,8 @@
                                                         [style.left.%]="getSegmentLeftPercent(seg.startWeek)"
                                                         [style.width.%]="getSegmentWidthPercent(seg.durationWeeks)"
                                                         [matTooltip]="task.name + ' - វដ្តទី ' + seg.iteration + ' (សប្តាហ៍ទី ' + seg.startWeek + ', រយៈពេល ' + seg.durationWeeks + 'W)'">
-                                                        <span *ngIf="seg.label" class="truncate px-1 tracking-tight text-white font-semibold">
+                                                        <span *ngIf="seg.label"
+                                                            class="truncate px-1 tracking-tight text-white font-semibold">
                                                             {{ seg.label }}
                                                         </span>
                                                     </div>
@@ -846,13 +932,15 @@
                         </div>
 
                         <!-- Legends -->
-                        <div class="flex flex-wrap items-center gap-6 text-[13px] font-medium text-slate-800 dark:text-slate-200 pt-1 px-1">
+                        <div
+                            class="flex flex-wrap items-center gap-6 text-[13px] font-medium text-slate-800 dark:text-slate-200 pt-1 px-1">
+                            <span class="text-slate-700 dark:text-slate-400 font-medium">កំណែប្រែវដ្ត (Agile Iteration):</span>
                             <div class="flex items-center gap-2">
-                                <div class="w-9 h-4.5 rounded-[3px] bg-[#f59e0b] shadow-2xs"></div>
+                                <div class="w-9 h-4.5 rounded-[3px] bg-[#1e293b] shadow-2xs"></div>
                                 <span>វដ្តទី ១ (Iteration 1)</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <div class="w-9 h-4.5 rounded-[3px] bg-[#f43f5e] shadow-2xs"></div>
+                                <div class="w-9 h-4.5 rounded-[3px] bg-[#0284c7] shadow-2xs"></div>
                                 <span>វដ្តទី ២ (Iteration 2)</span>
                             </div>
                             <div class="flex items-center gap-2">
@@ -863,24 +951,54 @@
                     </div>
                     <!-- TAB 4: PHASES / MILESTONES (ដំណាក់កាល)     -->
                     <!-- ========================================== -->
-                    <div *ngIf="projectNavTab() === 'phases'" class="p-6 space-y-4">
-                        <h3 class="text-lg font-medium text-slate-900 dark:text-white">ដំណាក់កាលគម្រោង (Project Phases)</h3>
+                    <div *ngIf="projectNavTab() === 'phases'" class="px-6 sm:px-8 py-6 space-y-5 font-kantumruy">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h3 class="text-lg font-medium text-slate-900 dark:text-white">ដំណាក់កាលគម្រោង (Project Phases)</h3>
+                                <p class="text-[13px] text-slate-400">គ្រប់គ្រងដំណាក់កាល និងវដ្តអភិវឌ្ឍន៍របស់គម្រោង</p>
+                            </div>
+                            <button type="button" (click)="openCreatePhaseModal()"
+                                class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto">
+                                <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                                <span>បង្កើតដំណាក់កាល</span>
+                            </button>
+                        </div>
+
                         <div class="space-y-3">
                             <div *ngFor="let ph of proj.phases"
-                                class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <h4 class="font-medium text-slate-900 dark:text-white">{{ ph.title }}</h4>
-                                    <p class="text-xs text-slate-400">{{ ph.quarter }} • {{ ph.startDate }} — {{ ph.endDate }} ({{ ph.tasksCount }} កិច្ចការ)</p>
+                                class="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-2.5 h-2.5 rounded-full"
+                                            [ngClass]="ph.status === 'completed' ? 'bg-emerald-500' : (ph.status === 'in_progress' ? 'bg-blue-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600')"></div>
+                                        <h4 class="text-[16px] font-medium text-slate-900 dark:text-white">{{ ph.title }}</h4>
+                                    </div>
+                                    <p class="text-[13px] text-slate-400 pl-5">
+                                        {{ ph.quarter }} • {{ ph.startDate }} — {{ ph.endDate }} <span *ngIf="ph.tasksCount">({{ ph.tasksCount }} កិច្ចការ)</span>
+                                    </p>
                                 </div>
-                                <span *ngIf="ph.status === 'completed'" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
-                                    បានបញ្ចប់
-                                </span>
-                                <span *ngIf="ph.status === 'in_progress'" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 self-start sm:self-auto">
-                                    កំពុងដំណើរការ
-                                </span>
-                                <span *ngIf="ph.status === 'planned'" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 self-start sm:self-auto">
-                                    គ្រោងទុក
-                                </span>
+
+                                <div class="flex items-center gap-3 self-end sm:self-auto pl-5 sm:pl-0">
+                                    <span *ngIf="ph.status === 'completed'"
+                                        class="px-3 py-1 rounded-full text-[13px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                                        បានបញ្ចប់
+                                    </span>
+                                    <span *ngIf="ph.status === 'in_progress'"
+                                        class="px-3 py-1 rounded-full text-[13px] font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                                        កំពុងដំណើរការ
+                                    </span>
+                                    <span *ngIf="ph.status === 'planned'"
+                                        class="px-3 py-1 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                        គ្រោងទុក
+                                    </span>
+
+                                    <!-- Delete Button -->
+                                    <button type="button" (click)="deletePhase(ph.id, $event)"
+                                        class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                                        [matTooltip]="'លុបដំណាក់កាលនេះ'">
+                                        <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -888,17 +1006,37 @@
                     <!-- ========================================== -->
                     <!-- TAB 5: TEAM MEMBERS (ក្រុមការងារ)          -->
                     <!-- ========================================== -->
-                    <div *ngIf="projectNavTab() === 'team'" class="p-6 space-y-4">
-                        <h3 class="text-lg font-medium text-slate-900 dark:text-white">សមាជិកក្រុមការងារ ({{ proj.members.length }} នាក់)</h3>
+                    <div *ngIf="projectNavTab() === 'team'" class="px-6 sm:px-8 py-6 space-y-5 font-kantumruy">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h3 class="text-lg font-medium text-slate-900 dark:text-white">សមាជិកក្រុមការងារ ({{ proj.members.length }} នាក់)</h3>
+                                <p class="text-[14px] text-slate-400">បញ្ជីសមាជិកដែលចូលរួមក្នុងការអភិវឌ្ឍគម្រោងនេះ</p>
+                            </div>
+                            <button type="button" (click)="openCreateMemberModal()"
+                                class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto">
+                                <mat-icon svgIcon="mdi:account-plus-outline" class="icon-size-4.5 text-white"></mat-icon>
+                                <span>បន្ថែមសមាជិក</span>
+                            </button>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            <div *ngFor="let m of proj.members" class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-sm">
-                                    {{ m.name.charAt(0) }}
+                            <div *ngFor="let m of proj.members"
+                                class="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:shadow-xs hover:border-blue-300 dark:hover:border-blue-700 transition-all flex items-center justify-between gap-4 group">
+                                <div class="flex items-center gap-4 min-w-0 flex-1">
+                                    <div class="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-blue-100 text-blue-900 dark:bg-blue-950/70 dark:text-blue-300 font-semibold text-[18px] flex items-center justify-center ring-2 ring-blue-50 dark:ring-blue-900/30 shrink-0">
+                                        {{ m.name.charAt(0) }}
+                                    </div>
+                                    <div class="min-w-0 flex-1 space-y-0.5">
+                                        <h4 class="text-[16px] font-medium text-slate-900 dark:text-white truncate">{{ m.name }}</h4>
+                                        <p class="text-[14px] text-slate-500 dark:text-slate-400 truncate">{{ m.role }}</p>
+                                        <p *ngIf="m.email" class="text-[13px] text-slate-400 dark:text-slate-500 truncate">{{ m.email }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-slate-900 dark:text-white">{{ m.name }}</h4>
-                                    <p class="text-xs text-slate-400">{{ m.role }}</p>
-                                </div>
+                                <button type="button" (click)="deleteMember(m.id, $event)"
+                                    class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
+                                    [matTooltip]="'ដកសមាជិកនេះ'">
+                                    <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -906,38 +1044,63 @@
                     <!-- ========================================== -->
                     <!-- TAB 6: MEETINGS (កិច្ចប្រជុំ)              -->
                     <!-- ========================================== -->
-                    <div *ngIf="projectNavTab() === 'meetings'" class="p-6 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-medium text-slate-900 dark:text-white">កិច្ចប្រជុំគម្រោង (Meetings)</h3>
+                    <div *ngIf="projectNavTab() === 'meetings'" class="px-6 sm:px-8 py-6 space-y-5 font-kantumruy">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h3 class="text-lg font-medium text-slate-900 dark:text-white">កិច្ចប្រជុំគម្រោង (Meetings)</h3>
+                                <p class="text-[14px] text-slate-400">កាលវិភាគ និងតំណភ្ជាប់ចូលរួមប្រជុំតាមអនឡាញ</p>
+                            </div>
+                            <button type="button" (click)="openCreateMeetingModal()"
+                                class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto">
+                                <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                                <span>បង្កើតកិច្ចប្រជុំ</span>
+                            </button>
                         </div>
 
                         <div class="space-y-3">
                             <div *ngFor="let m of proj.meetings"
-                                class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                    <div class="space-y-0.5">
+                                class="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:shadow-xs transition-all space-y-3 group">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div class="space-y-1">
                                         <div class="flex items-center gap-2">
-                                            <span class="text-xs font-medium px-2 py-0.5 rounded-md"
-                                                [ngClass]="m.status === 'upcoming' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600 border border-slate-200'">
+                                            <span class="text-[13px] font-medium px-2.5 py-0.5 rounded-full"
+                                                [ngClass]="m.status === 'upcoming' ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800' : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'">
                                                 {{ m.status === 'upcoming' ? 'ជិតមកដល់' : 'បានបញ្ចប់' }}
                                             </span>
-                                            <span class="text-xs text-blue-600 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
+                                            <span
+                                                class="text-[13px] font-medium text-blue-600 bg-blue-50 dark:bg-blue-950/60 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
                                                 {{ m.platform }}
                                             </span>
                                         </div>
-                                        <h4 class="font-medium text-slate-900 dark:text-white">{{ m.title }}</h4>
-                                        <p class="text-xs text-slate-400">{{ m.description }}</p>
+                                        <h4 class="text-[16px] font-medium text-slate-900 dark:text-white">{{ m.title }}</h4>
+                                        <p class="text-[14px] text-slate-500 dark:text-slate-400">{{ m.description }}</p>
                                     </div>
 
-                                    <a *ngIf="m.status === 'upcoming'" [href]="m.link" target="_blank"
-                                        class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
-                                        <mat-icon svgIcon="mdi:video-outline" class="icon-size-4"></mat-icon>
-                                        <span>ចូលរួមប្រជុំ</span>
-                                    </a>
+                                    <div class="flex items-center gap-2.5 self-start sm:self-auto">
+                                        <a *ngIf="m.status === 'upcoming'" [href]="m.link" target="_blank"
+                                            class="h-10 px-4 rounded-xl border border-blue-200 dark:border-blue-800/80 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer transition-colors">
+                                            <mat-icon svgIcon="mdi:video-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                                            <span>ចូលរួមប្រជុំ</span>
+                                        </a>
+
+                                        <!-- Delete Button -->
+                                        <button type="button" (click)="deleteMeeting(m.id, $event)"
+                                            class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                                            [matTooltip]="'លុបកិច្ចប្រជុំនេះ'">
+                                            <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs text-slate-400">
-                                    <span>{{ m.date }} • {{ m.time }}</span>
-                                    <span>{{ m.attendees.length }} នាក់ចូលរួម</span>
+                                <div
+                                    class="pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[14px] text-slate-500 dark:text-slate-400">
+                                    <span class="flex items-center gap-1.5">
+                                        <mat-icon svgIcon="mdi:calendar-outline" class="icon-size-4 text-slate-400"></mat-icon>
+                                        {{ m.date }} • {{ m.time }}
+                                    </span>
+                                    <span class="flex items-center gap-1.5">
+                                        <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-4 text-slate-400"></mat-icon>
+                                        {{ m.attendees.length }} នាក់ចូលរួម
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -946,56 +1109,85 @@
                     <!-- ========================================== -->
                     <!-- TAB 7: LINKS & RESOURCES (តំណភ្ជាប់)        -->
                     <!-- ========================================== -->
-                    <div *ngIf="projectNavTab() === 'links'" class="p-6 space-y-4">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <h3 class="text-lg font-medium text-slate-900 dark:text-white">តំណភ្ជាប់គម្រោង ({{ allProjectLinks().length }})</h3>
+                    <div *ngIf="projectNavTab() === 'links'" class="px-6 sm:px-8 py-6 space-y-5 font-kantumruy">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h3 class="text-lg font-medium text-slate-900 dark:text-white">តំណភ្ជាប់គម្រោង ({{ allProjectLinks().length }})</h3>
+                                <p class="text-[14px] text-slate-400">តំណភ្ជាប់ឯកសារ និងប្រភពធនធាននានារបស់គម្រោង</p>
+                            </div>
 
-                            <!-- Search Box -->
-                            <div class="relative flex items-center">
-                                <mat-icon svgIcon="mdi:magnify" class="icon-size-4 absolute left-2.5 text-slate-400 pointer-events-none"></mat-icon>
-                                <input type="text" placeholder="ស្វែងរកតំណភ្ជាប់..."
-                                    [ngModel]="linkSearchQuery()" (ngModelChange)="linkSearchQuery.set($event)"
-                                    class="w-full sm:w-56 pl-8 pr-2.5 py-1 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-white placeholder-slate-400" />
+                            <div class="flex items-center gap-3">
+                                <!-- Search Box -->
+                                <div class="relative flex items-center">
+                                    <mat-icon svgIcon="mdi:magnify"
+                                        class="icon-size-4 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
+                                    <input type="text" placeholder="ស្វែងរកតំណភ្ជាប់..." [ngModel]="linkSearchQuery()"
+                                        (ngModelChange)="linkSearchQuery.set($event)"
+                                        class="w-full sm:w-56 pl-9 pr-3 py-2 text-[14px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-white placeholder-slate-400 font-kantumruy" />
+                                </div>
+
+                                <!-- Add Link Button -->
+                                <button type="button" (click)="openCreateLinkModal()"
+                                    class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0">
+                                    <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                                    <span>បន្ថែមតំណភ្ជាប់</span>
+                                </button>
                             </div>
                         </div>
 
                         <!-- Links List -->
-                        <div class="space-y-2.5">
+                        <div class="space-y-3">
                             <div *ngFor="let item of allProjectLinks()"
-                                class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors group">
-                                <div class="flex items-center gap-3 min-w-0 pr-3">
-                                    <mat-icon [svgIcon]="getLinkIcon(item.type)" class="icon-size-5 text-blue-600 shrink-0"></mat-icon>
+                                class="p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 flex items-center justify-between hover:shadow-xs transition-all group">
+                                <div class="flex items-center gap-3.5 min-w-0 pr-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40">
+                                        <mat-icon [svgIcon]="getLinkIcon(item.type)"
+                                            class="icon-size-5 text-blue-600 dark:text-blue-400"></mat-icon>
+                                    </div>
                                     <div class="min-w-0">
-                                        <a [href]="item.url" target="_blank" class="text-[15px] font-medium text-blue-600 dark:text-blue-400 hover:underline block truncate">
+                                        <a [href]="item.url" target="_blank"
+                                            class="text-[16px] font-medium text-blue-600 dark:text-blue-400 hover:underline block truncate">
                                             {{ item.title }}
                                         </a>
-                                        <span class="text-xs text-slate-400 truncate block">{{ item.url }}</span>
+                                        <span class="text-[13.5px] text-slate-400 truncate block">{{ item.url }}</span>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center gap-3 shrink-0">
-                                    <span class="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md">
+                                    <span
+                                        class="text-[13px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg">
                                         {{ item.taskCode }}
                                     </span>
 
                                     <!-- Copy Link -->
                                     <button type="button" (click)="copyLinkUrl(item.url, item.id)"
-                                        class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg cursor-pointer"
+                                        class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors"
                                         [matTooltip]="copiedLinkId() === item.id ? 'បានចម្លង!' : 'ចម្លងតំណ'">
-                                        <mat-icon [svgIcon]="copiedLinkId() === item.id ? 'mdi:check' : 'mdi:content-copy'" class="icon-size-4" [ngClass]="copiedLinkId() === item.id ? 'text-emerald-600' : ''"></mat-icon>
+                                        <mat-icon
+                                            [svgIcon]="copiedLinkId() === item.id ? 'mdi:check' : 'mdi:content-copy'"
+                                            class="icon-size-4.5"
+                                            [ngClass]="copiedLinkId() === item.id ? 'text-emerald-600' : ''"></mat-icon>
                                     </button>
 
                                     <!-- Open Link -->
                                     <a [href]="item.url" target="_blank"
-                                        class="text-slate-400 hover:text-blue-600 p-1 rounded-lg cursor-pointer"
+                                        class="w-8 h-8 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-center cursor-pointer transition-colors"
                                         [matTooltip]="'បើកមើល'">
-                                        <mat-icon svgIcon="mdi:open-in-new" class="icon-size-4"></mat-icon>
+                                        <mat-icon svgIcon="mdi:open-in-new" class="icon-size-4.5"></mat-icon>
                                     </a>
+
+                                    <!-- Delete Link -->
+                                    <button type="button" (click)="deleteProjectLink(item.id, $event)"
+                                        class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center cursor-pointer transition-colors"
+                                        [matTooltip]="'លុបតំណភ្ជាប់'">
+                                        <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
+                                    </button>
                                 </div>
                             </div>
 
-                            <div *ngIf="allProjectLinks().length === 0" class="p-8 text-center text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
-                                <span class="text-xs">មិនមានតំណភ្ជាប់ត្រូវគ្នានឹងការស្វែងរកទេ</span>
+                            <div *ngIf="allProjectLinks().length === 0"
+                                class="p-8 text-center text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+                                <span class="text-[14px]">មិនមានតំណភ្ជាប់ត្រូវគ្នានឹងការស្វែងរកទេ</span>
                             </div>
                         </div>
                     </div>
@@ -1012,143 +1204,400 @@
     <!-- TASK DETAIL SIDE-DRAWER MODAL                                             -->
     <!-- ========================================================================= -->
     <div *ngIf="activeTaskModal() as currentTask"
-        class="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-all">
-        
-        <div class="w-full max-w-xl h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col font-kantumruy border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-200">
-            
-            <!-- Drawer Header -->
-            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3 bg-slate-50 dark:bg-slate-900/80">
-                <div class="space-y-1">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold uppercase tracking-wider text-purple-600 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded-md">
+        class="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs transition-all font-kantumruy">
+
+        <div
+            class="w-full max-w-xl h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col font-kantumruy border-l border-slate-200 dark:border-slate-800 relative animate-in slide-in-from-right duration-200">
+
+            <!-- Floating Circular Close Button on Left Edge -->
+            <button type="button" (click)="closeTaskModal()"
+                class="hidden md:flex -left-5 top-4 absolute w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 items-center justify-center text-slate-600 dark:text-slate-300 hover:text-rose-600 cursor-pointer z-50 transition-colors"
+                [matTooltip]="'បិទ'">
+                <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+            </button>
+            <button type="button" (click)="closeTaskModal()"
+                class="md:hidden absolute left-3 top-3 text-slate-500 z-50">
+                <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
+            </button>
+
+            <!-- Centered Standard Dialog Header (56px) -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 font-kantumruy bg-white dark:bg-slate-900 relative px-4 shrink-0">
+                <span class="w-full text-center text-[20px] font-medium font-kantumruy text-slate-800 dark:text-slate-200">
+                    ពត៌មានលម្អិតការងារ
+                </span>
+                <button [matMenuTriggerFor]="taskDrawerTopMenu"
+                    class="absolute right-3 top-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-5"></mat-icon>
+                </button>
+                <mat-menu #taskDrawerTopMenu="matMenu" class="font-kantumruy min-w-[170px]">
+                    <button mat-menu-item (click)="activeDetailTab.set('chat')">
+                        <mat-icon svgIcon="mdi:forum-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                        <span>ការពិភាក្សា (Chat)</span>
+                    </button>
+                    <button mat-menu-item (click)="activeDetailTab.set('subtasks')">
+                        <mat-icon svgIcon="mdi:checkbox-marked-circle-outline" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
+                        <span>ការងាររង (Subtasks)</span>
+                    </button>
+                    <button mat-menu-item (click)="activeDetailTab.set('members')">
+                        <mat-icon svgIcon="mdi:account-multiple-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
+                        <span>សមាជិក (Members)</span>
+                    </button>
+                    <button mat-menu-item (click)="activeDetailTab.set('links')">
+                        <mat-icon svgIcon="mdi:link-variant" class="text-cyan-500 !w-4.5 !h-4.5"></mat-icon>
+                        <span>តំណភ្ជាប់ (Links)</span>
+                    </button>
+                    <button mat-menu-item (click)="activeDetailTab.set('documents')">
+                        <mat-icon svgIcon="mdi:file-document-outline" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                        <span>ឯកសារ (Documents)</span>
+                    </button>
+                </mat-menu>
+            </div>
+
+            <!-- Task Top Status Bar -->
+            <div
+                class="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 shrink-0 space-y-2.5 font-kantumruy">
+                <!-- Top row: Code, Status Dropdown, Priority Dropdown -->
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span
+                            class="text-xs font-bold uppercase tracking-wider text-purple-600 bg-purple-50 dark:bg-purple-950/40 px-2.5 py-1 rounded-md border border-purple-200/60 dark:border-purple-900/40 font-mono">
                             {{ currentTask.code }}
                         </span>
-                        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full border"
+
+                        <!-- Status Badge Pill with Dropdown Menu -->
+                        <button [matMenuTriggerFor]="modalStatusMenu"
+                            class="inline-flex items-center gap-1.5 text-[12.5px] font-medium px-2.5 py-0.5 rounded-full border transition-all cursor-pointer shadow-2xs hover:opacity-90"
                             [ngClass]="getTaskStatusClass(currentTask.status)">
-                            <mat-icon [svgIcon]="getTaskStatusIcon(currentTask.status)" class="icon-size-3.5"></mat-icon>
+                            <mat-icon [svgIcon]="getTaskStatusIcon(currentTask.status)"
+                                class="icon-size-3.5"></mat-icon>
                             <span>{{ getTaskStatusLabel(currentTask.status) }}</span>
-                        </span>
+                            <mat-icon svgIcon="mdi:chevron-down" class="icon-size-3.5 opacity-70"></mat-icon>
+                        </button>
+                        <mat-menu #modalStatusMenu="matMenu" class="min-w-[170px] font-kantumruy">
+                            <button mat-menu-item (click)="updateTaskStatus(currentTask, 'new')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>ថ្មី (New)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(currentTask, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>បញ្ជាក់ (Confirmed)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(currentTask, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>មិនបញ្ជាក់ (Unconfirmed)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(currentTask, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>កំពុងធ្វើ (In Progress)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(currentTask, 'review')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>ស្នើពិនិត្យ (In Review)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(currentTask, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>បើកឡើងវិញ (Reopened)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(currentTask, 'done')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>បញ្ចប់ (Done)</span>
+                            </button>
+                        </mat-menu>
+
+                        <!-- Priority Badge Pill with Dropdown Menu -->
+                        <button [matMenuTriggerFor]="modalPriorityMenu"
+                            class="inline-flex items-center gap-1 text-[11.5px] px-2.5 py-0.5 rounded-md font-medium border cursor-pointer shadow-2xs hover:opacity-90 transition-all"
+                            [ngClass]="getPriorityClass(currentTask.priority)">
+                            <mat-icon [svgIcon]="getPriorityVisual(currentTask.priority).icon" class="icon-size-3.5"></mat-icon>
+                            <span>{{ getPriorityLabel(currentTask.priority) }}</span>
+                            <mat-icon svgIcon="mdi:chevron-down" class="icon-size-3 opacity-60"></mat-icon>
+                        </button>
+                        <mat-menu #modalPriorityMenu="matMenu" class="min-w-[150px] font-kantumruy">
+                            <button mat-menu-item (click)="currentTask.priority = 'urgent'" class="!text-[14px] flex items-center gap-2">
+                                <mat-icon svgIcon="mdi:alert-octagon" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span class="text-rose-600 font-medium">បន្ទាន់ (Urgent)</span>
+                            </button>
+                            <button mat-menu-item (click)="currentTask.priority = 'high'" class="!text-[14px] flex items-center gap-2">
+                                <mat-icon svgIcon="mdi:arrow-up-bold" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span class="text-amber-600 font-medium">ខ្ពស់ (High)</span>
+                            </button>
+                            <button mat-menu-item (click)="currentTask.priority = 'medium'" class="!text-[14px] flex items-center gap-2">
+                                <mat-icon svgIcon="mdi:equal" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span class="text-blue-600 font-medium">មធ្យម (Medium)</span>
+                            </button>
+                            <button mat-menu-item (click)="currentTask.priority = 'low'" class="!text-[14px] flex items-center gap-2">
+                                <mat-icon svgIcon="mdi:arrow-down-bold" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span class="text-slate-600 font-medium">ទាប (Low)</span>
+                            </button>
+                        </mat-menu>
                     </div>
-                    <h3 class="text-lg font-medium text-slate-900 dark:text-white leading-tight">
-                        {{ currentTask.title }}
-                    </h3>
                 </div>
 
-                <button type="button" (click)="closeTaskModal()"
-                    class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center cursor-pointer transition-colors">
-                    <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
-                </button>
+                <!-- Title -->
+                <h3 class="text-lg sm:text-[19px] font-medium text-slate-900 dark:text-white leading-snug">
+                    {{ currentTask.title }}
+                </h3>
+
+                <!-- Sub-row: Module / Project • Reporter • Assignee -->
+                <div class="flex items-center gap-2.5 text-[13px] text-slate-500 dark:text-slate-400 flex-wrap">
+                    <!-- Module / Project -->
+                    <span class="flex items-center gap-1">
+                        <mat-icon svgIcon="mdi:folder-outline" class="icon-size-4 text-slate-400"></mat-icon>
+                        <span>{{ selectedProject()?.name || 'Core System Structure' }}</span>
+                    </span>
+                    <span>•</span>
+
+                    <!-- Reporter -->
+                    <div class="flex items-center gap-1.5" [matTooltip]="'អ្នករាយការណ៍ (Reporter)'">
+                        <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden">
+                            <span>ឡ</span>
+                        </div>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">ឡេង សុខជាយ</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-medium">Reporter</span>
+                    </div>
+                    <span>•</span>
+
+                    <!-- Assignee -->
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-5 h-5 rounded-full ring-1.5 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden shrink-0">
+                            <img *ngIf="currentTask.assignee?.avatar" [src]="currentTask.assignee.avatar" class="w-full h-full object-cover" />
+                            <span *ngIf="!currentTask.assignee?.avatar">{{ currentTask.assignee?.initial || currentTask.assignee?.name?.charAt(0) || 'A' }}</span>
+                        </div>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ currentTask.assignee?.name || 'ចេង ច័ន្ទបញ្ញា' }}</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-medium">Assignee (1)</span>
+                    </div>
+                </div>
+
+                <!-- Date to do Pill Row -->
+                <div class="pt-0.5 flex items-center gap-2">
+                    <div
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium"
+                        [ngClass]="getDaysRemainingInfo(currentTask.due_date).isOverdue 
+                            ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/50' 
+                            : 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-800/50'">
+                        <mat-icon svgIcon="mdi:calendar-edit" class="icon-size-3.5"></mat-icon>
+                        <span>ថ្ងៃត្រូវធ្វើ៖ <strong>{{ getTaskDateToDo(currentTask.due_date, currentTask.created_at) }}</strong></span>
+                        <span class="opacity-60">•</span>
+                        <span class="flex items-center gap-0.5">
+                            <span *ngIf="getDaysRemainingInfo(currentTask.due_date).isOverdue">🚩</span>
+                            <span>{{ getDaysRemainingInfo(currentTask.due_date).text }}</span>
+                        </span>
+                    </div>
+                </div>
             </div>
 
             <!-- Drawer Tabs Navigation -->
-            <div class="flex items-center border-b border-slate-200 dark:border-slate-800 px-5 gap-4 overflow-x-auto [scrollbar-width:none]">
+            <div
+                class="flex items-center border-b border-slate-200 dark:border-slate-800 px-5 gap-4 overflow-x-auto [scrollbar-width:none]">
+                <button type="button" (click)="activeDetailTab.set('chat')"
+                    class="py-3 text-[16px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    [ngClass]="activeDetailTab() === 'chat' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'">
+                    <mat-icon svgIcon="mdi:forum-outline" class="icon-size-5"></mat-icon>
+                    <span>ការពិភាក្សា</span>
+                    <span class="px-2 py-0.5 rounded-full text-[12px] font-medium"
+                        [ngClass]="activeDetailTab() === 'chat' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-750 text-slate-600 dark:text-slate-300'">
+                        {{ currentTaskChatMessages().length }}
+                    </span>
+                </button>
+
                 <button type="button" (click)="activeDetailTab.set('subtasks')"
-                    class="py-3 text-[14px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer"
-                    [ngClass]="activeDetailTab() === 'subtasks' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900'">
-                    <mat-icon svgIcon="mdi:format-list-checks" class="icon-size-4.5"></mat-icon>
+                    class="py-3 text-[16px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    [ngClass]="activeDetailTab() === 'subtasks' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'">
+                    <mat-icon svgIcon="mdi:format-list-checks" class="icon-size-5"></mat-icon>
                     <span>កិច្ចការរង ({{ currentTask.subtasks.length }})</span>
                 </button>
 
                 <button type="button" (click)="activeDetailTab.set('members')"
-                    class="py-3 text-[14px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer"
-                    [ngClass]="activeDetailTab() === 'members' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900'">
-                    <mat-icon svgIcon="mdi:account-group" class="icon-size-4.5"></mat-icon>
+                    class="py-3 text-[16px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    [ngClass]="activeDetailTab() === 'members' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'">
+                    <mat-icon svgIcon="mdi:account-group" class="icon-size-5"></mat-icon>
                     <span>សមាជិក ({{ currentTask.members.length }})</span>
                 </button>
 
                 <button type="button" (click)="activeDetailTab.set('links')"
-                    class="py-3 text-[14px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer"
-                    [ngClass]="activeDetailTab() === 'links' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900'">
-                    <mat-icon svgIcon="mdi:link-variant" class="icon-size-4.5"></mat-icon>
+                    class="py-3 text-[16px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    [ngClass]="activeDetailTab() === 'links' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'">
+                    <mat-icon svgIcon="mdi:link-variant" class="icon-size-5"></mat-icon>
                     <span>តំណភ្ជាប់ ({{ currentTask.links.length }})</span>
                 </button>
 
                 <button type="button" (click)="activeDetailTab.set('documents')"
-                    class="py-3 text-[14px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer"
-                    [ngClass]="activeDetailTab() === 'documents' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900'">
-                    <mat-icon svgIcon="mdi:file-document-outline" class="icon-size-4.5"></mat-icon>
+                    class="py-3 text-[16px] font-medium border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                    [ngClass]="activeDetailTab() === 'documents' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'">
+                    <mat-icon svgIcon="mdi:file-document-outline" class="icon-size-5"></mat-icon>
                     <span>ឯកសារ ({{ currentTask.documents.length }})</span>
                 </button>
             </div>
 
             <!-- Drawer Body -->
-            <div class="flex-1 overflow-y-auto p-5 space-y-6">
-                <!-- Subtasks -->
-                <div *ngIf="activeDetailTab() === 'subtasks'" class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">បញ្ជីកិច្ចការរងលម្អិត</span>
-                        <span class="text-xs text-slate-400 font-medium">វឌ្ឍនភាព៖ {{ currentTask.progress }}%</span>
+            <div class="flex-1 overflow-y-auto p-5 space-y-6"
+                [ngClass]="activeDetailTab() === 'chat' ? 'bg-slate-50/50 dark:bg-slate-900/40 p-4 sm:p-5' : ''">
+
+                <!-- 💬 Tab 1: Chat Room (ការពិភាក្សា) -->
+                <div *ngIf="activeDetailTab() === 'chat'" class="space-y-4">
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-[13px] sm:text-[14px] font-medium uppercase tracking-wider text-slate-400">
+                            បន្ទប់ពិភាក្សាកិច្ចការ (TASK DISCUSSION ROOM)
+                        </span>
+                        <span class="text-[13px] sm:text-[14px] text-slate-400 font-normal">
+                            {{ currentTaskChatMessages().length }} សារ
+                        </span>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <input type="text" placeholder="បញ្ចូលកិច្ចការរងថ្មី..." [ngModel]="newSubtaskTitle()" (ngModelChange)="newSubtaskTitle.set($event)"
-                            (keydown.enter)="addSubtask(currentTask)"
-                            class="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                    <!-- Messages Stream -->
+                    <div class="space-y-4 pt-1">
+                        <ng-container *ngFor="let msg of currentTaskChatMessages()">
+                            <!-- System notification -->
+                            <div *ngIf="msg.is_system" class="flex items-center justify-center my-2">
+                                <div class="px-4 py-1.5 rounded-full text-[14px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 max-w-[90%] text-center shadow-2xs font-normal">
+                                    {{ msg.text }}
+                                </div>
+                            </div>
+
+                            <!-- Chat bubble row -->
+                            <div *ngIf="!msg.is_system" class="flex items-start gap-3"
+                                [ngClass]="msg.is_self ? 'flex-row-reverse' : 'flex-row'">
+                                <!-- Avatar -->
+                                <div class="w-9 h-9 min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-full overflow-hidden shrink-0 border border-white dark:border-slate-800 shadow-2xs flex items-center justify-center text-[13px] font-bold text-white"
+                                    [ngClass]="msg.sender_bg || 'bg-blue-600'">
+                                    <img *ngIf="msg.sender_avatar" [src]="msg.sender_avatar" alt="Avatar" class="w-full h-full object-cover rounded-full" />
+                                    <span *ngIf="!msg.sender_avatar">{{ msg.sender_initial || msg.sender_name.charAt(0) }}</span>
+                                </div>
+
+                                <!-- Message Content -->
+                                <div class="max-w-[82%] space-y-1" [ngClass]="msg.is_self ? 'items-end' : 'items-start'">
+                                    <div class="flex items-center gap-2"
+                                        [ngClass]="msg.is_self ? 'justify-end' : 'justify-start'">
+                                        <span class="text-[14.5px] font-medium text-slate-700 dark:text-slate-300">{{ msg.sender_name }}</span>
+                                        <span class="text-[12.5px] text-slate-400">{{ msg.time }}</span>
+                                    </div>
+
+                                    <!-- Text Bubble -->
+                                    <div *ngIf="msg.text && msg.text.trim()" class="p-3.5 rounded-2xl text-[16px] leading-relaxed shadow-2xs font-normal"
+                                        [ngClass]="msg.is_self ? 'bg-blue-600 text-white rounded-tr-xs' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-700 rounded-tl-xs'">
+                                        {{ msg.text }}
+                                    </div>
+
+                                    <!-- Attachments preview inside message bubble -->
+                                    <div *ngIf="msg.attachments && msg.attachments.length > 0" class="space-y-1.5 pt-1">
+                                        <div *ngFor="let att of msg.attachments">
+                                            <!-- Image preview -->
+                                            <div *ngIf="att.isImage && att.url" class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 max-w-xs shadow-2xs">
+                                                <img [src]="att.url" [alt]="att.name" class="max-h-48 w-auto object-cover" />
+                                            </div>
+
+                                            <!-- Document file chip -->
+                                            <div *ngIf="!att.isImage || !att.url" class="flex items-center gap-2 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs text-[14px]">
+                                                <mat-icon [svgIcon]="getDocIcon(att.type)" class="icon-size-4.5" [ngClass]="getDocIconClass(att.type)"></mat-icon>
+                                                <span class="truncate font-medium text-slate-700 dark:text-slate-300">{{ att.name }}</span>
+                                                <span class="text-[12px] text-slate-400 shrink-0">({{ att.size }})</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+
+                <!-- ☑️ Subtasks -->
+                <div *ngIf="activeDetailTab() === 'subtasks'" class="space-y-4 font-kantumruy">
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-[15px] sm:text-[16px] font-medium text-slate-700 dark:text-slate-200">
+                            បញ្ជីកិច្ចការរងលម្អិត
+                        </span>
+                        <span class="text-[14px] text-slate-500 dark:text-slate-400 font-medium">
+                            វឌ្ឍនភាព៖ {{ currentTask.progress }}%
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-2.5">
+                        <input type="text" placeholder="បញ្ចូលកិច្ចការរងថ្មី..." [ngModel]="newSubtaskTitle()"
+                            (ngModelChange)="newSubtaskTitle.set($event)" (keydown.enter)="addSubtask(currentTask)"
+                            class="flex-1 px-4 py-2.5 text-[16px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-kantumruy font-normal" />
                         <button type="button" (click)="addSubtask(currentTask)" [disabled]="!newSubtaskTitle().trim()"
-                            class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium cursor-pointer shrink-0">
+                            class="h-11 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[16px] font-medium cursor-pointer shrink-0 font-kantumruy">
                             បន្ថែម
                         </button>
                     </div>
 
-                    <div class="space-y-2">
-                        <div *ngFor="let st of currentTask.subtasks"
-                            (click)="toggleSubtask(currentTask, st)"
-                            class="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors select-none">
-                            <div class="flex items-center gap-3">
-                                <mat-icon [svgIcon]="st.completed ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'"
-                                    class="icon-size-5"
+                    <div class="space-y-2.5">
+                        <div *ngFor="let st of currentTask.subtasks" (click)="toggleSubtask(currentTask, st)"
+                            class="flex items-center justify-between p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/70 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-all select-none">
+                            <div class="flex items-center gap-3.5 min-w-0">
+                                <mat-icon
+                                    [svgIcon]="st.completed ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'"
+                                    class="icon-size-6 shrink-0"
                                     [ngClass]="st.completed ? 'text-emerald-600' : 'text-slate-400'"></mat-icon>
-                                <span class="text-[14px]"
-                                    [ngClass]="st.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200'">
+                                <span class="text-[16px] font-normal leading-relaxed text-slate-800 dark:text-slate-100 truncate">
                                     {{ st.title }}
                                 </span>
                             </div>
-                            <span *ngIf="st.completed" class="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">រួចរាល់</span>
+                            <span *ngIf="st.completed"
+                                class="text-[13px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1 rounded-full shrink-0">
+                                រួចរាល់
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Members -->
-                <div *ngIf="activeDetailTab() === 'members'" class="space-y-4">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block">សមាជិកទទួលបន្ទុក</span>
+                <!-- 👥 Members -->
+                <div *ngIf="activeDetailTab() === 'members'" class="space-y-4 font-kantumruy">
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-[15px] sm:text-[16px] font-medium text-slate-700 dark:text-slate-200 block">
+                            សមាជិកទទួលបន្ទុក
+                        </span>
+                        <span class="text-[14px] text-slate-400 font-normal">
+                            {{ currentTask.members.length }} នាក់
+                        </span>
+                    </div>
                     <div class="space-y-3">
                         <div *ngFor="let m of currentTask.members"
                             class="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/60">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-sm ring-2 ring-white dark:ring-slate-800">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-sm ring-2 ring-white dark:ring-slate-800">
                                     {{ m.name.charAt(0) }}
                                 </div>
                                 <div>
-                                    <h4 class="text-[15px] font-medium text-slate-900 dark:text-white">{{ m.name }}</h4>
-                                    <p class="text-xs text-slate-400">{{ m.role }}</p>
+                                    <h4 class="text-[16px] font-medium text-slate-900 dark:text-white">{{ m.name }}</h4>
+                                    <p class="text-[13px] text-slate-400">{{ m.role }}</p>
                                 </div>
                             </div>
-                            <span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 border border-blue-100">
+                            <span
+                                class="text-[13px] font-medium px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 border border-blue-100">
                                 សមាជិកកិច្ចការ
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Links -->
-                <div *ngIf="activeDetailTab() === 'links'" class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">តំណភ្ជាប់</span>
+                <!-- 🔗 Links -->
+                <div *ngIf="activeDetailTab() === 'links'" class="space-y-4 font-kantumruy">
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-[15px] sm:text-[16px] font-medium text-slate-700 dark:text-slate-200">
+                            តំណភ្ជាប់ ({{ currentTask.links.length }})
+                        </span>
                         <button type="button" (click)="showAddLinkForm.set(!showAddLinkForm())"
-                            class="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer">
-                            <mat-icon svgIcon="mdi:plus" class="icon-size-4"></mat-icon>
+                            class="text-[14px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer">
+                            <mat-icon svgIcon="mdi:plus" class="icon-size-4.5"></mat-icon>
                             <span>បន្ថែមតំណភ្ជាប់</span>
                         </button>
                     </div>
 
-                    <div *ngIf="showAddLinkForm()" class="p-4 rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-950/20 space-y-3">
-                        <input type="text" placeholder="ចំណងជើង..." [ngModel]="newLinkTitle()" (ngModelChange)="newLinkTitle.set($event)"
-                            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
-                        <input type="text" placeholder="URL..." [ngModel]="newLinkUrl()" (ngModelChange)="newLinkUrl.set($event)"
-                            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                    <div *ngIf="showAddLinkForm()"
+                        class="p-4 rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-950/20 space-y-3">
+                        <input type="text" placeholder="ចំណងជើង..." [ngModel]="newLinkTitle()"
+                            (ngModelChange)="newLinkTitle.set($event)"
+                            class="w-full px-3 py-2 text-[15px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-kantumruy" />
+                        <input type="text" placeholder="URL..." [ngModel]="newLinkUrl()"
+                            (ngModelChange)="newLinkUrl.set($event)"
+                            class="w-full px-3 py-2 text-[15px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-kantumruy" />
                         <div class="flex justify-end gap-2">
-                            <button type="button" (click)="showAddLinkForm.set(false)" class="px-3 py-1.5 rounded-lg border text-xs cursor-pointer">បោះបង់</button>
-                            <button type="button" (click)="addLink(currentTask)" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs cursor-pointer">រក្សាទុក</button>
+                            <button type="button" (click)="showAddLinkForm.set(false)"
+                                class="px-3.5 py-1.5 rounded-lg border text-[14px] cursor-pointer">បោះបង់</button>
+                            <button type="button" (click)="addLink(currentTask)"
+                                class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-[14px] cursor-pointer">រក្សាទុក</button>
                         </div>
                     </div>
 
@@ -1156,25 +1605,31 @@
                         <div *ngFor="let l of currentTask.links"
                             class="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                             <a [href]="l.url" target="_blank" class="flex items-center gap-3 truncate mr-3 flex-1">
-                                <mat-icon [svgIcon]="getLinkIcon(l.type)" class="icon-size-5 text-blue-600 shrink-0"></mat-icon>
+                                <mat-icon [svgIcon]="getLinkIcon(l.type)"
+                                    class="icon-size-5.5 text-blue-600 shrink-0"></mat-icon>
                                 <div class="truncate">
-                                    <h4 class="text-[14px] font-medium text-slate-900 dark:text-white truncate">{{ l.title }}</h4>
-                                    <p class="text-xs text-slate-400 truncate">{{ l.url }}</p>
+                                    <h4 class="text-[16px] font-medium text-slate-900 dark:text-white truncate">{{
+                                        l.title }}</h4>
+                                    <p class="text-[13px] text-slate-400 truncate">{{ l.url }}</p>
                                 </div>
                             </a>
-                            <button type="button" (click)="removeLink(currentTask, l.id)" class="text-slate-400 hover:text-red-600 p-1 rounded-lg cursor-pointer">
-                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                            <button type="button" (click)="removeLink(currentTask, l.id)"
+                                class="text-slate-400 hover:text-red-600 p-1 rounded-lg cursor-pointer">
+                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Documents -->
-                <div *ngIf="activeDetailTab() === 'documents'" class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">ឯកសារភ្ជាប់</span>
-                        <button type="button" (click)="triggerUploadDocument(currentTask)" class="text-xs font-medium text-emerald-600 flex items-center gap-1 cursor-pointer">
-                            <mat-icon svgIcon="mdi:upload" class="icon-size-4"></mat-icon>
+                <!-- 📄 Documents -->
+                <div *ngIf="activeDetailTab() === 'documents'" class="space-y-4 font-kantumruy">
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-[15px] sm:text-[16px] font-medium text-slate-700 dark:text-slate-200">
+                            ឯកសារភ្ជាប់ ({{ currentTask.documents.length }})
+                        </span>
+                        <button type="button" (click)="triggerUploadDocument(currentTask)"
+                            class="text-[14px] font-medium text-emerald-600 flex items-center gap-1 cursor-pointer">
+                            <mat-icon svgIcon="mdi:upload" class="icon-size-4.5"></mat-icon>
                             <span>+ ភ្ជាប់ឯកសារថ្មី</span>
                         </button>
                     </div>
@@ -1183,28 +1638,378 @@
                         <div *ngFor="let doc of currentTask.documents"
                             class="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                             <div class="flex items-center gap-3 truncate mr-3">
-                                <mat-icon [svgIcon]="getDocIcon(doc.type)" class="icon-size-6 shrink-0" [ngClass]="getDocIconClass(doc.type)"></mat-icon>
+                                <mat-icon [svgIcon]="getDocIcon(doc.type)" class="icon-size-6 shrink-0"
+                                    [ngClass]="getDocIconClass(doc.type)"></mat-icon>
                                 <div class="truncate">
-                                    <h4 class="text-[14px] font-medium text-slate-900 dark:text-white truncate">{{ doc.name }}</h4>
-                                    <p class="text-xs text-slate-400">{{ doc.size }} • {{ doc.upload_date }}</p>
+                                    <h4 class="text-[16px] font-medium text-slate-900 dark:text-white truncate">{{
+                                        doc.name }}</h4>
+                                    <p class="text-[13px] text-slate-400">{{ doc.size }} • {{ doc.upload_date }}</p>
                                 </div>
                             </div>
-                            <button type="button" (click)="removeDocument(currentTask, doc.id)" class="text-slate-400 hover:text-red-600 p-1.5 rounded-lg cursor-pointer">
-                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                            <button type="button" (click)="removeDocument(currentTask, doc.id)"
+                                class="text-slate-400 hover:text-red-600 p-1.5 rounded-lg cursor-pointer">
+                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Drawer Footer -->
-            <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end bg-slate-50 dark:bg-slate-900 shrink-0">
-                <button type="button" (click)="closeTaskModal()"
-                    class="h-10 px-5 rounded-xl bg-slate-900 text-white text-xs font-medium hover:bg-slate-800 transition-colors cursor-pointer">
-                    បិទផ្ទាំងនេះ
-                </button>
+            <!-- Staged Pending Attachments Preview in Chat Tab -->
+            <div *ngIf="pendingChatAttachments().length > 0 && activeDetailTab() === 'chat'"
+                class="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center gap-2 overflow-x-auto shrink-0">
+                <div *ngFor="let att of pendingChatAttachments(); let idx = index"
+                    class="flex items-center gap-2 px-2.5 py-1 bg-white dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 text-xs shrink-0">
+                    <mat-icon [svgIcon]="getDocIcon(att.type)" class="icon-size-4" [ngClass]="getDocIconClass(att.type)"></mat-icon>
+                    <span class="truncate max-w-[120px] font-medium text-slate-700 dark:text-slate-200">{{ att.name }}</span>
+                    <button type="button" (click)="removePendingChatAttachment(idx)" class="text-slate-400 hover:text-rose-500 cursor-pointer">
+                        <mat-icon svgIcon="mdi:close" class="!w-3 !h-3"></mat-icon>
+                    </button>
+                </div>
             </div>
 
+            <!-- Chat Bottom Input Bar (when in Chat Tab) -->
+            <div *ngIf="activeDetailTab() === 'chat'"
+                class="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+                <input type="file" #taskChatFileInput multiple (change)="onChatFileSelected($event, currentTask)" class="hidden"
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" />
+
+                <div class="flex items-center gap-2">
+                    <button type="button" (click)="taskChatFileInput.click()"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+                        [matTooltip]="'ភ្ជាប់ឯកសារ ឬរូបភាព'">
+                        <mat-icon svgIcon="mdi:paperclip" class="icon-size-5"></mat-icon>
+                    </button>
+
+                    <input type="text" [(ngModel)]="newChatMessageText" (keydown.enter)="sendTaskChatMessage(currentTask)"
+                        placeholder="សរសេរសារពិភាក្សា ឬសាកសួរព័ត៌មាន... (Enter ដើម្បីផ្ញើ)"
+                        class="flex-1 px-4 py-2.5 text-[16px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy font-normal" />
+
+                    <button type="button" (click)="sendTaskChatMessage(currentTask)"
+                        [disabled]="!newChatMessageText().trim() && pendingChatAttachments().length === 0"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all shrink-0 cursor-pointer"
+                        [matTooltip]="'ផ្ញើសារ'">
+                        <mat-icon svgIcon="mdi:send" class="icon-size-5"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- CREATE PHASE SIDE DRAWER DIALOG                                           -->
+    <!-- ========================================================================= -->
+    <div *ngIf="showCreatePhaseModal()"
+        class="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs font-kantumruy">
+        <div class="w-full max-w-lg h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col relative animate-in slide-in-from-right duration-200">
+            <!-- Floating Circular Close Button on Left Edge -->
+            <button type="button" (click)="showCreatePhaseModal.set(false)"
+                class="hidden md:flex -left-5 top-4 absolute w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 items-center justify-center text-slate-600 dark:text-slate-300 hover:text-rose-600 cursor-pointer z-50 transition-colors"
+                [matTooltip]="'បិទ'">
+                <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+            </button>
+            <button type="button" (click)="showCreatePhaseModal.set(false)"
+                class="md:hidden absolute left-3 top-3 text-slate-500 z-50">
+                <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
+            </button>
+
+            <!-- Dialog Header -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 font-kantumruy bg-white dark:bg-slate-900 relative px-4 shrink-0">
+                <span class="w-full text-center text-[20px] font-medium font-kantumruy text-slate-800 dark:text-slate-200">
+                    បង្កើតដំណាក់កាលថ្មី
+                </span>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-5">
+                <!-- Title -->
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ឈ្មោះដំណាក់កាល (Phase Title) <span class="text-rose-500">*</span></label>
+                    <input type="text" [ngModel]="newPhaseTitle()" (ngModelChange)="newPhaseTitle.set($event)"
+                        placeholder="ឧ. ដំណាក់កាលទី ៤៖ ការដាក់ឱ្យប្រើប្រាស់ (Deployment)..."
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+
+                <!-- Quarter & Status -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ត្រីមាស / វដ្ត (Quarter / Period)</label>
+                        <input type="text" [ngModel]="newPhaseQuarter()" (ngModelChange)="newPhaseQuarter.set($event)"
+                            placeholder="ឧ. ត្រីមាសទី ៤ (Q4)"
+                            class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ស្ថានភាព (Status)</label>
+                        <select [ngModel]="newPhaseStatus()" (ngModelChange)="newPhaseStatus.set($event)"
+                            class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy cursor-pointer">
+                            <option value="planned">គ្រោងទុក (Planned)</option>
+                            <option value="in_progress">កំពុងដំណើរការ (In Progress)</option>
+                            <option value="completed">បានបញ្ចប់ (Completed)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Dates -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ថ្ងៃចាប់ផ្តើម (Start Date)</label>
+                        <input type="text" [ngModel]="newPhaseStartDate()" (ngModelChange)="newPhaseStartDate.set($event)"
+                            placeholder="01/10/2026"
+                            class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ថ្ងៃបញ្ចប់ (End Date)</label>
+                        <input type="text" [ngModel]="newPhaseEndDate()" (ngModelChange)="newPhaseEndDate.set($event)"
+                            placeholder="31/12/2026"
+                            class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 grid grid-cols-2 gap-3 shrink-0">
+                <button type="button" (click)="createPhase()" [disabled]="!newPhaseTitle().trim()"
+                    class="h-11 rounded-xl bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 text-white text-[15px] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm">
+                    <mat-icon svgIcon="mdi:plus" class="icon-size-4.5"></mat-icon>
+                    <span>បង្កើតដំណាក់កាល</span>
+                </button>
+                <button type="button" (click)="showCreatePhaseModal.set(false)"
+                    class="h-11 rounded-xl bg-white border border-[#ef4444] text-[#ef4444] hover:bg-rose-50 dark:bg-slate-900 transition-all text-[15px] font-medium flex items-center justify-center gap-1.5 cursor-pointer">
+                    <mat-icon svgIcon="mdi:logout" class="icon-size-4.5"></mat-icon>
+                    <span>ចាកចេញ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- CREATE MEMBER SIDE DRAWER DIALOG                                          -->
+    <!-- ========================================================================= -->
+    <div *ngIf="showCreateMemberModal()"
+        class="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs font-kantumruy">
+        <div class="w-full max-w-lg h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col relative animate-in slide-in-from-right duration-200">
+            <!-- Floating Circular Close Button on Left Edge -->
+            <button type="button" (click)="showCreateMemberModal.set(false)"
+                class="hidden md:flex -left-5 top-4 absolute w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 items-center justify-center text-slate-600 dark:text-slate-300 hover:text-rose-600 cursor-pointer z-50 transition-colors"
+                [matTooltip]="'បិទ'">
+                <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+            </button>
+            <button type="button" (click)="showCreateMemberModal.set(false)"
+                class="md:hidden absolute left-3 top-3 text-slate-500 z-50">
+                <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
+            </button>
+
+            <!-- Dialog Header -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 font-kantumruy bg-white dark:bg-slate-900 relative px-4 shrink-0">
+                <span class="w-full text-center text-[20px] font-medium font-kantumruy text-slate-800 dark:text-slate-200">
+                    បន្ថែមសមាជិកថ្មី
+                </span>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ឈ្មោះសមាជិក (Member Name) <span class="text-rose-500">*</span></label>
+                    <input type="text" [ngModel]="newMemberName()" (ngModelChange)="newMemberName.set($event)"
+                        placeholder="ឧ. សុខ សុភា..."
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">តួនាទី (Role) <span class="text-rose-500">*</span></label>
+                    <input type="text" [ngModel]="newMemberRole()" (ngModelChange)="newMemberRole.set($event)"
+                        placeholder="ឧ. UI/UX Designer, Frontend Developer, QA..."
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">អ៊ីមែល (Email)</label>
+                    <input type="email" [ngModel]="newMemberEmail()" (ngModelChange)="newMemberEmail.set($event)"
+                        placeholder="member@company.com"
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 grid grid-cols-2 gap-3 shrink-0">
+                <button type="button" (click)="createMember()" [disabled]="!newMemberName().trim()"
+                    class="h-11 rounded-xl bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 text-white text-[15px] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm">
+                    <mat-icon svgIcon="mdi:account-plus-outline" class="icon-size-4.5"></mat-icon>
+                    <span>បន្ថែមសមាជិក</span>
+                </button>
+                <button type="button" (click)="showCreateMemberModal.set(false)"
+                    class="h-11 rounded-xl bg-white border border-[#ef4444] text-[#ef4444] hover:bg-rose-50 dark:bg-slate-900 transition-all text-[15px] font-medium flex items-center justify-center gap-1.5 cursor-pointer">
+                    <mat-icon svgIcon="mdi:logout" class="icon-size-4.5"></mat-icon>
+                    <span>ចាកចេញ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- ========================================================================= -->
+    <!-- CREATE LINK SIDE DRAWER DIALOG                                            -->
+    <!-- ========================================================================= -->
+    <div *ngIf="showCreateLinkModal()"
+        class="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs font-kantumruy">
+        <div class="w-full max-w-lg h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col relative animate-in slide-in-from-right duration-200">
+            <!-- Floating Circular Close Button on Left Edge -->
+            <button type="button" (click)="showCreateLinkModal.set(false)"
+                class="hidden md:flex -left-5 top-4 absolute w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 items-center justify-center text-slate-600 dark:text-slate-300 hover:text-rose-600 cursor-pointer z-50 transition-colors"
+                [matTooltip]="'បិទ'">
+                <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+            </button>
+            <button type="button" (click)="showCreateLinkModal.set(false)"
+                class="md:hidden absolute left-3 top-3 text-slate-500 z-50">
+                <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
+            </button>
+
+            <!-- Dialog Header -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 font-kantumruy bg-white dark:bg-slate-900 relative px-4 shrink-0">
+                <span class="w-full text-center text-[20px] font-medium font-kantumruy text-slate-800 dark:text-slate-200">
+                    បន្ថែមតំណភ្ជាប់ថ្មី
+                </span>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ចំណងជើងតំណភ្ជាប់ (Title) <span class="text-rose-500">*</span></label>
+                    <input type="text" [ngModel]="newProjectLinkTitle()" (ngModelChange)="newProjectLinkTitle.set($event)"
+                        placeholder="ឧ. UI Components Specs & System Design..."
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">តំណភ្ជាប់ URL (Link URL)</label>
+                    <input type="text" [ngModel]="newProjectLinkUrl()" (ngModelChange)="newProjectLinkUrl.set($event)"
+                        placeholder="https://figma.com/file/..."
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ប្រភេទតំណភ្ជាប់ (Link Type)</label>
+                    <select [ngModel]="newProjectLinkType()" (ngModelChange)="newProjectLinkType.set($event)"
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy cursor-pointer">
+                        <option value="figma">🎨 Figma Design</option>
+                        <option value="github">🐙 GitHub Repository</option>
+                        <option value="doc">📄 Documentation</option>
+                        <option value="external">🌐 ផ្សេងៗ (External Link)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 grid grid-cols-2 gap-3 shrink-0">
+                <button type="button" (click)="createProjectLink()" [disabled]="!newProjectLinkTitle().trim()"
+                    class="h-11 rounded-xl bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 text-white text-[15px] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm">
+                    <mat-icon svgIcon="mdi:link-plus" class="icon-size-4.5"></mat-icon>
+                    <span>បន្ថែមតំណភ្ជាប់</span>
+                </button>
+                <button type="button" (click)="showCreateLinkModal.set(false)"
+                    class="h-11 rounded-xl bg-white border border-[#ef4444] text-[#ef4444] hover:bg-rose-50 dark:bg-slate-900 transition-all text-[15px] font-medium flex items-center justify-center gap-1.5 cursor-pointer">
+                    <mat-icon svgIcon="mdi:logout" class="icon-size-4.5"></mat-icon>
+                    <span>ចាកចេញ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- CREATE TASK SIDE-DRAWER (STANDARD LAYOUT)                     -->
+    <!-- ============================================================= -->
+    <div *ngIf="showCreateTaskModal()"
+        class="fixed inset-0 z-50 flex justify-end bg-slate-900/60 backdrop-blur-xs font-kantumruy">
+        <div class="w-full max-w-lg h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col relative animate-in slide-in-from-right duration-200">
+            <!-- Floating circular close button on left edge (desktop) -->
+            <button type="button" (click)="showCreateTaskModal.set(false)"
+                class="hidden md:flex -left-5 top-4 absolute w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 items-center justify-center text-slate-600 dark:text-slate-300 hover:text-rose-600 cursor-pointer z-50 transition-colors"
+                [matTooltip]="'បិទ'">
+                <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+            </button>
+            <button type="button" (click)="showCreateTaskModal.set(false)"
+                class="md:hidden absolute left-3 top-3 text-slate-500 z-50">
+                <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
+            </button>
+
+            <!-- Dialog Header -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 font-kantumruy bg-white dark:bg-slate-900 relative px-4 shrink-0">
+                <span class="w-full text-center text-[20px] font-medium font-kantumruy text-slate-800 dark:text-slate-200">
+                    បង្កើតការងារថ្មី (New Task)
+                </span>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-5">
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ចំណងជើងការងារ (Task Title) <span class="text-rose-500">*</span></label>
+                    <input type="text" [ngModel]="newTaskTitle()" (ngModelChange)="newTaskTitle.set($event)"
+                        placeholder="ឧ. អភិវឌ្ឍន៍មុខងារផ្ទៀងផ្ទាត់ទិន្នន័យ (Data Validation)..."
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">ស្ថានភាពការងារ (Status)</label>
+                        <select [ngModel]="newTaskStatus()" (ngModelChange)="newTaskStatus.set($event)"
+                            class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy cursor-pointer">
+                            <option value="new">ថ្មី (New)</option>
+                            <option value="in_progress">កំពុងដំណើរការ (In Progress)</option>
+                            <option value="review">ស្នើសុំពិនិត្យ (Review)</option>
+                            <option value="confirmed">បញ្ជាក់ (Confirmed)</option>
+                            <option value="done">រួចរាល់ (Done)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">កម្រិតអាទិភាព (Priority)</label>
+                        <select [ngModel]="newTaskPriority()" (ngModelChange)="newTaskPriority.set($event)"
+                            class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy cursor-pointer">
+                            <option value="low">ទាប (Low)</option>
+                            <option value="medium">មធ្យម (Medium)</option>
+                            <option value="high">ខ្ពស់ (High)</option>
+                            <option value="urgent">បន្ទាន់ (Urgent)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">កាលបរិច្ឆេទកំណត់ (Due Date)</label>
+                    <input type="date" [ngModel]="newTaskDueDate()" (ngModelChange)="newTaskDueDate.set($event)"
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy" />
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[14px] font-medium text-slate-700 dark:text-slate-300">អ្នកទទួលខុសត្រូវ (Assignee)</label>
+                    <select [ngModel]="newTaskAssignee()" (ngModelChange)="newTaskAssignee.set($event)"
+                        class="w-full px-4 py-2.5 text-[15px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-kantumruy cursor-pointer">
+                        <option value="">-- ជ្រើសរើសសមាជិក --</option>
+                        <option *ngFor="let m of selectedProject()?.members" [value]="m.name">
+                            {{ m.name }} ({{ m.role }})
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 grid grid-cols-2 gap-3 shrink-0">
+                <button type="button" (click)="createProjectTask()" [disabled]="!newTaskTitle().trim()"
+                    class="h-11 rounded-xl bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 text-white text-[15px] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm">
+                    <mat-icon svgIcon="mdi:plus-circle" class="icon-size-4.5"></mat-icon>
+                    <span>បង្កើតការងារ</span>
+                </button>
+                <button type="button" (click)="showCreateTaskModal.set(false)"
+                    class="h-11 rounded-xl bg-white border border-[#ef4444] text-[#ef4444] hover:bg-rose-50 dark:bg-slate-900 transition-all text-[15px] font-medium flex items-center justify-center gap-1.5 cursor-pointer">
+                    <mat-icon svgIcon="mdi:logout" class="icon-size-4.5"></mat-icon>
+                    <span>ចាកចេញ</span>
+                </button>
+            </div>
         </div>
     </div>
 

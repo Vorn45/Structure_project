@@ -100,91 +100,91 @@
         <!-- 2. STATUS FILTER TABS ROW (7 Statuses + All)                           -->
         <!-- ===================================================================== -->
         <div
-            class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden font-kantumruy">
             <!-- 1. All -->
             <button (click)="setStatusFilter('all')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>ទាំងអស់</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'all' ? 'bg-slate-700 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'all' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().all }}
                 </span>
             </button>
 
             <!-- 2. New (ថ្មី) -->
             <button (click)="setStatusFilter('new')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'new' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>ថ្មី</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'new' ? 'bg-blue-700 text-white' : 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'new' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().new }}
                 </span>
             </button>
 
             <!-- 3. Confirmed (បញ្ជាក់) -->
             <button (click)="setStatusFilter('confirmed')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'confirmed' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>បញ្ជាក់</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'confirmed' ? 'bg-indigo-700 text-white' : 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'confirmed' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().confirmed }}
                 </span>
             </button>
 
             <!-- 4. Unconfirmed (មិនបញ្ជាក់) -->
             <button (click)="setStatusFilter('unconfirmed')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'unconfirmed' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>មិនបញ្ជាក់</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'unconfirmed' ? 'bg-slate-700 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'unconfirmed' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().unconfirmed }}
                 </span>
             </button>
 
             <!-- 5. In Progress (កំពុងធ្វើ) -->
             <button (click)="setStatusFilter('in_progress')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'in_progress' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>កំពុងធ្វើ</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'in_progress' ? 'bg-amber-700 text-white' : 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'in_progress' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().in_progress }}
                 </span>
             </button>
 
             <!-- 6. In Review (ស្នើពិនិត្យ) -->
             <button (click)="setStatusFilter('in_review')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'in_review' ? 'bg-sky-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>ស្នើពិនិត្យ</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'in_review' ? 'bg-sky-700 text-white' : 'bg-sky-100 dark:bg-sky-950/50 text-sky-700 dark:text-sky-400'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'in_review' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().in_review }}
                 </span>
             </button>
 
             <!-- 7. Reopened (បើកឡើងវិញ) -->
             <button (click)="setStatusFilter('reopened')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'reopened' ? 'bg-rose-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>បើកឡើងវិញ</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'reopened' ? 'bg-rose-700 text-white' : 'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'reopened' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().reopened }}
                 </span>
             </button>
 
             <!-- 8. Done (បញ្ចប់) -->
             <button (click)="setStatusFilter('done')"
-                class="px-3.5 py-1.5 rounded-xl text-[15px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5"
+                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'done' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>បញ្ចប់</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[12px] font-medium"
-                    [ngClass]="activeStatus() === 'done' ? 'bg-emerald-700 text-white' : 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400'">
+                <span class="text-[13px] font-normal"
+                    [ngClass]="activeStatus() === 'done' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().done }}
                 </span>
             </button>
@@ -224,7 +224,7 @@
             class="divide-y divide-slate-100 dark:divide-slate-800">
             <div *ngFor="let task of tasks(); trackBy: trackByTaskId" (click)="openTaskChat(task)"
                 class="group py-4 sm:py-4.5 px-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3.5">
-                <!-- Left Info: Priority Icon, Equal sign, Code, Title, Comments, Attachments -->
+                <!-- Left Info: Priority Icon, Equal sign, Code, Title -->
                 <div class="flex items-center gap-3 min-w-0 flex-1">
                     <!-- Priority Icon without box/shadow, just colored icon -->
                     <mat-icon [svgIcon]="getPriorityIcon(task.priority)" class="icon-size-5 shrink-0"
@@ -246,18 +246,21 @@
                         class="min-w-0 text-[16px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
                         {{ task.title }}
                     </p>
+                </div>
 
-                    <!-- Date to do badge -->
-                    <div class="hidden md:flex items-center gap-1.5 text-[12px] px-2.5 py-1 rounded-lg border shrink-0"
+                <!-- Right Meta: Date (No BG), Comments/Attachments, Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
+                <div class="flex items-center gap-3 self-end md:self-center shrink-0">
+                    <!-- Date to do (Fixed width for straight vertical column alignment) -->
+                    <div class="hidden md:flex items-center gap-1.5 text-[13px] font-kantumruy font-normal w-28 shrink-0"
                         [ngClass]="getDaysRemainingInfo(task.due_date).isOverdue 
-                            ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/40' 
-                            : 'bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-slate-700/60'">
-                        <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-3.5"></mat-icon>
+                            ? 'text-rose-600 dark:text-rose-400' 
+                            : 'text-slate-500 dark:text-slate-400'">
+                        <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-4 opacity-80 shrink-0"></mat-icon>
                         <span>{{ getTaskDateToDo(task.due_date, task.created_at) }}</span>
                     </div>
 
-                    <!-- Comments & Attachments -->
-                    <div class="hidden sm:flex items-center gap-2.5 text-slate-400 text-[13px] shrink-0">
+                    <!-- Comments & Attachments (Fixed width) -->
+                    <div class="hidden sm:flex items-center gap-2 text-slate-400 text-[13px] w-14 shrink-0">
                         <span *ngIf="(task.comments_count || 0) > 0" class="flex items-center gap-1">
                             <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5"></mat-icon>
                             <span>{{ task.comments_count }}</span>
@@ -267,32 +270,25 @@
                             <span>{{ task.attachments_count }}</span>
                         </span>
                     </div>
-                </div>
 
-                <!-- Right Meta: Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
-                <div class="flex items-center gap-3 self-end md:self-center shrink-0">
-                    <!-- Assignee Avatars Stack -->
-                    <div class="flex items-center -space-x-2 overflow-hidden shrink-0">
-                        <div *ngFor="let m of getTaskAssignees(task).slice(0, 3); let i = index"
-                            class="w-8 h-8 rounded-full ring-2 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center font-medium text-xs overflow-hidden shadow-2xs shrink-0"
-                            [matTooltip]="m.name + ' (' + (m.role || 'Assignee') + ')'">
-                            <img *ngIf="m.avatar" [src]="m.avatar" [alt]="m.name" class="w-full h-full object-cover" />
-                            <span *ngIf="!m.avatar">{{ m.name.charAt(0) }}</span>
-                        </div>
-                        <div *ngIf="getTaskAssignees(task).length > 3"
-                            class="w-8 h-8 rounded-full ring-2 ring-white dark:ring-slate-800 bg-slate-700 text-white flex items-center justify-center font-bold text-[11px] shrink-0"
-                            [matTooltip]="'+' + (getTaskAssignees(task).length - 3) + ' more'">
-                            +{{ getTaskAssignees(task).length - 3 }}
+                    <!-- Assignee Avatars Stack (Fixed width) -->
+                    <div class="w-8 shrink-0 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-full ring-2 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center font-medium text-xs overflow-hidden shadow-2xs shrink-0"
+                            [matTooltip]="task.assignee?.name || 'Assignee'">
+                            <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover" />
+                            <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.name?.charAt(0) || 'U' }}</span>
                         </div>
                     </div>
 
-                    <!-- Status Badge Pill matching reference buttons -->
-                    <button [matMenuTriggerFor]="listStatusMenu" (click)="$event.stopPropagation()"
-                        class="inline-flex items-center gap-1.5 text-[14px] font-medium px-3.5 py-1.5 rounded-xl border select-none transition-all shadow-2xs"
-                        [ngClass]="getStatusClass(task.status)">
-                        <mat-icon [svgIcon]="getStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
-                        <span>{{ getStatusLabel(task.status) }}</span>
-                    </button>
+                    <!-- Status Badge Pill matching reference buttons (Fixed width) -->
+                    <div class="w-28 shrink-0 flex justify-center">
+                        <button [matMenuTriggerFor]="listStatusMenu" (click)="$event.stopPropagation()"
+                            class="w-full inline-flex items-center justify-center gap-1.5 text-[14px] font-medium py-1.5 px-2 rounded-xl border select-none transition-all shadow-2xs cursor-pointer"
+                            [ngClass]="getStatusClass(task.status)">
+                            <mat-icon [svgIcon]="getStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
+                            <span>{{ getStatusLabel(task.status) }}</span>
+                        </button>
+                    </div>
                     <mat-menu #listStatusMenu="matMenu" class="min-w-[170px]">
                         <button mat-menu-item (click)="updateTaskStatus(task, 'new')" class="!text-[14px] flex items-center gap-2.5">
                             <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
@@ -324,7 +320,7 @@
                         </button>
                     </mat-menu>
 
-                    <!-- Relative Time (6 ថ្ងៃមុន / 1 សប្តាហ៍មុន) -->
+                    <!-- Relative Time (Fixed width) -->
                     <span class="text-[13px] text-slate-400 w-16 text-right shrink-0">
                         {{ getRelativeTime(task.created_at) }}
                     </span>
