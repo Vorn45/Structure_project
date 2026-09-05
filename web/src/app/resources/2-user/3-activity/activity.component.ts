@@ -105,8 +105,11 @@ export class UserActivityComponent implements OnInit {
 
     // Dynamic current tasks based on active project
     currentTasks = computed(() => {
-        const pId = this.currentProject().id;
-        return this.projectTasksMap()[pId] || [];
+        const cur = this.currentProject();
+        if (!cur) return [];
+        const pId = String(cur.id);
+        const map = this.projectTasksMap();
+        return map[pId] || map[cur.id] || [];
     });
 
     // Timeline configuration (Weeks 14 to 40 = 27 weeks total)
