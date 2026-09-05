@@ -2,6 +2,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
@@ -66,18 +68,51 @@ const PROJECTS: ProjectPlanItem[] = [
 @Injectable()
 export class PlanService {
     private projects: ProjectPlanItem[] = [...PROJECTS];
+    private readonly storeFilePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
     private isDbLoaded = false;
 
     constructor(
         @InjectRepository(PlanStore)
         private readonly _planStoreRepo: Repository<PlanStore>,
     ) {
+        this.loadFromDisk();
         this.initDbStore();
+    }
+
+    private loadFromDisk(): void {
+        try {
+            if (fs.existsSync(this.storeFilePath)) {
+                const raw = fs.readFileSync(this.storeFilePath, 'utf8');
+                const data = JSON.parse(raw);
+                if (data && Array.isArray(data.plans) && data.plans.length > 0) {
+                    this.projects = data.plans;
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load plans from disk:', e);
+        }
+    }
+
+    private saveToDisk(): void {
+        try {
+            const dir = path.dirname(this.storeFilePath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            const data = {
+                plans: this.projects,
+                updated_at: new Date().toISOString(),
+            };
+            fs.writeFileSync(this.storeFilePath, JSON.stringify(data, null, 2), 'utf8');
+        } catch (e) {
+            console.warn('Failed to save plans to disk:', e);
+        }
     }
 
     private async ensureTableExists(): Promise<void> {
         try {
             await this._planStoreRepo.query(`
+                CREATE EXTENSION IF NOT EXISTS "pgcrypto";
                 CREATE SCHEMA IF NOT EXISTS "user";
                 CREATE TABLE IF NOT EXISTS "user"."plan_store" (
                     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -104,7 +139,7 @@ export class PlanService {
             }
             this.isDbLoaded = true;
         } catch (err) {
-            console.warn('Could not load plan store from DB, using default projects:', err);
+            console.warn('Could not load plan store from DB, using memory/disk store:', err);
         }
     }
 
@@ -112,6 +147,11 @@ export class PlanService {
         if (!this.isDbLoaded) {
             await this.initDbStore();
         }
+    }
+
+    private async saveStore(): Promise<void> {
+        this.saveToDisk();
+        await this.saveToDb();
     }
 
     private async saveToDb(): Promise<void> {
@@ -220,7 +260,7 @@ export class PlanService {
         };
 
         this.projects.unshift(newPlan);
-        await this.saveToDb();
+        await this.saveStore();
 
         return {
             status_code: 201,
@@ -250,7 +290,7 @@ export class PlanService {
         };
 
         this.projects[index] = updated;
-        await this.saveToDb();
+        await this.saveStore();
 
         return {
             status_code: 200,
@@ -267,7 +307,7 @@ export class PlanService {
         }
 
         this.projects.splice(index, 1);
-        await this.saveToDb();
+        await this.saveStore();
 
         return {
             status_code: 200,

@@ -161,12 +161,11 @@ export class UserActivityComponent implements OnInit {
         this._activityService.getRoadmap().subscribe({
             next: (res) => {
                 if (res?.data) {
-                    const { projects, tasksMap } = res.data;
+                    const { projects, tasksMap, selectedProjectId } = res.data;
                     if (projects && projects.length > 0) {
                         this.projectOptions.set(projects);
-                        if (!this.currentProject()) {
-                            this.currentProject.set(projects[0]);
-                        }
+                        const match = selectedProjectId ? projects.find((p) => String(p.id) === String(selectedProjectId)) : null;
+                        this.currentProject.set(match || projects[0]);
                     }
                     if (tasksMap) {
                         this.projectTasksMap.set(tasksMap);
@@ -215,6 +214,10 @@ export class UserActivityComponent implements OnInit {
 
     selectProject(p: ProjectPlanOption): void {
         this.currentProject.set(p);
+        this._activityService.selectRoadmapProject(p.id).subscribe({
+            next: () => {},
+            error: () => {},
+        });
     }
 
     openCreateNewProjectDialog(): void {
@@ -293,6 +296,10 @@ export class UserActivityComponent implements OnInit {
                         });
                 }
                 this.currentProject.set(selected);
+                this._activityService.selectRoadmapProject(selected.id).subscribe({
+                    next: () => {},
+                    error: () => {},
+                });
             }
         });
     }

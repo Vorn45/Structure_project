@@ -20,6 +20,7 @@ import {
     CreateRoadmapProjectDto,
     CreateRoadmapTaskDto,
     QueryActivityDto,
+    SelectRoadmapProjectDto,
 } from './activity.dto';
 import { ActivityService } from './activity.service';
 
@@ -31,6 +32,14 @@ export class ActivityController {
     @Get('roadmap')
     async getRoadmapData(@Res({ passthrough: true }) res: express.Response) {
         return await this._service.getRoadmapData(res.locals.user);
+    }
+
+    @Post('roadmap/select-project')
+    async selectRoadmapProject(
+        @Body(new ValidationPipe({ transform: true })) dto: SelectRoadmapProjectDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.selectRoadmapProject(res.locals.user, dto);
     }
 
     @Post('roadmap/project')

@@ -2,11 +2,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { ActivityStore } from 'src/app/model/user/activity-store.entity';
-import { CreateActivityDto, CreateRoadmapProjectDto, CreateRoadmapTaskDto, QueryActivityDto } from './activity.dto';
+import {
+    CreateActivityDto,
+    CreateRoadmapProjectDto,
+    CreateRoadmapTaskDto,
+    QueryActivityDto,
+    SelectRoadmapProjectDto,
+} from './activity.dto';
 
 export interface ActivityItem {
     id: number;
@@ -133,22 +141,60 @@ const ACTIVITIES: ActivityItem[] = [
 
 @Injectable()
 export class ActivityService {
-    // In-memory cache synced with database
-    private userProjectsMap: { [userId: number]: RoadmapProject[] } = {};
-    private userTasksMap: { [userId: number]: { [projectId: string]: AgilePlanTask[] } } = {};
-    private userActivitiesMap: { [userId: number]: ActivityItem[] } = {};
+    // In-memory cache synced with database & disk
+    private userProjectsMap: { [userId: string]: RoadmapProject[] } = {};
+    private userTasksMap: { [userId: string]: { [projectId: string]: AgilePlanTask[] } } = {};
+    private userActivitiesMap: { [userId: string]: ActivityItem[] } = {};
+    private userSelectedProjectMap: { [userId: string]: string } = {};
+    private readonly storeFilePath = path.join(process.cwd(), 'storage', 'activities_data_store.json');
     private isDbLoaded = false;
 
     constructor(
         @InjectRepository(ActivityStore)
         private readonly _activityStoreRepo: Repository<ActivityStore>,
     ) {
+        this.loadFromDisk();
         this.initDbStore();
+    }
+
+    private loadFromDisk(): void {
+        try {
+            if (fs.existsSync(this.storeFilePath)) {
+                const raw = fs.readFileSync(this.storeFilePath, 'utf8');
+                const data = JSON.parse(raw);
+                if (data?.projects) this.userProjectsMap = data.projects;
+                if (data?.tasks_map) this.userTasksMap = data.tasks_map;
+                if (data?.activities) this.userActivitiesMap = data.activities;
+                if (data?.selected_project_ids) this.userSelectedProjectMap = data.selected_project_ids;
+            }
+        } catch (e) {
+            console.warn('Failed to load activity store from disk:', e);
+        }
+    }
+
+    private saveToDisk(): void {
+        try {
+            const dir = path.dirname(this.storeFilePath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            const data = {
+                projects: this.userProjectsMap,
+                tasks_map: this.userTasksMap,
+                activities: this.userActivitiesMap,
+                selected_project_ids: this.userSelectedProjectMap,
+                updated_at: new Date().toISOString(),
+            };
+            fs.writeFileSync(this.storeFilePath, JSON.stringify(data, null, 2), 'utf8');
+        } catch (e) {
+            console.warn('Failed to save activity store to disk:', e);
+        }
     }
 
     private async ensureTableExists(): Promise<void> {
         try {
             await this._activityStoreRepo.query(`
+                CREATE EXTENSION IF NOT EXISTS "pgcrypto";
                 CREATE SCHEMA IF NOT EXISTS "user";
                 CREATE TABLE IF NOT EXISTS "user"."activity_store" (
                     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -156,13 +202,14 @@ export class ActivityService {
                     "projects" JSONB NULL DEFAULT '[]'::jsonb,
                     "tasks_map" JSONB NULL DEFAULT '{}'::jsonb,
                     "activities" JSONB NULL DEFAULT '[]'::jsonb,
+                    "selected_project_ids" JSONB NULL DEFAULT '{}'::jsonb,
                     "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                     "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
                 );
                 CREATE UNIQUE INDEX IF NOT EXISTS "IDX_activity_store_key" ON "user"."activity_store" ("key");
             `);
         } catch (e: any) {
-            // Already exists or schema created
+            // Table or index already exists
         }
     }
 
@@ -172,21 +219,25 @@ export class ActivityService {
             const dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
             if (dbStore) {
                 if (dbStore.projects && typeof dbStore.projects === 'object') {
-                    this.userProjectsMap = dbStore.projects;
+                    this.userProjectsMap = { ...this.userProjectsMap, ...dbStore.projects };
                 }
                 if (dbStore.tasks_map && typeof dbStore.tasks_map === 'object') {
-                    this.userTasksMap = dbStore.tasks_map;
+                    this.userTasksMap = { ...this.userTasksMap, ...dbStore.tasks_map };
                 }
                 if (dbStore.activities && typeof dbStore.activities === 'object') {
-                    this.userActivitiesMap = dbStore.activities;
+                    this.userActivitiesMap = { ...this.userActivitiesMap, ...dbStore.activities };
+                }
+                if (dbStore.selected_project_ids && typeof dbStore.selected_project_ids === 'object') {
+                    this.userSelectedProjectMap = { ...this.userSelectedProjectMap, ...dbStore.selected_project_ids };
                 }
             } else {
-                this.ensureUserData(1);
+                this.ensureUserData('1');
+                this.ensureUserData('2');
                 await this.saveToDb();
             }
             this.isDbLoaded = true;
         } catch (err) {
-            console.warn('Could not load activity store from DB, using defaults:', err);
+            console.warn('Could not load activity store from DB, using memory/disk store:', err);
         }
     }
 
@@ -194,6 +245,11 @@ export class ActivityService {
         if (!this.isDbLoaded) {
             await this.initDbStore();
         }
+    }
+
+    private async saveStore(): Promise<void> {
+        this.saveToDisk();
+        await this.saveToDb();
     }
 
     private async saveToDb(): Promise<void> {
@@ -205,11 +261,13 @@ export class ActivityService {
                     projects: this.userProjectsMap,
                     tasks_map: this.userTasksMap,
                     activities: this.userActivitiesMap,
+                    selected_project_ids: this.userSelectedProjectMap,
                 });
             } else {
                 dbStore.projects = this.userProjectsMap;
                 dbStore.tasks_map = this.userTasksMap;
                 dbStore.activities = this.userActivitiesMap;
+                dbStore.selected_project_ids = this.userSelectedProjectMap;
             }
             await this._activityStoreRepo.save(dbStore);
         } catch (err) {
@@ -217,25 +275,39 @@ export class ActivityService {
         }
     }
 
-    private ensureUserData(userId: number) {
-        if (!this.userProjectsMap[userId] || !Array.isArray(this.userProjectsMap[userId]) || this.userProjectsMap[userId].length === 0) {
-            this.userProjectsMap[userId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
+    private ensureUserData(userId: string | number) {
+        const uId = String(userId || '1');
+        let needsSave = false;
+
+        if (!this.userProjectsMap[uId] || !Array.isArray(this.userProjectsMap[uId]) || this.userProjectsMap[uId].length === 0) {
+            this.userProjectsMap[uId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
+            needsSave = true;
         }
-        if (!this.userTasksMap[userId] || Object.keys(this.userTasksMap[userId]).length === 0) {
-            this.userTasksMap[userId] = {
+        if (!this.userTasksMap[uId] || Object.keys(this.userTasksMap[uId]).length === 0) {
+            this.userTasksMap[uId] = {
                 '1': JSON.parse(JSON.stringify(DEFAULT_PMS_TASKS)),
                 '2': JSON.parse(JSON.stringify(DEFAULT_WMS_TASKS)),
                 '3': JSON.parse(JSON.stringify(DEFAULT_EGOV_TASKS)),
             };
+            needsSave = true;
         }
-        if (!this.userActivitiesMap[userId] || !Array.isArray(this.userActivitiesMap[userId]) || this.userActivitiesMap[userId].length === 0) {
-            this.userActivitiesMap[userId] = JSON.parse(JSON.stringify(ACTIVITIES));
+        if (!this.userActivitiesMap[uId] || !Array.isArray(this.userActivitiesMap[uId]) || this.userActivitiesMap[uId].length === 0) {
+            this.userActivitiesMap[uId] = JSON.parse(JSON.stringify(ACTIVITIES));
+            needsSave = true;
+        }
+        if (!this.userSelectedProjectMap[uId]) {
+            this.userSelectedProjectMap[uId] = '1';
+            needsSave = true;
+        }
+
+        if (needsSave) {
+            this.saveStore().catch(() => {});
         }
     }
 
     async getActivities(user: UserPayload, query: QueryActivityDto) {
         await this.ensureLoaded();
-        const uId = user?.id || 1;
+        const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
         let list = [...(this.userActivitiesMap[uId] || [])];
@@ -262,7 +334,7 @@ export class ActivityService {
 
     async createActivity(user: UserPayload, dto: CreateActivityDto) {
         await this.ensureLoaded();
-        const uId = user?.id || 1;
+        const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
         const item: ActivityItem = {
@@ -273,7 +345,7 @@ export class ActivityService {
             type: dto.type || 'task',
             icon: dto.icon || 'mdi:check-circle',
             actor: {
-                id: uId,
+                id: Number(uId),
                 name: user?.name_en || user?.name_kh || 'Current User',
                 avatar: null,
             },
@@ -284,7 +356,7 @@ export class ActivityService {
             this.userActivitiesMap[uId] = [];
         }
         this.userActivitiesMap[uId].unshift(item);
-        await this.saveToDb();
+        await this.saveStore();
 
         return {
             status_code: 201,
@@ -295,7 +367,7 @@ export class ActivityService {
 
     async getRoadmapData(user: UserPayload) {
         await this.ensureLoaded();
-        const uId = user?.id || 1;
+        const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
         return {
@@ -304,13 +376,31 @@ export class ActivityService {
             data: {
                 projects: this.userProjectsMap[uId],
                 tasksMap: this.userTasksMap[uId],
+                selectedProjectId: this.userSelectedProjectMap[uId] || '1',
+            },
+        };
+    }
+
+    async selectRoadmapProject(user: UserPayload, dto: SelectRoadmapProjectDto) {
+        await this.ensureLoaded();
+        const uId = String(user?.id || 1);
+        this.ensureUserData(uId);
+
+        this.userSelectedProjectMap[uId] = String(dto.project_id);
+        await this.saveStore();
+
+        return {
+            status_code: 200,
+            message: 'Project selected successfully',
+            data: {
+                selectedProjectId: this.userSelectedProjectMap[uId],
             },
         };
     }
 
     async createRoadmapProject(user: UserPayload, dto: CreateRoadmapProjectDto) {
         await this.ensureLoaded();
-        const uId = user?.id || 1;
+        const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
         const newProject: RoadmapProject = {
@@ -336,8 +426,9 @@ export class ActivityService {
             this.userTasksMap[uId] = {};
         }
         this.userTasksMap[uId][newProject.id] = [starterTask];
+        this.userSelectedProjectMap[uId] = newProject.id;
 
-        await this.saveToDb();
+        await this.saveStore();
 
         return {
             status_code: 201,
@@ -351,7 +442,7 @@ export class ActivityService {
 
     async createRoadmapTask(user: UserPayload, dto: CreateRoadmapTaskDto) {
         await this.ensureLoaded();
-        const uId = user?.id || 1;
+        const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
         const projectId = String(dto.project_id);
@@ -375,7 +466,7 @@ export class ActivityService {
             proj.tasksCount = this.userTasksMap[uId][projectId].length;
         }
 
-        await this.saveToDb();
+        await this.saveStore();
 
         return {
             status_code: 201,
@@ -389,7 +480,7 @@ export class ActivityService {
 
     async deleteRoadmapTask(user: UserPayload, taskId: string, projectId: string) {
         await this.ensureLoaded();
-        const uId = user?.id || 1;
+        const uId = String(user?.id || 1);
         this.ensureUserData(uId);
 
         const pId = String(projectId);
@@ -399,7 +490,7 @@ export class ActivityService {
             if (proj) {
                 proj.tasksCount = this.userTasksMap[uId][pId].length;
             }
-            await this.saveToDb();
+            await this.saveStore();
         }
 
         return {

@@ -25,6 +25,9 @@ export class ActivityStore {
     @Column({ type: 'jsonb', nullable: true, default: () => "'[]'" })
     activities: any;
 
+    @Column({ type: 'jsonb', nullable: true, default: () => "'{}'" })
+    selected_project_ids: any;
+
     @CreateDateColumn({ name: 'created_at' })
     created_at: Date;
 

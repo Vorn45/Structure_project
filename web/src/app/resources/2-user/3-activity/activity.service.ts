@@ -42,6 +42,7 @@ export interface RoadmapDataResponse {
     data: {
         projects: ProjectPlanOption[];
         tasksMap: { [projectId: string]: AgilePlanTask[] };
+        selectedProjectId?: string;
     };
 }
 
@@ -60,6 +61,12 @@ export class UserActivityService {
 
     getRoadmap(): Observable<RoadmapDataResponse> {
         return this._http.get<RoadmapDataResponse>(`${this.baseUrl}/roadmap`, {
+            withCredentials: true,
+        });
+    }
+
+    selectRoadmapProject(projectId: string): Observable<any> {
+        return this._http.post(`${this.baseUrl}/roadmap/select-project`, { project_id: projectId }, {
             withCredentials: true,
         });
     }

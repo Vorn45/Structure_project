@@ -77,6 +77,12 @@ export class CreateRoadmapProjectDto {
     description?: string;
 }
 
+export class SelectRoadmapProjectDto {
+    @IsNotEmpty()
+    @IsString()
+    project_id: string;
+}
+
 export class CreateActivityDto {
     @IsNotEmpty()
     @IsString()
