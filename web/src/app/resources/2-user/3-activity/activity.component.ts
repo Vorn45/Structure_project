@@ -376,6 +376,14 @@ export class UserActivityComponent implements OnInit {
             };
         });
 
+        this.projectOptions.update((list) =>
+            list.map((p) =>
+                String(p.id) === String(pId)
+                    ? { ...p, tasksCount: (this.projectTasksMap()[pId] || []).length }
+                    : p
+            )
+        );
+
         // Delete from backend API
         this._activityService.deleteRoadmapTask(taskId, pId).subscribe({
             next: () => {},
