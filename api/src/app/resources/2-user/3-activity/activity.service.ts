@@ -252,28 +252,30 @@ export class ActivityService {
             await this.saveToDb();
         }
 
-        private async saveToDb(): Promise<void> {
-            try {
-                let dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
-                if (!dbStore) {
-                    dbStore = this._activityStoreRepo.create({
-                        key: 'default_activities_store',
-                        projects: this.userProjectsMap,
-                        tasks_map: this.userTasksMap,
-                        activities: this.userActivitiesMap,
-                        selected_project_ids: this.userSelectedProjectMap,
-                    });
-                } else {
-                    dbStore.projects = this.userProjectsMap;
-                    dbStore.tasks_map = this.userTasksMap;
-                    dbStore.activities = this.userActivitiesMap;
-                    dbStore.selected_project_ids = this.userSelectedProjectMap;
-                }
-                await this._activityStoreRepo.save(dbStore);
-            } catch (err) {
-                console.error('Failed to save activity store to DB:', err);
-            }
+    private async saveToDb(): Promise<void> {
+        try {
+            const projectsJson = JSON.stringify(this.userProjectsMap);
+            const tasksMapJson = JSON.stringify(this.userTasksMap);
+            const activitiesJson = JSON.stringify(this.userActivitiesMap);
+            const selectedIdsJson = JSON.stringify(this.userSelectedProjectMap);
+
+            await this._activityStoreRepo.query(
+                `
+                INSERT INTO "user"."activity_store" ("key", "projects", "tasks_map", "activities", "selected_project_ids", "updated_at")
+                VALUES ('default_activities_store', $1::jsonb, $2::jsonb, $3::jsonb, $4::jsonb, now())
+                ON CONFLICT ("key") DO UPDATE SET
+                    "projects" = EXCLUDED."projects",
+                    "tasks_map" = EXCLUDED."tasks_map",
+                    "activities" = EXCLUDED."activities",
+                    "selected_project_ids" = EXCLUDED."selected_project_ids",
+                    "updated_at" = now();
+                `,
+                [projectsJson, tasksMapJson, activitiesJson, selectedIdsJson],
+            );
+        } catch (err) {
+            console.error('Failed to save activity store to DB:', err);
         }
+    }
 
         private ensureUserData(userId: string | number) {
             const uId = String(userId || '1');

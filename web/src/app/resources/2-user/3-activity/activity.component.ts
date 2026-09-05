@@ -155,9 +155,43 @@ export class UserActivityComponent implements OnInit {
         private readonly _userService: UserService,
     ) {}
 
+    private readonly BACKUP_KEY = 'wfm_agile_roadmap_backup_v2';
+
     ngOnInit(): void {
+        this.loadFromLocalBackup();
         this.loadRoadmapFromApi();
         this.loadActivities();
+    }
+
+    private loadFromLocalBackup(): void {
+        try {
+            const raw = localStorage.getItem(this.BACKUP_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed.projects) && parsed.projects.length > 0) {
+                    this.projectOptions.set(parsed.projects);
+                }
+                if (parsed.tasksMap && typeof parsed.tasksMap === 'object') {
+                    this.projectTasksMap.set(parsed.tasksMap);
+                }
+                if (parsed.selectedProjectId) {
+                    const match = this.projectOptions().find((p) => String(p.id) === String(parsed.selectedProjectId));
+                    if (match) this.currentProject.set(match);
+                }
+            }
+        } catch {}
+    }
+
+    saveToLocalBackup(): void {
+        try {
+            const cur = this.currentProject();
+            const data = {
+                projects: this.projectOptions(),
+                tasksMap: this.projectTasksMap(),
+                selectedProjectId: cur ? String(cur.id) : '1',
+            };
+            localStorage.setItem(this.BACKUP_KEY, JSON.stringify(data));
+        } catch {}
     }
 
     loadRoadmapFromApi(): void {
@@ -187,21 +221,43 @@ export class UserActivityComponent implements OnInit {
                         }
                     }
 
-                    if (rawProjects && rawProjects.length > 0) {
-                        const normalizedProjects: ProjectPlanOption[] = rawProjects.map((p: any) => ({
-                            id: String(p.id),
-                            code: p.code,
-                            name: p.name,
-                            description: p.description,
-                            tasksCount: p.tasksCount !== undefined ? p.tasksCount : (p.tasks_count !== undefined ? p.tasks_count : (normalizedMap[String(p.id)]?.length || 0)),
-                        }));
-                        this.projectOptions.set(normalizedProjects);
-
-                        const match = rawSelectedId ? normalizedProjects.find((p) => String(p.id) === String(rawSelectedId)) : null;
-                        this.currentProject.set(match || normalizedProjects[0]);
+                    // Preserve any local projects that may not yet be in remote API response
+                    const currentLocalProjects = this.projectOptions();
+                    const mergedProjects: ProjectPlanOption[] = [...currentLocalProjects];
+                    if (Array.isArray(rawProjects)) {
+                        for (const rp of rawProjects) {
+                            const pId = String(rp.id);
+                            const existingIdx = mergedProjects.findIndex((p) => String(p.id) === pId);
+                            const item: ProjectPlanOption = {
+                                id: pId,
+                                code: rp.code,
+                                name: rp.name,
+                                description: rp.description,
+                                tasksCount: rp.tasksCount !== undefined ? rp.tasksCount : (rp.tasks_count !== undefined ? rp.tasks_count : (normalizedMap[pId]?.length || 0)),
+                            };
+                            if (existingIdx >= 0) {
+                                mergedProjects[existingIdx] = item;
+                            } else {
+                                mergedProjects.push(item);
+                            }
+                        }
                     }
 
-                    this.projectTasksMap.set(normalizedMap);
+                    if (mergedProjects.length > 0) {
+                        this.projectOptions.set(mergedProjects);
+                        const match = rawSelectedId ? mergedProjects.find((p) => String(p.id) === String(rawSelectedId)) : null;
+                        if (match) {
+                            this.currentProject.set(match);
+                        }
+                    }
+
+                    // Merge tasksMap
+                    this.projectTasksMap.update((currentMap) => ({
+                        ...currentMap,
+                        ...normalizedMap,
+                    }));
+
+                    this.saveToLocalBackup();
                 }
             },
             error: () => {
@@ -246,6 +302,7 @@ export class UserActivityComponent implements OnInit {
 
     selectProject(p: ProjectPlanOption): void {
         this.currentProject.set(p);
+        this.saveToLocalBackup();
         this._activityService.selectRoadmapProject(p.id).subscribe({
             next: () => {},
             error: () => {},
@@ -276,6 +333,7 @@ export class UserActivityComponent implements OnInit {
                     [pId]: [starterTask],
                 }));
                 this.currentProject.set(projectWithCount);
+                this.saveToLocalBackup();
 
                 // Persist new plan to backend Roadmap API
                 this._activityService
@@ -342,6 +400,7 @@ export class UserActivityComponent implements OnInit {
                     this.currentProject.set(existing || selected);
                 }
 
+                this.saveToLocalBackup();
                 this._activityService.selectRoadmapProject(pId).subscribe({
                     next: () => {},
                     error: () => {},
@@ -396,6 +455,8 @@ export class UserActivityComponent implements OnInit {
                     )
                 );
 
+                this.saveToLocalBackup();
+
                 // Persist to backend API
                 this._activityService
                     .createRoadmapTask({
@@ -434,6 +495,8 @@ export class UserActivityComponent implements OnInit {
                     : p
             )
         );
+
+        this.saveToLocalBackup();
 
         // Delete from backend API
         this._activityService.deleteRoadmapTask(taskId, pId).subscribe({
