@@ -164,15 +164,44 @@ export class UserActivityComponent implements OnInit {
         this._activityService.getRoadmap().subscribe({
             next: (res) => {
                 if (res?.data) {
-                    const { projects, tasksMap, selectedProjectId } = res.data;
-                    if (projects && projects.length > 0) {
-                        this.projectOptions.set(projects);
-                        const match = selectedProjectId ? projects.find((p) => String(p.id) === String(selectedProjectId)) : null;
-                        this.currentProject.set(match || projects[0]);
+                    const rawProjects = res.data.projects || (res.data as any).projects || [];
+                    const rawTasksMap = res.data.tasksMap || (res.data as any).tasks_map || {};
+                    const rawSelectedId = res.data.selectedProjectId || (res.data as any).selected_project_id;
+
+                    // Normalize all tasks and segments in tasksMap
+                    const normalizedMap: { [pId: string]: AgilePlanTask[] } = {};
+                    for (const [pId, tasks] of Object.entries(rawTasksMap)) {
+                        if (Array.isArray(tasks)) {
+                            normalizedMap[String(pId)] = tasks.map((t: any) => ({
+                                id: String(t.id),
+                                name: t.name,
+                                segments: Array.isArray(t.segments)
+                                    ? t.segments.map((s: any) => ({
+                                          iteration: Number(s.iteration) as 1 | 2 | 3,
+                                          startWeek: Number(s.startWeek !== undefined ? s.startWeek : s.start_week) || 14,
+                                          durationWeeks: Number(s.durationWeeks !== undefined ? s.durationWeeks : s.duration_weeks) || 1,
+                                          label: s.label,
+                                      }))
+                                    : [],
+                            }));
+                        }
                     }
-                    if (tasksMap) {
-                        this.projectTasksMap.set(tasksMap);
+
+                    if (rawProjects && rawProjects.length > 0) {
+                        const normalizedProjects: ProjectPlanOption[] = rawProjects.map((p: any) => ({
+                            id: String(p.id),
+                            code: p.code,
+                            name: p.name,
+                            description: p.description,
+                            tasksCount: p.tasksCount !== undefined ? p.tasksCount : (p.tasks_count !== undefined ? p.tasks_count : (normalizedMap[String(p.id)]?.length || 0)),
+                        }));
+                        this.projectOptions.set(normalizedProjects);
+
+                        const match = rawSelectedId ? normalizedProjects.find((p) => String(p.id) === String(rawSelectedId)) : null;
+                        this.currentProject.set(match || normalizedProjects[0]);
                     }
+
+                    this.projectTasksMap.set(normalizedMap);
                 }
             },
             error: () => {
