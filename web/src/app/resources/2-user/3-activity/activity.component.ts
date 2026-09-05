@@ -152,56 +152,9 @@ export class UserActivityComponent implements OnInit {
         private readonly _userService: UserService,
     ) {}
 
-    private get currentUserId(): string {
-        return String(this._userService.getUser()?.id || this._userService.user?.id || 'default');
-    }
-
     ngOnInit(): void {
-        this.loadFromStorage();
         this.loadRoadmapFromApi();
         this.loadActivities();
-    }
-
-    private loadFromStorage(): void {
-        try {
-            const uid = this.currentUserId;
-            const storedProjects = localStorage.getItem(`wfm_activity_projects_${uid}`);
-            if (storedProjects) {
-                const parsed = JSON.parse(storedProjects);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    this.projectOptions.set(parsed);
-                }
-            }
-
-            const storedTasks = localStorage.getItem(`wfm_activity_tasks_map_${uid}`);
-            if (storedTasks) {
-                const parsed = JSON.parse(storedTasks);
-                if (parsed && typeof parsed === 'object') {
-                    this.projectTasksMap.set(parsed);
-                }
-            }
-
-            const storedCurId = localStorage.getItem(`wfm_activity_current_project_id_${uid}`);
-            if (storedCurId) {
-                const found = this.projectOptions().find((p) => String(p.id) === String(storedCurId));
-                if (found) {
-                    this.currentProject.set(found);
-                }
-            }
-        } catch (e) {
-            console.error('Failed to load from localStorage', e);
-        }
-    }
-
-    private saveToStorage(): void {
-        try {
-            const uid = this.currentUserId;
-            localStorage.setItem(`wfm_activity_projects_${uid}`, JSON.stringify(this.projectOptions()));
-            localStorage.setItem(`wfm_activity_tasks_map_${uid}`, JSON.stringify(this.projectTasksMap()));
-            localStorage.setItem(`wfm_activity_current_project_id_${uid}`, this.currentProject()?.id || '1');
-        } catch (e) {
-            console.error('Failed to save to localStorage', e);
-        }
     }
 
     loadRoadmapFromApi(): void {
@@ -210,19 +163,14 @@ export class UserActivityComponent implements OnInit {
                 if (res?.data) {
                     const { projects, tasksMap } = res.data;
                     if (projects && projects.length > 0) {
-                        this.projectOptions.update((existing) => {
-                            const existingIds = new Set(existing.map((e) => String(e.id)));
-                            const additions = projects.filter((p) => !existingIds.has(String(p.id)));
-                            return [...existing, ...additions];
-                        });
+                        this.projectOptions.set(projects);
+                        if (!this.currentProject()) {
+                            this.currentProject.set(projects[0]);
+                        }
                     }
                     if (tasksMap) {
-                        this.projectTasksMap.update((existing) => ({
-                            ...tasksMap,
-                            ...existing,
-                        }));
+                        this.projectTasksMap.set(tasksMap);
                     }
-                    this.saveToStorage();
                 }
             },
             error: () => {
@@ -244,18 +192,13 @@ export class UserActivityComponent implements OnInit {
                         tasksCount: p.total_tasks || 0,
                     }));
 
-                    // Merge with existing while avoiding duplicates
-                    this.projectOptions.update((existing) => {
-                        const existingIds = new Set(existing.map((e) => String(e.id)));
-                        const additions = apiProjects.filter((ap) => !existingIds.has(String(ap.id)));
-                        return [...existing, ...additions];
-                    });
-                    this.saveToStorage();
+                    this.projectOptions.set(apiProjects);
+                    if (!this.currentProject() && apiProjects.length > 0) {
+                        this.currentProject.set(apiProjects[0]);
+                    }
                 }
             },
-            error: () => {
-                // Fallback to local defaults if API is offline
-            },
+            error: () => {},
         });
     }
 
@@ -272,7 +215,6 @@ export class UserActivityComponent implements OnInit {
 
     selectProject(p: ProjectPlanOption): void {
         this.currentProject.set(p);
-        this.saveToStorage();
     }
 
     openCreateNewProjectDialog(): void {
@@ -294,7 +236,6 @@ export class UserActivityComponent implements OnInit {
                     ],
                 }));
                 this.currentProject.set(newProject);
-                this.saveToStorage();
 
                 // Persist new plan to backend Roadmap API
                 this._activityService
@@ -352,7 +293,6 @@ export class UserActivityComponent implements OnInit {
                         });
                 }
                 this.currentProject.set(selected);
-                this.saveToStorage();
             }
         });
     }
@@ -399,8 +339,6 @@ export class UserActivityComponent implements OnInit {
                     )
                 );
 
-                this.saveToStorage();
-
                 // Persist to backend API
                 this._activityService
                     .createRoadmapTask({
@@ -427,7 +365,6 @@ export class UserActivityComponent implements OnInit {
                 [pId]: currentList.filter((t) => t.id !== taskId),
             };
         });
-        this.saveToStorage();
 
         // Delete from backend API
         this._activityService.deleteRoadmapTask(taskId, pId).subscribe({

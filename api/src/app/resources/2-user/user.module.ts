@@ -7,6 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/app/common/common.module';
 import { User } from 'src/app/model/user/users.entity';
 import { TaskStore } from 'src/app/model/user/task-store.entity';
+import { ActivityStore } from 'src/app/model/user/activity-store.entity';
+import { PlanStore } from 'src/app/model/user/plan-store.entity';
 
 // Controllers
 import { HomeController } from './1-home/home.controller';
@@ -45,7 +47,7 @@ import { ReportService } from './5-report/report.service';
     imports: [
         HttpModule,
         CommonModule,
-        TypeOrmModule.forFeature([User, TaskStore]),
+        TypeOrmModule.forFeature([User, TaskStore, ActivityStore, PlanStore]),
     ],
     controllers: [
         HomeController,

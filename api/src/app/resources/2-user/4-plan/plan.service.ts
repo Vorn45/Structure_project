@@ -1,8 +1,11 @@
 // ===========================================================================>> Core Library
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { QueryPlanDto } from './plan.dto';
 
 export interface ProjectPlanItem {
@@ -63,12 +66,77 @@ const PROJECTS: ProjectPlanItem[] = [
 @Injectable()
 export class PlanService {
     private projects: ProjectPlanItem[] = [...PROJECTS];
+    private isDbLoaded = false;
+
+    constructor(
+        @InjectRepository(PlanStore)
+        private readonly _planStoreRepo: Repository<PlanStore>,
+    ) {
+        this.initDbStore();
+    }
+
+    private async ensureTableExists(): Promise<void> {
+        try {
+            await this._planStoreRepo.query(`
+                CREATE SCHEMA IF NOT EXISTS "user";
+                CREATE TABLE IF NOT EXISTS "user"."plan_store" (
+                    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    "key" VARCHAR(255) NOT NULL DEFAULT 'default_plans_store',
+                    "plans" JSONB NULL DEFAULT '[]'::jsonb,
+                    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS "IDX_plan_store_key" ON "user"."plan_store" ("key");
+            `);
+        } catch (e: any) {
+            // Already exists or created
+        }
+    }
+
+    private async initDbStore(): Promise<void> {
+        await this.ensureTableExists();
+        try {
+            const dbStore = await this._planStoreRepo.findOne({ where: { key: 'default_plans_store' } });
+            if (dbStore && Array.isArray(dbStore.plans) && dbStore.plans.length > 0) {
+                this.projects = dbStore.plans;
+            } else {
+                await this.saveToDb();
+            }
+            this.isDbLoaded = true;
+        } catch (err) {
+            console.warn('Could not load plan store from DB, using default projects:', err);
+        }
+    }
+
+    private async ensureLoaded(): Promise<void> {
+        if (!this.isDbLoaded) {
+            await this.initDbStore();
+        }
+    }
+
+    private async saveToDb(): Promise<void> {
+        try {
+            let dbStore = await this._planStoreRepo.findOne({ where: { key: 'default_plans_store' } });
+            if (!dbStore) {
+                dbStore = this._planStoreRepo.create({
+                    key: 'default_plans_store',
+                    plans: this.projects,
+                });
+            } else {
+                dbStore.plans = this.projects;
+            }
+            await this._planStoreRepo.save(dbStore);
+        } catch (err) {
+            console.error('Failed to save plan store to DB:', err);
+        }
+    }
 
     getRawProjects(): ProjectPlanItem[] {
         return this.projects;
     }
 
     async getPlans(user: UserPayload, query: QueryPlanDto) {
+        await this.ensureLoaded();
         let list = [...this.projects];
 
         if (query.search) {
@@ -102,6 +170,7 @@ export class PlanService {
     }
 
     async getPlanById(user: UserPayload, id: string) {
+        await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
@@ -115,6 +184,7 @@ export class PlanService {
     }
 
     async getTeamMembers(user: UserPayload, id: string) {
+        await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
@@ -132,6 +202,7 @@ export class PlanService {
     }
 
     async createPlan(user: UserPayload, dto: any) {
+        await this.ensureLoaded();
         const newPlan: ProjectPlanItem = {
             id: `proj-${Date.now().toString().slice(-4)}`,
             code: dto.code || `PMS-${Math.floor(100 + Math.random() * 900)}`,
@@ -149,6 +220,7 @@ export class PlanService {
         };
 
         this.projects.unshift(newPlan);
+        await this.saveToDb();
 
         return {
             status_code: 201,
@@ -158,6 +230,7 @@ export class PlanService {
     }
 
     async updatePlan(user: UserPayload, id: string, dto: any) {
+        await this.ensureLoaded();
         const index = this.projects.findIndex((p) => p.id === id || p.code === id);
         if (index === -1) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
@@ -177,6 +250,7 @@ export class PlanService {
         };
 
         this.projects[index] = updated;
+        await this.saveToDb();
 
         return {
             status_code: 200,
@@ -186,12 +260,14 @@ export class PlanService {
     }
 
     async deletePlan(user: UserPayload, id: string) {
+        await this.ensureLoaded();
         const index = this.projects.findIndex((p) => p.id === id || p.code === id);
         if (index === -1) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
 
         this.projects.splice(index, 1);
+        await this.saveToDb();
 
         return {
             status_code: 200,

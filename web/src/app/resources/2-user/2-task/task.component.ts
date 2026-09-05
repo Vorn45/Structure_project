@@ -827,27 +827,10 @@ export class UserTaskComponent implements OnInit {
         return `${months} ខែមុន`;
     }
 
-    private saveChatToStorage(taskId: number, msgs: TaskChatMessage[]): void {
-        try {
-            const cacheKey = `wfm_task_chat_${taskId}`;
-            localStorage.setItem(cacheKey, JSON.stringify(msgs));
-        } catch (e) {}
-    }
-
-    private loadChatFromStorage(taskId: number): TaskChatMessage[] | null {
-        try {
-            const cacheKey = `wfm_task_chat_${taskId}`;
-            const raw = localStorage.getItem(cacheKey);
-            if (raw) return JSON.parse(raw);
-        } catch (e) {}
-        return null;
-    }
-
     appendChatMessage(taskId: number, message: TaskChatMessage): void {
         this.chatMessages.update((msgs) => {
             const updated = [...msgs, message];
             this.taskChatHistoryMap.set(taskId, updated);
-            this.saveChatToStorage(taskId, updated);
             return updated;
         });
     }
@@ -857,10 +840,9 @@ export class UserTaskComponent implements OnInit {
         this.selectedTask.set(task);
         this.showChatRoom.set(true);
 
-        const cached = this.taskChatHistoryMap.get(task.id) || this.loadChatFromStorage(task.id);
+        const cached = this.taskChatHistoryMap.get(task.id);
         if (cached && cached.length > 0) {
             this.chatMessages.set([...cached]);
-            this.taskChatHistoryMap.set(task.id, cached);
         } else {
             const reporterName = task.reporter?.name || 'Leng sokchhay';
             const reporterAvatar = task.reporter?.avatar || '/images/placeholder/avatar.jpg';
@@ -920,7 +902,6 @@ export class UserTaskComponent implements OnInit {
 
                     this.chatMessages.set(mapped);
                     this.taskChatHistoryMap.set(task.id, mapped);
-                    this.saveChatToStorage(task.id, mapped);
                 }
             },
             error: () => {},
@@ -973,7 +954,6 @@ export class UserTaskComponent implements OnInit {
                                 m.id === tempId ? { ...m, id: serverComment.id, created_at: serverComment.created_at } : m
                             );
                             this.taskChatHistoryMap.set(currentTask.id, updated);
-                            this.saveChatToStorage(currentTask.id, updated);
                             return updated;
                         });
                     }

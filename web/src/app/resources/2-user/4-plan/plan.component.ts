@@ -916,7 +916,6 @@ export class UserPlanComponent implements OnInit {
                     proj.agileTasks = [...DEFAULT_AGILE_TASKS];
                 }
                 proj.agileTasks = [newTask, ...proj.agileTasks];
-                this.savePlansToStorage();
             }
         });
     }
@@ -927,31 +926,6 @@ export class UserPlanComponent implements OnInit {
             proj.agileTasks = [...DEFAULT_AGILE_TASKS];
         }
         proj.agileTasks = proj.agileTasks.filter((t) => t.id !== taskId);
-        this.savePlansToStorage();
-    }
-
-    private savePlansToStorage(): void {
-        try {
-            localStorage.setItem('wfm_user_plans', JSON.stringify(this.plans()));
-        } catch (e) {
-            console.error('Failed to save plans to localStorage', e);
-        }
-    }
-
-    private loadPlansFromStorage(): boolean {
-        try {
-            const stored = localStorage.getItem('wfm_user_plans');
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    this.plans.set(parsed);
-                    return true;
-                }
-            }
-        } catch (e) {
-            console.error('Failed to load plans from localStorage', e);
-        }
-        return false;
     }
 
     ngOnInit(): void {
@@ -960,7 +934,6 @@ export class UserPlanComponent implements OnInit {
 
     loadPlans(): void {
         this.loading.set(true);
-        const hasLocal = this.loadPlansFromStorage();
 
         this._planService
             .getPlans({
@@ -969,46 +942,35 @@ export class UserPlanComponent implements OnInit {
             })
             .subscribe({
                 next: (res) => {
-                    if (!hasLocal) {
+                    if (res?.data?.results?.length) {
+                        const items: ExtendedProjectItem[] = res.data.results.map((ap) => ({
+                            id: String(ap.id),
+                            code: ap.code,
+                            name: ap.name,
+                            description: ap.description,
+                            status: (ap.status as any) || 'active',
+                            priority: 'high',
+                            category: 'Development',
+                            budget_allocated: 50000,
+                            budget_spent: 20000,
+                            total_tasks: ap.total_tasks || 0,
+                            completed_tasks: ap.completed_tasks || 0,
+                            progress: ap.progress || 0,
+                            start_date: ap.start_date || new Date().toISOString(),
+                            end_date: ap.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
+                            team_lead: { id: 1, name: 'Project Lead', role: 'Leader' },
+                            members: ap.members || [],
+                            tasks: [],
+                            agileTasks: [...DEFAULT_AGILE_TASKS],
+                        }));
+                        this.plans.set(items);
+                    } else {
                         this.plans.set(DEFAULT_INVITED_PROJECTS);
-                        this.savePlansToStorage();
-                    } else if (res?.data?.results?.length) {
-                        // Merge any new API projects that aren't in local storage yet
-                        const current = this.plans();
-                        const existingIds = new Set(current.map((p) => String(p.id)));
-                        const additions: ExtendedProjectItem[] = res.data.results
-                            .filter((ap) => !existingIds.has(String(ap.id)))
-                            .map((ap) => ({
-                                id: String(ap.id),
-                                code: ap.code,
-                                name: ap.name,
-                                description: ap.description,
-                                status: (ap.status as any) || 'active',
-                                priority: 'high',
-                                category: 'Development',
-                                budget_allocated: 50000,
-                                budget_spent: 20000,
-                                total_tasks: ap.total_tasks || 0,
-                                completed_tasks: ap.completed_tasks || 0,
-                                progress: ap.progress || 0,
-                                start_date: ap.start_date || new Date().toISOString(),
-                                end_date: ap.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
-                                team_lead: { id: 1, name: 'Project Lead', role: 'Leader' },
-                                members: [],
-                                tasks: [],
-                                agileTasks: [...DEFAULT_AGILE_TASKS],
-                            }));
-                        if (additions.length > 0) {
-                            this.plans.set([...current, ...additions]);
-                            this.savePlansToStorage();
-                        }
                     }
                     this.loading.set(false);
                 },
                 error: () => {
-                    if (!hasLocal) {
-                        this.plans.set(DEFAULT_INVITED_PROJECTS);
-                    }
+                    this.plans.set(DEFAULT_INVITED_PROJECTS);
                     this.loading.set(false);
                 },
             });

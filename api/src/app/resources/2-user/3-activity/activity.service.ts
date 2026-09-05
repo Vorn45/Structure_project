@@ -1,8 +1,11 @@
 // ===========================================================================>> Core Library
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { ActivityStore } from 'src/app/model/user/activity-store.entity';
 import { CreateActivityDto, CreateRoadmapProjectDto, CreateRoadmapTaskDto, QueryActivityDto } from './activity.dto';
 
 export interface ActivityItem {
@@ -130,32 +133,112 @@ const ACTIVITIES: ActivityItem[] = [
 
 @Injectable()
 export class ActivityService {
-    // User-account isolated storage
+    // In-memory cache synced with database
     private userProjectsMap: { [userId: number]: RoadmapProject[] } = {};
     private userTasksMap: { [userId: number]: { [projectId: string]: AgilePlanTask[] } } = {};
     private userActivitiesMap: { [userId: number]: ActivityItem[] } = {};
+    private isDbLoaded = false;
+
+    constructor(
+        @InjectRepository(ActivityStore)
+        private readonly _activityStoreRepo: Repository<ActivityStore>,
+    ) {
+        this.initDbStore();
+    }
+
+    private async ensureTableExists(): Promise<void> {
+        try {
+            await this._activityStoreRepo.query(`
+                CREATE SCHEMA IF NOT EXISTS "user";
+                CREATE TABLE IF NOT EXISTS "user"."activity_store" (
+                    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    "key" VARCHAR(255) NOT NULL DEFAULT 'default_activities_store',
+                    "projects" JSONB NULL DEFAULT '[]'::jsonb,
+                    "tasks_map" JSONB NULL DEFAULT '{}'::jsonb,
+                    "activities" JSONB NULL DEFAULT '[]'::jsonb,
+                    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+                    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS "IDX_activity_store_key" ON "user"."activity_store" ("key");
+            `);
+        } catch (e: any) {
+            // Already exists or schema created
+        }
+    }
+
+    private async initDbStore(): Promise<void> {
+        await this.ensureTableExists();
+        try {
+            const dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
+            if (dbStore) {
+                if (dbStore.projects && typeof dbStore.projects === 'object') {
+                    this.userProjectsMap = dbStore.projects;
+                }
+                if (dbStore.tasks_map && typeof dbStore.tasks_map === 'object') {
+                    this.userTasksMap = dbStore.tasks_map;
+                }
+                if (dbStore.activities && typeof dbStore.activities === 'object') {
+                    this.userActivitiesMap = dbStore.activities;
+                }
+            } else {
+                this.ensureUserData(1);
+                await this.saveToDb();
+            }
+            this.isDbLoaded = true;
+        } catch (err) {
+            console.warn('Could not load activity store from DB, using defaults:', err);
+        }
+    }
+
+    private async ensureLoaded(): Promise<void> {
+        if (!this.isDbLoaded) {
+            await this.initDbStore();
+        }
+    }
+
+    private async saveToDb(): Promise<void> {
+        try {
+            let dbStore = await this._activityStoreRepo.findOne({ where: { key: 'default_activities_store' } });
+            if (!dbStore) {
+                dbStore = this._activityStoreRepo.create({
+                    key: 'default_activities_store',
+                    projects: this.userProjectsMap,
+                    tasks_map: this.userTasksMap,
+                    activities: this.userActivitiesMap,
+                });
+            } else {
+                dbStore.projects = this.userProjectsMap;
+                dbStore.tasks_map = this.userTasksMap;
+                dbStore.activities = this.userActivitiesMap;
+            }
+            await this._activityStoreRepo.save(dbStore);
+        } catch (err) {
+            console.error('Failed to save activity store to DB:', err);
+        }
+    }
 
     private ensureUserData(userId: number) {
-        if (!this.userProjectsMap[userId]) {
+        if (!this.userProjectsMap[userId] || !Array.isArray(this.userProjectsMap[userId]) || this.userProjectsMap[userId].length === 0) {
             this.userProjectsMap[userId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
         }
-        if (!this.userTasksMap[userId]) {
+        if (!this.userTasksMap[userId] || Object.keys(this.userTasksMap[userId]).length === 0) {
             this.userTasksMap[userId] = {
                 '1': JSON.parse(JSON.stringify(DEFAULT_PMS_TASKS)),
                 '2': JSON.parse(JSON.stringify(DEFAULT_WMS_TASKS)),
                 '3': JSON.parse(JSON.stringify(DEFAULT_EGOV_TASKS)),
             };
         }
-        if (!this.userActivitiesMap[userId]) {
+        if (!this.userActivitiesMap[userId] || !Array.isArray(this.userActivitiesMap[userId]) || this.userActivitiesMap[userId].length === 0) {
             this.userActivitiesMap[userId] = JSON.parse(JSON.stringify(ACTIVITIES));
         }
     }
 
     async getActivities(user: UserPayload, query: QueryActivityDto) {
+        await this.ensureLoaded();
         const uId = user?.id || 1;
         this.ensureUserData(uId);
 
-        let list = [...this.userActivitiesMap[uId]];
+        let list = [...(this.userActivitiesMap[uId] || [])];
 
         if (query.type && query.type !== 'all') {
             list = list.filter((a) => a.type === query.type);
@@ -178,6 +261,7 @@ export class ActivityService {
     }
 
     async createActivity(user: UserPayload, dto: CreateActivityDto) {
+        await this.ensureLoaded();
         const uId = user?.id || 1;
         this.ensureUserData(uId);
 
@@ -196,7 +280,11 @@ export class ActivityService {
             created_at: new Date().toISOString(),
         };
 
+        if (!this.userActivitiesMap[uId]) {
+            this.userActivitiesMap[uId] = [];
+        }
         this.userActivitiesMap[uId].unshift(item);
+        await this.saveToDb();
 
         return {
             status_code: 201,
@@ -206,6 +294,7 @@ export class ActivityService {
     }
 
     async getRoadmapData(user: UserPayload) {
+        await this.ensureLoaded();
         const uId = user?.id || 1;
         this.ensureUserData(uId);
 
@@ -220,6 +309,7 @@ export class ActivityService {
     }
 
     async createRoadmapProject(user: UserPayload, dto: CreateRoadmapProjectDto) {
+        await this.ensureLoaded();
         const uId = user?.id || 1;
         this.ensureUserData(uId);
 
@@ -237,8 +327,17 @@ export class ActivityService {
             segments: [{ iteration: 1, startWeek: 14, durationWeeks: 3, label: '3W' }],
         };
 
+        if (!this.userProjectsMap[uId]) {
+            this.userProjectsMap[uId] = [];
+        }
         this.userProjectsMap[uId].unshift(newProject);
+
+        if (!this.userTasksMap[uId]) {
+            this.userTasksMap[uId] = {};
+        }
         this.userTasksMap[uId][newProject.id] = [starterTask];
+
+        await this.saveToDb();
 
         return {
             status_code: 201,
@@ -251,6 +350,7 @@ export class ActivityService {
     }
 
     async createRoadmapTask(user: UserPayload, dto: CreateRoadmapTaskDto) {
+        await this.ensureLoaded();
         const uId = user?.id || 1;
         this.ensureUserData(uId);
 
@@ -261,16 +361,21 @@ export class ActivityService {
             segments: dto.segments as AgilePlanSegment[],
         };
 
+        if (!this.userTasksMap[uId]) {
+            this.userTasksMap[uId] = {};
+        }
         if (!this.userTasksMap[uId][projectId]) {
             this.userTasksMap[uId][projectId] = [];
         }
 
         this.userTasksMap[uId][projectId].unshift(newTask);
 
-        const proj = this.userProjectsMap[uId].find((p) => String(p.id) === projectId);
+        const proj = this.userProjectsMap[uId]?.find((p) => String(p.id) === projectId);
         if (proj) {
             proj.tasksCount = this.userTasksMap[uId][projectId].length;
         }
+
+        await this.saveToDb();
 
         return {
             status_code: 201,
@@ -283,16 +388,18 @@ export class ActivityService {
     }
 
     async deleteRoadmapTask(user: UserPayload, taskId: string, projectId: string) {
+        await this.ensureLoaded();
         const uId = user?.id || 1;
         this.ensureUserData(uId);
 
         const pId = String(projectId);
-        if (this.userTasksMap[uId][pId]) {
+        if (this.userTasksMap[uId] && this.userTasksMap[uId][pId]) {
             this.userTasksMap[uId][pId] = this.userTasksMap[uId][pId].filter((t) => t.id !== taskId);
-            const proj = this.userProjectsMap[uId].find((p) => String(p.id) === pId);
+            const proj = this.userProjectsMap[uId]?.find((p) => String(p.id) === pId);
             if (proj) {
                 proj.tasksCount = this.userTasksMap[uId][pId].length;
             }
+            await this.saveToDb();
         }
 
         return {
