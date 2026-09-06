@@ -68,26 +68,27 @@ import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-but
 
                     <!-- Fast Contact Channels -->
                     <div class="grid grid-cols-2 gap-3 font-kantumruy">
-                        <a href="https://t.me/wmssupport" target="_blank"
+                        <a href="https://t.me/wmsassitantVornManager_bot" target="_blank"
                             class="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 hover:border-blue-400 transition-all flex items-center gap-3">
                             <div class="w-9 h-9 rounded-lg bg-blue-500 text-white flex items-center justify-center shrink-0">
                                 <mat-icon svgIcon="mdi:send" class="icon-size-5"></mat-icon>
                             </div>
                             <div class="min-w-0">
                                 <p class="text-[15px] font-medium text-slate-800 dark:text-white truncate">Telegram ជំនួយ</p>
-                                <p class="text-[12px] text-slate-500 dark:text-slate-400">&#64;wmssupport</p>
+                                <p class="text-[12px] text-slate-500 dark:text-slate-400">&#64;wmsassitantVornManager_bot</p>
                             </div>
                         </a>
 
-                        <div class="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center gap-3">
+                        <a href="tel:010843612"
+                            class="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 hover:border-emerald-400 transition-all flex items-center gap-3">
                             <div class="w-9 h-9 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0">
                                 <mat-icon svgIcon="mdi:phone" class="icon-size-5"></mat-icon>
                             </div>
                             <div class="min-w-0">
                                 <p class="text-[15px] font-medium text-slate-800 dark:text-white truncate">ទូរស័ព្ទបន្ទាន់</p>
-                                <p class="text-[12px] text-slate-500 dark:text-slate-400">087 600 064</p>
+                                <p class="text-[12px] text-slate-500 dark:text-slate-400">010 843 612</p>
                             </div>
-                        </div>
+                        </a>
                     </div>
 
                     <!-- Report Issue Form -->
