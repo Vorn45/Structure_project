@@ -26,7 +26,7 @@ export class DashboardService {
     async getStats(user: UserPayload) {
         const rawProjects = this._planService.getRawProjects();
         const totalProjects = rawProjects.length;
-        const activeProjects = rawProjects.filter((p) => p.status === 'active' || p.status === 'in_progress').length;
+        const activeProjects = rawProjects.filter((p) => p.status === 'active').length;
         const completedProjects = rawProjects.filter((p) => p.status === 'completed').length;
         const planningProjects = rawProjects.filter((p) => p.status === 'planning' || p.status === 'on_hold').length;
 
