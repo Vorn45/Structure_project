@@ -1,0 +1,552 @@
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
+    style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
+
+    <!-- ===== FRAMED MAIN CONTAINER ===== -->
+    <div class="flex flex-col flex-1 min-w-0 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+        style="min-height: calc(100vh - 2rem);">
+
+        <!-- ========================================================================= -->
+        <!-- SCENARIO A: ALL PROJECTS OVERVIEW (WHEN NO PROJECT IS SELECTED)           -->
+        <!-- ========================================================================= -->
+        @if (!selectedProject()) {
+            <div class="flex flex-col flex-1 p-4 sm:p-6 space-y-5">
+                <!-- Top Header Row -->
+                <div class="flex items-center justify-between gap-4">
+                    <!-- Left: Title & Count -->
+                    <div class="flex items-center gap-3 shrink-0">
+                        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200 dark:border-blue-800">
+                            <mat-icon svgIcon="mdi:folder-outline" class="icon-size-5"></mat-icon>
+                        </div>
+                        <span class="text-[18px] font-medium text-slate-800 dark:text-white">គម្រោងទាំងអស់ (Projects Governance)</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            {{ filteredProjects().length }}
+                        </span>
+                    </div>
+
+                    <!-- Right: Create Project & Refresh -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" (click)="openCreateDrawer()"
+                            class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                            <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                            <span>បង្កើតគម្រោង</span>
+                        </button>
+
+                        <button type="button" (click)="loadData()"
+                            class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer"
+                            matTooltip="ផ្ទុកឡើងវិញ">
+                            <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Filter Tabs & Search Bar -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <!-- Tabs -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 [scrollbar-width:none]">
+                        <button (click)="filterByStatus('all')"
+                            class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                            [ngClass]="statusFilter() === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                            <span>ទាំងអស់</span>
+                            <span class="text-[12px] font-normal"
+                                [ngClass]="statusFilter() === 'all' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
+                                {{ projectCounts().all }}
+                            </span>
+                        </button>
+
+                        <button (click)="filterByStatus('active')"
+                            class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                            [ngClass]="statusFilter() === 'active' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                            <span>កំពុងដំណើរការ</span>
+                            <span class="text-[12px] font-normal"
+                                [ngClass]="statusFilter() === 'active' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                                {{ projectCounts().active }}
+                            </span>
+                        </button>
+
+                        <button (click)="filterByStatus('planning')"
+                            class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                            [ngClass]="statusFilter() === 'planning' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                            <span>រៀបចំផែនការ</span>
+                            <span class="text-[12px] font-normal"
+                                [ngClass]="statusFilter() === 'planning' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                                {{ projectCounts().planning }}
+                            </span>
+                        </button>
+
+                        <button (click)="filterByStatus('on_hold')"
+                            class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                            [ngClass]="statusFilter() === 'on_hold' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                            <span>ផ្អាក</span>
+                            <span class="text-[12px] font-normal"
+                                [ngClass]="statusFilter() === 'on_hold' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                                {{ projectCounts().on_hold }}
+                            </span>
+                        </button>
+
+                        <button (click)="filterByStatus('completed')"
+                            class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                            [ngClass]="statusFilter() === 'completed' ? 'bg-purple-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                            <span>បានបញ្ចប់</span>
+                            <span class="text-[12px] font-normal"
+                                [ngClass]="statusFilter() === 'completed' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                                {{ projectCounts().completed }}
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative flex items-center shrink-0">
+                        <mat-icon svgIcon="mdi:magnify"
+                            class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
+                        <input type="text" placeholder="ស្វែងរកគម្រោង..." [ngModel]="searchQuery()"
+                            (ngModelChange)="searchQuery.set($event)"
+                            class="w-full sm:w-60 pl-9 pr-3 py-1.5 text-[14px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
+                    </div>
+                </div>
+
+                <!-- Projects Grid (PMS Standard Card Design) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    @for (plan of filteredProjects(); track plan.id) {
+                        <div (click)="selectProject(plan)"
+                            class="group relative w-full rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden">
+
+                            <!-- Top Khmer Decorative Line -->
+                            <div class="h-1 w-full bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600"></div>
+
+                            <!-- Subtle Watermark -->
+                            <div class="absolute right-0 top-1 w-24 h-24 pointer-events-none opacity-[0.04] dark:opacity-[0.08] text-blue-900 dark:text-blue-200">
+                                <svg viewBox="0 0 120 120" fill="currentColor" class="w-full h-full">
+                                    <path d="M60 10 C65 25 80 35 95 35 C80 45 75 60 85 75 C70 70 60 85 60 105 C60 85 50 70 35 75 C45 60 40 45 25 35 C40 35 55 25 60 10 Z" />
+                                    <circle cx="60" cy="55" r="12" fill="none" stroke="currentColor" stroke-width="3" />
+                                </svg>
+                            </div>
+
+                            <div class="p-4 space-y-3 relative z-10">
+                                <!-- Code & Status Header -->
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-[11.5px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-900/40 px-2 py-0.5 rounded-md shadow-2xs font-mono">
+                                        {{ plan.code }}
+                                    </span>
+
+                                    <span class="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs"
+                                        [ngClass]="getStatusClass(plan.status)">
+                                        <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
+                                        <span>{{ getStatusLabel(plan.status) }}</span>
+                                    </span>
+                                </div>
+
+                                <!-- Title & Description -->
+                                <div class="space-y-0.5">
+                                    <h3 class="text-[15px] font-medium text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate">
+                                        {{ plan.name }}
+                                    </h3>
+                                    <p class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-1 font-normal">
+                                        {{ plan.description || 'មិនមានការពិពណ៌នាបន្ថែម' }}
+                                    </p>
+                                </div>
+
+                                <!-- Lead & Budget Info -->
+                                <div class="flex items-center justify-between text-[12px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                                    <div class="flex items-center gap-1">
+                                        <span>ប្រធាន:</span>
+                                        <button (click)="openLeadModal(plan, $event)" class="font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 flex items-center gap-0.5 cursor-pointer">
+                                            <span>{{ plan.members?.[0]?.name || 'N/A' }}</span>
+                                            <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-3 text-slate-400"></mat-icon>
+                                        </button>
+                                    </div>
+                                    <button (click)="openBudgetModal(plan, $event)" class="font-mono text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer">
+                                        ${{ plan.budget || 5000 | number }}
+                                    </button>
+                                </div>
+
+                                <!-- Progress Bar & Task Count -->
+                                <div class="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                                    <div class="flex justify-between items-center text-[12px]">
+                                        <span class="text-slate-500 dark:text-slate-400">កិច្ចការរួចរាល់</span>
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium">
+                                            {{ plan.completed_tasks }} / {{ plan.total_tasks }} ({{ plan.progress }}%)
+                                        </span>
+                                    </div>
+                                    <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
+                                            [style.width.%]="plan.progress"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Open Button & Admin Actions -->
+                            <div class="px-4 pb-4 pt-0 relative z-10 flex items-center gap-2">
+                                <button type="button" (click)="selectProject(plan); $event.stopPropagation()"
+                                    class="flex-1 h-8.5 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13px] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
+                                    <mat-icon svgIcon="mdi:view-dashboard-outline" class="icon-size-4"></mat-icon>
+                                    <span>ចូលមើលគម្រោង ({{ plan.tasks?.length || plan.total_tasks || 0 }})</span>
+                                </button>
+                                <button type="button" (click)="openEditDrawer(plan); $event.stopPropagation()"
+                                    class="w-8.5 h-8.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-500 flex items-center justify-center cursor-pointer">
+                                    <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4"></mat-icon>
+                                </button>
+                                <button type="button" (click)="confirmDelete(plan, $event)"
+                                    class="w-8.5 h-8.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center cursor-pointer">
+                                    <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    } @empty {
+                        <div class="col-span-full py-16 text-center text-slate-400">
+                            <mat-icon svgIcon="mdi:folder-open-outline" class="icon-size-10 text-slate-300 dark:text-slate-600"></mat-icon>
+                            <h4 class="mt-2 text-[15px] font-medium text-slate-700 dark:text-slate-300">មិនមានគម្រោងត្រូវនឹងការស្វែងរកឡើយ</h4>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- ========================================================================= -->
+        <!-- SCENARIO B: SELECTED PROJECT WORKSPACE                                     -->
+        <!-- ========================================================================= -->
+        @if (selectedProject(); as proj) {
+            <div class="flex flex-col flex-1 h-full min-h-[calc(100vh-2rem)]">
+                <!-- 1. Top Bar Header -->
+                <div class="h-14 px-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <button type="button" (click)="clearSelectedProject()"
+                            class="w-8 h-8 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer"
+                            matTooltip="ត្រឡប់ទៅបញ្ជីគម្រោងទាំងអស់">
+                            <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[12px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">{{ proj.code }}</span>
+                            <h2 class="text-[16px] font-medium text-slate-900 dark:text-white truncate">{{ proj.name }}</h2>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button (click)="openBudgetModal(proj)" class="h-8 px-3 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
+                            ថវិកា: ${{ proj.budget || 5000 | number }}
+                        </button>
+                        <button (click)="openLeadModal(proj)" class="h-8 px-3 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer">
+                            ប្រធាន: {{ proj.members?.[0]?.name || 'N/A' }}
+                        </button>
+                        <button (click)="openEditDrawer(proj)" class="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium cursor-pointer shadow-2xs">
+                            កែប្រែគម្រោង
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Workspace Split Layout: Left Sidebar + Right Area -->
+                <div class="flex flex-1 min-h-0">
+                    <!-- Left Sidebar -->
+                    <div class="w-56 shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 p-3 flex flex-col gap-1 select-none">
+                        <!-- General -->
+                        <button (click)="projectNavTab.set('general')"
+                            class="w-full h-10 px-3 rounded-xl text-[14px] flex items-center justify-between cursor-pointer"
+                            [ngClass]="projectNavTab() === 'general' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-600 hover:bg-slate-100'">
+                            <div class="flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:information-outline" class="icon-size-4.5"></mat-icon>
+                                <span>ទូទៅ</span>
+                            </div>
+                        </button>
+
+                        <!-- Plan / Agile Roadmap -->
+                        <button (click)="projectNavTab.set('plan')"
+                            class="w-full h-10 px-3 rounded-xl text-[14px] flex items-center justify-between cursor-pointer"
+                            [ngClass]="projectNavTab() === 'plan' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-600 hover:bg-slate-100'">
+                            <div class="flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:calendar-outline" class="icon-size-4.5"></mat-icon>
+                                <span>ផែនការ Agile</span>
+                            </div>
+                        </button>
+
+                        <!-- Tasks -->
+                        <button (click)="projectNavTab.set('tasks')"
+                            class="w-full h-10 px-3 rounded-xl text-[14px] flex items-center justify-between cursor-pointer"
+                            [ngClass]="projectNavTab() === 'tasks' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-600 hover:bg-slate-100'">
+                            <div class="flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:format-list-checkbox" class="icon-size-4.5"></mat-icon>
+                                <span>ការងារ (Tasks)</span>
+                            </div>
+                            <span class="px-2 py-0.2 rounded-full text-[11px] font-medium bg-slate-200 text-slate-700">
+                                {{ filteredProjectTasks().length }}
+                            </span>
+                        </button>
+
+                        <!-- Team -->
+                        <button (click)="projectNavTab.set('team')"
+                            class="w-full h-10 px-3 rounded-xl text-[14px] flex items-center justify-between cursor-pointer"
+                            [ngClass]="projectNavTab() === 'team' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-600 hover:bg-slate-100'">
+                            <div class="flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-4.5"></mat-icon>
+                                <span>ក្រុមការងារ</span>
+                            </div>
+                            <span class="px-2 py-0.2 rounded-full text-[11px] font-medium bg-slate-200 text-slate-700">
+                                {{ proj.members?.length || 1 }}
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Right Main Content -->
+                    <div class="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-800 p-6 overflow-y-auto">
+                        <!-- TAB: General -->
+                        @if (projectNavTab() === 'general') {
+                            <div class="space-y-5 max-w-4xl">
+                                <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 space-y-3">
+                                    <h3 class="text-[16px] font-medium text-slate-900 dark:text-white">ព័ត៌មានលម្អិតអំពីគម្រោង</h3>
+                                    <p class="text-[14px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                                        {{ proj.description || 'មិនទាន់មានការពិពណ៌នាបន្ថែម' }}
+                                    </p>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                                        <div class="text-[12px] text-slate-400">កាលបរិច្ឆេទចាប់ផ្ដើម & បញ្ចប់</div>
+                                        <div class="text-[14px] font-medium text-slate-800 mt-1 font-mono">
+                                            {{ proj.start_date | date:'d MMM y' }} — {{ proj.end_date | date:'d MMM y' }}
+                                        </div>
+                                    </div>
+                                    <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                                        <div class="text-[12px] text-slate-400">ស្ថានភាពគម្រោង</div>
+                                        <div class="text-[14px] font-medium text-emerald-600 mt-1">
+                                            {{ getStatusLabel(proj.status) }} ({{ proj.progress }}%)
+                                        </div>
+                                    </div>
+                                    <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                                        <div class="text-[12px] text-slate-400">ថវិកាអនុម័ត</div>
+                                        <div class="text-[14px] font-medium text-slate-900 mt-1 font-mono">
+                                            ${{ proj.budget || 5000 | number }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- TAB: Agile Plan -->
+                        @if (projectNavTab() === 'plan') {
+                            <div class="space-y-4 max-w-4xl">
+                                <h3 class="text-[16px] font-medium text-slate-900 dark:text-white">កាលវិភាគការងារ Agile Sprints</h3>
+                                <div class="space-y-3">
+                                    @for (task of agileTasks(); track task.id) {
+                                        <div class="p-4 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                                            <div>
+                                                <div class="font-medium text-slate-800 text-[14px]">{{ task.name }}</div>
+                                                <div class="text-[12px] text-slate-400 mt-0.5">Iteration {{ task.segments[0]?.iteration }} • {{ task.segments[0]?.durationWeeks }} សប្តាហ៍</div>
+                                            </div>
+                                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                                {{ task.segments[0]?.label || 'Active Sprint' }}
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- TAB: Tasks -->
+                        @if (projectNavTab() === 'tasks') {
+                            <div class="space-y-3 max-w-4xl">
+                                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                    <h3 class="text-[16px] font-medium text-slate-900">បញ្ជីកិច្ចការ ({{ filteredProjectTasks().length }})</h3>
+                                    <input type="text" placeholder="ស្វែងរកកិច្ចការ..." [ngModel]="taskSearchQuery()" (ngModelChange)="taskSearchQuery.set($event)"
+                                        class="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none w-56" />
+                                </div>
+                                @for (t of filteredProjectTasks(); track t.id) {
+                                    <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex items-start justify-between">
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs font-mono text-slate-400 font-bold">{{ t.code }}</span>
+                                                <h4 class="text-[14px] font-medium text-slate-800">{{ t.title }}</h4>
+                                            </div>
+                                            <p class="text-xs text-slate-400 mt-1">{{ t.description }}</p>
+                                        </div>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-200 text-slate-700">
+                                            {{ t.status }}
+                                        </span>
+                                    </div>
+                                } @empty {
+                                    <div class="py-12 text-center text-slate-400 text-xs">មិនទាន់មាន Task ក្នុងគម្រោងនេះទេ</div>
+                                }
+                            </div>
+                        }
+
+                        <!-- TAB: Team -->
+                        @if (projectNavTab() === 'team') {
+                            <div class="space-y-4 max-w-4xl">
+                                <h3 class="text-[16px] font-medium text-slate-900">សមាជិកក្រុមការងារគម្រោង</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    @for (m of proj.members || []; track m.id) {
+                                        <div class="p-3.5 rounded-xl border border-slate-200 bg-white flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">
+                                                {{ m.name.slice(0, 1) }}
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-[14px] text-slate-800">{{ m.name }}</div>
+                                                <div class="text-xs text-slate-400">{{ m.role }}</div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <!-- Create / Edit Project Side Drawer -->
+    @if (isDrawerOpen()) {
+        <div (click)="closeDrawer()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-40 transition-opacity"></div>
+        <div class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800">
+            <button (click)="closeDrawer()" class="-left-5 top-4 absolute z-50 w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 shadow-md cursor-pointer">
+                <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+            </button>
+
+            <div class="min-h-14 max-h-14 h-14 border-b border-slate-200 px-6 flex items-center justify-between">
+                <h2 class="text-[16px] font-medium text-slate-900">{{ isEditing() ? 'កែប្រែព័ត៌មានគម្រោង' : 'បង្កើតគម្រោងថ្មី (Create Project)' }}</h2>
+                <span class="text-[12px] text-slate-400 font-mono">PMS GOVERNANCE</span>
+            </div>
+
+            <form [formGroup]="projectForm" (ngSubmit)="submitProjectForm()" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                    <label class="block text-[13px] font-medium text-slate-700 mb-1">ឈ្មោះគម្រោង <span class="text-rose-500">*</span></label>
+                    <input type="text" formControlName="name" placeholder="ឧ. ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា"
+                        class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">កូដសម្គាល់ <span class="text-rose-500">*</span></label>
+                        <input type="text" formControlName="code" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-mono outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">ស្ថានភាព <span class="text-rose-500">*</span></label>
+                        <select formControlName="status" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none">
+                            <option value="active">កំពុងដំណើរការ</option>
+                            <option value="planning">រៀបចំផែនការ</option>
+                            <option value="completed">បានបញ្ចប់</option>
+                            <option value="on_hold">ផ្អាក</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[13px] font-medium text-slate-700 mb-1">ការពិពណ៌នា</label>
+                    <textarea rows="3" formControlName="description" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">ថ្ងៃចាប់ផ្ដើម</label>
+                        <input type="date" formControlName="start_date" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">ថ្ងៃបញ្ចប់</label>
+                        <input type="date" formControlName="end_date" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">ថវិកា (USD $)</label>
+                        <input type="number" formControlName="budget" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">វឌ្ឍនភាព (%)</label>
+                        <input type="number" formControlName="progress" min="0" max="100" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none" />
+                    </div>
+                </div>
+            </form>
+
+            <div class="p-4 border-t border-slate-200 flex justify-end gap-2 bg-slate-50">
+                <button (click)="closeDrawer()" type="button" class="h-9 px-4 rounded-xl border border-slate-200 text-slate-600 text-[14px] font-medium cursor-pointer">បោះបង់</button>
+                <button (click)="submitProjectForm()" type="button" [disabled]="saving() || projectForm.invalid"
+                    class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs">
+                    {{ isEditing() ? 'រក្សាទុកការកែប្រែ' : 'បង្កើតគម្រោង' }}
+                </button>
+            </div>
+        </div>
+    }
+
+    <!-- Budget Allocation Modal -->
+    @if (showBudgetModal()) {
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+                <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                        <mat-icon svgIcon="mdi:currency-usd" class="icon-size-5"></mat-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-[15px] font-medium text-slate-900">កែប្រែថវិកាគម្រោង</h3>
+                        <p class="text-[12px] text-slate-400">{{ budgetProject()?.name }}</p>
+                    </div>
+                </div>
+
+                <form [formGroup]="budgetForm" (ngSubmit)="saveBudget()" class="space-y-3">
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">ថវិកាអនុម័តសរុប (USD $)</label>
+                        <input type="number" formControlName="budget" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 mb-1">ថវិកាបានចំណាយ (USD $)</label>
+                        <input type="number" formControlName="spent" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none" />
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex justify-end gap-2">
+                        <button (click)="showBudgetModal.set(false)" type="button" class="h-9 px-4 rounded-xl border border-slate-200 text-slate-600 text-[14px] font-medium cursor-pointer">បោះបង់</button>
+                        <button type="submit" [disabled]="budgetForm.invalid" class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs">រក្សាទុក</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <!-- Lead Assignment Modal -->
+    @if (showLeadModal()) {
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+                <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                        <mat-icon svgIcon="mdi:badge-account-outline" class="icon-size-5"></mat-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-[15px] font-medium text-slate-900">ចាត់តាំងប្រធានគម្រោង</h3>
+                        <p class="text-[12px] text-slate-400">{{ leadProject()?.name }}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-[13px] font-medium text-slate-700 mb-1">ជ្រើសរើសបុគ្គលិកជាប្រធានដឹកនាំ</label>
+                    <select [ngModel]="selectedLeadId()" (ngModelChange)="selectedLeadId.set($event)"
+                        class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none cursor-pointer">
+                        @for (u of users(); track u.id) {
+                            <option [value]="u.id">{{ u.name_kh }} ({{ u.role }} - {{ u.position }})</option>
+                        }
+                    </select>
+
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex justify-end gap-2">
+                        <button (click)="showLeadModal.set(false)" type="button" class="h-9 px-4 rounded-xl border border-slate-200 text-slate-600 text-[14px] font-medium cursor-pointer">បោះបង់</button>
+                        <button (click)="saveLead()" type="button" class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs">ចាត់តាំង</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Delete Confirmation Modal -->
+    @if (showDeleteModal()) {
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4 border border-rose-100">
+                    <mat-icon svgIcon="mdi:alert-outline" class="icon-size-6"></mat-icon>
+                </div>
+                <h3 class="text-[16px] font-medium text-slate-900">តើអ្នកពិតជាចង់លុបគម្រោងនេះមែនទេ?</h3>
+                <p class="text-[13px] text-slate-500 mt-2">
+                    គម្រោង <span class="font-bold text-slate-800">{{ deleteTarget()?.name }}</span> នឹងត្រូវលុបចេញពីប្រព័ន្ធ។
+                </p>
+                <div class="mt-6 flex justify-end gap-2">
+                    <button (click)="showDeleteModal.set(false)" class="h-9 px-4 rounded-xl border border-slate-200 text-slate-600 text-[14px] font-medium cursor-pointer">បោះបង់</button>
+                    <button (click)="deleteProject()" class="h-9 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs">លុបគម្រោង</button>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

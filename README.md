@@ -35,6 +35,27 @@ npm start
 
 ---
 
+## ⚖️ Load Balancer & Docker Deployment
+
+A high-performance **Nginx Reverse Proxy & Load Balancer** is pre-configured to distribute traffic across scalable NestJS API replicas and serve the Angular web client.
+
+### Start Stack with Load Balancer:
+```bash
+docker compose up -d --build
+```
+
+### Scale API Backend Instances Dynamically:
+```bash
+docker compose up -d --scale api=3
+```
+
+- **Load Balancer Health**: `http://localhost/healthz`
+- **Application Web**: `http://localhost`
+- **API Endpoints**: `http://localhost/api`
+- Full documentation: [docs/load_balancer.md](file:///d:/WFM/docs/load_balancer.md)
+
+---
+
 ## 🔐 Security Features
 - **Multi-Factor Authentication (2FA)**: Google Authenticator (TOTP), Email OTP, Telegram OTP.
 - **Passkeys (WebAuthn / FIDO2)**: Hardware security keys & biometric login.
@@ -46,3 +67,4 @@ npm start
 ## 🤖 CI/CD & Automation
 - **GitHub Actions**: Automated API & Web build validation on push and pull requests.
 - **Telegram Bot Notifications**: Real-time push events and pipeline pass/fail alerts.
+

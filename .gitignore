@@ -30,5 +30,12 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
+# Runtime & Database
+postgres_data/
+*/postgres_data/
+api/storage/
+storage/
+
 # Temp
 *.ps1
+

@@ -1,0 +1,256 @@
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
+    style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
+
+    <!-- ===== FRAMED MAIN CONTAINER ===== -->
+    <div class="flex flex-col flex-1 min-w-0 space-y-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+        style="min-height: calc(100vh - 2rem);">
+
+        <!-- Top Header Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200 dark:border-blue-800">
+                        <mat-icon svgIcon="mdi:view-dashboard-outline" class="icon-size-5.5"></mat-icon>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-medium text-slate-900 dark:text-white tracking-tight">
+                            ផ្ទាំងគ្រប់គ្រងរដ្ឋបាល (Admin Dashboard)
+                        </h1>
+                        <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            ទិដ្ឋភាពរួមនៃប្រព័ន្ធគ្រប់គ្រងគម្រោង បុគ្គលិក វត្តមាន និងវឌ្ឍនភាពការងារអង្គភាព
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button
+                    type="button"
+                    (click)="loadStats()"
+                    class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
+                    <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
+                    <span>ផ្ទុកឡើងវិញ</span>
+                </button>
+
+                <button
+                    type="button"
+                    (click)="navigateTo('/admin/projects')"
+                    class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                    <mat-icon svgIcon="mdi:folder-outline" class="icon-size-4.5 text-white"></mat-icon>
+                    <span>គ្រប់គ្រងគម្រោង</span>
+                </button>
+            </div>
+        </div>
+
+        @if (stats(); as s) {
+            <!-- KPI Metric Summary Row (4 Cards) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                <!-- 1. Total Projects -->
+                <div
+                    (click)="navigateTo('/admin/projects')"
+                    class="p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[14px] font-medium text-slate-500 dark:text-slate-400">គម្រោងសរុប (Projects)</span>
+                        <span class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900">
+                            <mat-icon svgIcon="mdi:folder-multiple-outline" class="icon-size-5"></mat-icon>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ s.kpi.total_projects }}</span>
+                        <span class="text-[13px] text-emerald-600 dark:text-emerald-400 font-medium">
+                            {{ s.kpi.active_projects }} កំពុងដំណើរការ
+                        </span>
+                    </div>
+                    <div class="mt-2 text-[13px] text-slate-400 dark:text-slate-500">
+                        {{ s.kpi.completed_projects }} បានបញ្ចប់ • {{ s.kpi.planning_projects }} កំពុងរៀបចំ
+                    </div>
+                </div>
+
+                <!-- 2. Tasks & Progress -->
+                <div
+                    (click)="navigateTo('/admin/projects')"
+                    class="p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs hover:border-emerald-400 dark:hover:border-emerald-500 transition-all cursor-pointer group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[14px] font-medium text-slate-500 dark:text-slate-400">កិច្ចការសរុប (Tasks)</span>
+                        <span class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
+                            <mat-icon svgIcon="mdi:clipboard-check-outline" class="icon-size-5"></mat-icon>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ s.kpi.total_tasks }}</span>
+                        <span class="text-[13px] text-emerald-600 dark:text-emerald-400 font-medium">
+                            {{ s.kpi.task_completion_rate }}% រួចរាល់
+                        </span>
+                    </div>
+                    <div class="mt-3 w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" [style.width.%]="s.kpi.task_completion_rate"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Active Staff -->
+                <div
+                    (click)="navigateTo('/admin/users')"
+                    class="p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs hover:border-purple-400 dark:hover:border-purple-500 transition-all cursor-pointer group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[14px] font-medium text-slate-500 dark:text-slate-400">បុគ្គលិកសកម្ម (Staff)</span>
+                        <span class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-100 dark:border-purple-900">
+                            <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-5"></mat-icon>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ s.kpi.active_users }}</span>
+                        <span class="text-[13px] text-slate-500">នាក់ (សរុប {{ s.kpi.total_users }})</span>
+                    </div>
+                    <div class="mt-2 text-[13px] text-emerald-600 dark:text-emerald-400 font-medium">
+                        100% គណនីកំពុងដំណើរការ
+                    </div>
+                </div>
+
+                <!-- 4. Pending Leave Requests -->
+                <div
+                    (click)="navigateTo('/admin/attendance')"
+                    class="p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 transition-all cursor-pointer group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[14px] font-medium text-slate-500 dark:text-slate-400">ច្បាប់ឈប់សម្រាករង់ចាំ</span>
+                        <span class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-100 dark:border-amber-900">
+                            <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-5"></mat-icon>
+                        </span>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ s.kpi.pending_leaves }}</span>
+                        <span class="text-[13px] text-amber-600 dark:text-amber-400 font-medium">
+                            ត្រូវការការអនុម័ត
+                        </span>
+                    </div>
+                    <div class="mt-2 text-[13px] text-slate-400">
+                        ចុចដើម្បីពិនិត្យ និងសម្រេច
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Section: Projects Overview & Department Performance -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Projects Summary (2 Cols) -->
+                <div class="lg:col-span-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/60">
+                            <div>
+                                <h2 class="text-[17px] font-medium text-slate-800 dark:text-white">ស្ថានភាពគម្រោងសំខាន់ៗ (Projects Overview)</h2>
+                                <p class="text-[13px] text-slate-400">តាមដានវឌ្ឍនភាព និងប្រធានដឹកនាំគម្រោង</p>
+                            </div>
+                            <button
+                                (click)="navigateTo('/admin/projects')"
+                                class="text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer">
+                                <span>មើលទាំងអស់</span>
+                                <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4"></mat-icon>
+                            </button>
+                        </div>
+
+                        <!-- Projects Table -->
+                        <div class="overflow-x-auto mt-3">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-[13px] font-medium text-slate-400 border-b border-slate-100 dark:border-slate-700/50">
+                                        <th class="pb-2.5 px-2">កូដ/ឈ្មោះគម្រោង</th>
+                                        <th class="pb-2.5 px-2">ប្រធានគម្រោង</th>
+                                        <th class="pb-2.5 px-2">វឌ្ឍនភាព</th>
+                                        <th class="pb-2.5 px-2">ស្ថានភាព</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
+                                    @for (p of s.projects_summary; track p.id) {
+                                        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
+                                            <td class="py-3 px-2">
+                                                <div class="font-medium text-slate-900 dark:text-white">{{ p.name }}</div>
+                                                <div class="text-[12px] text-blue-600 dark:text-blue-400 font-mono">{{ p.code }}</div>
+                                            </td>
+                                            <td class="py-3 px-2 text-slate-700 dark:text-slate-300">
+                                                <div class="flex items-center gap-1.5">
+                                                    <span class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                                        {{ p.lead.slice(0, 1) }}
+                                                    </span>
+                                                    <span class="text-[13px]">{{ p.lead }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-2">
+                                                <div class="w-32">
+                                                    <div class="flex justify-between text-[12px] mb-1 text-slate-500 font-medium">
+                                                        <span>{{ p.completed_tasks }}/{{ p.total_tasks }}</span>
+                                                        <span>{{ p.progress }}%</span>
+                                                    </div>
+                                                    <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+                                                        <div class="bg-blue-600 h-1.5 rounded-full" [style.width.%]="p.progress"></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-2">
+                                                <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium border ' + getStatusBadge(p.status).class">
+                                                    {{ getStatusBadge(p.status).label }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department Breakdown (1 Col) -->
+                <div class="rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/60">
+                            <div>
+                                <h2 class="text-[17px] font-medium text-slate-800 dark:text-white">នាយកដ្ឋាន និងផ្នែក</h2>
+                                <p class="text-[13px] text-slate-400">ចំនួនបុគ្គលិកតាមផ្នែក</p>
+                            </div>
+                            <button (click)="navigateTo('/admin/settings')" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 flex items-center justify-center cursor-pointer">
+                                <mat-icon svgIcon="mdi:cog-outline" class="icon-size-4.5"></mat-icon>
+                            </button>
+                        </div>
+
+                        <div class="space-y-3.5 mt-4">
+                            @for (dept of s.department_stats; track dept.name) {
+                                <div>
+                                    <div class="flex justify-between items-center text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        <span>{{ dept.name }}</span>
+                                        <span class="text-slate-400 font-mono">{{ dept.members }} នាក់</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-purple-500 h-1.5 rounded-full" [style.width.%]="dept.progress"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Recent Activities Stream -->
+                    <div class="mt-6 pt-3.5 border-t border-slate-100 dark:border-slate-700/60">
+                        <h3 class="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">សកម្មភាពថ្មីៗក្នុងប្រព័ន្ធ</h3>
+                        <div class="space-y-2.5">
+                            @for (act of s.recent_activity; track act.id) {
+                                <div class="flex items-start gap-2 text-[13px]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
+                                    <div class="flex-1">
+                                        <div class="text-slate-700 dark:text-slate-200 font-medium">{{ act.text }}</div>
+                                        <div class="text-[11px] text-slate-400">{{ act.user }} • {{ act.time }}</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        } @else if (loading()) {
+            <div class="flex flex-col items-center justify-center p-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <mat-icon svgIcon="mdi:loading" class="animate-spin text-blue-600 icon-size-8"></mat-icon>
+                <span class="mt-3 text-[14px] text-slate-500">កំពុងផ្ទុកទិន្នន័យផ្ទាំងគ្រប់គ្រង...</span>
+            </div>
+        }
+
+    </div>
+</div>

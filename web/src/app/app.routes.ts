@@ -77,6 +77,18 @@ export const appRoutes: Route[] = [
                 path: 'member',
                 loadChildren: () => import('app/resources/2-user/user.routes'),
             },
+            {
+                path: 'admin',
+                loadChildren: () => import('app/resources/3-admin/admin.routes'),
+            },
+            {
+                path: 'org-admin',
+                loadChildren: () => import('app/resources/3-admin/admin.routes'),
+            },
+            {
+                path: 'super-admin',
+                loadChildren: () => import('app/resources/3-admin/admin.routes'),
+            },
             { path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/shared/error/not-found.routes') },
             { path: '**', redirectTo: '/redirect' },
         ],

@@ -1,0 +1,229 @@
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
+    style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
+
+    <!-- ===== FRAMED MAIN CONTAINER ===== -->
+    <div class="flex flex-col flex-1 min-w-0 space-y-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+        style="min-height: calc(100vh - 2rem);">
+
+        <!-- Top Header Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-200 dark:border-amber-800">
+                    <mat-icon svgIcon="mdi:calendar-check-outline" class="icon-size-5.5"></mat-icon>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-medium text-slate-900 dark:text-white tracking-tight">
+                        វត្តមាន និងច្បាប់ឈប់សម្រាក (Attendance & Leaves)
+                    </h1>
+                    <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        ពិនិត្យទិន្នន័យវត្តមានប្រចាំថ្ងៃ និងអនុម័តសំណើរសុំច្បាប់ឈប់សម្រាករបស់បុគ្គលិក
+                    </p>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button
+                    type="button"
+                    (click)="loadData()"
+                    class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
+                    <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
+                    <span>ផ្ទុកឡើងវិញ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Attendance Quick KPI Cards -->
+        @if (attendance(); as att) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+                    <div class="text-[13px] text-slate-400 font-medium">បុគ្គលិកសរុប</div>
+                    <div class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ att.total_staff }} នាក់</div>
+                    <div class="mt-1 text-[12px] text-slate-400">កម្លាំងពលកម្មសរុប</div>
+                </div>
+                <div class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+                    <div class="text-[13px] text-emerald-600 font-medium">មានវត្តមានថ្ងៃនេះ</div>
+                    <div class="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ att.present_today }} នាក់</div>
+                    <div class="mt-1 text-[12px] text-emerald-500 font-medium">បានស្កេនវត្តមាន</div>
+                </div>
+                <div class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+                    <div class="text-[13px] text-amber-600 font-medium">មកយឺតថ្ងៃនេះ</div>
+                    <div class="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">{{ att.late_today }} នាក់</div>
+                    <div class="mt-1 text-[12px] text-amber-500">លើសពីម៉ោង ០៨:០០</div>
+                </div>
+                <div class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+                    <div class="text-[13px] text-purple-600 font-medium">កំពុងឈប់សម្រាក</div>
+                    <div class="mt-2 text-2xl font-bold text-purple-600 dark:text-purple-400">{{ att.on_leave }} នាក់</div>
+                    <div class="mt-1 text-[12px] text-purple-500">មានច្បាប់អនុញ្ញាត</div>
+                </div>
+            </div>
+        }
+
+        <!-- Filter Tab Buttons -->
+        <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+            <button
+                type="button"
+                (click)="activeTab.set('leaves')"
+                class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                [ngClass]="activeTab() === 'leaves' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
+                <span>សំណើរសុំច្បាប់ឈប់សម្រាក</span>
+                <span class="text-[12px] font-normal" [ngClass]="activeTab() === 'leaves' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400'">
+                    {{ leaves().length }}
+                </span>
+            </button>
+            <button
+                type="button"
+                (click)="activeTab.set('attendance')"
+                class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                [ngClass]="activeTab() === 'attendance' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
+                <span>កំណត់ត្រាវត្តមានប្រចាំថ្ងៃ (Daily Logs)</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: Leaves Review Cards -->
+        @if (activeTab() === 'leaves') {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @for (leave of leaves(); track leave.id) {
+                    <div class="rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold flex items-center justify-center text-[13px] shrink-0">
+                                        {{ leave.user_name.slice(0, 1) }}
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-slate-900 dark:text-white text-[15px]">{{ leave.user_name }}</div>
+                                        <div class="text-[12px] text-slate-400">{{ leave.department }}</div>
+                                    </div>
+                                </div>
+                                <span [class]="'px-2.5 py-0.5 rounded-full text-[12px] font-medium border ' + getLeaveStatusClass(leave.status)">
+                                    {{ getLeaveStatusLabel(leave.status) }}
+                                </span>
+                            </div>
+
+                            <!-- Details -->
+                            <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1.5 text-[13px]">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">ប្រភេទច្បាប់:</span>
+                                    <span class="font-medium text-slate-800 dark:text-slate-200">{{ getLeaveTypeLabel(leave.leave_type) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">កាលបរិច្ឆេទ:</span>
+                                    <span class="font-mono text-slate-700 dark:text-slate-300 text-[12px]">{{ leave.start_date }} ដល់ {{ leave.end_date }} ({{ leave.duration_days }} ថ្ងៃ)</span>
+                                </div>
+                                <div class="pt-1.5 border-t border-slate-200/60 dark:border-slate-800">
+                                    <span class="text-slate-400">មូលហេតុ:</span>
+                                    <div class="mt-0.5 text-slate-700 dark:text-slate-300 italic">"{{ leave.reason }}"</div>
+                                </div>
+                                @if (leave.reviewer_comment) {
+                                    <div class="pt-1.5 border-t border-slate-200/60 dark:border-slate-800 text-blue-600 dark:text-blue-400">
+                                        <span>មតិអ្នកអនុម័ត: {{ leave.reviewer_comment }}</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        @if (leave.status === 'pending') {
+                            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-end gap-2">
+                                <button
+                                    (click)="openActionModal(leave, 'rejected')"
+                                    class="h-8 px-3 text-[13px] font-medium rounded-xl border border-slate-200 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer">
+                                    បដិសេធ (Reject)
+                                </button>
+                                <button
+                                    (click)="openActionModal(leave, 'approved')"
+                                    class="h-8 px-3 text-[13px] font-medium rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 cursor-pointer shadow-2xs">
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4"></mat-icon>
+                                    <span>អនុម័ត (Approve)</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                } @empty {
+                    <div class="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <mat-icon svgIcon="mdi:calendar-check-outline" class="icon-size-8 text-slate-300"></mat-icon>
+                        <div class="mt-2 text-[13px]">មិនមានសំណើរសុំច្បាប់រង់ចាំការសម្រេចឡើយ</div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- TAB 2: Attendance Logs Table -->
+        @if (activeTab() === 'attendance') {
+            <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[13px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-700/80">
+                            <th class="py-3 px-4">បុគ្គលិក</th>
+                            <th class="py-3 px-4">នាយកដ្ឋាន</th>
+                            <th class="py-3 px-4">ម៉ោងចូល (Check In)</th>
+                            <th class="py-3 px-4">ម៉ោងចេញ (Check Out)</th>
+                            <th class="py-3 px-4">ស្ថានភាព</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
+                        @for (log of attendance()?.logs || []; track log.id) {
+                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30">
+                                <td class="py-3 px-4">
+                                    <div class="font-medium text-slate-900 dark:text-white">{{ log.user_name }}</div>
+                                    <div class="text-[12px] text-slate-400">{{ log.user_en }}</div>
+                                </td>
+                                <td class="py-3 px-4 text-[13px] text-slate-600 dark:text-slate-400">{{ log.department }}</td>
+                                <td class="py-3 px-4 text-[13px] font-mono font-medium text-emerald-600">{{ log.check_in }}</td>
+                                <td class="py-3 px-4 text-[13px] font-mono text-slate-400">{{ log.check_out || '---' }}</td>
+                                <td class="py-3 px-4">
+                                    <span [class]="log.status === 'on_time'
+                                        ? 'px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        : 'px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-amber-50 text-amber-700 border border-amber-200'">
+                                        {{ log.status === 'on_time' ? 'ទាន់ពេលវេលា' : 'មកយឺត' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+
+    <!-- Action Modal -->
+    @if (actionModalOpen()) {
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+                <h3 class="text-[16px] font-medium text-slate-900 dark:text-white">
+                    {{ actionType() === 'approved' ? 'អនុម័តសំណើរសុំច្បាប់' : 'បដិសេធសំណើរសុំច្បាប់' }}
+                </h3>
+                <p class="text-[13px] text-slate-500 mt-1">
+                    សម្រាប់បុគ្គលិក: <strong class="text-slate-800 dark:text-slate-200">{{ targetLeave()?.user_name }}</strong>
+                </p>
+
+                <div class="mt-4">
+                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        មតិយោបល់ ឬចំណាំរបស់អ្នកសម្រេច
+                    </label>
+                    <textarea
+                        rows="3"
+                        [ngModel]="comment()"
+                        (ngModelChange)="comment.set($event)"
+                        class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none resize-none"></textarea>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-2">
+                    <button (click)="actionModalOpen.set(false)" class="h-9 px-4 rounded-xl border border-slate-200 text-slate-600 text-[14px] font-medium cursor-pointer">
+                        បោះបង់
+                    </button>
+                    <button
+                        (click)="submitLeaveAction()"
+                        [class]="actionType() === 'approved'
+                            ? 'h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs'
+                            : 'h-9 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs'">
+                        បញ្ជាក់ការសម្រេច
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

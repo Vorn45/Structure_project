@@ -10,6 +10,7 @@ import { SsoLoginModule } from './resources/1-account/1-auth/1-login/7-sso/sso-l
 import { ForgetPasswordModule } from './resources/1-account/1-auth/2-forgot-password/forget-password.module';
 import { SignUpModule } from './resources/1-account/1-auth/3-signup/signup.module';
 import { UserModule } from './resources/2-user/user.module';
+import { AdminModule } from './resources/3-admin/admin.module';
 
 export const appRoutes: Routes = [
     {
@@ -33,6 +34,10 @@ export const appRoutes: Routes = [
     {
         path: 'user',
         module: UserModule,
+    },
+    {
+        path: 'admin',
+        module: AdminModule,
     },
 ];
 
