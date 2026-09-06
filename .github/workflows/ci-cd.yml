@@ -25,10 +25,11 @@ jobs:
         uses: actions/checkout@v4
 
       # ----------------------------------------------------
-      # TOPIC 1: Push Event
+      # TOPIC 1: Push Event (Non-blocking notification)
       # ----------------------------------------------------
       - name: Notify Telegram Push Event
         if: github.event_name == 'push'
+        continue-on-error: true
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -44,6 +45,7 @@ jobs:
       # TOPIC 2: Pipeline Event (Started / Running)
       # ----------------------------------------------------
       - name: Notify Telegram Pipeline Running
+        continue-on-error: true
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -62,13 +64,13 @@ jobs:
       - name: Install & Build API
         run: |
           cd api
-          npm ci
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
           npm run build
 
       - name: Install & Build Web
         run: |
           cd web
-          npm ci
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
           npm run build
         env:
           API_BASE_URL: "https://structure-project.onrender.com/api"
@@ -92,6 +94,7 @@ jobs:
       # ----------------------------------------------------
       - name: Notify Telegram on Success
         if: success()
+        continue-on-error: true
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -107,6 +110,7 @@ jobs:
       # ----------------------------------------------------
       - name: Notify Telegram on Failure
         if: failure()
+        continue-on-error: true
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
