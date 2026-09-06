@@ -52,7 +52,9 @@ docker compose up -d --scale api=3
 - **Load Balancer Health**: `http://localhost/healthz`
 - **Application Web**: `http://localhost`
 - **API Endpoints**: `http://localhost/api`
-- Full documentation: [docs/load_balancer.md](file:///d:/WFM/docs/load_balancer.md)
+- Load Balancer Documentation: [docs/load_balancer.md](file:///d:/WFM/docs/load_balancer.md)
+- System Capacity & User Benchmarks: [docs/system_capacity.md](file:///d:/WFM/docs/system_capacity.md)
+
 
 ---
 
