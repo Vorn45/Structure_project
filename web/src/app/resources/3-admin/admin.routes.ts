@@ -17,12 +17,27 @@ export default [
             import('./1-dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
     },
     {
+        path: 'planner',
+        loadComponent: () =>
+            import('./6-planner/planner.component').then((m) => m.PlannerComponent),
+    },
+    {
         path: 'users',
         loadComponent: () =>
             import('./2-users/user-management.component').then((m) => m.UserManagementComponent),
     },
     {
         path: 'user',
+        loadComponent: () =>
+            import('./2-users/user-management.component').then((m) => m.UserManagementComponent),
+    },
+    {
+        path: 'staff',
+        loadComponent: () =>
+            import('./2-users/user-management.component').then((m) => m.UserManagementComponent),
+    },
+    {
+        path: 'clients',
         loadComponent: () =>
             import('./2-users/user-management.component').then((m) => m.UserManagementComponent),
     },
@@ -45,6 +60,21 @@ export default [
         path: 'leaves',
         loadComponent: () =>
             import('./4-attendance/attendance-leave.component').then((m) => m.AttendanceLeaveComponent),
+    },
+    {
+        path: 'financials',
+        loadComponent: () =>
+            import('./5-settings/admin-settings.component').then((m) => m.AdminSettingsComponent),
+    },
+    {
+        path: 'reports',
+        loadComponent: () =>
+            import('./1-dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
+    },
+    {
+        path: 'admin',
+        loadComponent: () =>
+            import('./5-settings/admin-settings.component').then((m) => m.AdminSettingsComponent),
     },
     {
         path: 'organization',

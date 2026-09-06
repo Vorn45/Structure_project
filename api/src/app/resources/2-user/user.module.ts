@@ -9,6 +9,7 @@ import { User } from 'src/app/model/user/users.entity';
 import { TaskStore } from 'src/app/model/user/task-store.entity';
 import { ActivityStore } from 'src/app/model/user/activity-store.entity';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
+import { PlannerStore } from 'src/app/model/user/planner-store.entity';
 
 // Controllers
 import { HomeController } from './1-home/home.controller';
@@ -25,6 +26,7 @@ import { TaskAttachmentController } from './2-task/2-attachment/attachment.contr
 import { ActivityController } from './3-activity/activity.controller';
 import { PlanController } from './4-plan/plan.controller';
 import { ReportController } from './5-report/report.controller';
+import { PlannerController } from './6-planner/planner.controller';
 
 // Services
 import { HomeService } from './1-home/home.service';
@@ -41,13 +43,14 @@ import { TaskAttachmentService } from './2-task/2-attachment/attachment.service'
 import { ActivityService } from './3-activity/activity.service';
 import { PlanService } from './4-plan/plan.service';
 import { ReportService } from './5-report/report.service';
+import { PlannerService } from './6-planner/planner.service';
 
 // ======================================= >> Code Starts Here << ========================== //
 @Module({
     imports: [
         HttpModule,
         CommonModule,
-        TypeOrmModule.forFeature([User, TaskStore, ActivityStore, PlanStore]),
+        TypeOrmModule.forFeature([User, TaskStore, ActivityStore, PlanStore, PlannerStore]),
     ],
     controllers: [
         HomeController,
@@ -62,6 +65,7 @@ import { ReportService } from './5-report/report.service';
         ActivityController,
         PlanController,
         ReportController,
+        PlannerController,
     ],
     providers: [
         HomeService,
@@ -76,6 +80,7 @@ import { ReportService } from './5-report/report.service';
         ActivityService,
         PlanService,
         ReportService,
+        PlannerService,
     ],
     exports: [
         HomeService,
@@ -90,6 +95,7 @@ import { ReportService } from './5-report/report.service';
         ActivityService,
         PlanService,
         ReportService,
+        PlannerService,
     ],
 })
 export class UserModule {}

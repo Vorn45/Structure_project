@@ -1,0 +1,579 @@
+<div class="planner-root flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
+    style="font-family: 'Kantumruy Pro', sans-serif !important; font-size: 16px !important; min-height: 100vh;">
+
+    <!-- ===== FRAMED CONTENT CONTAINER (Matches other pages) ===== -->
+    <div class="flex flex-col flex-1 min-w-0 w-full bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+        style="min-height: calc(100vh - 2rem);">
+
+        <!-- ===== TOP HEADER ROW (Matches other pages) ===== -->
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <!-- Left: Home Icon, Title, and Count Pill -->
+            <div class="flex items-center gap-3 shrink-0">
+                <button
+                    type="button"
+                    (click)="navigateHome()"
+                    class="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center cursor-pointer"
+                    [matTooltip]="'ទំព័រដើម (Home)'">
+                    <mat-icon svgIcon="mdi:home-outline" class="icon-size-5 text-slate-500 dark:text-slate-400"></mat-icon>
+                </button>
+
+                <span class="text-[19px] font-normal text-slate-800 dark:text-white">ផែនការ</span>
+
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13.5px] font-normal bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    {{ filteredEvents().length }}
+                </span>
+            </div>
+
+            <!-- Right: + Add New Schedule Button -->
+            <button
+                type="button"
+                (click)="openCreateScheduleModal()"
+                class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14.5px] font-medium flex items-center gap-1.5 shadow-2xs hover:shadow-xs transition-all cursor-pointer shrink-0">
+                <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                <span>បង្កើតកាលវិភាគថ្មី</span>
+            </button>
+        </div>
+
+        <!-- ===== MAIN CONTENT GRID (1/4 Left Sidebar, 3/4 Right Calendar) ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- ============================================================== -->
+        <!-- LEFT 1/4 COLUMN: CALENDAR SELECTOR, MINI CALENDAR, CHECKLIST  -->
+        <!-- ============================================================== -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <!-- 1. All Calendar Dropdown Box -->
+            <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center justify-between cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 flex items-center justify-center shrink-0">
+                        <mat-icon svgIcon="mdi:calendar-month" class="icon-size-5 text-rose-500"></mat-icon>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-[16px] font-normal text-slate-900 dark:text-white truncate">
+                            ប្រតិទិនទាំងអស់
+                        </div>
+                        <div class="text-[13.5px] text-slate-500 dark:text-slate-400 truncate font-normal">
+                            ផ្ទាល់ខ្លួន, ក្រុមការងារ
+                        </div>
+                    </div>
+                </div>
+                <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4.5 text-slate-400"></mat-icon>
+            </div>
+
+            <!-- 2. Mini Month Calendar & Accordions Card -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs space-y-6">
+
+                <!-- Mini Month Header with Round Chevrons -->
+                <div>
+                    <div class="flex items-center justify-between pb-3">
+                        <h3 class="text-[17.5px] font-normal text-slate-900 dark:text-white">
+                            {{ currentMonthLabel }}
+                        </h3>
+                        <div class="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                (click)="previousMonth()"
+                                class="w-8 h-8 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
+                                <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4.5"></mat-icon>
+                            </button>
+                            <button
+                                type="button"
+                                (click)="nextMonth()"
+                                class="w-8 h-8 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
+                                <mat-icon svgIcon="mdi:chevron-right" class="icon-size-4.5"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mini Weekday Names in Khmer (អា ច អ ព ព្រ សុ ស) -->
+                    <div class="grid grid-cols-7 text-center text-[14px] font-normal text-slate-500 dark:text-slate-400 mb-2.5">
+                        <span>អា</span>
+                        <span>ច</span>
+                        <span>អ</span>
+                        <span>ព</span>
+                        <span>ព្រ</span>
+                        <span>សុ</span>
+                        <span>ស</span>
+                    </div>
+
+                    <!-- Mini Month Days Grid -->
+                    <div class="grid grid-cols-7 gap-y-1.5 text-center text-[15px] font-normal">
+                        @for (cell of miniCalendarGrid; track $index) {
+                            @if (cell.empty) {
+                                <div class="h-8"></div>
+                            } @else {
+                                <div
+                                    (click)="selectMiniDay(cell.dayNum)"
+                                    [class]="cell.isSelected ? 'w-8.5 h-8.5 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-xs font-normal' : 'w-8.5 h-8.5 mx-auto rounded-full flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer font-normal transition-all'">
+                                    {{ cell.dayNum }}
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- 3. My Schedule Filter Checklist -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-700/80">
+                    <div class="flex items-center justify-between mb-3.5 cursor-pointer">
+                        <span class="text-[17px] font-normal text-slate-900 dark:text-white">
+                            កាលវិភាគរបស់ខ្ញុំ
+                        </span>
+                        <mat-icon svgIcon="mdi:chevron-up" class="icon-size-5 text-slate-400"></mat-icon>
+                    </div>
+
+                    <div class="space-y-3 text-[15.5px] font-normal text-slate-700 dark:text-slate-300">
+                        <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
+                            <input type="checkbox" [(ngModel)]="filterScheduleMeeting" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <span>កិច្ចប្រជុំទូទៅ</span>
+                        </label>
+
+                        <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
+                            <input type="checkbox" [(ngModel)]="filterProjectReview" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <span>ត្រួតពិនិត្យគម្រោង</span>
+                        </label>
+
+                        <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
+                            <input type="checkbox" [(ngModel)]="filterOnlineMeeting" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <span>ប្រជុំអនឡាញ</span>
+                        </label>
+
+                        <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
+                            <input type="checkbox" [(ngModel)]="filterRecessBreak" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <span>សម្រាកខ្លី</span>
+                        </label>
+
+                        <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
+                            <input type="checkbox" [(ngModel)]="filterCoffeeDate" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <span>ជួបញ៉ាំកាហ្វេ</span>
+                        </label>
+
+                        <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
+                            <input type="checkbox" [(ngModel)]="filterOther" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <span>ផ្សេងៗ</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 4. Categories Section -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-700/80">
+                    <div class="flex items-center justify-between mb-3.5 cursor-pointer">
+                        <span class="text-[17px] font-normal text-slate-900 dark:text-white">
+                            ប្រភេទ
+                        </span>
+                        <mat-icon svgIcon="mdi:chevron-up" class="icon-size-5 text-slate-400"></mat-icon>
+                    </div>
+
+                    <div class="space-y-2">
+                        <!-- All Filter Option -->
+                        <div
+                            (click)="setCategoryFilter('all')"
+                            [class]="selectedCategory() === 'all' ? 'bg-blue-50 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-800 p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs font-normal' : 'p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 border border-transparent flex items-center justify-between cursor-pointer transition-all'">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-3 h-3 rounded-full bg-blue-600 ring-2 ring-blue-200 dark:ring-blue-900"></span>
+                                <span class="text-[15.5px] font-normal text-slate-800 dark:text-slate-200">ទាំងអស់</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[13px] font-normal bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                {{ categoryCounts().work + categoryCounts().myself + categoryCounts().breaks }}
+                            </span>
+                        </div>
+
+                        <!-- Work Category -->
+                        <div
+                            (click)="setCategoryFilter('work')"
+                            [class]="selectedCategory() === 'work' ? 'bg-orange-50 dark:bg-orange-950/60 border border-orange-300 dark:border-orange-800 p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs font-normal' : 'p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 border border-transparent flex items-center justify-between cursor-pointer transition-all'">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-3 h-3 rounded-full bg-[#f97316] ring-2 ring-orange-200 dark:ring-orange-900"></span>
+                                <span class="text-[15.5px] font-normal text-slate-800 dark:text-slate-200">ការងារ</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[13px] font-normal bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                {{ categoryCounts().work }}
+                            </span>
+                        </div>
+
+                        <!-- Myself Category -->
+                        <div
+                            (click)="setCategoryFilter('myself')"
+                            [class]="selectedCategory() === 'myself' ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-300 dark:border-indigo-800 p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs font-normal' : 'p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 border border-transparent flex items-center justify-between cursor-pointer transition-all'">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-3 h-3 rounded-full bg-[#6366f1] ring-2 ring-indigo-200 dark:ring-indigo-900"></span>
+                                <span class="text-[15.5px] font-normal text-slate-800 dark:text-slate-200">ផ្ទាល់ខ្លួន</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[13px] font-normal bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                {{ categoryCounts().myself }}
+                            </span>
+                        </div>
+
+                        <!-- Breaks Category -->
+                        <div
+                            (click)="setCategoryFilter('breaks')"
+                            [class]="selectedCategory() === 'breaks' ? 'bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs font-normal' : 'p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 border border-transparent flex items-center justify-between cursor-pointer transition-all'">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-3 h-3 rounded-full bg-[#f43f5e] ring-2 ring-rose-200 dark:ring-rose-900"></span>
+                                <span class="text-[15.5px] font-normal text-slate-800 dark:text-slate-200">ការសម្រាក</span>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[13px] font-normal bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                {{ categoryCounts().breaks }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================================================== -->
+        <!-- RIGHT 3/4 COLUMN: MAIN WEEKLY TIME GRID CALENDAR               -->
+        <!-- ============================================================== -->
+        <div class="lg:col-span-9 p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs min-w-0">
+
+            <!-- Top Header & Controls Bar -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700/80">
+                
+                <!-- Left: Month Title with Chevrons -->
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        (click)="previousMonth()"
+                        class="w-8.5 h-8.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
+                        <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4.5"></mat-icon>
+                    </button>
+                    <h2 class="text-[22px] font-normal text-slate-800 dark:text-white tracking-wide leading-none">
+                        {{ currentMonthLabel }}
+                    </h2>
+                    <button
+                        type="button"
+                        (click)="nextMonth()"
+                        class="w-8.5 h-8.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
+                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-4.5"></mat-icon>
+                    </button>
+                </div>
+
+                <!-- Right: View Switcher (Day, Week, Month) + Settings Gear Button -->
+                <div class="flex items-center gap-3">
+                    <!-- Pill Buttons -->
+                    <div class="flex items-center p-1 bg-slate-100 dark:bg-slate-700/60 rounded-xl text-[16px] font-normal text-slate-600 dark:text-slate-300">
+                        <button
+                            type="button"
+                            (click)="setView('day')"
+                            [class]="activeView() === 'day' ? 'px-4 py-1.5 rounded-lg bg-[#1e293b] text-white shadow-2xs transition-all cursor-pointer font-normal text-[16px]' : 'px-4 py-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer font-normal text-[16px]'">
+                            ថ្ងៃ
+                        </button>
+                        <button
+                            type="button"
+                            (click)="setView('week')"
+                            [class]="activeView() === 'week' ? 'px-4 py-1.5 rounded-lg bg-[#1e293b] text-white shadow-2xs transition-all cursor-pointer font-normal text-[16px]' : 'px-4 py-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer font-normal text-[16px]'">
+                            សប្តាហ៍
+                        </button>
+                        <button
+                            type="button"
+                            (click)="setView('month')"
+                            [class]="activeView() === 'month' ? 'px-4 py-1.5 rounded-lg bg-[#1e293b] text-white shadow-2xs transition-all cursor-pointer font-normal text-[16px]' : 'px-4 py-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer font-normal text-[16px]'">
+                            ខែ
+                        </button>
+                    </div>
+
+                    <!-- Settings Gear -->
+                    <button
+                        type="button"
+                        class="w-9.5 h-9.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
+                        <mat-icon svgIcon="mdi:cog-outline" class="icon-size-4.5"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Weekly Schedule Time Grid Table -->
+            <div class="overflow-x-auto custom-calendar-scroll pt-2">
+                <div class="min-w-[820px]">
+
+                    <!-- Days Header Columns Row -->
+                    <div class="grid grid-cols-12 gap-0 border-b border-slate-200 dark:border-slate-700 text-center pb-3">
+                        <!-- Left Navigation Chevron Column -->
+                        <div class="col-span-1 flex items-center justify-center text-slate-400">
+                            <button
+                                type="button"
+                                (click)="previousWeek()"
+                                class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer text-slate-500">
+                                <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4.5"></mat-icon>
+                            </button>
+                        </div>
+
+                        <!-- 6 Day Columns (2 មីនា ដល់ 7 មីនា) -->
+                        <div class="col-span-10 grid grid-cols-6 gap-0">
+                            @for (col of dayColumns; track col.nameKh + col.dateNum) {
+                                <div class="px-2 text-center">
+                                    <div class="text-[16px] font-normal text-slate-800 dark:text-slate-100 leading-normal">
+                                        {{ col.nameKh }} {{ col.dateNum }}
+                                    </div>
+                                    <div class="text-[12.5px] text-slate-400 font-normal mt-0.5">
+                                        {{ col.subTime }}
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Right Navigation Chevron Column -->
+                        <div class="col-span-1 flex items-center justify-center text-slate-400">
+                            <button
+                                type="button"
+                                (click)="nextWeek()"
+                                class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer text-slate-500">
+                                <mat-icon svgIcon="mdi:chevron-right" class="icon-size-4.5"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots & Schedule Events Canvas Grid -->
+                    <div class="relative mt-2" style="height: 540px;">
+
+                        <!-- Horizontal Grid Lines for Time Slots -->
+                        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                            @for (slot of timeSlots; track slot) {
+                                <div class="flex items-center border-t border-slate-100 dark:border-slate-700/60 w-full h-[76px]">
+                                    <span class="text-[14.5px] font-normal text-slate-500 dark:text-slate-400 w-24 shrink-0 pr-2 truncate">
+                                        {{ slot }}
+                                    </span>
+                                    <div class="flex-1 border-t border-slate-100 dark:border-slate-700/60 h-0"></div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- 6-Column Vertical Grid Lines -->
+                        <div class="absolute inset-0 ml-24 grid grid-cols-6 gap-0 pointer-events-none">
+                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                            <div class="h-full"></div>
+                        </div>
+
+                        <!-- Rendered Schedule Events Matching Screenshot -->
+                        <div class="absolute inset-0 ml-24 grid grid-cols-6 gap-2 pointer-events-auto p-1">
+                            
+                            <!-- Column 0: 2 មីនា -->
+                            <div class="relative h-full">
+                                @for (ev of filteredEvents(); track ev.id) {
+                                    @if (ev.dayIndex === 0) {
+                                        <div
+                                            (click)="openScheduleDetailModal(ev)"
+                                            [style.top.px]="ev.topPosition"
+                                            [style.height.px]="ev.height"
+                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
+                                            <div>
+                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                    {{ ev.time }}
+                                                </div>
+                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
+                                                    {{ ev.title }}
+                                                </div>
+                                            </div>
+
+                                            <!-- Attendee Avatars Stack -->
+                                            <div class="flex items-center mt-2 pt-1">
+                                                @for (m of ev.members.slice(0, 2); track $index) {
+                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-slate-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
+                                                        {{ m.initials }}
+                                                    </div>
+                                                }
+                                                @if (ev.extraCount > 0) {
+                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-[#f97316] text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
+                                                        +{{ ev.extraCount }}
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Column 1: 3 មីនា -->
+                            <div class="relative h-full">
+                                @for (ev of filteredEvents(); track ev.id) {
+                                    @if (ev.dayIndex === 1) {
+                                        <div
+                                            (click)="openScheduleDetailModal(ev)"
+                                            [style.top.px]="ev.topPosition"
+                                            [style.height.px]="ev.height"
+                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
+                                            <div>
+                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                    {{ ev.time }}
+                                                </div>
+                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
+                                                    {{ ev.title }}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center mt-2 pt-1">
+                                                @for (m of ev.members.slice(0, 2); track $index) {
+                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-purple-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
+                                                        {{ m.initials }}
+                                                    </div>
+                                                }
+                                                @if (ev.extraCount > 0) {
+                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
+                                                        +{{ ev.extraCount }}
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Column 2: 4 មីនា -->
+                            <div class="relative h-full">
+                                @for (ev of filteredEvents(); track ev.id) {
+                                    @if (ev.dayIndex === 2) {
+                                        <div
+                                            (click)="openScheduleDetailModal(ev)"
+                                            [style.top.px]="ev.topPosition"
+                                            [style.height.px]="ev.height"
+                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
+                                            <div>
+                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                    {{ ev.time }}
+                                                </div>
+                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
+                                                    {{ ev.title }}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center mt-2 pt-1">
+                                                @for (m of ev.members.slice(0, 2); track $index) {
+                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-indigo-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
+                                                        {{ m.initials }}
+                                                    </div>
+                                                }
+                                                @if (ev.extraCount > 0) {
+                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
+                                                        +{{ ev.extraCount }}
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Column 3: 5 មីនា -->
+                            <div class="relative h-full">
+                                @for (ev of filteredEvents(); track ev.id) {
+                                    @if (ev.dayIndex === 3) {
+                                        <div
+                                            (click)="openScheduleDetailModal(ev)"
+                                            [style.top.px]="ev.topPosition"
+                                            [style.height.px]="ev.height"
+                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
+                                            <div>
+                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                    {{ ev.time }}
+                                                </div>
+                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
+                                                    {{ ev.title }}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center mt-2 pt-1">
+                                                @for (m of ev.members.slice(0, 2); track $index) {
+                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-emerald-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
+                                                        {{ m.initials }}
+                                                    </div>
+                                                }
+                                                @if (ev.extraCount > 0) {
+                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
+                                                        +{{ ev.extraCount }}
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Column 4: 6 មីនា -->
+                            <div class="relative h-full">
+                                @for (ev of filteredEvents(); track ev.id) {
+                                    @if (ev.dayIndex === 4) {
+                                        <div
+                                            (click)="openScheduleDetailModal(ev)"
+                                            [style.top.px]="ev.topPosition"
+                                            [style.height.px]="ev.height"
+                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
+                                            <div>
+                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                    {{ ev.time }}
+                                                </div>
+                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
+                                                    {{ ev.title }}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center mt-2 pt-1">
+                                                @for (m of ev.members.slice(0, 2); track $index) {
+                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-rose-600 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
+                                                        {{ m.initials }}
+                                                    </div>
+                                                }
+                                                @if (ev.extraCount > 0) {
+                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-rose-500 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
+                                                        +{{ ev.extraCount }}
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Column 5: 7 មីនា -->
+                            <div class="relative h-full">
+                                @for (ev of filteredEvents(); track ev.id) {
+                                    @if (ev.dayIndex === 5) {
+                                        <div
+                                            (click)="openScheduleDetailModal(ev)"
+                                            [style.top.px]="ev.topPosition"
+                                            [style.height.px]="ev.height"
+                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
+                                            <div>
+                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                    {{ ev.time }}
+                                                </div>
+                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
+                                                    {{ ev.title }}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center mt-2 pt-1">
+                                                @for (m of ev.members.slice(0, 2); track $index) {
+                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-amber-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
+                                                        {{ m.initials }}
+                                                    </div>
+                                                }
+                                                @if (ev.extraCount > 0) {
+                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-[#f97316] text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
+                                                        +{{ ev.extraCount }}
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <!-- END OF FRAMED CONTENT CONTAINER -->
+
+</div>
+

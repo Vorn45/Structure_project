@@ -17,6 +17,11 @@ export default [
             import('./2-task/task.component').then((m) => m.UserTaskComponent),
     },
     {
+        path: 'planner',
+        loadComponent: () =>
+            import('../3-admin/6-planner/planner.component').then((m) => m.PlannerComponent),
+    },
+    {
         path: 'activity',
         loadComponent: () =>
             import('./3-activity/activity.component').then((m) => m.UserActivityComponent),

@@ -11,11 +11,58 @@ export interface AdminStats {
         planning_projects: number;
         total_tasks: number;
         completed_tasks: number;
+        in_progress_tasks?: number;
+        pending_tasks?: number;
         task_completion_rate: number;
         active_users: number;
         total_users: number;
         pending_leaves: number;
     };
+    task_distribution?: {
+        completed: number;
+        in_progress: number;
+        pending: number;
+        completion_percentage: number;
+    };
+    trend?: {
+        weekly: {
+            days: string[];
+            in_progress: number[];
+            completed: number[];
+        };
+        monthly: {
+            months: string[];
+            in_progress: number[];
+            completed: number[];
+        };
+        yearly: {
+            years: string[];
+            in_progress: number[];
+            completed: number[];
+        };
+    };
+    scheduled_meetings?: Array<{
+        id: string;
+        title: string;
+        time: string;
+        dateGroup: string;
+        dateLabel: string;
+        badgeColor: string;
+        borderClass: string;
+        members: string[];
+        extraCount: number;
+    }>;
+    top_performers?: Array<{
+        id: string;
+        name: string;
+        name_kh: string;
+        email: string;
+        role: string;
+        avatar: string;
+        initials: string;
+        avatarBg: string;
+        tasks_completed?: number;
+    }>;
     projects_summary: Array<{
         id: string;
         code: string;
