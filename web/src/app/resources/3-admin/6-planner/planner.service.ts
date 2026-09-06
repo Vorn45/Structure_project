@@ -7,6 +7,9 @@ export interface BackendPlannerSchedule {
     id: string;
     title: string;
     time: string;
+    date?: string;
+    start_date?: string;
+    end_date?: string;
     day_index: number;
     start_day_index?: number;
     end_day_index?: number;

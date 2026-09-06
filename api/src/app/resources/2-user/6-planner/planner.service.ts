@@ -12,6 +12,9 @@ export interface PlannerScheduleItem {
     id: string;
     title: string;
     time: string;
+    date?: string;
+    start_date?: string;
+    end_date?: string;
     day_index: number;
     start_day_index?: number;
     end_day_index?: number;
@@ -210,26 +213,39 @@ export class PlannerService {
     // STORE HELPERS
     // =========================================================================
     private async _readSchedules(): Promise<PlannerScheduleItem[]> {
+        let schedules: PlannerScheduleItem[] = [];
         try {
             const dbStore = await this._storeRepo.findOne({
                 where: { key: 'default_planner_store' },
             });
             if (dbStore && Array.isArray(dbStore.schedules) && dbStore.schedules.length > 0) {
-                return dbStore.schedules;
+                schedules = dbStore.schedules;
             }
         } catch (e) {
             // Fallback to local scratch file if table not yet migrated
         }
 
-        if (fs.existsSync(this._storageFile)) {
+        if (schedules.length === 0 && fs.existsSync(this._storageFile)) {
             try {
                 const data = fs.readFileSync(this._storageFile, 'utf8');
-                return JSON.parse(data);
+                schedules = JSON.parse(data);
             } catch (err) {}
         }
 
-        await this._writeSchedules(DEFAULT_SCHEDULES);
-        return DEFAULT_SCHEDULES;
+        // Ensure default core schedules are always preserved alongside custom schedules
+        const existingIds = new Set(schedules.map((s) => s.id));
+        const missingDefaults = DEFAULT_SCHEDULES.filter((d) => !existingIds.has(d.id));
+        if (missingDefaults.length > 0) {
+            schedules = [...schedules, ...missingDefaults];
+            await this._writeSchedules(schedules);
+        }
+
+        if (schedules.length === 0) {
+            schedules = DEFAULT_SCHEDULES;
+            await this._writeSchedules(schedules);
+        }
+
+        return schedules;
     }
 
     private async _writeSchedules(schedules: PlannerScheduleItem[]): Promise<void> {
@@ -314,22 +330,21 @@ export class PlannerService {
         };
 
         // Strict filtering:
-        // - Admin sees ALL Work plans across the entire organization (plus own personal/breaks).
-        // - Regular Users ONLY see Work plans where they are explicitly assigned/selected or creator.
+        // - Admin sees ALL Work, Personal & Break plans across the entire organization.
+        // - Regular Users see Work plans where they are explicitly assigned/selected or creator, plus own personal/breaks.
         let visibleSchedules = allSchedules.filter((sch) => {
+            if (isAdmin || (query as any)?.admin === 'true' || (query as any)?.scope === 'all' || (query as any)?.all === 'true') {
+                return true;
+            }
+
             if (sch.category === 'work') {
-                if (isAdmin) {
-                    return true;
-                }
                 return isUserAssignedOrCreator(sch);
             }
 
-            // For personal ('myself') or breaks: only the creator sees it (or admin if scope=all)
-            if (isAdmin && ((query as any)?.scope === 'all' || (query as any)?.all === 'true')) {
-                return true;
-            }
+            // For personal ('myself') or breaks: only the creator sees it
             return (sch.created_by && currentUserId && String(sch.created_by) === String(currentUserId)) ||
-                   (sch.created_by_name && nameKh && sch.created_by_name.toLowerCase().includes(nameKh));
+                   (sch.created_by_name && nameKh && sch.created_by_name.toLowerCase().includes(nameKh)) ||
+                   (sch.created_by_name && nameEn && sch.created_by_name.toLowerCase().includes(nameEn));
         });
 
         // Category filter
@@ -422,10 +437,17 @@ export class PlannerService {
                 },
             ];
 
+        const targetDate = (dto as any).date || (dto as any).start_date || new Date().toISOString().split('T')[0];
+        const startDate = (dto as any).start_date || targetDate;
+        const endDate = (dto as any).end_date || startDate;
+
         const newSchedule: PlannerScheduleItem = {
             id: 'sch_' + Date.now(),
             title: dto.title.trim(),
             time: timeDisplay,
+            date: targetDate,
+            start_date: startDate,
+            end_date: endDate,
             day_index: Number(dayIndex),
             start_day_index: dto.start_day_index !== undefined ? Number(dto.start_day_index) : Number(dayIndex),
             end_day_index: dto.end_day_index !== undefined ? Number(dto.end_day_index) : Number(dayIndex),

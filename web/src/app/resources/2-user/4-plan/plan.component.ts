@@ -14,6 +14,10 @@ import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { CreateProjectDialogComponent } from '../1-home/create-project-dialog/create-project-dialog.component';
 import { CreateMeetingDialogComponent } from '../1-home/create-meeting-dialog/create-meeting-dialog.component';
 import { AddPlanDialogComponent } from '../3-activity/add-plan-dialog.component';
+import { CreateTaskDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-task-dialog.component';
+import { CreatePhaseDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-phase-dialog.component';
+import { CreateMemberDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-member-dialog.component';
+import { CreateLinkDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-link-dialog.component';
 import { ProfileViewComponent } from 'app/resources/1-account/2-profile/view/component';
 import { ProjectPlanItem, UserPlanService } from './plan.service';
 
@@ -850,45 +854,6 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     newLinkUrl = signal<string>('');
     showAddLinkForm = signal<boolean>(false);
 
-    // Create Phase state
-    showCreatePhaseModal = signal<boolean>(false);
-    newPhaseTitle = signal<string>('');
-    newPhaseQuarter = signal<string>('ត្រីមាសទី ១ (Q1)');
-    newPhaseStartDate = signal<string>('01/10/2026');
-    newPhaseEndDate = signal<string>('31/12/2026');
-    newPhaseStatus = signal<'completed' | 'in_progress' | 'planned'>('planned');
-
-    // Create Meeting state
-    showCreateMeetingModal = signal<boolean>(false);
-    newMeetingTitle = signal<string>('');
-    newMeetingDescription = signal<string>('');
-    newMeetingPlatform = signal<'Google Meet' | 'Zoom' | 'Microsoft Teams' | 'Office'>('Google Meet');
-    newMeetingLink = signal<string>('https://meet.google.com/abc-defg-hij');
-    newMeetingDate = signal<string>('ថ្ងៃនេះ (Today)');
-    newMeetingTime = signal<string>('ម៉ោង ០២:០០ រសៀល - ០៣:០០ រសៀល');
-    newMeetingStatus = signal<'upcoming' | 'completed' | 'ongoing'>('upcoming');
-
-    // Create Member state
-    showCreateMemberModal = signal<boolean>(false);
-    newMemberName = signal<string>('');
-    newMemberRole = signal<string>('Frontend Developer');
-    newMemberEmail = signal<string>('');
-
-    // Create Link state
-    showCreateLinkModal = signal<boolean>(false);
-    newProjectLinkTitle = signal<string>('');
-    newProjectLinkUrl = signal<string>('');
-    newProjectLinkType = signal<'figma' | 'github' | 'doc' | 'external'>('figma');
-    newProjectLinkTaskCode = signal<string>('');
-
-    // Create Task state
-    showCreateTaskModal = signal<boolean>(false);
-    newTaskTitle = signal<string>('');
-    newTaskPriority = signal<'urgent' | 'high' | 'medium' | 'low'>('medium');
-    newTaskStatus = signal<string>('new');
-    newTaskDueDate = signal<string>('15/09/2026');
-    newTaskAssignee = signal<string>('');
-
     // Project counts computed
     projectCounts = computed(() => {
         const all = this.plans();
@@ -1413,32 +1378,28 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     openCreatePhaseModal(): void {
         const proj = this.selectedProject();
-        const nextNum = (proj?.phases?.length || 0) + 1;
-        this.newPhaseTitle.set(`ដំណាក់កាលទី ${nextNum}៖ `);
-        this.newPhaseQuarter.set(`ត្រីមាសទី ${nextNum} (Q${nextNum})`);
-        this.newPhaseStartDate.set('01/10/2026');
-        this.newPhaseEndDate.set('31/12/2026');
-        this.newPhaseStatus.set('planned');
-        this.showCreatePhaseModal.set(true);
-    }
-
-    createPhase(): void {
-        const title = this.newPhaseTitle().trim();
-        const proj = this.selectedProject();
-        if (!title || !proj) return;
-        if (!proj.phases) proj.phases = [];
-        const newPhase: ProjectPhaseItem = {
-            id: `ph-${Date.now()}`,
-            title,
-            quarter: this.newPhaseQuarter() || 'ត្រីមាស',
-            startDate: this.newPhaseStartDate() || '01/10/2026',
-            endDate: this.newPhaseEndDate() || '31/12/2026',
-            tasksCount: 0,
-            status: this.newPhaseStatus(),
-        };
-        proj.phases.push(newPhase);
-        this.showCreatePhaseModal.set(false);
-        this.saveProjectChanges(proj);
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+            currentPhasesCount: proj?.phases?.length || 0,
+            projectName: proj?.name,
+        });
+        const dialogRef = this._matDialog.open(CreatePhaseDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.title && proj) {
+                if (!proj.phases) proj.phases = [];
+                const newPhase: ProjectPhaseItem = {
+                    id: `ph-${Date.now()}`,
+                    title: result.title,
+                    quarter: result.quarter || 'ត្រីមាស',
+                    startDate: result.startDate || '01/10/2026',
+                    endDate: result.endDate || '31/12/2026',
+                    tasksCount: 0,
+                    status: result.status || 'planned',
+                };
+                proj.phases.push(newPhase);
+                this.saveProjectChanges(proj);
+            }
+        });
     }
 
     deletePhase(phaseId: string, event: Event): void {
@@ -1461,27 +1422,6 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         });
     }
 
-    createMeeting(): void {
-        const title = this.newMeetingTitle().trim();
-        const proj = this.selectedProject();
-        if (!title || !proj) return;
-        if (!proj.meetings) proj.meetings = [];
-        const newM: ProjectMeetingItem = {
-            id: `m-${Date.now()}`,
-            title,
-            description: this.newMeetingDescription().trim() || 'ការពិភាក្សា និងសម្របសម្រួលការងារគម្រោង',
-            date: this.newMeetingDate().trim() || 'ថ្ងៃនេះ',
-            time: this.newMeetingTime().trim() || 'ម៉ោង ០២:០០ រសៀល',
-            platform: this.newMeetingPlatform(),
-            link: this.newMeetingLink().trim() || 'https://meet.google.com',
-            status: this.newMeetingStatus(),
-            attendees: proj.members ? [...proj.members.slice(0, 3)] : [],
-        };
-        proj.meetings.unshift(newM);
-        this.showCreateMeetingModal.set(false);
-        this.saveProjectChanges(proj);
-    }
-
     deleteMeeting(meetingId: string, event: Event): void {
         event.stopPropagation();
         const proj = this.selectedProject();
@@ -1491,28 +1431,27 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     openCreateMemberModal(): void {
-        this.newMemberName.set('');
-        this.newMemberRole.set('Frontend Developer');
-        this.newMemberEmail.set('');
-        this.showCreateMemberModal.set(true);
-    }
-
-    createMember(): void {
-        const name = this.newMemberName().trim();
         const proj = this.selectedProject();
-        if (!name || !proj) return;
-        if (!proj.members) proj.members = [];
-        const newM: TaskMember = {
-            id: Date.now(),
-            name,
-            role: this.newMemberRole() || 'Developer',
-            email: this.newMemberEmail().trim() || undefined,
-            initial: name.charAt(0).toUpperCase(),
-            bgClass: 'bg-indigo-600',
-        };
-        proj.members.push(newM);
-        this.showCreateMemberModal.set(false);
-        this.saveProjectChanges(proj);
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+            projectName: proj?.name,
+        });
+        const dialogRef = this._matDialog.open(CreateMemberDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.name && proj) {
+                if (!proj.members) proj.members = [];
+                const newM: TaskMember = {
+                    id: Date.now(),
+                    name: result.name,
+                    role: result.role || 'Developer',
+                    email: result.email || undefined,
+                    initial: result.name.charAt(0).toUpperCase(),
+                    bgClass: 'bg-indigo-600',
+                };
+                proj.members.push(newM);
+                this.saveProjectChanges(proj);
+            }
+        });
     }
 
     deleteMember(memberId: number, event: Event): void {
@@ -1525,53 +1464,31 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     openCreateLinkModal(): void {
         const proj = this.selectedProject();
-        this.newProjectLinkTitle.set('');
-        this.newProjectLinkUrl.set('');
-        this.newProjectLinkType.set('figma');
-        this.newProjectLinkTaskCode.set(proj ? `#${proj.code}-001` : '#PMS-001');
-        this.showCreateLinkModal.set(true);
-    }
-
-    createProjectLink(): void {
-        const title = this.newProjectLinkTitle().trim();
-        let url = this.newProjectLinkUrl().trim();
-        const proj = this.selectedProject();
-        if (!title || !proj) return;
-
-        if (!url) {
-            const type = this.newProjectLinkType();
-            if (type === 'figma') url = 'https://figma.com';
-            else if (type === 'github') url = 'https://github.com';
-            else if (type === 'doc') url = 'https://notion.so';
-            else url = 'https://google.com';
-        } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            url = 'https://' + url;
-        }
-
-        if (!proj.links) {
-            proj.links = [];
-        }
-
-        const newLink: TaskLink = {
-            id: `lnk-${Date.now()}`,
-            title,
-            url,
-            type: this.newProjectLinkType(),
-            createdAt: 'ថ្ងៃនេះ',
-        };
-
-        proj.links.unshift(newLink);
-
-        if (proj.tasks && proj.tasks.length > 0) {
-            const task = proj.tasks[0];
-            if (!task.links) task.links = [];
-            task.links.unshift(newLink);
-        }
-
-        this.showCreateLinkModal.set(false);
-        this.newProjectLinkTitle.set('');
-        this.newProjectLinkUrl.set('');
-        this.saveProjectChanges(proj);
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+            taskCode: proj ? `#${proj.code}-001` : '#PMS-001',
+            projectName: proj?.name,
+        });
+        const dialogRef = this._matDialog.open(CreateLinkDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.title && proj) {
+                if (!proj.links) proj.links = [];
+                const newLink: TaskLink = {
+                    id: `lnk-${Date.now()}`,
+                    title: result.title,
+                    url: result.url,
+                    type: result.type || 'figma',
+                    createdAt: 'ថ្ងៃនេះ',
+                };
+                proj.links.unshift(newLink);
+                if (proj.tasks && proj.tasks.length > 0) {
+                    const task = proj.tasks[0];
+                    if (!task.links) task.links = [];
+                    task.links.unshift(newLink);
+                }
+                this.saveProjectChanges(proj);
+            }
+        });
     }
 
     deleteProjectLink(linkId: string, event: Event): void {
@@ -1592,55 +1509,54 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     openCreateTaskModal(): void {
-        this.newTaskTitle.set('');
-        this.newTaskStatus.set('new');
-        this.newTaskPriority.set('medium');
-        this.newTaskDueDate.set('');
-        this.newTaskAssignee.set('');
-        this.showCreateTaskModal.set(true);
-    }
-
-    createProjectTask(): void {
-        const title = this.newTaskTitle().trim();
         const proj = this.selectedProject();
-        if (!title || !proj) return;
-        if (!proj.tasks) proj.tasks = [];
-        const nextNum = proj.tasks.length + 101;
-        const newTask: IndividualTaskItem = {
-            id: `tsk-${Date.now()}`,
-            code: `#${proj.code}-${nextNum}`,
-            title,
-            description: title,
-            status: this.newTaskStatus(),
-            priority: this.newTaskPriority(),
-            due_date: this.newTaskDueDate(),
-            due_days_left: 7,
-            comments_count: 0,
-            attachments_count: 0,
-            reporter: {
-                id: 1,
-                name: 'អ្នកគ្រប់គ្រង (Admin)',
-                role: 'Project Manager',
-                initial: 'A',
-                bgClass: 'bg-blue-600',
-            },
-            assignee: {
-                id: 2,
-                name: this.newTaskAssignee() || 'សមាជិកក្រុម',
-                role: 'Assignee',
-                initial: 'S',
-                bgClass: 'bg-emerald-600',
-            },
-            subtasks: [
-                { id: 'st-1', title: 'រៀបចំលក្ខខណ្ឌតម្រូវការដំបូង', completed: false },
-            ],
-            members: proj.members ? [...proj.members.slice(0, 2)] : [],
-            links: [],
-            documents: [],
-        };
-        proj.tasks.unshift(newTask);
-        this.showCreateTaskModal.set(false);
-        this.saveProjectChanges(proj);
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+            projectCode: proj?.code,
+            projectName: proj?.name,
+            members: proj?.members || [],
+        });
+        const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.title && proj) {
+                if (!proj.tasks) proj.tasks = [];
+                const nextNum = proj.tasks.length + 101;
+                const newTask: IndividualTaskItem = {
+                    id: `tsk-${Date.now()}`,
+                    code: `#${proj.code}-${nextNum}`,
+                    title: result.title,
+                    description: result.description || result.title,
+                    status: result.status || 'new',
+                    priority: result.priority || 'medium',
+                    due_date: result.due_date || '15/09/2026',
+                    due_days_left: 7,
+                    comments_count: 0,
+                    attachments_count: 0,
+                    reporter: {
+                        id: 1,
+                        name: 'អ្នកគ្រប់គ្រង (Admin)',
+                        role: 'Project Manager',
+                        initial: 'A',
+                        bgClass: 'bg-blue-600',
+                    },
+                    assignee: {
+                        id: 2,
+                        name: result.assignee || 'សមាជិកក្រុម',
+                        role: 'Assignee',
+                        initial: (result.assignee || 'S').charAt(0).toUpperCase(),
+                        bgClass: 'bg-emerald-600',
+                    },
+                    subtasks: [
+                        { id: 'st-1', title: 'រៀបចំលក្ខខណ្ឌតម្រូវការដំបូង', completed: false },
+                    ],
+                    members: proj.members ? [...proj.members.slice(0, 2)] : [],
+                    links: [],
+                    documents: [],
+                };
+                proj.tasks.unshift(newTask);
+                this.saveProjectChanges(proj);
+            }
+        });
     }
 
     triggerUploadDocument(task: IndividualTaskItem): void {

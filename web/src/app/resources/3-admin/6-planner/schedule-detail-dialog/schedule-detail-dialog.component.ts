@@ -72,7 +72,7 @@ export interface ScheduleDetailDialogData {
                             <span>កាលបរិច្ឆេទ / ថ្ងៃអនុវត្ត</span>
                         </div>
                         <div class="text-[15.5px] font-medium text-slate-800 dark:text-slate-100">
-                            {{ getDayLabel(schedule.dayIndex, schedule.startDayIndex, schedule.endDayIndex) }}
+                            {{ getFormattedDate() }}
                         </div>
                     </div>
 
@@ -180,16 +180,6 @@ export interface ScheduleDetailDialogData {
 export class ScheduleDetailDialogComponent {
     schedule: PlannerScheduleEvent;
 
-    private readonly dayNames = [
-        'ច័ន្ទ 2 មីនា 2026',
-        'អង្គារ 3 មីនា 2026',
-        'ពុធ 4 មីនា 2026',
-        'ព្រហស្បតិ៍ 5 មីនា 2026',
-        'សុក្រ 6 មីនា 2026',
-        'សៅរ៍ 7 មីនា 2026',
-        'អាទិត្យ 8 មីនា 2026',
-    ];
-
     constructor(
         public dialogRef: MatDialogRef<ScheduleDetailDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: ScheduleDetailDialogData,
@@ -249,16 +239,33 @@ export class ScheduleDetailDialogComponent {
         }
     }
 
-    getDayLabel(dayIndex?: number, startDay?: number, endDay?: number): string {
-        const start = startDay !== undefined ? startDay : (dayIndex !== undefined ? dayIndex : 0);
-        const end = endDay !== undefined ? endDay : start;
-
-        const startName = this.dayNames[start] || `ថ្ងៃទី ${start + 1}`;
-        if (start === end) {
-            return startName;
+    getFormattedDate(): string {
+        if ((this.schedule as any).date) {
+            return this.formatKhmerDate((this.schedule as any).date);
         }
-        const endName = this.dayNames[end] || `ថ្ងៃទី ${end + 1}`;
-        return `${startName} ដល់ ${endName}`;
+        const khmerDays = ['ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍', 'អាទិត្យ'];
+        const start = this.schedule.startDayIndex !== undefined ? this.schedule.startDayIndex : (this.schedule.dayIndex !== undefined ? this.schedule.dayIndex : 0);
+        const end = this.schedule.endDayIndex !== undefined ? this.schedule.endDayIndex : start;
+
+        const startName = khmerDays[start] || `ថ្ងៃទី ${start + 1}`;
+        if (start === end) {
+            return `ថ្ងៃ ${startName}`;
+        }
+        const endName = khmerDays[end] || `ថ្ងៃទី ${end + 1}`;
+        return `ថ្ងៃ ${startName} ដល់ ថ្ងៃ ${endName}`;
+    }
+
+    private formatKhmerDate(dateStr: string): string {
+        const parts = dateStr.split('-');
+        if (parts.length < 3) return dateStr;
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        const khmerDays = ['អាទិត្យ', 'ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍'];
+        const khmerMonths = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+        const dayName = khmerDays[d.getDay()] || '';
+        const dayNum = String(d.getDate()).padStart(2, '0');
+        const monthName = khmerMonths[d.getMonth()] || '';
+        const yearNum = d.getFullYear();
+        return `${dayName} ទី ${dayNum} ${monthName} ${yearNum}`;
     }
 
     close(): void {

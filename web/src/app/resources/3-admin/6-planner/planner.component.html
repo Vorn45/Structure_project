@@ -72,6 +72,12 @@
                         <div class="flex items-center gap-1.5">
                             <button
                                 type="button"
+                                (click)="goToToday()"
+                                class="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 text-[13px] font-normal transition-all cursor-pointer">
+                                ថ្ងៃនេះ
+                            </button>
+                            <button
+                                type="button"
                                 (click)="previousMonth()"
                                 class="w-8 h-8 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
                                 <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4.5"></mat-icon>
@@ -104,7 +110,11 @@
                             } @else {
                                 <div
                                     (click)="selectMiniDay(cell.dayNum)"
-                                    [class]="cell.isSelected ? 'w-8.5 h-8.5 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-xs font-normal' : 'w-8.5 h-8.5 mx-auto rounded-full flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer font-normal transition-all'">
+                                    [class]="cell.isSelected
+                                        ? 'w-8.5 h-8.5 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-xs font-normal'
+                                        : (cell.isToday
+                                            ? 'w-8.5 h-8.5 mx-auto rounded-full ring-2 ring-blue-600 dark:ring-blue-500 text-blue-600 dark:text-blue-400 font-medium flex items-center justify-center cursor-pointer bg-blue-50/60 dark:bg-blue-950/40'
+                                            : 'w-8.5 h-8.5 mx-auto rounded-full flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer font-normal transition-all')">
                                     {{ cell.dayNum }}
                                 </div>
                             }
@@ -123,32 +133,56 @@
 
                     <div class="space-y-3 text-[15.5px] font-normal text-slate-700 dark:text-slate-300">
                         <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
-                            <input type="checkbox" [(ngModel)]="filterScheduleMeeting" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <input
+                                type="checkbox"
+                                [ngModel]="filterScheduleMeeting()"
+                                (ngModelChange)="filterScheduleMeeting.set($event)"
+                                class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
                             <span>កិច្ចប្រជុំទូទៅ</span>
                         </label>
 
                         <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
-                            <input type="checkbox" [(ngModel)]="filterProjectReview" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <input
+                                type="checkbox"
+                                [ngModel]="filterProjectReview()"
+                                (ngModelChange)="filterProjectReview.set($event)"
+                                class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
                             <span>ត្រួតពិនិត្យគម្រោង</span>
                         </label>
 
                         <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
-                            <input type="checkbox" [(ngModel)]="filterOnlineMeeting" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <input
+                                type="checkbox"
+                                [ngModel]="filterOnlineMeeting()"
+                                (ngModelChange)="filterOnlineMeeting.set($event)"
+                                class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
                             <span>ប្រជុំអនឡាញ</span>
                         </label>
 
                         <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
-                            <input type="checkbox" [(ngModel)]="filterRecessBreak" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <input
+                                type="checkbox"
+                                [ngModel]="filterRecessBreak()"
+                                (ngModelChange)="filterRecessBreak.set($event)"
+                                class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
                             <span>សម្រាកខ្លី</span>
                         </label>
 
                         <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
-                            <input type="checkbox" [(ngModel)]="filterCoffeeDate" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <input
+                                type="checkbox"
+                                [ngModel]="filterCoffeeDate()"
+                                (ngModelChange)="filterCoffeeDate.set($event)"
+                                class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
                             <span>ជួបញ៉ាំកាហ្វេ</span>
                         </label>
 
                         <label class="flex items-center gap-2.5 cursor-pointer hover:text-slate-900 dark:hover:text-white">
-                            <input type="checkbox" [(ngModel)]="filterOther" class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
+                            <input
+                                type="checkbox"
+                                [ngModel]="filterOther()"
+                                (ngModelChange)="filterOther.set($event)"
+                                class="w-4.5 h-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
                             <span>ផ្សេងៗ</span>
                         </label>
                     </div>
@@ -231,22 +265,28 @@
             <!-- Top Header & Controls Bar -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700/80">
                 
-                <!-- Left: Month Title with Chevrons -->
-                <div class="flex items-center gap-3">
+                <!-- Left: Title with Chevrons & Today Button -->
+                <div class="flex items-center gap-2.5 sm:gap-3">
                     <button
                         type="button"
-                        (click)="previousMonth()"
+                        (click)="previousPeriod()"
                         class="w-8.5 h-8.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
                         <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4.5"></mat-icon>
                     </button>
-                    <h2 class="text-[22px] font-normal text-slate-800 dark:text-white tracking-wide leading-none">
-                        {{ currentMonthLabel }}
+                    <h2 class="text-[20px] sm:text-[22px] font-normal text-slate-800 dark:text-white tracking-wide leading-none">
+                        {{ headerTitle }}
                     </h2>
                     <button
                         type="button"
-                        (click)="nextMonth()"
+                        (click)="nextPeriod()"
                         class="w-8.5 h-8.5 rounded-full border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs">
                         <mat-icon svgIcon="mdi:chevron-right" class="icon-size-4.5"></mat-icon>
+                    </button>
+                    <button
+                        type="button"
+                        (click)="goToToday()"
+                        class="h-8.5 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-800/80 text-[13.5px] font-medium transition-all cursor-pointer shadow-2xs">
+                        ថ្ងៃនេះ
                     </button>
                 </div>
 
@@ -283,292 +323,300 @@
                 </div>
             </div>
 
-            <!-- Weekly Schedule Time Grid Table -->
-            <div class="overflow-x-auto custom-calendar-scroll pt-2">
-                <div class="min-w-[820px]">
+            <!-- ========================================================= -->
+            <!-- 1. WEEK VIEW (7 DAYS HOURLY GRID)                         -->
+            <!-- ========================================================= -->
+            @if (activeView() === 'week') {
+                <div class="overflow-x-auto custom-calendar-scroll pt-2">
+                    <div class="min-w-[860px]">
 
-                    <!-- Days Header Columns Row -->
-                    <div class="grid grid-cols-12 gap-0 border-b border-slate-200 dark:border-slate-700 text-center pb-3">
-                        <!-- Left Navigation Chevron Column -->
-                        <div class="col-span-1 flex items-center justify-center text-slate-400">
-                            <button
-                                type="button"
-                                (click)="previousWeek()"
-                                class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer text-slate-500">
-                                <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4.5"></mat-icon>
-                            </button>
-                        </div>
+                        <!-- Days Header Columns Row (7 Days: ច័ន្ទ ដល់ អាទិត្យ) -->
+                        <div class="grid grid-cols-12 gap-0 border-b border-slate-200 dark:border-slate-700 text-center pb-3">
+                            <!-- Left Navigation Chevron Column -->
+                            <div class="col-span-1 flex items-center justify-center text-slate-400">
+                                <button
+                                    type="button"
+                                    (click)="previousWeek()"
+                                    class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer text-slate-500">
+                                    <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4.5"></mat-icon>
+                                </button>
+                            </div>
 
-                        <!-- 6 Day Columns (2 មីនា ដល់ 7 មីនា) -->
-                        <div class="col-span-10 grid grid-cols-6 gap-0">
-                            @for (col of dayColumns; track col.nameKh + col.dateNum) {
-                                <div class="px-2 text-center">
-                                    <div class="text-[16px] font-normal text-slate-800 dark:text-slate-100 leading-normal">
-                                        {{ col.nameKh }} {{ col.dateNum }}
+                            <!-- 7 Day Columns -->
+                            <div class="col-span-10 grid grid-cols-7 gap-1">
+                                @for (col of dayColumns; track col.nameKh + col.dateNum) {
+                                    <div
+                                        (click)="selectMiniDay(col.dateNum)"
+                                        [class]="col.isCurrent
+                                            ? 'px-2 py-1.5 text-center rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 shadow-2xs cursor-pointer transition-all'
+                                            : 'px-2 py-1.5 text-center rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all border border-transparent'">
+                                        <div class="text-[13px] uppercase font-normal text-slate-400 tracking-wider">
+                                            {{ col.nameEn }}
+                                        </div>
+                                        <div [class]="col.isCurrent ? 'text-[20px] font-semibold text-blue-600 dark:text-blue-400 leading-tight' : 'text-[20px] font-medium text-slate-800 dark:text-slate-100 leading-tight'">
+                                            {{ col.dateNum }}
+                                        </div>
+                                        <div [class]="col.isCurrent ? 'text-[12px] text-blue-500 dark:text-blue-300 font-medium mt-0.5' : 'text-[12px] text-slate-400 font-normal mt-0.5'">
+                                            {{ col.subTime }}
+                                        </div>
                                     </div>
-                                    <div class="text-[12.5px] text-slate-400 font-normal mt-0.5">
-                                        {{ col.subTime }}
+                                }
+                            </div>
+
+                            <!-- Right Navigation Chevron Column -->
+                            <div class="col-span-1 flex items-center justify-center text-slate-400">
+                                <button
+                                    type="button"
+                                    (click)="nextWeek()"
+                                    class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer text-slate-500">
+                                    <mat-icon svgIcon="mdi:chevron-right" class="icon-size-4.5"></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Time Slots & Schedule Events Canvas Grid -->
+                        <div class="relative mt-2" [style.height.px]="timeSlots.length * HOUR_ROW_HEIGHT">
+
+                            <!-- Horizontal Grid Lines for Time Slots (60px per hour) -->
+                            <div class="absolute inset-0 flex flex-col pointer-events-none">
+                                @for (slot of timeSlots; track slot) {
+                                    <div class="flex items-start border-t border-slate-100 dark:border-slate-700/60 w-full" [style.height.px]="HOUR_ROW_HEIGHT">
+                                        <span class="text-[13.5px] font-normal text-slate-400 dark:text-slate-500 w-24 shrink-0 pr-2 truncate -mt-2.5">
+                                            {{ slot }}
+                                        </span>
+                                        <div class="flex-1 border-t border-slate-100 dark:border-slate-700/60 h-0"></div>
                                     </div>
-                                </div>
-                            }
-                        </div>
-
-                        <!-- Right Navigation Chevron Column -->
-                        <div class="col-span-1 flex items-center justify-center text-slate-400">
-                            <button
-                                type="button"
-                                (click)="nextWeek()"
-                                class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer text-slate-500">
-                                <mat-icon svgIcon="mdi:chevron-right" class="icon-size-4.5"></mat-icon>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Time Slots & Schedule Events Canvas Grid -->
-                    <div class="relative mt-2" style="height: 540px;">
-
-                        <!-- Horizontal Grid Lines for Time Slots -->
-                        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                            @for (slot of timeSlots; track slot) {
-                                <div class="flex items-center border-t border-slate-100 dark:border-slate-700/60 w-full h-[76px]">
-                                    <span class="text-[14.5px] font-normal text-slate-500 dark:text-slate-400 w-24 shrink-0 pr-2 truncate">
-                                        {{ slot }}
-                                    </span>
-                                    <div class="flex-1 border-t border-slate-100 dark:border-slate-700/60 h-0"></div>
-                                </div>
-                            }
-                        </div>
-
-                        <!-- 6-Column Vertical Grid Lines -->
-                        <div class="absolute inset-0 ml-24 grid grid-cols-6 gap-0 pointer-events-none">
-                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
-                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
-                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
-                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
-                            <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
-                            <div class="h-full"></div>
-                        </div>
-
-                        <!-- Rendered Schedule Events Matching Screenshot -->
-                        <div class="absolute inset-0 ml-24 grid grid-cols-6 gap-2 pointer-events-auto p-1">
-                            
-                            <!-- Column 0: 2 មីនា -->
-                            <div class="relative h-full">
-                                @for (ev of filteredEvents(); track ev.id) {
-                                    @if (ev.dayIndex === 0) {
-                                        <div
-                                            (click)="openScheduleDetailModal(ev)"
-                                            [style.top.px]="ev.topPosition"
-                                            [style.height.px]="ev.height"
-                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
-                                            <div>
-                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
-                                                    {{ ev.time }}
-                                                </div>
-                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
-                                                    {{ ev.title }}
-                                                </div>
-                                            </div>
-
-                                            <!-- Attendee Avatars Stack -->
-                                            <div class="flex items-center mt-2 pt-1">
-                                                @for (m of ev.members.slice(0, 2); track $index) {
-                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-slate-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
-                                                        {{ m.initials }}
-                                                    </div>
-                                                }
-                                                @if (ev.extraCount > 0) {
-                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-[#f97316] text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
-                                                        +{{ ev.extraCount }}
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
                                 }
                             </div>
 
-                            <!-- Column 1: 3 មីនា -->
-                            <div class="relative h-full">
-                                @for (ev of filteredEvents(); track ev.id) {
-                                    @if (ev.dayIndex === 1) {
-                                        <div
-                                            (click)="openScheduleDetailModal(ev)"
-                                            [style.top.px]="ev.topPosition"
-                                            [style.height.px]="ev.height"
-                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
-                                            <div>
-                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
-                                                    {{ ev.time }}
-                                                </div>
-                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
-                                                    {{ ev.title }}
-                                                </div>
-                                            </div>
-
-                                            <div class="flex items-center mt-2 pt-1">
-                                                @for (m of ev.members.slice(0, 2); track $index) {
-                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-purple-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
-                                                        {{ m.initials }}
-                                                    </div>
-                                                }
-                                                @if (ev.extraCount > 0) {
-                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
-                                                        +{{ ev.extraCount }}
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                }
+                            <!-- 7-Column Vertical Grid Lines -->
+                            <div class="absolute inset-0 ml-24 grid grid-cols-7 gap-0 pointer-events-none">
+                                <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                                <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                                <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                                <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                                <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                                <div class="border-r border-slate-100/90 dark:border-slate-700/40 h-full"></div>
+                                <div class="h-full"></div>
                             </div>
 
-                            <!-- Column 2: 4 មីនា -->
-                            <div class="relative h-full">
-                                @for (ev of filteredEvents(); track ev.id) {
-                                    @if (ev.dayIndex === 2) {
-                                        <div
-                                            (click)="openScheduleDetailModal(ev)"
-                                            [style.top.px]="ev.topPosition"
-                                            [style.height.px]="ev.height"
-                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
-                                            <div>
-                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
-                                                    {{ ev.time }}
-                                                </div>
-                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
-                                                    {{ ev.title }}
-                                                </div>
+                            <!-- Rendered Schedule Events Matching Reference Design -->
+                            <div class="absolute inset-0 ml-24 grid grid-cols-7 gap-1.5 pointer-events-auto p-0.5">
+                                @for (col of dayColumns; track col.nameKh + col.dateNum; let colIndex = $index) {
+                                    <div class="relative h-full">
+                                        <!-- Current Time Indicator Line for Today's Column -->
+                                        @if (col.isCurrent && currentTimeTop !== null) {
+                                            <div
+                                                [style.top.px]="currentTimeTop"
+                                                class="absolute inset-x-0 z-20 flex items-center pointer-events-none">
+                                                <div class="w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-white dark:ring-slate-900 -ml-1 shadow-sm"></div>
+                                                <div class="flex-1 h-[2px] bg-blue-500/80"></div>
                                             </div>
+                                        }
 
-                                            <div class="flex items-center mt-2 pt-1">
-                                                @for (m of ev.members.slice(0, 2); track $index) {
-                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-indigo-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
-                                                        {{ m.initials }}
+                                        <!-- Render Events In This Column -->
+                                        @for (ev of filteredEvents(); track ev.id) {
+                                            @if (isEventInDay(ev, colIndex)) {
+                                                <div
+                                                    (click)="openScheduleDetailModal(ev)"
+                                                    [style.top.px]="ev.topPosition"
+                                                    [style.height.px]="ev.height"
+                                                    [class]="'absolute inset-x-1 p-2.5 rounded-r-xl rounded-l-none shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between overflow-hidden ' + getEventThemeClasses(ev.colorTheme).card">
+                                                    
+                                                    <!-- Top Title -->
+                                                    <div class="min-w-0">
+                                                        <div [class]="'text-[14px] font-medium leading-tight line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
+                                                            {{ ev.title }}
+                                                        </div>
                                                     </div>
-                                                }
-                                                @if (ev.extraCount > 0) {
-                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
-                                                        +{{ ev.extraCount }}
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                }
-                            </div>
 
-                            <!-- Column 3: 5 មីនា -->
-                            <div class="relative h-full">
-                                @for (ev of filteredEvents(); track ev.id) {
-                                    @if (ev.dayIndex === 3) {
-                                        <div
-                                            (click)="openScheduleDetailModal(ev)"
-                                            [style.top.px]="ev.topPosition"
-                                            [style.height.px]="ev.height"
-                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
-                                            <div>
-                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
-                                                    {{ ev.time }}
-                                                </div>
-                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
-                                                    {{ ev.title }}
-                                                </div>
-                                            </div>
-
-                                            <div class="flex items-center mt-2 pt-1">
-                                                @for (m of ev.members.slice(0, 2); track $index) {
-                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-emerald-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
-                                                        {{ m.initials }}
+                                                    <!-- Bottom Time Range & Avatars -->
+                                                    <div class="mt-auto pt-1 min-w-0">
+                                                        <div [class]="'text-[12px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                            {{ ev.time }}
+                                                        </div>
+                                                        @if (ev.members && ev.members.length > 0) {
+                                                            <div class="flex items-center mt-1">
+                                                                @for (m of ev.members.slice(0, 2); track $index) {
+                                                                    <div [class]="'w-5.5 h-5.5 min-w-[22px] min-h-[22px] rounded-full ' + (m.bg || 'bg-slate-700 text-white') + ' flex items-center justify-center text-[10px] font-semibold ring-1.5 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-1.5' : '')">
+                                                                        {{ m.initials }}
+                                                                    </div>
+                                                                }
+                                                                @if (ev.extraCount > 0) {
+                                                                    <div class="w-5.5 h-5.5 min-w-[22px] min-h-[22px] rounded-full bg-[#f97316] text-white flex items-center justify-center text-[10px] font-semibold ring-1.5 ring-white dark:ring-slate-800 -ml-1.5 shadow-2xs">
+                                                                        +{{ ev.extraCount }}
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        }
                                                     </div>
-                                                }
-                                                @if (ev.extraCount > 0) {
-                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
-                                                        +{{ ev.extraCount }}
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                }
-                            </div>
-
-                            <!-- Column 4: 6 មីនា -->
-                            <div class="relative h-full">
-                                @for (ev of filteredEvents(); track ev.id) {
-                                    @if (ev.dayIndex === 4) {
-                                        <div
-                                            (click)="openScheduleDetailModal(ev)"
-                                            [style.top.px]="ev.topPosition"
-                                            [style.height.px]="ev.height"
-                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
-                                            <div>
-                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
-                                                    {{ ev.time }}
                                                 </div>
-                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
-                                                    {{ ev.title }}
-                                                </div>
-                                            </div>
-
-                                            <div class="flex items-center mt-2 pt-1">
-                                                @for (m of ev.members.slice(0, 2); track $index) {
-                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-rose-600 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
-                                                        {{ m.initials }}
-                                                    </div>
-                                                }
-                                                @if (ev.extraCount > 0) {
-                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-rose-500 text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
-                                                        +{{ ev.extraCount }}
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                }
-                            </div>
-
-                            <!-- Column 5: 7 មីនា -->
-                            <div class="relative h-full">
-                                @for (ev of filteredEvents(); track ev.id) {
-                                    @if (ev.dayIndex === 5) {
-                                        <div
-                                            (click)="openScheduleDetailModal(ev)"
-                                            [style.top.px]="ev.topPosition"
-                                            [style.height.px]="ev.height"
-                                            [class]="'absolute inset-x-1 p-3 rounded-2xl shadow-xs transition-all hover:shadow-md cursor-pointer flex flex-col justify-between ' + getEventThemeClasses(ev.colorTheme).card">
-                                            <div>
-                                                <div [class]="'text-[12.5px] font-normal leading-tight truncate ' + getEventThemeClasses(ev.colorTheme).timeTag">
-                                                    {{ ev.time }}
-                                                </div>
-                                                <div [class]="'text-[15px] font-normal mt-1 leading-snug line-clamp-2 ' + getEventThemeClasses(ev.colorTheme).title">
-                                                    {{ ev.title }}
-                                                </div>
-                                            </div>
-
-                                            <div class="flex items-center mt-2 pt-1">
-                                                @for (m of ev.members.slice(0, 2); track $index) {
-                                                    <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + (m.bg || 'bg-amber-700 text-white') + ' flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')">
-                                                        {{ m.initials }}
-                                                    </div>
-                                                }
-                                                @if (ev.extraCount > 0) {
-                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-[#f97316] text-white flex items-center justify-center text-[11px] font-semibold ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-2xs">
-                                                        +{{ ev.extraCount }}
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
+                                            }
+                                        }
+                                    </div>
                                 }
                             </div>
 
                         </div>
 
                     </div>
-
                 </div>
-            </div>
+            }
+
+            <!-- ========================================================= -->
+            <!-- 2. MONTH VIEW (MATCHING USER SCREENSHOT)                  -->
+            <!-- ========================================================= -->
+            @if (activeView() === 'month') {
+                <div class="pt-2">
+                    <!-- Month Weekday Names Header (Sun in Red) -->
+                    <div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700 pb-2 text-center text-[14.5px] font-normal">
+                        <span class="text-rose-500 font-medium">Sun (អា)</span>
+                        <span class="text-slate-600 dark:text-slate-300">Mon (ច)</span>
+                        <span class="text-slate-600 dark:text-slate-300">Tue (អ)</span>
+                        <span class="text-slate-600 dark:text-slate-300">Wed (ព)</span>
+                        <span class="text-slate-600 dark:text-slate-300">Thu (ព្រ)</span>
+                        <span class="text-slate-600 dark:text-slate-300">Fri (សុ)</span>
+                        <span class="text-slate-600 dark:text-slate-300">Sat (ស)</span>
+                    </div>
+
+                    <!-- Month Calendar Weeks Grid -->
+                    <div class="border-l border-t border-slate-200 dark:border-slate-700 mt-2">
+                        @for (week of monthViewWeeks; track $index) {
+                            <div class="grid grid-cols-7">
+                                @for (cell of week; track cell.dateIso) {
+                                    <div
+                                        (click)="selectMiniDay(cell.dateNum)"
+                                        [class]="'min-h-[110px] p-2 border-r border-b border-slate-200/90 dark:border-slate-700 flex flex-col justify-between transition-all ' + (cell.isCurrentMonth ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-900/40 text-slate-400')">
+                                        
+                                        <!-- Top Day Number -->
+                                        <div class="flex items-center justify-between mb-1.5">
+                                            @if (cell.isToday) {
+                                                <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-[14px] font-semibold shadow-xs">
+                                                    {{ cell.dateNum }}
+                                                </div>
+                                            } @else {
+                                                <span [class]="cell.isSunday ? 'text-[15px] font-medium text-rose-500 pl-1' : (cell.isCurrentMonth ? 'text-[15px] font-medium text-slate-700 dark:text-slate-200 pl-1' : 'text-[14px] font-normal text-slate-300 dark:text-slate-600 pl-1')">
+                                                    {{ cell.dateNum }}
+                                                </span>
+                                            }
+
+                                            @if (cell.events.length > 2) {
+                                                <span class="text-[11.5px] text-slate-400 font-normal">
+                                                    +{{ cell.events.length - 2 }}
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <!-- Event Pills (Matching Screenshot) -->
+                                        <div class="space-y-1 flex-1 overflow-hidden">
+                                            @for (ev of cell.events.slice(0, 2); track ev.id) {
+                                                <div
+                                                    (click)="$event.stopPropagation(); openScheduleDetailModal(ev)"
+                                                    [class]="'px-2 py-1 rounded-md text-[12px] font-medium truncate flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer ' + getEventPillClasses(ev.colorTheme)"
+                                                    [matTooltip]="ev.time + ' - ' + ev.title">
+                                                    <mat-icon svgIcon="mdi:calendar-check" class="icon-size-3.5 shrink-0"></mat-icon>
+                                                    <span class="truncate">{{ ev.title }}</span>
+                                                </div>
+                                            }
+                                        </div>
+
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- ========================================================= -->
+            <!-- 3. DAY VIEW (FOCUSED SINGLE DAY TIMELINE)                 -->
+            <!-- ========================================================= -->
+            @if (activeView() === 'day') {
+                <div class="pt-2">
+                    <div class="text-[17px] font-medium text-slate-800 dark:text-white pb-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <mat-icon svgIcon="mdi:calendar-today" class="icon-size-5 text-blue-600"></mat-icon>
+                            <span>កាលវិភាគសម្រាប់ {{ getKhmerFormattedDate(formatDateToIso(selectedDayDate)) }}</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[12.5px] bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-medium">
+                                {{ selectedDayEvents.length }} កម្មវិធី
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            (click)="openCreateScheduleModal()"
+                            class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-all">
+                            <mat-icon svgIcon="mdi:plus" class="icon-size-4"></mat-icon>
+                            <span>បន្ថែម</span>
+                        </button>
+                    </div>
+
+                    <!-- Single Day Events List & Empty State -->
+                    @if (selectedDayEvents.length === 0) {
+                        <div class="py-16 text-center flex flex-col items-center justify-center">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-3.5">
+                                <mat-icon svgIcon="mdi:calendar-blank-outline" class="icon-size-8"></mat-icon>
+                            </div>
+                            <h3 class="text-[17px] font-medium text-slate-700 dark:text-slate-200 mb-1">
+                                គ្មានកាលវិភាគសម្រាប់ថ្ងៃនេះទេ
+                            </h3>
+                            <p class="text-[14px] text-slate-400 mb-4">
+                                អ្នកអាចបង្កើតកាលវិភាគ ឬកិច្ចប្រជុំថ្មីសម្រាប់ថ្ងៃនេះបាន។
+                            </p>
+                            <button
+                                type="button"
+                                (click)="openCreateScheduleModal()"
+                                class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14.5px] font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-all">
+                                <mat-icon svgIcon="mdi:plus" class="icon-size-4.5"></mat-icon>
+                                <span>បង្កើតកាលវិភាគថ្មី</span>
+                            </button>
+                        </div>
+                    } @else {
+                        <div class="space-y-3.5 mt-4">
+                            @for (ev of selectedDayEvents; track ev.id) {
+                                <div
+                                    (click)="openScheduleDetailModal(ev)"
+                                    [class]="'p-4.5 rounded-2xl border-l-[6px] shadow-2xs hover:shadow-md flex items-center justify-between cursor-pointer transition-all ' + getEventThemeClasses(ev.colorTheme).card">
+                                    <div class="space-y-1.5 min-w-0 pr-4">
+                                        <div class="flex items-center gap-2">
+                                            <span [class]="'text-[13px] font-medium ' + getEventThemeClasses(ev.colorTheme).timeTag">
+                                                {{ ev.time }}
+                                            </span>
+                                            @if (ev.type) {
+                                                <span class="px-2 py-0.5 rounded-md text-[11.5px] bg-slate-200/70 dark:bg-slate-700/70 text-slate-700 dark:text-slate-300 font-normal">
+                                                    {{ ev.type }}
+                                                </span>
+                                            }
+                                        </div>
+                                        <div [class]="'text-[17.5px] font-semibold truncate ' + getEventThemeClasses(ev.colorTheme).title">
+                                            {{ ev.title }}
+                                        </div>
+                                        @if (ev.note) {
+                                            <div class="text-[14px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                                                {{ ev.note }}
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Avatars -->
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        @if (ev.members && ev.members.length > 0) {
+                                            <div class="flex items-center">
+                                                @for (m of ev.members; track $index) {
+                                                    <div [class]="'w-8.5 h-8.5 rounded-full ' + (m.bg || 'bg-slate-700 text-white') + ' flex items-center justify-center text-[12px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')"
+                                                         [matTooltip]="m.name + ' (' + m.role + ')'">
+                                                        {{ m.initials }}
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-5 text-slate-400"></mat-icon>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
 
         </div>
 

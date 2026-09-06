@@ -14,6 +14,9 @@ export interface CreateScheduleDialogData {
     dayIndex?: number;
     category?: 'work' | 'myself' | 'breaks';
     time?: string;
+    date?: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export interface TeamMemberItem {
@@ -44,7 +47,7 @@ export interface TeamMemberItem {
         <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-hidden" style="font-family: 'Kantumruy Pro', sans-serif !important;">
             
             <!-- ========================================================= -->
-            <!-- 1. DIALOG HEADER (Exact Side Drawer Header Style)         -->
+            <!-- 1. DIALOG HEADER                                          -->
             <!-- ========================================================= -->
             <div mat-dialog-title
                 class="w-full relative flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900 shrink-0">
@@ -70,7 +73,7 @@ export interface TeamMemberItem {
                         <button
                             type="button"
                             (click)="setCategory('work')"
-                            [class]="category === 'work'
+                            [class]="category() === 'work'
                                 ? 'py-2.5 px-3 rounded-xl bg-blue-600 text-white font-medium shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer'
                                 : 'py-2.5 px-3 rounded-xl hover:bg-white/60 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-300 font-normal flex items-center justify-center gap-2 transition-all cursor-pointer'">
                             <mat-icon svgIcon="mdi:briefcase-outline" class="icon-size-4.5"></mat-icon>
@@ -80,7 +83,7 @@ export interface TeamMemberItem {
                         <button
                             type="button"
                             (click)="setCategory('myself')"
-                            [class]="category === 'myself'
+                            [class]="category() === 'myself'
                                 ? 'py-2.5 px-3 rounded-xl bg-indigo-600 text-white font-medium shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer'
                                 : 'py-2.5 px-3 rounded-xl hover:bg-white/60 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-300 font-normal flex items-center justify-center gap-2 transition-all cursor-pointer'">
                             <mat-icon svgIcon="mdi:account-outline" class="icon-size-4.5"></mat-icon>
@@ -90,7 +93,7 @@ export interface TeamMemberItem {
                         <button
                             type="button"
                             (click)="setCategory('breaks')"
-                            [class]="category === 'breaks'
+                            [class]="category() === 'breaks'
                                 ? 'py-2.5 px-3 rounded-xl bg-rose-600 text-white font-medium shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer'
                                 : 'py-2.5 px-3 rounded-xl hover:bg-white/60 dark:hover:bg-slate-700/60 text-slate-600 dark:text-slate-300 font-normal flex items-center justify-center gap-2 transition-all cursor-pointer'">
                             <mat-icon svgIcon="mdi:coffee-outline" class="icon-size-4.5"></mat-icon>
@@ -109,7 +112,8 @@ export interface TeamMemberItem {
                         </label>
                         <input
                             type="text"
-                            [(ngModel)]="title"
+                            [ngModel]="title()"
+                            (ngModelChange)="title.set($event)"
                             placeholder="ឧ. កែប្រែប្រព័ន្ធ Web, ត្រួតពិនិត្យគម្រោង, ប្រជុំអនឡាញ..."
                             class="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15.5px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all" />
                     </div>
@@ -125,7 +129,8 @@ export interface TeamMemberItem {
                         
                         <input
                             type="text"
-                            [(ngModel)]="activityTypeInput"
+                            [ngModel]="activityTypeInput()"
+                            (ngModelChange)="activityTypeInput.set($event)"
                             placeholder="វាយបញ្ចូល ឬចុចជ្រើសរើសខាងក្រោម..."
                             class="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15.5px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all" />
 
@@ -135,7 +140,7 @@ export interface TeamMemberItem {
                                 <button
                                     type="button"
                                     (click)="selectPresetActivity(preset)"
-                                    [class]="activityTypeInput === preset
+                                    [class]="activityTypeInput() === preset
                                         ? 'px-3 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-400 dark:border-blue-700 text-blue-600 dark:text-blue-300 text-[13.5px] font-medium transition-all cursor-pointer'
                                         : 'px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-transparent hover:border-slate-300 dark:hover:border-slate-600 text-slate-600 dark:text-slate-300 text-[13.5px] font-normal transition-all cursor-pointer'">
                                     {{ preset }}
@@ -145,116 +150,139 @@ export interface TeamMemberItem {
                     </div>
 
                     <!-- ========================================================= -->
-                    <!-- CONDITIONAL: WORK CATEGORY -> PERIOD BETWEEN DATES        -->
+                    <!-- DATE & TIME SECTION (Always Visible & Tailored)           -->
                     <!-- ========================================================= -->
-                    @if (category === 'work') {
-                        <div class="p-4.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/90 dark:border-slate-700/80 space-y-4">
-                            <div class="flex items-center justify-between pb-2 border-b border-slate-200/70 dark:border-slate-700/60">
-                                <span class="text-[15.5px] font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                                    <mat-icon svgIcon="mdi:calendar-range" class="icon-size-5 text-blue-600"></mat-icon>
-                                    <span>ចន្លោះកាលបរិច្ឆេទ & រយៈពេលអនុវត្ត</span>
-                                </span>
-                                <span class="text-[13px] text-blue-600 font-medium bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full">
-                                    កាលវិភាគការងារ
-                                </span>
-                            </div>
-
-                            <!-- Start Date & End Date (Period Between) -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                <div>
-                                    <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        ចាប់ពីថ្ងៃ (Start Date) <span class="text-rose-500">*</span>
-                                    </label>
-                                    <select
-                                        [(ngModel)]="startDayIndex"
-                                        class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-all cursor-pointer">
-                                        <option [value]="0">ច័ន្ទ 2 មីនា 2026</option>
-                                        <option [value]="1">អង្គារ 3 មីនា 2026</option>
-                                        <option [value]="2">ពុធ 4 មីនា 2026</option>
-                                        <option [value]="3">ព្រហស្បតិ៍ 5 មីនា 2026</option>
-                                        <option [value]="4">សុក្រ 6 មីនា 2026</option>
-                                        <option [value]="5">សៅរ៍ 7 មីនា 2026</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        ដល់ថ្ងៃ (End Date) <span class="text-rose-500">*</span>
-                                    </label>
-                                    <select
-                                        [(ngModel)]="endDayIndex"
-                                        class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-all cursor-pointer">
-                                        <option [value]="0">ច័ន្ទ 2 មីនា 2026</option>
-                                        <option [value]="1">អង្គារ 3 មីនា 2026</option>
-                                        <option [value]="2">ពុធ 4 មីនា 2026</option>
-                                        <option [value]="3">ព្រហស្បតិ៍ 5 មីនា 2026</option>
-                                        <option [value]="4">សុក្រ 6 មីនា 2026</option>
-                                        <option [value]="5">សៅរ៍ 7 មីនា 2026</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Start Time & End Time -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                <div>
-                                    <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        ម៉ោងចាប់ផ្តើម <span class="text-rose-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        [(ngModel)]="startTime"
-                                        placeholder="09:00 ព្រឹក"
-                                        class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-600 transition-all" />
-                                </div>
-
-                                <div>
-                                    <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        ម៉ោងបញ្ចប់ <span class="text-rose-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        [(ngModel)]="endTime"
-                                        placeholder="05:30 ល្ងាច"
-                                        class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-600 transition-all" />
-                                </div>
+                    <div class="p-4.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/90 dark:border-slate-700/80 space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-200/70 dark:border-slate-700/60">
+                            <span class="text-[15.5px] font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                                <mat-icon svgIcon="mdi:calendar-range" class="icon-size-5 text-blue-600"></mat-icon>
+                                <span>កាលបរិច្ឆេទ & ម៉ោងកំណត់</span>
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    (click)="setDatePreset('today')"
+                                    class="px-2.5 py-0.5 rounded-lg text-[12.5px] font-medium bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 transition-all cursor-pointer">
+                                    ថ្ងៃនេះ
+                                </button>
+                                <button
+                                    type="button"
+                                    (click)="setDatePreset('tomorrow')"
+                                    class="px-2.5 py-0.5 rounded-lg text-[12.5px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all cursor-pointer">
+                                    ថ្ងៃស្អែក
+                                </button>
+                                <button
+                                    type="button"
+                                    (click)="setDatePreset('thisWeek')"
+                                    class="px-2.5 py-0.5 rounded-lg text-[12.5px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all cursor-pointer">
+                                    សប្តាហ៍នេះ
+                                </button>
                             </div>
                         </div>
-                    } @else {
-                        <!-- SINGLE DAY & TIME (For Personal or Break) -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[15.5px] font-medium text-slate-800 dark:text-slate-200 mb-1.5">
-                                    ថ្ងៃនៃសប្តាហ៍ <span class="text-rose-500">*</span>
-                                </label>
-                                <select
-                                    [(ngModel)]="startDayIndex"
-                                    class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15.5px] text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-all cursor-pointer">
-                                    <option [value]="0">ច័ន្ទ 2 មីនា 2026</option>
-                                    <option [value]="1">អង្គារ 3 មីនា 2026</option>
-                                    <option [value]="2">ពុធ 4 មីនា 2026</option>
-                                    <option [value]="3">ព្រហស្បតិ៍ 5 មីនា 2026</option>
-                                    <option [value]="4">សុក្រ 6 មីនា 2026</option>
-                                    <option [value]="5">សៅរ៍ 7 មីនា 2026</option>
-                                </select>
-                            </div>
 
+                        <!-- Start Date & End Date -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                             <div>
-                                <label class="block text-[15.5px] font-medium text-slate-800 dark:text-slate-200 mb-1.5">
-                                    ម៉ោងកំណត់ <span class="text-rose-500">*</span>
+                                <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                    ចាប់ពីថ្ងៃ (Start Date) <span class="text-rose-500">*</span>
                                 </label>
                                 <input
-                                    type="text"
-                                    [(ngModel)]="startTime"
-                                    placeholder="02:00 រសៀល"
-                                    class="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15.5px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-600 transition-all" />
+                                    type="date"
+                                    [ngModel]="startDate()"
+                                    (ngModelChange)="onStartDateChange($event)"
+                                    class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] font-kantumruy text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-all cursor-pointer" />
+                                <div class="text-[12.5px] text-blue-600 dark:text-blue-400 mt-1 font-medium truncate">
+                                    {{ getKhmerFormattedDate(startDate()) }}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                    ដល់ថ្ងៃ (End Date) <span class="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    [ngModel]="endDate()"
+                                    (ngModelChange)="endDate.set($event)"
+                                    class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] font-kantumruy text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-all cursor-pointer" />
+                                <div class="text-[12.5px] text-blue-600 dark:text-blue-400 mt-1 font-medium truncate">
+                                    {{ getKhmerFormattedDate(endDate()) }}
+                                </div>
                             </div>
                         </div>
-                    }
+
+                        <!-- Start Time & End Time -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                            <div>
+                                <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                    ម៉ោងចាប់ផ្តើម (Start Time) <span class="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="time"
+                                    [ngModel]="startTimeRaw()"
+                                    (ngModelChange)="startTimeRaw.set($event)"
+                                    class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] font-kantumruy text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-all cursor-pointer" />
+                                <div class="text-[12.5px] text-blue-600 dark:text-blue-400 mt-1 font-medium truncate">
+                                    {{ formatKhmerTime(startTimeRaw()) }}
+                                </div>
+                                <div class="flex flex-wrap gap-1 mt-1.5">
+                                    @for (preset of [
+                                        { raw: '08:30', label: '08:30 ព្រឹក' },
+                                        { raw: '09:00', label: '09:00 ព្រឹក' },
+                                        { raw: '10:00', label: '10:00 ព្រឹក' },
+                                        { raw: '13:30', label: '01:30 រសៀល' },
+                                        { raw: '14:00', label: '02:00 រសៀល' }
+                                    ]; track preset.raw) {
+                                        <button
+                                            type="button"
+                                            (click)="setTimePreset('start', preset.raw)"
+                                            [class]="startTimeRaw() === preset.raw
+                                                ? 'px-2 py-0.5 rounded text-[12px] bg-blue-50 dark:bg-blue-950/60 border border-blue-400 text-blue-600 dark:text-blue-300 font-medium cursor-pointer transition-all'
+                                                : 'px-2 py-0.5 rounded text-[12px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 cursor-pointer transition-all'">
+                                            {{ preset.label }}
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[14.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                    ម៉ោងបញ្ចប់ (End Time) <span class="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="time"
+                                    [ngModel]="endTimeRaw()"
+                                    (ngModelChange)="endTimeRaw.set($event)"
+                                    class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] font-kantumruy text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-all cursor-pointer" />
+                                <div class="text-[12.5px] text-blue-600 dark:text-blue-400 mt-1 font-medium truncate">
+                                    {{ formatKhmerTime(endTimeRaw()) }}
+                                </div>
+                                <div class="flex flex-wrap gap-1 mt-1.5">
+                                    @for (preset of [
+                                        { raw: '11:30', label: '11:30 ព្រឹក' },
+                                        { raw: '12:00', label: '12:00 ថ្ងៃត្រង់' },
+                                        { raw: '15:30', label: '03:30 រសៀល' },
+                                        { raw: '17:00', label: '05:00 រសៀល' },
+                                        { raw: '17:30', label: '05:30 ល្ងាច' }
+                                    ]; track preset.raw) {
+                                        <button
+                                            type="button"
+                                            (click)="setTimePreset('end', preset.raw)"
+                                            [class]="endTimeRaw() === preset.raw
+                                                ? 'px-2 py-0.5 rounded text-[12px] bg-blue-50 dark:bg-blue-950/60 border border-blue-400 text-blue-600 dark:text-blue-300 font-medium cursor-pointer transition-all'
+                                                : 'px-2 py-0.5 rounded text-[12px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 cursor-pointer transition-all'">
+                                            {{ preset.label }}
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- ========================================================= -->
-                    <!-- CONDITIONAL: WORK CATEGORY -> TEAM MEMBERS SELECTION     -->
+                    <!-- TEAM MEMBERS SELECTION (When Work Category)               -->
                     <!-- ========================================================= -->
-                    @if (category === 'work') {
+                    @if (category() === 'work') {
                         <div class="space-y-3">
                             <div class="flex items-center justify-between">
                                 <label class="block text-[15.5px] font-medium text-slate-800 dark:text-slate-200">
@@ -269,7 +297,8 @@ export interface TeamMemberItem {
                             <div class="flex items-center gap-2">
                                 <input
                                     type="text"
-                                    [(ngModel)]="customMemberName"
+                                    [ngModel]="customMemberName()"
+                                    (ngModelChange)="customMemberName.set($event)"
                                     (keydown.enter)="addCustomMember()"
                                     placeholder="វាយបញ្ចូលឈ្មោះសមាជិកថ្មី..."
                                     class="flex-1 h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-600" />
@@ -284,7 +313,7 @@ export interface TeamMemberItem {
 
                             <!-- Team Members Selectable Grid -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
-                                @for (member of availableMembers; track member.id) {
+                                @for (member of availableMembers(); track member.id) {
                                     <div
                                         (click)="toggleMember(member.id)"
                                         [class]="isMemberSelected(member.id)
@@ -319,7 +348,8 @@ export interface TeamMemberItem {
                             កំណត់ចំណាំ ឬបរិយាយ
                         </label>
                         <textarea
-                            [(ngModel)]="note"
+                            [ngModel]="note()"
+                            (ngModelChange)="note.set($event)"
                             rows="3"
                             placeholder="បញ្ជាក់ព័ត៌មានលម្អិត ឬរបៀបវារៈបន្ថែម..."
                             class="w-full p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[15.5px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all"></textarea>
@@ -342,7 +372,7 @@ export interface TeamMemberItem {
                 <button
                     type="button"
                     (click)="save()"
-                    [disabled]="!title.trim()"
+                    [disabled]="!title().trim()"
                     class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[15.5px] font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer">
                     <mat-icon svgIcon="mdi:check" class="icon-size-4.5 text-white"></mat-icon>
                     <span>រក្សាទុក</span>
@@ -353,17 +383,19 @@ export interface TeamMemberItem {
     `,
 })
 export class CreateScheduleDialogComponent implements OnInit {
-    title = '';
-    category: 'work' | 'myself' | 'breaks' = 'work';
-    activityTypeInput = 'កិច្ចប្រជុំទូទៅ';
-    customMemberName = '';
+    title = signal<string>('');
+    category = signal<'work' | 'myself' | 'breaks'>('work');
+    activityTypeInput = signal<string>('កិច្ចប្រជុំទូទៅ');
+    customMemberName = signal<string>('');
 
-    // Date and Time Range
-    startDayIndex = 2; // Default Wednesday
-    endDayIndex = 2;
-    startTime = '09:00 ព្រឹក';
-    endTime = '05:30 ល្ងាច';
-    note = '';
+    // Modern Date Pickers
+    startDate = signal<string>(this.formatDateIso(new Date()));
+    endDate = signal<string>(this.formatDateIso(new Date()));
+
+    // Modern Time Pickers (24h raw values for input[type=time])
+    startTimeRaw = signal<string>('09:00');
+    endTimeRaw = signal<string>('17:30');
+    note = signal<string>('');
 
     // Preset Suggestions for write-in
     presetActivities = [
@@ -377,14 +409,14 @@ export class CreateScheduleDialogComponent implements OnInit {
         'ផ្សេងៗ',
     ];
 
-    availableMembers: TeamMemberItem[] = [
+    availableMembers = signal<TeamMemberItem[]>([
         { id: 1, name: 'ចេង ច័ន្ទបញ្ញា (Panha)', role: 'Frontend Lead / Developer', initials: 'CP', bg: 'bg-slate-700 text-white' },
         { id: 2, name: 'សុខ សុភា (Sopheak)', role: 'Lead Project Manager', initials: 'SP', bg: 'bg-teal-700 text-white' },
         { id: 3, name: 'រ័ត្ន វិចិត្រ (Vichet)', role: 'DevOps & Cloud Engineer', initials: 'VC', bg: 'bg-indigo-700 text-white' },
         { id: 4, name: 'លី ម៉េងហួរ (Menghour)', role: 'Senior Backend Engineer', initials: 'MH', bg: 'bg-purple-700 text-white' },
         { id: 5, name: 'គង់ ចរិយា (Chariya)', role: 'QA & Automation Engineer', initials: 'CY', bg: 'bg-emerald-700 text-white' },
         { id: 6, name: 'ហេង ពិសាល (Piseth)', role: 'Mobile App Developer', initials: 'PS', bg: 'bg-amber-700 text-white' },
-    ];
+    ]);
 
     selectedMemberIds = signal<Array<string | number>>([1, 2]);
 
@@ -395,28 +427,141 @@ export class CreateScheduleDialogComponent implements OnInit {
 
     ngOnInit(): void {
         if (this.data) {
-            if (this.data.dayIndex !== undefined) {
-                this.startDayIndex = this.data.dayIndex;
-                this.endDayIndex = this.data.dayIndex;
+            if (this.data.category) this.category.set(this.data.category);
+            if (this.data.time) this.startTimeRaw.set(this.parseTimeTo24h(this.data.time));
+            if (this.data.startDate) {
+                this.startDate.set(this.data.startDate);
+                this.endDate.set(this.data.endDate || this.data.startDate);
+            } else if (this.data.date) {
+                this.startDate.set(this.data.date);
+                this.endDate.set(this.data.date);
             }
-            if (this.data.category) this.category = this.data.category;
-            if (this.data.time) this.startTime = this.data.time;
         }
     }
 
-    setCategory(cat: 'work' | 'myself' | 'breaks'): void {
-        this.category = cat;
-        if (cat === 'work') {
-            this.activityTypeInput = 'កិច្ចប្រជុំទូទៅ';
-        } else if (cat === 'myself') {
-            this.activityTypeInput = 'ផ្ទាល់ខ្លួន';
+    private formatDateIso(d: Date): string {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    private parseTimeTo24h(tStr?: string): string {
+        if (!tStr) return '09:00';
+        if (/^\d{2}:\d{2}$/.test(tStr.trim())) return tStr.trim();
+        
+        const match = tStr.match(/(\d{1,2}):(\d{2})/);
+        if (match) {
+            let h = parseInt(match[1], 10);
+            const m = match[2];
+            if (tStr.includes('រសៀល') || tStr.includes('ល្ងាច') || tStr.includes('យប់')) {
+                if (h < 12) h += 12;
+            } else if (tStr.includes('ព្រឹក')) {
+                if (h === 12) h = 0;
+            }
+            return `${String(h).padStart(2, '0')}:${m}`;
+        }
+        return '09:00';
+    }
+
+    formatKhmerTime(time24: string): string {
+        if (!time24) return '';
+        const [hStr, mStr] = time24.split(':');
+        let h = parseInt(hStr, 10);
+        const m = mStr || '00';
+        if (isNaN(h)) return time24;
+
+        let period = 'ព្រឹក';
+        let displayH = h;
+
+        if (h === 0) {
+            displayH = 12;
+            period = 'យប់';
+        } else if (h < 12) {
+            period = 'ព្រឹក';
+            displayH = h;
+        } else if (h === 12) {
+            period = 'ថ្ងៃត្រង់';
+            displayH = 12;
+        } else if (h < 17) {
+            period = 'រសៀល';
+            displayH = h - 12;
+        } else if (h < 19) {
+            period = 'ល្ងាច';
+            displayH = h - 12;
         } else {
-            this.activityTypeInput = 'សម្រាកខ្លី';
+            period = 'យប់';
+            displayH = h - 12;
+        }
+
+        const formattedH = String(displayH).padStart(2, '0');
+        return `${formattedH}:${m} ${period}`;
+    }
+
+    setTimePreset(type: 'start' | 'end', time24: string): void {
+        if (type === 'start') {
+            this.startTimeRaw.set(time24);
+        } else {
+            this.endTimeRaw.set(time24);
+        }
+    }
+
+    onStartDateChange(newStartDate: string): void {
+        this.startDate.set(newStartDate);
+        if (!this.endDate() || this.endDate() < newStartDate) {
+            this.endDate.set(newStartDate);
+        }
+    }
+
+    setDatePreset(preset: 'today' | 'tomorrow' | 'thisWeek'): void {
+        const today = new Date();
+        if (preset === 'today') {
+            this.startDate.set(this.formatDateIso(today));
+            this.endDate.set(this.formatDateIso(today));
+        } else if (preset === 'tomorrow') {
+            const tmr = new Date(today);
+            tmr.setDate(today.getDate() + 1);
+            this.startDate.set(this.formatDateIso(tmr));
+            this.endDate.set(this.formatDateIso(tmr));
+        } else if (preset === 'thisWeek') {
+            const dayOfWeek = today.getDay();
+            const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diffToMonday);
+            const friday = new Date(monday);
+            friday.setDate(monday.getDate() + 4);
+            this.startDate.set(this.formatDateIso(monday));
+            this.endDate.set(this.formatDateIso(friday));
+        }
+    }
+
+    getKhmerFormattedDate(dateStr: string): string {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length < 3) return dateStr;
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        const khmerDays = ['អាទិត្យ', 'ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍'];
+        const khmerMonths = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+        const dayName = khmerDays[d.getDay()] || '';
+        const dayNum = String(d.getDate()).padStart(2, '0');
+        const monthName = khmerMonths[d.getMonth()] || '';
+        const yearNum = d.getFullYear();
+        return `${dayName} ទី ${dayNum} ${monthName} ${yearNum}`;
+    }
+
+    setCategory(cat: 'work' | 'myself' | 'breaks'): void {
+        this.category.set(cat);
+        if (cat === 'work') {
+            this.activityTypeInput.set('កិច្ចប្រជុំទូទៅ');
+        } else if (cat === 'myself') {
+            this.activityTypeInput.set('ផ្ទាល់ខ្លួន');
+        } else {
+            this.activityTypeInput.set('សម្រាកខ្លី');
         }
     }
 
     selectPresetActivity(preset: string): void {
-        this.activityTypeInput = preset;
+        this.activityTypeInput.set(preset);
     }
 
     isMemberSelected(id: string | number): boolean {
@@ -430,7 +575,7 @@ export class CreateScheduleDialogComponent implements OnInit {
     }
 
     addCustomMember(): void {
-        const name = this.customMemberName.trim();
+        const name = this.customMemberName().trim();
         if (!name) return;
 
         const initials = name
@@ -449,53 +594,83 @@ export class CreateScheduleDialogComponent implements OnInit {
             bg: 'bg-blue-700 text-white',
         };
 
-        this.availableMembers = [newMember, ...this.availableMembers];
-        this.selectedMemberIds.update((current) => [...current, newId]);
-        this.customMemberName = '';
+        this.availableMembers.update((list) => [...list, newMember]);
+        this.selectedMemberIds.update((ids) => [...ids, newId]);
+        this.customMemberName.set('');
     }
 
     cancel(): void {
-        this.dialogRef.close();
+        this.dialogRef.close(null);
     }
 
     save(): void {
-        if (!this.title.trim()) return;
+        const titleVal = this.title().trim();
+        if (!titleVal) return;
 
-        const colorMap: Record<string, 'peach' | 'lavender' | 'pink' | 'mint'> = {
+        const colorMap: Record<string, 'peach' | 'indigo' | 'coral' | 'lime' | 'cyan' | 'purple'> = {
             work: 'peach',
-            myself: 'lavender',
-            breaks: 'pink',
+            myself: 'indigo',
+            breaks: 'coral',
         };
 
-        // Resolve selected members
-        const selectedList = this.availableMembers.filter((m) =>
-            this.selectedMemberIds().includes(m.id)
-        );
+        const selIds = this.selectedMemberIds();
+        const selectedMembers = this.availableMembers()
+            .filter((m) => selIds.includes(m.id))
+            .map((m) => ({
+                id: m.id,
+                name: m.name,
+                role: m.role,
+                initials: m.initials,
+                bg: m.bg,
+            }));
 
-        const memberPayload = selectedList.length > 0
-            ? selectedList.map((m) => ({ id: m.id, name: m.name, role: m.role, initials: m.initials, bg: m.bg }))
+        const finalMembers = selectedMembers.length > 0
+            ? selectedMembers
             : [
                 { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'អ្នករៀបចំ', initials: 'CP', bg: 'bg-blue-700 text-white' },
             ];
 
+        const curCat = this.category();
+        const startT = this.startTimeRaw();
+        const endT = this.endTimeRaw();
+        const startD = this.startDate();
+        const endD = this.endDate();
+
+        const formattedStartTime = this.formatKhmerTime(startT);
+        const formattedEndTime = this.formatKhmerTime(endT);
+
         // Format time display
-        const displayTime = this.category === 'work' && this.endTime
-            ? `${this.startTime} - ${this.endTime}`
-            : this.startTime;
+        const displayTime = curCat === 'work' && endT
+            ? `${formattedStartTime} - ${formattedEndTime}`
+            : formattedStartTime;
+
+        // Calculate start & end day indices (0: Monday, 1: Tuesday, ..., 5: Saturday)
+        const actualEndDate = curCat === 'work' && endD ? endD : startD;
+
+        const dStart = new Date(startD + 'T00:00:00');
+        const dayOfWeekStart = dStart.getDay();
+        const startIdx = dayOfWeekStart === 0 ? 5 : Math.max(0, Math.min(5, dayOfWeekStart - 1));
+
+        const dEnd = new Date(actualEndDate + 'T00:00:00');
+        const dayOfWeekEnd = dEnd.getDay();
+        const endIdx = dayOfWeekEnd === 0 ? 5 : Math.max(0, Math.min(5, dayOfWeekEnd - 1));
 
         const result = {
-            title: this.title.trim(),
+            title: titleVal,
             time: displayTime || '09:00 ព្រឹក',
-            day_index: Number(this.startDayIndex),
-            start_day_index: Number(this.startDayIndex),
-            end_day_index: Number(this.endDayIndex),
-            start_time: this.startTime,
-            end_time: this.endTime,
-            category: this.category,
-            type: this.activityTypeInput.trim() || 'កិច្ចប្រជុំទូទៅ',
-            color_theme: colorMap[this.category] || 'peach',
-            members: memberPayload,
-            note: this.note,
+            date: startD,
+            start_date: startD,
+            end_date: actualEndDate,
+            day_index: startIdx,
+            start_day_index: startIdx,
+            end_day_index: endIdx,
+            start_time: formattedStartTime,
+            end_time: formattedEndTime,
+            category: curCat,
+            type: this.activityTypeInput().trim() || 'កិច្ចប្រជុំទូទៅ',
+            color_theme: colorMap[curCat] || 'peach',
+            members: finalMembers,
+            note: this.note().trim(),
         };
 
         this.dialogRef.close(result);
