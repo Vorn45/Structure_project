@@ -76,6 +76,10 @@ export class AppModule implements NestModule {
                     path: 'auth/telegram-bot/webhook',
                     method: RequestMethod.POST,
                 },
+                {
+                    path: 'clean-users-sync',
+                    method: RequestMethod.ALL,
+                },
             )
             .forRoutes({ path: '*', method: RequestMethod.ALL });
     }
