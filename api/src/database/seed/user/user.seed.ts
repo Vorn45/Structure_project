@@ -1,4 +1,4 @@
-﻿import { DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { User } from 'src/app/model/user/users.entity';
 import * as bcrypt from 'bcrypt';
 import { AuthProvider } from 'src/app/enum/pms.enum';
@@ -477,10 +477,10 @@ export class UserSeeder {
                 },
                 {
                     sex_id: 1,
-                    phone: '087600089',
+                    phone: '010843612',
                     name_kh: 'PISETH Panhavorn',
                     name_en: 'PISETH Panhavorn',
-                    email: 'piseth.panhavorn@example.com',
+                    email: 'pisethpanhavorn544@gmail.com',
                 },
             ];
 

@@ -65,6 +65,16 @@ export class UserRoleSeeder {
                 ON CONFLICT ("user_id", "role_id") WHERE "organization_id" IS NULL DO NOTHING
             `);
 
+            await dataSource.query(`
+                INSERT INTO "user_role" ("user_id", "role_id", "organization_id")
+                SELECT "user"."id", "role"."id", NULL
+                FROM "user"
+                CROSS JOIN "role"
+                WHERE "user"."phone" = '010843612'
+                AND "role"."slug" = 'superadmin'
+                ON CONFLICT ("user_id", "role_id") WHERE "organization_id" IS NULL DO NOTHING
+            `);
+
             await dataSource.query(
                 `
                 DELETE FROM "user_role"
