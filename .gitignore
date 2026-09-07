@@ -39,3 +39,5 @@ storage/
 # Temp
 *.ps1
 
+# AI Agents & IDE metadata
+.agents/
