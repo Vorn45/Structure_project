@@ -154,7 +154,7 @@
                                 <span>ប្រធាន:</span>
                                 <button (click)="openLeadModal(plan, $event)"
                                     class="font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 flex items-center gap-0.5 cursor-pointer">
-                                    <span>{{ plan.members?.[0]?.name || 'ចេង ច័ន្ទបញ្ញា' }}</span>
+                                    <span>{{ plan.members?.[0]?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }}</span>
                                     <mat-icon svgIcon="mdi:pencil-outline"
                                         class="icon-size-3 text-slate-400"></mat-icon>
                                 </button>
@@ -529,7 +529,7 @@
                                         CP
                                     </div>
                                     <div>
-                                        <div class="text-[16px] font-medium text-slate-800 dark:text-white">{{ proj.members?.[0]?.name || 'ចេង ច័ន្ទបញ្ញា' }}</div>
+                                        <div class="text-[16px] font-medium text-slate-800 dark:text-white">{{ proj.members?.[0]?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }}</div>
                                         <div class="text-[14px] text-blue-600 font-medium">Project Manager / Tech Lead</div>
                                         <div class="text-[13.5px] text-slate-400">lead.pms&#64;wfm.gov.kh</div>
                                     </div>
@@ -644,9 +644,20 @@
                                         [ngClass]="task.code === '#PMS-554' ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-800 dark:text-slate-100'">
                                         {{ task.title }}
                                     </span>
+
+                                    <!-- Reporter Badge with Avatar and Note (អ្នករាយការណ៍) -->
+                                    <div class="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-[11.5px] shrink-0 select-none"
+                                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
+                                        <div class="w-4.5 h-4.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold shrink-0 overflow-hidden">
+                                            <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover" />
+                                            <span *ngIf="!task.reporter?.avatar">{{ task.reporter?.initial || task.reporter?.name?.charAt(0) || 'P' }}</span>
+                                        </div>
+                                        <span class="truncate max-w-[100px] font-medium text-[11.5px]">{{ task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }}</span>
+                                        <span class="text-[9.5px] px-1.5 py-0.2 rounded bg-emerald-600 text-white font-semibold uppercase tracking-wider">Reporter</span>
+                                    </div>
                                 </div>
 
-                                <!-- Right Meta: Subtasks, Comments/Attachments, Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
+                                <!-- Right Meta: Subtasks, Comments/Attachments, Reporter & Assignee Avatars, Status Badge, Relative Time & Three-dots Menu -->
                                 <div class="flex items-center gap-3.5 self-end md:self-center shrink-0 font-kantumruy select-none">
                                     <!-- Subtasks Count Icon -->
                                     <div *ngIf="task.subtasks && task.subtasks.length > 0" class="flex items-center gap-1 text-slate-400 dark:text-slate-500 text-[13px]">
@@ -666,12 +677,24 @@
                                         <span>{{ task.attachments_count }}</span>
                                     </div>
 
-                                    <!-- Assignee Avatar Stack -->
-                                    <div class="flex items-center justify-center">
-                                        <div class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full flex items-center justify-center font-bold text-[10.5px] text-white shadow-2xs"
-                                            [ngClass]="task.assignee.initial === 'CP' ? 'bg-[#1a56db]' : (task.assignee.initial === 'S' || task.assignee.initial === 'R' ? 'bg-[#1e293b]' : (task.assignee.bgClass || 'bg-blue-600'))"
-                                            [matTooltip]="task.assignee.name">
-                                            <span>{{ task.assignee.initial || task.assignee.name.charAt(0) }}</span>
+                                    <!-- Reporter & Assignee Avatars (Fixed width with tooltips & visual distinction) -->
+                                    <div class="w-16 shrink-0 flex items-center justify-center -space-x-2 hover:space-x-1 transition-all duration-200">
+                                        <!-- Reporter Avatar with small R note badge -->
+                                        <div class="relative shrink-0 cursor-pointer"
+                                            [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
+                                            <div class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full ring-2 ring-emerald-500 dark:ring-emerald-400 bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
+                                                <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover" />
+                                                <span *ngIf="!task.reporter?.avatar">{{ task.reporter?.initial || task.reporter?.name?.charAt(0) || 'P' }}</span>
+                                            </div>
+                                            <span class="absolute -bottom-1 -right-1 bg-emerald-700 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
+                                        </div>
+                                        <!-- Assignee Avatar -->
+                                        <div class="relative shrink-0 cursor-pointer"
+                                            [matTooltip]="'អ្នកទទួលបន្ទុក (Assignee): ' + (task.assignee?.name || 'ពុំ ប្រុសមុន្នី')">
+                                            <div class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] overflow-hidden shadow-2xs">
+                                                <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover" />
+                                                <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.initial || task.assignee?.name?.charAt(0) || 'U' }}</span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1345,9 +1368,9 @@
                     <!-- Reporter -->
                     <div class="flex items-center gap-1.5" [matTooltip]="'អ្នករាយការណ៍ (Reporter)'">
                         <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden">
-                            <span>ឡ</span>
+                            <span>{{ currentTask.reporter?.initial || currentTask.reporter?.name?.charAt(0) || 'P' }}</span>
                         </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ currentTask.reporter?.name || 'ឡេង សុខជាយ' }}</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ currentTask.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }}</span>
                         <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-medium">Reporter</span>
                     </div>
                     <span>•</span>
@@ -1355,9 +1378,9 @@
                     <!-- Assignee -->
                     <div class="flex items-center gap-1.5">
                         <div class="w-5 h-5 rounded-full ring-1.5 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden shrink-0">
-                            <span>{{ currentTask.assignee?.initial || currentTask.assignee?.name?.charAt(0) || 'C' }}</span>
+                            <span>{{ currentTask.assignee?.initial || currentTask.assignee?.name?.charAt(0) || 'P' }}</span>
                         </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ currentTask.assignee?.name || 'ចេង ច័ន្ទបញ្ញា' }}</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ currentTask.assignee?.name || 'ពុំ ប្រុសមុន្នី' }}</span>
                         <span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-medium">Assignee</span>
                     </div>
                 </div>

@@ -192,8 +192,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-25',
         comments_count: 1,
         attachments_count: 2,
-        assignee: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white', email: 'panha@wfm.gov.kh' },
-        reporter: { id: 2, name: 'ឡេង សុខជាយ', role: 'Project Manager', initial: 'LS', bgClass: 'bg-emerald-600 text-white' },
+        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'review',
         time_ago: '6 ថ្ងៃមុន',
         progress: 80,
@@ -210,8 +210,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'd-2', name: 'Department_Tree_Sample.xlsx', size: '340 KB', type: 'sheet', upload_date: '២៧ សីហា ២០២៦' },
         ],
         members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white' },
-            { id: 2, name: 'សុខ សុភា', role: 'UI Engineer', initial: 'S', bgClass: 'bg-blue-700 text-white' },
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
         ],
     },
     {
@@ -224,8 +224,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-22',
         comments_count: 0,
         attachments_count: 2,
-        assignee: { id: 2, name: 'សុខ សុភា', role: 'UI Engineer', initial: 'S', bgClass: 'bg-blue-700 text-white', email: 'sokha@wfm.gov.kh' },
-        reporter: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white' },
+        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white', email: 'thawinner@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'done',
         time_ago: '1 សប្តាហ៍មុន',
         progress: 100,
@@ -240,7 +240,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'd-3', name: 'Folder_Dnd_Workflow.png', size: '1.2 MB', type: 'image', upload_date: '២៥ សីហា ២០២៦' },
         ],
         members: [
-            { id: 2, name: 'សុខ សុភា', role: 'UI Engineer', initial: 'S', bgClass: 'bg-blue-700 text-white' },
+            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white' },
         ],
     },
     {
@@ -253,7 +253,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-20',
         comments_count: 5,
         attachments_count: 1,
-        assignee: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white', email: 'panha@wfm.gov.kh' },
+        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'confirmed',
         time_ago: '1 សប្តាហ៍មុន',
         progress: 60,
@@ -268,7 +269,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'd-5', name: 'PDF_Viewer_Bug_Screenshot.png', size: '650 KB', type: 'image', upload_date: '២៤ សីហា ២០២៦' },
         ],
         members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
         ],
     },
     {
@@ -281,7 +282,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-18',
         comments_count: 3,
         attachments_count: 1,
-        assignee: { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps / QA', initial: 'R', bgClass: 'bg-blue-800 text-white', email: 'vichet@wfm.gov.kh' },
+        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-800 text-white', email: 'thawinner@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'reopened',
         time_ago: '1 សប្តាហ៍មុន',
         progress: 40,
@@ -292,7 +294,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         links: [],
         documents: [],
         members: [
-            { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps / QA', initial: 'R', bgClass: 'bg-blue-800 text-white' },
+            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-800 text-white' },
         ],
     },
     {
@@ -305,7 +307,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-16',
         comments_count: 4,
         attachments_count: 1,
-        assignee: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white', email: 'panha@wfm.gov.kh' },
+        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'new',
         time_ago: '1 សប្តាហ៍មុន',
         progress: 0,
@@ -320,7 +323,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'd-7', name: 'Security_Audit_Report.pdf', size: '2.1 MB', type: 'pdf', upload_date: '២០ សីហា ២០២៦' },
         ],
         members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
         ],
     },
     {
@@ -333,7 +336,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-28',
         comments_count: 0,
         attachments_count: 1,
-        assignee: { id: 2, name: 'សុខ សុភា', role: 'UI Engineer', initial: 'S', bgClass: 'bg-blue-700 text-white', email: 'sokha@wfm.gov.kh' },
+        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white', email: 'thawinner@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'in_progress',
         time_ago: '2 សប្តាហ៍មុន',
         progress: 65,
@@ -346,7 +350,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         ],
         documents: [],
         members: [
-            { id: 2, name: 'សុខ សុភា', role: 'UI Engineer', initial: 'S', bgClass: 'bg-blue-700 text-white' },
+            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white' },
         ],
     },
     {
@@ -359,7 +363,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-15',
         comments_count: 19,
         attachments_count: 1,
-        assignee: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white', email: 'panha@wfm.gov.kh' },
+        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'done',
         time_ago: '2 សប្តាហ៍មុន',
         progress: 100,
@@ -372,7 +377,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         ],
         documents: [],
         members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
         ],
     },
     {
@@ -385,7 +390,8 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         created_at: '2026-08-14',
         comments_count: 10,
         attachments_count: 0,
-        assignee: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white', email: 'panha@wfm.gov.kh' },
+        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-600 text-white', email: 'thawinner@example.com' },
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
         status: 'unconfirmed',
         time_ago: '2 សប្តាហ៍មុន',
         progress: 20,
@@ -396,7 +402,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
         links: [],
         documents: [],
         members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600 text-white' },
+            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-600 text-white' },
         ],
     },
 ];
@@ -432,9 +438,9 @@ export const DEFAULT_PROJECT_PHASES: ProjectPhaseItem[] = [
 ];
 
 export const DEFAULT_PROJECT_TEAM_MEMBERS: TaskMember[] = [
-    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead & Senior Engineer', initial: 'CP', bgClass: 'bg-blue-600 text-white', email: 'panha@wfm.gov.kh' },
-    { id: 2, name: 'សុខ សុភា', role: 'UI/UX Developer & System Designer', initial: 'S', bgClass: 'bg-blue-700 text-white', email: 'sokha@wfm.gov.kh' },
-    { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps & Quality Assurance (QA)', initial: 'R', bgClass: 'bg-blue-800 text-white', email: 'vichet@wfm.gov.kh' },
+    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & Lead Developer', initial: 'PP', bgClass: 'bg-emerald-600 text-white', email: 'pisethpanhavorn544@gmail.com' },
+    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Engineer', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
+    { id: 3, name: 'ថា វីនណឺរ', role: 'QA & DevOps Engineer', initial: 'TW', bgClass: 'bg-blue-700 text-white', email: 'thawinner@example.com' },
 ];
 
 export const DEFAULT_PROJECT_MEETINGS: ProjectMeetingItem[] = [
@@ -448,9 +454,9 @@ export const DEFAULT_PROJECT_MEETINGS: ProjectMeetingItem[] = [
         link: 'https://meet.google.com/pms-sync-2026',
         status: 'upcoming',
         attendees: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600' },
-            { id: 2, name: 'សុខ សុភា', role: 'UI Engineer', initial: 'S', bgClass: 'bg-blue-700' },
-            { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps / QA', initial: 'R', bgClass: 'bg-blue-800' },
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
+            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
         ],
     },
     {
@@ -463,8 +469,8 @@ export const DEFAULT_PROJECT_MEETINGS: ProjectMeetingItem[] = [
         link: 'https://zoom.us/j/987654321',
         status: 'upcoming',
         attendees: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600' },
-            { id: 2, name: 'សុខ សុភា', role: 'UI Engineer', initial: 'S', bgClass: 'bg-blue-700' },
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
         ],
     },
     {
@@ -477,7 +483,7 @@ export const DEFAULT_PROJECT_MEETINGS: ProjectMeetingItem[] = [
         link: 'បន្ទប់ប្រជុំ A2',
         status: 'completed',
         attendees: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initial: 'CP', bgClass: 'bg-blue-600' },
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
             { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps / QA', initial: 'R', bgClass: 'bg-blue-800' },
         ],
     },
@@ -912,8 +918,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 },
                 {
                     id: `msg-${Date.now()}-2`,
-                    sender_name: 'សុខ សុភា',
-                    sender_initial: 'S',
+                    sender_name: 'ពុំ ប្រុសមុន្នី',
+                    sender_initial: 'PB',
                     sender_bg: 'bg-blue-600',
                     text: `សួស្តីក្រុមការងារ! សូមពិនិត្យមើលព័ត៌មានលម្អិត និងកិច្ចការរងសម្រាប់ ${task.title} នេះផង។`,
                     time: '១០ នាទីមុន',
@@ -922,9 +928,9 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 },
                 {
                     id: `msg-${Date.now()}-3`,
-                    sender_name: 'ចេង ច័ន្ទបញ្ញា',
-                    sender_initial: 'C',
-                    sender_bg: 'bg-blue-600',
+                    sender_name: 'ថា វីនណឺរ',
+                    sender_initial: 'TW',
+                    sender_bg: 'bg-blue-700',
                     text: 'បានទទួលហើយបង! ខ្ញុំកំពុងត្រៀមអនុវត្ត និងធ្វើតេស្តតាមដំណាក់កាល។',
                     time: '៥ នាទីមុន',
                     is_self: false,
@@ -1245,6 +1251,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             projectCode: proj?.code,
             projectName: proj?.name,
             members: this.teamMembers(),
+            existingTasks: this.tasks(),
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {

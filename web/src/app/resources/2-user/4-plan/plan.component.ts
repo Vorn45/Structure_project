@@ -335,9 +335,9 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         total_tasks: 8,
         completed_tasks: 2,
         members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Dev', avatar: null, initial: 'C', bgClass: 'bg-blue-600' },
-            { id: 2, name: 'សុខ សុភា', role: 'Project Lead', avatar: null, initial: 'S', bgClass: 'bg-blue-600' },
-            { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps', avatar: null, initial: 'R', bgClass: 'bg-blue-700' },
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', avatar: null, initial: 'PP', bgClass: 'bg-emerald-600' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', avatar: null, initial: 'PB', bgClass: 'bg-blue-600' },
+            { id: 3, name: 'ថា វីនណឺរ', role: 'User', avatar: null, initial: 'TW', bgClass: 'bg-blue-700' },
         ],
         tasks: [
             {
@@ -352,9 +352,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '6 ថ្ងៃមុន',
                 comments_count: 1,
                 attachments_count: 2,
-                assignee: { id: 0, name: 'Assignee', role: 'Member', avatar: null },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 members: [
-                    { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
+                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 ],
                 progress: 80,
                 subtasks: [
@@ -382,10 +383,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 0,
                 attachments_count: 2,
-                assignee: { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 members: [
-                    { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
-                    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend', initial: 'C', bgClass: 'bg-blue-600' },
+                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 ],
                 progress: 100,
                 subtasks: [
@@ -412,9 +413,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 5,
                 attachments_count: 1,
-                assignee: { id: 0, name: 'Assignee', role: 'Member', avatar: null },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 members: [
-                    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend', initial: 'C', bgClass: 'bg-blue-600' },
+                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 ],
                 progress: 60,
                 subtasks: [
@@ -440,9 +442,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 3,
                 attachments_count: 1,
-                assignee: { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps', initial: 'R', bgClass: 'bg-blue-700' },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 members: [
-                    { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps', initial: 'R', bgClass: 'bg-blue-700' },
+                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 ],
                 progress: 40,
                 subtasks: [
@@ -466,9 +469,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 4,
                 attachments_count: 1,
-                assignee: { id: 0, name: 'Assignee', role: 'Member', avatar: null },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 members: [
-                    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend', initial: 'C', bgClass: 'bg-blue-600' },
+                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 ],
                 progress: 0,
                 subtasks: [
@@ -494,9 +498,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '2 សប្តាហ៍មុន',
                 comments_count: 0,
                 attachments_count: 1,
-                assignee: { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 members: [
-                    { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
+                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 ],
                 progress: 65,
                 subtasks: [
@@ -523,10 +528,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '2 សប្តាហ៍មុន',
                 comments_count: 19,
                 attachments_count: 1,
-                assignee: { id: 0, name: 'Assignee', role: 'Member', avatar: null },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 members: [
-                    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend', initial: 'C', bgClass: 'bg-blue-600' },
-                    { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
+                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 ],
                 progress: 100,
                 subtasks: [
@@ -552,9 +557,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '2 សប្តាហ៍មុន',
                 comments_count: 10,
                 attachments_count: 0,
-                assignee: { id: 0, name: 'Assignee', role: 'Member', avatar: null },
+                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 members: [
-                    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend', initial: 'C', bgClass: 'bg-blue-600' },
+                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 ],
                 progress: 20,
                 subtasks: [
@@ -611,9 +617,9 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 link: 'https://meet.google.com/pms-sync-2026',
                 status: 'upcoming',
                 attendees: [
-                    { id: 2, name: 'សុខ សុភា', role: 'Project Lead', initial: 'S', bgClass: 'bg-blue-600' },
-                    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Dev', initial: 'C', bgClass: 'bg-blue-600' },
-                    { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps', initial: 'R', bgClass: 'bg-blue-700' },
+                    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
+                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 ],
             },
             {
@@ -626,8 +632,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 link: 'https://zoom.us/j/987654321',
                 status: 'upcoming',
                 attendees: [
-                    { id: 2, name: 'សុខ សុភា', role: 'Project Lead', initial: 'S', bgClass: 'bg-blue-600' },
-                    { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Dev', initial: 'C', bgClass: 'bg-blue-600' },
+                    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 ],
             },
             {
@@ -640,15 +646,15 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 link: 'បន្ទប់ប្រជុំ A2',
                 status: 'completed',
                 attendees: [
-                    { id: 2, name: 'សុខ សុភា', role: 'Project Lead', initial: 'S', bgClass: 'bg-blue-600' },
-                    { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps', initial: 'R', bgClass: 'bg-blue-700' },
+                    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
+                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 ],
             },
         ],
         activities: [
             {
                 id: 'act-1',
-                user: { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
+                user: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
                 action: 'បានផ្លាស់ប្តូរស្ថានភាពកិច្ចការទៅជា',
                 target: '✓ បញ្ចប់',
                 targetCode: '#PMS-671',
@@ -657,7 +663,7 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
             },
             {
                 id: 'act-2',
-                user: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend', initial: 'C', bgClass: 'bg-blue-600' },
+                user: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 action: 'បានស្នើសុំពិនិត្យកិច្ចការ',
                 target: 'Org Admin | Structure | Department',
                 targetCode: '#PMS-675',
@@ -666,7 +672,7 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
             },
             {
                 id: 'act-3',
-                user: { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps', initial: 'R', bgClass: 'bg-blue-700' },
+                user: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
                 action: 'បានភ្ជាប់ឯកសារថ្មី',
                 target: 'Security_Audit_Report.pdf',
                 targetCode: '#PMS-554',
@@ -675,7 +681,7 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
             },
             {
                 id: 'act-4',
-                user: { id: 2, name: 'សុខ សុភា', role: 'Lead', initial: 'S', bgClass: 'bg-blue-600' },
+                user: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
                 action: 'បានបន្ថែមតំណភ្ជាប់ Figma Spec',
                 target: 'Figma Security Settings v2',
                 targetCode: '#PMS-554',
@@ -684,7 +690,7 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
             },
             {
                 id: 'act-5',
-                user: { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend', initial: 'C', bgClass: 'bg-blue-600' },
+                user: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
                 action: 'បានបញ្ចប់កិច្ចការរង',
                 target: 'Integrate CDK DragDropModule',
                 targetCode: '#PMS-671',
@@ -1694,8 +1700,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                 },
                 {
                     id: `msg-${Date.now()}-3`,
-                    sender_name: 'ចេង ច័ន្ទបញ្ញា',
-                    sender_initial: 'C',
+                    sender_name: 'ពុំ ប្រុសមុន្នី',
+                    sender_initial: 'PB',
                     sender_bg: 'bg-blue-600',
                     text: 'បានទទួលហើយបង! ខ្ញុំកំពុងត្រៀមអនុវត្ត និងធ្វើតេស្តតាមដំណាក់កាល។',
                     time: '៥ នាទីមុន',
@@ -1977,6 +1983,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             projectCode: proj?.code,
             projectName: proj?.name,
             members: proj?.members || [],
+            existingTasks: proj?.tasks || [],
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {

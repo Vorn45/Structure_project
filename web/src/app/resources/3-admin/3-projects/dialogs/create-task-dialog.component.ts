@@ -14,6 +14,7 @@ export interface CreateTaskDialogData {
     projectName?: string;
     user?: any;
     members?: { id: number | string; name: string; role: string; avatar?: string }[];
+    existingTasks?: { code?: string; project_id?: string }[];
 }
 
 export interface WorkStatus {
@@ -273,13 +274,21 @@ export interface TeamMember {
                         <!-- 5. Task Code & Category -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
-                                    កូដសម្គាល់ការងារ
-                                </label>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block font-normal text-slate-800 dark:text-slate-200 text-[16px]">
+                                        កូដសម្គាល់ការងារ
+                                    </label>
+                                    <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                        <mat-icon svgIcon="mdi:lock-outline" class="!w-3 !h-3"></mat-icon>
+                                        <span>Auto</span>
+                                    </span>
+                                </div>
                                 <input
                                     type="text"
-                                    [(ngModel)]="taskCode"
-                                    class="w-full px-3.5 py-2.5 text-[15px] font-kantumruy font-mono uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    [value]="taskCode"
+                                    readonly
+                                    tabindex="-1"
+                                    class="w-full px-3.5 py-2.5 text-[15px] font-kantumruy font-mono uppercase font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/90 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 cursor-not-allowed select-none focus:outline-none"
                                 />
                             </div>
 
@@ -419,11 +428,34 @@ export class CreateTaskDialogComponent implements OnInit {
     ];
     selectedProjectId: string = 'bms-digitech';
 
-    onProjectSelected(projId: string): void {
+    generateNextCode(projId: string): string {
         const found = this.projectList.find((p) => p.id === projId);
-        if (found) {
-            this.taskCode = `${found.code}-0000`;
+        const prefix = found ? found.code : (projId.toUpperCase().includes('WMS') ? 'WMS' : 'BMS');
+
+        const projectTasks = (this.data?.existingTasks || []).filter(
+            (t) => (t.project_id === projId || t.code?.toUpperCase().includes(prefix))
+        );
+
+        let maxNum = -1;
+        for (const t of projectTasks) {
+            if (t.code) {
+                const match = t.code.match(/\d+/);
+                if (match) {
+                    const val = parseInt(match[0], 10);
+                    if (!isNaN(val) && val > maxNum) {
+                        maxNum = val;
+                    }
+                }
+            }
         }
+
+        const nextNum = maxNum >= 0 ? maxNum + 1 : 0;
+        return `${prefix}-${String(nextNum).padStart(4, '0')}`;
+    }
+
+    onProjectSelected(projId: string): void {
+        this.selectedProjectId = projId;
+        this.taskCode = this.generateNextCode(projId);
     }
 
     // The 7 statuses matching "ការងារខ្ញុំ"
@@ -488,14 +520,14 @@ export class CreateTaskDialogComponent implements OnInit {
     selectedStatus = signal<string>('new');
 
     // Reporter (អ្នករាយការណ៍ / អ្នកបង្កើត)
-    reporterName: string = 'PISETH PANHAVORN';
+    reporterName: string = 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
     reporterRole: string = 'Super Admin / Lead Developer';
 
     // Team Members for Assignee / Response (អ្នកទទួលខុសត្រូវ / អ្នកឆ្លើយតបការងារ)
     teamMembers: TeamMember[] = [
-        { id: '1', name: 'PISETH PANHAVORN', role: 'Super Admin / Lead Developer' },
-        { id: '2', name: 'PUM BRUSMUNY', role: 'Frontend Lead' },
-        { id: '3', name: 'THA WINNER', role: 'Backend Lead' },
+        { id: '1', name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin / Lead Developer' },
+        { id: '2', name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead' },
+        { id: '3', name: 'ថា វីនណឺរ', role: 'Backend Lead' },
     ];
     selectedAssigneeIds = signal<string[]>(['1']);
 
@@ -520,8 +552,8 @@ export class CreateTaskDialogComponent implements OnInit {
         public dialogRef: MatDialogRef<CreateTaskDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: CreateTaskDialogData,
     ) {
-        if (this.data?.user?.kh_name) {
-            this.reporterName = this.data.user.kh_name;
+        if (this.data?.user?.kh_name || this.data?.user?.name) {
+            this.reporterName = this.data.user.kh_name || this.data.user.name;
         }
         if (this.data?.projectCode) {
             const found = this.projectList.find(
@@ -529,10 +561,6 @@ export class CreateTaskDialogComponent implements OnInit {
             );
             if (found) {
                 this.selectedProjectId = found.id;
-                this.taskCode = `${found.code}-0000`;
-            } else {
-                const prefix = this.data.projectCode.toUpperCase().includes('WMS') ? 'WMS' : 'BMS';
-                this.taskCode = `${prefix}-0000`;
             }
         }
         if (this.data?.members && this.data.members.length > 0) {
@@ -542,9 +570,10 @@ export class CreateTaskDialogComponent implements OnInit {
                 role: m.role,
                 avatar: m.avatar,
             }));
-            if (this.teamMembers.length > 0) {
-                this.selectedAssigneeIds.set([this.teamMembers[0].id]);
-            }
+        }
+        this.taskCode = this.generateNextCode(this.selectedProjectId);
+        if (this.teamMembers.length > 0) {
+            this.selectedAssigneeIds.set([this.teamMembers[0].id]);
         }
     }
 
@@ -554,7 +583,7 @@ export class CreateTaskDialogComponent implements OnInit {
         const title = this.taskTitle.trim();
         if (!title) return;
 
-        const assignees = this.selectedAssignees.map((m) => m.name).join(', ') || 'ចេង ច័ន្ទបញ្ញា';
+        const assignees = this.selectedAssignees.map((m) => m.name).join(', ') || 'ពុំ ប្រុសមុន្នី';
         const selectedProj = this.projectList.find((p) => p.id === this.selectedProjectId);
 
         this.dialogRef.close({

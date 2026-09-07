@@ -434,7 +434,7 @@ export interface ScheduledMeeting {
                         <div class="relative h-48 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center">
                             <div *ngIf="cameraOff()" class="text-center">
                                 <div class="w-16 h-16 rounded-full bg-purple-600 text-white text-2xl font-medium flex items-center justify-center mx-auto">
-                                    {{ data?.user?.kh_name?.slice(0, 1) || 'ច' }}
+                                    {{ data?.user?.kh_name?.slice(0, 1) || 'ព' }}
                                 </div>
                                 <p class="text-[13px] text-slate-400 mt-2">កាមេរ៉ាត្រូវបានបិទ</p>
                             </div>
@@ -442,7 +442,7 @@ export interface ScheduledMeeting {
                                 <mat-icon svgIcon="mdi:account" class="icon-size-16 text-purple-300"></mat-icon>
                             </div>
                             <div class="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded bg-black/60 text-white text-[13px] flex items-center gap-1.5 font-kantumruy">
-                                <span>{{ data?.user?.kh_name || 'ចេង ច័ន្ទបញ្ញា' }} (អ្នក)</span>
+                                <span>{{ data?.user?.kh_name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }} (អ្នក)</span>
                                 <mat-icon [svgIcon]="micMuted() ? 'mdi:microphone-off' : 'mdi:microphone'"
                                     class="icon-size-3.5"
                                     [ngClass]="micMuted() ? 'text-red-400' : 'text-emerald-400'"></mat-icon>
@@ -553,9 +553,9 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             duration: '១ ម៉ោង',
             roomCode: 'meet-sprint-8821',
             roomUrl: 'https://meet.wms.gov.kh/room/meet-sprint-8821',
-            organizer: 'សុខ សុភា',
+            organizer: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
             status: 'live',
-            participants: [{ name: 'សុខ សុភា' }, { name: 'ចេង ច័ន្ទបញ្ញា' }],
+            participants: [{ name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }, { name: 'ពុំ ប្រុសមុន្នី' }],
         },
         {
             id: 'm2',
@@ -566,9 +566,9 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             duration: '១ ម៉ោង',
             roomCode: 'meet-arch-5542',
             roomUrl: 'https://meet.wms.gov.kh/room/meet-arch-5542',
-            organizer: 'កែវ សុវណ្ណ',
+            organizer: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
             status: 'upcoming',
-            participants: [{ name: 'កែវ សុវណ្ណ' }],
+            participants: [{ name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }, { name: 'ថា វីនណឺរ' }],
         },
     ]);
 
@@ -639,9 +639,9 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             duration: this.formDuration,
             roomCode: this.generatedRoomCode,
             roomUrl: this.generatedRoomUrl,
-            organizer: this.data?.user?.kh_name || 'ចេង ច័ន្ទបញ្ញា',
+            organizer: this.data?.user?.kh_name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
             status: 'upcoming',
-            participants: [{ name: this.data?.user?.kh_name || 'ចេង ច័ន្ទបញ្ញា' }],
+            participants: [{ name: this.data?.user?.kh_name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }],
             agenda: this.formAgenda.trim(),
         };
 

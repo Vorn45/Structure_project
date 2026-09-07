@@ -468,17 +468,14 @@ export class CreateProjectDialogComponent implements OnInit {
     selectedStatus = signal<'planning' | 'active' | 'on_hold' | 'completed'>('active');
 
     // Project Lead (ប្រធានគម្រោង)
-    leadName: string = 'សុខ សុភា';
-    leadRole: string = 'Project Lead';
+    leadName: string = 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+    leadRole: string = 'Super Admin & Lead';
 
     // Team Members Available for Selection
     availableMembers: TeamMember[] = [
-        { id: '1', name: 'សុខ សុភា', role: 'Project Lead' },
-        { id: '2', name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead' },
-        { id: '3', name: 'រ័ត្ន វិចិត្រ', role: 'DevOps & Cloud Lead' },
-        { id: '4', name: 'កែវ សុវណ្ណ', role: 'Backend Lead' },
-        { id: '5', name: 'ហេង ស្រីពៅ', role: 'UI/UX Designer' },
-        { id: '6', name: 'លី ម៉េងហួរ', role: 'QA Engineer' },
+        { id: '1', name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & Lead' },
+        { id: '2', name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Engineer' },
+        { id: '3', name: 'ថា វីនណឺរ', role: 'QA & DevOps Engineer' },
     ];
     selectedMemberIds = signal<string[]>(['1', '2']);
 

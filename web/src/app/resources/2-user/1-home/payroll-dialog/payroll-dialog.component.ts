@@ -72,7 +72,7 @@ export interface PayrollDialogData {
                     <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 grid grid-cols-2 gap-3 text-[14px]">
                         <div>
                             <span class="text-slate-400 block text-[12px]">ឈ្មោះបុគ្គលិក</span>
-                            <span class="font-medium text-slate-800 dark:text-white">{{ data?.user?.kh_name || 'ចេង ច័ន្ទបញ្ញា' }}</span>
+                            <span class="font-medium text-slate-800 dark:text-white">{{ data?.user?.kh_name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }}</span>
                         </div>
                         <div>
                             <span class="text-slate-400 block text-[12px]">អត្តលេខ / គណនី</span>

@@ -410,12 +410,9 @@ export class CreateScheduleDialogComponent implements OnInit {
     ];
 
     availableMembers = signal<TeamMemberItem[]>([
-        { id: 1, name: 'ចេង ច័ន្ទបញ្ញា (Panha)', role: 'Frontend Lead / Developer', initials: 'CP', bg: 'bg-slate-700 text-white' },
-        { id: 2, name: 'សុខ សុភា (Sopheak)', role: 'Lead Project Manager', initials: 'SP', bg: 'bg-teal-700 text-white' },
-        { id: 3, name: 'រ័ត្ន វិចិត្រ (Vichet)', role: 'DevOps & Cloud Engineer', initials: 'VC', bg: 'bg-indigo-700 text-white' },
-        { id: 4, name: 'លី ម៉េងហួរ (Menghour)', role: 'Senior Backend Engineer', initials: 'MH', bg: 'bg-purple-700 text-white' },
-        { id: 5, name: 'គង់ ចរិយា (Chariya)', role: 'QA & Automation Engineer', initials: 'CY', bg: 'bg-emerald-700 text-white' },
-        { id: 6, name: 'ហេង ពិសាល (Piseth)', role: 'Mobile App Developer', initials: 'PS', bg: 'bg-amber-700 text-white' },
+        { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត (Piseth Panhavorn)', role: 'Super Admin & Lead', initials: 'PP', bg: 'bg-emerald-700 text-white' },
+        { id: 2, name: 'ពុំ ប្រុសមុន្នី (Pum Brusmuny)', role: 'Frontend Engineer', initials: 'PB', bg: 'bg-blue-700 text-white' },
+        { id: 3, name: 'ថា វីនណឺរ (Tha Winner)', role: 'QA & DevOps Engineer', initials: 'TW', bg: 'bg-indigo-700 text-white' },
     ]);
 
     selectedMemberIds = signal<Array<string | number>>([1, 2]);
@@ -627,7 +624,7 @@ export class CreateScheduleDialogComponent implements OnInit {
         const finalMembers = selectedMembers.length > 0
             ? selectedMembers
             : [
-                { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'អ្នករៀបចំ', initials: 'CP', bg: 'bg-blue-700 text-white' },
+                { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'អ្នករៀបចំ', initials: 'PP', bg: 'bg-emerald-700 text-white' },
             ];
 
         const curCat = this.category();
@@ -671,7 +668,7 @@ export class CreateScheduleDialogComponent implements OnInit {
             color_theme: colorMap[curCat] || 'peach',
             members: finalMembers,
             note: this.note().trim(),
-        };
+            };
 
         this.dialogRef.close(result);
     }

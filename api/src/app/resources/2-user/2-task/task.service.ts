@@ -622,7 +622,19 @@ export class TaskService {
             formattedCode = dto.code.trim().startsWith('#') ? dto.code.trim() : `#${dto.code.trim()}`;
         } else {
             const projectTasks = this.tasks.filter((t) => t.project_id === dto.project_id || t.code?.toUpperCase().includes(prefix));
-            const nextSeq = projectTasks.length;
+            let maxNum = -1;
+            for (const t of projectTasks) {
+                if (t.code) {
+                    const match = t.code.match(/\d+/);
+                    if (match) {
+                        const val = parseInt(match[0], 10);
+                        if (!isNaN(val) && val > maxNum) {
+                            maxNum = val;
+                        }
+                    }
+                }
+            }
+            const nextSeq = maxNum >= 0 ? maxNum + 1 : 0;
             formattedCode = `#${prefix}-${String(nextSeq).padStart(4, '0')}`;
         }
 

@@ -652,9 +652,10 @@ export class UserTaskComponent implements OnInit {
         const currentProj = this.projects().find((p) => p.id === this.selectedProjectId() && p.id !== 'all');
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
-            projectCode: currentProj?.id || 'PMS',
-            projectName: currentProj?.name || 'PMS Core',
+            projectCode: currentProj?.id || 'BMS',
+            projectName: currentProj?.name || 'BMS Digitech',
             members: this.teamMembers(),
+            existingTasks: this.tasks(),
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {

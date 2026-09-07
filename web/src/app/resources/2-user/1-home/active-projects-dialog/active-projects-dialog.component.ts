@@ -159,7 +159,7 @@ export class ActiveProjectsDialogComponent implements OnInit {
             completedTasks: 20,
             status: 'on_track',
             dueDate: '១៥ កញ្ញា ២០២៦',
-            members: [{ name: 'ចេង ច័ន្ទបញ្ញា' }, { name: 'សុខ សុភា' }],
+            members: [{ name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }, { name: 'ពុំ ប្រុសមុន្នី' }],
         },
         {
             id: '2',
