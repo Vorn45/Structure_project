@@ -159,9 +159,14 @@ export const appConfig = {
     },
     ORGANIZATION_LOG: {
         TELEGRAM_BOT_TOKEN:
-            process.env.ORGANIZATION_LOG_TELEGRAM_BOT_TOKEN?.trim() || '',
+            process.env.ORGANIZATION_LOG_TELEGRAM_BOT_TOKEN?.trim() ||
+            process.env.TELEGRAM_BOT_TOKEN?.trim() ||
+            '',
         TELEGRAM_CHAT_ID:
-            process.env.ORGANIZATION_LOG_TELEGRAM_CHAT_ID?.trim() || '',
+            process.env.ORGANIZATION_LOG_TELEGRAM_CHAT_ID?.trim() ||
+            process.env.TELEGRAM_CHAT_MAIN_ID?.trim() ||
+            process.env.TELEGRAM_CHAT_LOGS_ID?.trim() ||
+            '',
     },
     JS_REPORT: {
         BASE_URL: process.env.JS_BASE_URL?.trim() || '',

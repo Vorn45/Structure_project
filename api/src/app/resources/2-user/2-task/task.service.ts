@@ -1,13 +1,15 @@
-// ===========================================================================>> Core Library
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
+import axios from 'axios';
 
 // ===========================================================================>> Custom Library
+import { appConfig } from 'src/app.config';
 import { User } from 'src/app/model/user/users.entity';
 import { TaskStore } from 'src/app/model/user/task-store.entity';
+import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateTaskDto } from './task.dto';
 
@@ -253,6 +255,8 @@ export class TaskService {
         private readonly _userRepo: Repository<User>,
         @InjectRepository(TaskStore)
         private readonly _taskStoreRepo: Repository<TaskStore>,
+        @InjectRepository(TelegramThread)
+        private readonly _threadRepo: Repository<TelegramThread>,
     ) {
         this.loadFromDisk();
         this.initDbStore();
@@ -671,6 +675,12 @@ export class TaskService {
         this.tasks.unshift(newTask);
         this.saveStore();
 
+        // Dispatch Telegram Notification (Exact PMS format)
+        const creatorName = user.name_kh || user.name_en || 'PISETH PANHAVORN';
+        const taskCode = newTask.code || `#${prefix}-0000`;
+        const firstLine = `📌 ${creatorName} បានបង្កើតការងារថ្មី ${taskCode}`;
+        this.sendTelegramNotification(firstLine, newTask, [user.id, newTask.assignee?.id].filter(Boolean) as number[]);
+
         return {
             status_code: 201,
             message: 'Task created successfully',
@@ -678,26 +688,149 @@ export class TaskService {
         };
     }
 
+    private getProjectPrefix(task?: TaskItem): string {
+        if (!task) return 'PMS';
+        if (task.project_id === 'bms-digitech' || task.code?.startsWith('#BMS') || task.project_name?.includes('BMS')) return 'BMS';
+        if (task.project_id === 'wms-digitech' || task.code?.startsWith('#WMS') || task.project_name?.includes('WMS')) return 'WMS';
+        return 'PMS';
+    }
+
+    private getTaskContextLine(task: TaskItem): string {
+        const prefix = this.getProjectPrefix(task);
+        const label = task.module || task.title;
+        return `${prefix}: ${label}`;
+    }
+
     private getStatusLabel(status?: string): string {
-        switch (status) {
-            case 'new': return 'ថ្មី';
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'todo': return 'ថ្មី';
             case 'confirmed': return 'បញ្ជាក់';
             case 'unconfirmed': return 'មិនបញ្ជាក់';
             case 'in_progress': return 'កំពុងធ្វើ';
-            case 'in_review': return 'ស្នើពិនិត្យ';
+            case 'in_review':
+            case 'review': return 'ស្នើពិនិត្យ';
             case 'reopened': return 'បើកឡើងវិញ';
-            case 'done': return 'បញ្ចប់';
+            case 'done':
+            case 'completed': return 'បញ្ចប់';
             default: return status || '';
         }
     }
 
     private getPriorityLabel(priority?: string): string {
-        switch (priority) {
+        switch (priority?.toLowerCase()) {
             case 'urgent': return 'បន្ទាន់';
             case 'high': return 'ខ្ពស់';
             case 'medium': return 'មធ្យម';
             case 'low': return 'ទាប';
             default: return priority || '';
+        }
+    }
+
+    private escapeHtml(text: string): string {
+        return (text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    private async sendTelegramNotification(
+        firstLine: string,
+        task: TaskItem,
+        targetUserIds?: Array<number | string>,
+    ): Promise<void> {
+        const botToken = appConfig.AUTH.TELEGRAM_BOT_TOKEN || appConfig.ORGANIZATION_LOG.TELEGRAM_BOT_TOKEN;
+        if (!botToken) return;
+
+        const secondLine = this.escapeHtml(this.getTaskContextLine(task));
+        const escapedFirstLine = this.escapeHtml(firstLine);
+        const fullMessage = `${escapedFirstLine}\n${secondLine}`;
+
+        const frontendUrl = (
+            process.env.APP_DEPLOY_URL ||
+            'https://structure-project-ten.vercel.app'
+        ).replace(/\/+$/, '');
+        const taskUrl = `${frontendUrl}/#/member/projects/${task.project_id || 'wms-digitech'}`;
+
+        const replyMarkup = {
+            inline_keyboard: [
+                [
+                    {
+                        text: 'មើលការងារលម្អិត',
+                        url: taskUrl,
+                    },
+                ],
+            ],
+        };
+
+        try {
+            const linkedUsers = await this._userRepo
+                .createQueryBuilder('user')
+                .where('user.telegram_id IS NOT NULL')
+                .andWhere('user.is_active = 1')
+                .getMany();
+
+            if (!linkedUsers.length) return;
+
+            const usersToSend: User[] = [];
+
+            if (targetUserIds && targetUserIds.length > 0) {
+                const targetSet = new Set(targetUserIds.map((id) => String(id)));
+                for (const u of linkedUsers) {
+                    if (targetSet.has(String(u.id)) && u.telegram_id) {
+                        usersToSend.push(u);
+                    }
+                }
+            }
+
+            // Fallback: send to all linked active users so they receive task notifications
+            if (usersToSend.length === 0) {
+                for (const u of linkedUsers) {
+                    if (u.telegram_id) {
+                        usersToSend.push(u);
+                    }
+                }
+            }
+
+            for (const u of usersToSend) {
+                const chatId = u.telegram_id;
+                if (!chatId) continue;
+
+                let messageThreadId: number | undefined = undefined;
+                try {
+                    const thread = await this._threadRepo.findOne({
+                        where: { user_id: u.id, project_id: task.project_id },
+                    });
+                    if (thread?.message_thread_id) {
+                        messageThreadId = thread.message_thread_id;
+                    }
+                } catch (e) {}
+
+                const payload: any = {
+                    chat_id: chatId,
+                    text: fullMessage,
+                    parse_mode: 'HTML',
+                    reply_markup: replyMarkup,
+                };
+                if (messageThreadId) {
+                    payload.message_thread_id = messageThreadId;
+                }
+
+                axios
+                    .post(`https://api.telegram.org/bot${botToken}/sendMessage`, payload, { timeout: 15000 })
+                    .catch((err) => {
+                        if (messageThreadId) {
+                            delete payload.message_thread_id;
+                            axios
+                                .post(`https://api.telegram.org/bot${botToken}/sendMessage`, payload, { timeout: 15000 })
+                                .catch((e) => console.warn('[Telegram Notification Direct Fallback] Error:', e?.message || e));
+                        } else {
+                            console.warn(`[Telegram Notification] Failed to send to ${chatId}:`, err?.message || err);
+                        }
+                    });
+            }
+        } catch (err: any) {
+            console.warn('[Telegram Notification] Error querying linked users:', err?.message || err);
         }
     }
 
@@ -815,6 +948,30 @@ export class TaskService {
         this.tasks[index] = updated;
         this.saveStore();
 
+        // Send Telegram Notification (Exact PMS format)
+        const updaterName = user.name_kh || user.name_en || 'Piseth Panhavorn';
+        const targetIds = [
+            user.id,
+            updated.reporter?.id,
+            updated.assignee?.id,
+            ...(updated.assignees?.map((a) => a.id) || []),
+        ].filter(Boolean) as number[];
+
+        if (dto.status && dto.status !== current.status) {
+            const firstLine = `🔄 ${updaterName} ប្តូរស្ថានភាពការងារទៅ << ${this.getStatusLabel(dto.status)} >>`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
+        } else if (dto.priority && dto.priority !== current.priority) {
+            const firstLine = `⚡ ${updaterName} ប្តូរអាទិភាពការងារទៅ << ${this.getPriorityLabel(dto.priority)} >>`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
+        } else if (dto.assignee || (dto.assignees && dto.assignees.length > 0)) {
+            const assigneeName = dto.assignee?.name || (dto.assignees ? dto.assignees.map((a: any) => a.name).join(', ') : '');
+            const firstLine = `👤 ${updaterName} បានចាត់តាំងការងារទៅកាន់ << ${assigneeName} >>`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
+        } else if (dto.title && dto.title !== current.title) {
+            const firstLine = `✏️ ${updaterName} បានកែប្រែចំណងជើងការងារ`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
+        }
+
         return {
             status_code: 200,
             message: 'Task updated successfully',
@@ -912,6 +1069,20 @@ export class TaskService {
         }
         task.updated_at = new Date().toISOString();
         this.saveStore();
+
+        // Send Telegram Notification (Exact PMS format)
+        const senderName = user.name_kh || user.name_en || 'Piseth Panhavorn';
+        const commentText = (text || '').trim();
+        const firstLine = `🔔 ${senderName}: ${commentText}`;
+
+        const targetIds = [
+            user.id,
+            task.reporter?.id,
+            task.assignee?.id,
+            ...(task.assignees?.map((a) => a.id) || []),
+        ].filter(Boolean) as number[];
+
+        this.sendTelegramNotification(firstLine, task, targetIds);
 
         return {
             status_code: 201,

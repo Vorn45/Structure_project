@@ -10,6 +10,7 @@ import { TaskStore } from 'src/app/model/user/task-store.entity';
 import { ActivityStore } from 'src/app/model/user/activity-store.entity';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { PlannerStore } from 'src/app/model/user/planner-store.entity';
+import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
 
 // Controllers
 import { HomeController } from './1-home/home.controller';
@@ -50,7 +51,7 @@ import { PlannerService } from './6-planner/planner.service';
     imports: [
         HttpModule,
         CommonModule,
-        TypeOrmModule.forFeature([User, TaskStore, ActivityStore, PlanStore, PlannerStore]),
+        TypeOrmModule.forFeature([User, TaskStore, ActivityStore, PlanStore, PlannerStore, TelegramThread]),
     ],
     controllers: [
         HomeController,
