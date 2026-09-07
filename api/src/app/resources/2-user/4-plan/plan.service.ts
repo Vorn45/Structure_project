@@ -97,9 +97,9 @@ const PROJECTS: ProjectPlanItem[] = [
         total_tasks: 10,
         completed_tasks: 4,
         members: [
-            { id: 101, name: 'Piseth Panhavorn', role: 'Lead Developer', phone: '010843612', avatar: null },
-            { id: 102, name: 'Pum Prusmuny', role: 'Developer', phone: '087280875', avatar: null },
-            { id: 103, name: 'Tha Winner', role: 'Developer', phone: '078776682', avatar: null },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: null },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '078776682', avatar: null },
         ],
     },
     {
@@ -114,9 +114,9 @@ const PROJECTS: ProjectPlanItem[] = [
         total_tasks: 14,
         completed_tasks: 9,
         members: [
-            { id: 101, name: 'Piseth Panhavorn', role: 'Project Manager', phone: '010843612', avatar: null },
-            { id: 102, name: 'Pum Prusmuny', role: 'Developer', phone: '087280875', avatar: null },
-            { id: 103, name: 'Tha Winner', role: 'Developer', phone: '078776682', avatar: null },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: null },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '078776682', avatar: null },
         ],
     },
 ];

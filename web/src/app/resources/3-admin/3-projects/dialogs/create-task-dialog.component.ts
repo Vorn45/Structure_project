@@ -488,15 +488,14 @@ export class CreateTaskDialogComponent implements OnInit {
     selectedStatus = signal<string>('new');
 
     // Reporter (អ្នករាយការណ៍ / អ្នកបង្កើត)
-    reporterName: string = 'Piseth Panhavorn';
+    reporterName: string = 'PISETH PANHAVORN';
     reporterRole: string = 'Super Admin / Lead Developer';
 
     // Team Members for Assignee / Response (អ្នកទទួលខុសត្រូវ / អ្នកឆ្លើយតបការងារ)
     teamMembers: TeamMember[] = [
-        { id: '1', name: 'Piseth Panhavorn', role: 'Super Admin / Lead Developer' },
-        { id: '2', name: 'Pum Prusmuny', role: 'Frontend Lead' },
-        { id: '3', name: 'Tha Winner', role: 'Backend Lead' },
-        { id: '4', name: 'Leng Sokchhay', role: 'System Admin' },
+        { id: '1', name: 'PISETH PANHAVORN', role: 'Super Admin / Lead Developer' },
+        { id: '2', name: 'PUM BRUSMUNY', role: 'Frontend Lead' },
+        { id: '3', name: 'THA WINNER', role: 'Backend Lead' },
     ];
     selectedAssigneeIds = signal<string[]>(['1']);
 

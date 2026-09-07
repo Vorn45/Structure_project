@@ -22,22 +22,22 @@ async function run() {
     const targetUsers = [
         {
             phone: '010843612',
-            name_en: 'Piseth Panhavorn',
-            name_kh: 'Piseth Panhavorn',
+            name_en: 'PISETH PANHAVORN',
+            name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
             email: 'pisethpanhavorn544@gmail.com',
             roles: ['superadmin', 'user'],
         },
         {
             phone: '087280875',
-            name_en: 'Pum Prusmuny',
-            name_kh: 'Pum Prusmuny',
+            name_en: 'PUM BRUSMUNY',
+            name_kh: 'ពុំ ប្រុសមុន្នី',
             email: 'pumprusmuny@example.com',
             roles: ['user'],
         },
         {
             phone: '078776682',
-            name_en: 'Tha Winner',
-            name_kh: 'Tha Winner',
+            name_en: 'THA WINNER',
+            name_kh: 'ថា វីនណឺរ',
             email: 'thawinner@example.com',
             roles: ['user'],
         },

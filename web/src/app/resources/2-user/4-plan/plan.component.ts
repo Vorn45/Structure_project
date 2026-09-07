@@ -709,11 +709,11 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         progress: 55,
         start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
-        team_lead: { id: 101, name: 'Piseth Panhavorn', role: 'Lead Developer' },
+        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer' },
         members: [
-            { id: 101, name: 'Piseth Panhavorn', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
-            { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com' },
-            { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com' },
+            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
         ],
         tasks: [
             {
@@ -728,10 +728,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '5 ថ្ងៃមុន',
                 comments_count: 3,
                 attachments_count: 1,
-                assignee: { id: 101, name: 'Piseth Panhavorn', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600' },
+                assignee: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600' },
                 members: [
-                    { id: 101, name: 'Piseth Panhavorn', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600' },
-                    { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
+                    { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600' },
+                    { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
                 ],
                 progress: 100,
                 subtasks: [
@@ -757,10 +757,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '3 ថ្ងៃមុន',
                 comments_count: 4,
                 attachments_count: 2,
-                assignee: { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
+                assignee: { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
                 members: [
-                    { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
-                    { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
+                    { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
+                    { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
                 ],
                 progress: 65,
                 subtasks: [
@@ -786,10 +786,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '4 ថ្ងៃមុន',
                 comments_count: 2,
                 attachments_count: 1,
-                assignee: { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
+                assignee: { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
                 members: [
-                    { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
-                    { id: 101, name: 'Piseth Panhavorn', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600' },
+                    { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
+                    { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600' },
                 ],
                 progress: 85,
                 subtasks: [
@@ -900,11 +900,11 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         progress: 75,
         start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
-        team_lead: { id: 101, name: 'Piseth Panhavorn', role: 'Project Manager' },
+        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager' },
         members: [
-            { id: 101, name: 'Piseth Panhavorn', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
-            { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com' },
-            { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com' },
+            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
         ],
         tasks: [
             {
@@ -919,10 +919,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '1 សប្តាហ៍មុន',
                 comments_count: 5,
                 attachments_count: 2,
-                assignee: { id: 101, name: 'Piseth Panhavorn', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600' },
+                assignee: { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600' },
                 members: [
-                    { id: 101, name: 'Piseth Panhavorn', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600' },
-                    { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
+                    { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600' },
+                    { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
                 ],
                 progress: 100,
                 subtasks: [
@@ -948,10 +948,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '5 ថ្ងៃមុន',
                 comments_count: 3,
                 attachments_count: 1,
-                assignee: { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
+                assignee: { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
                 members: [
-                    { id: 102, name: 'Pum Prusmuny', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
-                    { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
+                    { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600' },
+                    { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
                 ],
                 progress: 70,
                 subtasks: [
@@ -973,10 +973,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
                 time_ago: '4 ថ្ងៃមុន',
                 comments_count: 2,
                 attachments_count: 1,
-                assignee: { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
+                assignee: { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
                 members: [
-                    { id: 103, name: 'Tha Winner', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
-                    { id: 101, name: 'Piseth Panhavorn', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600' },
+                    { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600' },
+                    { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600' },
                 ],
                 progress: 85,
                 subtasks: [

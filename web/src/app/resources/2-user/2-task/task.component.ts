@@ -134,10 +134,9 @@ export class UserTaskComponent implements OnInit {
 
     // Team Members Pool for Multi-Assignee Selection (Loaded dynamically from DB)
     teamMembers = signal<TaskMember[]>([
-        { id: 1, name: 'Piseth Panhavorn', role: 'Super Admin / Lead Developer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
-        { id: 2, name: 'Pum Prusmuny', role: 'Frontend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'pumprusmuny@example.com' },
-        { id: 3, name: 'Tha Winner', role: 'Backend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'thawinner@example.com' },
-        { id: 4, name: 'Leng Sokchhay', role: 'System Admin', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-slate-600', email: 'lengsokchhay.168@gmail.com' },
+        { id: 1, name: 'PISETH PANHAVORN', role: 'Super Admin / Lead Developer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
+        { id: 2, name: 'PUM BRUSMUNY', role: 'Frontend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'pumprusmuny@example.com' },
+        { id: 3, name: 'THA WINNER', role: 'Backend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'thawinner@example.com' },
     ]);
 
     // Aggregated list of all files for the task (defaults + uploaded in chat)

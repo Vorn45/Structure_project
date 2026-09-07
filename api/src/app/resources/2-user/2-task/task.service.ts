@@ -465,9 +465,9 @@ export class TaskService {
                 status_code: 200,
                 message: 'Task team members retrieved successfully',
                 data: [
-                    { id: 1, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', role: 'Super Admin / Lead Developer', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600' },
-                    { id: 2, name: 'Pum Prusmuny', name_en: 'Pum Prusmuny', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600' },
-                    { id: 3, name: 'Tha Winner', name_en: 'Tha Winner', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600' },
+                    { id: 1, name: 'PISETH PANHAVORN', name_en: 'PISETH PANHAVORN', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin / Lead Developer', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600' },
+                    { id: 2, name: 'PUM BRUSMUNY', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600' },
+                    { id: 3, name: 'THA WINNER', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600' },
                 ],
             };
         }
