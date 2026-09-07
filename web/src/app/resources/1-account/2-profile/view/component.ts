@@ -519,61 +519,18 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
         });
     }
 
-    openPersonalProfile(): void {
-        this.updateProfile();
-    }
-
     settingDialog(): void { }
 
-    openNotifications(): void {
-        this.settingDialog();
+    openCreateOrganization(): void { }
+
+    openUnderConstruction(_featureName?: string): void { }
+
+    /** Template action bindings can't use the transloco pipe directly, so this wraps translate() for use inside (click) handlers. */
+    translate(key: string): string {
+        return this._translocoService.translate(key);
     }
 
-    openCompanyInfo(): void {
-        this._dialogRef?.close();
-        this._router.navigateByUrl('/admin/organization');
-    }
-
-    openUsersAndPermissions(): void {
-        this._dialogRef?.close();
-        this._router.navigateByUrl('/admin/users');
-    }
-
-    openTaxSettings(): void {
-        this._dialogRef?.close();
-        this._router.navigateByUrl('/admin/financials');
-    }
-
-    openSystemSettings(): void {
-        this._dialogRef?.close();
-        this._router.navigateByUrl('/admin/settings');
-    }
-
-    closeDrawer(): void {
-        this._dialogRef?.close();
-    }
-
-    get activeRoleLabel(): string {
-        const active = this.displayRoles.find(r => r.isActive);
-        if (active) return active.title;
-        if (this.user?.roles && this.user.roles.length) {
-            const role = this.user.roles[0];
-            return role.name_kh || role.name_en || role.title || 'អ្នកគ្រប់គ្រងប្រព័ន្ធ';
-        }
-        return 'អ្នកគ្រប់គ្រងប្រព័ន្ធ';
-    }
-
-    get activeOrgTitle(): string {
-        const active = this.displayRoles.find(r => r.isActive && r.group === 'org');
-        if (active) return active.title;
-        return 'ឌីជីថេក ខេអេច ឯ.ក';
-    }
-
-    get activeOrgSubtitle(): string {
-        const active = this.displayRoles.find(r => r.isActive && r.group === 'org');
-        if (active && active.subtitle) return active.subtitle;
-        return 'ក្រុមហ៊ុនបច្ចេកវិទ្យា (ភ្នំពេញ)';
-    }
+    openAboutOrg(_item: SwitchRoleRow): void { }
 
     updateProfile(): void {
         const dialogConfig = this._dialogConfigService.getDialogConfig(this.user);

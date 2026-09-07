@@ -83,8 +83,6 @@ export class UserComponent implements OnInit, OnDestroy {
             roles     : this.user?.roles ?? [],
             type      : type
         });
-        dialogConfig.width = '420px';
-        dialogConfig.maxWidth = '100vw';
         const dialogRef = this._matDialog.open(ProfileViewComponent, dialogConfig);
 
         dialogRef.afterClosed().subscribe(result => {
