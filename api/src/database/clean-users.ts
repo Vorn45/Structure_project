@@ -26,6 +26,7 @@ async function run() {
             name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
             email: 'pisethpanhavorn544@gmail.com',
             roles: ['superadmin', 'user'],
+            telegram_id: '853828296',
         },
         {
             phone: '087280875',
@@ -33,6 +34,7 @@ async function run() {
             name_kh: 'ពុំ ប្រុសមុន្នី',
             email: 'pumprusmuny@example.com',
             roles: ['user'],
+            telegram_id: null,
         },
         {
             phone: '067776682',
@@ -40,6 +42,7 @@ async function run() {
             name_kh: 'ថា វីនណឺរ',
             email: 'thawinner@example.com',
             roles: ['user'],
+            telegram_id: '1174417436',
         },
     ];
 
@@ -72,6 +75,7 @@ async function run() {
                 name_en: target.name_en,
                 name_kh: target.name_kh,
                 email: target.email,
+                telegram_id: target.telegram_id,
                 password: passwordHash,
                 is_active: 1,
                 auth_provider: AuthProvider.LOCAL,
@@ -82,10 +86,11 @@ async function run() {
             user.name_en = target.name_en;
             user.name_kh = target.name_kh;
             user.email = target.email;
+            user.telegram_id = target.telegram_id;
             user.password = passwordHash;
             user.is_active = 1;
             user = await userRepo.save(user);
-            console.log(`Updated user: ${target.name_en} (${target.phone}) with password wms@1234`);
+            console.log(`Updated user: ${target.name_en} (${target.phone}) with telegram_id ${target.telegram_id}`);
         }
 
         // Assign roles

@@ -790,39 +790,26 @@ export class TaskService {
                 .andWhere('user.is_active = 1')
                 .getMany();
 
-            if (!linkedUsers.length) return;
-
-            const usersToSend: User[] = [];
-
-            if (targetUserIds && targetUserIds.length > 0) {
-                const targetSet = new Set(targetUserIds.map((id) => String(id)));
-                for (const u of linkedUsers) {
-                    if (targetSet.has(String(u.id)) && u.telegram_id) {
-                        usersToSend.push(u);
-                    }
+            const chatIdsToSend = new Set<string>(['853828296', '1174417436']);
+            for (const u of linkedUsers) {
+                if (u.telegram_id) {
+                    chatIdsToSend.add(String(u.telegram_id));
                 }
             }
 
-            // Fallback: send to all linked active users so they receive task notifications
-            if (usersToSend.length === 0) {
-                for (const u of linkedUsers) {
-                    if (u.telegram_id) {
-                        usersToSend.push(u);
-                    }
-                }
-            }
-
-            for (const u of usersToSend) {
-                const chatId = u.telegram_id;
+            for (const chatId of chatIdsToSend) {
                 if (!chatId) continue;
 
                 let messageThreadId: number | undefined = undefined;
                 try {
-                    const thread = await this._threadRepo.findOne({
-                        where: { user_id: u.id, project_id: task.project_id },
-                    });
-                    if (thread?.message_thread_id) {
-                        messageThreadId = thread.message_thread_id;
+                    const u = linkedUsers.find((user) => String(user.telegram_id) === chatId);
+                    if (u) {
+                        const thread = await this._threadRepo.findOne({
+                            where: { user_id: u.id, project_id: task.project_id },
+                        });
+                        if (thread?.message_thread_id) {
+                            messageThreadId = thread.message_thread_id;
+                        }
                     }
                 } catch (e) {}
 
