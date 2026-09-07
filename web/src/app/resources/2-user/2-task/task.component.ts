@@ -113,7 +113,18 @@ export class UserTaskComponent implements OnInit {
     viewMode = signal<'grid' | 'kanban' | 'list'>('kanban');
     activeStatus = signal<string>('all');
     activePriority = signal<string>('all');
+    selectedMemberFilter = signal<number | 'all'>('all');
+    selectedProjectId = signal<string | 'all'>('all');
     searchQuery = signal<string>('');
+
+    // Available Projects list
+    projects = signal<{ id: string; name: string }[]>([
+        { id: 'all', name: 'គម្រោងទាំងអស់' },
+        { id: 'bms-digitech', name: 'BMS Digitech' },
+        { id: 'wms-digitech', name: 'WMS Digitech' },
+        { id: 'pms-v2', name: 'PMS-V2 System' },
+        { id: 'egov-portal', name: 'E-Gov Portal' },
+    ]);
 
     // Task Chat Drawer & File Modal State
     selectedTask = signal<TaskItem | null>(null);
@@ -280,12 +291,33 @@ export class UserTaskComponent implements OnInit {
                 search: this.searchQuery() || undefined,
                 status: this.activeStatus() !== 'all' ? this.activeStatus() : undefined,
                 priority: this.activePriority() !== 'all' ? this.activePriority() : undefined,
+                project_id: this.selectedProjectId() !== 'all' ? this.selectedProjectId() : undefined,
             })
             .subscribe({
                 next: (res) => {
                     const results = res.data.results || [];
                     const userSpecific = results.filter((t) => this.isTaskBelongToCurrentUser(t));
-                    const finalTasks = userSpecific.length > 0 ? userSpecific : results;
+                    let finalTasks = userSpecific.length > 0 ? userSpecific : results;
+                    
+                    if (this.selectedProjectId() !== 'all') {
+                        const pid = this.selectedProjectId().toLowerCase();
+                        finalTasks = finalTasks.filter(
+                            (t) =>
+                                (t.project_id && t.project_id.toLowerCase().includes(pid)) ||
+                                (t.project_name && t.project_name.toLowerCase().includes(pid))
+                        );
+                    }
+
+                    if (this.selectedMemberFilter() !== 'all') {
+                        const memId = this.selectedMemberFilter();
+                        finalTasks = finalTasks.filter(
+                            (t) =>
+                                t.assignee?.id === memId ||
+                                (t.assignees && t.assignees.some((a) => a.id === memId)) ||
+                                t.reporter?.id === memId,
+                        );
+                    }
+
                     this.tasks.set(finalTasks);
                     this.computeCounts(finalTasks, res.data.counts);
                     this.loading.set(false);
@@ -295,6 +327,21 @@ export class UserTaskComponent implements OnInit {
                     this.loading.set(false);
                 },
             });
+    }
+
+    setProjectFilter(projectId: string | 'all'): void {
+        this.selectedProjectId.set(projectId);
+        this.loadTasks();
+    }
+
+    getSelectedProjectLabel(): string {
+        const p = this.projects().find((item) => item.id === this.selectedProjectId());
+        return p ? p.name : 'គម្រោងទាំងអស់';
+    }
+
+    setMemberFilter(memberId: number | 'all'): void {
+        this.selectedMemberFilter.set(memberId);
+        this.loadTasks();
     }
 
     setStatusFilter(status: string): void {
@@ -627,8 +674,12 @@ export class UserTaskComponent implements OnInit {
     }
 
     openCreateModal(): void {
+        const currentProj = this.projects().find((p) => p.id === this.selectedProjectId() && p.id !== 'all');
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
+            projectCode: currentProj?.id || 'PMS',
+            projectName: currentProj?.name || 'PMS Core',
+            members: this.teamMembers(),
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
@@ -640,6 +691,8 @@ export class UserTaskComponent implements OnInit {
                         priority: result.priority || 'medium',
                         due_date: result.due_date,
                         assignee: result.assignee,
+                        project_id: result.project_id || (this.selectedProjectId() !== 'all' ? this.selectedProjectId() : 'bms-digitech'),
+                        project_name: result.project_name || (currentProj?.name || 'BMS Digitech'),
                         description: result.description || result.title,
                     })
                     .subscribe({

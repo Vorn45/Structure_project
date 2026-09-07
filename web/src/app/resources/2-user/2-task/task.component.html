@@ -54,13 +54,69 @@
                 </div>
             </div>
 
-            <!-- Right: Avatar, Search Box with Inner Filter, and Plus Button -->
-            <div class="flex items-center gap-3 shrink-0">
-                <!-- User Avatar -->
-                <div
-                    class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 overflow-hidden bg-white shadow-2xs shrink-0">
-                    <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
+            <!-- Right: Project Selector, Stacked Avatars (+2), Search Box, and Plus Button -->
+            <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                <!-- Project Selector Dropdown Button -->
+                <button [matMenuTriggerFor]="projectMenu"
+                    class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 text-[14px] font-medium shadow-2xs transition-all cursor-pointer"
+                    [matTooltip]="'ជ្រើសរើសគម្រោង (Select Project)'">
+                    <mat-icon svgIcon="mdi:folder-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                    <span class="max-w-[130px] truncate">{{ getSelectedProjectLabel() }}</span>
+                    <mat-icon svgIcon="mdi:chevron-down" class="icon-size-3.5 text-slate-400"></mat-icon>
+                </button>
+
+                <!-- Project Menu -->
+                <mat-menu #projectMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
+                    <div class="px-3 py-1.5 text-[12px] font-semibold text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
+                        ជ្រើសរើសគម្រោង (Select Project)
+                    </div>
+                    <button mat-menu-item (click)="setProjectFilter('all')" class="!text-[14px]">
+                        <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5 mr-2 text-slate-500"></mat-icon>
+                        <span [class.font-bold]="selectedProjectId() === 'all'">គម្រោងទាំងអស់ (All Projects)</span>
+                    </button>
+                    <button *ngFor="let p of projects().slice(1)" mat-menu-item (click)="setProjectFilter(p.id)" class="!text-[14px]">
+                        <mat-icon svgIcon="mdi:circle-medium" class="icon-size-4.5 mr-2 text-blue-500"></mat-icon>
+                        <span [class.font-bold]="selectedProjectId() === p.id">{{ p.name }}</span>
+                    </button>
+                </mat-menu>
+
+                <!-- Stacked Team Member Avatars with +2 Count Badge (Matching reference screenshot) -->
+                <div class="flex items-center -space-x-2 overflow-hidden shrink-0 cursor-pointer"
+                    [matMenuTriggerFor]="memberMenu" [matTooltip]="'តម្រងតាមសមាជិក (Filter by Member)'">
+                    <!-- 1. Robot / Bot Avatar -->
+                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs">
+                        <mat-icon svgIcon="mdi:robot-outline" class="icon-size-4.5 text-white"></mat-icon>
+                    </div>
+                    <!-- 2. DigiTech / Team Avatar -->
+                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs">
+                        <mat-icon svgIcon="mdi:domain" class="icon-size-4 text-white"></mat-icon>
+                    </div>
+                    <!-- 3. User Avatar -->
+                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600 text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs overflow-hidden">
+                        <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
+                    </div>
+                    <!-- 4. +2 Badge Pill -->
+                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-600 text-white text-[11px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs">
+                        +2
+                    </div>
                 </div>
+
+                <!-- Member Selection Menu -->
+                <mat-menu #memberMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
+                    <div class="px-3 py-1.5 text-[12px] font-semibold text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
+                        សមាជិកក្រុម (Team Members)
+                    </div>
+                    <button mat-menu-item (click)="setMemberFilter('all')" class="!text-[14px]">
+                        <mat-icon svgIcon="mdi:account-group" class="icon-size-4.5 mr-2 text-slate-500"></mat-icon>
+                        <span [class.font-bold]="selectedMemberFilter() === 'all'">ទាំងអស់ (All Members)</span>
+                    </button>
+                    <button *ngFor="let m of teamMembers().slice(0, 10)" mat-menu-item (click)="setMemberFilter(m.id)" class="!text-[14px]">
+                        <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[11px] mr-2 shrink-0">
+                            {{ m.name.slice(0, 1) }}
+                        </div>
+                        <span [class.font-bold]="selectedMemberFilter() === m.id">{{ m.name }}</span>
+                    </button>
+                </mat-menu>
 
                 <!-- Search Box with Left Search Icon & Right Filter Icon inside -->
                 <div class="relative flex items-center">
@@ -68,7 +124,7 @@
                         class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
                     <input type="text" placeholder="ស្វែងរក..." [(ngModel)]="searchQuery"
                         (ngModelChange)="onSearchChange()"
-                        class="w-40 sm:w-56 pl-9 pr-8 py-1.5 text-[15px] bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
+                        class="w-36 sm:w-52 pl-9 pr-8 py-1.5 text-[15px] bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
                     <!-- Filter icon button on the right inside search input -->
                     <button [matMenuTriggerFor]="priorityMenu"
                         class="absolute right-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center"

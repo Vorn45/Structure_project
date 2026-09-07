@@ -256,7 +256,21 @@ export interface TeamMember {
                             </div>
                         </mat-menu>
 
-                        <!-- 4. Task Code & Category -->
+                        <!-- 4. Project Selection (ជ្រើសរើសគម្រោង) -->
+                        <div>
+                            <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
+                                គម្រោង (Project) <span class="text-red-500">*</span>
+                            </label>
+                            <select
+                                [(ngModel)]="selectedProjectId"
+                                (ngModelChange)="onProjectSelected($event)"
+                                class="w-full px-3.5 py-2.5 text-[15px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
+                            >
+                                <option *ngFor="let p of projectList" [value]="p.id">{{ p.name }}</option>
+                            </select>
+                        </div>
+
+                        <!-- 5. Task Code & Category -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
@@ -392,12 +406,27 @@ export interface TeamMember {
 })
 export class CreateTaskDialogComponent implements OnInit {
     taskTitle: string = '';
-    taskCode: string = 'TSK-' + Math.floor(1000 + Math.random() * 9000);
+    taskCode: string = 'BMS-' + Math.floor(1000 + Math.random() * 9000);
     category: string = 'it';
     startDate: string = new Date().toISOString().split('T')[0];
     endDate: string = new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0];
     priority = signal<'low' | 'medium' | 'high'>('medium');
     description: string = '';
+
+    projectList = [
+        { id: 'bms-digitech', name: 'BMS Digitech', code: 'BMS' },
+        { id: 'wms-digitech', name: 'WMS Digitech', code: 'WMS' },
+        { id: 'pms-v2', name: 'PMS-V2 System', code: 'PMS' },
+        { id: 'egov-portal', name: 'E-Gov Portal', code: 'EGOV' },
+    ];
+    selectedProjectId: string = 'bms-digitech';
+
+    onProjectSelected(projId: string): void {
+        const found = this.projectList.find((p) => p.id === projId);
+        if (found) {
+            this.taskCode = `${found.code}-${Math.floor(1000 + Math.random() * 9000)}`;
+        }
+    }
 
     // The 7 statuses matching "ការងារខ្ញុំ"
     statusList: WorkStatus[] = [
@@ -499,7 +528,15 @@ export class CreateTaskDialogComponent implements OnInit {
             this.reporterName = this.data.user.kh_name;
         }
         if (this.data?.projectCode) {
-            this.taskCode = `${this.data.projectCode}-${Math.floor(100 + Math.random() * 900)}`;
+            const found = this.projectList.find(
+                (p) => p.code.toLowerCase() === this.data.projectCode?.toLowerCase() || p.id.toLowerCase() === this.data.projectCode?.toLowerCase()
+            );
+            if (found) {
+                this.selectedProjectId = found.id;
+                this.taskCode = `${found.code}-${Math.floor(1000 + Math.random() * 9000)}`;
+            } else {
+                this.taskCode = `${this.data.projectCode}-${Math.floor(100 + Math.random() * 900)}`;
+            }
         }
         if (this.data?.members && this.data.members.length > 0) {
             this.teamMembers = this.data.members.map((m) => ({
@@ -521,6 +558,7 @@ export class CreateTaskDialogComponent implements OnInit {
         if (!title) return;
 
         const assignees = this.selectedAssignees.map((m) => m.name).join(', ') || 'ចេង ច័ន្ទបញ្ញា';
+        const selectedProj = this.projectList.find((p) => p.id === this.selectedProjectId);
 
         this.dialogRef.close({
             title,
@@ -532,6 +570,8 @@ export class CreateTaskDialogComponent implements OnInit {
             reporter: this.reporterName,
             assignee: assignees,
             assignees: this.selectedAssignees,
+            project_id: this.selectedProjectId,
+            project_name: selectedProj?.name || 'BMS Digitech',
             description: this.description.trim() || title,
         });
     }
