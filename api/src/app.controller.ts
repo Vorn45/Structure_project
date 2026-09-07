@@ -31,11 +31,23 @@ export class AppController {
             // 1. Ensure roles exist
             let superadminRole = await roleRepo.findOne({ where: { slug: 'superadmin' } });
             if (!superadminRole) {
-                superadminRole = await roleRepo.save(roleRepo.create({ name: 'Super Admin', slug: 'superadmin' }));
+                superadminRole = await roleRepo.save(
+                    roleRepo.create({
+                        name_kh: 'អ្នកគ្រប់គ្រងជាន់ខ្ពស់',
+                        name_en: 'Super Admin',
+                        slug: 'superadmin',
+                    }),
+                );
             }
             let userRole = await roleRepo.findOne({ where: { slug: 'user' } });
             if (!userRole) {
-                userRole = await roleRepo.save(roleRepo.create({ name: 'User', slug: 'user' }));
+                userRole = await roleRepo.save(
+                    roleRepo.create({
+                        name_kh: 'អ្នកប្រើប្រាស់',
+                        name_en: 'User',
+                        slug: 'user',
+                    }),
+                );
             }
 
             const targetUsers = [
