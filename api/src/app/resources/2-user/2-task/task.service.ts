@@ -441,12 +441,14 @@ export class TaskService {
 
     async getMembers(user: UserPayload) {
         let dbUsers: User[] = [];
+        const allowedPhones = ['010843612', '087280875', '078776682'];
         try {
             dbUsers = await this._userRepo.find({
                 relations: ['user_roles', 'user_roles.role', 'avatar_file'],
                 order: { id: 'ASC' },
-                take: 100,
             });
+            // Filter strictly to the 3 active team members
+            dbUsers = dbUsers.filter((u) => u.phone && allowedPhones.includes(u.phone));
         } catch (e) {
             console.error('Error fetching users from DB:', e);
         }
@@ -455,12 +457,20 @@ export class TaskService {
             'bg-blue-600',
             'bg-emerald-600',
             'bg-indigo-600',
-            'bg-amber-600',
-            'bg-purple-600',
-            'bg-rose-600',
-            'bg-cyan-600',
-            'bg-teal-600',
         ];
+
+        // If DB has none yet, fallback to clean static members
+        if (!dbUsers || dbUsers.length === 0) {
+            return {
+                status_code: 200,
+                message: 'Task team members retrieved successfully',
+                data: [
+                    { id: 1, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', role: 'Super Admin / Lead Developer', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600' },
+                    { id: 2, name: 'Pum Prusmuny', name_en: 'Pum Prusmuny', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600' },
+                    { id: 3, name: 'Tha Winner', name_en: 'Tha Winner', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600' },
+                ],
+            };
+        }
 
         const mapped = dbUsers.map((u, idx) => {
             const roleName =
@@ -480,7 +490,7 @@ export class TaskService {
 
             return {
                 id: u.id,
-                name: u.name_kh || u.name_en || `User #${u.id}`,
+                name: u.name_en || u.name_kh || `User #${u.id}`,
                 name_kh: u.name_kh,
                 name_en: u.name_en,
                 email: u.email || '',

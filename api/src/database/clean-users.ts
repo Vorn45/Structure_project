@@ -16,9 +16,6 @@ async function run() {
     const userRoleRepo = dataSource.getRepository(UserRole);
 
     const roles = await roleRepo.find();
-    const superadminRole = roles.find(r => r.slug === 'superadmin');
-    const userRole = roles.find(r => r.slug === 'user');
-
     console.log('Available roles:', roles.map(r => r.slug));
 
     // Target clean users
@@ -26,48 +23,39 @@ async function run() {
         {
             phone: '010843612',
             name_en: 'Piseth Panhavorn',
-            name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+            name_kh: 'Piseth Panhavorn',
             email: 'pisethpanhavorn544@gmail.com',
             roles: ['superadmin', 'user'],
         },
         {
             phone: '087280875',
             name_en: 'Pum Prusmuny',
-            name_kh: 'ពុំ ព្រះមុនី',
+            name_kh: 'Pum Prusmuny',
             email: 'pumprusmuny@example.com',
             roles: ['user'],
         },
         {
             phone: '078776682',
             name_en: 'Tha Winner',
-            name_kh: 'ថា វីនន័រ',
+            name_kh: 'Tha Winner',
             email: 'thawinner@example.com',
             roles: ['user'],
-        },
-        {
-            phone: '087600063',
-            name_en: 'Leng sokchhay',
-            name_kh: 'ឡេង សុខឆាយ',
-            email: 'lengsokchhay.168@gmail.com',
-            roles: ['superadmin', 'user'],
         },
     ];
 
     const keepPhones = targetUsers.map(u => u.phone);
 
-    // 1. Delete all other users
-    const allUsers = await userRepo.find();
-    for (const u of allUsers) {
-        if (!keepPhones.includes(u.phone)) {
-            try {
-                // Delete user roles first
-                await userRoleRepo.delete({ user_id: u.id });
-                await userRepo.delete(u.id);
-                console.log(`Deleted legacy user: ${u.name_en} (${u.phone})`);
-            } catch (err) {
-                console.warn(`Could not delete user ${u.id}:`, err);
-            }
-        }
+    // 1. Force delete all foreign key dependencies and legacy users
+    try {
+        await dataSource.query(`DELETE FROM "organization_member" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
+        await dataSource.query(`DELETE FROM "user_role" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
+        await dataSource.query(`DELETE FROM "user_sessions" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
+        await dataSource.query(`DELETE FROM "user_session_logs" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
+        await dataSource.query(`DELETE FROM "user_devices" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
+        await dataSource.query(`DELETE FROM "user" WHERE "phone" NOT IN ('010843612', '087280875', '078776682')`);
+        console.log('Successfully cleared all legacy users from database tables!');
+    } catch (err) {
+        console.error('SQL cleanup error:', err);
     }
 
     // 2. Set/update passwords and roles for target users

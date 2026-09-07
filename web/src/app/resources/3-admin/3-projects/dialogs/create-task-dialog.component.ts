@@ -416,8 +416,6 @@ export class CreateTaskDialogComponent implements OnInit {
     projectList = [
         { id: 'bms-digitech', name: 'BMS Digitech', code: 'BMS' },
         { id: 'wms-digitech', name: 'WMS Digitech', code: 'WMS' },
-        { id: 'pms-v2', name: 'PMS-V2 System', code: 'PMS' },
-        { id: 'egov-portal', name: 'E-Gov Portal', code: 'EGOV' },
     ];
     selectedProjectId: string = 'bms-digitech';
 

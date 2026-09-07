@@ -122,8 +122,6 @@ export class UserTaskComponent implements OnInit {
         { id: 'all', name: 'គម្រោងទាំងអស់' },
         { id: 'bms-digitech', name: 'BMS Digitech' },
         { id: 'wms-digitech', name: 'WMS Digitech' },
-        { id: 'pms-v2', name: 'PMS-V2 System' },
-        { id: 'egov-portal', name: 'E-Gov Portal' },
     ]);
 
     // Task Chat Drawer & File Modal State
