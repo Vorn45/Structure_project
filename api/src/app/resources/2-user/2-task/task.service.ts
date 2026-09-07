@@ -453,30 +453,34 @@ export class TaskService {
             });
             // Filter strictly to the 3 active team members
             dbUsers = dbUsers.filter((u) => u.phone && allowedPhones.includes(u.phone));
+            // Deduplicate by phone
+            const seen = new Set<string>();
+            const unique: User[] = [];
+            for (const u of dbUsers) {
+                const p = u.phone?.trim() || '';
+                if (p && !seen.has(p)) {
+                    seen.add(p);
+                    unique.push(u);
+                }
+            }
+            dbUsers = unique;
         } catch (e) {
             console.error('Error fetching users from DB:', e);
         }
 
         const colors = [
+            'bg-indigo-600',
             'bg-blue-600',
             'bg-emerald-600',
-            'bg-indigo-600',
         ];
 
-        // If DB has none yet, fallback to clean static members
-        if (!dbUsers || dbUsers.length === 0) {
-            return {
-                status_code: 200,
-                message: 'Task team members retrieved successfully',
-                data: [
-                    { id: 1, name: 'PISETH PANHAVORN', name_en: 'PISETH PANHAVORN', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin / Lead Developer', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600' },
-                    { id: 2, name: 'PUM BRUSMUNY', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600' },
-                    { id: 3, name: 'THA WINNER', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600' },
-                ],
-            };
-        }
+        const defaultFallbacks = [
+            { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600', phone: '010843612' },
+            { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600', phone: '087280875' },
+            { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600', phone: '067776682' },
+        ];
 
-        const mapped = dbUsers.map((u, idx) => {
+        let mapped = dbUsers.map((u, idx) => {
             const roleName =
                 u.user_roles?.[0]?.role?.name_kh ||
                 u.user_roles?.[0]?.role?.name_en ||
@@ -492,21 +496,37 @@ export class TaskService {
                 avatarUrl = u.telegram_photo_url;
             }
 
+            const displayName = u.name_en || u.name_kh || `User #${u.id}`;
+
             return {
                 id: u.id,
-                name: u.name_en || u.name_kh || `User #${u.id}`,
+                name: displayName,
                 name_kh: u.name_kh,
                 name_en: u.name_en,
                 email: u.email || '',
+                phone: u.phone || '',
                 role: roleName,
                 avatar: avatarUrl,
                 colorClass: colors[idx % colors.length],
             };
         });
 
+        // Ensure all 3 members (Piseth, Pum, Winner) are guaranteed to be in the returned list
+        for (const def of defaultFallbacks) {
+            const exists = mapped.some(
+                (m) =>
+                    (m.phone && def.phone && m.phone === def.phone) ||
+                    m.id === def.id ||
+                    (m.name && def.name && m.name.toLowerCase().includes(def.name.toLowerCase().split(' ')[0]))
+            );
+            if (!exists) {
+                mapped.push(def);
+            }
+        }
+
         return {
             status_code: 200,
-            message: 'Task team members retrieved successfully from DB',
+            message: 'Task team members retrieved successfully',
             data: mapped,
         };
     }
