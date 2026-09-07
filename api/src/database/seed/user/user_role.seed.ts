@@ -4,26 +4,11 @@ export class UserRoleSeeder {
     public static async seed(dataSource: DataSource) {
         try {
             const departmentMembers = [
-                'Leng Sokchhay',
-                'Leng Kimlang',
-                'Cheng Chanpanha',
-                'Sorn Leang',
-                'Panha Viraktitya',
-                'Muy Methy',
-                'Ei Sreyroth',
-                'Yoeun Satya',
-                'Samkhan Sovichea',
-                'Chin Sophal',
-                'Yim Khleok',
+                'PISETH PANHAVORN',
+                'PUM BRUSMUNY',
+                'THA WINNER',
             ];
-            const geekAndCamCyberExcluded = [
-                'Leng Kimlang',
-                'Ei Sreyroth',
-                'Yoeun Satya',
-                'Samkhan Sovichea',
-                'Chin Sophal',
-                'Yim Khleok',
-            ];
+            const geekAndCamCyberExcluded: string[] = [];
 
             await dataSource.query(`
                 INSERT INTO "user_role" ("user_id", "role_id", "organization_id")

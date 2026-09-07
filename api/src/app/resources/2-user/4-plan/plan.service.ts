@@ -48,9 +48,9 @@ const PROJECTS: ProjectPlanItem[] = [
         total_tasks: 8,
         completed_tasks: 2,
         members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Dev', avatar: null, email: 'Chanpanhacheng@gmail.com' },
-            { id: 2, name: 'សុខ សុភា', role: 'Project Lead', avatar: null, email: 'sok.sopheak@gmail.com' },
-            { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps', avatar: null, email: 'rath.vichet@gmail.com' },
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', avatar: null, email: 'pisethpanhavorn544@gmail.com' },
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'Developer', avatar: null, email: 'pumprusmuny@example.com' },
+            { id: 3, name: 'ថា វីនណឺរ', role: 'Developer', avatar: null, email: 'thawinner@example.com' },
         ],
     },
     {

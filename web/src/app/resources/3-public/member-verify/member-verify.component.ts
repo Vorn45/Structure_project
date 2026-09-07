@@ -224,10 +224,10 @@ export class MemberVerifyComponent implements OnInit {
 
     ngOnInit(): void {
         this._route.queryParams.subscribe((params) => {
-            const phone = params['phone'] || params['code'] || '087600064';
-            const nameKh = params['name_kh'] || 'ចេង ច័ន្ទបញ្ញា';
-            const nameEn = params['name_en'] || 'CHENG CHANPANHA';
-            const email = params['email'] || 'Chanpanhacheng@gmail.com';
+            const phone = params['phone'] || params['code'] || '010843612';
+            const nameKh = params['name_kh'] || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+            const nameEn = params['name_en'] || 'PISETH PANHAVORN';
+            const email = params['email'] || 'pisethpanhavorn544@gmail.com';
             const gender = params['gender'] || 'ប្រុស';
 
             this.member.set({

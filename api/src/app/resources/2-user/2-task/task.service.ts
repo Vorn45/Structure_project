@@ -53,7 +53,7 @@ export interface TaskItem {
 const INITIAL_TASKS: TaskItem[] = [
     {
         id: 1,
-        code: '#PMS-675',
+        code: '#WMS-675',
         module: 'Org Admin | Structure',
         title: 'Org Admin | Structure | Department',
         description: 'Manage departmental structures, permissions, and organizational units in core hierarchy.',
@@ -63,19 +63,19 @@ const INITIAL_TASKS: TaskItem[] = [
         comments_count: 1,
         attachments_count: 2,
         due_date: new Date(Date.now() + 86400000 * 6).toISOString(),
-        project_id: 'proj-001',
-        project_name: 'Core System Structure',
-        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'អ្នកទទួលបន្ទុក (Assignee)' },
+        project_id: 'wms-digitech',
+        project_name: 'WMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' },
         assignees: [
-            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 2,
-        code: '#PMS-671',
+        code: '#BMS-671',
         module: 'Project | Folder',
         title: 'Project | Folder | Drag & Drop',
         description: 'Implement intuitive drag and drop folder organization for project documents.',
@@ -85,85 +85,85 @@ const INITIAL_TASKS: TaskItem[] = [
         comments_count: 0,
         attachments_count: 2,
         due_date: new Date(Date.now() - 86400000 * 2).toISOString(),
-        project_id: 'proj-001',
-        project_name: 'Document Management',
-        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' },
+        project_id: 'bms-digitech',
+        project_name: 'BMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', avatar: null, role: 'User' },
         assignees: [
-            { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' }
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', avatar: null, role: 'User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 3,
-        code: '#PMS-670',
+        code: '#WMS-670',
         module: 'Project | Folder',
         title: 'Project | Folder | Cannot Scroll PDF',
         description: 'Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.',
         status: TaskStatusEnum.CONFIRMED,
         priority: TaskPriorityEnum.URGENT,
         progress: 100,
-        comments_count: 5,
+        comments_count: 2,
         attachments_count: 1,
         due_date: new Date(Date.now() - 86400000 * 3).toISOString(),
-        project_id: 'proj-001',
-        project_name: 'Document Management',
-        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' },
+        project_id: 'wms-digitech',
+        project_name: 'WMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 3, name: 'ថា វីនណឺរ', avatar: null, role: 'User' },
         assignees: [
-            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
+            { id: 3, name: 'ថា វីនណឺរ', avatar: null, role: 'User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 4,
-        code: '#PMS-574',
+        code: '#BMS-574',
         module: 'My Work | Profile',
         title: 'My Work | Profile | Missing Cover',
         description: 'Provide fallback default cover gradient when user cover photo URL is empty or unverified.',
         status: TaskStatusEnum.REOPENED,
         priority: TaskPriorityEnum.URGENT,
         progress: 40,
-        comments_count: 3,
+        comments_count: 1,
         attachments_count: 1,
         due_date: new Date(Date.now() - 86400000 * 5).toISOString(),
-        project_id: 'proj-002',
-        project_name: 'User Experience',
-        reporter: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 4, name: 'បញ្ញា វិរៈទិត្យា', avatar: null, role: 'វិស្វករ Fullstack' },
+        project_id: 'bms-digitech',
+        project_name: 'BMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' },
         assignees: [
-            { id: 4, name: 'បញ្ញា វិរៈទិត្យា', avatar: null, role: 'វិស្វករ Fullstack' }
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 5,
-        code: '#PMS-554',
+        code: '#WMS-554',
         module: 'Security Settings',
         title: 'Security setting UI improvements',
         description: 'Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.',
         status: TaskStatusEnum.NEW,
         priority: TaskPriorityEnum.HIGH,
         progress: 10,
-        comments_count: 4,
+        comments_count: 1,
         attachments_count: 1,
         due_date: new Date(Date.now() - 86400000 * 6).toISOString(),
-        project_id: 'proj-002',
-        project_name: 'Security Hub',
-        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'អ្នកទទួលបន្ទុក (Assignee)' },
+        project_id: 'wms-digitech',
+        project_name: 'WMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', avatar: null, role: 'User' },
         assignees: [
-            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', avatar: null, role: 'User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 6,
-        code: '#PMS-532',
+        code: '#BMS-532',
         module: 'User | Report',
         title: 'User | Report | Progress Compare',
         description: 'Render interactive comparison charts comparing weekly member work hours and sprint deliverables.',
@@ -173,56 +173,56 @@ const INITIAL_TASKS: TaskItem[] = [
         comments_count: 0,
         attachments_count: 1,
         due_date: new Date(Date.now() + 86400000 * 4).toISOString(),
-        project_id: 'proj-003',
-        project_name: 'Analytics & Reporting',
-        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' },
+        project_id: 'bms-digitech',
+        project_name: 'BMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 3, name: 'ថា វីនណឺរ', avatar: null, role: 'User' },
         assignees: [
-            { id: 3, name: 'ស៊ន់ ​លាង', avatar: null, role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់' }
+            { id: 3, name: 'ថា វីនណឺរ', avatar: null, role: 'User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 7,
-        code: '#PMS-531',
+        code: '#WMS-531',
         module: 'User | Report',
         title: 'User | Report | Progress',
         description: 'Real-time sync of task milestone updates and aggregated department productivity scorecards.',
         status: TaskStatusEnum.CONFIRMED,
         priority: TaskPriorityEnum.MEDIUM,
         progress: 88,
-        comments_count: 19,
+        comments_count: 2,
         attachments_count: 1,
         due_date: new Date(Date.now() + 86400000 * 2).toISOString(),
-        project_id: 'proj-003',
-        project_name: 'Analytics & Reporting',
-        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' },
+        project_id: 'wms-digitech',
+        project_name: 'WMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' },
         assignees: [
-            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
+            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
     },
     {
         id: 8,
-        code: '#PMS-513',
+        code: '#BMS-513',
         module: 'Profile | Switch Org',
         title: 'Profile | Switch Org | Exit Org',
         description: 'Provide safe confirmation step and revoke tenant session when member switches workspace.',
         status: TaskStatusEnum.UNCONFIRMED,
         priority: TaskPriorityEnum.LOW,
         progress: 0,
-        comments_count: 10,
+        comments_count: 1,
         attachments_count: 0,
         due_date: new Date(Date.now() + 86400000 * 8).toISOString(),
-        project_id: 'proj-001',
-        project_name: 'Core System Structure',
-        reporter: { id: 1, name: 'ឡេង សុខឆាយ', avatar: null, role: 'អ្នករាយការណ៍ (Reporter)' },
-        assignee: { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' },
+        project_id: 'bms-digitech',
+        project_name: 'BMS Digitech',
+        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
+        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', avatar: null, role: 'User' },
         assignees: [
-            { id: 2, name: 'ចេង ច័ន្ទបញ្ញា', avatar: '/images/placeholder/avatar.jpg', role: 'ប្រធានផ្នែក Frontend Lead' }
+            { id: 2, name: 'ពុំ ប្រុសមុន្នី', avatar: null, role: 'User' }
         ],
         created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
         updated_at: new Date().toISOString(),
@@ -331,9 +331,9 @@ export class TaskService {
         let comments = this.taskComments.get(taskId);
         if (!comments || comments.length === 0) {
             const task = this.tasks.find((t) => t.id === taskId);
-            const reporterName = task?.reporter?.name || 'ឡេង សុខឆាយ';
-            const reporterAvatar = task?.reporter?.avatar || '/images/placeholder/avatar.jpg';
-            const assigneeName = task?.assignee?.name || 'ចេង ច័ន្ទបញ្ញា';
+            const reporterName = task?.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+            const reporterAvatar = task?.reporter?.avatar || null;
+            const assigneeName = task?.assignee?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
 
             comments = [
                 {
@@ -514,8 +514,8 @@ export class TaskService {
      * Matches by Khmer/English name, email, or user ID so mock ID collisions do not cause cross-user leaks.
      */
     private isTaskBelongToUser(task: TaskItem, user?: UserPayload): boolean {
-        const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
-        const userNameKh = (user?.name_kh || 'ចេង ច័ន្ទបញ្ញា').toLowerCase().trim();
+        const userNameEn = (user?.name_en || '').toLowerCase().trim();
+        const userNameKh = (user?.name_kh || '').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
         const matchUser = (target?: { name?: string; email?: string; id?: number } | null): boolean => {
@@ -524,12 +524,6 @@ export class TaskService {
             if (targetName) {
                 if (userNameKh && (targetName === userNameKh || targetName.includes(userNameKh) || userNameKh.includes(targetName))) return true;
                 if (userNameEn && (targetName === userNameEn || targetName.includes(userNameEn) || userNameEn.includes(targetName))) return true;
-                if (targetName.includes('ចេង ច័ន្ទបញ្ញា') || targetName.includes('cheng chanpanha')) {
-                    if (userNameEn.includes('cheng') || userNameKh.includes('ចេង')) return true;
-                }
-                if (targetName.includes('ឡេង សុខឆាយ') || targetName.includes('leng sokchhay')) {
-                    if (userNameEn.includes('leng') || userNameKh.includes('ឡេង')) return true;
-                }
             }
             if (userEmail && target.email && target.email.toLowerCase().trim() === userEmail) return true;
             if (user?.id && target.id && target.id === user.id) return true;
@@ -624,28 +618,28 @@ export class TaskService {
         await this.ensureStoreLoaded();
         const newTask: TaskItem = {
             id: Date.now(),
-            code: `#PMS-${Math.floor(100 + Math.random() * 900)}`,
+            code: `#WMS-${Math.floor(100 + Math.random() * 900)}`,
             title: dto.title,
             description: dto.description || '',
-            module: 'Core System',
+            module: 'Task Management',
             status: dto.status || TaskStatusEnum.TODO,
             priority: dto.priority || TaskPriorityEnum.MEDIUM,
             progress: 0,
             comments_count: 0,
             attachments_count: 0,
             due_date: dto.due_date || null,
-            project_id: dto.project_id || 'proj-001',
-            project_name: 'Core System Structure',
+            project_id: dto.project_id || 'wms-digitech',
+            project_name: dto.project_id === 'bms-digitech' ? 'BMS Digitech' : 'WMS Digitech',
             reporter: {
                 id: user.id,
-                name: user.name_en || user.name_kh || 'Ratha Vuth',
+                name: user.name_en || user.name_kh || 'PISETH PANHAVORN',
                 avatar: (user.avatar as any)?.uri || null,
-                role: 'Reporter',
+                role: 'Super Admin',
             },
             assignee: {
-                id: 1,
-                name: 'Cheng Chanpanha',
-                avatar: '/images/placeholder/avatar.jpg',
+                id: user.id,
+                name: user.name_en || user.name_kh || 'PISETH PANHAVORN',
+                avatar: (user.avatar as any)?.uri || null,
                 role: 'Assignee',
             },
             created_at: new Date().toISOString(),
@@ -835,8 +829,8 @@ export class TaskService {
 
         const comments = this.ensureTaskComments(taskId);
 
-        const userNameEn = (user?.name_en || 'Cheng Chanpanha').toLowerCase().trim();
-        const userNameKh = (user?.name_kh || 'ចេង ច័ន្ទបញ្ញា').toLowerCase().trim();
+        const userNameEn = (user?.name_en || '').toLowerCase().trim();
+        const userNameKh = (user?.name_kh || '').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
         return {
@@ -854,7 +848,6 @@ export class TaskService {
                     const isSelf = Boolean(
                         (userNameKh && (senderName === userNameKh || senderName.includes(userNameKh) || userNameKh.includes(senderName))) ||
                         (userNameEn && (senderName === userNameEn || senderName.includes(userNameEn) || userNameEn.includes(senderName))) ||
-                        (senderName.includes('ចេង ច័ន្ទបញ្ញា') || senderName.includes('cheng chanpanha')) ||
                         (userEmail && senderName === userEmail) ||
                         (user?.id && c.sender_id === user.id)
                     );

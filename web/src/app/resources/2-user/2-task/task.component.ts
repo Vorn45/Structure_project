@@ -227,8 +227,8 @@ export class UserTaskComponent implements OnInit {
 
     isTaskBelongToCurrentUser(task: TaskItem): boolean {
         const user = this._userService.getUser();
-        const userNameEn = (user?.en_name || user?.name || 'Cheng Chanpanha').toLowerCase().trim();
-        const userNameKh = (user?.kh_name || 'ចេង ច័ន្ទបញ្ញា').toLowerCase().trim();
+        const userNameEn = (user?.en_name || user?.name || '').toLowerCase().trim();
+        const userNameKh = (user?.kh_name || '').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
 
         const matchUser = (target?: { name?: string; email?: string; id?: number } | null): boolean => {
@@ -237,12 +237,6 @@ export class UserTaskComponent implements OnInit {
             if (targetName) {
                 if (userNameKh && (targetName === userNameKh || targetName.includes(userNameKh) || userNameKh.includes(targetName))) return true;
                 if (userNameEn && (targetName === userNameEn || targetName.includes(userNameEn) || userNameEn.includes(targetName))) return true;
-                if (targetName.includes('ចេង ច័ន្ទបញ្ញា') || targetName.includes('cheng chanpanha')) {
-                    if (userNameEn.includes('cheng') || userNameKh.includes('ចេង')) return true;
-                }
-                if (targetName.includes('ឡេង សុខឆាយ') || targetName.includes('leng sokchhay')) {
-                    if (userNameEn.includes('leng') || userNameKh.includes('ឡេង')) return true;
-                }
             }
             if (userEmail && target.email && target.email.toLowerCase().trim() === userEmail) return true;
             if (user?.id && target.id && target.id === user.id) return true;
@@ -878,9 +872,9 @@ export class UserTaskComponent implements OnInit {
         if (cached && cached.length > 0) {
             this.chatMessages.set([...cached]);
         } else {
-            const reporterName = task.reporter?.name || 'Leng sokchhay';
-            const reporterAvatar = task.reporter?.avatar || '/images/placeholder/avatar.jpg';
-            const assigneeName = task.assignee?.name || 'Cheng Chanpanha';
+            const reporterName = task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+            const reporterAvatar = task.reporter?.avatar || null;
+            const assigneeName = task.assignee?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
 
             const initialMessages: TaskChatMessage[] = [
                 {
@@ -909,7 +903,7 @@ export class UserTaskComponent implements OnInit {
             next: (res) => {
                 if (res?.data?.comments && res.data.comments.length > 0) {
                     const currentUser: any = this._userService.getUser();
-                    const currentUserName = (currentUser?.en_name || currentUser?.name || currentUser?.kh_name || 'Cheng Chanpanha').toLowerCase().trim();
+                    const currentUserName = (currentUser?.en_name || currentUser?.name || currentUser?.kh_name || '').toLowerCase().trim();
 
                     const mapped = (res.data.comments as TaskChatMessage[]).map((c) => {
                         if (c.is_system) {
@@ -917,7 +911,7 @@ export class UserTaskComponent implements OnInit {
                         }
                         const senderName = (c.sender_name || '').toLowerCase().trim();
                         const isSelf = Boolean(
-                            (currentUserName && (senderName === currentUserName || senderName.includes('cheng chanpanha') || currentUserName.includes(senderName))) ||
+                            (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName))) ||
                             (currentUser?.id && c.sender_id === currentUser.id) ||
                             c.is_self
                         );

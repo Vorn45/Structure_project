@@ -92,7 +92,7 @@ export class AdminAttendanceService {
                 late_today: 1,
                 on_leave: 1,
                 logs: [
-                    { id: 'att-1', user_name: 'ចេង ច័ន្ទបញ្ញា', user_en: 'Chanpanha Cheng', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '07:55 AM', check_out: '05:30 PM', status: 'on_time' },
+                    { id: 'att-1', user_name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', user_en: 'Piseth Panhavorn', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '07:55 AM', check_out: '05:30 PM', status: 'on_time' },
                     { id: 'att-2', user_name: 'សុខ សុភា', user_en: 'Sok Sopheak', department: 'គ្រប់គ្រងគម្រោង (PMO)', check_in: '07:58 AM', check_out: null, status: 'on_time' },
                     { id: 'att-3', user_name: 'រ័ត្ន វិចិត្រ', user_en: 'Rath Vichet', department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)', check_in: '08:45 AM', check_out: null, status: 'late' },
                     { id: 'att-4', user_name: 'លី ម៉េងហួរ', user_en: 'Ly Menghour', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '07:50 AM', check_out: null, status: 'on_time' },

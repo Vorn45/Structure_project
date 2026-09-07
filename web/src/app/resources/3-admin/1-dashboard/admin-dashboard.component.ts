@@ -407,12 +407,12 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     performers: TeamMemberPerformer[] = [
         {
             id: 'p1',
-            name: 'ចេង ច័ន្ទបញ្ញា (Panha)',
-            name_kh: 'ចេង ច័ន្ទបញ្ញា',
-            email: 'Chanpanhacheng@gmail.com',
-            role: 'Senior Fullstack Engineer',
+            name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត (Piseth Panhavorn)',
+            name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+            email: 'pisethpanhavorn544@gmail.com',
+            role: 'Super Admin',
             avatar: '',
-            initials: 'CP',
+            initials: 'PP',
             avatarBg: 'bg-slate-700 text-white',
         },
         {

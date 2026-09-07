@@ -21,7 +21,7 @@ export class PayrollService {
                 bank_account: {
                     bank_name: 'ABA Bank',
                     account_number: '001 234 567',
-                    account_name: user?.name_en || 'CHENG CHANPANHA',
+                    account_name: user?.name_en || 'PISETH PANHAVORN',
                 },
                 earnings: [
                     { title: 'ប្រាក់បៀវត្សគោល (Basic Salary)', amount: 1500.0 },

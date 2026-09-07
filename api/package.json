@@ -26,6 +26,7 @@
     "migrate": "ts-node -r tsconfig-paths/register src/database/migrate.ts",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeder.ts",
     "seeder": "ts-node -r tsconfig-paths/register src/database/seeder.ts",
+    "clean-users": "ts-node -r tsconfig-paths/register src/database/clean-users.ts",
     "backfill:project-file-folder-ids": "ts-node -r tsconfig-paths/register src/database/backfill-project-file-folder-ids.ts",
     "backfill:organization-catalog-defaults": "ts-node -r tsconfig-paths/register src/database/backfill-organization-catalog-defaults.ts",
     "postman:gen": "bash scripts/gen-postman.sh",

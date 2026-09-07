@@ -205,7 +205,7 @@ export class ActiveProjectsDialogComponent implements OnInit {
                         completedTasks: p.completed_tasks,
                         status: p.status === 'active' ? 'in_progress' : 'on_track',
                         dueDate: p.end_date ? new Intl.DateTimeFormat('km-KH', { dateStyle: 'medium' }).format(new Date(p.end_date)) : 'មិនកំណត់',
-                        members: p.members || [{ name: 'Cheng Chanpanha' }],
+                        members: p.members || [{ name: 'PISETH PANHAVORN' }],
                     }));
                 }
             },

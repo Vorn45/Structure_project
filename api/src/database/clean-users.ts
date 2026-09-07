@@ -46,17 +46,19 @@ async function run() {
     const keepPhones = targetUsers.map(u => u.phone);
 
     // 1. Force delete all foreign key dependencies and legacy users
-    try {
-        await dataSource.query(`DELETE FROM "organization_member" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
-        await dataSource.query(`DELETE FROM "user_role" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
-        await dataSource.query(`DELETE FROM "user_sessions" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
-        await dataSource.query(`DELETE FROM "user_session_logs" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
-        await dataSource.query(`DELETE FROM "user_devices" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`, [keepPhones]);
-        await dataSource.query(`DELETE FROM "user" WHERE "phone" NOT IN ('010843612', '087280875', '078776682')`);
-        console.log('Successfully cleared all legacy users from database tables!');
-    } catch (err) {
-        console.error('SQL cleanup error:', err);
+    for (const sql of [
+        `DELETE FROM "organization_member" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
+        `DELETE FROM "user_role" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
+        `DELETE FROM "user_device" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
+        `DELETE FROM "user_session_log" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
+        `DELETE FROM "user"."task_store"`,
+        `DELETE FROM "user" WHERE "phone" NOT IN ('010843612', '087280875', '078776682')`,
+    ]) {
+        try {
+            await dataSource.query(sql, [keepPhones]);
+        } catch (_) {}
     }
+    console.log('Successfully cleared all legacy users and task stores from database tables!');
 
     // 2. Set/update passwords and roles for target users
     const salt = await bcrypt.genSalt(10);

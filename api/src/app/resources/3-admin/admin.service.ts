@@ -52,16 +52,16 @@ export interface LeaveRequestItem {
 const DEFAULT_USERS: AdminUserItem[] = [
     {
         id: 1,
-        name_kh: 'ចេង ច័ន្ទបញ្ញា',
-        name_en: 'Chanpanha Cheng',
-        email: 'Chanpanhacheng@gmail.com',
-        phone: '012 345 678',
-        role: 'Admin',
+        name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+        name_en: 'Piseth Panhavorn',
+        email: 'pisethpanhavorn544@gmail.com',
+        phone: '010 843 612',
+        role: 'Super Admin',
         department: 'ព័ត៌មានវិទ្យា (IT)',
-        position: 'Senior Fullstack Engineer',
+        position: 'Super Admin',
         avatar: null,
         is_active: 1,
-        projects_count: 3,
+        projects_count: 2,
         created_at: '2026-01-10T08:00:00.000Z',
     },
     {
