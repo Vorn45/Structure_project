@@ -136,26 +136,10 @@ export class UserTaskComponent implements OnInit {
 
     // Team Members Pool for Multi-Assignee Selection (Loaded dynamically from DB)
     teamMembers = signal<TaskMember[]>([
-        { id: 1, name: 'កែវ វិបុល', role: 'អភិបាលប្រព័ន្ធ (Admin)', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'keovibul.tech@gmail.com' },
-        { id: 2, name: 'ស៊ុន ស្រីពេជ្រ', role: 'ប្រធានផ្នែក Frontend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'sunsreypich.dev@gmail.com' },
-        { id: 3, name: 'ជា ដារ៉ារ័ត្ន', role: 'អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'cheadararath@gmail.com' },
-        { id: 4, name: 'មុន្នី រតនៈ', role: 'វិស្វករ Fullstack', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', email: 'monyrothana.dev@gmail.com' },
-        { id: 5, name: 'អ៊ុក គឹមហុង', role: 'អ្នកបង្កើតកម្មវិធី Mobile', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-purple-600', email: 'oukkimhong.app@gmail.com' },
-        { id: 6, name: 'ផាន់ សុវណ្ណារ៉ា', role: 'ត្រួតពិនិត្យគុណភាព QA & Test', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-rose-600', email: 'sovannara.phan@gmail.com' },
-        { id: 7, name: 'អេង ពិសិដ្ឋ', role: 'វិស្វករ Cloud & DevOps', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-cyan-600', email: 'engpiseth.cloud@gmail.com' },
-        { id: 8, name: 'នួន គន្ធា', role: 'អ្នករចនា UI/UX', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-teal-600', email: 'nounkunthea.ux@gmail.com' },
-        { id: 9, name: 'តាំង ម៉េងហុង', role: 'អ្នកអភិវឌ្ឍន៍កម្មវិធី Web', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'tangmenghong@gmail.com' },
-        { id: 10, name: 'ម៉ៅ សុភ័ក្ត្រ', role: 'អ្នកគ្រប់គ្រងទិន្នន័យ Database', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'maosopheak.db@gmail.com' },
-        { id: 11, name: 'សោម វណ្ណដា', role: 'វិស្វករប្រព័ន្ធ System Engineer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', email: 'somvannda.sys@gmail.com' },
-        { id: 12, name: 'ចាន់ ឧត្តម', role: 'អ្នកអភិវឌ្ឍន៍ Backend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-purple-600', email: 'chanoudom.code@gmail.com' },
-        { id: 13, name: 'ឃុន ស្រីណែត', role: 'អ្នកអភិវឌ្ឍន៍ Frontend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-rose-600', email: 'khunsreynet.fe@gmail.com' },
-        { id: 14, name: 'ឌុច វីរៈ', role: 'អ្នកគ្រប់គ្រងហេដ្ឋារចនាសម្ព័ន្ធ DevOps', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-cyan-600', email: 'douchvirak.ops@gmail.com' },
-        { id: 15, name: 'ព្រំ ធារ៉ា', role: 'អ្នកវិភាគទិន្នន័យ Data Analyst', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-teal-600', email: 'promtheara.data@gmail.com' },
-        { id: 16, name: 'យិន លីហ្សា', role: 'អ្នករចនា UI/UX Designer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'yinliza.design@gmail.com' },
-        { id: 17, name: 'ថៃ វិសាល', role: 'វិស្វករសន្តិសុខ Security Engineer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'thaiviseth.sec@gmail.com' },
-        { id: 18, name: 'ហុង សម្បត្តិ', role: 'អ្នកគ្រប់គ្រងគម្រោង Project Manager', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'hongsambath.pm@gmail.com' },
-        { id: 19, name: 'ឡុង វិច្ឆិកា', role: 'អ្នកអភិវឌ្ឍន៍ Backend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', email: 'longvicheka.be@gmail.com' },
-        { id: 20, name: 'ឈិន ម៉ានិត', role: 'អ្នកអភិវឌ្ឍន៍ Frontend', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-purple-600', email: 'chhinmanith.dev@gmail.com' },
+        { id: 1, name: 'Piseth Panhavorn', role: 'Super Admin / Lead Developer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
+        { id: 2, name: 'Pum Prusmuny', role: 'Frontend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'pumprusmuny@example.com' },
+        { id: 3, name: 'Tha Winner', role: 'Backend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'thawinner@example.com' },
+        { id: 4, name: 'Leng Sokchhay', role: 'System Admin', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-slate-600', email: 'lengsokchhay.168@gmail.com' },
     ]);
 
     // Aggregated list of all files for the task (defaults + uploaded in chat)
