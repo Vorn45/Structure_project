@@ -35,7 +35,7 @@ async function run() {
             roles: ['user'],
         },
         {
-            phone: '078776682',
+            phone: '067776682',
             name_en: 'THA WINNER',
             name_kh: 'ថា វីនណឺរ',
             email: 'thawinner@example.com',
@@ -52,7 +52,7 @@ async function run() {
         `DELETE FROM "user_device" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
         `DELETE FROM "user_session_log" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
         `DELETE FROM "user"."task_store"`,
-        `DELETE FROM "user" WHERE "phone" NOT IN ('010843612', '087280875', '078776682')`,
+        `DELETE FROM "user" WHERE "phone" NOT IN ('010843612', '087280875', '067776682')`,
     ]) {
         try {
             await dataSource.query(sql, [keepPhones]);

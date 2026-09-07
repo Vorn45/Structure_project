@@ -99,7 +99,7 @@ const PROJECTS: ProjectPlanItem[] = [
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
-            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '078776682', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
         ],
     },
     {
@@ -116,7 +116,7 @@ const PROJECTS: ProjectPlanItem[] = [
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
-            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '078776682', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
         ],
     },
 ];

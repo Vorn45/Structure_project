@@ -445,7 +445,7 @@ export class TaskService {
 
     async getMembers(user: UserPayload) {
         let dbUsers: User[] = [];
-        const allowedPhones = ['010843612', '087280875', '078776682'];
+        const allowedPhones = ['010843612', '087280875', '067776682'];
         try {
             dbUsers = await this._userRepo.find({
                 relations: ['user_roles', 'user_roles.role', 'avatar_file'],

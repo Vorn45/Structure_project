@@ -29,7 +29,7 @@ export class UserSeeder {
                 },
                 {
                     sex_id: 1,
-                    phone: '078776682',
+                    phone: '067776682',
                     name_kh: 'ថា វីនណឺរ',
                     name_en: 'THA WINNER',
                     email: 'thawinner@example.com',
