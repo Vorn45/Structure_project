@@ -662,6 +662,7 @@ export class UserTaskComponent implements OnInit {
                 this._taskService
                     .createTask({
                         title: result.title,
+                        code: result.code,
                         status: result.status || 'new',
                         priority: result.priority || 'medium',
                         due_date: result.due_date,

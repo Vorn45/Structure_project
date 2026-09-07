@@ -1982,10 +1982,10 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.title && proj) {
                 if (!proj.tasks) proj.tasks = [];
-                const nextNum = proj.tasks.length + 101;
+                const codeFormatted = result.code ? (result.code.startsWith('#') ? result.code : `#${result.code}`) : `#${proj.code || 'BMS'}-${String(proj.tasks.length).padStart(4, '0')}`;
                 const newTask: IndividualTaskItem = {
                     id: `tsk-${Date.now()}`,
-                    code: `#${proj.code}-${nextNum}`,
+                    code: codeFormatted,
                     title: result.title,
                     description: result.description || result.title,
                     status: result.status || 'new',
@@ -1996,9 +1996,9 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                     attachments_count: 0,
                     reporter: {
                         id: 1,
-                        name: 'អ្នកគ្រប់គ្រង (Admin)',
-                        role: 'Project Manager',
-                        initial: 'A',
+                        name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+                        role: 'Super Admin',
+                        initial: 'P',
                         bgClass: 'bg-blue-600',
                     },
                     assignee: {

@@ -2,7 +2,7 @@
   "tasks": [
     {
       "id": 1,
-      "code": "#WMS-675",
+      "code": "#WMS-0000",
       "module": "Org Admin | Structure",
       "title": "Org Admin | Structure | Department",
       "description": "Manage departmental structures, permissions, and organizational units in core hierarchy.",
@@ -39,7 +39,7 @@
     },
     {
       "id": 2,
-      "code": "#BMS-671",
+      "code": "#BMS-0000",
       "module": "Project | Folder",
       "title": "Project | Folder | Drag & Drop",
       "description": "Implement intuitive drag and drop folder organization for project documents.",
@@ -76,7 +76,7 @@
     },
     {
       "id": 3,
-      "code": "#WMS-670",
+      "code": "#WMS-0001",
       "module": "Project | Folder",
       "title": "Project | Folder | Cannot Scroll PDF",
       "description": "Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.",
@@ -113,7 +113,7 @@
     },
     {
       "id": 4,
-      "code": "#BMS-574",
+      "code": "#BMS-0001",
       "module": "My Work | Profile",
       "title": "My Work | Profile | Missing Cover",
       "description": "Provide fallback default cover gradient when user cover photo URL is empty or unverified.",
@@ -150,7 +150,7 @@
     },
     {
       "id": 5,
-      "code": "#WMS-554",
+      "code": "#WMS-0002",
       "module": "Security Settings",
       "title": "Security setting UI improvements",
       "description": "Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.",
@@ -187,7 +187,7 @@
     },
     {
       "id": 6,
-      "code": "#BMS-532",
+      "code": "#BMS-0002",
       "module": "User | Report",
       "title": "User | Report | Progress Compare",
       "description": "Render interactive comparison charts comparing weekly member work hours and sprint deliverables.",
@@ -224,7 +224,7 @@
     },
     {
       "id": 7,
-      "code": "#WMS-531",
+      "code": "#WMS-0003",
       "module": "User | Report",
       "title": "User | Report | Progress",
       "description": "Real-time sync of task milestone updates and aggregated department productivity scorecards.",
@@ -261,7 +261,7 @@
     },
     {
       "id": 8,
-      "code": "#BMS-513",
+      "code": "#BMS-0003",
       "module": "Profile | Switch Org",
       "title": "Profile | Switch Org | Exit Org",
       "description": "Provide safe confirmation step and revoke tenant session when member switches workspace.",
@@ -298,5 +298,5 @@
     }
   ],
   "comments": {},
-  "updated_at": "2026-09-07T15:30:00.000Z"
+  "updated_at": "2026-09-07T15:42:00.000Z"
 }

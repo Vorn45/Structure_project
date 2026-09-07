@@ -53,7 +53,7 @@ export interface TaskItem {
 const INITIAL_TASKS: TaskItem[] = [
     {
         id: 1,
-        code: '#WMS-675',
+        code: '#WMS-0000',
         module: 'Org Admin | Structure',
         title: 'Org Admin | Structure | Department',
         description: 'Manage departmental structures, permissions, and organizational units in core hierarchy.',
@@ -75,7 +75,7 @@ const INITIAL_TASKS: TaskItem[] = [
     },
     {
         id: 2,
-        code: '#BMS-671',
+        code: '#BMS-0000',
         module: 'Project | Folder',
         title: 'Project | Folder | Drag & Drop',
         description: 'Implement intuitive drag and drop folder organization for project documents.',
@@ -97,7 +97,7 @@ const INITIAL_TASKS: TaskItem[] = [
     },
     {
         id: 3,
-        code: '#WMS-670',
+        code: '#WMS-0001',
         module: 'Project | Folder',
         title: 'Project | Folder | Cannot Scroll PDF',
         description: 'Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.',
@@ -119,7 +119,7 @@ const INITIAL_TASKS: TaskItem[] = [
     },
     {
         id: 4,
-        code: '#BMS-574',
+        code: '#BMS-0001',
         module: 'My Work | Profile',
         title: 'My Work | Profile | Missing Cover',
         description: 'Provide fallback default cover gradient when user cover photo URL is empty or unverified.',
@@ -141,7 +141,7 @@ const INITIAL_TASKS: TaskItem[] = [
     },
     {
         id: 5,
-        code: '#WMS-554',
+        code: '#WMS-0002',
         module: 'Security Settings',
         title: 'Security setting UI improvements',
         description: 'Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.',
@@ -163,7 +163,7 @@ const INITIAL_TASKS: TaskItem[] = [
     },
     {
         id: 6,
-        code: '#BMS-532',
+        code: '#BMS-0002',
         module: 'User | Report',
         title: 'User | Report | Progress Compare',
         description: 'Render interactive comparison charts comparing weekly member work hours and sprint deliverables.',
@@ -185,7 +185,7 @@ const INITIAL_TASKS: TaskItem[] = [
     },
     {
         id: 7,
-        code: '#WMS-531',
+        code: '#WMS-0003',
         module: 'User | Report',
         title: 'User | Report | Progress',
         description: 'Real-time sync of task milestone updates and aggregated department productivity scorecards.',
@@ -207,7 +207,7 @@ const INITIAL_TASKS: TaskItem[] = [
     },
     {
         id: 8,
-        code: '#BMS-513',
+        code: '#BMS-0003',
         module: 'Profile | Switch Org',
         title: 'Profile | Switch Org | Exit Org',
         description: 'Provide safe confirmation step and revoke tenant session when member switches workspace.',
@@ -616,9 +616,19 @@ export class TaskService {
 
     async createTask(user: UserPayload, dto: CreateTaskDto) {
         await this.ensureStoreLoaded();
+        const prefix = (dto.project_id === 'wms-digitech' || (dto.code && dto.code.toUpperCase().includes('WMS'))) ? 'WMS' : 'BMS';
+        let formattedCode = '';
+        if (dto.code && dto.code.trim()) {
+            formattedCode = dto.code.trim().startsWith('#') ? dto.code.trim() : `#${dto.code.trim()}`;
+        } else {
+            const projectTasks = this.tasks.filter((t) => t.project_id === dto.project_id || t.code?.toUpperCase().includes(prefix));
+            const nextSeq = projectTasks.length;
+            formattedCode = `#${prefix}-${String(nextSeq).padStart(4, '0')}`;
+        }
+
         const newTask: TaskItem = {
             id: Date.now(),
-            code: `#WMS-${Math.floor(100 + Math.random() * 900)}`,
+            code: formattedCode,
             title: dto.title,
             description: dto.description || '',
             module: 'Task Management',
@@ -628,8 +638,8 @@ export class TaskService {
             comments_count: 0,
             attachments_count: 0,
             due_date: dto.due_date || null,
-            project_id: dto.project_id || 'wms-digitech',
-            project_name: dto.project_id === 'bms-digitech' ? 'BMS Digitech' : 'WMS Digitech',
+            project_id: dto.project_id || (prefix === 'WMS' ? 'wms-digitech' : 'bms-digitech'),
+            project_name: prefix === 'BMS' ? 'BMS Digitech' : 'WMS Digitech',
             reporter: {
                 id: user.id,
                 name: user.name_en || user.name_kh || 'PISETH PANHAVORN',

@@ -1249,10 +1249,10 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.title) {
-                const nextNum = this.tasks().length + 672;
+                const codeFormatted = result.code ? (result.code.startsWith('#') ? result.code : `#${result.code}`) : `#${proj?.code || 'BMS'}-${String(this.tasks().length).padStart(4, '0')}`;
                 const newTask: AdminTaskItem = {
                     id: `tsk-${Date.now()}`,
-                    code: `#${proj?.code || 'PMS'}-${nextNum}`,
+                    code: codeFormatted,
                     title: result.title,
                     description: result.description || result.title,
                     status: result.status || 'new',
@@ -1264,9 +1264,9 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     progress: 0,
                     assignee: {
                         id: 1,
-                        name: result.assignee || 'ចេង ច័ន្ទបញ្ញា',
-                        role: 'Frontend Lead',
-                        initial: (result.assignee || 'C').charAt(0).toUpperCase(),
+                        name: result.assignee || 'PISETH PANHAVORN',
+                        role: 'Super Admin',
+                        initial: (result.assignee || 'P').charAt(0).toUpperCase(),
                         bgClass: 'bg-blue-600 text-white',
                     },
                     subtasks: [

@@ -406,7 +406,7 @@ export interface TeamMember {
 })
 export class CreateTaskDialogComponent implements OnInit {
     taskTitle: string = '';
-    taskCode: string = 'BMS-' + Math.floor(1000 + Math.random() * 9000);
+    taskCode: string = 'BMS-0000';
     category: string = 'it';
     startDate: string = new Date().toISOString().split('T')[0];
     endDate: string = new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0];
@@ -422,7 +422,7 @@ export class CreateTaskDialogComponent implements OnInit {
     onProjectSelected(projId: string): void {
         const found = this.projectList.find((p) => p.id === projId);
         if (found) {
-            this.taskCode = `${found.code}-${Math.floor(1000 + Math.random() * 9000)}`;
+            this.taskCode = `${found.code}-0000`;
         }
     }
 
@@ -529,9 +529,10 @@ export class CreateTaskDialogComponent implements OnInit {
             );
             if (found) {
                 this.selectedProjectId = found.id;
-                this.taskCode = `${found.code}-${Math.floor(1000 + Math.random() * 9000)}`;
+                this.taskCode = `${found.code}-0000`;
             } else {
-                this.taskCode = `${this.data.projectCode}-${Math.floor(100 + Math.random() * 900)}`;
+                const prefix = this.data.projectCode.toUpperCase().includes('WMS') ? 'WMS' : 'BMS';
+                this.taskCode = `${prefix}-0000`;
             }
         }
         if (this.data?.members && this.data.members.length > 0) {
