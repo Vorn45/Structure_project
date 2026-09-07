@@ -302,9 +302,21 @@
                         class="min-w-0 text-[16px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
                         {{ task.title }}
                     </p>
+
+                    <!-- Reporter Badge with Avatar and Note (អ្នករាយការណ៍) -->
+                    <div *ngIf="task.reporter"
+                        class="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-[11.5px] shrink-0 select-none"
+                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
+                        <div class="w-4.5 h-4.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold shrink-0 overflow-hidden">
+                            <img *ngIf="task.reporter.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover" />
+                            <span *ngIf="!task.reporter.avatar">{{ task.reporter.name?.charAt(0) || 'R' }}</span>
+                        </div>
+                        <span class="truncate max-w-[100px] font-medium text-[11.5px]">{{ task.reporter.name }}</span>
+                        <span class="text-[9.5px] px-1 py-0.2 rounded bg-emerald-600 text-white font-semibold uppercase tracking-wider">Reporter</span>
+                    </div>
                 </div>
 
-                <!-- Right Meta: Date (No BG), Comments/Attachments, Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
+                <!-- Right Meta: Date (No BG), Comments/Attachments, Avatars (Reporter & Assignee), Status Badge, Relative Time & Three-dots Menu -->
                 <div class="flex items-center gap-3 self-end md:self-center shrink-0">
                     <!-- Date to do (Fixed width for straight vertical column alignment) -->
                     <div class="hidden md:flex items-center gap-1.5 text-[13px] font-kantumruy font-normal w-28 shrink-0"
@@ -327,10 +339,18 @@
                         </span>
                     </div>
 
-                    <!-- Assignee Avatars Stack (Fixed width) -->
-                    <div class="w-8 shrink-0 flex items-center justify-center">
-                        <div class="w-8 h-8 rounded-full ring-2 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center font-medium text-xs overflow-hidden shadow-2xs shrink-0"
-                            [matTooltip]="task.assignee?.name || 'Assignee'">
+                    <!-- Reporter & Assignee Avatars (Fixed width with tooltips) -->
+                    <div class="w-14 shrink-0 flex items-center justify-center -space-x-1.5 hover:space-x-1 transition-all duration-200">
+                        <!-- Reporter Avatar -->
+                        <div *ngIf="task.reporter"
+                            class="w-7 h-7 rounded-full ring-2 ring-white dark:ring-slate-800 bg-emerald-600 text-white flex items-center justify-center font-semibold text-[10px] overflow-hidden shadow-2xs shrink-0 cursor-pointer relative z-10"
+                            [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
+                            <img *ngIf="task.reporter.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover" />
+                            <span *ngIf="!task.reporter.avatar">{{ task.reporter.name?.charAt(0) || 'R' }}</span>
+                        </div>
+                        <!-- Assignee Avatar -->
+                        <div class="w-7 h-7 rounded-full ring-2 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center font-semibold text-[10px] overflow-hidden shadow-2xs shrink-0 cursor-pointer relative z-20"
+                            [matTooltip]="'អ្នកទទួលបន្ទុក (Assignee): ' + (task.assignee?.name || 'Assignee')">
                             <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover" />
                             <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.name?.charAt(0) || 'U' }}</span>
                         </div>
@@ -458,12 +478,25 @@
 
                             <div
                                 class="flex items-center justify-between text-[12px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-700">
-                                <div class="flex items-center gap-1.5">
-                                    <div
-                                        class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-semibold">
-                                        {{ task.assignee?.name?.charAt(0) || 'U' }}
+                                <div class="flex items-center gap-2">
+                                    <!-- Reporter Avatar -->
+                                    <div *ngIf="task.reporter" class="flex items-center gap-1"
+                                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
+                                        <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold overflow-hidden shadow-2xs">
+                                            <img *ngIf="task.reporter.avatar" [src]="task.reporter.avatar" class="w-full h-full object-cover" />
+                                            <span *ngIf="!task.reporter.avatar">{{ task.reporter.name?.charAt(0) || 'R' }}</span>
+                                        </div>
                                     </div>
-                                    <span class="truncate max-w-[85px] text-[11px]">{{ task.assignee?.name || 'User' }}</span>
+                                    <!-- Assignee Avatar & Name -->
+                                    <div class="flex items-center gap-1.5"
+                                        [matTooltip]="'អ្នកទទួលបន្ទុក (Assignee): ' + (task.assignee?.name || 'Assignee')">
+                                        <div
+                                            class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-semibold overflow-hidden shadow-2xs">
+                                            <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" class="w-full h-full object-cover" />
+                                            <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.name?.charAt(0) || 'U' }}</span>
+                                        </div>
+                                        <span class="truncate max-w-[80px] text-[11px] font-medium">{{ task.assignee?.name || 'User' }}</span>
+                                    </div>
                                 </div>
 
                                 <div class="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md"
