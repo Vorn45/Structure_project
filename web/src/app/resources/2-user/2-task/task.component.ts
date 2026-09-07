@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
-import { CreateProjectDialogComponent } from '../1-home/create-project-dialog/create-project-dialog.component';
+import { CreateTaskDialogComponent } from '../../3-admin/3-projects/dialogs/create-task-dialog.component';
 import { TaskDrawerComponent } from './task-drawer/task-drawer.component';
 import { FilePreviewModalComponent } from './file-preview-modal/file-preview-modal.component';
 import {
@@ -630,22 +630,22 @@ export class UserTaskComponent implements OnInit {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
         });
-        const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
+        const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
-            if (result?.created && result?.name) {
+            if (result?.title) {
                 this._taskService
                     .createTask({
-                        title: result.name,
+                        title: result.title,
                         status: result.status || 'new',
-                        priority: 'medium',
-                        description: result.name,
+                        priority: result.priority || 'medium',
+                        due_date: result.due_date,
+                        assignee: result.assignee,
+                        description: result.description || result.title,
                     })
                     .subscribe({
                         next: () => this.loadTasks(),
                         error: () => this.loadTasks(),
                     });
-            } else if (result?.created) {
-                this.loadTasks();
             }
         });
     }

@@ -14,9 +14,10 @@ export interface CreateProjectDialogData {
     user?: any;
 }
 
-export interface WorkStatus {
-    id: string;
+export interface ProjectStatusOption {
+    id: 'planning' | 'active' | 'on_hold' | 'completed';
     label: string;
+    sublabel: string;
     icon: string;
     activeColor: string;
     activeBg: string;
@@ -74,7 +75,7 @@ export interface TeamMember {
                     <!-- Cover Banner -->
                     <div class="rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-[#0f284e] text-white p-5 shadow-sm relative overflow-hidden font-kantumruy">
                         <div class="absolute right-0 top-0 text-white/5 pointer-events-none -mr-6 -mt-6">
-                            <mat-icon svgIcon="mdi:plus-circle" class="icon-size-40"></mat-icon>
+                            <mat-icon svgIcon="mdi:folder-plus-outline" class="icon-size-40"></mat-icon>
                         </div>
                         <div class="relative z-10">
                             <span class="text-[13px] font-medium tracking-wider uppercase bg-white/20 px-3 py-1 rounded-full text-blue-100">
@@ -84,7 +85,7 @@ export interface TeamMember {
                                 បង្កើត និង រៀបចំផែនការអនុវត្តគម្រោង
                             </h3>
                             <p class="text-[14px] text-blue-200/90 mt-1.5 leading-normal">
-                                កំណត់ស្ថានភាពការងារ អ្នករាយការណ៍ និងអ្នកទទួលខុសត្រូវអនុវត្តគម្រោង
+                                កំណត់ព័ត៌មានគម្រោង ស្ថានភាព ថវិកា ប្រធានគម្រោង និងសមាជិកក្រុមការងារ
                             </p>
                         </div>
                     </div>
@@ -92,7 +93,7 @@ export interface TeamMember {
                     <!-- Form Inputs -->
                     <div class="space-y-5 text-[16px] font-kantumruy">
                         
-                        <!-- Project Name -->
+                        <!-- 1. Project Name -->
                         <div>
                             <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
                                 ឈ្មោះគម្រោង <span class="text-red-500">*</span>
@@ -105,13 +106,13 @@ export interface TeamMember {
                             />
                         </div>
 
-                        <!-- 1. STATUS SELECTION (The 7 Statuses matching My Work) -->
+                        <!-- 2. PROJECT STATUS SELECTION (4 Standard Project Statuses) -->
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block font-normal text-slate-800 dark:text-slate-200 text-[16px]">
-                                    ស្ថានភាពការងារ (Work Status) <span class="text-red-500">*</span>
+                                    ស្ថានភាពគម្រោង (Project Status) <span class="text-red-500">*</span>
                                 </label>
-                                <span class="text-[13px] text-slate-400">ជ្រើសរើស ១ ក្នុងចំណោម ៧</span>
+                                <span class="text-[13px] text-slate-400">ជ្រើសរើស ១ ក្នុងចំណោម ៤</span>
                             </div>
 
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-kantumruy">
@@ -119,33 +120,36 @@ export interface TeamMember {
                                     *ngFor="let s of statusList"
                                     type="button"
                                     (click)="selectedStatus.set(s.id)"
-                                    class="p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer select-none font-kantumruy"
+                                    class="p-2.5 rounded-xl border text-left flex flex-col justify-center gap-1 transition-all cursor-pointer select-none font-kantumruy"
                                     [ngClass]="selectedStatus() === s.id
                                         ? s.activeBorder + ' ' + s.activeBg + ' ring-1 ' + s.activeBorder
                                         : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
                                 >
-                                    <mat-icon [svgIcon]="s.icon" class="icon-size-4.5 shrink-0"
-                                        [ngClass]="selectedStatus() === s.id ? s.activeColor : 'text-slate-400'"></mat-icon>
-                                    <span class="text-[14px] font-normal truncate"
-                                        [ngClass]="selectedStatus() === s.id ? s.activeColor + ' font-medium' : ''">
-                                        {{ s.label }}
-                                    </span>
+                                    <div class="flex items-center gap-1.5">
+                                        <mat-icon [svgIcon]="s.icon" class="icon-size-4.5 shrink-0"
+                                            [ngClass]="selectedStatus() === s.id ? s.activeColor : 'text-slate-400'"></mat-icon>
+                                        <span class="text-[14px] truncate"
+                                            [ngClass]="selectedStatus() === s.id ? s.activeColor + ' font-medium' : 'font-normal'">
+                                            {{ s.label }}
+                                        </span>
+                                    </div>
+                                    <span class="text-[11.5px] text-slate-400 pl-6 truncate">{{ s.sublabel }}</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- 2. REPORTER (អ្នករាយការណ៍) & RESPONSIBLE / ASSIGNEE (អ្នកទទួលខុសត្រូវ - MULTI SELECT) -->
+                        <!-- 3. PROJECT LEAD (ប្រធានគម្រោង) & TEAM MEMBERS (សមាជិកក្រុមការងារ) -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-start">
                             
-                            <!-- Reporter (អ្នករាយការណ៍ / អ្នកស្នើសុំ) -->
+                            <!-- Project Lead (ប្រធានគម្រោង) -->
                             <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 space-y-2.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[13px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                                        អ្នករាយការណ៍ (REPORTER)
+                                        ប្រធានគម្រោង (PROJECT LEAD)
                                     </span>
                                     <button
                                         type="button"
-                                        [matMenuTriggerFor]="reporterMenu"
+                                        [matMenuTriggerFor]="leadMenu"
                                         class="text-[12px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-kantumruy"
                                     >
                                         ផ្លាស់ប្តូរ
@@ -153,31 +157,31 @@ export interface TeamMember {
                                 </div>
                                 <div class="flex items-center gap-3 bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xs">
                                     <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium text-[16px] shrink-0">
-                                        {{ reporterName.slice(0, 1) }}
+                                        {{ leadName.slice(0, 1) }}
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <p class="text-[15px] font-medium text-slate-900 dark:text-white truncate leading-tight">
-                                            {{ reporterName }}
+                                            {{ leadName }}
                                         </p>
                                         <p class="text-[12px] text-slate-400 truncate mt-0.5">
-                                            {{ reporterRole }}
+                                            {{ leadRole }}
                                         </p>
                                     </div>
                                     <span class="px-2 py-0.5 rounded text-[11px] bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-medium shrink-0">
-                                        Reporter
+                                        Lead
                                     </span>
                                 </div>
                             </div>
 
-                            <!-- Assignee / Responsible (អ្នកទទួលខុសត្រូវ / អ្នកឆ្លើយតបការងារ - Multi-Select) -->
+                            <!-- Team Members (សមាជិកក្រុមការងារ - Multi-Select) -->
                             <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 space-y-2.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[13px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                                        អ្នកទទួលខុសត្រូវ (RESPONSE) ({{ selectedAssignees.length }})
+                                        សមាជិកក្រុមការងារ (MEMBERS) ({{ selectedMembers.length }})
                                     </span>
                                     <button
                                         type="button"
-                                        [matMenuTriggerFor]="assigneeMenu"
+                                        [matMenuTriggerFor]="membersMenu"
                                         class="px-2.5 py-1 text-[13px] font-medium font-kantumruy text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                                     >
                                         <mat-icon svgIcon="mdi:account-plus" class="icon-size-4"></mat-icon>
@@ -185,27 +189,24 @@ export interface TeamMember {
                                     </button>
                                 </div>
 
-                                <!-- Multi-selected Assignee Cards (Formatted just like the Reporter Card) -->
-                                <div class="space-y-2">
-                                    <div *ngFor="let m of selectedAssignees"
-                                        class="flex items-center gap-3 bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xs">
-                                        <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[16px] shrink-0">
+                                <!-- Multi-selected Team Members -->
+                                <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                    <div *ngFor="let m of selectedMembers"
+                                        class="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xs">
+                                        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[14px] shrink-0">
                                             {{ m.name.slice(0, 1) }}
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <p class="text-[15px] font-medium text-slate-900 dark:text-white truncate leading-tight">
+                                            <p class="text-[14px] font-medium text-slate-900 dark:text-white truncate leading-tight">
                                                 {{ m.name }}
                                             </p>
-                                            <p class="text-[12px] text-slate-400 truncate mt-0.5">
+                                            <p class="text-[11px] text-slate-400 truncate mt-0.5">
                                                 {{ m.role }}
                                             </p>
                                         </div>
-                                        <span class="px-2 py-0.5 rounded text-[11px] bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-medium shrink-0">
-                                            Response
-                                        </span>
                                         <button
                                             type="button"
-                                            (click)="toggleAssignee(m.id)"
+                                            (click)="toggleMember(m.id)"
                                             class="text-slate-400 hover:text-red-500 transition-colors p-1"
                                             matTooltip="ដកចេញ"
                                         >
@@ -213,25 +214,44 @@ export interface TeamMember {
                                         </button>
                                     </div>
 
-                                    <div *ngIf="!selectedAssignees.length" class="text-center py-3 text-[13px] text-slate-400 font-kantumruy bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-                                        សូមចុច «+ ជ្រើសរើស» ដើម្បីបន្ថែមអ្នកទទួលខុសត្រូវ
+                                    <div *ngIf="!selectedMembers.length" class="text-center py-3 text-[13px] text-slate-400 font-kantumruy bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                                        សូមចុច «+ ជ្រើសរើស» ដើម្បីបន្ថែមសមាជិក
                                     </div>
                                 </div>
                             </div>
 
                         </div>
 
-                        <!-- Multi-Select Menu for Assignee / Response -->
-                        <mat-menu #assigneeMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
+                        <!-- Dropdown Menu for Project Lead -->
+                        <mat-menu #leadMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
                             <div class="px-3 py-1.5 text-[12px] font-medium text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-                                ជ្រើសរើសអ្នកទទួលខុសត្រូវ (Multi-Select)
+                                ជ្រើសរើសប្រធានគម្រោង (Project Lead)
                             </div>
-                            <div *ngFor="let m of teamMembers"
-                                (click)="toggleAssignee(m.id); $event.stopPropagation()"
+                            <div *ngFor="let m of availableMembers"
+                                (click)="leadName = m.name; leadRole = m.role"
                                 class="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-lg transition-colors font-kantumruy select-none">
-                                <mat-icon [svgIcon]="isAssigneeSelected(m.id) ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'"
+                                <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-[12px] font-medium shrink-0">
+                                    {{ m.name.slice(0, 1) }}
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[14px] font-medium text-slate-800 dark:text-white truncate">{{ m.name }}</p>
+                                    <p class="text-[11px] text-slate-400 truncate">{{ m.role }}</p>
+                                </div>
+                                <mat-icon *ngIf="leadName === m.name" svgIcon="mdi:check" class="icon-size-4 text-blue-600"></mat-icon>
+                            </div>
+                        </mat-menu>
+
+                        <!-- Multi-Select Menu for Team Members -->
+                        <mat-menu #membersMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
+                            <div class="px-3 py-1.5 text-[12px] font-medium text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
+                                ជ្រើសរើសសមាជិកក្រុមការងារ (Team Members)
+                            </div>
+                            <div *ngFor="let m of availableMembers"
+                                (click)="toggleMember(m.id); $event.stopPropagation()"
+                                class="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-lg transition-colors font-kantumruy select-none">
+                                <mat-icon [svgIcon]="isMemberSelected(m.id) ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'"
                                     class="icon-size-5 shrink-0"
-                                    [ngClass]="isAssigneeSelected(m.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'"></mat-icon>
+                                    [ngClass]="isMemberSelected(m.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'"></mat-icon>
                                 <div class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[12px] font-medium shrink-0">
                                     {{ m.name.slice(0, 1) }}
                                 </div>
@@ -242,35 +262,16 @@ export interface TeamMember {
                             </div>
                         </mat-menu>
 
-                        <!-- Menu for Reporter -->
-                        <mat-menu #reporterMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
-                            <div class="px-3 py-1.5 text-[12px] font-medium text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-                                ជ្រើសរើសអ្នករាយការណ៍ (Reporter)
-                            </div>
-                            <div *ngFor="let m of teamMembers"
-                                (click)="reporterName = m.name; reporterRole = m.role"
-                                class="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-lg transition-colors font-kantumruy select-none">
-                                <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-[12px] font-medium shrink-0">
-                                    {{ m.name.slice(0, 1) }}
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-[14px] font-medium text-slate-800 dark:text-white truncate">{{ m.name }}</p>
-                                    <p class="text-[11px] text-slate-400 truncate">{{ m.role }}</p>
-                                </div>
-                                <mat-icon *ngIf="reporterName === m.name" svgIcon="mdi:check" class="icon-size-4 text-blue-600"></mat-icon>
-                            </div>
-                        </mat-menu>
-
-                        <!-- Project Code & Category -->
+                        <!-- 4. Project Code & Category -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
-                                    កូដសម្គាល់គម្រោង
+                                    កូដសម្គាល់គម្រោង <span class="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     [(ngModel)]="projectCode"
-                                    class="w-full px-3.5 py-2.5 text-[15px] font-kantumruy font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    class="w-full px-3.5 py-2.5 text-[15px] font-kantumruy font-mono uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 />
                             </div>
 
@@ -285,11 +286,74 @@ export interface TeamMember {
                                     <option value="it">បច្ចេកវិទ្យាព័ត៌មាន (IT & Software)</option>
                                     <option value="infrastructure">ហេដ្ឋារចនាសម្ព័ន្ធ (Infrastructure)</option>
                                     <option value="operations">ប្រតិបត្តិការទូទៅ (Operations)</option>
+                                    <option value="design">ការរចនា និង UI/UX (Design & Creative)</option>
+                                    <option value="marketing">យុទ្ធនាការ និងផ្សព្វផ្សាយ (Marketing)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Dates -->
+                        <!-- 5. Budget & Priority -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
+                                    ថវិកាគម្រោង (Budget USD)
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono font-medium">$</span>
+                                    <input
+                                        type="number"
+                                        [(ngModel)]="budget"
+                                        placeholder="5000"
+                                        class="w-full pl-8 pr-3.5 py-2.5 text-[15px] font-kantumruy font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
+                                    កម្រិតអាទិភាព (Priority)
+                                </label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button
+                                        type="button"
+                                        (click)="priority.set('low')"
+                                        class="p-2 rounded-xl border font-kantumruy text-[13px] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                        [ngClass]="priority() === 'low'
+                                            ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500'
+                                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
+                                    >
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span>ទាប</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        (click)="priority.set('medium')"
+                                        class="p-2 rounded-xl border font-kantumruy text-[13px] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                        [ngClass]="priority() === 'medium'
+                                            ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500'
+                                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
+                                    >
+                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                        <span>មធ្យម</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        (click)="priority.set('high')"
+                                        class="p-2 rounded-xl border font-kantumruy text-[13px] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                        [ngClass]="priority() === 'high'
+                                            ? 'border-rose-500 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500'
+                                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
+                                    >
+                                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                        <span>ខ្ពស់</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. Dates -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
@@ -304,7 +368,7 @@ export interface TeamMember {
 
                             <div>
                                 <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
-                                    កាលបរិច្ឆេទទទួលបញ្ចប់
+                                    កាលបរិច្ឆេទបញ្ចប់
                                 </label>
                                 <input
                                     type="date"
@@ -314,51 +378,7 @@ export interface TeamMember {
                             </div>
                         </div>
 
-                        <!-- Priority -->
-                        <div>
-                            <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
-                                កម្រិតអាទិភាព (Priority)
-                            </label>
-                            <div class="grid grid-cols-3 gap-3">
-                                <button
-                                    type="button"
-                                    (click)="priority.set('low')"
-                                    class="p-3 rounded-xl border font-kantumruy text-[15px] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                    [ngClass]="priority() === 'low'
-                                        ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500'
-                                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-                                >
-                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                                    <span>ទាប (Low)</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    (click)="priority.set('medium')"
-                                    class="p-3 rounded-xl border font-kantumruy text-[15px] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                    [ngClass]="priority() === 'medium'
-                                        ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500'
-                                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-                                >
-                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                    <span>មធ្យម (Medium)</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    (click)="priority.set('high')"
-                                    class="p-3 rounded-xl border font-kantumruy text-[15px] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                    [ngClass]="priority() === 'high'
-                                        ? 'border-rose-500 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500'
-                                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-                                >
-                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                                    <span>ខ្ពស់ (High)</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Description -->
+                        <!-- 7. Description -->
                         <div>
                             <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
                                 ការពិពណ៌នា ឬ គោលបំណងគម្រោង
@@ -366,8 +386,8 @@ export interface TeamMember {
                             <textarea
                                 rows="3"
                                 [(ngModel)]="description"
-                                placeholder="ពិពណ៌នាអំពីខ្លឹមសារ និងលទ្ធផលរំពឹងទុក..."
-                                class="w-full p-3 text-[16px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                placeholder="ពិពណ៌នាអំពីខ្លឹមសារ និងលទ្ធផលរំពឹងទុករបស់គម្រោង..."
+                                class="w-full p-3 text-[16px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
                             ></textarea>
                         </div>
 
@@ -382,8 +402,8 @@ export interface TeamMember {
                 <button
                     type="button"
                     (click)="createProject()"
-                    [disabled]="isSubmitting()"
-                    class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                    [disabled]="isSubmitting() || !projectName.trim()"
+                    class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-2xs"
                 >
                     <mat-icon *ngIf="!isSubmitting()" svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
                     <mat-icon *ngIf="isSubmitting()" svgIcon="mdi:loading" class="!w-5 !h-5 !text-white shrink-0 animate-spin"></mat-icon>
@@ -398,102 +418,84 @@ export class CreateProjectDialogComponent implements OnInit {
     projectName: string = '';
     projectCode: string = 'PRJ-' + Math.floor(1000 + Math.random() * 9000);
     category: string = 'it';
+    budget: number = 5000;
     startDate: string = new Date().toISOString().split('T')[0];
-    endDate: string = '';
+    endDate: string = new Date(Date.now() + 86400000 * 60).toISOString().split('T')[0];
     priority = signal<'low' | 'medium' | 'high'>('medium');
     description: string = '';
     isSubmitting = signal<boolean>(false);
     successMessage = signal<string>('');
 
-    // The 7 statuses matching "ការងារខ្ញុំ"
-    statusList: WorkStatus[] = [
+    // 4 Project Statuses (Projects Governance Standard)
+    statusList: ProjectStatusOption[] = [
         {
-            id: 'new',
-            label: 'ថ្មី',
-            icon: 'mdi:clipboard-text-outline',
+            id: 'planning',
+            label: 'រៀបចំផែនការ',
+            sublabel: 'Planning',
+            icon: 'mdi:clock-outline',
             activeColor: 'text-blue-600 dark:text-blue-400',
-            activeBg: 'bg-blue-50/70 dark:bg-blue-950/40',
+            activeBg: 'bg-blue-50/80 dark:bg-blue-950/40',
             activeBorder: 'border-blue-500',
         },
         {
-            id: 'confirmed',
-            label: 'បញ្ជាក់',
-            icon: 'mdi:clipboard-check-outline',
-            activeColor: 'text-blue-600 dark:text-blue-400',
-            activeBg: 'bg-blue-50/70 dark:bg-blue-950/40',
-            activeBorder: 'border-blue-500',
-        },
-        {
-            id: 'unconfirmed',
-            label: 'មិនបញ្ជាក់',
-            icon: 'mdi:clipboard-minus-outline',
-            activeColor: 'text-slate-600 dark:text-slate-300',
-            activeBg: 'bg-slate-100 dark:bg-slate-800',
-            activeBorder: 'border-slate-500',
-        },
-        {
-            id: 'in_progress',
-            label: 'កំពុងធ្វើ',
+            id: 'active',
+            label: 'កំពុងដំណើរការ',
+            sublabel: 'In Progress',
             icon: 'mdi:progress-clock',
-            activeColor: 'text-amber-600 dark:text-amber-400',
-            activeBg: 'bg-amber-50/70 dark:bg-amber-950/40',
-            activeBorder: 'border-amber-500',
+            activeColor: 'text-emerald-600 dark:text-emerald-400',
+            activeBg: 'bg-emerald-50/80 dark:bg-emerald-950/40',
+            activeBorder: 'border-emerald-500',
         },
         {
-            id: 'under_review',
-            label: 'ស្នើសុំពិនិត្យ',
-            icon: 'mdi:magnify',
-            activeColor: 'text-blue-600 dark:text-blue-400',
-            activeBg: 'bg-blue-50/70 dark:bg-blue-950/40',
-            activeBorder: 'border-blue-500',
-        },
-        {
-            id: 'reopened',
-            label: 'បើកឡើងវិញ',
-            icon: 'mdi:refresh',
+            id: 'on_hold',
+            label: 'ផ្អាក',
+            sublabel: 'On Hold',
+            icon: 'mdi:pause-circle-outline',
             activeColor: 'text-amber-600 dark:text-amber-400',
-            activeBg: 'bg-amber-50/70 dark:bg-amber-950/40',
+            activeBg: 'bg-amber-50/80 dark:bg-amber-950/40',
             activeBorder: 'border-amber-500',
         },
         {
             id: 'completed',
-            label: 'បញ្ចប់',
-            icon: 'mdi:check-circle',
-            activeColor: 'text-emerald-600 dark:text-emerald-400',
-            activeBg: 'bg-emerald-50/70 dark:bg-emerald-950/40',
-            activeBorder: 'border-emerald-500',
+            label: 'បានបញ្ចប់',
+            sublabel: 'Completed',
+            icon: 'mdi:check-circle-outline',
+            activeColor: 'text-purple-600 dark:text-purple-400',
+            activeBg: 'bg-purple-50/80 dark:bg-purple-950/40',
+            activeBorder: 'border-purple-500',
         },
     ];
-    selectedStatus = signal<string>('new');
+    selectedStatus = signal<'planning' | 'active' | 'on_hold' | 'completed'>('active');
 
-    // Reporter (អ្នករាយការណ៍ / អ្នកបង្កើត)
-    reporterName: string = 'ចេង ច័ន្ទបញ្ញា';
-    reporterRole: string = 'Fullstack Developer';
+    // Project Lead (ប្រធានគម្រោង)
+    leadName: string = 'សុខ សុភា';
+    leadRole: string = 'Project Lead';
 
-    // Team Members for Assignee / Response (អ្នកទទួលខុសត្រូវ / អ្នកឆ្លើយតបការងារ)
-    teamMembers: TeamMember[] = [
-        { id: '1', name: 'សុខ សុភា', role: 'ប្រធានគម្រោង' },
-        { id: '2', name: 'រ័ត្ន វិចិត្រ', role: 'Frontend Lead' },
-        { id: '3', name: 'កែវ សុវណ្ណ', role: 'Backend Lead' },
-        { id: '4', name: 'ហេង ស្រីពៅ', role: 'UI/UX Designer' },
-        { id: '5', name: 'ចេង ច័ន្ទបញ្ញា', role: 'Fullstack Developer' },
+    // Team Members Available for Selection
+    availableMembers: TeamMember[] = [
+        { id: '1', name: 'សុខ សុភា', role: 'Project Lead' },
+        { id: '2', name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead' },
+        { id: '3', name: 'រ័ត្ន វិចិត្រ', role: 'DevOps & Cloud Lead' },
+        { id: '4', name: 'កែវ សុវណ្ណ', role: 'Backend Lead' },
+        { id: '5', name: 'ហេង ស្រីពៅ', role: 'UI/UX Designer' },
+        { id: '6', name: 'លី ម៉េងហួរ', role: 'QA Engineer' },
     ];
-    selectedAssigneeIds = signal<string[]>(['1']);
+    selectedMemberIds = signal<string[]>(['1', '2']);
 
-    get selectedAssignees(): TeamMember[] {
-        return this.teamMembers.filter((m) => this.selectedAssigneeIds().includes(m.id));
+    get selectedMembers(): TeamMember[] {
+        return this.availableMembers.filter((m) => this.selectedMemberIds().includes(m.id));
     }
 
-    isAssigneeSelected(id: string): boolean {
-        return this.selectedAssigneeIds().includes(id);
+    isMemberSelected(id: string): boolean {
+        return this.selectedMemberIds().includes(id);
     }
 
-    toggleAssignee(id: string): void {
-        const current = this.selectedAssigneeIds();
+    toggleMember(id: string): void {
+        const current = this.selectedMemberIds();
         if (current.includes(id)) {
-            this.selectedAssigneeIds.set(current.filter((item) => item !== id));
+            this.selectedMemberIds.set(current.filter((item) => item !== id));
         } else {
-            this.selectedAssigneeIds.set([...current, id]);
+            this.selectedMemberIds.set([...current, id]);
         }
     }
 
@@ -503,7 +505,7 @@ export class CreateProjectDialogComponent implements OnInit {
         private readonly _homeService: UserHomeService,
     ) {
         if (this.data?.user?.kh_name) {
-            this.reporterName = this.data.user.kh_name;
+            this.leadName = this.data.user.kh_name;
         }
     }
 
@@ -512,54 +514,73 @@ export class CreateProjectDialogComponent implements OnInit {
     createProject(): void {
         if (this.isSubmitting()) return;
 
-        if (!this.projectName || !this.projectName.trim()) {
-            this.projectName = `គម្រោង ${this.projectCode}`;
-        }
+        const name = this.projectName.trim();
+        if (!name) return;
 
         this.isSubmitting.set(true);
         const statusObj = this.statusList.find((s) => s.id === this.selectedStatus());
-        const assignees = this.selectedAssignees.map((m) => m.name).join(', ');
+
+        const membersPayload = this.selectedMembers.map((m) => ({
+            id: Number(m.id) || 1,
+            name: m.name,
+            role: m.role,
+            avatar: null,
+        }));
+
+        // Ensure lead is in members list
+        if (!membersPayload.some((m) => m.name === this.leadName)) {
+            membersPayload.unshift({
+                id: Date.now(),
+                name: this.leadName,
+                role: this.leadRole,
+                avatar: null,
+            });
+        }
 
         const payload = {
-            code: this.projectCode,
-            name: this.projectName.trim(),
+            code: this.projectCode.trim().toUpperCase(),
+            name: name,
             description: this.description.trim(),
-            status: this.selectedStatus() || 'active',
+            status: this.selectedStatus(),
+            priority: this.priority(),
+            category: this.category,
+            budget: Number(this.budget) || 5000,
             start_date: this.startDate || new Date().toISOString(),
-            end_date: this.endDate || new Date(Date.now() + 86400000 * 30).toISOString(),
+            end_date: this.endDate || new Date(Date.now() + 86400000 * 60).toISOString(),
+            members: membersPayload,
         };
 
         this._homeService.createProject(payload).subscribe({
             next: (res) => {
                 this.successMessage.set(
-                    `បានបង្កើតគម្រោង «${this.projectName.trim()}» ជាមួយស្ថានភាព «${statusObj?.label || 'ថ្មី'}» ដោយជោគជ័យ!`,
+                    `បានបង្កើតគម្រោង «${name}» ជាមួយស្ថានភាព «${statusObj?.label || 'កំពុងដំណើរការ'}» ដោយជោគជ័យ!`,
                 );
                 setTimeout(() => {
                     this.dialogRef.close({
                         created: true,
                         project: res?.data || payload,
-                        name: this.projectName,
+                        name: name,
                         status: this.selectedStatus(),
-                        reporter: this.reporterName,
-                        assignees: this.selectedAssignees,
+                        lead: { name: this.leadName, role: this.leadRole },
+                        members: membersPayload,
                     });
-                }, 1000);
+                }, 800);
             },
             error: (err) => {
                 console.error('Failed to create project via API', err);
                 this.successMessage.set(
-                    `បានបង្កើតគម្រោង «${this.projectName.trim()}» ដោយជោគជ័យ!`,
+                    `បានបង្កើតគម្រោង «${name}» ដោយជោគជ័យ!`,
                 );
                 setTimeout(() => {
                     this.dialogRef.close({
                         created: true,
                         project: payload,
-                        name: this.projectName,
+                        name: name,
                         status: this.selectedStatus(),
-                        reporter: this.reporterName,
-                        assignees: this.selectedAssignees,
+                        lead: { name: this.leadName, role: this.leadRole },
+                        members: membersPayload,
                     });
-                }, 1000);
+                }, 800);
             },
         });
     }

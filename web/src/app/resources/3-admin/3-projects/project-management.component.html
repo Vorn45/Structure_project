@@ -16,27 +16,21 @@
                 <div class="flex items-center gap-3 shrink-0">
                     <div
                         class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200 dark:border-blue-800">
-                        <mat-icon svgIcon="mdi:folder-outline" class="icon-size-5"></mat-icon>
+                        <mat-icon svgIcon="mdi:home" class="icon-size-5"></mat-icon>
                     </div>
-                    <span class="text-[18px] font-medium text-slate-800 dark:text-white">គម្រោងទាំងអស់ (Projects Governance)</span>
+                    <span class="text-[18px] font-medium text-slate-800 dark:text-white">គម្រោង</span>
                     <span
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                         {{ filteredProjects().length }}
                     </span>
                 </div>
 
-                <!-- Right: Create Project & Refresh -->
+                <!-- Right: Create Project -->
                 <div class="flex items-center gap-2 shrink-0">
                     <button type="button" (click)="openCreateProjectModal()"
                         class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
                         <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
                         <span>បង្កើតគម្រោង</span>
-                    </button>
-
-                    <button type="button" (click)="loadData()"
-                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer"
-                        matTooltip="ផ្ទុកឡើងវិញ">
-                        <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
                     </button>
                 </div>
             </div>
