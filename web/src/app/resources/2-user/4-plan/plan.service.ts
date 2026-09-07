@@ -20,6 +20,7 @@ export interface ProjectPlanItem {
         role: string;
         avatar?: string | null;
         email?: string;
+        phone?: string;
     }>;
     tasks?: any[];
     phases?: any[];
