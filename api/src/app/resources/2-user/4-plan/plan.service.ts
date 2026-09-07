@@ -84,6 +84,40 @@ const PROJECTS: ProjectPlanItem[] = [
             { id: 2, name: 'សុខ សុភា', role: 'Project Lead', avatar: null },
         ],
     },
+    {
+        id: '4',
+        code: 'BMS-DIGI',
+        name: 'BMS Digitech',
+        description: 'Business Management System - Digitech Project Management & Workflow.',
+        status: 'active',
+        progress: 45,
+        start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
+        end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
+        total_tasks: 10,
+        completed_tasks: 4,
+        members: [
+            { id: 101, name: 'Piseth Panhavorn', role: 'Lead Developer', phone: '010843612', avatar: null },
+            { id: 102, name: 'Pum Prusmuny', role: 'Developer', phone: '087280875', avatar: null },
+            { id: 103, name: 'Tha Winner', role: 'Developer', phone: '078776682', avatar: null },
+        ],
+    },
+    {
+        id: '5',
+        code: 'WMS-DIGI',
+        name: 'WMS Digitech',
+        description: 'Workforce & Attendance Management System - Digitech.',
+        status: 'active',
+        progress: 70,
+        start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
+        end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
+        total_tasks: 14,
+        completed_tasks: 9,
+        members: [
+            { id: 101, name: 'Piseth Panhavorn', role: 'Project Manager', phone: '010843612', avatar: null },
+            { id: 102, name: 'Pum Prusmuny', role: 'Developer', phone: '087280875', avatar: null },
+            { id: 103, name: 'Tha Winner', role: 'Developer', phone: '078776682', avatar: null },
+        ],
+    },
 ];
 
 @Injectable()

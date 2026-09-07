@@ -482,6 +482,20 @@ export class UserSeeder {
                     name_en: 'PISETH Panhavorn',
                     email: 'pisethpanhavorn544@gmail.com',
                 },
+                {
+                    sex_id: 1,
+                    phone: '087280875',
+                    name_kh: 'ពុំ ព្រះមុនី',
+                    name_en: 'Pum Prusmuny',
+                    email: 'pumprusmuny@example.com',
+                },
+                {
+                    sex_id: 1,
+                    phone: '078776682',
+                    name_kh: 'ថា វីនន័រ',
+                    name_en: 'Tha Winner',
+                    email: 'thawinner@example.com',
+                },
             ];
 
             for (const mockUserData of mockUsers) {
