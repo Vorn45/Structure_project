@@ -25,9 +25,8 @@ export interface AddPlanDialogData {
 }
 
 const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
-    { id: '1', code: 'PMS-V2', name: 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា (PMS)' },
-    { id: '2', code: 'WMS-HR', name: 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន និងបុគ្គលិក (WMS)' },
-    { id: '3', code: 'E-GOV', name: 'ប្រព័ន្ធច្រកចេញចូលតែមួយ (E-Gov Portal)' },
+    { id: '4', code: 'BMS-DIGI', name: 'BMS Digitech' },
+    { id: '5', code: 'WMS-DIGI', name: 'WMS Digitech' },
 ];
 
 @Component({
@@ -227,9 +226,9 @@ export class AddPlanDialogComponent {
     weeksList: number[] = Array.from({ length: 27 }, (_, i) => 14 + i);
 
     projectList: AddPlanProjectOption[] = DEFAULT_PROJECT_OPTIONS;
-    selectedProjectId = '1';
-    selectedProjectCode = 'PMS-V2';
-    selectedProjectName = 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា (PMS)';
+    selectedProjectId = '4';
+    selectedProjectCode = 'BMS-DIGI';
+    selectedProjectName = 'BMS Digitech';
 
     constructor(
         private readonly _dialogRef: MatDialogRef<AddPlanDialogComponent>,

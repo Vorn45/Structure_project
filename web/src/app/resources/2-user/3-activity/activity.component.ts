@@ -90,17 +90,15 @@ export class UserActivityComponent implements OnInit {
 
     // Current Project selection
     projectOptions = signal<ProjectPlanOption[]>([
-        { id: '1', code: 'PMS-V2', name: 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា (PMS)', description: 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា ការងារ ដំណាក់កាល និងកាលវិភាគការងាររបស់បុគ្គលិក', tasksCount: PMS_TASKS.length },
-        { id: '2', code: 'WMS-HR', name: 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន និងបុគ្គលិក (WMS)', description: 'ប្រព័ន្ធកត់ត្រាវត្តមាន ស្កេនមុខ និងគ្រប់គ្រងច្បាប់ឈប់សម្រាក', tasksCount: WMS_TASKS.length },
-        { id: '3', code: 'E-GOV', name: 'ប្រព័ន្ធច្រកចេញចូលតែមួយ (E-Gov Portal)', description: 'ប្រព័ន្ធផ្តល់សេវាសាធារណៈ និងឯកសាររដ្ឋបាលឌីជីថល', tasksCount: EGOV_TASKS.length },
+        { id: '4', code: 'BMS-DIGI', name: 'BMS Digitech', description: 'Business Management System - Digitech Project Management & Workflow.', tasksCount: 6 },
+        { id: '5', code: 'WMS-DIGI', name: 'WMS Digitech', description: 'Workforce & Attendance Management System - Digitech Real-time QR & Payroll.', tasksCount: 6 },
     ]);
     currentProject = signal<ProjectPlanOption>(this.projectOptions()[0]);
 
     // Tasks mapped by Project ID
     projectTasksMap = signal<{ [projectId: string]: AgilePlanTask[] }>({
-        '1': PMS_TASKS,
-        '2': WMS_TASKS,
-        '3': EGOV_TASKS,
+        '4': WMS_TASKS,
+        '5': EGOV_TASKS,
     });
 
     // Dynamic current tasks based on active project

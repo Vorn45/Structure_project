@@ -37,55 +37,6 @@ export interface ProjectPlanItem {
 
 const PROJECTS: ProjectPlanItem[] = [
     {
-        id: '1',
-        code: 'PMS-V2',
-        name: 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា (PMS)',
-        description: 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា ការងារ ដំណាក់កាល និងកាលវិភាគការងាររបស់បុគ្គលិក។',
-        status: 'active',
-        progress: 85,
-        start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
-        end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
-        total_tasks: 8,
-        completed_tasks: 2,
-        members: [
-            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', avatar: null, email: 'pisethpanhavorn544@gmail.com' },
-            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'Developer', avatar: null, email: 'pumprusmuny@example.com' },
-            { id: 3, name: 'ថា វីនណឺរ', role: 'Developer', avatar: null, email: 'thawinner@example.com' },
-        ],
-    },
-    {
-        id: '2',
-        code: 'WMS-HR',
-        name: 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន និងបុគ្គលិក (WMS)',
-        description: 'ប្រព័ន្ធតាមដានម៉ោងធ្វើការ ច្បាប់ឈប់សម្រាក និងការបើកប្រាក់បៀវត្ស។',
-        status: 'active',
-        progress: 60,
-        start_date: new Date(Date.now() - 86400000 * 60).toISOString(),
-        end_date: new Date(Date.now() + 86400000 * 30).toISOString(),
-        total_tasks: 12,
-        completed_tasks: 7,
-        members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Dev', avatar: null },
-            { id: 4, name: 'លី ម៉េងហួរ', role: 'Backend Lead', avatar: null },
-        ],
-    },
-    {
-        id: '3',
-        code: 'E-GOV',
-        name: 'ប្រព័ន្ធច្រកចេញចូលតែមួយ (E-Gov Portal)',
-        description: 'ច្រកផ្ដល់សេវាសាធារណៈឌីជីថលជូនប្រជាពលរដ្ឋ និងអង្គភាពពាក់ព័ន្ធ។',
-        status: 'planning',
-        progress: 25,
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 86400000 * 90).toISOString(),
-        total_tasks: 5,
-        completed_tasks: 1,
-        members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Dev', avatar: null },
-            { id: 2, name: 'សុខ សុភា', role: 'Project Lead', avatar: null },
-        ],
-    },
-    {
         id: '4',
         code: 'BMS-DIGI',
         name: 'BMS Digitech',
@@ -141,7 +92,10 @@ export class PlanService {
                 const raw = fs.readFileSync(this.storeFilePath, 'utf8');
                 const data = JSON.parse(raw);
                 if (data && Array.isArray(data.plans) && data.plans.length > 0) {
-                    this.projects = data.plans;
+                    this.projects = data.plans.filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id));
+                    if (this.projects.length === 0) {
+                        this.projects = [...PROJECTS];
+                    }
                 }
             }
         } catch (e) {
@@ -189,7 +143,11 @@ export class PlanService {
         try {
             const dbStore = await this._planStoreRepo.findOne({ where: { key: 'default_plans_store' } });
             if (dbStore && Array.isArray(dbStore.plans) && dbStore.plans.length > 0) {
-                this.projects = dbStore.plans;
+                this.projects = dbStore.plans.filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id));
+                if (this.projects.length === 0) {
+                    this.projects = [...PROJECTS];
+                }
+                await this.saveStore();
             } else {
                 await this.saveToDb();
             }

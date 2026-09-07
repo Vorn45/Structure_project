@@ -67,26 +67,26 @@
                     <!-- 1. ទាញយក (Download) -->
                     <button mat-menu-item (click)="exportReportCSV()" class="!text-[15px]">
                         <mat-icon svgIcon="mdi:download-outline" class="icon-size-5 mr-2 text-blue-600"></mat-icon>
-                        <span>ទាញយក</span>
-                    </button>
+                            <span>ទាញយក</span>
+                        </button>
 
-                    <!-- 2. បោះពុម្ព -->
-                    <button mat-menu-item (click)="printReport()" class="!text-[15px]">
-                        <mat-icon svgIcon="mdi:printer-outline" class="icon-size-5 mr-2 text-slate-600 dark:text-slate-300"></mat-icon>
-                        <span>បោះពុម្ព</span>
-                    </button>
+                        <!-- 2. បោះពុម្ព -->
+                        <button mat-menu-item (click)="printReport()" class="!text-[15px]">
+                            <mat-icon svgIcon="mdi:printer-outline" class="icon-size-5 mr-2 text-slate-600 dark:text-slate-300"></mat-icon>
+                            <span>បោះពុម្ព</span>
+                        </button>
 
-                    <!-- 3. ផែនការគម្រោង (Hover directly shows PMS-V2, WMS-HR, E-GOV) -->
-                    <button mat-menu-item [matMenuTriggerFor]="reportProjectListSubMenu" class="!text-[15px]">
-                        <mat-icon svgIcon="mdi:calendar-multiselect" class="icon-size-5 mr-2 text-indigo-600"></mat-icon>
-                        <span>ផែនការគម្រោង</span>
-                    </button>
-                </mat-menu>
+                        <!-- 3. ផែនការគម្រោង (Hover directly shows PMS-V2, WMS-HR, E-GOV) -->
+                        <button mat-menu-item [matMenuTriggerFor]="reportProjectListSubMenu" class="!text-[15px]">
+                            <mat-icon svgIcon="mdi:calendar-multiselect" class="icon-size-5 mr-2 text-indigo-600"></mat-icon>
+                            <span>ផែនការគម្រោង</span>
+                        </button>
+                    </mat-menu>
 
-                <!-- Submenu: Direct Projects List (Clean single line, No wrapping) -->
-                <mat-menu #reportProjectListSubMenu="matMenu" class="!rounded-xl font-kantumruy !min-w-[320px]">
-                    <button *ngFor="let p of projects" mat-menu-item (click)="selectedProjectId.set(p.id); onProjectChange()"
-                        class="!text-[15px] !h-11 !px-4">
+                    <!-- Submenu: Direct Projects List (Clean single line, No wrapping) -->
+                    <mat-menu #reportProjectListSubMenu="matMenu" class="!rounded-xl font-kantumruy !min-w-[320px]">
+                        <button *ngFor="let p of projects" mat-menu-item (click)="selectedProjectId.set(p.id); onProjectChange()"
+                            class="!text-[15px] !h-11 !px-4">
                         <div class="flex items-center justify-between w-full gap-4">
                             <span class="whitespace-nowrap" [ngClass]="selectedProjectId() === p.id ? 'font-medium text-indigo-600' : 'text-slate-700 dark:text-slate-200'">
                                 {{ p.name }}

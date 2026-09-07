@@ -29,13 +29,12 @@ export interface PeriodMetrics {
 }
 
 const REPORT_PROJECTS: ReportProjectItem[] = [
-    { id: '1', code: 'PMS-V2', name: 'ប្រព័ន្ធគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា (PMS)' },
-    { id: '2', code: 'WMS-HR', name: 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន និងបុគ្គលិក (WMS)' },
-    { id: '3', code: 'E-GOV', name: 'ប្រព័ន្ធច្រកចេញចូលតែមួយ (E-Gov Portal)' },
+    { id: '4', code: 'BMS-DIGI', name: 'BMS Digitech' },
+    { id: '5', code: 'WMS-DIGI', name: 'WMS Digitech' },
 ];
 
 const PERIOD_METRICS_DATA: Record<string, Record<ReportPeriodEnum, PeriodMetrics>> = {
-    '1': {
+    '4': {
         [ReportPeriodEnum.WEEK]: {
             velocity: 85,
             completedTasks: 4,
