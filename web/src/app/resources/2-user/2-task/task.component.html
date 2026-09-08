@@ -1,4 +1,4 @@
-<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 select-none transition-colors text-[16px] box-border"
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 select-none transition-colors text-[14px] box-border"
     style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
 
     <!-- ===== FRAMED CONTENT CONTAINER (Fit height to outer padding) ===== -->
@@ -159,10 +159,10 @@
             class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden font-kantumruy">
             <!-- 1. All -->
             <button (click)="setStatusFilter('all')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>ទាំងអស់</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'all' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().all }}
                 </span>
@@ -170,10 +170,10 @@
 
             <!-- 2. New (ថ្មី) -->
             <button (click)="setStatusFilter('new')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'new' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>ថ្មី</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'new' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().new }}
                 </span>
@@ -181,10 +181,10 @@
 
             <!-- 3. Confirmed (បញ្ជាក់) -->
             <button (click)="setStatusFilter('confirmed')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'confirmed' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>បញ្ជាក់</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'confirmed' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().confirmed }}
                 </span>
@@ -192,10 +192,10 @@
 
             <!-- 4. Unconfirmed (មិនបញ្ជាក់) -->
             <button (click)="setStatusFilter('unconfirmed')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'unconfirmed' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>មិនបញ្ជាក់</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'unconfirmed' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().unconfirmed }}
                 </span>
@@ -203,10 +203,10 @@
 
             <!-- 5. In Progress (កំពុងធ្វើ) -->
             <button (click)="setStatusFilter('in_progress')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'in_progress' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>កំពុងធ្វើ</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'in_progress' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().in_progress }}
                 </span>
@@ -214,10 +214,10 @@
 
             <!-- 6. In Review (ស្នើពិនិត្យ) -->
             <button (click)="setStatusFilter('in_review')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'in_review' ? 'bg-sky-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>ស្នើពិនិត្យ</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'in_review' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().in_review }}
                 </span>
@@ -225,10 +225,10 @@
 
             <!-- 7. Reopened (បើកឡើងវិញ) -->
             <button (click)="setStatusFilter('reopened')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'reopened' ? 'bg-rose-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>បើកឡើងវិញ</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'reopened' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().reopened }}
                 </span>
@@ -236,10 +236,10 @@
 
             <!-- 8. Done (បញ្ចប់) -->
             <button (click)="setStatusFilter('done')"
-                class="px-3.5 py-1.5 rounded-xl text-[16px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
                 [ngClass]="activeStatus() === 'done' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
                 <span>បញ្ចប់</span>
-                <span class="text-[13px] font-normal"
+                <span class="text-[12px] font-normal"
                     [ngClass]="activeStatus() === 'done' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
                     {{ counts().done }}
                 </span>
@@ -299,7 +299,7 @@
 
                     <!-- Title & Module Hierarchy -->
                     <p
-                        class="min-w-0 text-[16px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
+                        class="min-w-0 text-[14.5px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
                         {{ task.title }}
                     </p>
 
@@ -340,10 +340,13 @@
                     <!-- Assignee Avatar (Single avatar column) -->
                     <div class="w-10 shrink-0 flex items-center justify-center">
                         <div class="relative shrink-0 cursor-pointer"
-                            [matTooltip]="'អ្នកទទួលបន្ទុក (Assignee): ' + (task.assignee?.name || 'ពុំ ប្រុសមុន្នី')">
-                            <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
+                            [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក: ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
+                            <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
                                 <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
                                 <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.name?.charAt(0) || 'U' }}</span>
+                            </div>
+                            <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
+                                <mat-icon svgIcon="mdi:account-outline" class="!w-3.5 !h-3.5"></mat-icon>
                             </div>
                         </div>
                     </div>
@@ -464,7 +467,7 @@
                             </div>
 
                             <p
-                                class="min-w-0 text-[16px] font-normal text-slate-900 dark:text-slate-100 leading-6 line-clamp-2 font-kantumruy">
+                                class="min-w-0 text-[14px] font-medium text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 font-kantumruy">
                                 {{ task.title }}
                             </p>
 
@@ -629,7 +632,7 @@
 
                             <!-- Main Title -->
                             <p
-                                class="min-w-0 text-[16px] font-normal text-slate-900 dark:text-slate-100 leading-6 truncate font-kantumruy">
+                                class="min-w-0 text-[14.5px] font-medium text-slate-900 dark:text-slate-100 leading-snug truncate font-kantumruy">
                                 {{ task.title }}
                             </p>
 

@@ -1623,19 +1623,20 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         bgClass: 'bg-indigo-600',
                         avatar: a.avatar || null,
                     }))
-                    : (proj.members ? [...proj.members.slice(0, 2)] : []);
+                    : (result.assignee?.name ? [{
+                        id: Number(result.assignee.id) || 1,
+                        name: result.assignee.name,
+                        role: result.assignee.role || 'Assignee',
+                        initial: (result.assignee.name || 'M').charAt(0).toUpperCase(),
+                        bgClass: 'bg-indigo-600',
+                        avatar: result.assignee.avatar || null,
+                    }] : []);
 
-                const primaryAssignee: TaskMember = selectedMembers.length > 0 ? selectedMembers[0] : {
-                    id: 2,
-                    name: typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'សមាជិកក្រុម'),
-                    role: result.assignee?.role || 'Assignee',
-                    initial: (typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'S')).charAt(0).toUpperCase(),
-                    bgClass: 'bg-emerald-600',
-                };
+                const primaryAssignee: TaskMember | null = selectedMembers.length > 0 ? selectedMembers[0] : null;
 
                 const reporterName = typeof result.reporter === 'string'
                     ? result.reporter
-                    : (result.reporter?.name || result.reporterName || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត');
+                    : (result.reporter?.name || result.reporterName || '');
 
                 const newTask: IndividualTaskItem = {
                     id: `tsk-${Date.now()}`,

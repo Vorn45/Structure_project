@@ -9,6 +9,11 @@ html, body {
     margin: 0;
     padding: 0;
     font-family: 'Kantumruy Pro', 'Inter var', sans-serif !important;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 /* Tooltip Typography & Khmer Support */
@@ -29,8 +34,27 @@ html, body {
     box-sizing: border-box;
 }
 
-*:not(.mat-icon):not([class*="material-icons"]):not([class*="icon-"]):not([class*="mdi"]) {
+*:not(.mat-icon):not([class*="material-icons"]):not([class*="icon-"]):not([class*="mdi"]):not(code):not(kbd):not(samp):not(pre) {
     font-family: 'Kantumruy Pro', 'Inter var', sans-serif;
+    letter-spacing: normal;
+}
+
+/* Form Controls & Material Overlay Typography Normalization */
+button, input, select, textarea, optgroup,
+.mat-mdc-dialog-container,
+.mat-mdc-menu-panel,
+.mat-mdc-button-base,
+.mat-mdc-tab-header,
+.mat-mdc-card,
+.mat-mdc-snack-bar-container {
+    font-family: 'Kantumruy Pro', 'Inter var', sans-serif !important;
+}
+
+.mat-mdc-dialog-title {
+    font-family: 'Kantumruy Pro', sans-serif !important;
+    font-size: 1.0625rem !important; /* 17px */
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
 }
 
 body {
@@ -453,3 +477,415 @@ body.dark .cdk-overlay-pane:has(.my-work-report-dialog) {
         max-height: 100vh !important;
     }
 }
+
+/* =====================================================================
+   Global Form Control Overrides (Custom Dropdowns & Date Pickers)
+   ===================================================================== */
+select,
+.custom-select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 16px 16px !important;
+    padding-right: 36px !important;
+    border-radius: 0.75rem !important; /* 12px */
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    color: #1e293b;
+    font-family: 'Kantumruy Pro', sans-serif !important;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+        border-color: #cbd5e1;
+    }
+    &:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+}
+
+body.dark select,
+.dark select,
+body.dark .custom-select,
+.dark .custom-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E") !important;
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+
+    &:hover {
+        border-color: #475569 !important;
+    }
+    &:focus {
+        border-color: #60a5fa !important;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+    }
+}
+
+select option {
+    background-color: #ffffff;
+    color: #1e293b;
+    padding: 8px 12px;
+    font-family: 'Kantumruy Pro', sans-serif !important;
+}
+
+body.dark select option,
+.dark select option {
+    background-color: #1e293b;
+    color: #f8fafc;
+}
+
+/* Custom Date, Time, Datetime Inputs */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    position: relative;
+    font-family: 'Kantumruy Pro', sans-serif !important;
+    font-size: 14px;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background-color: #ffffff;
+    padding: 8px 12px;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+
+    &::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        opacity: 0.55;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+        padding: 4px;
+        margin-right: -4px;
+        filter: invert(40%) sepia(10%) saturate(800%) hue-rotate(180deg);
+        &:hover {
+            opacity: 1;
+            transform: scale(1.08);
+        }
+    }
+
+    &:hover {
+        border-color: #cbd5e1;
+    }
+    &:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+}
+
+body.dark input[type="date"],
+.dark input[type="date"],
+body.dark input[type="time"],
+.dark input[type="time"],
+body.dark input[type="datetime-local"],
+.dark input[type="datetime-local"] {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #f8fafc;
+
+    &::-webkit-calendar-picker-indicator {
+        filter: invert(80%);
+    }
+    &:hover {
+        border-color: #475569;
+    }
+    &:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+}
+
+/* =====================================================================
+   Custom SaaS Datepicker Calendar Styling (Angular Material Datepicker)
+   ===================================================================== */
+.mat-datepicker-content,
+.custom-saas-datepicker {
+    border-radius: 18px !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.06) !important;
+    font-family: 'Kantumruy Pro', sans-serif !important;
+    overflow: hidden !important;
+    padding: 6px 8px !important;
+
+    .mat-calendar {
+        width: 300px !important;
+        font-family: 'Kantumruy Pro', sans-serif !important;
+    }
+
+    .mat-calendar-header {
+        padding: 8px 8px 4px !important;
+    }
+
+    .mat-calendar-controls {
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .mat-calendar-period-button {
+        font-family: 'Kantumruy Pro', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 14.5px !important;
+        color: #1e293b !important;
+        border-radius: 10px !important;
+        padding: 4px 10px !important;
+        transition: background-color 0.15s ease !important;
+
+        &:hover {
+            background-color: #f1f5f9 !important;
+        }
+    }
+
+    .mat-calendar-previous-button,
+    .mat-calendar-next-button {
+        border-radius: 10px !important;
+        color: #64748b !important;
+        transition: all 0.15s ease !important;
+
+        &:hover {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+    }
+
+    .mat-calendar-table-header th {
+        font-family: 'Kantumruy Pro', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #94a3b8 !important;
+        padding-bottom: 6px !important;
+    }
+
+    .mat-calendar-body-cell-content {
+        border-radius: 10px !important;
+        font-family: 'Kantumruy Pro', sans-serif !important;
+        font-size: 13px !important;
+        color: #334155 !important;
+        transition: all 0.15s ease !important;
+        border: none !important;
+
+        &.mat-calendar-body-selected {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.25) !important;
+        }
+
+        &.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+            border: 1.5px solid #3b82f6 !important;
+            color: #2563eb !important;
+            font-weight: 600 !important;
+        }
+    }
+
+    .mat-calendar-body-cell:hover:not(.mat-calendar-body-disabled) .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+        background-color: #eff6ff !important;
+        color: #2563eb !important;
+    }
+}
+
+/* Dark Mode for Custom Datepicker */
+body.dark .mat-datepicker-content,
+.dark .mat-datepicker-content,
+body.dark .custom-saas-datepicker,
+.dark .custom-saas-datepicker {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+
+    .mat-calendar-period-button {
+        color: #f8fafc !important;
+        &:hover {
+            background-color: #334155 !important;
+        }
+    }
+
+    .mat-calendar-previous-button,
+    .mat-calendar-next-button {
+        color: #94a3b8 !important;
+        &:hover {
+            background-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+    }
+
+    .mat-calendar-table-header th {
+        color: #64748b !important;
+    }
+
+    .mat-calendar-body-cell-content {
+        color: #cbd5e1 !important;
+
+        &.mat-calendar-body-selected {
+            background-color: #3b82f6 !important;
+            color: #ffffff !important;
+        }
+
+        &.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+            border-color: #60a5fa !important;
+            color: #60a5fa !important;
+        }
+    }
+
+    .mat-calendar-body-cell:hover:not(.mat-calendar-body-disabled) .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+        background-color: #334155 !important;
+        color: #93c5fd !important;
+    }
+}
+
+/* =====================================================================
+   Custom SaaS Toast / Snackbar Overrides
+   ===================================================================== */
+.mat-mdc-snack-bar-container {
+    font-family: 'Kantumruy Pro', sans-serif !important;
+
+    .mdc-snackbar__surface {
+        border-radius: 14px !important;
+        box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08) !important;
+        padding: 4px 8px !important;
+    }
+
+    .mdc-snackbar__label {
+        font-family: 'Kantumruy Pro', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        line-height: 1.5 !important;
+    }
+
+    /* Success Toast */
+    &.green-snackbar,
+    &.toast-success {
+        .mdc-snackbar__surface {
+            background-color: #ecfdf5 !important;
+            border: 1px solid #a7f3d0 !important;
+        }
+        .mdc-snackbar__label {
+            color: #065f46 !important;
+        }
+        .mdc-button {
+            color: #047857 !important;
+            font-family: 'Kantumruy Pro', sans-serif !important;
+            font-weight: 600 !important;
+        }
+    }
+
+    /* Error Toast */
+    &.red-snackbar,
+    &.toast-error {
+        .mdc-snackbar__surface {
+            background-color: #fff1f2 !important;
+            border: 1px solid #fecdd3 !important;
+        }
+        .mdc-snackbar__label {
+            color: #9f1239 !important;
+        }
+        .mdc-button {
+            color: #be123c !important;
+            font-family: 'Kantumruy Pro', sans-serif !important;
+            font-weight: 600 !important;
+        }
+    }
+
+    /* Info Toast */
+    &.toast-info {
+        .mdc-snackbar__surface {
+            background-color: #eff6ff !important;
+            border: 1px solid #bfdbfe !important;
+        }
+        .mdc-snackbar__label {
+            color: #1e40af !important;
+        }
+    }
+
+    /* Warning Toast */
+    &.toast-warning {
+        .mdc-snackbar__surface {
+            background-color: #fffbeb !important;
+            border: 1px solid #fde68a !important;
+        }
+        .mdc-snackbar__label {
+            color: #92400e !important;
+        }
+    }
+}
+
+/* Dark Mode for Toasts */
+body.dark .mat-mdc-snack-bar-container,
+.dark .mat-mdc-snack-bar-container {
+    &.green-snackbar,
+    &.toast-success {
+        .mdc-snackbar__surface {
+            background-color: #064e3b !important;
+            border-color: #047857 !important;
+        }
+        .mdc-snackbar__label {
+            color: #d1fae5 !important;
+        }
+    }
+
+    &.red-snackbar,
+    &.toast-error {
+        .mdc-snackbar__surface {
+            background-color: #881337 !important;
+            border-color: #be123c !important;
+        }
+        .mdc-snackbar__label {
+            color: #ffe4e6 !important;
+        }
+    }
+
+    &.toast-info {
+        .mdc-snackbar__surface {
+            background-color: #1e3a8a !important;
+            border-color: #2563eb !important;
+        }
+        .mdc-snackbar__label {
+            color: #dbeafe !important;
+        }
+    }
+
+    &.toast-warning {
+        .mdc-snackbar__surface {
+            background-color: #78350f !important;
+            border-color: #b45309 !important;
+        }
+        .mdc-snackbar__label {
+            color: #fef3c7 !important;
+        }
+    }
+}
+
+/* =====================================================================
+   Custom SaaS Confirmation Dialog Overrides
+   ===================================================================== */
+.helper-confirmation-dialog-panel {
+    font-family: 'Kantumruy Pro', sans-serif !important;
+
+    .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+        border-radius: 20px !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18) !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+}
+
+body.dark .helper-confirmation-dialog-panel,
+.dark .helper-confirmation-dialog-panel {
+    .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+        border-color: #334155 !important;
+        background-color: #1e293b !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    }
+}
+

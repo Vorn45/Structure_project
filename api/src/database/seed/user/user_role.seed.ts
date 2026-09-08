@@ -255,7 +255,7 @@ export class UserRoleSeeder {
             // unique index on `(user_id, role_id) WHERE organization_id IS NULL`).
             await dataSource.query(`
                 INSERT INTO "user_role" ("user_id", "role_id", "organization_id", "is_default")
-                SELECT DISTINCT "existing_role"."user_id", "personal_workspace_role"."id", NULL, FALSE
+                SELECT DISTINCT "existing_role"."user_id", "personal_workspace_role"."id", CAST(NULL AS uuid), FALSE
                 FROM "user_role" "existing_role"
                 INNER JOIN "role" "user_role_kind" ON "user_role_kind"."id" = "existing_role"."role_id"
                 CROSS JOIN "role" "personal_workspace_role"

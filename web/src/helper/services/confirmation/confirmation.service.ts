@@ -12,6 +12,7 @@ export class HelperConfirmationService {
     private _matDialog: MatDialog = inject(MatDialog);
 
     private _defaultConfig: HelperConfirmationConfig = {
+        variant: 'compact',
         title: 'បញ្ជាក់សកម្មភាព',
         message: 'តើលោកអ្នកពិតជាបានត្រួតពិនិត្យសំណើនេះបានសព្វគ្រប់ហើយមែនទេ?',
         icon: {
@@ -34,6 +35,7 @@ export class HelperConfirmationService {
     };
 
     private _defaultDeleteConfig: HelperConfirmationConfig = {
+        variant: 'compact',
         title: 'បញ្ជាក់ការលុប',
         message: 'តើអ្នកប្រាកដថាអ្នកពិតជាចង់លុបមែនទេ?',
         icon: {

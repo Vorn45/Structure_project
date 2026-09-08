@@ -24,4 +24,40 @@ export class SnackbarService {
 
         this.snackbar.open(message, '', config);
     }
+
+    success(message: string, duration = 3000): void {
+        this.snackbar.open(message, 'បិទ', {
+            duration,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+            panelClass: ['toast-success'],
+        });
+    }
+
+    error(message: string, duration = 4000): void {
+        this.snackbar.open(message, 'បិទ', {
+            duration,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+            panelClass: ['toast-error'],
+        });
+    }
+
+    info(message: string, duration = 3000): void {
+        this.snackbar.open(message, 'បិទ', {
+            duration,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+            panelClass: ['toast-info'],
+        });
+    }
+
+    warning(message: string, duration = 3500): void {
+        this.snackbar.open(message, 'បិទ', {
+            duration,
+            horizontalPosition: 'right',
+            verticalPosition: 'bottom',
+            panelClass: ['toast-warning'],
+        });
+    }
 }

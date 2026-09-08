@@ -1,4 +1,4 @@
-<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[14px] box-border relative select-none"
     style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
 
     <!-- ===== FRAMED MAIN CONTAINER ===== -->
@@ -681,19 +681,25 @@
                                     <div class="w-16 shrink-0 flex items-center justify-center -space-x-2 hover:space-x-1 transition-all duration-200">
                                         <!-- Reporter Avatar with small R note badge -->
                                         <div class="relative shrink-0 cursor-pointer"
-                                            [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
-                                            <div class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full ring-2 ring-emerald-500 dark:ring-emerald-400 bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
+                                            [matTooltip]="'អ្នករាយការណ៍: ' + (task.reporter?.name || 'មិនទាន់មាន')">
+                                            <div *ngIf="task.reporter?.name" class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full ring-2 ring-emerald-500 dark:ring-emerald-400 bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
                                                 <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover" />
                                                 <span *ngIf="!task.reporter?.avatar">{{ task.reporter?.initial || task.reporter?.name?.charAt(0) || 'P' }}</span>
                                             </div>
-                                            <span class="absolute -bottom-1 -right-1 bg-emerald-700 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
+                                            <div *ngIf="!task.reporter?.name" class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 flex items-center justify-center text-[10px] bg-slate-50 dark:bg-slate-800">
+                                                <mat-icon svgIcon="mdi:account-outline" class="icon-size-3.5"></mat-icon>
+                                            </div>
+                                            <span *ngIf="task.reporter?.name" class="absolute -bottom-1 -right-1 bg-emerald-700 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
                                         </div>
                                         <!-- Assignee Avatar -->
                                         <div class="relative shrink-0 cursor-pointer"
-                                            [matTooltip]="'អ្នកទទួលបន្ទុក (Assignee): ' + (task.assignee?.name || 'ពុំ ប្រុសមុន្នី')">
-                                            <div class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] overflow-hidden shadow-2xs">
+                                            [matTooltip]="'អ្នកទទួលបន្ទុក: ' + (task.assignee?.name || 'មិនទាន់មាន')">
+                                            <div *ngIf="task.assignee?.name" class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10.5px] overflow-hidden shadow-2xs">
                                                 <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover" />
                                                 <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.initial || task.assignee?.name?.charAt(0) || 'U' }}</span>
+                                            </div>
+                                            <div *ngIf="!task.assignee?.name" class="w-6.5 h-6.5 min-w-[26px] min-h-[26px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 flex items-center justify-center text-[10px] bg-slate-50 dark:bg-slate-800">
+                                                <mat-icon svgIcon="mdi:account-outline" class="icon-size-3.5"></mat-icon>
                                             </div>
                                         </div>
                                     </div>
@@ -834,10 +840,14 @@
                                                 }
                                             </div>
 
-                                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-2xs"
-                                                [ngClass]="task.assignee.bgClass || 'bg-blue-600 text-white'"
-                                                [matTooltip]="task.assignee.name">
-                                                {{ task.assignee.initial || task.assignee.name.charAt(0) }}
+                                            <div *ngIf="task.assignee?.name" class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-2xs"
+                                                [ngClass]="task.assignee?.bgClass || 'bg-blue-600 text-white'"
+                                                [matTooltip]="task.assignee?.name || ''">
+                                                {{ task.assignee?.initial || task.assignee?.name?.charAt(0) }}
+                                            </div>
+                                            <div *ngIf="!task.assignee?.name" class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-400 border border-dashed border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800"
+                                                matTooltip="មិនទាន់កំណត់">
+                                                <mat-icon svgIcon="mdi:account-outline" class="icon-size-3"></mat-icon>
                                             </div>
                                         </div>
                                     </div>

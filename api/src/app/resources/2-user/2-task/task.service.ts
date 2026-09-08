@@ -677,17 +677,17 @@ export class TaskService {
                 email: (typeof a === 'object' && a.email) ? a.email : '',
             }));
         } else if (dto.assignee) {
-            if (typeof dto.assignee === 'string') {
+            if (typeof dto.assignee === 'string' && dto.assignee.trim()) {
                 assigneesList = dto.assignee.split(',').map((nameStr: string, idx: number) => ({
                     id: idx + 1,
                     name: nameStr.trim(),
                     avatar: null,
                     role: 'Assignee',
                 }));
-            } else if (typeof dto.assignee === 'object') {
+            } else if (typeof dto.assignee === 'object' && dto.assignee.name && dto.assignee.name.trim()) {
                 assigneesList = [{
                     id: Number(dto.assignee.id) || 1,
-                    name: dto.assignee.name || user.name_en || user.name_kh || 'Assignee',
+                    name: dto.assignee.name.trim(),
                     avatar: dto.assignee.avatar || null,
                     role: dto.assignee.role || 'Assignee',
                     email: dto.assignee.email || '',
@@ -698,26 +698,21 @@ export class TaskService {
         const primaryAssignee = assigneesList.length > 0 ? assigneesList[0] : null;
 
         // Process reporter
-        let taskReporter = {
-            id: user.id,
-            name: user.name_en || user.name_kh || 'PISETH PANHAVORN',
-            avatar: (user.avatar as any)?.uri || null,
-            role: 'Super Admin',
-        };
+        let taskReporter: any = null;
         if (dto.reporter) {
-            if (typeof dto.reporter === 'string') {
+            if (typeof dto.reporter === 'string' && dto.reporter.trim()) {
                 taskReporter = {
-                    id: user.id,
-                    name: dto.reporter,
-                    avatar: (user.avatar as any)?.uri || null,
-                    role: 'Super Admin',
+                    id: user?.id || 0,
+                    name: dto.reporter.trim(),
+                    avatar: (user?.avatar as any)?.uri || null,
+                    role: 'Reporter',
                 };
-            } else if (typeof dto.reporter === 'object' && dto.reporter.name) {
+            } else if (typeof dto.reporter === 'object' && dto.reporter.name && dto.reporter.name.trim()) {
                 taskReporter = {
-                    id: Number(dto.reporter.id) || user.id,
-                    name: dto.reporter.name,
-                    avatar: dto.reporter.avatar || (user.avatar as any)?.uri || null,
-                    role: dto.reporter.role || 'Super Admin',
+                    id: Number(dto.reporter.id) || user?.id || 0,
+                    name: dto.reporter.name.trim(),
+                    avatar: dto.reporter.avatar || (user?.avatar as any)?.uri || null,
+                    role: dto.reporter.role || 'Reporter',
                 };
             }
         }
@@ -748,10 +743,10 @@ export class TaskService {
         this.saveStore();
 
         // Dispatch Telegram Notification (Exact PMS format)
-        const creatorName = taskReporter.name || user.name_kh || user.name_en || 'PISETH PANHAVORN';
+        const creatorName = taskReporter?.name || user?.name_kh || user?.name_en || 'អ្នកប្រើប្រាស់';
         const taskCode = newTask.code || `#${prefix}-0000`;
         const firstLine = `📌 ${creatorName} បានបង្កើតការងារថ្មី ${taskCode}`;
-        this.sendTelegramNotification(firstLine, newTask, [user.id, ...assigneesList.map((a) => a.id)].filter(Boolean) as number[]);
+        this.sendTelegramNotification(firstLine, newTask, [user?.id, ...assigneesList.map((a) => a.id)].filter(Boolean) as number[]);
 
         return {
             status_code: 201,

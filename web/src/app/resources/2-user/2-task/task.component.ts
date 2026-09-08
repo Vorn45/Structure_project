@@ -702,9 +702,14 @@ export class UserTaskComponent implements OnInit {
             projectName: currentProj?.name || 'BMS Digitech',
             members: this.teamMembers(),
             existingTasks: this.tasks(),
+            onTaskCreated: () => this.loadTasks(),
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
+            if (result?.alreadyCreated) {
+                this.loadTasks();
+                return;
+            }
             if (result?.title) {
                 const primaryAssignee = result.assignees && result.assignees.length > 0
                     ? {
@@ -726,17 +731,23 @@ export class UserTaskComponent implements OnInit {
                     }))
                     : (primaryAssignee ? [primaryAssignee] : []);
 
-                const reporterObj = typeof result.reporter === 'object' && result.reporter
-                    ? {
-                        id: this._userService.getUser()?.id || 1,
-                        name: result.reporter.name || this._userService.getUser()?.name || 'PISETH PANHAVORN',
-                        role: result.reporter.role || 'Super Admin',
+                let reporterObj: any = null;
+                if (result.reporter) {
+                    if (typeof result.reporter === 'object' && result.reporter.name && result.reporter.name.trim()) {
+                        reporterObj = {
+                            id: Number(result.reporter.id) || this._userService.getUser()?.id || 0,
+                            name: result.reporter.name.trim(),
+                            role: result.reporter.role || 'Reporter',
+                            avatar: result.reporter.avatar || null,
+                        };
+                    } else if (typeof result.reporter === 'string' && result.reporter.trim()) {
+                        reporterObj = {
+                            id: this._userService.getUser()?.id || 0,
+                            name: result.reporter.trim(),
+                            role: 'Reporter',
+                        };
                     }
-                    : {
-                        id: this._userService.getUser()?.id || 1,
-                        name: result.reporter || this._userService.getUser()?.name || 'PISETH PANHAVORN',
-                        role: 'Super Admin',
-                    };
+                }
 
                 this._taskService
                     .createTask({

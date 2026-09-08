@@ -113,8 +113,8 @@ export interface AdminTaskItem {
     created_at?: string;
     comments_count: number;
     attachments_count: number;
-    assignee: TaskMember;
-    reporter?: TaskMember;
+    assignee?: TaskMember | null;
+    reporter?: TaskMember | null;
     members?: TaskMember[];
     status: 'review' | 'done' | 'confirmed' | 'reopened' | 'new' | 'in_progress' | 'unconfirmed' | string;
     time_ago: string;
@@ -1267,19 +1267,20 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                         bgClass: 'bg-indigo-600 text-white',
                         avatar: a.avatar || null,
                     }))
-                    : [...this.teamMembers().slice(0, 2)];
+                    : (result.assignee?.name ? [{
+                        id: Number(result.assignee.id) || 1,
+                        name: result.assignee.name,
+                        role: result.assignee.role || 'Member',
+                        initial: (result.assignee.name || 'M').charAt(0).toUpperCase(),
+                        bgClass: 'bg-indigo-600 text-white',
+                        avatar: result.assignee.avatar || null,
+                    }] : []);
 
-                const primaryAssignee: TaskMember = selectedMembers.length > 0 ? selectedMembers[0] : {
-                    id: 1,
-                    name: typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'PISETH PANHAVORN'),
-                    role: result.assignee?.role || 'Super Admin',
-                    initial: (typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'P')).charAt(0).toUpperCase(),
-                    bgClass: 'bg-blue-600 text-white',
-                };
+                const primaryAssignee: TaskMember | null = selectedMembers.length > 0 ? selectedMembers[0] : null;
 
                 const reporterName = typeof result.reporter === 'string'
                     ? result.reporter
-                    : (result.reporter?.name || result.reporterName || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត');
+                    : (result.reporter?.name || result.reporterName || '');
 
                 const newTask: AdminTaskItem = {
                     id: `tsk-${Date.now()}`,
@@ -1293,13 +1294,13 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     comments_count: 0,
                     attachments_count: 0,
                     progress: 0,
-                    reporter: {
+                    reporter: reporterName ? {
                         id: 1,
                         name: reporterName,
                         role: result.reporter?.role || 'Super Admin',
                         initial: reporterName.charAt(0).toUpperCase(),
                         bgClass: 'bg-blue-600 text-white',
-                    },
+                    } : null,
                     assignee: primaryAssignee,
                     subtasks: [
                         { id: `st-${Date.now()}`, title: 'រៀបចំលក្ខខណ្ឌតម្រូវការដំបូង', completed: false },
