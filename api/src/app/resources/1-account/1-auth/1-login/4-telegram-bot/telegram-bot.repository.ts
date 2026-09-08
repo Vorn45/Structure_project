@@ -35,17 +35,15 @@ export class TelegramBotRepository {
     }
 
     async findActiveByPhone(phone: string) {
+        const candidates = [phone, `0${phone}`, `855${phone}`, `+855${phone}`];
         return await this.userRepo
             .createQueryBuilder('user')
             .where('user.phone IS NOT NULL')
             .andWhere('user.is_active = 1')
-            .andWhere('user.telegram_id IS NULL')
             .andWhere(
-                `REGEXP_REPLACE(
-                    REGEXP_REPLACE(REGEXP_REPLACE(user.phone, '[^0-9]', '', 'g'), '^855', ''),
-                    '^0', ''
-                ) = :digits`,
-                { digits: phone },
+                '(user.phone IN (:...candidates) OR ' +
+                `REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(user.phone, '[^0-9]', '', 'g'), '^855', ''), '^0', '') = :phone)`,
+                { candidates, phone },
             )
             .getOne();
     }
