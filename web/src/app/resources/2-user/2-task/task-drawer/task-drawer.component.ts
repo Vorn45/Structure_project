@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import {
     TASK_TYPES_LIST,
     TaskAttachment,
@@ -19,8 +20,88 @@ import {
 @Component({
     selector: 'task-drawer',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatMenuModule, MatTooltipModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatIconModule,
+        MatButtonModule,
+        MatMenuModule,
+        MatTooltipModule,
+        SideDialogCloseButtonComponent,
+    ],
     templateUrl: './task-drawer.component.html',
+    styles: [
+        `
+            ::ng-deep .task-dropdown-menu.mat-mdc-menu-panel {
+                background-color: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 1rem !important;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+                padding: 6px !important;
+            }
+
+            :host-context(.dark) ::ng-deep .task-dropdown-menu.mat-mdc-menu-panel,
+            .dark ::ng-deep .task-dropdown-menu.mat-mdc-menu-panel {
+                background-color: #121c2e !important;
+                border: 1px solid rgba(51, 65, 85, 0.8) !important;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6) !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item {
+                color: #1e293b !important;
+                border-radius: 0.65rem !important;
+                min-height: 38px !important;
+                padding: 6px 10px !important;
+                font-size: 13px !important;
+                font-family: 'Kantumruy Pro', sans-serif !important;
+                transition: all 120ms ease !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item:hover,
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item.cdk-keyboard-focused,
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item.cdk-program-focused {
+                background-color: #f1f5f9 !important;
+                color: #0f172a !important;
+            }
+
+            :host-context(.dark) ::ng-deep .task-dropdown-menu .mat-mdc-menu-item,
+            .dark ::ng-deep .task-dropdown-menu .mat-mdc-menu-item {
+                color: #cbd5e1 !important;
+            }
+
+            :host-context(.dark) ::ng-deep .task-dropdown-menu .mat-mdc-menu-item:hover,
+            .dark ::ng-deep .task-dropdown-menu .mat-mdc-menu-item:hover {
+                background-color: #1c2b44 !important;
+                color: #ffffff !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mdc-list-item__primary-text {
+                color: inherit !important;
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-divider {
+                border-top-color: #e2e8f0 !important;
+            }
+
+            :host-context(.dark) ::ng-deep .task-dropdown-menu .mat-divider,
+            .dark ::ng-deep .task-dropdown-menu .mat-divider {
+                border-top-color: rgba(51, 65, 85, 0.6) !important;
+            }
+
+            ::ng-deep .side-dialog-close-button {
+                z-index: 50 !important;
+                box-shadow: -4px 0 10px rgba(0, 0, 0, 0.08) !important;
+            }
+
+            :host-context(.dark) ::ng-deep .side-dialog-close-button,
+            .dark ::ng-deep .side-dialog-close-button {
+                box-shadow: -4px 0 12px rgba(0, 0, 0, 0.4) !important;
+            }
+        `,
+    ],
 })
 export class TaskDrawerComponent {
     task = input<TaskItem | null>(null);
@@ -30,7 +111,11 @@ export class TaskDrawerComponent {
     allFiles = input<TaskAttachment[]>([]);
     currentUserAvatar = input<string>('');
 
+    dialogMode = input<'details' | 'chat'>('details');
+
     closeDrawer = output<void>();
+    switchToChat = output<void>();
+    switchToDetails = output<void>();
     statusChange = output<{ task: TaskItem; status: string }>();
     typeChange = output<{ task: TaskItem; taskType: string }>();
     priorityChange = output<{ task: TaskItem; priority: string }>();
@@ -42,6 +127,17 @@ export class TaskDrawerComponent {
     downloadFile = output<TaskAttachment>();
 
     taskTypes = TASK_TYPES_LIST;
+
+    mobileTab = signal<'details' | 'chat'>('chat');
+
+    constructor() {
+        effect(() => {
+            const mode = this.dialogMode();
+            if (mode) {
+                this.mobileTab.set(mode);
+            }
+        });
+    }
 
     getTaskTypeInfo(type?: string): TaskTypeOption {
         const found = this.taskTypes.find((t) => t.id === type);
@@ -80,6 +176,10 @@ export class TaskDrawerComponent {
         if (assignees.length === 1) return assignees[0].name;
         if (assignees.length === 2) return `${assignees[0].name}, ${assignees[1].name}`;
         return `${assignees[0].name}, ${assignees[1].name} (+${assignees.length - 2})`;
+    }
+
+    hasUserChatMessages(): boolean {
+        return (this.messages() || []).some((m) => !m.is_system);
     }
 
     isMemberAssigned(task: TaskItem | null | undefined, member: TaskMember): boolean {
@@ -196,6 +296,24 @@ export class TaskDrawerComponent {
         return d.toISOString().split('T')[0];
     }
 
+    setQuickDueDate(task: TaskItem, daysAhead: number): void {
+        const d = new Date();
+        d.setDate(d.getDate() + daysAhead);
+        this.dueDateChange.emit({ task, dueDate: d.toISOString() });
+    }
+
+    clearDueDate(task: TaskItem): void {
+        this.dueDateChange.emit({ task, dueDate: null });
+    }
+
+    onDateInputChange(event: Event, task: TaskItem): void {
+        const input = event.target as HTMLInputElement;
+        if (input && input.value) {
+            const d = new Date(input.value);
+            this.dueDateChange.emit({ task, dueDate: d.toISOString() });
+        }
+    }
+
     getStatusClass(status?: string): string {
         switch (status?.toLowerCase()) {
             case 'new':
@@ -219,6 +337,48 @@ export class TaskDrawerComponent {
             default:
                 return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
         }
+    }
+
+    isStatusDone(status?: string): boolean {
+        const s = (status || '').toLowerCase();
+        return s === 'done' || s === 'completed';
+    }
+
+    getStatusPillClass(status?: string): string {
+        switch (status?.toLowerCase()) {
+            case 'done':
+            case 'completed':
+                return 'bg-emerald-50 text-emerald-700 border-emerald-200/90 dark:bg-emerald-950/70 dark:border-emerald-700/80 dark:text-emerald-400';
+            case 'in_progress':
+                return 'bg-amber-50 text-amber-700 border-amber-200/90 dark:bg-amber-950/70 dark:border-amber-700/80 dark:text-amber-400';
+            case 'in_review':
+            case 'review':
+                return 'bg-sky-50 text-sky-700 border-sky-200/90 dark:bg-sky-950/70 dark:border-sky-700/80 dark:text-sky-400';
+            case 'confirmed':
+                return 'bg-indigo-50 text-indigo-700 border-indigo-200/90 dark:bg-indigo-950/70 dark:border-indigo-700/80 dark:text-indigo-400';
+            case 'new':
+            case 'pending':
+                return 'bg-blue-50 text-blue-700 border-blue-200/90 dark:bg-blue-950/70 dark:border-blue-700/80 dark:text-blue-400';
+            case 'reopened':
+                return 'bg-rose-50 text-rose-700 border-rose-200/90 dark:bg-rose-950/70 dark:border-rose-700/80 dark:text-rose-400';
+            default:
+                return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300';
+        }
+    }
+
+    getKhmerDateLabel(dateStr?: string | null): string {
+        const khmerMonths = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+        if (!dateStr) {
+            const now = new Date();
+            return `${now.getDate()} ${khmerMonths[now.getMonth()]}`;
+        }
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '25 សីហា';
+        return `${d.getDate()} ${khmerMonths[d.getMonth()]}`;
+    }
+
+    addQuickEmoji(emoji: string): void {
+        this.newChatMessage = (this.newChatMessage || '') + emoji;
     }
 
     getStatusLabel(status?: string): string {

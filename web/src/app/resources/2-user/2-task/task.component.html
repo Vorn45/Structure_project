@@ -278,7 +278,7 @@
         <!-- ===================================================================== -->
         <div *ngIf="!loading() && viewMode() === 'list' && tasks().length > 0"
             class="divide-y divide-slate-100 dark:divide-slate-800">
-            <div *ngFor="let task of tasks(); trackBy: trackByTaskId" (click)="openTaskChat(task)"
+            <div *ngFor="let task of tasks(); trackBy: trackByTaskId" (click)="openTaskDetails(task)"
                 class="group py-4 sm:py-4.5 px-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3.5">
                 <!-- Left Info: Priority Icon, Equal sign, Code, Title -->
                 <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -305,12 +305,12 @@
 
                     <!-- Reporter Avatar with small R note badge (Moved right after title) -->
                     <div class="relative shrink-0 cursor-pointer ml-2"
-                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
-                        <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-emerald-500 dark:ring-emerald-400 bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
+                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'មិនបានបញ្ជាក់')">
+                        <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
                             <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover block" />
-                            <span *ngIf="!task.reporter?.avatar">{{ task.reporter?.name?.charAt(0) || 'P' }}</span>
+                            <mat-icon *ngIf="!task.reporter?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
                         </div>
-                        <span class="absolute -bottom-1 -right-1 bg-emerald-700 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
+                        <span class="absolute -bottom-1 -right-1 bg-emerald-600 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
                     </div>
                 </div>
 
@@ -327,9 +327,11 @@
 
                     <!-- Comments & Attachments (Fixed width) -->
                     <div class="hidden sm:flex items-center gap-2 text-slate-400 text-[13px] w-14 shrink-0">
-                        <span *ngIf="(task.comments_count || 0) > 0" class="flex items-center gap-1">
+                        <span (click)="$event.stopPropagation(); openTaskChat(task, $event)"
+                            class="flex items-center gap-1 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            [matTooltip]="'បើកបន្ទប់ពិភាក្សា (Open Chat)'">
                             <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5"></mat-icon>
-                            <span>{{ task.comments_count }}</span>
+                            <span>{{ (task.comments_count || 0) + 1 }}</span>
                         </span>
                         <span *ngIf="(task.attachments_count || 0) > 0" class="flex items-center gap-1">
                             <mat-icon svgIcon="mdi:paperclip" class="icon-size-3.5"></mat-icon>
@@ -341,9 +343,9 @@
                     <div class="w-10 shrink-0 flex items-center justify-center">
                         <div class="relative shrink-0 cursor-pointer"
                             [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក: ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
-                            <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
+                            <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
                                 <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
-                                <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.name?.charAt(0) || 'U' }}</span>
+                                <mat-icon *ngIf="!task.assignee?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
                             </div>
                             <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
                                 <mat-icon svgIcon="mdi:account-outline" class="!w-3.5 !h-3.5"></mat-icon>
@@ -448,7 +450,7 @@
                         class="space-y-3 flex-1 min-h-[200px] transition-colors rounded-xl p-1">
                         <div *ngFor="let task of getTasksByColumn(col.key); trackBy: trackByTaskId" cdkDrag
                             [cdkDragData]="task" (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()"
-                            (click)="openTaskChat(task)"
+                            (click)="openTaskDetails(task)"
                             class="group rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 shadow-2xs hover:shadow-md cursor-grab active:cursor-grabbing space-y-2.5 transition-shadow select-none">
 
                             <!-- CDK drag placeholder -->
@@ -476,22 +478,29 @@
                                 <div class="flex items-center gap-2">
                                     <!-- Reporter Avatar with R note badge -->
                                     <div class="relative shrink-0 cursor-pointer"
-                                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
-                                        <div class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full ring-1.5 ring-emerald-500 bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold overflow-hidden shadow-2xs">
+                                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'មិនបានបញ្ជាក់')">
+                                        <div class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
                                             <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter?.name || 'Reporter'" class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] object-cover block rounded-full" />
-                                            <span *ngIf="!task.reporter?.avatar">{{ task.reporter?.name?.charAt(0) || 'P' }}</span>
+                                            <mat-icon *ngIf="!task.reporter?.avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-400 dark:text-slate-500"></mat-icon>
                                         </div>
-                                        <span class="absolute -bottom-1 -right-1 bg-emerald-700 text-white text-[7px] font-extrabold px-0.5 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
+                                        <span class="absolute -bottom-1 -right-1 bg-emerald-600 text-white text-[7px] font-extrabold px-0.5 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
                                     </div>
                                     <!-- Assignee Avatar & Name -->
-                                    <div class="flex items-center gap-1.5"
-                                        [matTooltip]="'អ្នកទទួលបន្ទុក (Assignee): ' + (task.assignee?.name || 'Assignee')">
+                                    <div class="flex items-center gap-1.5" *ngIf="getTaskAssignees(task).length > 0"
+                                        [matTooltip]="'អ្នកទទួលបន្ទុក: ' + getTaskAssignees(task)[0].name">
                                         <div
-                                            class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full ring-1.5 ring-blue-500 bg-blue-600 text-white flex items-center justify-center text-[9px] font-semibold overflow-hidden shadow-2xs">
-                                            <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee?.name || 'Assignee'" class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] object-cover block rounded-full" />
-                                            <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.name?.charAt(0) || 'U' }}</span>
+                                            class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
+                                            <img *ngIf="getTaskAssignees(task)[0].avatar" [src]="getTaskAssignees(task)[0].avatar" [alt]="getTaskAssignees(task)[0].name" class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] object-cover block rounded-full" />
+                                            <mat-icon *ngIf="!getTaskAssignees(task)[0].avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-400 dark:text-slate-500"></mat-icon>
                                         </div>
-                                        <span class="truncate max-w-[80px] text-[11px] font-medium">{{ task.assignee?.name || 'User' }}</span>
+                                        <span class="truncate max-w-[80px] text-[11px] font-medium">{{ getTaskAssignees(task)[0].name }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-slate-400" *ngIf="getTaskAssignees(task).length === 0"
+                                        [matTooltip]="'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
+                                        <div class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
+                                            <mat-icon svgIcon="mdi:account-outline" class="!w-3 !h-3"></mat-icon>
+                                        </div>
+                                        <span class="text-[11px]">គ្មានអ្នកទទួលបន្ទុក</span>
                                     </div>
                                 </div>
 
@@ -519,7 +528,7 @@
         <!-- ===================================================================== -->
         <div *ngIf="!loading() && viewMode() === 'grid' && tasks().length > 0"
             class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            <div *ngFor="let task of tasks()" (click)="openTaskChat(task)"
+            <div *ngFor="let task of tasks()" (click)="openTaskDetails(task)"
                 class="group rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/90 p-4 sm:p-5 shadow-2xs hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 cursor-pointer transition-all duration-200 flex flex-col justify-between">
                 <!-- Top Section: Logo + Header Info + Menu -->
                 <div>
@@ -646,9 +655,9 @@
                                 <!-- Type Selector Dropdown -->
                                 <button [matMenuTriggerFor]="cardTypeMenu" (click)="$event.stopPropagation()"
                                     class="inline-flex items-center gap-1.5 text-[11.5px] px-2 py-0.5 rounded-md font-medium border border-slate-200/90 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-750 transition-all">
-                                    <div class="w-3.5 h-3.5 rounded flex items-center justify-center text-white shrink-0"
+                                    <div class="w-4 h-4 rounded flex items-center justify-center text-white shrink-0 shadow-2xs"
                                         [ngClass]="getTaskTypeInfo(task.task_type).badgeBg">
-                                        <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-2.5 !h-2.5"></mat-icon>
+                                        <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-3 !h-3"></mat-icon>
                                     </div>
                                     <span class="font-medium">{{ getTaskTypeInfo(task.task_type).label }}</span>
                                     <mat-icon svgIcon="mdi:chevron-down" class="icon-size-3 opacity-50"></mat-icon>
@@ -717,10 +726,10 @@
                     <div class="flex items-center">
                         <ng-container *ngIf="getTaskAssignees(task).length > 0">
                             <div *ngFor="let m of getTaskAssignees(task).slice(0, 3); let i = index"
-                                class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full border-2 border-white dark:border-slate-800 overflow-hidden shadow-2xs -ml-1.5 first:ml-0 bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold"
+                                class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full border-2 border-white dark:border-slate-800 overflow-hidden shadow-2xs -ml-1.5 first:ml-0 bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
                                 [matTooltip]="m.name">
                                 <img *ngIf="m.avatar" [src]="m.avatar" alt="Avatar" class="w-full h-full object-cover" />
-                                <span *ngIf="!m.avatar">{{ m.name.charAt(0) }}</span>
+                                <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-400 dark:text-slate-500"></mat-icon>
                             </div>
                             <div *ngIf="getTaskAssignees(task).length > 3"
                                 class="w-6 h-6 min-w-[24px] min-h-[24px] rounded-full border-2 border-white dark:border-slate-800 bg-slate-600 text-white text-[10px] font-semibold flex items-center justify-center -ml-1.5 shadow-2xs">
@@ -737,8 +746,9 @@
                     </div>
 
                     <!-- Right: Speech Message Processing Bubble Icon -->
-                    <div
-                        class="text-slate-500 hover:text-slate-700 dark:text-slate-400 flex items-center gap-1 cursor-pointer">
+                    <div (click)="$event.stopPropagation(); openTaskChat(task, $event)"
+                        class="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 flex items-center gap-1 cursor-pointer transition-colors"
+                        [matTooltip]="'បើកបន្ទប់ពិភាក្សា (Open Chat)'">
                         <mat-icon svgIcon="mdi:message-processing" class="icon-size-5"></mat-icon>
                     </div>
                 </div>
@@ -748,17 +758,20 @@
 
     </div>
 
-        <!-- ===================================================================== -->
-    <!-- 5. SLIDE-OVER DRAWER: TASK CHAT ROOM & DETAILS COMPONENT               -->
+    <!-- ===================================================================== -->
+    <!-- 5. TASK DIALOGS: DETAILS MODAL (1) & CHAT ROOM MODAL (2)               -->
     <!-- ===================================================================== -->
     <task-drawer
         [task]="selectedTask()"
         [show]="showChatRoom()"
+        [dialogMode]="dialogMode()"
         [messages]="chatMessages()"
         [teamMembers]="teamMembers()"
         [allFiles]="allTaskFiles()"
         [currentUserAvatar]="getAvatarUrl()"
         (closeDrawer)="closeTaskChat()"
+        (switchToChat)="switchToChat()"
+        (switchToDetails)="switchToDetails()"
         (statusChange)="updateTaskStatus($event.task, $event.status)"
         (typeChange)="updateTaskType($event.task, $event.taskType)"
         (priorityChange)="updateTaskPriority($event.task, $event.priority)"

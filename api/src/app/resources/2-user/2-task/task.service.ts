@@ -69,10 +69,8 @@ const INITIAL_TASKS: TaskItem[] = [
         project_id: 'wms-digitech',
         project_name: 'WMS Digitech',
         reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
-        assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' },
-        assignees: [
-            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' }
-        ],
+        assignee: null as any,
+        assignees: [],
         created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -334,37 +332,77 @@ export class TaskService {
         created_at: string;
     }> {
         let comments = this.taskComments.get(taskId);
-        if (!comments || comments.length === 0) {
-            const task = this.tasks.find((t) => t.id === taskId);
-            const reporterName = task?.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
-            const reporterAvatar = task?.reporter?.avatar || null;
-            const assigneeName = task?.assignee?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+        const task = this.tasks.find((t) => t.id === taskId);
+        const reporterName = task?.reporter?.name || 'អ្នកគ្រប់គ្រង';
+        const reporterAvatar = task?.reporter?.avatar || null;
+        const reporterId = task?.reporter?.id || 1;
+        const hasAssignee = Boolean(task?.assignee?.name || (task?.assignees && task.assignees.length > 0));
+        const assigneeName = task?.assignee?.name || (task?.assignees && task.assignees.length > 0 ? task.assignees[0].name : '');
 
-            comments = [
+        if (!comments || comments.length === 0) {
+            const initialComments: any[] = [
                 {
                     id: 1,
                     sender_id: 0,
                     sender_name: 'ប្រព័ន្ធ (System)',
                     sender_avatar: null,
-                    text: `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`,
+                    text: hasAssignee && assigneeName
+                        ? `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
+                        : `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
                     time: '8:30 AM',
                     is_self: false,
                     is_system: true,
-                    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+                    created_at: task?.created_at || new Date(Date.now() - 3600000 * 4).toISOString(),
                 },
-                {
+            ];
+
+            // Default intro assignment message from real reporter to assignee
+            if (hasAssignee && assigneeName) {
+                initialComments.push({
                     id: 2,
-                    sender_id: 999,
+                    sender_id: reporterId,
                     sender_name: reporterName,
                     sender_avatar: reporterAvatar,
                     text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
                     time: '8:45 AM',
                     is_self: false,
-                    created_at: new Date(Date.now() - 3600000 * 3.5).toISOString(),
-                },
-            ];
+                    created_at: task?.created_at || new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                });
+            }
+
+            comments = initialComments;
             this.taskComments.set(taskId, comments);
             this.saveStore();
+        } else if (task && hasAssignee && assigneeName) {
+            // Ensure default intro exists and is updated with real task info
+            const introIndex = comments.findIndex(c => !c.is_system && typeof c.text === 'string' && c.text.includes('ខ្ញុំបានចាត់តាំងភារកិច្ច'));
+            if (introIndex >= 0) {
+                comments[introIndex].sender_name = reporterName;
+                comments[introIndex].sender_avatar = reporterAvatar;
+                comments[introIndex].sender_id = reporterId;
+                comments[introIndex].text = `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`;
+                this.taskComments.set(taskId, comments);
+                this.saveStore();
+            } else {
+                const introMsg = {
+                    id: 2,
+                    sender_id: reporterId,
+                    sender_name: reporterName,
+                    sender_avatar: reporterAvatar,
+                    text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
+                    time: '8:45 AM',
+                    is_self: false,
+                    created_at: task?.created_at || new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                };
+                // Insert after system message or at start
+                if (comments.length > 0 && comments[0].is_system) {
+                    comments.splice(1, 0, introMsg);
+                } else {
+                    comments.unshift(introMsg);
+                }
+                this.taskComments.set(taskId, comments);
+                this.saveStore();
+            }
         }
         return comments;
     }
