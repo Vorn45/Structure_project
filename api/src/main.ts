@@ -133,24 +133,11 @@
 
         // Enable CORS for frontend
         app.enableCors({
-            origin: (origin, callback) => {
-                if (
-                    !origin ||
-                    origin.startsWith('http://localhost') ||
-                    origin.startsWith('http://127.0.0.1') ||
-                    origin.includes('vercel.app') ||
-                    origin.includes('camcyber.com') ||
-                    origin.includes('onrender.com') ||
-                    (appConfig.CORS.ORIGINS as readonly string[]).includes(origin)
-                ) {
-                    callback(null, true);
-                } else {
-                    callback(null, true);
-                }
-            },
+            origin: true,
             methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
             credentials: true,
-            allowedHeaders: 'Content-Type, Accept, Authorization',
+            allowedHeaders: '*',
+            exposedHeaders: '*',
         });
 
         app.useBodyParser('json', { limit: '1024mb' });
