@@ -51,6 +51,7 @@ const PROJECTS: ProjectPlanItem[] = [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
             { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null },
         ],
     },
     {
@@ -68,6 +69,7 @@ const PROJECTS: ProjectPlanItem[] = [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
             { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null },
         ],
     },
 ];
@@ -146,6 +148,13 @@ export class PlanService {
                 this.projects = dbStore.plans.filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id));
                 if (this.projects.length === 0) {
                     this.projects = [...PROJECTS];
+                } else {
+                    for (const proj of this.projects) {
+                        if (!proj.members) proj.members = [];
+                        if (!proj.members.some((m: any) => m.phone === '011242425' || m.name?.toLowerCase().includes('sovannara'))) {
+                            proj.members.push({ id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null });
+                        }
+                    }
                 }
                 await this.saveStore();
             } else {

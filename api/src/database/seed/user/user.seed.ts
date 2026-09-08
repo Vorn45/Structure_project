@@ -38,6 +38,15 @@ export class UserSeeder {
                     is_active: 1,
                     auth_provider: AuthProvider.LOCAL,
                 },
+                {
+                    sex_id: 1,
+                    phone: '011242425',
+                    name_kh: 'ភួង សុវណ្ណារ៉ា',
+                    name_en: 'Phuong Sovannara',
+                    email: 'phuongsovannara@gmail.com',
+                    is_active: 1,
+                    auth_provider: AuthProvider.LOCAL,
+                },
             ];
 
             const allowedPhones = activeUsers.map((u) => u.phone).filter(Boolean) as string[];

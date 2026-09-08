@@ -445,13 +445,13 @@ export class TaskService {
 
     async getMembers(user: UserPayload) {
         let dbUsers: User[] = [];
-        const allowedPhones = ['010843612', '087280875', '067776682'];
+        const allowedPhones = ['010843612', '087280875', '067776682', '011242425'];
         try {
             dbUsers = await this._userRepo.find({
                 relations: ['user_roles', 'user_roles.role', 'avatar_file'],
                 order: { id: 'ASC' },
             });
-            // Filter strictly to the 3 active team members
+            // Filter strictly to the 4 active team members
             dbUsers = dbUsers.filter((u) => u.phone && allowedPhones.includes(u.phone));
             // Deduplicate by phone
             const seen = new Set<string>();
@@ -472,12 +472,15 @@ export class TaskService {
             'bg-indigo-600',
             'bg-blue-600',
             'bg-emerald-600',
+            'bg-amber-600',
+            'bg-purple-600',
         ];
 
         const defaultFallbacks = [
             { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600', phone: '010843612' },
             { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600', phone: '087280875' },
             { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600', phone: '067776682' },
+            { id: 67, name: 'Phuong Sovannara', name_en: 'Phuong Sovannara', name_kh: 'ភួង សុវណ្ណារ៉ា', role: 'Developer', email: 'phuongsovannara@gmail.com', avatar: null, colorClass: 'bg-amber-600', phone: '011242425' },
         ];
 
         let mapped = dbUsers.map((u, idx) => {

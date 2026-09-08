@@ -48,6 +48,14 @@
                     roles: ['user'],
                     telegram_id: '1174417436',
                 },
+                {
+                    phone: '011242425',
+                    name_en: 'Phuong Sovannara',
+                    name_kh: 'ភួង សុវណ្ណារ៉ា',
+                    email: 'phuongsovannara@gmail.com',
+                    roles: ['user'],
+                    telegram_id: null,
+                },
             ];
 
             const salt = await bcrypt.genSalt(10);

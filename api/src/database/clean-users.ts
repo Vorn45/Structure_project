@@ -44,6 +44,14 @@ async function run() {
             roles: ['user'],
             telegram_id: '1174417436',
         },
+        {
+            phone: '011242425',
+            name_en: 'Phuong Sovannara',
+            name_kh: 'ភួង សុវណ្ណារ៉ា',
+            email: 'phuongsovannara@gmail.com',
+            roles: ['user'],
+            telegram_id: null,
+        },
     ];
 
     const keepPhones = targetUsers.map(u => u.phone);
@@ -55,7 +63,7 @@ async function run() {
         `DELETE FROM "user_device" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
         `DELETE FROM "user_session_log" WHERE "user_id" NOT IN (SELECT id FROM "user" WHERE "phone" = ANY($1))`,
         `DELETE FROM "user"."task_store"`,
-        `DELETE FROM "user" WHERE "phone" NOT IN ('010843612', '087280875', '067776682')`,
+        `DELETE FROM "user" WHERE "phone" NOT IN ('010843612', '087280875', '067776682', '011242425')`,
     ]) {
         try {
             await dataSource.query(sql, [keepPhones]);
