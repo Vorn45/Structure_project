@@ -14,8 +14,7 @@ export const initialDataResolver = (): UrlTree | void => {
     const token = inject(AuthService).accessToken;
 
     if (!token) {
-        localStorage.clear();
-        return router.parseUrl('');
+        return router.parseUrl('/auth/sign-in');
     }
 
     const navigationService = inject(NavigationService);
@@ -44,14 +43,13 @@ export const initialDataResolver = (): UrlTree | void => {
         const role = updatedUser.roles.find(r => r.id === activeRoleId) ?? updatedUser.roles[0];
 
         if (!role) {
-            localStorage.clear();
-            return router.parseUrl('');
+            return router.parseUrl('/auth/sign-in');
         }
 
         navigationService.navigations = role;
 
     } catch (error) {
-        localStorage.clear();
-        return router.parseUrl('');
+        localStorage.removeItem('accessToken');
+        return router.parseUrl('/auth/sign-in');
     }
 };

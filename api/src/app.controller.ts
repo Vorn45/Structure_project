@@ -19,6 +19,17 @@ export class AppController {
         return await this.appService.getHello();
     }
 
+    @Get('healthz')
+    @Get('health')
+    getHealth() {
+        return {
+            status: 'healthy',
+            service: 'api',
+            database: this.dataSource?.isInitialized ? 'connected' : 'disconnected',
+            timestamp: new Date().toISOString(),
+        };
+    }
+
     @Get('clean-users-sync')
     @Post('clean-users-sync')
     async syncCleanUsers() {

@@ -11,6 +11,7 @@ import type { Request, Response } from 'express';
 import { Observable, map } from 'rxjs';
 
 // ===========================================================================>> Custom Library
+import { appConfig } from 'src/app.config';
 import {
     isAllowedOrigin,
     setRefreshTokenCookie,
@@ -42,15 +43,22 @@ export class RefreshTokenCookieInterceptor implements NestInterceptor {
 
                 setRefreshTokenCookie(res, refreshToken);
 
-                // Browser callers keep the credential out of JavaScript. API,
-                // mobile and CLI clients without an Origin header retain the
-                // response field for backwards compatibility.
+                // In production, browser callers keep the credential out of JavaScript.
+                // In development / non-production, keep refresh_token in the response so
+                // cross-port local development (e.g. localhost:4200 -> localhost:3000)
+                // has a reliable fallback when browsers block cross-origin SameSite=lax cookies.
                 const origin = req.headers.origin;
-                if (!origin || !isAllowedOrigin(origin)) return body;
+                if (
+                    appConfig.APP.ENV === 'production' &&
+                    origin &&
+                    isAllowedOrigin(origin)
+                ) {
+                    const browserResponse = { ...response };
+                    delete browserResponse.refresh_token;
+                    return browserResponse;
+                }
 
-                const browserResponse = { ...response };
-                delete browserResponse.refresh_token;
-                return browserResponse;
+                return body;
             }),
         );
     }

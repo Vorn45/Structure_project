@@ -55,13 +55,7 @@ export class AuthService {
     set refreshToken(refresh_token: string) {
         if (!refresh_token || refresh_token === 'undefined' || refresh_token === 'null') {
             localStorage.removeItem('refreshToken');
-        } else if (refresh_token.startsWith('pms_rt_')) {
-            // Opaque refresh tokens belong in the HttpOnly cookie set by the
-            // API. Never persist them in JavaScript-readable storage.
-            localStorage.removeItem('refreshToken');
-            localStorage.setItem(this._refreshSessionKey, 'true');
         } else {
-            // Temporary migration support for refresh JWTs issued by an older API.
             localStorage.setItem('refreshToken', refresh_token);
             localStorage.setItem(this._refreshSessionKey, 'true');
         }
@@ -150,15 +144,14 @@ export class AuthService {
         if (refresh_token) {
             try {
                 if (
-                    refresh_token.startsWith('pms_rt_') ||
+                    !refresh_token.startsWith('pms_rt_') &&
                     AuthUtils.isTokenExpired(refresh_token)
                 ) {
                     this.refreshToken = '';
                     refresh_token = '';
                 }
             } catch {
-                this.refreshToken = '';
-                refresh_token = '';
+                // Ignore decoding error for opaque tokens
             }
         }
         if (!refresh_token && !this.hasRefreshSession) {
