@@ -99,6 +99,14 @@ export class UserTaskComponent implements OnInit {
     loading = signal<boolean>(true);
     tasks = signal<TaskItem[]>([]);
     isDragging = signal<boolean>(false);
+    showDeleteModal = signal<boolean>(false);
+    deleteTarget = signal<TaskItem | null>(null);
+    isDeleting = signal<boolean>(false);
+
+    confirmDelete(task: TaskItem): void {
+        this.deleteTarget.set(task);
+        this.showDeleteModal.set(true);
+    }
     counts = signal<{
         all: number;
         new: number;
@@ -771,10 +779,25 @@ export class UserTaskComponent implements OnInit {
         });
     }
 
-    deleteTask(id: number): void {
-        if (!confirm('តើអ្នកពិតជាចង់លុបការងារនេះមែនទេ?')) return;
+    deleteTask(taskId?: number): void {
+        const id = taskId || this.deleteTarget()?.id;
+        if (!id) return;
+        this.isDeleting.set(true);
         this._taskService.deleteTask(id).subscribe({
-            next: () => this.loadTasks(),
+            next: () => {
+                this.isDeleting.set(false);
+                this.showDeleteModal.set(false);
+                this.deleteTarget.set(null);
+                if (this.selectedTask()?.id === id) {
+                    this.closeTaskChat();
+                }
+                this.loadTasks();
+            },
+            error: () => {
+                this.isDeleting.set(false);
+                this.showDeleteModal.set(false);
+                this.deleteTarget.set(null);
+            },
         });
     }
 

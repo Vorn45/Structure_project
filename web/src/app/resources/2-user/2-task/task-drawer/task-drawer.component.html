@@ -148,6 +148,13 @@
                                 <span class="text-[13px]">ភ្ជាប់ឯកសារថ្មី</span>
                             </div>
                         </button>
+                        <mat-divider></mat-divider>
+                        <button mat-menu-item (click)="deleteTask.emit(task()!)">
+                            <div class="flex items-center gap-2.5 text-rose-600">
+                                <mat-icon svgIcon="mdi:trash-can-outline" class="!w-4 !h-4 text-rose-600"></mat-icon>
+                                <span class="text-[13px] text-rose-600 font-medium">លុបការងារ</span>
+                            </div>
+                        </button>
                     </mat-menu>
                 </div>
             </div>

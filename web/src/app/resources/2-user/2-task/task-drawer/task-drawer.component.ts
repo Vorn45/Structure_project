@@ -125,6 +125,7 @@ export class TaskDrawerComponent {
     viewFile = output<TaskAttachment>();
     previewImage = output<string>();
     downloadFile = output<TaskAttachment>();
+    deleteTask = output<TaskItem>();
 
     taskTypes = TASK_TYPES_LIST;
 
