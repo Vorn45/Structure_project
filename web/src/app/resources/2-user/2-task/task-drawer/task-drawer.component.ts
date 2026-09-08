@@ -91,6 +91,24 @@ import {
                 width: 100% !important;
             }
 
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mat-icon {
+                margin: 0 !important;
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+                margin-inline-end: 0 !important;
+                margin-inline-start: 0 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mat-icon svg {
+                width: 100% !important;
+                height: 100% !important;
+                display: block !important;
+                margin: auto !important;
+            }
+
             ::ng-deep .task-dropdown-menu .mat-divider {
                 border-top-color: #e2e8f0 !important;
             }

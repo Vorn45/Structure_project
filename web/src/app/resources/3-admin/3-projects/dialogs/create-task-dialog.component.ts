@@ -213,7 +213,7 @@ export interface TeamMember {
                             <div *ngIf="reporterName" class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                     <img *ngIf="reporterAvatar" [src]="reporterAvatar" alt="Avatar" class="w-full h-full object-cover" />
-                                    <mat-icon *ngIf="!reporterAvatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-500 dark:text-slate-400"></mat-icon>
+                                    <mat-icon *ngIf="!reporterAvatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-[14px] font-medium text-slate-800 dark:text-white truncate leading-tight">
@@ -232,45 +232,37 @@ export interface TeamMember {
                                 </button>
                             </div>
 
-                            <!-- Unselected Reporter Placeholder -->
-                            <button
-                                *ngIf="!reporterName"
-                                type="button"
-                                [matMenuTriggerFor]="reporterMenu"
-                                class="w-full py-2.5 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 bg-white dark:bg-slate-800 text-left flex items-center justify-between text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all cursor-pointer"
-                            >
-                                <span class="text-[13px] font-medium">+ ជ្រើសរើសអ្នករាយការណ៍</span>
-                                <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400"></mat-icon>
-                            </button>
+                            <!-- Empty state for Reporter -->
+                            <div *ngIf="!reporterName" class="p-3 text-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
+                                <p class="text-xs text-slate-500 dark:text-slate-400">មិនទាន់បានកំណត់អ្នកបង្កើតនៅឡើយទេ</p>
+                            </div>
                         </div>
 
-                        <!-- Assignee / Responsible (អ្នកទទួលខុសត្រូវ) -->
-                        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/30 space-y-2">
+                        <!-- Assignees Section -->
+                        <div class="space-y-2">
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-[13px] font-medium text-slate-700 dark:text-slate-300 block">
-                                        អ្នកទទួលខុសត្រូវ
+                                <label class="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                    <span>អ្នកទទួលបន្ទុក</span>
+                                    <span *ngIf="selectedAssignees.length > 0" class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 font-semibold">
+                                        {{ selectedAssignees.length }} នាក់
                                     </span>
-                                    <span *ngIf="selectedAssignees.length > 0" class="text-[11px] font-semibold px-1.5 py-0.2 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-                                        {{ selectedAssignees.length }}
-                                    </span>
-                                </div>
+                                </label>
                                 <button
                                     type="button"
                                     [matMenuTriggerFor]="assigneeMenu"
-                                    class="px-2 py-0.5 text-[12px] font-medium font-kantumruy text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 rounded-lg transition-colors cursor-pointer"
-                                >
-                                    + បន្ថែម
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer">
+                                    <mat-icon svgIcon="mdi:account-plus-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                                    <span>ចាត់តាំង</span>
                                 </button>
                             </div>
 
-                            <!-- Selected Assignee List -->
+                            <!-- Selected Assignees List -->
                             <div *ngIf="selectedAssignees.length > 0" class="space-y-1.5 max-h-36 overflow-y-auto pr-0.5">
                                 <div *ngFor="let m of selectedAssignees"
                                     class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
                                     <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                         <img *ngIf="m.avatar" [src]="m.avatar" alt="Avatar" class="w-full h-full object-cover" />
-                                        <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-500 dark:text-slate-400"></mat-icon>
+                                        <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <p class="text-[13px] font-medium text-slate-800 dark:text-white truncate leading-tight">
@@ -314,19 +306,15 @@ export interface TeamMember {
                         <div (click)="$event.stopPropagation()" class="max-h-60 overflow-y-auto space-y-0.5">
                             <div *ngFor="let m of teamMembers"
                                 (click)="toggleAssignee(m.id)"
-                                class="flex items-center justify-between w-full px-2.5 py-1.5 rounded-xl cursor-pointer transition-colors font-kantumruy select-none my-0.5"
-                                [ngClass]="isAssigneeSelected(m.id)
-                                    ? 'bg-blue-50/70 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
-                                    : 'hover:bg-slate-100 dark:hover:bg-slate-800/70 text-slate-800 dark:text-slate-200'">
+                                class="flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors font-kantumruy select-none my-0.5">
                                 <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                                     <!-- Avatar or Default Icon User -->
                                     <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                         <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
-                                        <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-500 dark:text-slate-400"></mat-icon>
+                                        <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                     </div>
-                                    <div class="min-w-0 text-left">
-                                        <p class="text-[12.5px] font-medium truncate leading-snug"
-                                            [ngClass]="isAssigneeSelected(m.id) ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-slate-800 dark:text-slate-200'">
+                                    <div class="min-w-0 text-left flex-1">
+                                        <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">
                                             {{ m.name }}
                                         </p>
                                         <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate leading-tight">
@@ -334,7 +322,7 @@ export interface TeamMember {
                                         </p>
                                     </div>
                                 </div>
-                                <mat-icon *ngIf="isAssigneeSelected(m.id)" svgIcon="mdi:check" class="!w-4 !h-4 text-blue-500 shrink-0 ml-auto"></mat-icon>
+                                <mat-icon *ngIf="isAssigneeSelected(m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 text-blue-500 shrink-0 ml-auto"></mat-icon>
                             </div>
 
                             <div *ngIf="teamMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
@@ -356,14 +344,14 @@ export interface TeamMember {
                                         <!-- Avatar or Default Icon User -->
                                         <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                             <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
-                                            <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-500 dark:text-slate-400"></mat-icon>
+                                            <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                         </div>
                                         <div class="min-w-0 text-left">
                                             <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">{{ m.name }}</p>
                                             <p class="text-[11px] text-slate-400 truncate leading-tight">{{ m.role || 'អ្នករាយការណ៍' }}</p>
                                         </div>
                                     </div>
-                                    <mat-icon *ngIf="reporterName === m.name || (reporterId && reporterId === m.id)" svgIcon="mdi:check" class="!w-4 !h-4 text-blue-500 ml-auto"></mat-icon>
+                                    <mat-icon *ngIf="reporterName === m.name || (reporterId && reporterId === m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 shrink-0 text-blue-500 ml-auto"></mat-icon>
                                 </div>
                             </button>
 
@@ -608,6 +596,24 @@ export interface TeamMember {
                 display: flex !important;
                 align-items: center !important;
                 width: 100% !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mat-icon {
+                margin: 0 !important;
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+                margin-inline-end: 0 !important;
+                margin-inline-start: 0 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mat-icon svg {
+                width: 100% !important;
+                height: 100% !important;
+                display: block !important;
+                margin: auto !important;
             }
         `,
     ],

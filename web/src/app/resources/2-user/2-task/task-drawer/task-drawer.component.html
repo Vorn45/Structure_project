@@ -230,7 +230,7 @@
                                 [matTooltip]="'ផ្លាស់ប្តូរអ្នកទទួលបន្ទុក'">
                                 <div class="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                     <img *ngIf="getTaskAssignees(task())[0].avatar" [src]="getTaskAssignees(task())[0].avatar" class="w-full h-full object-cover" />
-                                    <mat-icon *ngIf="!getTaskAssignees(task())[0].avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-500 dark:text-slate-400"></mat-icon>
+                                    <mat-icon *ngIf="!getTaskAssignees(task())[0].avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                 </div>
                                 <span class="truncate max-w-[130px]">{{ getTaskAssignees(task())[0].name }}</span>
                                 <mat-icon svgIcon="mdi:chevron-down" class="!w-3 !h-3 opacity-70 text-slate-500 dark:text-slate-400"></mat-icon>
@@ -246,7 +246,7 @@
                                         [matTooltip]="member.name"
                                         class="inline-block w-5 h-5 rounded-full ring-2 ring-white dark:ring-[#0c1527] overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-2xs">
                                         <img *ngIf="member.avatar" [src]="member.avatar" class="w-full h-full object-cover" />
-                                        <mat-icon *ngIf="!member.avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-500 dark:text-slate-400"></mat-icon>
+                                        <mat-icon *ngIf="!member.avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                     </div>
                                 </div>
                                 <span class="text-[13px] text-slate-800 dark:text-slate-200 font-semibold">
@@ -277,7 +277,7 @@
                                 [matTooltip]="'ផ្លាស់ប្តូរអ្នកបង្កើត'">
                                 <div class="w-5 h-5 rounded-full flex items-center justify-center overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                     <img *ngIf="task()?.reporter?.avatar" [src]="task()?.reporter?.avatar" class="w-full h-full object-cover" />
-                                    <mat-icon *ngIf="!task()?.reporter?.avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-500 dark:text-slate-400"></mat-icon>
+                                    <mat-icon *ngIf="!task()?.reporter?.avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                 </div>
                                 <span class="truncate max-w-[130px]">{{ task()?.reporter?.name || 'មិនបានបញ្ជាក់' }}</span>
                                 <mat-icon svgIcon="mdi:chevron-down" class="!w-3 !h-3 opacity-70 text-slate-500 dark:text-slate-400"></mat-icon>
@@ -400,20 +400,16 @@
                     <div (click)="$event.stopPropagation()" class="max-h-64 overflow-y-auto p-1.5 space-y-0.5">
                         <div *ngFor="let m of filteredTeamMembers()"
                             (click)="toggleAssignee(m, $event)"
-                            class="flex items-center justify-between p-2 rounded-xl cursor-pointer transition-colors font-kantumruy select-none"
-                            [ngClass]="isMemberAssigned(task(), m)
-                                ? 'bg-blue-50/70 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
-                                : 'hover:bg-slate-100 dark:hover:bg-slate-800/70 text-slate-800 dark:text-slate-200'">
+                            class="flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors font-kantumruy select-none my-0.5">
                             
                             <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                                 <!-- Avatar or Default Icon User -->
                                 <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                     <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
-                                    <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-500 dark:text-slate-400"></mat-icon>
+                                    <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-[12.5px] font-medium truncate leading-snug"
-                                        [ngClass]="isMemberAssigned(task(), m) ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-slate-800 dark:text-slate-200'">
+                                    <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">
                                         {{ m.name }}
                                     </p>
                                     <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate leading-tight">
@@ -422,13 +418,8 @@
                                 </div>
                             </div>
 
-                            <!-- Checkbox Indicator -->
-                            <div class="w-4.5 h-4.5 rounded-md flex items-center justify-center shrink-0 transition-colors"
-                                [ngClass]="isMemberAssigned(task(), m)
-                                    ? 'bg-blue-600 text-white shadow-2xs'
-                                    : 'border border-slate-300 dark:border-slate-600'">
-                                <mat-icon *ngIf="isMemberAssigned(task(), m)" svgIcon="mdi:check" class="!w-3 !h-3 text-white"></mat-icon>
-                            </div>
+                            <!-- Checkmark Selection Indicator (Reporter Style) -->
+                            <mat-icon *ngIf="isMemberAssigned(task(), m)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 shrink-0 text-blue-500 ml-auto"></mat-icon>
                         </div>
 
                         <!-- Empty search state -->
@@ -451,14 +442,14 @@
                                     <!-- Avatar or Default Icon User -->
                                     <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                         <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
-                                        <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-500 dark:text-slate-400"></mat-icon>
+                                        <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                     </div>
                                     <div class="min-w-0 text-left">
                                         <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">{{ m.name }}</p>
                                         <p class="text-[11px] text-slate-400 truncate leading-tight">{{ m.role || 'អ្នករាយការណ៍' }}</p>
                                     </div>
                                 </div>
-                                <mat-icon *ngIf="task()?.reporter?.id === m.id || (task()?.reporter?.name && m.name && task()?.reporter?.name === m.name)" svgIcon="mdi:check" class="!w-4 !h-4 text-blue-500 ml-auto"></mat-icon>
+                                <mat-icon *ngIf="task()?.reporter?.id === m.id || (task()?.reporter?.name && m.name && task()?.reporter?.name === m.name)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 shrink-0 text-blue-500 ml-auto"></mat-icon>
                             </div>
                         </button>
                     </div>
