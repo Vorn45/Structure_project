@@ -294,17 +294,19 @@ export interface TeamMember {
 
                             <div>
                                 <label class="block font-normal text-slate-800 dark:text-slate-200 mb-1.5 text-[16px]">
-                                    ប្រភេទការងារ
+                                    ប្រភេទការងារ (Task Type)
                                 </label>
                                 <select
-                                    [(ngModel)]="category"
+                                    [(ngModel)]="selectedTaskType"
                                     class="w-full px-3.5 py-2.5 text-[15px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 >
-                                    <option value="it">បច្ចេកវិទ្យាព័ត៌មាន (IT & Software)</option>
-                                    <option value="infrastructure">ហេដ្ឋារចនាសម្ព័ន្ធ (Infrastructure)</option>
-                                    <option value="operations">ប្រតិបត្តិការទូទៅ (Operations)</option>
-                                    <option value="design">ការរចនា និង UI/UX (Design & Creative)</option>
-                                    <option value="marketing">យុទ្ធនាការ និងផ្សព្វផ្សាយ (Marketing)</option>
+                                    <option value="bug">🐞 កំហុស (Bug)</option>
+                                    <option value="feature">➕ មុខងារ (Feature)</option>
+                                    <option value="improvement">⬆️ ការកែលម្អ (Improvement)</option>
+                                    <option value="documentation">📄 ឯកសារ (Documentation)</option>
+                                    <option value="research">🔍 ស្រាវជ្រាវ (Research)</option>
+                                    <option value="refactor">🧹 ប្លង់កម្មវិធី (Refactor)</option>
+                                    <option value="core_task">🎯 កិច្ចការចម្បង (Core Task)</option>
                                 </select>
                             </div>
                         </div>
@@ -518,6 +520,7 @@ export class CreateTaskDialogComponent implements OnInit {
         },
     ];
     selectedStatus = signal<string>('new');
+    selectedTaskType: string = 'bug';
 
     // Reporter (អ្នករាយការណ៍ / អ្នកបង្កើត)
     reporterName: string = 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
@@ -591,6 +594,7 @@ export class CreateTaskDialogComponent implements OnInit {
         this.dialogRef.close({
             title,
             code: this.taskCode,
+            task_type: this.selectedTaskType,
             status: this.selectedStatus(),
             priority: this.priority(),
             due_date: this.endDate,

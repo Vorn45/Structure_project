@@ -189,5 +189,49 @@ export class IconsService {
                 </svg>`,
             ),
         );
+
+        // Task Type Icons (Pixel-perfect matching design specification)
+        matIconRegistry.addSvgIconLiteral(
+            'task-type-feature',
+            domSanitizer.bypassSecurityTrustHtml(
+                `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
+            )
+        );
+        matIconRegistry.addSvgIconLiteral(
+            'task-type-improvement',
+            domSanitizer.bypassSecurityTrustHtml(
+                `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="6 11 12 5 18 11"></polyline></svg>`
+            )
+        );
+        matIconRegistry.addSvgIconLiteral(
+            'task-type-bug',
+            domSanitizer.bypassSecurityTrustHtml(
+                `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8h-1.81a5.985 5.985 0 0 0-1.82-1.96l.93-.93a.996.996 0 1 0-1.41-1.41l-1.47 1.47C12.8 5.06 12.4 5 12 5s-.8.06-1.42.17L9.11 3.7a.996.996 0 1 0-1.41 1.41l.93.93C7.44 6.74 6.7 7.58 6.2 8H4a1 1 0 0 0 0 2h1.61c-.07.32-.11.66-.11 1v1H4a1 1 0 0 0 0 2h1.5v1c0 .34.04.68.11 1H4a1 1 0 0 0 0 2h2.2c1.08.91 2.37 1.54 3.8 1.83v-5.83h4v5.83c1.43-.29 2.72-.92 3.8-1.83H20a1 1 0 0 0 0-2h-1.61c.07-.32.11-.66.11-1v-1H20a1 1 0 0 0 0-2h-1.5v-1c0-.34-.04-.68-.11-1H20a1 1 0 0 0 0-2z"/></svg>`
+            )
+        );
+        matIconRegistry.addSvgIconLiteral(
+            'task-type-doc',
+            domSanitizer.bypassSecurityTrustHtml(
+                `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`
+            )
+        );
+        matIconRegistry.addSvgIconLiteral(
+            'task-type-research',
+            domSanitizer.bypassSecurityTrustHtml(
+                `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2.19 12.19L6.5 17.5l3.31-7.69L17.5 6.5l-3.31 7.69z"/></svg>`
+            )
+        );
+        matIconRegistry.addSvgIconLiteral(
+            'task-type-refactor',
+            domSanitizer.bypassSecurityTrustHtml(
+                `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34a.996.996 0 0 0-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"/></svg>`
+            )
+        );
+        matIconRegistry.addSvgIconLiteral(
+            'task-type-core',
+            domSanitizer.bypassSecurityTrustHtml(
+                `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2" fill="currentColor"></circle></svg>`
+            )
+        );
     }
 }

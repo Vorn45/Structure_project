@@ -637,6 +637,46 @@
                             <p class="text-[13px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
                                 {{ task.description || 'Project Management System (PMS)' }}
                             </p>
+
+                            <!-- Task Type & Priority Header Row (Matching reference screenshot) -->
+                            <div class="flex items-center gap-2 mt-2">
+                                <!-- Type Selector Dropdown -->
+                                <button [matMenuTriggerFor]="cardTypeMenu" (click)="$event.stopPropagation()"
+                                    class="inline-flex items-center gap-1.5 text-[11.5px] px-2 py-0.5 rounded-md font-medium border border-slate-200/90 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-750 transition-all">
+                                    <div class="w-3.5 h-3.5 rounded flex items-center justify-center text-white shrink-0"
+                                        [ngClass]="getTaskTypeInfo(task.task_type).badgeBg">
+                                        <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-2.5 !h-2.5"></mat-icon>
+                                    </div>
+                                    <span class="font-medium">{{ getTaskTypeInfo(task.task_type).label }}</span>
+                                    <mat-icon svgIcon="mdi:chevron-down" class="icon-size-3 opacity-50"></mat-icon>
+                                </button>
+                                <mat-menu #cardTypeMenu="matMenu" class="!rounded-2xl !p-1.5 !min-w-[190px] font-kantumruy !bg-[#1c2438] !text-white !border !border-slate-700">
+                                    <button *ngFor="let t of taskTypes" mat-menu-item (click)="updateTaskType(task, t.id)"
+                                        class="!text-[13px] flex items-center gap-2.5 !text-slate-200 hover:!bg-slate-800/80 !rounded-xl my-0.5">
+                                        <div class="w-5 h-5 rounded-lg flex items-center justify-center text-white shrink-0 shadow-2xs" [ngClass]="t.badgeBg">
+                                            <mat-icon [svgIcon]="t.icon" class="!w-3.5 !h-3.5 text-white"></mat-icon>
+                                        </div>
+                                        <span class="font-medium">{{ t.label }}</span>
+                                    </button>
+                                </mat-menu>
+
+                                <span class="text-slate-300 dark:text-slate-600 font-bold">•</span>
+
+                                <!-- Priority Selector -->
+                                <button [matMenuTriggerFor]="cardPriorityDropMenu" (click)="$event.stopPropagation()"
+                                    class="inline-flex items-center gap-1 text-[11.5px] px-2 py-0.5 rounded-md font-medium border cursor-pointer transition-colors shadow-2xs"
+                                    [ngClass]="getPriorityClass(task.priority)">
+                                    <mat-icon [svgIcon]="getPriorityIcon(task.priority)" class="icon-size-3"></mat-icon>
+                                    <span>{{ getPriorityLabel(task.priority) }}</span>
+                                    <mat-icon svgIcon="mdi:chevron-down" class="icon-size-3 opacity-50"></mat-icon>
+                                </button>
+                                <mat-menu #cardPriorityDropMenu="matMenu">
+                                    <button mat-menu-item (click)="updateTaskPriority(task, 'urgent')">បន្ទាន់ (Urgent)</button>
+                                    <button mat-menu-item (click)="updateTaskPriority(task, 'high')">ខ្ពស់ (High)</button>
+                                    <button mat-menu-item (click)="updateTaskPriority(task, 'medium')">មធ្យម (Medium)</button>
+                                    <button mat-menu-item (click)="updateTaskPriority(task, 'low')">ទាប (Low)</button>
+                                </mat-menu>
+                            </div>
                         </div>
                     </div>
 
@@ -717,6 +757,7 @@
         [currentUserAvatar]="getAvatarUrl()"
         (closeDrawer)="closeTaskChat()"
         (statusChange)="updateTaskStatus($event.task, $event.status)"
+        (typeChange)="updateTaskType($event.task, $event.taskType)"
         (priorityChange)="updateTaskPriority($event.task, $event.priority)"
         (dueDateChange)="updateTaskDueDate($event.task, $event.dueDate)"
         (assigneeToggle)="toggleTaskAssignee($event.task, $event.member)"

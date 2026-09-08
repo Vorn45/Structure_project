@@ -15,12 +15,14 @@ import { CreateTaskDialogComponent } from '../../3-admin/3-projects/dialogs/crea
 import { TaskDrawerComponent } from './task-drawer/task-drawer.component';
 import { FilePreviewModalComponent } from './file-preview-modal/file-preview-modal.component';
 import {
+    TASK_TYPES_LIST,
     TaskAttachment,
     TaskChatMessage,
     TaskItem,
     TaskMember,
     TaskPriority,
     TaskStatus,
+    TaskTypeOption,
 } from './models/task.types';
 import { UserTaskService } from './task.service';
 
@@ -87,6 +89,13 @@ import { UserTaskService } from './task.service';
     ],
 })
 export class UserTaskComponent implements OnInit {
+    taskTypes = TASK_TYPES_LIST;
+
+    getTaskTypeInfo(type?: string): TaskTypeOption {
+        const found = this.taskTypes.find((t) => t.id === type);
+        return found || this.taskTypes[2]; // Default to 'bug' (កំហុស)
+    }
+
     loading = signal<boolean>(true);
     tasks = signal<TaskItem[]>([]);
     isDragging = signal<boolean>(false);
@@ -504,6 +513,43 @@ export class UserTaskComponent implements OnInit {
         });
     }
 
+    updateTaskType(task: TaskItem, newType: string): void {
+        const oldType = task.task_type;
+        const targetType = newType;
+
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.update((t) => (t ? { ...t, task_type: targetType } : null));
+            const oldLabel = this.getTaskTypeInfo(oldType).label;
+            const newLabel = this.getTaskTypeInfo(targetType).label;
+            const systemMsg: TaskChatMessage = {
+                id: Date.now(),
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `បានប្តូរប្រភេទការងារពី "${oldLabel}" ទៅជា "${newLabel}"`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                is_system: true,
+            };
+            this.appendChatMessage(task.id, systemMsg);
+        }
+
+        this.tasks.update((tasks) =>
+            tasks.map((t) => (t.id === task.id ? { ...t, task_type: targetType } : t))
+        );
+
+        this._taskService.updateTask(task.id, { task_type: targetType as any }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.update((t) => (t ? { ...t, ...res.data } : null));
+                    }
+                    this.tasks.update((tasks) =>
+                        tasks.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
+                    );
+                }
+            },
+            error: (err) => console.error('Failed to update task type', err),
+        });
+    }
+
     updateTaskDueDate(task: TaskItem, newDateStr: string | null): void {
         const formatted = newDateStr ? this.formatDate(newDateStr) : 'សម្អាត';
 
@@ -696,6 +742,7 @@ export class UserTaskComponent implements OnInit {
                     .createTask({
                         title: result.title,
                         code: result.code,
+                        task_type: result.task_type || 'bug',
                         status: result.status || 'new',
                         priority: result.priority || 'medium',
                         due_date: result.due_date,

@@ -6,12 +6,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
+    TASK_TYPES_LIST,
     TaskAttachment,
     TaskChatMessage,
     TaskItem,
     TaskMember,
     TaskPriority,
     TaskStatus,
+    TaskTypeOption,
 } from '../models/task.types';
 
 @Component({
@@ -30,6 +32,7 @@ export class TaskDrawerComponent {
 
     closeDrawer = output<void>();
     statusChange = output<{ task: TaskItem; status: string }>();
+    typeChange = output<{ task: TaskItem; taskType: string }>();
     priorityChange = output<{ task: TaskItem; priority: string }>();
     dueDateChange = output<{ task: TaskItem; dueDate: string | null }>();
     assigneeToggle = output<{ task: TaskItem; member: TaskMember }>();
@@ -37,6 +40,13 @@ export class TaskDrawerComponent {
     viewFile = output<TaskAttachment>();
     previewImage = output<string>();
     downloadFile = output<TaskAttachment>();
+
+    taskTypes = TASK_TYPES_LIST;
+
+    getTaskTypeInfo(type?: string): TaskTypeOption {
+        const found = this.taskTypes.find((t) => t.id === type);
+        return found || this.taskTypes[2]; // Default to 'bug' (កំហុស) or 'feature'
+    }
 
     activeTab = signal<'chat' | 'details' | 'files'>('chat');
     newChatMessage = '';

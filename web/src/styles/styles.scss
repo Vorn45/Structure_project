@@ -59,6 +59,92 @@ body::-webkit-scrollbar {
     background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
+/* Task Type Dropdown Menu (White / Clean Theme with Pixel-Perfect Icon Badges) */
+.mat-mdc-menu-panel.task-type-menu-panel {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    min-width: 165px !important;
+    max-width: 200px !important;
+    padding: 6px !important;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08) !important;
+
+    .mat-mdc-menu-content {
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+    }
+
+    .mat-mdc-menu-item {
+        min-height: 36px !important;
+        height: 36px !important;
+        padding: 0 8px !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        color: #334155 !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        line-height: 1 !important;
+        letter-spacing: normal !important;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &:hover, &:focus {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        .mat-mdc-menu-item-text {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+
+        .type-badge-icon {
+            width: 22px !important;
+            height: 22px !important;
+            min-width: 22px !important;
+            min-height: 22px !important;
+            max-width: 22px !important;
+            max-height: 22px !important;
+            border-radius: 6px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+            overflow: hidden !important;
+
+            mat-icon {
+                width: 13px !important;
+                height: 13px !important;
+                min-width: 13px !important;
+                min-height: 13px !important;
+                max-width: 13px !important;
+                max-height: 13px !important;
+                font-size: 13px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                color: #ffffff !important;
+                fill: currentColor !important;
+
+                svg {
+                    width: 13px !important;
+                    height: 13px !important;
+                    max-width: 13px !important;
+                    max-height: 13px !important;
+                }
+            }
+        }
+    }
+}
+
 .custom-otp-dialog .mat-dialog-container,
 .custom-otp-dialog .mat-mdc-dialog-container {
     border-radius: 12px !important;

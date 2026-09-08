@@ -25,6 +25,7 @@ export interface TaskItem {
     title: string;
     description: string;
     module?: string;
+    task_type?: string;
     status: TaskStatus;
     priority: TaskPriority;
     progress: number;
