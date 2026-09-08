@@ -827,7 +827,7 @@ export class TaskService {
 
         const frontendUrl = (
             process.env.APP_DEPLOY_URL ||
-            'https://structure-project-ten.vercel.app'
+            'https://wms-digitechkh.vercel.app'
         ).replace(/\/+$/, '');
         const taskUrl = `${frontendUrl}/#/member/projects/${task.project_id || 'wms-digitech'}`;
 

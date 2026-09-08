@@ -126,6 +126,7 @@
         // Enable CORS for frontend
         app.enableCors({
             origin: [
+                'https://wms-digitechkh.vercel.app',
                 'https://structure-project-ten.vercel.app',
                 'http://localhost:4200',
                 'http://localhost:4002',

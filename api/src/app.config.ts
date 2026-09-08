@@ -253,6 +253,7 @@ export const appConfig = {
             'http://localhost:3000',
             'http://localhost:4444',
             'https://app.nextask.digital',
+            'https://wms-digitechkh.vercel.app',
             'https://structure-project-ten.vercel.app',
         ],
     },
