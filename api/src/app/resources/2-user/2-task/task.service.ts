@@ -1217,6 +1217,55 @@ export class TaskService {
             this.sendTelegramNotification(firstLine, updated, targetIds);
         }
 
+        if (this._notificationService) {
+            let updateMsgKh = `${updaterName} បានធ្វើបច្ចុប្បន្នភាពភារកិច្ច "${updated.code}: ${updated.title}"`;
+            if (dto.status && dto.status !== current.status) {
+                updateMsgKh = `${updaterName} បានប្តូរស្ថានភាពទៅជា "${this.getStatusLabel(dto.status)}" លើភារកិច្ច "${updated.code}: ${updated.title}"`;
+            } else if (dto.priority && dto.priority !== current.priority) {
+                updateMsgKh = `${updaterName} បានប្តូរអាទិភាពទៅជា "${this.getPriorityLabel(dto.priority)}" លើភារកិច្ច "${updated.code}: ${updated.title}"`;
+            }
+
+            const notif: NotificationItem = {
+                id: 'notif_update_' + Date.now(),
+                type: 'task_updated',
+                title: 'បច្ចុប្បន្នភាពភារកិច្ច',
+                title_kh: 'បច្ចុប្បន្នភាពភារកិច្ច',
+                title_en: 'Task Updated',
+                message: updateMsgKh,
+                message_kh: updateMsgKh,
+                message_en: `${updaterName} updated task "${updated.code}: ${updated.title}"`,
+                is_unread: true,
+                read_at: null,
+                created_at: new Date().toISOString(),
+                project: {
+                    id: updated.project_id,
+                    name_en: updated.project_name,
+                    name_kh: updated.project_name,
+                    short_name_en: updated.project_name,
+                    short_name_kh: updated.project_name,
+                },
+                task: {
+                    id: updated.id,
+                    task_code: updated.code,
+                    title: updated.title,
+                },
+                last_message: {
+                    source: 'activity',
+                    id: 'msg_' + Date.now(),
+                    content: updateMsgKh,
+                    sender_id: user?.id || 1,
+                    chat_message_type_id: 1,
+                    created_at: new Date().toISOString(),
+                    sender: { id: user?.id || 1, name_en: updaterName, name_kh: updaterName },
+                },
+            };
+            this._notificationService.pushNotification(notif, targetIds);
+        }
+
+        if (this._realtimeGateway) {
+            this._realtimeGateway.emitTaskUpdated({ task_id: updated.id, status_id: updated.status as any, project_id: updated.project_id });
+        }
+
         return {
             status_code: 200,
             message: 'Task updated successfully',

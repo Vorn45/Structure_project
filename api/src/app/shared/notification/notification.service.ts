@@ -468,11 +468,68 @@ export class NotificationService {
 
     constructor(private readonly _realtimeGateway?: RealtimeGateway) {}
 
+    async simulateTestNotification(user?: UserPayload) {
+        const idNum = Math.floor(Math.random() * 9000) + 1000;
+        const senderName = user?.name_kh || user?.name_en || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត (Piseth)';
+        const testNotif: NotificationItem = {
+            id: 'notif_live_' + Date.now(),
+            type: 'task_assigned',
+            title: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
+            title_kh: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
+            title_en: 'New Task Assigned',
+            message: `${senderName} បានចាត់តាំងភារកិច្ច "#WMS-${idNum}: Real-time Notification System" ជូនអ្នក។`,
+            message_kh: `${senderName} បានចាត់តាំងភារកិច្ច "#WMS-${idNum}: Real-time Notification System" ជូនអ្នក។`,
+            message_en: `${senderName} assigned task "#WMS-${idNum}: Real-time Notification System" to you.`,
+            is_unread: true,
+            read_at: null,
+            created_at: new Date().toISOString(),
+            organization: {
+                id: 'org_1',
+                name_en: 'Digitech Systems',
+                name_kh: 'ឌីជីថេក ស៊ីស្ទឹម',
+                avatar: { uri: 'images/logo/default_logo.png' },
+            },
+            project: {
+                id: 'wms-digitech',
+                name_en: 'WMS Digitech',
+                name_kh: 'WMS ឌីជីថេក',
+                short_name_en: 'WMS Digitech',
+                short_name_kh: 'WMS ឌីជីថេក',
+                avatar: { uri: 'images/logo/default_logo.png' },
+            },
+            task: {
+                id: idNum,
+                task_code: `#WMS-${idNum}`,
+                title: `Real-time Notification System (#WMS-${idNum})`,
+            },
+            last_message: {
+                source: 'activity',
+                id: 'msg_' + Date.now(),
+                content: `បានចាត់តាំងភារកិច្ច "#WMS-${idNum}: Real-time Notification" ជូនអ្នក`,
+                sender_id: user?.id || 1,
+                chat_message_type_id: 1,
+                created_at: new Date().toISOString(),
+                sender: { id: user?.id || 1, name_en: senderName, name_kh: senderName },
+            },
+        };
+
+        return await this.pushNotification(testNotif);
+    }
+
     async pushNotification(notification: NotificationItem, targetUserIds?: number[]) {
+        notification.is_unread = true;
+        notification.read_at = null;
+        if (!notification.created_at) {
+            notification.created_at = new Date().toISOString();
+        }
         this.notifications.unshift(notification);
         if (this._realtimeGateway) {
             this._realtimeGateway.emitNotification(notification, targetUserIds);
         }
-        return notification;
+        return {
+            status_code: 201,
+            message: 'Notification pushed successfully',
+            data: notification,
+        };
     }
 }
