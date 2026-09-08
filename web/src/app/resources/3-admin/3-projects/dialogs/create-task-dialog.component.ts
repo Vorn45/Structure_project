@@ -844,6 +844,24 @@ export class CreateTaskDialogComponent implements OnInit {
         const title = this.taskTitle.trim();
         const selectedProj = this.projectList.find((p) => p.id === this.selectedProjectId);
         const primaryAssignee = this.selectedAssignees.length > 0 ? this.selectedAssignees[0] : null;
+        const currentUser = this.data?.user;
+        const currentUserName = currentUser?.en_name || currentUser?.name || currentUser?.kh_name || '';
+
+        const effectiveReporter = this.reporterName
+            ? {
+                  id: this.reporterId ? Number(this.reporterId) : (currentUser?.id || undefined),
+                  name: this.reporterName,
+                  role: this.reporterRole || 'Reporter',
+                  avatar: this.reporterAvatar,
+              }
+            : (currentUserName
+                  ? {
+                        id: currentUser?.id,
+                        name: currentUserName,
+                        role: currentUser?.roles?.[0]?.name_en || currentUser?.roles?.[0]?.name_kh || 'Reporter',
+                        avatar: currentUser?.avatar?.uri || null,
+                    }
+                  : null);
 
         return {
             title,
@@ -853,15 +871,8 @@ export class CreateTaskDialogComponent implements OnInit {
             priority: this.priority(),
             due_date: this.formatIsoDate(this.endDate),
             start_date: this.formatIsoDate(this.startDate),
-            reporter: this.reporterName
-                ? {
-                      id: this.reporterId ? Number(this.reporterId) : undefined,
-                      name: this.reporterName,
-                      role: this.reporterRole,
-                      avatar: this.reporterAvatar,
-                  }
-                : null,
-            reporterName: this.reporterName || null,
+            reporter: effectiveReporter,
+            reporterName: effectiveReporter?.name || null,
             assignee: primaryAssignee,
             assignees: this.selectedAssignees,
             assigneeNames: this.selectedAssignees.map((m) => m.name).join(', '),

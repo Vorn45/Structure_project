@@ -229,16 +229,30 @@ export class UserTaskComponent implements OnInit {
     }
 
     computeCounts(tasks: TaskItem[], apiCounts?: any): void {
-        this.counts.set({
-            all: apiCounts?.all ?? tasks.length,
-            new: apiCounts?.new ?? tasks.filter((t) => t.status === 'new' || t.status === 'pending').length,
-            confirmed: apiCounts?.confirmed ?? tasks.filter((t) => t.status === 'confirmed').length,
-            unconfirmed: apiCounts?.unconfirmed ?? tasks.filter((t) => t.status === 'unconfirmed' || t.status === 'todo').length,
-            in_progress: apiCounts?.in_progress ?? tasks.filter((t) => t.status === 'in_progress').length,
-            in_review: apiCounts?.in_review ?? tasks.filter((t) => t.status === 'in_review' || t.status === 'review').length,
-            reopened: apiCounts?.reopened ?? tasks.filter((t) => t.status === 'reopened').length,
-            done: apiCounts?.done ?? tasks.filter((t) => t.status === 'done' || t.status === 'completed').length,
-        });
+        const isLocallyFiltered = Boolean(this.searchQuery() || this.selectedMemberFilter() !== 'all');
+        if (isLocallyFiltered) {
+            this.counts.set({
+                all: tasks.length,
+                new: tasks.filter((t) => t.status === 'new' || t.status === 'pending').length,
+                confirmed: tasks.filter((t) => t.status === 'confirmed').length,
+                unconfirmed: tasks.filter((t) => t.status === 'unconfirmed' || t.status === 'todo').length,
+                in_progress: tasks.filter((t) => t.status === 'in_progress').length,
+                in_review: tasks.filter((t) => t.status === 'in_review' || t.status === 'review').length,
+                reopened: tasks.filter((t) => t.status === 'reopened').length,
+                done: tasks.filter((t) => t.status === 'done' || t.status === 'completed').length,
+            });
+        } else {
+            this.counts.set({
+                all: apiCounts?.all ?? tasks.length,
+                new: apiCounts?.new ?? tasks.filter((t) => t.status === 'new' || t.status === 'pending').length,
+                confirmed: apiCounts?.confirmed ?? tasks.filter((t) => t.status === 'confirmed').length,
+                unconfirmed: apiCounts?.unconfirmed ?? tasks.filter((t) => t.status === 'unconfirmed' || t.status === 'todo').length,
+                in_progress: apiCounts?.in_progress ?? tasks.filter((t) => t.status === 'in_progress').length,
+                in_review: apiCounts?.in_review ?? tasks.filter((t) => t.status === 'in_review' || t.status === 'review').length,
+                reopened: apiCounts?.reopened ?? tasks.filter((t) => t.status === 'reopened').length,
+                done: apiCounts?.done ?? tasks.filter((t) => t.status === 'done' || t.status === 'completed').length,
+            });
+        }
     }
 
     isTaskBelongToCurrentUser(task: TaskItem): boolean {
@@ -283,12 +297,12 @@ export class UserTaskComponent implements OnInit {
                 status: this.activeStatus() !== 'all' ? this.activeStatus() : undefined,
                 priority: this.activePriority() !== 'all' ? this.activePriority() : undefined,
                 project_id: this.selectedProjectId() !== 'all' ? this.selectedProjectId() : undefined,
+                member_id: this.selectedMemberFilter() !== 'all' ? String(this.selectedMemberFilter()) : undefined,
             })
             .subscribe({
                 next: (res) => {
                     const results = res.data.results || [];
-                    const userSpecific = results.filter((t) => this.isTaskBelongToCurrentUser(t));
-                    let finalTasks = userSpecific.length > 0 ? userSpecific : results;
+                    let finalTasks = results;
                     
                     if (this.selectedProjectId() !== 'all') {
                         const pid = this.selectedProjectId().toLowerCase();

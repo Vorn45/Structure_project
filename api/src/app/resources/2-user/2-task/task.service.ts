@@ -312,6 +312,10 @@ export class TaskService {
                         }
                     }
                 }
+                // Heal any stored tasks that are missing a reporter so they are never orphaned
+                if (this.healMissingReporters()) {
+                    await this.saveToDb();
+                }
             } else {
                 await this.saveToDb();
             }
@@ -441,10 +445,29 @@ export class TaskService {
                         }
                     }
                 }
+                if (this.healMissingReporters()) {
+                    this.saveToDisk();
+                }
             }
         } catch (e) {
             console.error('Failed to load tasks from disk store:', e);
         }
+    }
+
+    private healMissingReporters(): boolean {
+        let modified = false;
+        for (const t of this.tasks) {
+            if (!t.reporter || !t.reporter.name || t.reporter.name.trim() === '') {
+                t.reporter = {
+                    id: 2,
+                    name: 'PUM BRUSMUNY',
+                    role: 'Frontend Lead',
+                    avatar: null,
+                };
+                modified = true;
+            }
+        }
+        return modified;
     }
 
     private saveStore(): void {
@@ -632,17 +655,15 @@ export class TaskService {
 
     async getTasks(user: UserPayload, query: QueryTasksDto) {
         await this.ensureStoreLoaded();
-        // Filter tasks that belong to the current user (fallback to all tasks if no specific match)
-        const matchedTasks = this.tasks.filter((t) => this.isTaskBelongToUser(t, user));
-        const userTasks = matchedTasks.length > 0 ? matchedTasks : this.tasks;
-        let list = [...userTasks];
+        let list = [...this.tasks];
 
         if (query.search && query.search !== 'undefined' && query.search !== 'null' && query.search.trim()) {
             const s = query.search.trim().toLowerCase();
             list = list.filter(
                 (t) =>
-                    t.title.toLowerCase().includes(s) ||
-                    t.description.toLowerCase().includes(s),
+                    (t.title && t.title.toLowerCase().includes(s)) ||
+                    (t.description && t.description.toLowerCase().includes(s)) ||
+                    (t.code && t.code.toLowerCase().includes(s)),
             );
         }
 
@@ -654,11 +675,33 @@ export class TaskService {
             list = list.filter((t) => t.priority === query.priority);
         }
 
-        if (query.project_id && query.project_id !== 'undefined' && query.project_id !== 'null') {
-            list = list.filter((t) => t.project_id === query.project_id);
+        if (query.project_id && query.project_id !== 'undefined' && query.project_id !== 'null' && query.project_id !== 'all') {
+            const pid = query.project_id.toLowerCase();
+            list = list.filter((t) =>
+                (t.project_id && t.project_id.toLowerCase().includes(pid)) ||
+                (t.project_name && t.project_name.toLowerCase().includes(pid))
+            );
         }
 
-        const limit = query.limit ? parseInt(query.limit, 10) : 20;
+        if (query.member_id && query.member_id !== 'all' && query.member_id !== 'undefined' && query.member_id !== 'null') {
+            const mId = Number(query.member_id);
+            list = list.filter(
+                (t) =>
+                    Number(t.assignee?.id) === mId ||
+                    (t.assignees && t.assignees.some((a) => Number(a.id) === mId)) ||
+                    Number(t.reporter?.id) === mId,
+            );
+        }
+
+        const projectScope = (query.project_id && query.project_id !== 'all' && query.project_id !== 'undefined' && query.project_id !== 'null')
+            ? this.tasks.filter((t) => {
+                const pid = query.project_id!.toLowerCase();
+                return (t.project_id && t.project_id.toLowerCase().includes(pid)) ||
+                       (t.project_name && t.project_name.toLowerCase().includes(pid));
+            })
+            : this.tasks;
+
+        const limit = query.limit ? parseInt(query.limit, 10) : 100;
         const offset = query.offset ? parseInt(query.offset, 10) : 0;
         const paginated = list.slice(offset, offset + limit);
 
@@ -671,14 +714,14 @@ export class TaskService {
                 limit,
                 offset,
                 counts: {
-                    all: userTasks.length,
-                    new: userTasks.filter((t) => t.status === TaskStatusEnum.NEW || (t.status as any) === 'pending').length,
-                    confirmed: userTasks.filter((t) => t.status === TaskStatusEnum.CONFIRMED).length,
-                    unconfirmed: userTasks.filter((t) => t.status === TaskStatusEnum.UNCONFIRMED || (t.status as any) === 'todo').length,
-                    in_progress: userTasks.filter((t) => t.status === TaskStatusEnum.IN_PROGRESS).length,
-                    in_review: userTasks.filter((t) => t.status === TaskStatusEnum.IN_REVIEW || (t.status as any) === 'review').length,
-                    reopened: userTasks.filter((t) => t.status === TaskStatusEnum.REOPENED).length,
-                    done: userTasks.filter((t) => t.status === TaskStatusEnum.DONE || (t.status as any) === 'completed').length,
+                    all: projectScope.length,
+                    new: projectScope.filter((t) => t.status === TaskStatusEnum.NEW || (t.status as any) === 'pending').length,
+                    confirmed: projectScope.filter((t) => t.status === TaskStatusEnum.CONFIRMED).length,
+                    unconfirmed: projectScope.filter((t) => t.status === TaskStatusEnum.UNCONFIRMED || (t.status as any) === 'todo').length,
+                    in_progress: projectScope.filter((t) => t.status === TaskStatusEnum.IN_PROGRESS).length,
+                    in_review: projectScope.filter((t) => t.status === TaskStatusEnum.IN_REVIEW || (t.status as any) === 'review').length,
+                    reopened: projectScope.filter((t) => t.status === TaskStatusEnum.REOPENED).length,
+                    done: projectScope.filter((t) => t.status === TaskStatusEnum.DONE || (t.status as any) === 'completed').length,
                 },
             },
         };
@@ -773,6 +816,16 @@ export class TaskService {
             }
         }
 
+        // Fallback: If no reporter is explicitly selected, creator (user) is ALWAYS the reporter!
+        if (!taskReporter && user) {
+            taskReporter = {
+                id: user.id || 1,
+                name: user.name_en || user.name_kh || 'User',
+                avatar: (user.avatar as any)?.uri || null,
+                role: user.roles?.[0]?.name_en || user.roles?.[0]?.name_kh || 'Reporter',
+            };
+        }
+
         const newTask: TaskItem = {
             id: Date.now(),
             code: formattedCode,
@@ -780,7 +833,7 @@ export class TaskService {
             description: dto.description || '',
             module: 'Task Management',
             task_type: dto.task_type || 'feature',
-            status: dto.status || TaskStatusEnum.TODO,
+            status: dto.status || TaskStatusEnum.NEW,
             priority: dto.priority || TaskPriorityEnum.MEDIUM,
             progress: 0,
             comments_count: 0,

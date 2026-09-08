@@ -38,6 +38,10 @@ export class QueryTasksDto {
 
     @IsOptional()
     @IsString()
+    member_id?: string;
+
+    @IsOptional()
+    @IsString()
     limit?: string;
 
     @IsOptional()
