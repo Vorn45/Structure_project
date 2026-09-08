@@ -11,6 +11,8 @@ import { User } from 'src/app/model/user/users.entity';
 import { TaskStore } from 'src/app/model/user/task-store.entity';
 import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { NotificationService, NotificationItem } from 'src/app/shared/notification/notification.service';
+import { RealtimeGateway } from 'src/app/shared/realtime/realtime.gateway';
 import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateTaskDto } from './task.dto';
 
 // In-memory / mock store to serve user task operations
@@ -256,6 +258,8 @@ export class TaskService {
         private readonly _taskStoreRepo: Repository<TaskStore>,
         @InjectRepository(TelegramThread)
         private readonly _threadRepo: Repository<TelegramThread>,
+        private readonly _notificationService?: NotificationService,
+        private readonly _realtimeGateway?: RealtimeGateway,
     ) {
         this.loadFromDisk();
         this.initDbStore();
@@ -784,7 +788,51 @@ export class TaskService {
         const creatorName = taskReporter?.name || user?.name_kh || user?.name_en || 'អ្នកប្រើប្រាស់';
         const taskCode = newTask.code || `#${prefix}-0000`;
         const firstLine = `📌 ${creatorName} បានបង្កើតការងារថ្មី ${taskCode}`;
-        this.sendTelegramNotification(firstLine, newTask, [user?.id, ...assigneesList.map((a) => a.id)].filter(Boolean) as number[]);
+        const targetIds = [user?.id, ...assigneesList.map((a) => a.id)].filter(Boolean) as number[];
+        this.sendTelegramNotification(firstLine, newTask, targetIds);
+
+        // Push in-app real-time notification
+        if (this._notificationService) {
+            const notif: NotificationItem = {
+                id: 'notif_task_' + Date.now(),
+                type: 'task_assigned',
+                title: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
+                title_kh: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
+                title_en: 'New task assigned',
+                message: `${creatorName} បានបង្កើត និងចាត់តាំងភារកិច្ច "${taskCode}: ${newTask.title}"`,
+                message_kh: `${creatorName} បានបង្កើត និងចាត់តាំងភារកិច្ច "${taskCode}: ${newTask.title}"`,
+                message_en: `${creatorName} created and assigned task "${taskCode}: ${newTask.title}"`,
+                is_unread: true,
+                read_at: null,
+                created_at: new Date().toISOString(),
+                project: {
+                    id: newTask.project_id,
+                    name_en: newTask.project_name,
+                    name_kh: newTask.project_name,
+                    short_name_en: newTask.project_name,
+                    short_name_kh: newTask.project_name,
+                },
+                task: {
+                    id: newTask.id,
+                    task_code: newTask.code,
+                    title: newTask.title,
+                },
+                last_message: {
+                    source: 'activity',
+                    id: 'msg_' + Date.now(),
+                    content: 'បានចាត់តាំងភារកិច្ចថ្មី',
+                    sender_id: user?.id || 1,
+                    chat_message_type_id: 1,
+                    created_at: new Date().toISOString(),
+                    sender: { id: user?.id || 1, name_en: creatorName, name_kh: creatorName },
+                },
+            };
+            this._notificationService.pushNotification(notif, targetIds);
+        }
+
+        if (this._realtimeGateway) {
+            this._realtimeGateway.emitTaskUpdated({ task_id: newTask.id, project_id: newTask.project_id });
+        }
 
         return {
             status_code: 201,
@@ -1219,6 +1267,49 @@ export class TaskService {
         ].filter(Boolean) as number[];
 
         this.sendTelegramNotification(firstLine, task, targetIds);
+
+        // Push in-app real-time notification
+        if (this._notificationService) {
+            const commentNotif: NotificationItem = {
+                id: 'notif_comment_' + Date.now(),
+                type: 'chat_task',
+                title: 'សារថ្មីក្នុងភារកិច្ច',
+                title_kh: 'សារថ្មីក្នុងភារកិច្ច',
+                title_en: 'New comment in task',
+                message: `${senderName}: ${commentText || 'បានផ្ញើឯកសារភ្ជាប់'} (${task.code || ''})`,
+                message_kh: `${senderName}: ${commentText || 'បានផ្ញើឯកសារភ្ជាប់'} (${task.code || ''})`,
+                message_en: `${senderName}: ${commentText || 'sent an attachment'} (${task.code || ''})`,
+                is_unread: true,
+                read_at: null,
+                created_at: new Date().toISOString(),
+                project: {
+                    id: task.project_id,
+                    name_en: task.project_name,
+                    name_kh: task.project_name,
+                    short_name_en: task.project_name,
+                    short_name_kh: task.project_name,
+                },
+                task: {
+                    id: task.id,
+                    task_code: task.code,
+                    title: task.title,
+                },
+                last_message: {
+                    source: 'message',
+                    id: 'msg_' + Date.now(),
+                    content: commentText || 'បានផ្ញើឯកសារភ្ជាប់',
+                    sender_id: user.id,
+                    chat_message_type_id: 1,
+                    created_at: new Date().toISOString(),
+                    sender: { id: user.id, name_en: user.name_en || senderName, name_kh: user.name_kh || senderName },
+                },
+            };
+            this._notificationService.pushNotification(commentNotif, targetIds);
+        }
+
+        if (this._realtimeGateway) {
+            this._realtimeGateway.emitTaskUpdated({ task_id: task.id, project_id: task.project_id });
+        }
 
         return {
             status_code: 201,

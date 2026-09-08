@@ -35,6 +35,7 @@ import {
 import { NotificationSettingsComponent }    from 'app/layout/common/notifications/settings/component';
 import { InvitationDetailDialogComponent }  from 'app/layout/common/notifications/invitation-detail/component';
 import { DialogConfigService }              from 'app/shared/dialog-config.service';
+import { Router }                           from '@angular/router';
 import { env }                              from 'envs/env';
 import { Subject, takeUntil }               from 'rxjs';
 
@@ -133,6 +134,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private _injector: Injector,
         private _dialog: MatDialog,
         private _dialogConfig: DialogConfigService,
+        private _router: Router,
     ) {}
 
     get filteredNotifications(): Notification[] {
@@ -274,13 +276,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         }
         this._createOverlay();
         this._overlayRef.attach(new TemplatePortal(this._notificationsPanel, this._viewContainerRef));
-        // The portal's embedded view is created fresh on this attach, so on an
-        // OnPush host it can render with whatever was current as of the last
-        // check rather than the latest `notifications`/`unreadCount` pushed in
-        // since — force one detection pass so the very first open is current.
+        this._notificationsService.refresh();
         this._changeDetectorRef.detectChanges();
-        if (this.activeTab === 'unread' && !this._unreadLoaded) this._loadUnreadFirstPage();
-        else this._fillListIfShort();
+        if (this.activeTab === 'unread') {
+            if (!this._unreadLoaded) this._loadUnreadFirstPage();
+        } else {
+            this._fillListIfShort();
+        }
     }
 
     closePanel(): void {
@@ -299,7 +301,16 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
 
     markAllAsRead(): void {
+        this.unreadCount = 0;
+        this.notifications = this.notifications.map((n) => ({ ...n, read: true, read_at: new Date() }));
+        this.unreadNotifications = [];
+        this._changeDetectorRef.markForCheck();
         this._notificationsService.markAllRead().subscribe();
+    }
+
+    /** Plays the Apple iPhone chime immediately for testing/preview */
+    playTestSound(): void {
+        this._notificationsService.playIphoneChime();
     }
 
     /** Fetch the next "all" page and append it below what's already loaded. */
@@ -366,6 +377,22 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this._dialog.open(NotificationSettingsComponent, this._dialogConfig.getDialogConfig());
     }
 
+    /** View all notifications - navigates to tasks / activity page */
+    viewAllNotifications(): void {
+        this.closePanel();
+        const currentUrl = this._router.url;
+        const isAdmin =
+            currentUrl.startsWith('/admin') ||
+            currentUrl.startsWith('/org-admin') ||
+            currentUrl.startsWith('/super-admin');
+
+        if (isAdmin) {
+            this._router.navigate(['/admin/planner']);
+        } else {
+            this._router.navigate(['/member/tasks']);
+        }
+    }
+
     /**
      * Messenger-style 3-pane view, same as the group-chats bell's own "ពេញអេក្រង់"
      * entry — opened on the Task tab since that's what this bell is about.
@@ -376,14 +403,22 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.closePanel();
     }
 
-    /** Mark the group read and open the task's chat (or the invitation dialog) accordingly. */
+    /** Mark the group read and navigate to the related task / page. */
     onGroupClick(group: NotificationGroup): void {
         const unreadIds = new Set(group.items.filter((n) => !n.read).map((n) => n.id));
+        if (!group.latest.read) {
+            unreadIds.add(group.latest.id);
+        }
+
         if (unreadIds.size) {
             this.notifications = this.notifications.map((n) =>
                 unreadIds.has(n.id) ? { ...n, read: true, read_at: new Date() } : n,
             );
             this.unreadNotifications = this.unreadNotifications.filter((n) => !unreadIds.has(n.id));
+            group.unreadCount = 0;
+            group.latest.read = true;
+            this.unreadCount = Math.max(0, this.unreadCount - unreadIds.size);
+            this._notificationsService.decrementUnreadCount(unreadIds.size);
             this._changeDetectorRef.markForCheck();
             this._notificationsService.markReadMany([...unreadIds]).subscribe();
         }
@@ -404,10 +439,37 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this._openTaskChat(group.latest);
-    }
+        this.closePanel();
 
-    private _openTaskChat(_notification: Notification): void {}
+        const notif = group.latest;
+        const currentUrl = this._router.url;
+        const isAdmin =
+            currentUrl.startsWith('/admin') ||
+            currentUrl.startsWith('/org-admin') ||
+            currentUrl.startsWith('/super-admin');
+
+        const type = (notif.type || '').toLowerCase();
+        const title = (notif.title || notif.title_kh || notif.title_en || '').toLowerCase();
+
+        const taskId = notif.task?.id || notif.data?.task_id || notif.data?.['task_id'];
+        const taskCode = notif.task?.task_code || notif.data?.task_code;
+
+        if (type.includes('attendance') || title.includes('វត្តមាន')) {
+            this._router.navigate([isAdmin ? '/admin/dashboard' : '/member/home']);
+        } else if (type.includes('account') || type.includes('setting')) {
+            this._router.navigate(['/profile']);
+        } else if (type.includes('feature') || title.includes('ប្រកាស')) {
+            this._router.navigate([isAdmin ? '/admin/projects' : '/member/projects']);
+        } else {
+            // Task assigned, task comments, error alerts
+            this._router.navigate([isAdmin ? '/admin/planner' : '/member/tasks'], {
+                queryParams: {
+                    ...(taskId ? { taskId: String(taskId) } : {}),
+                    ...(taskCode ? { taskCode: String(taskCode) } : {}),
+                },
+            });
+        }
+    }
 
     // -------------------------------------------------------------------------
     // @ Display helpers
@@ -426,11 +488,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
 
     /** The task's name (falls back to its code, then the notification title). */
+    /** The notification's title in Khmer */
     taskTitle(notification: Notification): string {
         return (
+            notification.title_kh ||
+            notification.title ||
             notification.task?.title ||
             notification.task?.task_code ||
-            this.titleText(notification)
+            notification.title_en ||
+            'ការជូនដំណឹង'
         );
     }
 
@@ -438,22 +504,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         return notification.message_kh || notification.message || notification.message_en || '';
     }
 
-    /**
-     * The chat-preview line, split into renderable parts: "<sender> <label>"
-     * as plain text, then (for status/priority/type changes) the resolved
-     * value's icon inline, followed by the value's name. Falls back to the
-     * plain notification message when the task has no chat activity yet.
-     */
     lastMessagePrefix(notification: Notification): string {
+        if (notification.message_kh) return notification.message_kh;
+        if (notification.message) return notification.message;
         const last = notification.last_message;
         if (!last) return this.messageText(notification);
 
         const senderName = last.sender?.name_kh || last.sender?.name_en || '';
-        // The API sends a generic "updated" content for some activity fields —
-        // override with the same wording the task chat timeline uses (see
-        // SYSTEM_FIELD_LABEL in chat.service.ts) so it reads as what changed.
         const content = (last.field_name && FIELD_LABEL_OVERRIDE[last.field_name]) || last.content || '';
-        return senderName ? `${senderName} ${content}`.trim() : content;
+        return senderName ? `${senderName}: ${content}`.trim() : content;
     }
 
     lastMessageValueText(notification: Notification): string {
@@ -521,6 +580,61 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
     onNotificationAvatarError(event: Event): void {
         (event.target as HTMLImageElement).src = 'images/logo/default_logo.png';
+    }
+
+    /** Relative time in Khmer e.g. "មុននេះបន្តិច", "2 នាទីមុន", "1 ម៉ោងមុន", "ម្សិលមិញ" */
+    formatRelativeTime(date: Date | string): string {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+        const now = Date.now();
+        const diffSec = Math.floor((now - d.getTime()) / 1000);
+
+        if (diffSec < 60) return 'មុននេះបន្តិច';
+        const diffMin = Math.floor(diffSec / 60);
+        if (diffMin < 60) return `${diffMin} នាទីមុន`;
+        const diffHr = Math.floor(diffMin / 60);
+        if (diffHr < 24) return `${diffHr} ម៉ោងមុន`;
+        const diffDays = Math.floor(diffHr / 24);
+        if (diffDays === 1) return 'ម្សិលមិញ';
+        if (diffDays < 7) return `${diffDays} ថ្ងៃមុន`;
+        return d.toLocaleDateString('km-KH', { month: 'short', day: 'numeric' });
+    }
+
+    /** Visual icon + badge background matching reference layout */
+    getNotificationIconMeta(notification: Notification): { icon: string; bgClass: string; textClass: string } {
+        const type = (notification.type || '').toLowerCase();
+        const title = (notification.title || notification.title_en || notification.title_kh || '').toLowerCase();
+
+        if (type.includes('fail') || type.includes('error') || type.includes('bug') || title.includes('fail') || title.includes('បញ្ហា')) {
+            return {
+                icon: 'mdi:alert-circle-outline',
+                bgClass: 'bg-rose-50 dark:bg-rose-950/60 border border-rose-100 dark:border-rose-900/40',
+                textClass: 'text-rose-500 dark:text-rose-400',
+            };
+        }
+
+        if (type.includes('update') || type.includes('setting') || type.includes('account') || title.includes('update') || title.includes('កែប្រែ')) {
+            return {
+                icon: 'mdi:cog-outline',
+                bgClass: 'bg-amber-50 dark:bg-amber-950/60 border border-amber-100 dark:border-amber-900/40',
+                textClass: 'text-amber-500 dark:text-amber-400',
+            };
+        }
+
+        if (type.includes('feature') || type.includes('announce') || type.includes('system') || title.includes('feature') || title.includes('វត្តមាន') || title.includes('ប្រកាស')) {
+            return {
+                icon: 'mdi:bullhorn-outline',
+                bgClass: 'bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/40',
+                textClass: 'text-emerald-500 dark:text-emerald-400',
+            };
+        }
+
+        // Default / Task Assigned
+        return {
+            icon: 'mdi:bell-outline',
+            bgClass: 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/40',
+            textClass: 'text-indigo-600 dark:text-indigo-400',
+        };
     }
 
     /** 24-hour HH:mm, e.g. "16:30". */

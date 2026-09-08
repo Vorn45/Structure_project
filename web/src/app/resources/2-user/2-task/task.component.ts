@@ -312,6 +312,21 @@ export class UserTaskComponent implements OnInit {
                     this.tasks.set(finalTasks);
                     this.computeCounts(finalTasks, res.data.counts);
                     this.loading.set(false);
+
+                    // Auto-open task if navigating from notification with taskId/taskCode
+                    const q = this._route.snapshot.queryParams;
+                    if (q['taskId'] || q['taskCode']) {
+                        const targetId = q['taskId'];
+                        const targetCode = (q['taskCode'] || '').toLowerCase();
+                        const found = finalTasks.find(
+                            (t) =>
+                                (targetId && String(t.id) === String(targetId)) ||
+                                (targetCode && t.code && t.code.toLowerCase().includes(targetCode)),
+                        );
+                        if (found) {
+                            setTimeout(() => this.openTaskChat(found), 100);
+                        }
+                    }
                 },
                 error: (err) => {
                     console.error('Failed to load tasks', err);

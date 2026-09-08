@@ -116,6 +116,13 @@ export class NotificationsService implements OnDestroy {
         return this._unreadCount.asObservable();
     }
 
+    private _currentUnreadCount = 0;
+
+    decrementUnreadCount(amount = 1): void {
+        this._currentUnreadCount = Math.max(0, this._currentUnreadCount - amount);
+        this._unreadCount.next(this._currentUnreadCount);
+    }
+
     /**
      * Sets the loaded notification list. `unreadCount`, when given, is the
      * server-reported total across *all* pages (`data.unread_count`) and is
@@ -126,7 +133,8 @@ export class NotificationsService implements OnDestroy {
     setNotifications(value: Notification[], unreadCount?: number): void {
         this._notificationsCache = value;
         this._notifications.next(value);
-        this._unreadCount.next(unreadCount ?? value.filter((n) => !n.read).length);
+        this._currentUnreadCount = unreadCount ?? value.filter((n) => !n.read).length;
+        this._unreadCount.next(this._currentUnreadCount);
     }
 
     set notifications(value: Notification[]) {
@@ -168,18 +176,75 @@ export class NotificationsService implements OnDestroy {
      * swallows autoplay-policy rejections (browsers block playback until the user
      * has interacted with the page at least once).
      */
+    private _audioCtx?: AudioContext;
+
+    /** Plays an authentic Apple iPhone style Tri-tone notification chime using Web Audio API */
+    playIphoneChime(): void {
+        try {
+            const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+            if (!AudioCtx) return;
+
+            if (!this._audioCtx || this._audioCtx.state === 'closed') {
+                this._audioCtx = new AudioCtx();
+            }
+
+            if (this._audioCtx.state === 'suspended') {
+                void this._audioCtx.resume();
+            }
+
+            const ctx = this._audioCtx;
+            const now = ctx.currentTime;
+
+            // Classic Apple iPhone Tri-Tone: G5 (784Hz), B5 (988Hz), D6 (1175Hz)
+            const notes = [
+                { freq: 783.99, start: now + 0.00, dur: 0.18, vol: 0.65 },
+                { freq: 987.77, start: now + 0.14, dur: 0.18, vol: 0.70 },
+                { freq: 1174.66, start: now + 0.28, dur: 0.45, vol: 0.75 },
+            ];
+
+            notes.forEach((n) => {
+                // Fundamental sine wave tone
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(n.freq, n.start);
+
+                // Attack and smooth decay envelope
+                gain.gain.setValueAtTime(0.0001, n.start);
+                gain.gain.linearRampToValueAtTime(n.vol, n.start + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, n.start + n.dur);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(n.start);
+                osc.stop(n.start + n.dur + 0.05);
+
+                // Add subtle higher harmonic for bell-like chime clarity
+                const harmonic = ctx.createOscillator();
+                const harmonicGain = ctx.createGain();
+                harmonic.type = 'sine';
+                harmonic.frequency.setValueAtTime(n.freq * 2, n.start);
+
+                harmonicGain.gain.setValueAtTime(0.0001, n.start);
+                harmonicGain.gain.linearRampToValueAtTime(n.vol * 0.25, n.start + 0.015);
+                harmonicGain.gain.exponentialRampToValueAtTime(0.0001, n.start + (n.dur * 0.7));
+
+                harmonic.connect(harmonicGain);
+                harmonicGain.connect(ctx.destination);
+
+                harmonic.start(n.start);
+                harmonic.stop(n.start + n.dur + 0.05);
+            });
+        } catch (e) {
+            console.debug('[notifications] iphone chime error:', e);
+        }
+    }
+
     private _playSound(scope: NotificationSettingScope = 'general'): void {
         if (!this._soundAllowed(scope)) return;
-        try {
-            const audio = this._ensureAudio();
-            audio.muted = false;
-            audio.currentTime = 0;
-            void audio.play().catch((err) =>
-                console.debug('[notifications] sound blocked', err),
-            );
-        } catch (err) {
-            console.debug('[notifications] sound error', err);
-        }
+        this.playIphoneChime();
     }
 
     /**
@@ -289,6 +354,7 @@ export class NotificationsService implements OnDestroy {
                 }),
                 catchError((err) => {
                     console.warn('Error fetching notifications:', err?.message || err);
+                    if (offset === 0) this.setNotifications([], 0);
                     return of([]);
                 }),
             );
@@ -438,7 +504,6 @@ export class NotificationsService implements OnDestroy {
             );
     }
 
-    /** GET /notification/unread-count — refreshes just the badge, without refetching the list. */
     refreshUnreadCount(): void {
         this._httpClient
             .get<{ data: { unread_count: number } }>(`${this._baseUrl}/unread-count`)
@@ -447,7 +512,10 @@ export class NotificationsService implements OnDestroy {
                 catchError(() => of(null)),
             )
             .subscribe((res) => {
-                if (res?.data?.unread_count != null) this._unreadCount.next(res.data.unread_count);
+                if (res?.data?.unread_count != null) {
+                    this._currentUnreadCount = res.data.unread_count;
+                    this._unreadCount.next(res.data.unread_count);
+                }
             });
     }
 

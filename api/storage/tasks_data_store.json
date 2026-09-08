@@ -1,343 +1,307 @@
 {
   "tasks": [
     {
-      "id": 1788875601937,
-      "code": "#BMS-0004",
-      "title": "test",
-      "description": "test",
-      "module": "Task Management",
-      "task_type": "bug",
-      "status": "new",
-      "priority": "medium",
-      "progress": 0,
-      "comments_count": 0,
-      "attachments_count": 0,
-      "due_date": "2026-09-15",
-      "project_id": "bms-digitech",
-      "project_name": "BMS Digitech",
-      "reporter": {
-        "id": 2,
-        "name": "PUM BRUSMUNY",
-        "avatar": null,
-        "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន"
-      },
-      "assignee": {
-        "id": 3,
-        "name": "THA WINNER",
-        "avatar": null,
-        "role": "អ្នកប្រើប្រាស់",
-        "email": ""
-      },
-      "assignees": [
-        {
-          "id": 3,
-          "name": "THA WINNER",
-          "avatar": null,
-          "role": "អ្នកប្រើប្រាស់",
-          "email": ""
-        }
-      ],
-      "created_at": "2026-09-08T13:53:21.937Z",
-      "updated_at": "2026-09-08T13:53:21.937Z"
-    },
-    {
       "id": 1,
-      "code": "#WMS-0000",
+      "code": "#PMS-675",
       "title": "Org Admin | Structure | Department",
       "module": "Org Admin | Structure",
       "status": "in_review",
       "assignee": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin & User",
-        "avatar": null
+        "id": 2,
+        "name": "ចេង ច័ន្ទបញ្ញា",
+        "role": "អ្នកទទួលបន្ទុក (Assignee)",
+        "avatar": "/images/placeholder/avatar.jpg"
       },
-      "due_date": "2026-09-13T12:00:00.000Z",
+      "due_date": "2026-09-10T11:42:12.187Z",
       "priority": "high",
       "progress": 85,
       "reporter": {
         "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
+        "name": "ឡេង សុខឆាយ",
+        "role": "អ្នករាយការណ៍ (Reporter)",
         "avatar": null
       },
       "assignees": [
         {
-          "id": 1,
-          "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-          "role": "Super Admin & User",
-          "avatar": null
+          "id": 2,
+          "name": "ចេង ច័ន្ទបញ្ញា",
+          "role": "ប្រធានផ្នែក Frontend Lead",
+          "avatar": "/images/placeholder/avatar.jpg"
         }
       ],
-      "created_at": "2026-09-01T08:00:00.000Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-07T08:00:00.000Z",
+      "created_at": "2026-08-29T11:42:12.187Z",
+      "project_id": "proj-001",
+      "updated_at": "2026-09-04T11:42:12.187Z",
       "description": "Manage departmental structures, permissions, and organizational units in core hierarchy.",
-      "project_name": "WMS Digitech",
+      "project_name": "Core System Structure",
       "comments_count": 1,
       "attachments_count": 2
     },
     {
       "id": 2,
-      "code": "#BMS-0000",
+      "code": "#PMS-671",
       "title": "Project | Folder | Drag & Drop",
       "module": "Project | Folder",
       "status": "done",
       "assignee": {
-        "id": 2,
-        "name": "ពុំ ប្រុសមុន្នី",
-        "role": "User",
+        "id": 3,
+        "name": "ស៊ន់ ​លាង",
+        "role": "អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់",
         "avatar": null
       },
-      "due_date": "2026-09-05T12:00:00.000Z",
+      "due_date": "2026-09-02T11:42:12.187Z",
       "priority": "high",
       "progress": 100,
       "reporter": {
         "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [
-        {
-          "id": 2,
-          "name": "ពុំ ប្រុសមុន្នី",
-          "role": "User",
-          "avatar": null
-        }
-      ],
-      "created_at": "2026-08-31T08:00:00.000Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-08T14:12:30.178Z",
-      "description": "Implement intuitive drag and drop folder organization for project documents.",
-      "project_name": "BMS Digitech",
-      "comments_count": 2,
-      "attachments_count": 2
-    },
-    {
-      "id": 3,
-      "code": "#WMS-0001",
-      "title": "Project | Folder | Cannot Scroll PDF",
-      "module": "Project | Folder",
-      "status": "confirmed",
-      "assignee": {
-        "id": 3,
-        "name": "ថា វីនណឺរ",
-        "role": "User",
-        "avatar": null
-      },
-      "due_date": "2026-09-04T12:00:00.000Z",
-      "priority": "urgent",
-      "progress": 100,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
+        "name": "ឡេង សុខឆាយ",
+        "role": "អ្នករាយការណ៍ (Reporter)",
         "avatar": null
       },
       "assignees": [
         {
           "id": 3,
-          "name": "ថា វីនណឺរ",
-          "role": "User",
+          "name": "ស៊ន់ ​លាង",
+          "role": "អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់",
           "avatar": null
         }
       ],
-      "created_at": "2026-08-31T08:00:00.000Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-07T08:00:00.000Z",
+      "created_at": "2026-08-28T11:42:12.187Z",
+      "project_id": "proj-001",
+      "updated_at": "2026-09-04T11:42:12.187Z",
+      "description": "Implement intuitive drag and drop folder organization for project documents.",
+      "project_name": "Document Management",
+      "comments_count": 0,
+      "attachments_count": 2
+    },
+    {
+      "id": 3,
+      "code": "#PMS-670",
+      "title": "Project | Folder | Cannot Scroll PDF",
+      "module": "Project | Folder",
+      "status": "confirmed",
+      "assignee": {
+        "id": 2,
+        "name": "ចេង ច័ន្ទបញ្ញា",
+        "role": "ប្រធានផ្នែក Frontend Lead",
+        "avatar": "/images/placeholder/avatar.jpg"
+      },
+      "due_date": "2026-09-01T11:42:12.187Z",
+      "priority": "urgent",
+      "progress": 100,
+      "reporter": {
+        "id": 1,
+        "name": "ឡេង សុខឆាយ",
+        "role": "អ្នករាយការណ៍ (Reporter)",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 2,
+          "name": "ចេង ច័ន្ទបញ្ញា",
+          "role": "ប្រធានផ្នែក Frontend Lead",
+          "avatar": "/images/placeholder/avatar.jpg"
+        }
+      ],
+      "created_at": "2026-08-28T11:42:12.187Z",
+      "project_id": "proj-001",
+      "updated_at": "2026-09-08T08:58:41.101Z",
       "description": "Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.",
-      "project_name": "WMS Digitech",
+      "project_name": "Document Management",
       "comments_count": 2,
       "attachments_count": 1
     },
     {
       "id": 4,
-      "code": "#BMS-0001",
+      "code": "#PMS-574",
       "title": "My Work | Profile | Missing Cover",
       "module": "My Work | Profile",
       "status": "reopened",
       "assignee": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin & User",
+        "id": 4,
+        "name": "បញ្ញា វិរៈទិត្យា",
+        "role": "វិស្វករ Fullstack",
         "avatar": null
       },
-      "due_date": "2026-09-02T12:00:00.000Z",
+      "due_date": "2026-08-30T11:42:12.187Z",
       "priority": "urgent",
       "progress": 40,
       "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
+        "id": 2,
+        "name": "ចេង ច័ន្ទបញ្ញា",
+        "role": "អ្នករាយការណ៍ (Reporter)",
+        "avatar": "/images/placeholder/avatar.jpg"
       },
       "assignees": [
         {
-          "id": 1,
-          "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-          "role": "Super Admin & User",
+          "id": 4,
+          "name": "បញ្ញា វិរៈទិត្យា",
+          "role": "វិស្វករ Fullstack",
           "avatar": null
         }
       ],
-      "created_at": "2026-08-31T08:00:00.000Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-07T08:00:00.000Z",
+      "created_at": "2026-08-28T11:42:12.187Z",
+      "project_id": "proj-002",
+      "updated_at": "2026-09-04T11:50:53.619Z",
       "description": "Provide fallback default cover gradient when user cover photo URL is empty or unverified.",
-      "project_name": "BMS Digitech",
-      "comments_count": 1,
-      "attachments_count": 1
+      "project_name": "User Experience",
+      "comments_count": 6,
+      "attachments_count": 4
     },
     {
       "id": 5,
-      "code": "#WMS-0002",
+      "code": "#PMS-554",
       "title": "Security setting UI improvements",
       "module": "Security Settings",
       "status": "new",
       "assignee": {
         "id": 2,
-        "name": "ពុំ ប្រុសមុន្នី",
-        "role": "User",
-        "avatar": null
+        "name": "ចេង ច័ន្ទបញ្ញា",
+        "role": "អ្នកទទួលបន្ទុក (Assignee)",
+        "avatar": "/images/placeholder/avatar.jpg"
       },
-      "due_date": "2026-09-01T12:00:00.000Z",
+      "due_date": "2026-08-29T11:42:12.187Z",
       "priority": "high",
       "progress": 10,
       "reporter": {
         "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
+        "name": "ឡេង សុខឆាយ",
+        "role": "អ្នករាយការណ៍ (Reporter)",
         "avatar": null
       },
       "assignees": [
         {
           "id": 2,
-          "name": "ពុំ ប្រុសមុន្នី",
-          "role": "User",
-          "avatar": null
+          "name": "ចេង ច័ន្ទបញ្ញា",
+          "role": "ប្រធានផ្នែក Frontend Lead",
+          "avatar": "/images/placeholder/avatar.jpg"
         }
       ],
-      "created_at": "2026-08-31T08:00:00.000Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-08T13:37:56.058Z",
+      "created_at": "2026-08-28T11:42:12.187Z",
+      "project_id": "proj-002",
+      "updated_at": "2026-09-04T11:42:12.187Z",
       "description": "Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.",
-      "project_name": "WMS Digitech",
-      "comments_count": 2,
+      "project_name": "Security Hub",
+      "comments_count": 4,
       "attachments_count": 1
     },
     {
       "id": 6,
-      "code": "#BMS-0002",
+      "code": "#PMS-532",
       "title": "User | Report | Progress Compare",
       "module": "User | Report",
       "status": "in_progress",
       "assignee": {
         "id": 3,
-        "name": "ថា វីនណឺរ",
-        "role": "User",
+        "name": "ស៊ន់ ​លាង",
+        "role": "អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់",
         "avatar": null
       },
-      "due_date": "2026-09-11T12:00:00.000Z",
+      "due_date": "2026-09-08T11:42:12.187Z",
       "priority": "medium",
       "progress": 55,
       "reporter": {
         "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
+        "name": "ឡេង សុខឆាយ",
+        "role": "អ្នករាយការណ៍ (Reporter)",
         "avatar": null
       },
       "assignees": [
         {
           "id": 3,
-          "name": "ថា វីនណឺរ",
-          "role": "User",
+          "name": "ស៊ន់ ​លាង",
+          "role": "អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់",
           "avatar": null
+        },
+        {
+          "id": 64,
+          "name": "PISETH PANHAVORN",
+          "role": "អភិបាលប្រព័ន្ធ",
+          "email": "pisethpanhavorn544@gmail.com",
+          "avatar": null,
+          "colorClass": "bg-blue-600"
         }
       ],
-      "created_at": "2026-08-24T08:00:00.000Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-07T08:00:00.000Z",
+      "created_at": "2026-08-21T11:42:12.187Z",
+      "project_id": "proj-003",
+      "updated_at": "2026-09-08T14:17:12.500Z",
       "description": "Render interactive comparison charts comparing weekly member work hours and sprint deliverables.",
-      "project_name": "BMS Digitech",
-      "comments_count": 0,
+      "project_name": "Analytics & Reporting",
+      "comments_count": 8,
       "attachments_count": 1
     },
     {
       "id": 7,
-      "code": "#WMS-0003",
+      "code": "#PMS-531",
       "title": "User | Report | Progress",
       "module": "User | Report",
       "status": "confirmed",
       "assignee": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin & User",
-        "avatar": null
+        "id": 2,
+        "name": "ចេង ច័ន្ទបញ្ញា",
+        "role": "ប្រធានផ្នែក Frontend Lead",
+        "avatar": "/images/placeholder/avatar.jpg"
       },
-      "due_date": "2026-09-09T12:00:00.000Z",
+      "due_date": "2026-09-06T11:42:12.187Z",
       "priority": "medium",
       "progress": 88,
       "reporter": {
         "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [
-        {
-          "id": 1,
-          "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-          "role": "Super Admin & User",
-          "avatar": null
-        }
-      ],
-      "created_at": "2026-08-24T08:00:00.000Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-07T08:00:00.000Z",
-      "description": "Real-time sync of task milestone updates and aggregated department productivity scorecards.",
-      "project_name": "WMS Digitech",
-      "comments_count": 2,
-      "attachments_count": 1
-    },
-    {
-      "id": 8,
-      "code": "#BMS-0003",
-      "title": "Profile | Switch Org | Exit Org",
-      "module": "Profile | Switch Org",
-      "status": "unconfirmed",
-      "assignee": {
-        "id": 2,
-        "name": "PUM BRUSMUNY",
-        "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
-        "email": "pumprusmuny@example.com",
-        "avatar": null,
-        "colorClass": "bg-blue-600"
-      },
-      "due_date": "2026-09-15T12:00:00.000Z",
-      "priority": "low",
-      "progress": 0,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
+        "name": "ឡេង សុខឆាយ",
+        "role": "អ្នករាយការណ៍ (Reporter)",
         "avatar": null
       },
       "assignees": [
         {
           "id": 2,
-          "name": "PUM BRUSMUNY",
-          "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
-          "email": "pumprusmuny@example.com",
-          "avatar": null,
-          "colorClass": "bg-blue-600"
+          "name": "ចេង ច័ន្ទបញ្ញា",
+          "role": "ប្រធានផ្នែក Frontend Lead",
+          "avatar": "/images/placeholder/avatar.jpg"
         }
       ],
-      "created_at": "2026-08-24T08:00:00.000Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-08T13:28:19.137Z",
+      "created_at": "2026-08-21T11:42:12.187Z",
+      "project_id": "proj-003",
+      "updated_at": "2026-09-04T11:42:12.187Z",
+      "description": "Real-time sync of task milestone updates and aggregated department productivity scorecards.",
+      "project_name": "Analytics & Reporting",
+      "comments_count": 19,
+      "attachments_count": 1
+    },
+    {
+      "id": 8,
+      "code": "#PMS-513",
+      "title": "Profile | Switch Org | Exit Org",
+      "module": "Profile | Switch Org",
+      "status": "unconfirmed",
+      "assignee": {
+        "id": 2,
+        "name": "ចេង ច័ន្ទបញ្ញា",
+        "role": "ប្រធានផ្នែក Frontend Lead",
+        "avatar": "/images/placeholder/avatar.jpg"
+      },
+      "due_date": "2026-09-12T11:42:12.187Z",
+      "priority": "low",
+      "progress": 0,
+      "reporter": {
+        "id": 1,
+        "name": "ឡេង សុខឆាយ",
+        "role": "អ្នករាយការណ៍ (Reporter)",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 2,
+          "name": "ចេង ច័ន្ទបញ្ញា",
+          "role": "ប្រធានផ្នែក Frontend Lead",
+          "avatar": "/images/placeholder/avatar.jpg"
+        }
+      ],
+      "created_at": "2026-08-21T11:42:12.187Z",
+      "project_id": "proj-001",
+      "updated_at": "2026-09-04T11:42:12.187Z",
       "description": "Provide safe confirmation step and revoke tenant session when member switches workspace.",
-      "project_name": "BMS Digitech",
-      "comments_count": 4,
+      "project_name": "Core System Structure",
+      "comments_count": 10,
       "attachments_count": 0
     }
   ],
@@ -345,70 +309,70 @@
     "1": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #WMS-0000 ត្រូវបានបង្កើតដោយ ពិសិដ្ឋ បញ្ញាវ័ន្ត និងចាត់តាំងទៅកាន់ ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "text": "ភារកិច្ច #PMS-675 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
         "time": "8:30 AM",
         "is_self": false,
         "is_system": true,
         "sender_id": 0,
-        "created_at": "2026-09-08T05:24:18.470Z",
+        "created_at": "2026-09-04T07:42:50.922Z",
         "sender_name": "ប្រព័ន្ធ (System)",
         "sender_avatar": null
       },
       {
         "id": 2,
-        "text": "សួស្តី @ពិសិដ្ឋ បញ្ញាវ័ន្ត! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Org Admin | Structure | Department\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Org Admin | Structure | Department\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
         "sender_id": 999,
-        "created_at": "2026-09-08T05:54:18.470Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
+        "created_at": "2026-09-04T08:12:50.923Z",
+        "sender_name": "ឡេង សុខឆាយ",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
       }
     ],
     "2": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #BMS-0000 ត្រូវបានបង្កើតដោយ ពិសិដ្ឋ បញ្ញាវ័ន្ត និងចាត់តាំងទៅកាន់ ពុំ ប្រុសមុន្នី",
+        "text": "ភារកិច្ច #PMS-671 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ស៊ន់ ​លាង",
         "time": "8:30 AM",
         "is_self": false,
         "is_system": true,
         "sender_id": 0,
-        "created_at": "2026-09-08T05:24:18.473Z",
+        "created_at": "2026-09-04T22:50:50.945Z",
         "sender_name": "ប្រព័ន្ធ (System)",
         "sender_avatar": null
       },
       {
         "id": 2,
-        "sender_id": 1,
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null,
-        "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Drag & Drop\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ស៊ន់ ​លាង! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Drag & Drop\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "created_at": "2026-08-31T08:00:00.000Z"
+        "sender_id": 999,
+        "created_at": "2026-09-04T23:20:50.945Z",
+        "sender_name": "ឡេង សុខឆាយ",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
       }
     ],
     "3": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #WMS-0001 ត្រូវបានបង្កើតដោយ ពិសិដ្ឋ បញ្ញាវ័ន្ត និងចាត់តាំងទៅកាន់ ថា វីនណឺរ",
+        "text": "ភារកិច្ច #PMS-670 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
         "time": "8:30 AM",
         "is_self": false,
         "is_system": true,
         "sender_id": 0,
-        "created_at": "2026-09-08T05:24:18.474Z",
+        "created_at": "2026-09-04T22:50:50.952Z",
         "sender_name": "ប្រព័ន្ធ (System)",
         "sender_avatar": null
       },
       {
         "id": 2,
-        "text": "សួស្តី @ថា វីនណឺរ! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Cannot Scroll PDF\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Cannot Scroll PDF\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
         "sender_id": 999,
-        "created_at": "2026-09-08T05:54:18.474Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
+        "created_at": "2026-09-04T23:20:50.952Z",
+        "sender_name": "ឡេង សុខឆាយ",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
       }
     ],
     "4": [
@@ -523,13 +487,13 @@
       },
       {
         "id": 2,
-        "sender_id": 1,
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null,
-        "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Security setting UI improvements\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Security setting UI improvements\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "created_at": "2026-08-31T08:00:00.000Z"
+        "sender_id": 999,
+        "created_at": "2026-09-04T08:12:40.850Z",
+        "sender_name": "ឡេង សុខឆាយ",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
       }
     ],
     "6": [
@@ -553,6 +517,77 @@
         "created_at": "2026-09-04T23:20:50.958Z",
         "sender_name": "ឡេង សុខឆាយ",
         "sender_avatar": "/images/placeholder/avatar.jpg"
+      },
+      {
+        "id": 1788875784856,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ស៊ន់ ​លាង, PISETH PANHAVORN",
+        "time": "08:56 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T13:56:24.852Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788875820738,
+        "text": "check task",
+        "time": "08:57 PM",
+        "is_self": true,
+        "is_system": false,
+        "sender_id": 64,
+        "created_at": "2026-09-08T13:57:00.738Z",
+        "attachments": [],
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
+      },
+      {
+        "id": 1788876852738,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "hii",
+        "time": "09:14 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:14:12.739Z"
+      },
+      {
+        "id": 1788876978802,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "check task",
+        "time": "09:16 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:16:18.802Z"
+      },
+      {
+        "id": 1788877019484,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "hii",
+        "time": "09:16 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:16:59.484Z"
+      },
+      {
+        "id": 1788877032499,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "hii",
+        "time": "09:17 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:17:12.500Z"
       }
     ],
     "7": [
@@ -592,60 +627,15 @@
       },
       {
         "id": 2,
-        "sender_id": 1,
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null,
-        "text": "សួស្តី @PUM BRUSMUNY! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Profile | Switch Org | Exit Org\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Profile | Switch Org | Exit Org\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "created_at": "2026-08-24T08:00:00.000Z"
-      },
-      {
-        "id": 1788874096405,
-        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ",
-        "time": "08:28 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T13:28:16.401Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788874099142,
-        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ PUM BRUSMUNY",
-        "time": "08:28 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T13:28:19.138Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      }
-    ],
-    "1788875601937": [
-      {
-        "id": 1,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
-        "text": "ភារកិច្ច #BMS-0004 ត្រូវបានបង្កើតដោយ PUM BRUSMUNY និងចាត់តាំងទៅកាន់ THA WINNER",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "created_at": "2026-09-08T13:53:21.937Z"
-      },
-      {
-        "id": 2,
-        "sender_id": 2,
-        "sender_name": "PUM BRUSMUNY",
-        "sender_avatar": null,
-        "text": "សួស្តី @THA WINNER! ខ្ញុំបានចាត់តាំងភារកិច្ច \"test\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "created_at": "2026-09-08T13:53:21.937Z"
+        "sender_id": 999,
+        "created_at": "2026-09-04T08:12:48.356Z",
+        "sender_name": "ឡេង សុខឆាយ",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
       }
     ]
   },
-  "updated_at": "2026-09-08T14:12:30.191Z"
+  "updated_at": "2026-09-08T14:17:12.500Z"
 }
