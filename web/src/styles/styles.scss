@@ -607,21 +607,21 @@ body.dark input[type="datetime-local"],
    ===================================================================== */
 .mat-datepicker-content,
 .custom-saas-datepicker {
-    border-radius: 18px !important;
+    border-radius: 16px !important;
     border: 1px solid #e2e8f0 !important;
     background-color: #ffffff !important;
-    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05) !important;
     font-family: 'Kantumruy Pro', sans-serif !important;
     overflow: hidden !important;
-    padding: 6px 8px !important;
+    padding: 0 !important;
 
     .mat-calendar {
-        width: 300px !important;
+        width: 290px !important;
         font-family: 'Kantumruy Pro', sans-serif !important;
     }
 
     .mat-calendar-header {
-        padding: 8px 8px 4px !important;
+        padding: 8px 10px 4px !important;
     }
 
     .mat-calendar-controls {
@@ -634,10 +634,10 @@ body.dark input[type="datetime-local"],
     .mat-calendar-period-button {
         font-family: 'Kantumruy Pro', sans-serif !important;
         font-weight: 600 !important;
-        font-size: 14.5px !important;
+        font-size: 14px !important;
         color: #1e293b !important;
-        border-radius: 10px !important;
-        padding: 4px 10px !important;
+        border-radius: 8px !important;
+        padding: 4px 8px !important;
         transition: background-color 0.15s ease !important;
 
         &:hover {
@@ -647,8 +647,10 @@ body.dark input[type="datetime-local"],
 
     .mat-calendar-previous-button,
     .mat-calendar-next-button {
-        border-radius: 10px !important;
+        border-radius: 8px !important;
         color: #64748b !important;
+        width: 32px !important;
+        height: 32px !important;
         transition: all 0.15s ease !important;
 
         &:hover {
@@ -657,16 +659,36 @@ body.dark input[type="datetime-local"],
         }
     }
 
+    /* Remove the duplicate/redundant month row that creates double padding/gap */
+    tr[aria-hidden="true"]:has(.mat-calendar-body-label),
+    tr:has(.mat-calendar-body-label[colspan="7"]),
+    .mat-calendar-table-header-divider {
+        display: none !important;
+    }
+
+    /* Hide text of body label in first row spacer so it doesn't push dates or duplicate month name */
+    .mat-calendar-body-label {
+        font-size: 0 !important;
+        line-height: 0 !important;
+        color: transparent !important;
+        visibility: hidden !important;
+    }
+
+    .mat-calendar-content {
+        padding: 0 8px 8px !important;
+    }
+
     .mat-calendar-table-header th {
         font-family: 'Kantumruy Pro', sans-serif !important;
         font-size: 12px !important;
         font-weight: 600 !important;
         color: #94a3b8 !important;
+        padding-top: 4px !important;
         padding-bottom: 6px !important;
     }
 
     .mat-calendar-body-cell-content {
-        border-radius: 10px !important;
+        border-radius: 8px !important;
         font-family: 'Kantumruy Pro', sans-serif !important;
         font-size: 13px !important;
         color: #334155 !important;
@@ -691,6 +713,11 @@ body.dark input[type="datetime-local"],
         background-color: #eff6ff !important;
         color: #2563eb !important;
     }
+}
+
+.cdk-overlay-pane:has(.custom-saas-datepicker) {
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 /* Dark Mode for Custom Datepicker */

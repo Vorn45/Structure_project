@@ -440,17 +440,17 @@ export interface TeamMember {
                             <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[14px]">
                                 កាលបរិច្ឆេទចាប់ផ្តើម
                             </label>
-                            <div class="relative">
-                                <button
-                                    type="button"
-                                    (click)="startPicker.open()"
-                                    class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-left cursor-pointer"
+                            <div class="relative group">
+                                <div
+                                    class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white group-hover:border-slate-300 dark:group-hover:border-slate-600 transition-all text-left pointer-events-none select-none shadow-2xs"
                                 >
                                     <span class="truncate">{{ formatDisplayDate(startDate) }}</span>
-                                    <mat-icon svgIcon="heroicons_outline:calendar" class="!w-4 !h-4 text-slate-400 shrink-0"></mat-icon>
-                                </button>
+                                    <mat-icon svgIcon="heroicons_outline:calendar" class="!w-4 !h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 shrink-0 transition-colors"></mat-icon>
+                                </div>
                                 <input
-                                    class="cdk-visually-hidden"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    readonly
+                                    (click)="startPicker.open()"
                                     [matDatepicker]="startPicker"
                                     [(ngModel)]="startDate"
                                 />
@@ -462,21 +462,21 @@ export interface TeamMember {
                             <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[14px]">
                                 កាលបរិច្ឆេទទទួលបញ្ចប់
                             </label>
-                            <div class="relative">
-                                <button
-                                    type="button"
-                                    (click)="endPicker.open()"
-                                    class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-left cursor-pointer"
+                            <div class="relative group">
+                                <div
+                                    class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white group-hover:border-slate-300 dark:group-hover:border-slate-600 transition-all text-left pointer-events-none select-none shadow-2xs"
                                 >
                                     <span class="truncate">{{ formatDisplayDate(endDate) }}</span>
-                                    <mat-icon svgIcon="heroicons_outline:calendar" class="!w-4 !h-4 text-slate-400 shrink-0"></mat-icon>
-                                </button>
+                                    <mat-icon svgIcon="heroicons_outline:calendar" class="!w-4 !h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 shrink-0 transition-colors"></mat-icon>
+                                </div>
                                 <input
-                                    class="cdk-visually-hidden"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    readonly
+                                    (click)="endPicker.open()"
                                     [matDatepicker]="endPicker"
                                     [(ngModel)]="endDate"
                                 />
-                                <mat-datepicker #endPicker panelClass="custom-saas-datepicker"></mat-datepicker>
+                                <mat-datepicker #endPicker [xPosition]="'end'" panelClass="custom-saas-datepicker"></mat-datepicker>
                             </div>
                         </div>
                     </div>
