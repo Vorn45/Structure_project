@@ -42,6 +42,11 @@ export class NotificationController {
         return await this._service.getFirebaseConfig();
     }
 
+    @Post('test')
+    async simulateTestNotification(@Res({ passthrough: true }) res: express.Response) {
+        return await this._service.simulateTestNotification(res.locals.user);
+    }
+
     @Post('fcm-token')
     async saveFcmToken(
         @Res({ passthrough: true }) res: express.Response,

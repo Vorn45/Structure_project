@@ -313,6 +313,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this._notificationsService.playIphoneChime();
     }
 
+    /** Triggers a live test notification from backend to simulate receiving a new task */
+    triggerTestNotification(): void {
+        this._notificationsService.triggerTestNotification().subscribe(() => {
+            this._notificationsService.refresh();
+        });
+    }
+
     /** Fetch the next "all" page and append it below what's already loaded. */
     loadMore(): void {
         if (this.isLoadingMore || !this.hasMore) return;
@@ -582,14 +589,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         (event.target as HTMLImageElement).src = 'images/logo/default_logo.png';
     }
 
-    /** Relative time in Khmer e.g. "មុននេះបន្តិច", "2 នាទីមុន", "1 ម៉ោងមុន", "ម្សិលមិញ" */
+    /** Relative time in Khmer e.g. "ទើបតែឥឡូវនេះ", "1 នាទីមុន", "1 ម៉ោងមុន", "ម្សិលមិញ" */
     formatRelativeTime(date: Date | string): string {
         const d = new Date(date);
         if (isNaN(d.getTime())) return '';
         const now = Date.now();
         const diffSec = Math.floor((now - d.getTime()) / 1000);
 
-        if (diffSec < 60) return 'មុននេះបន្តិច';
+        if (diffSec < 45) return 'ទើបតែឥឡូវនេះ';
         const diffMin = Math.floor(diffSec / 60);
         if (diffMin < 60) return `${diffMin} នាទីមុន`;
         const diffHr = Math.floor(diffMin / 60);

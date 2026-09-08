@@ -338,6 +338,17 @@ export class NotificationsService implements OnDestroy {
         this.getAll().subscribe();
     }
 
+    /** Triggers a live test notification on backend with realtime socket & sound */
+    triggerTestNotification(): Observable<any> {
+        return this._httpClient.post(`${this._baseUrl}/test`, {}).pipe(
+            timeout(8000),
+            catchError((err) => {
+                console.warn('Error triggering test notification:', err);
+                return of(null);
+            }),
+        );
+    }
+
     /** GET /notification — returns { limit, offset, total, unread_count, results }. */
     getAll(limit = 30, offset = 0): Observable<Notification[]> {
         return this._httpClient
