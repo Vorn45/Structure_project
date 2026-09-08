@@ -1,6 +1,6 @@
 export const env = {
     production: true,
-    APP_VERSION: require('../../package.json').version,
+    APP_VERSION: '1.0.0',
     API_BASE_URL: 'https://structure-project.onrender.com/api',
     FILE_BASE_URL: 'https://file-v4-api.uat.camcyber.com',
     SOCKET_URL: 'https://structure-project.onrender.com',
