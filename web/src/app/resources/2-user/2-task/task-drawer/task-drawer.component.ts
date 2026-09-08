@@ -145,8 +145,48 @@ export class TaskDrawerComponent {
 
         const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         if (diffDays < 0) return { text: 'ហួសកាលកំណត់', isOverdue: true };
-        if (diffDays === 0) return { text: 'ថ្ងៃនេះ (Today)', isOverdue: false };
+        if (diffDays === 0) return { text: 'ថ្ងៃនេះ', isOverdue: false };
         return { text: `សល់ ${diffDays} ថ្ងៃ`, isOverdue: false };
+    }
+
+    getStatusDot(status?: string): string {
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'pending':
+                return 'bg-blue-500';
+            case 'confirmed':
+                return 'bg-indigo-500';
+            case 'unconfirmed':
+            case 'todo':
+                return 'bg-slate-400';
+            case 'in_progress':
+                return 'bg-amber-500';
+            case 'in_review':
+            case 'review':
+                return 'bg-sky-500';
+            case 'reopened':
+                return 'bg-rose-500';
+            case 'done':
+            case 'completed':
+                return 'bg-emerald-500';
+            default:
+                return 'bg-slate-400';
+        }
+    }
+
+    getPriorityColor(priority?: string): string {
+        switch (priority?.toLowerCase()) {
+            case 'urgent':
+                return 'text-rose-500';
+            case 'high':
+                return 'text-amber-500';
+            case 'medium':
+                return 'text-blue-500';
+            case 'low':
+                return 'text-slate-400';
+            default:
+                return 'text-blue-500';
+        }
     }
 
     getIsoDate(dateStr?: string | null): string {
