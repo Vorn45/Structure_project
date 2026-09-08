@@ -134,10 +134,26 @@
         // Enable CORS for frontend
         app.enableCors({
             origin: true,
-            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
             credentials: true,
-            allowedHeaders: '*',
-            exposedHeaders: '*',
+            methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+            allowedHeaders: [
+                'Content-Type',
+                'Accept',
+                'Authorization',
+                'X-Requested-With',
+                'Origin',
+                'Access-Control-Request-Method',
+                'Access-Control-Request-Headers',
+                'x-device-id',
+                'x-client-version',
+                'ngrok-skip-browser-warning',
+                'sec-ch-ua',
+                'sec-ch-ua-mobile',
+                'sec-ch-ua-platform',
+            ],
+            exposedHeaders: ['Authorization', 'Set-Cookie'],
+            preflightContinue: false,
+            optionsSuccessStatus: 204,
         });
 
         app.useBodyParser('json', { limit: '1024mb' });
