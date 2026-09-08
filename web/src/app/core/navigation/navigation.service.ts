@@ -26,8 +26,6 @@ export class NavigationService {
                 this._rawItems = navigationData.orgAdmin;
                 break;
             case 'personal_workspace':
-                this._rawItems = navigationData.personalWorkspace;
-                break;
             case 'member':
             case 'user':
             case 'volunteer':
