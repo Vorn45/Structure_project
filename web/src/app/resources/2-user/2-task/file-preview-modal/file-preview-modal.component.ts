@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, input, output, signal } from '@angular/core';
+import { Component, HostListener, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -21,6 +20,13 @@ export class FilePreviewModalComponent {
     downloadFile = output<TaskAttachment>();
 
     isFileModalFullscreen = signal<boolean>(false);
+
+    @HostListener('document:keydown.escape')
+    onEscape(): void {
+        if (this.previewFile() || this.previewImage()) {
+            this.closeModal.emit();
+        }
+    }
 
     constructor(private readonly _sanitizer: DomSanitizer) {}
 

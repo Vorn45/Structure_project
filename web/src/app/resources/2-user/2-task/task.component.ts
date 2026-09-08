@@ -1042,6 +1042,7 @@ export class UserTaskComponent implements OnInit {
 
     closeFilePreview(): void {
         this.previewFileModal.set(null);
+        this.previewImageModal.set(null);
     }
 
     downloadFile(file: TaskAttachment): void {
