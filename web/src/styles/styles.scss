@@ -651,12 +651,46 @@ body.dark input[type="datetime-local"],
         color: #64748b !important;
         width: 32px !important;
         height: 32px !important;
+        min-width: 32px !important;
+        padding: 0 !important;
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         transition: all 0.15s ease !important;
 
         &:hover {
             background-color: #f1f5f9 !important;
             color: #0f172a !important;
         }
+
+        &::after {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            margin: 0 !important;
+            width: 7px !important;
+            height: 7px !important;
+            border: 0 solid currentColor !important;
+            border-top-width: 2px !important;
+            content: "" !important;
+        }
+    }
+
+    .mat-calendar-previous-button::after {
+        border-left-width: 2px !important;
+        transform: translate(calc(-50% + 1px), -50%) rotate(-45deg) !important;
+    }
+
+    .mat-calendar-next-button::after {
+        border-right-width: 2px !important;
+        transform: translate(calc(-50% - 1px), -50%) rotate(45deg) !important;
+    }
+
+    .mat-datepicker-actions {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
     }
 
     /* Remove the duplicate/redundant month row that creates double padding/gap */

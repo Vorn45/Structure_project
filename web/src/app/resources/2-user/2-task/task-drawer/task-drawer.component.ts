@@ -5,6 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, MAT_NATIVE_DATE_FORMATS } from '@angular/material/core';
+import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import {
     TASK_TYPES_LIST,
@@ -27,7 +30,13 @@ import {
         MatButtonModule,
         MatMenuModule,
         MatTooltipModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
         SideDialogCloseButtonComponent,
+    ],
+    providers: [
+        { provide: DateAdapter, useClass: KhmerDateAdapter },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
     ],
     templateUrl: './task-drawer.component.html',
     styles: [
@@ -121,6 +130,7 @@ export class TaskDrawerComponent {
     priorityChange = output<{ task: TaskItem; priority: string }>();
     dueDateChange = output<{ task: TaskItem; dueDate: string | null }>();
     assigneeToggle = output<{ task: TaskItem; member: TaskMember }>();
+    reporterChange = output<{ task: TaskItem; member: TaskMember }>();
     sendMessage = output<{ text: string; attachments: TaskAttachment[] }>();
     viewFile = output<TaskAttachment>();
     previewImage = output<string>();
@@ -137,12 +147,19 @@ export class TaskDrawerComponent {
             if (mode) {
                 this.mobileTab.set(mode);
             }
-        });
+        }, { allowSignalWrites: true });
     }
 
+    taskDueDate = computed<Date | null>(() => {
+        const raw = this.task()?.due_date;
+        if (!raw) return null;
+        const d = new Date(raw);
+        return isNaN(d.getTime()) ? null : d;
+    });
+
     getTaskTypeInfo(type?: string): TaskTypeOption {
-        const found = this.taskTypes.find((t) => t.id === type);
-        return found || this.taskTypes[2]; // Default to 'bug' (កំហុស) or 'feature'
+        const found = this.taskTypes.find((t) => t.id === type || t.id.toLowerCase() === type?.toLowerCase());
+        return found || this.taskTypes[0]; // Default to 'feature' (មុខងារ)
     }
 
     activeTab = signal<'chat' | 'details' | 'files'>('chat');
@@ -214,6 +231,15 @@ export class TaskDrawerComponent {
         ];
         const id = Number(member.id) || 0;
         return colors[id % colors.length];
+    }
+
+    getMemberInitial(name?: string): string {
+        if (!name) return 'U';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length > 1) {
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+        return name.slice(0, 2).toUpperCase();
     }
 
     formatDate(dateStr?: string | null): string {
@@ -297,12 +323,6 @@ export class TaskDrawerComponent {
         return d.toISOString().split('T')[0];
     }
 
-    setQuickDueDate(task: TaskItem, daysAhead: number): void {
-        const d = new Date();
-        d.setDate(d.getDate() + daysAhead);
-        this.dueDateChange.emit({ task, dueDate: d.toISOString() });
-    }
-
     clearDueDate(task: TaskItem): void {
         this.dueDateChange.emit({ task, dueDate: null });
     }
@@ -313,6 +333,39 @@ export class TaskDrawerComponent {
             const d = new Date(input.value);
             this.dueDateChange.emit({ task, dueDate: d.toISOString() });
         }
+    }
+
+    setQuickDueDate(task: TaskItem, daysToAdd: number): void {
+        const d = new Date();
+        d.setDate(d.getDate() + daysToAdd);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const iso = `${year}-${month}-${day}`;
+        this.dueDateChange.emit({ task, dueDate: iso });
+    }
+
+    onMatDateChange(event: any, task: TaskItem): void {
+        const dateVal = event.value;
+        if (!dateVal) {
+            this.clearDueDate(task);
+            return;
+        }
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return;
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const iso = `${year}-${month}-${day}`;
+        this.dueDateChange.emit({ task, dueDate: iso });
+    }
+
+    isModuleRedundantWithTitle(): boolean {
+        const mod = (this.task()?.module || '').toLowerCase().trim();
+        const title = (this.task()?.title || '').toLowerCase().trim();
+        if (!mod) return true;
+        const cleanMod = mod.replace(/s$/, '').replace(/\|/g, '').trim();
+        return title.startsWith(mod) || title.startsWith(cleanMod) || title.includes(mod);
     }
 
     getStatusClass(status?: string): string {
@@ -363,7 +416,7 @@ export class TaskDrawerComponent {
             case 'reopened':
                 return 'bg-rose-50 text-rose-700 border-rose-200/90 dark:bg-rose-950/70 dark:border-rose-700/80 dark:text-rose-400';
             default:
-                return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300';
+                return 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200';
         }
     }
 

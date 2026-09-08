@@ -617,7 +617,7 @@ export class CreateTaskDialogComponent implements OnInit {
     ];
     selectedStatus = signal<string>('new');
     taskTypesList = TASK_TYPES_LIST;
-    selectedTaskType: string = 'bug';
+    selectedTaskType: string = 'feature';
 
     getTaskTypeOption(typeId: string): TaskTypeOption {
         return this.taskTypesList.find((t) => t.id === typeId) || this.taskTypesList[0];
