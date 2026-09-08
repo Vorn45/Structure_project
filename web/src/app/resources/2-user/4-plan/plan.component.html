@@ -726,7 +726,7 @@
                             <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 space-y-1">
                                 <span class="text-[15px] text-slate-700 dark:text-slate-300 block font-medium">កិច្ចការសរុប</span>
                                 <p class="text-[26px] font-medium text-slate-800 dark:text-white leading-tight mt-0.5">{{ (proj.tasks || []).length }}</p>
-                                <span class="text-[14px] text-emerald-600 dark:text-emerald-400 font-medium block">បានបញ្ចប់ {{ (proj.progress * (proj.tasks?.length || 8) / 100) | number:'1.0-0' }} កិច្ចការ</span>
+                                <span class="text-[14px] text-emerald-600 dark:text-emerald-400 font-medium block">បានបញ្ចប់ {{ getTaskCountByStatus('completed') }} កិច្ចការ</span>
                             </div>
 
                             <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 space-y-1">
@@ -801,6 +801,181 @@
                                 <!-- ECharts Trend Line Container -->
                                 <div #taskTrendChartRef class="w-full h-76"></div>
                             </div>
+                        </div>
+
+                        <!-- ======================================================== -->
+                        <!-- ALL TASKS OVERVIEW SECTION IN THIS PROJECT (ទិដ្ឋភាពទូទៅនៃកិច្ចការ) -->
+                        <!-- ======================================================== -->
+                        <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 space-y-5 shadow-2xs font-kantumruy">
+                            
+                            <!-- Header Row -->
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700/60 pb-4">
+                                <div>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                                            <mat-icon svgIcon="mdi:format-list-checkbox" class="icon-size-5"></mat-icon>
+                                        </div>
+                                        <h3 class="text-[17px] font-medium text-slate-800 dark:text-white">កិច្ចការទាំងអស់ក្នុងគម្រោង (All Project Tasks)</h3>
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                            {{ (proj.tasks || []).length }} កិច្ចការ
+                                        </span>
+                                    </div>
+                                    <p class="text-[13.5px] text-slate-500 dark:text-slate-400 mt-1">
+                                        ទិដ្ឋភាពទូទៅនៃកិច្ចការ ស្ថានភាពការងារ និងអ្នកទទួលខុសត្រូវទាំងអស់ក្នុងគម្រោង {{ proj.name }}
+                                    </p>
+                                </div>
+
+                                <!-- Right: Search, Status Filter Pills & View All Shortcut -->
+                                <div class="flex flex-wrap items-center gap-2.5">
+                                    <!-- Search -->
+                                    <div class="relative flex items-center">
+                                        <mat-icon svgIcon="mdi:magnify" class="icon-size-4 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
+                                        <input type="text" [placeholder]="'ស្វែងរកក្នុង ' + proj.code + '...'"
+                                            [ngModel]="overviewTaskSearchQuery()" (ngModelChange)="overviewTaskSearchQuery.set($event)"
+                                            class="h-9 w-48 sm:w-56 pl-8.5 pr-3 text-[13.5px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 dark:text-white placeholder-slate-400 font-kantumruy" />
+                                    </div>
+
+                                    <!-- Status Pills -->
+                                    <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                                        <button type="button" (click)="overviewTaskStatusFilter.set('all')"
+                                            class="px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer"
+                                            [ngClass]="overviewTaskStatusFilter() === 'all' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-2xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'">
+                                            ទាំងអស់
+                                        </button>
+                                        <button type="button" (click)="overviewTaskStatusFilter.set('in_progress')"
+                                            class="px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer"
+                                            [ngClass]="overviewTaskStatusFilter() === 'in_progress' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-2xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'">
+                                            កំពុងធ្វើ
+                                        </button>
+                                        <button type="button" (click)="overviewTaskStatusFilter.set('review')"
+                                            class="px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer"
+                                            [ngClass]="overviewTaskStatusFilter() === 'review' ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-2xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'">
+                                            ស្នើពិនិត្យ
+                                        </button>
+                                        <button type="button" (click)="overviewTaskStatusFilter.set('done')"
+                                            class="px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer"
+                                            [ngClass]="overviewTaskStatusFilter() === 'done' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-2xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'">
+                                            បានបញ្ចប់
+                                        </button>
+                                    </div>
+
+                                    <!-- Open Tasks Tab Button -->
+                                    <button type="button" (click)="projectNavTab.set('tasks')"
+                                        class="h-9 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-700 dark:text-blue-300 text-[13px] font-medium flex items-center gap-1 border border-blue-200 dark:border-blue-800/80 cursor-pointer transition-colors"
+                                        [matTooltip]="'បើកផ្ទាំងការងារលម្អិត'">
+                                        <span>ផ្ទាំងការងារ</span>
+                                        <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4"></mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tasks Table -->
+                            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700/80">
+                                <table class="w-full text-left border-collapse text-[14px] font-kantumruy">
+                                    <thead>
+                                        <tr class="bg-slate-50/80 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-medium text-[13px]">
+                                            <th class="py-3 px-4">កូដ & កិច្ចការ</th>
+                                            <th class="py-3 px-3 text-center">អាទិភាព</th>
+                                            <th class="py-3 px-3">អ្នកទទួលខុសត្រូវ</th>
+                                            <th class="py-3 px-3">កាលបរិច្ឆេទ</th>
+                                            <th class="py-3 px-3">វឌ្ឍនភាព</th>
+                                            <th class="py-3 px-3 text-center">ស្ថានភាព</th>
+                                            <th class="py-3 px-3 text-right">សកម្មភាព</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                                        <tr *ngFor="let task of filteredOverviewTasks()"
+                                            (click)="openTaskModal(task)"
+                                            class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 cursor-pointer transition-colors group">
+                                            
+                                            <!-- Code & Title -->
+                                            <td class="py-3.5 px-4 min-w-[280px]">
+                                                <div class="flex items-center gap-2.5">
+                                                    <mat-icon [svgIcon]="getPriorityVisual(task.priority).icon" class="icon-size-4.5 shrink-0"
+                                                        [ngClass]="getPriorityVisual(task.priority).color"></mat-icon>
+                                                    <span class="font-mono text-[13px] font-medium text-slate-500 dark:text-slate-400 shrink-0">
+                                                        {{ task.code }}
+                                                    </span>
+                                                    <span class="text-slate-300 dark:text-slate-600">•</span>
+                                                    <span class="text-[14.5px] text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 font-normal truncate max-w-[320px] transition-colors">
+                                                        {{ task.title }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <!-- Priority -->
+                                            <td class="py-3.5 px-3 text-center shrink-0">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11.5px] font-medium border"
+                                                    [ngClass]="getPriorityClass(task.priority)">
+                                                    {{ getPriorityLabel(task.priority) }}
+                                                </span>
+                                            </td>
+
+                                            <!-- Assignee -->
+                                            <td class="py-3.5 px-3 min-w-[140px]">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-6.5 h-6.5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-2xs shrink-0"
+                                                        [ngClass]="task.assignee?.bgClass || 'bg-blue-600'">
+                                                        {{ task.assignee?.initial || task.assignee?.name?.charAt(0) || 'A' }}
+                                                    </div>
+                                                    <span class="text-[13px] text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
+                                                        {{ task.assignee?.name || 'គ្មាន' }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <!-- Due Date -->
+                                            <td class="py-3.5 px-3 text-[13px] text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                                                <div class="flex items-center gap-1.5">
+                                                    <mat-icon svgIcon="mdi:calendar-outline" class="icon-size-3.5 text-slate-400"></mat-icon>
+                                                    <span>{{ getTaskDateToDo(task.due_date, task.created_at) }}</span>
+                                                </div>
+                                            </td>
+
+                                            <!-- Progress -->
+                                            <td class="py-3.5 px-3 min-w-[110px]">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                                        <div class="h-full rounded-full transition-all"
+                                                            [ngClass]="(task.status === 'done' || task.status === 'completed') ? 'bg-emerald-500' : 'bg-blue-500'"
+                                                            [style.width.%]="(task.status === 'done' || task.status === 'completed') ? 100 : (task.progress || 50)"></div>
+                                                    </div>
+                                                    <span class="text-xs text-slate-500 font-medium">
+                                                        {{ (task.status === 'done' || task.status === 'completed') ? 100 : (task.progress || 50) }}%
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <!-- Status Badge -->
+                                            <td class="py-3.5 px-3 text-center whitespace-nowrap">
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-medium border"
+                                                    [ngClass]="getTaskStatusClass(task.status)">
+                                                    <mat-icon [svgIcon]="getTaskStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
+                                                    <span>{{ getTaskStatusLabel(task.status) }}</span>
+                                                </span>
+                                            </td>
+
+                                            <!-- Action -->
+                                            <td class="py-3.5 px-3 text-right">
+                                                <button type="button" (click)="$event.stopPropagation(); openTaskModal(task)"
+                                                    class="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-700 inline-flex items-center justify-center transition-colors cursor-pointer"
+                                                    [matTooltip]="'មើលកិច្ចការលម្អិត'">
+                                                    <mat-icon svgIcon="mdi:open-in-new" class="icon-size-4"></mat-icon>
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Empty Search State -->
+                                        <tr *ngIf="filteredOverviewTasks().length === 0">
+                                            <td colspan="7" class="py-8 text-center text-slate-400">
+                                                <mat-icon svgIcon="mdi:clipboard-text-search-outline" class="icon-size-8 mx-auto text-slate-300 dark:text-slate-600 mb-1.5"></mat-icon>
+                                                <p class="text-sm">រកមិនឃើញកិច្ចការដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </div>
 
                     </div>

@@ -919,6 +919,10 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     // Search input inside selected project tasks
     taskSearchQuery = signal<string>('');
 
+    // Overview tab task search and filter signals
+    overviewTaskSearchQuery = signal<string>('');
+    overviewTaskStatusFilter = signal<string>('all');
+
     // Filter for subtasks/tasks within selected project
     subtaskFilter = signal<string>('all');
 
@@ -926,6 +930,40 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     linkSearchQuery = signal<string>('');
     linkTypeFilter = signal<string>('all');
     copiedLinkId = signal<string | null>(null);
+
+    // Filtered overview tasks for currently selected project in General Overview tab
+    filteredOverviewTasks = computed(() => {
+        const proj = this.selectedProject();
+        if (!proj || !proj.tasks) return [];
+        let list = proj.tasks;
+
+        const q = this.overviewTaskSearchQuery().toLowerCase().trim();
+        if (q) {
+            list = list.filter(
+                (t) =>
+                    t.title.toLowerCase().includes(q) ||
+                    t.code.toLowerCase().includes(q) ||
+                    t.description.toLowerCase().includes(q) ||
+                    (t.assignee && t.assignee.name.toLowerCase().includes(q)),
+            );
+        }
+
+        const filter = this.overviewTaskStatusFilter();
+        if (filter !== 'all') {
+            if (filter === 'done') {
+                list = list.filter((t) => t.status === 'done' || t.status === 'completed');
+            } else if (filter === 'in_progress') {
+                list = list.filter((t) => t.status === 'in_progress');
+            } else if (filter === 'review') {
+                list = list.filter((t) => t.status === 'review' || t.status === 'in_review');
+            } else if (filter === 'new') {
+                list = list.filter((t) => t.status === 'new' || t.status === 'unconfirmed' || t.status === 'todo');
+            } else {
+                list = list.filter((t) => t.status === filter);
+            }
+        }
+        return list;
+    });
 
     // Active Task for full modal / side detail view (showing chat, subtasks, members, links, documents)
     activeTaskModal = signal<IndividualTaskItem | null>(null);
