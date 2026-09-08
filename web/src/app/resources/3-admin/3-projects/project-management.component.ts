@@ -1257,6 +1257,30 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.title) {
                 const codeFormatted = result.code ? (result.code.startsWith('#') ? result.code : `#${result.code}`) : `#${proj?.code || 'BMS'}-${String(this.tasks().length).padStart(4, '0')}`;
+                
+                const selectedMembers: TaskMember[] = result.assignees && result.assignees.length > 0
+                    ? result.assignees.map((a: any, idx: number) => ({
+                        id: Number(a.id) || idx + 1,
+                        name: a.name,
+                        role: a.role || 'Member',
+                        initial: (a.name || 'M').charAt(0).toUpperCase(),
+                        bgClass: 'bg-indigo-600 text-white',
+                        avatar: a.avatar || null,
+                    }))
+                    : [...this.teamMembers().slice(0, 2)];
+
+                const primaryAssignee: TaskMember = selectedMembers.length > 0 ? selectedMembers[0] : {
+                    id: 1,
+                    name: typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'PISETH PANHAVORN'),
+                    role: result.assignee?.role || 'Super Admin',
+                    initial: (typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'P')).charAt(0).toUpperCase(),
+                    bgClass: 'bg-blue-600 text-white',
+                };
+
+                const reporterName = typeof result.reporter === 'string'
+                    ? result.reporter
+                    : (result.reporter?.name || result.reporterName || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត');
+
                 const newTask: AdminTaskItem = {
                     id: `tsk-${Date.now()}`,
                     code: codeFormatted,
@@ -1269,17 +1293,18 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     comments_count: 0,
                     attachments_count: 0,
                     progress: 0,
-                    assignee: {
+                    reporter: {
                         id: 1,
-                        name: result.assignee || 'PISETH PANHAVORN',
-                        role: 'Super Admin',
-                        initial: (result.assignee || 'P').charAt(0).toUpperCase(),
+                        name: reporterName,
+                        role: result.reporter?.role || 'Super Admin',
+                        initial: reporterName.charAt(0).toUpperCase(),
                         bgClass: 'bg-blue-600 text-white',
                     },
+                    assignee: primaryAssignee,
                     subtasks: [
                         { id: `st-${Date.now()}`, title: 'រៀបចំលក្ខខណ្ឌតម្រូវការដំបូង', completed: false },
                     ],
-                    members: [...this.teamMembers().slice(0, 2)],
+                    members: selectedMembers,
                     links: [],
                     documents: [],
                 };

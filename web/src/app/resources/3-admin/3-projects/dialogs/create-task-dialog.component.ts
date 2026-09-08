@@ -532,19 +532,20 @@ export class CreateTaskDialogComponent implements OnInit {
     selectedAssigneeIds = signal<string[]>(['1']);
 
     get selectedAssignees(): TeamMember[] {
-        return this.teamMembers.filter((m) => this.selectedAssigneeIds().includes(m.id));
+        return this.teamMembers.filter((m) => this.selectedAssigneeIds().includes(String(m.id)));
     }
 
-    isAssigneeSelected(id: string): boolean {
-        return this.selectedAssigneeIds().includes(id);
+    isAssigneeSelected(id: string | number): boolean {
+        return this.selectedAssigneeIds().includes(String(id));
     }
 
-    toggleAssignee(id: string): void {
+    toggleAssignee(id: string | number): void {
         const current = this.selectedAssigneeIds();
-        if (current.includes(id)) {
-            this.selectedAssigneeIds.set(current.filter((item) => item !== id));
+        const strId = String(id);
+        if (current.includes(strId)) {
+            this.selectedAssigneeIds.set(current.filter((item) => item !== strId));
         } else {
-            this.selectedAssigneeIds.set([...current, id]);
+            this.selectedAssigneeIds.set([...current, strId]);
         }
     }
 
@@ -573,7 +574,7 @@ export class CreateTaskDialogComponent implements OnInit {
         }
         this.taskCode = this.generateNextCode(this.selectedProjectId);
         if (this.teamMembers.length > 0) {
-            this.selectedAssigneeIds.set([this.teamMembers[0].id]);
+            this.selectedAssigneeIds.set([String(this.teamMembers[0].id)]);
         }
     }
 
@@ -585,6 +586,7 @@ export class CreateTaskDialogComponent implements OnInit {
 
         const assignees = this.selectedAssignees.map((m) => m.name).join(', ') || 'ពុំ ប្រុសមុន្នី';
         const selectedProj = this.projectList.find((p) => p.id === this.selectedProjectId);
+        const primaryAssignee = this.selectedAssignees.length > 0 ? this.selectedAssignees[0] : null;
 
         this.dialogRef.close({
             title,
@@ -593,9 +595,14 @@ export class CreateTaskDialogComponent implements OnInit {
             priority: this.priority(),
             due_date: this.endDate,
             start_date: this.startDate,
-            reporter: this.reporterName,
-            assignee: assignees,
+            reporter: {
+                name: this.reporterName,
+                role: this.reporterRole,
+            },
+            reporterName: this.reporterName,
+            assignee: primaryAssignee || { id: 1, name: assignees, role: 'Assignee' },
             assignees: this.selectedAssignees,
+            assigneeNames: assignees,
             project_id: this.selectedProjectId,
             project_name: selectedProj?.name || 'BMS Digitech',
             description: this.description.trim() || title,

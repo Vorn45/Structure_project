@@ -660,6 +660,38 @@ export class UserTaskComponent implements OnInit {
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result?.title) {
+                const primaryAssignee = result.assignees && result.assignees.length > 0
+                    ? {
+                        id: Number(result.assignees[0].id) || 1,
+                        name: result.assignees[0].name,
+                        role: result.assignees[0].role || 'Assignee',
+                        avatar: result.assignees[0].avatar || null,
+                    }
+                    : (typeof result.assignee === 'object' && result.assignee
+                        ? result.assignee
+                        : { id: 1, name: result.assignee || 'PISETH PANHAVORN', role: 'Assignee' });
+
+                const assigneesList = result.assignees && result.assignees.length > 0
+                    ? result.assignees.map((a: any) => ({
+                        id: Number(a.id) || 1,
+                        name: a.name,
+                        role: a.role || 'Assignee',
+                        avatar: a.avatar || null,
+                    }))
+                    : [primaryAssignee];
+
+                const reporterObj = typeof result.reporter === 'object' && result.reporter
+                    ? {
+                        id: this._userService.getUser()?.id || 1,
+                        name: result.reporter.name || this._userService.getUser()?.name || 'PISETH PANHAVORN',
+                        role: result.reporter.role || 'Super Admin',
+                    }
+                    : {
+                        id: this._userService.getUser()?.id || 1,
+                        name: result.reporter || this._userService.getUser()?.name || 'PISETH PANHAVORN',
+                        role: 'Super Admin',
+                    };
+
                 this._taskService
                     .createTask({
                         title: result.title,
@@ -667,11 +699,13 @@ export class UserTaskComponent implements OnInit {
                         status: result.status || 'new',
                         priority: result.priority || 'medium',
                         due_date: result.due_date,
-                        assignee: result.assignee,
+                        reporter: reporterObj,
+                        assignee: primaryAssignee,
+                        assignees: assigneesList,
                         project_id: result.project_id || (this.selectedProjectId() !== 'all' ? this.selectedProjectId() : 'bms-digitech'),
                         project_name: result.project_name || (currentProj?.name || 'BMS Digitech'),
                         description: result.description || result.title,
-                    })
+                    } as any)
                     .subscribe({
                         next: () => this.loadTasks(),
                         error: () => this.loadTasks(),

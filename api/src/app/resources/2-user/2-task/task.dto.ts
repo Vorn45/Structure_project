@@ -78,6 +78,9 @@ export class CreateTaskDto {
 
     @IsOptional()
     assignees?: any[];
+
+    @IsOptional()
+    reporter?: any;
 }
 
 export class UpdateTaskDto {

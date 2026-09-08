@@ -1613,6 +1613,30 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             if (result && result.title && proj) {
                 if (!proj.tasks) proj.tasks = [];
                 const codeFormatted = result.code ? (result.code.startsWith('#') ? result.code : `#${result.code}`) : `#${proj.code || 'BMS'}-${String(proj.tasks.length).padStart(4, '0')}`;
+                
+                const selectedMembers: TaskMember[] = result.assignees && result.assignees.length > 0
+                    ? result.assignees.map((a: any, idx: number) => ({
+                        id: Number(a.id) || idx + 1,
+                        name: a.name,
+                        role: a.role || 'Assignee',
+                        initial: (a.name || 'M').charAt(0).toUpperCase(),
+                        bgClass: 'bg-indigo-600',
+                        avatar: a.avatar || null,
+                    }))
+                    : (proj.members ? [...proj.members.slice(0, 2)] : []);
+
+                const primaryAssignee: TaskMember = selectedMembers.length > 0 ? selectedMembers[0] : {
+                    id: 2,
+                    name: typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'សមាជិកក្រុម'),
+                    role: result.assignee?.role || 'Assignee',
+                    initial: (typeof result.assignee === 'string' ? result.assignee : (result.assignee?.name || 'S')).charAt(0).toUpperCase(),
+                    bgClass: 'bg-emerald-600',
+                };
+
+                const reporterName = typeof result.reporter === 'string'
+                    ? result.reporter
+                    : (result.reporter?.name || result.reporterName || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត');
+
                 const newTask: IndividualTaskItem = {
                     id: `tsk-${Date.now()}`,
                     code: codeFormatted,
@@ -1626,22 +1650,16 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                     attachments_count: 0,
                     reporter: {
                         id: 1,
-                        name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-                        role: 'Super Admin',
-                        initial: 'P',
+                        name: reporterName,
+                        role: result.reporter?.role || 'Super Admin',
+                        initial: reporterName.charAt(0).toUpperCase(),
                         bgClass: 'bg-blue-600',
                     },
-                    assignee: {
-                        id: 2,
-                        name: result.assignee || 'សមាជិកក្រុម',
-                        role: 'Assignee',
-                        initial: (result.assignee || 'S').charAt(0).toUpperCase(),
-                        bgClass: 'bg-emerald-600',
-                    },
+                    assignee: primaryAssignee,
                     subtasks: [
                         { id: 'st-1', title: 'រៀបចំលក្ខខណ្ឌតម្រូវការដំបូង', completed: false },
                     ],
-                    members: proj.members ? [...proj.members.slice(0, 2)] : [],
+                    members: selectedMembers,
                     links: [],
                     documents: [],
                 };
