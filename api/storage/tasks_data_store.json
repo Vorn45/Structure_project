@@ -4,41 +4,41 @@
       "id": 1788882595357,
       "code": "#BMS-0004",
       "title": "test",
-      "description": "test",
       "module": "Task Management",
-      "task_type": "feature",
       "status": "new",
-      "priority": "medium",
-      "progress": 0,
-      "comments_count": 0,
-      "attachments_count": 0,
-      "due_date": "2026-09-15",
-      "project_id": "bms-digitech",
-      "project_name": "BMS Digitech",
-      "reporter": {
-        "id": 1,
-        "name": "PISETH PANHAVORN",
-        "avatar": null,
-        "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន"
-      },
       "assignee": {
         "id": 3,
         "name": "THA WINNER",
-        "avatar": null,
         "role": "អ្នកប្រើប្រាស់",
-        "email": ""
+        "email": "",
+        "avatar": null
+      },
+      "due_date": "2026-09-15",
+      "priority": "medium",
+      "progress": 0,
+      "reporter": {
+        "id": 1,
+        "name": "PISETH PANHAVORN",
+        "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
+        "avatar": null
       },
       "assignees": [
         {
           "id": 3,
           "name": "THA WINNER",
-          "avatar": null,
           "role": "អ្នកប្រើប្រាស់",
-          "email": ""
+          "email": "",
+          "avatar": null
         }
       ],
+      "task_type": "feature",
       "created_at": "2026-09-08T15:49:55.357Z",
-      "updated_at": "2026-09-08T15:49:55.357Z"
+      "project_id": "bms-digitech",
+      "updated_at": "2026-09-08T15:49:55.357Z",
+      "description": "test",
+      "project_name": "BMS Digitech",
+      "comments_count": 0,
+      "attachments_count": 0
     },
     {
       "id": 1,
@@ -239,9 +239,9 @@
         {
           "id": 1,
           "name": "PISETH PANHAVORN",
-          "avatar": null,
           "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
           "email": "pisethpanhavorn544@gmail.com",
+          "avatar": null,
           "colorClass": "bg-blue-600"
         }
       ],
@@ -686,58 +686,58 @@
       },
       {
         "id": 1788881851144,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
         "time": "10:37 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:37:31.141Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:31.141Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881853034,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 16/09/2026",
         "time": "10:37 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:37:33.031Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:33.031Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881854368,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
         "time": "10:37 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:37:34.365Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:34.365Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881857200,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ពុំ ប្រុសមុន្នី, THA WINNER, Phuong Sovannara",
         "time": "10:37 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:37:37.196Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:37.196Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881858561,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ពុំ ប្រុសមុន្នី, THA WINNER, Phuong Sovannara, PISETH PANHAVORN",
         "time": "10:37 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:37:38.557Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:38.557Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       }
     ],
     "6": [
@@ -832,193 +832,216 @@
       },
       {
         "id": 1788881950115,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
         "time": "10:39 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:39:10.112Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:10.112Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881956940,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 08/09/2026",
         "time": "10:39 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:39:16.937Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:16.937Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881962282,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 17/09/2026",
         "time": "10:39 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:39:22.279Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:22.279Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881963313,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
         "time": "10:39 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:39:23.310Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:23.310Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788881967353,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 08/09/2026",
         "time": "10:39 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:39:27.350Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:27.350Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882145514,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 09/09/2026",
         "time": "10:42 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:42:25.511Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:42:25.511Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882299323,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានប្តូរអាទិភាពពី \"ទាប\" ទៅជា \"បន្ទាន់\"",
         "time": "10:44 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:44:59.321Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:44:59.321Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882300470,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានប្តូរអាទិភាពពី \"បន្ទាន់\" ទៅជា \"ខ្ពស់\"",
         "time": "10:45 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:45:00.468Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:45:00.468Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882303051,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានប្តូរស្ថានភាពពី \"មិនបញ្ជាក់\" ទៅជា \"កំពុងធ្វើ\"",
         "time": "10:45 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:45:03.050Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:45:03.050Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882625345,
-        "sender_id": 2,
-        "sender_name": "ពុំ ប្រុសមុន្នី",
-        "sender_avatar": "/images/placeholder/avatar.jpg",
         "text": "🙏",
         "time": "10:50 PM",
         "is_self": true,
         "is_system": false,
+        "sender_id": 2,
+        "created_at": "2026-09-08T15:50:25.345Z",
         "attachments": [],
-        "created_at": "2026-09-08T15:50:25.345Z"
+        "sender_name": "ពុំ ប្រុសមុន្នី",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
       },
       {
         "id": 1788882698392,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានប្តូរស្ថានភាពពី \"កំពុងធ្វើ\" ទៅជា \"ថ្មី\"",
         "time": "10:51 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:51:38.391Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:38.391Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882701578,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានប្តូរស្ថានភាពពី \"ថ្មី\" ទៅជា \"មិនបញ្ជាក់\"",
         "time": "10:51 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:51:41.577Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:41.577Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882702680,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានប្តូរប្រភេទការងារពី \"មុខងារ\" ទៅជា \"កំហុស\"",
         "time": "10:51 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:51:42.675Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:42.675Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882704182,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានប្តូរប្រភេទការងារពី \"កំហុស\" ទៅជា \"ការកែលម្អ\"",
         "time": "10:51 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:51:44.177Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:44.177Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882776090,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ PUM BRUSMUNY, PISETH PANHAVORN",
         "time": "10:52 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:52:56.086Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:52:56.086Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882778510,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ PUM BRUSMUNY",
         "time": "10:52 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:52:58.506Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:52:58.506Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       },
       {
         "id": 1788882790059,
-        "sender_id": 0,
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null,
         "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 26/09/2026",
         "time": "10:53 PM",
         "is_self": false,
         "is_system": true,
-        "created_at": "2026-09-08T15:53:10.056Z"
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:53:10.056Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      }
+    ],
+    "1788882595357": [
+      {
+        "id": 1,
+        "text": "ភារកិច្ច #BMS-0004 ត្រូវបានបង្កើតដោយ PISETH PANHAVORN និងចាត់តាំងទៅកាន់ THA WINNER",
+        "time": "8:30 AM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:49:55.357Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 2,
+        "text": "សួស្តី @THA WINNER! ខ្ញុំបានចាត់តាំងភារកិច្ច \"test\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "time": "8:45 AM",
+        "is_self": false,
+        "sender_id": 1,
+        "created_at": "2026-09-08T15:49:55.357Z",
+        "sender_name": "PISETH PANHAVORN",
+        "sender_avatar": null
       }
     ]
   },
-  "updated_at": "2026-09-08T15:54:33.835Z"
+  "updated_at": "2026-09-08T16:20:49.653Z"
 }
