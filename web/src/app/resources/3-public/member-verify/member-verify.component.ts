@@ -46,15 +46,15 @@ export interface VerifiedMemberData {
                     <!-- Left Emblem Logo -->
                     <div class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-full bg-white p-1 shadow-xs shrink-0 flex items-center justify-center overflow-hidden border border-white/20">
-                            <img src="images/logo/nextask-logo.png" alt="Logo" class="w-full h-full object-contain"
+                            <img src="images/logo/default_logo.png" alt="WMS DIGITECHKH" class="w-full h-full object-contain"
                                 (error)="onLogoError($event)" />
                         </div>
                         <div class="flex flex-col">
                             <h1 class="text-[14px] font-medium leading-tight tracking-wide text-white">
-                                {{ member()?.organization_kh || 'ប្រព័ន្ធគ្រប់គ្រងការងារស្នូល' }}
+                                {{ member()?.organization_kh || 'ប្រព័ន្ធគ្រប់គ្រងការងារ WMS DIGITECHKH' }}
                             </h1>
                             <span class="text-[10px] text-blue-100/90 font-normal tracking-wide mt-0.5">
-                                {{ member()?.organization_en || 'CORE WORK MANAGEMENT SYSTEM' }}
+                                {{ member()?.organization_en || 'WMS DIGITECHKH' }}
                             </span>
                         </div>
                     </div>
@@ -241,8 +241,8 @@ export class MemberVerifyComponent implements OnInit {
                 pob: 'រាជធានីភ្នំពេញ',
                 phone: phone,
                 email: email,
-                organization_kh: 'ប្រព័ន្ធគ្រប់គ្រងការងារស្នូល',
-                organization_en: 'CORE WORK MANAGEMENT SYSTEM',
+                organization_kh: 'ប្រព័ន្ធគ្រប់គ្រងការងារ WMS DIGITECHKH',
+                organization_en: 'WMS DIGITECHKH',
                 role_title: 'សមាជិកប្រព័ន្ធ (Core Member)',
                 status: 'សុពលភាពសកម្ម (Active Verified)',
                 valid_until: '៣១ ធ្នូ ២០២៧',

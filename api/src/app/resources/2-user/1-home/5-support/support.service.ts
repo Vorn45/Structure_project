@@ -53,8 +53,8 @@ export class SupportService {
                     },
                 ],
                 contacts: {
-                    telegram_support: '@nextask_support',
-                    email: 'support@nextask.digital',
+                    telegram_support: '@digitechkh_support',
+                    email: 'support@digitechkh.com',
                     hotline: '023 888 999',
                 },
                 tickets: this.tickets,

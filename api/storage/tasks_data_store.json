@@ -248,10 +248,10 @@
       "task_type": "improvement",
       "created_at": "2026-08-31T08:00:00.000Z",
       "project_id": "wms-digitech",
-      "updated_at": "2026-09-08T15:37:38.549Z",
+      "updated_at": "2026-09-08T16:35:24.341Z",
       "description": "Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.",
       "project_name": "WMS Digitech",
-      "comments_count": 10,
+      "comments_count": 12,
       "attachments_count": 1
     },
     {
@@ -738,6 +738,28 @@
         "created_at": "2026-09-08T15:37:38.557Z",
         "sender_name": "ប្រព័ន្ធ (System)",
         "sender_avatar": null
+      },
+      {
+        "id": 1788885321486,
+        "text": "បានប្តូរប្រភេទការងារពី \"ការកែលម្អ\" ទៅជា \"កំហុស\"",
+        "time": "11:35 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T16:35:21.481Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788885324358,
+        "text": "បានប្តូរប្រភេទការងារពី \"កំហុស\" ទៅជា \"ការកែលម្អ\"",
+        "time": "11:35 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T16:35:24.353Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       }
     ],
     "6": [
@@ -1043,5 +1065,5 @@
       }
     ]
   },
-  "updated_at": "2026-09-08T16:20:49.653Z"
+  "updated_at": "2026-09-08T16:56:30.443Z"
 }

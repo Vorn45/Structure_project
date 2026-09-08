@@ -315,7 +315,7 @@ export class UserHomeComponent implements OnInit {
         if (logo?.uri && logo?.file_domain) {
             return `${logo.file_domain.replace(/\/+$/, '')}/${logo.uri.replace(/^\/+/, '')}`;
         }
-        return 'images/logo/plan_logo.png';
+        return 'images/logo/default_logo.png';
     }
 
     setFilter(filter: string): void {

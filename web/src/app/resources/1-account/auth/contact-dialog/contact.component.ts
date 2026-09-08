@@ -80,15 +80,15 @@ export class AuthContactDialogComponent {
         },
         {
             label: 'ContactDialog.EmailLabel',
-            value: 'info@nextask.com',
+            value: 'info@digitechkh.com',
             icon : 'mdi:email',
-            href : 'mailto:info@nextask.com',
+            href : 'mailto:info@digitechkh.com',
         },
         {
             label: 'ContactDialog.WebsiteLabel',
-            value: 'nextask.com',
+            value: 'digitechkh.com',
             icon : 'mdi:web',
-            href : 'https://nextask.com',
+            href : 'https://digitechkh.com',
         },
     ];
 

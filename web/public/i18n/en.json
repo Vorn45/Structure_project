@@ -13,7 +13,7 @@
             "NoAccount": "Don't have an account?"
         },
         "Sign-Up": {
-            "TryFree": "Try NexTask for free",
+            "TryFree": "Try WMS DIGITECHKH for free",
             "SignUpWithGoogle": "Sign up with Google",
             "PersonalInfo": "Personal information",
             "FillProfileInfo": "Fill in your name, sex and phone number",
@@ -79,7 +79,7 @@
             "AlreadyHaveAccount": "Already have an account?"
         },
         "Legacy": {
-            "Slogan": "Core Work Management System",
+            "Slogan": "WMS DIGITECHKH",
             "SignInSubtitle": "Enter your phone number or email <br> and your password"
         }
     },

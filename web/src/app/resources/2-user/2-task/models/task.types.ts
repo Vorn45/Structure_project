@@ -31,16 +31,17 @@ export interface TaskTypeOption {
     iconColor: string;
     badgeBg: string;
     badgeText: string;
+    dotBg?: string;
 }
 
 export const TASK_TYPES_LIST: TaskTypeOption[] = [
-    { id: 'feature', label: 'មុខងារ', icon: 'task-type-feature', iconColor: 'text-blue-500', badgeBg: 'bg-[#2563eb]', badgeText: 'text-white' },
-    { id: 'improvement', label: 'ការកែលម្អ', icon: 'task-type-improvement', iconColor: 'text-emerald-500', badgeBg: 'bg-[#10b981]', badgeText: 'text-white' },
-    { id: 'bug', label: 'កំហុស', icon: 'task-type-bug', iconColor: 'text-rose-500', badgeBg: 'bg-[#ef4444]', badgeText: 'text-white' },
-    { id: 'documentation', label: 'ឯកសារ', icon: 'task-type-doc', iconColor: 'text-purple-500', badgeBg: 'bg-[#a855f7]', badgeText: 'text-white' },
-    { id: 'research', label: 'ស្រាវជ្រាវ', icon: 'task-type-research', iconColor: 'text-orange-500', badgeBg: 'bg-[#f97316]', badgeText: 'text-white' },
-    { id: 'refactor', label: 'ប្លង់កម្មវិធី', icon: 'task-type-refactor', iconColor: 'text-teal-500', badgeBg: 'bg-[#14b8a6]', badgeText: 'text-white' },
-    { id: 'core_task', label: 'កិច្ចការចម្បង', icon: 'task-type-core', iconColor: 'text-amber-500', badgeBg: 'bg-[#f59e0b]', badgeText: 'text-white' },
+    { id: 'feature', label: 'មុខងារ', icon: 'mdi:star-four-points', iconColor: 'text-blue-500', badgeBg: 'bg-blue-50 dark:bg-blue-950/50', badgeText: 'text-blue-600 dark:text-blue-400', dotBg: 'bg-blue-500' },
+    { id: 'improvement', label: 'ការកែលម្អ', icon: 'mdi:trending-up', iconColor: 'text-emerald-500', badgeBg: 'bg-emerald-50 dark:bg-emerald-950/50', badgeText: 'text-emerald-600 dark:text-emerald-400', dotBg: 'bg-emerald-500' },
+    { id: 'bug', label: 'កំហុស', icon: 'mdi:bug-outline', iconColor: 'text-rose-500', badgeBg: 'bg-rose-50 dark:bg-rose-950/50', badgeText: 'text-rose-600 dark:text-rose-400', dotBg: 'bg-rose-500' },
+    { id: 'documentation', label: 'ឯកសារ', icon: 'mdi:file-document-outline', iconColor: 'text-purple-500', badgeBg: 'bg-purple-50 dark:bg-purple-950/50', badgeText: 'text-purple-600 dark:text-purple-400', dotBg: 'bg-purple-500' },
+    { id: 'research', label: 'ស្រាវជ្រាវ', icon: 'mdi:compass-outline', iconColor: 'text-orange-500', badgeBg: 'bg-orange-50 dark:bg-orange-950/50', badgeText: 'text-orange-600 dark:text-orange-400', dotBg: 'bg-orange-500' },
+    { id: 'refactor', label: 'ប្លង់កម្មវិធី', icon: 'mdi:palette-outline', iconColor: 'text-teal-500', badgeBg: 'bg-teal-50 dark:bg-teal-950/50', badgeText: 'text-teal-600 dark:text-teal-400', dotBg: 'bg-teal-500' },
+    { id: 'core_task', label: 'កិច្ចការចម្បង', icon: 'mdi:bullseye-arrow', iconColor: 'text-amber-500', badgeBg: 'bg-amber-50 dark:bg-amber-950/50', badgeText: 'text-amber-600 dark:text-amber-400', dotBg: 'bg-amber-500' },
 ];
 
 export interface TaskMember {

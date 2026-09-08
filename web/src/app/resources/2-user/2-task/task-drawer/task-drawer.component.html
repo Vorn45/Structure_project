@@ -64,14 +64,14 @@
             <!-- Left Pane Header -->
             <div class="h-14 px-5 flex items-center justify-between border-b border-slate-200/90 dark:border-slate-800/60 bg-white dark:bg-[#0c1527] shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <!-- NexTask Logo (as seen in Profile & reference) -->
+                    <!-- WMS DIGITECHKH Logo -->
                     <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#162238] border border-slate-200 dark:border-slate-750 p-1 flex items-center justify-center shrink-0 shadow-2xs">
-                        <img src="images/logo/nextask-logo.png" alt="Logo" class="w-full h-full object-contain" />
+                        <img src="images/logo/default_logo.png" alt="WMS DIGITECHKH" class="w-full h-full object-contain" />
                     </div>
 
                     <!-- Task Code -->
                     <span class="font-mono text-[14px] font-bold text-slate-800 dark:text-slate-100 select-all truncate">
-                        {{ task()?.code || ('#PMS-' + task()?.id) }}
+                        {{ task()?.code || ('#WMS-' + task()?.id) }}
                     </span>
                 </div>
 
@@ -158,7 +158,7 @@
                         <mat-icon svgIcon="mdi:folder-outline" class="!w-3.5 !h-3.5"></mat-icon>
                         <span>{{ task()?.module }}</span>
                     </div>
-                    <h2 class="text-[16px] font-bold text-slate-900 dark:text-white leading-snug font-kantumruy select-text">
+                    <h2 class="text-[16px] font-bold text-slate-600 dark:text-slate-300 leading-snug font-kantumruy select-text">
                         {{ task()?.title }}
                     </h2>
                 </div>
@@ -193,10 +193,7 @@
                         <div class="flex-1 flex justify-end">
                             <button [matMenuTriggerFor]="detailsTypeMenu"
                                 class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[13px] font-medium text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors cursor-pointer">
-                                <div class="w-4 h-4 rounded flex items-center justify-center text-white shrink-0 shadow-2xs"
-                                    [ngClass]="getTaskTypeInfo(task()?.task_type).badgeBg">
-                                    <mat-icon [svgIcon]="getTaskTypeInfo(task()?.task_type).icon" class="!w-2.5 !h-2.5 text-white"></mat-icon>
-                                </div>
+                                <mat-icon [svgIcon]="getTaskTypeInfo(task()?.task_type).icon" class="!w-4 !h-4 shrink-0" [ngClass]="getTaskTypeInfo(task()?.task_type).iconColor"></mat-icon>
                                 <span>{{ getTaskTypeInfo(task()?.task_type).label }}</span>
                                 <mat-icon svgIcon="mdi:chevron-down" class="!w-3 !h-3 opacity-70 text-slate-500 dark:text-slate-400"></mat-icon>
                             </button>
@@ -336,9 +333,7 @@
                 <mat-menu #detailsTypeMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy min-w-[200px]">
                     <button *ngFor="let t of taskTypes" mat-menu-item (click)="typeChange.emit({ task: task()!, taskType: t.id })">
                         <div class="flex items-center gap-2.5 w-full">
-                            <div class="w-6 h-6 rounded-md flex items-center justify-center text-white shrink-0 shadow-2xs" [ngClass]="t.badgeBg">
-                                <mat-icon [svgIcon]="t.icon" class="!w-3.5 !h-3.5 text-white"></mat-icon>
-                            </div>
+                            <mat-icon [svgIcon]="t.icon" class="!w-4.5 !h-4.5 shrink-0" [ngClass]="t.iconColor"></mat-icon>
                             <span class="font-medium text-[13px] text-slate-800 dark:text-slate-200">{{ t.label }}</span>
                             <mat-icon *ngIf="task()?.task_type === t.id" svgIcon="mdi:check" class="!w-4 !h-4 text-blue-500 ml-auto"></mat-icon>
                         </div>
@@ -556,7 +551,7 @@
                 </div>
 
                 <!-- Centered 'ជជែក' (Chat) Header Title -->
-                <h3 class="text-[15px] font-semibold text-slate-800 dark:text-slate-200 font-kantumruy">
+                <h3 class="text-[15px] font-semibold text-slate-600 dark:text-slate-300 font-kantumruy">
                     ជជែក
                 </h3>
             </div>

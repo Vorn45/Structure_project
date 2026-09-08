@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="48" fill="#000000"/>
+  <circle cx="50" cy="50" r="42" fill="none" stroke="#ffffff" stroke-width="3.5"/>
+  <!-- 'L' and 'P' / triangle emblem -->
+  <path fill="#ffffff" d="M 50,19 L 23,71 L 58,71 L 54,63 L 36,63 L 50,36 L 64,63 L 59,71 L 77,71 Z"/>
+  <path fill="#000000" d="M 50,36 L 43,56 L 53,56 L 57,48 Z"/>
+  <polygon points="54,63 59,53 65,63" fill="#ffffff"/>
+  <polygon points="51,56 57,56 61,63 55,63" fill="#000000"/>
+</svg>

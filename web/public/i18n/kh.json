@@ -14,7 +14,7 @@
             "NoAccount": "មិនមានគណនី?"
         },
         "Sign-Up": {
-            "TryFree": "សាកល្បង NexTask ដោយឥតគិតថ្លៃ",
+            "TryFree": "សាកល្បង WMS DIGITECHKH ដោយឥតគិតថ្លៃ",
             "SignUpWithGoogle": "ចុះឈ្មោះជាមួយ Google",
             "PersonalInfo": "ព័ត៌មានផ្ទាល់ខ្លួន",
             "FillProfileInfo": "សូមបំពេញឈ្មោះ ភេទ និងលេខទូរស័ព្ទ",
@@ -80,7 +80,7 @@
             "AlreadyHaveAccount": "មានគណនីរួចហើយ?"
         },
         "Legacy": {
-            "Slogan": "ប្រព័ន្ធឌីជីថលគ្រប់គ្រងការងារស្នូល",
+            "Slogan": "ប្រព័ន្ធគ្រប់គ្រងការងារ WMS DIGITECHKH",
             "SignInSubtitle": "សូមបញ្ចូលលេខទូរស័ព្ទ ឬអ៊ីមែល <br> និងពាក្យសម្ងាត់របស់លោកអ្នក"
         }
     },
