@@ -30,7 +30,7 @@
                     name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
                     email: 'pisethpanhavorn544@gmail.com',
                     roles: ['superadmin', 'user'],
-                    telegram_id: '853828296',
+                    telegram_id: '8836877586',
                 },
                 {
                     phone: '087280875',

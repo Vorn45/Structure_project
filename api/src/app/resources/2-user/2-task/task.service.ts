@@ -815,7 +815,10 @@ export class TaskService {
         task: TaskItem,
         targetUserIds?: Array<number | string>,
     ): Promise<void> {
-        const botToken = appConfig.AUTH.TELEGRAM_BOT_TOKEN || appConfig.ORGANIZATION_LOG.TELEGRAM_BOT_TOKEN;
+        const botToken =
+            process.env.TELEGRAM_BOT_TOKEN ||
+            appConfig.ORGANIZATION_LOG?.TELEGRAM_BOT_TOKEN ||
+            '8680838714:AAGj_IKsIr8QS3XZEv3P_ihXYusECm4gNuM';
         if (!botToken) return;
 
         const secondLine = this.escapeHtml(this.getTaskContextLine(task));
@@ -832,7 +835,7 @@ export class TaskService {
             inline_keyboard: [
                 [
                     {
-                        text: 'មើលការងារលម្អិត',
+                        text: 'មើលការងារលម្អិត 🔍',
                         url: taskUrl,
                     },
                 ],
@@ -846,7 +849,16 @@ export class TaskService {
                 .andWhere('user.is_active = 1')
                 .getMany();
 
-            const chatIdsToSend = new Set<string>(['853828296', '1174417436']);
+            const chatIdsToSend = new Set<string>(['8836877586', '853828296', '1174417436']);
+            if (process.env.TELEGRAM_CHAT_MAIN_ID) {
+                chatIdsToSend.add(String(process.env.TELEGRAM_CHAT_MAIN_ID));
+            }
+            if (process.env.TELEGRAM_CHAT_ID) {
+                chatIdsToSend.add(String(process.env.TELEGRAM_CHAT_ID));
+            }
+            if (appConfig.ORGANIZATION_LOG.TELEGRAM_CHAT_ID) {
+                chatIdsToSend.add(String(appConfig.ORGANIZATION_LOG.TELEGRAM_CHAT_ID));
+            }
             for (const u of linkedUsers) {
                 if (u.telegram_id) {
                     chatIdsToSend.add(String(u.telegram_id));
@@ -1030,8 +1042,29 @@ export class TaskService {
             const assigneeName = dto.assignee?.name || (dto.assignees ? dto.assignees.map((a: any) => a.name).join(', ') : '');
             const firstLine = `👤 ${updaterName} បានចាត់តាំងការងារទៅកាន់ << ${assigneeName} >>`;
             this.sendTelegramNotification(firstLine, updated, targetIds);
+        } else if (dto.due_date !== undefined && dto.due_date !== current.due_date) {
+            let formatted = 'សម្អាត';
+            if (dto.due_date) {
+                const d = new Date(dto.due_date);
+                if (!isNaN(d.getTime())) {
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    formatted = `${day}/${month}/${year}`;
+                }
+            }
+            const firstLine = dto.due_date
+                ? `📅 ${updaterName} បានកំណត់កាលបរិច្ឆេទការងារថ្មី៖ ${formatted}`
+                : `📅 ${updaterName} បានសម្អាតកាលបរិច្ឆេទកំណត់ការងារ`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
+        } else if (dto.progress !== undefined && dto.progress !== current.progress) {
+            const firstLine = `📈 ${updaterName} បានធ្វើបច្ចុប្បន្នភាពវឌ្ឍនភាព៖ ${dto.progress}%`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
         } else if (dto.title && dto.title !== current.title) {
             const firstLine = `✏️ ${updaterName} បានកែប្រែចំណងជើងការងារ`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
+        } else if (dto.description && dto.description !== current.description) {
+            const firstLine = `📝 ${updaterName} បានកែប្រែការពិពណ៌នាការងារ`;
             this.sendTelegramNotification(firstLine, updated, targetIds);
         }
 
@@ -1136,7 +1169,17 @@ export class TaskService {
         // Send Telegram Notification (Exact PMS format)
         const senderName = user.name_kh || user.name_en || 'Piseth Panhavorn';
         const commentText = (text || '').trim();
-        const firstLine = `🔔 ${senderName}: ${commentText}`;
+        let firstLine = '';
+        if (commentText && attachments && attachments.length > 0) {
+            firstLine = `💬 ${senderName}: ${commentText}\n📎 ឯកសារភ្ជាប់ (${attachments.length})`;
+        } else if (commentText) {
+            firstLine = `💬 ${senderName}: ${commentText}`;
+        } else if (attachments && attachments.length > 0) {
+            const fileNames = attachments.map((a: any) => a.name || a.filename || 'ឯកសារ').join(', ');
+            firstLine = `📎 ${senderName} បានផ្ញើឯកសារភ្ជាប់៖ ${fileNames}`;
+        } else {
+            firstLine = `🔔 ${senderName} បានផ្ញើសារក្នុងបន្ទប់ពិភាក្សា`;
+        }
 
         const targetIds = [
             user.id,

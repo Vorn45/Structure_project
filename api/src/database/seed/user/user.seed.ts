@@ -15,7 +15,7 @@ export class UserSeeder {
                     name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
                     name_en: 'PISETH PANHAVORN',
                     email: 'pisethpanhavorn544@gmail.com',
-                    telegram_id: '853828296',
+                    telegram_id: '8836877586',
                     is_active: 1,
                     auth_provider: AuthProvider.LOCAL,
                 },
