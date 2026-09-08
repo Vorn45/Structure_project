@@ -106,6 +106,31 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
     public isLoadingRoles: boolean = true;
     public activeTab: 'my-work' | 'unit-work' = 'my-work';
 
+    /**
+     * The API exposes gender as the numeric `sex_id` (1 male, 2 female) and
+     * returns it under `gender` from `mapProfileInfo`, while older records may
+     * still hold a string. Resolve all of those to the icon to show, or null.
+     */
+    get genderIcon(): string | null {
+        const raw = this.user?.sex_id ?? this.user?.gender;
+
+        if (raw === null || raw === undefined || raw === '') {
+            return null;
+        }
+
+        if (typeof raw === 'string') {
+            const normalized = raw.trim().toLowerCase();
+            if (normalized === 'male' || normalized === 'm') return 'mdi:gender-male';
+            if (normalized === 'female' || normalized === 'f') return 'mdi:gender-female';
+        }
+
+        const code = Number(raw);
+        if (code === 1) return 'mdi:gender-male';
+        if (code === 2) return 'mdi:gender-female';
+
+        return null;
+    }
+
     private static readonly DEFAULT_AVATAR = '/images/placeholder/avatar.jpg';
     public displayRoles: SwitchRoleRow[] = [];
     public readonly skeletons = Array.from({ length: 4 });

@@ -61,17 +61,25 @@
             <form-validation-error [control]="form.get('en_name')" patternType="en" />
         </mat-form-field>
 
-        <!-- <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Telegram Username</mat-label>
-            <input matInput formControlName="telegram_username">
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ 'Common.Gender' | transloco }}</mat-label>
+            <mat-select formControlName="sex_id">
+                <mat-option [value]="1">{{ 'Common.Male' | transloco }}</mat-option>
+                <mat-option [value]="2">{{ 'Common.Female' | transloco }}</mat-option>
+            </mat-select>
             <mat-icon
                 matPrefix
                 class="icon-size-6"
-                svgIcon="mdi:at"
-                [ngClass]="form.get('telegram_username')?.invalid && form.get('telegram_username')?.touched ? 'text-red-500' : ''">
+                svgIcon="mdi:gender-male-female"
+                [ngClass]="form.get('sex_id')?.invalid && form.get('sex_id')?.touched ? 'text-red-500' : ''">
             </mat-icon>
-            <form-validation-error [control]="form.get('telegram_username')" />
-        </mat-form-field> -->
+            <form-validation-error [control]="form.get('sex_id')" />
+        </mat-form-field>
+
+        <!-- No telegram_username field here on purpose: the handle mirrors the
+             linked Telegram account and is written by the login/bot/mini-app
+             flows, so anything typed here would be overwritten on the next
+             Telegram sign-in. Link it through the telegram-connect dialog. -->
 
         <mat-form-field appearance="outline" class="w-full">
             <mat-label>{{ 'Common.Phone' | transloco }}</mat-label>

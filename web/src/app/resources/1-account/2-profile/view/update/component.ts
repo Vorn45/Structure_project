@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { AuthService } from 'app/core/auth/auth.service';
 import { UserService } from 'app/core/user/user.service';
@@ -38,6 +39,7 @@ import { ProfileService } from '../../profile.service';
         MatDialogModule,
         MatFormFieldModule,
         MatProgressSpinnerModule,
+        MatSelectModule,
         MatDatepickerModule,
         TranslocoModule,
         FormValidationErrorComponent,
@@ -84,7 +86,7 @@ export class UpdateProfileDialogComponent implements OnInit {
             en_name           : [user?.name_en || user?.en_name || user?.name?.name_en || (typeof user?.name === 'string' ? user?.name : null), [Validators.required, Validators.pattern(LATIN_NAME_PATTERN)]],
             phone             : [user?.phone_number || user?.phone || null, Validators.required],
             email             : [user?.email || null, [Validators.required, Validators.email]],
-            // telegram_username : [user?.telegram_username || null],
+            sex_id            : [this.genderValue(user)],
         });
 
         this.src = this.avatarUrl(user);
@@ -153,8 +155,9 @@ export class UpdateProfileDialogComponent implements OnInit {
             email: values.email,
         };
 
-        if (user.sex_id) {
-            payload.sex_id = user.sex_id;
+        const gender = this.genderValue(values);
+        if (gender !== null) {
+            payload.sex_id = gender;
         }
 
         const scannedAvatar = typeof values.avatar === 'string' && values.avatar.startsWith('data:image/')
@@ -292,8 +295,31 @@ export class UpdateProfileDialogComponent implements OnInit {
             en_name: data.name_en || data.en_name || data.name?.name_en || (typeof data.name === 'string' ? data.name : null),
             date_of_birth: data.date_of_birth || data.dob || null,
             phone: data.phone_number || data.phone || null,
+            sex_id: this.genderValue(data),
             roles: data.roles || (data.role ? [data.role] : []),
         };
+    }
+
+    /**
+     * Normalises gender to the `sex_id` codes the API uses (1 male, 2 female).
+     * The API returns it as `gender` from `mapProfileInfo` while the column is
+     * `sex_id`, and older records carry strings, so accept all three shapes.
+     */
+    private genderValue(source: any): number | null {
+        const raw = source?.sex_id ?? source?.gender;
+
+        if (raw === null || raw === undefined || raw === '') {
+            return null;
+        }
+
+        if (typeof raw === 'string') {
+            const normalized = raw.trim().toLowerCase();
+            if (normalized === 'male' || normalized === 'm') return 1;
+            if (normalized === 'female' || normalized === 'f') return 2;
+        }
+
+        const parsed = Number(raw);
+        return parsed === 1 || parsed === 2 ? parsed : null;
     }
 
     private avatarValue(user: any): string | null {
