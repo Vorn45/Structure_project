@@ -159,3 +159,5 @@ export class AccountController {
         return await this._service.changeOwnPassword(res.locals.user, dto);
     }
 }
+
+
