@@ -1,16 +1,22 @@
+const isLocal =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+     window.location.hostname === '127.0.0.1');
+
 const FILE_BASE_URL =
     process.env.FILE_BASE_URL || 'https://file-v4-api.uat.camcyber.com';
 
 export const env = {
-    production: true,
+    production: !isLocal,
     APP_VERSION: require('../../package.json').version,
 
     API_BASE_URL:
         process.env.API_BASE_URL ||
-        'https://structure-project.onrender.com/api',
+        (isLocal ? 'http://localhost:3000/api' : 'https://structure-project.onrender.com/api'),
     FILE_BASE_URL: FILE_BASE_URL,
     SOCKET_URL:
-        process.env.SOCKET_URL || 'https://structure-project.onrender.com',
+        process.env.SOCKET_URL ||
+        (isLocal ? 'http://localhost:3000' : 'https://structure-project.onrender.com'),
     GOOGLE_CLIENT_ID:
         process.env.GOOGLE_CLIENT_ID ||
         '54356070191-kacqa35o9tefnughhdgi5b6jkhshso2c.apps.googleusercontent.com',
