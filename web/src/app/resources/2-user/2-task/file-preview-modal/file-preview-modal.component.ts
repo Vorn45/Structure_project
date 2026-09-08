@@ -79,6 +79,16 @@ export class FilePreviewModalComponent {
         return 'text-blue-500 bg-blue-50 dark:bg-blue-950/40';
     }
 
+    downloadImageUrl(url: string): void {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'attachment-image.png';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     toggleFullscreen(): void {
         this.isFileModalFullscreen.update((v) => !v);
     }

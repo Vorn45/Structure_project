@@ -287,6 +287,18 @@ export class TaskDrawerComponent {
         return 'text-blue-500 bg-blue-50 dark:bg-blue-950/40';
     }
 
+    isImageAttachment(att?: TaskAttachment | null): boolean {
+        if (!att) return false;
+        if (att.isImage) return true;
+        const name = (att.name || '').toLowerCase();
+        const type = (att.type || '').toLowerCase();
+        return (
+            type.startsWith('image/') ||
+            /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/i.test(name) ||
+            (!!att.url && att.url.startsWith('data:image/'))
+        );
+    }
+
     // Drag drop & file handling
     onDragOver(event: DragEvent): void {
         event.preventDefault();

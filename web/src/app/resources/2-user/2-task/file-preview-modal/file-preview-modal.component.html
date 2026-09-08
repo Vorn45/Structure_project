@@ -1,11 +1,37 @@
-<!-- Fullscreen PDF / File Preview Modal -->
+<!-- 1. Pure Image Lightbox (When previewImage URL is set) -->
+<div *ngIf="previewImage()" (click)="closeModal.emit()"
+    class="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
+    
+    <!-- Floating Action Bar (Top Right) -->
+    <div class="fixed top-4 right-4 z-50 flex items-center gap-2" (click)="$event.stopPropagation()">
+        <button type="button" (click)="downloadImageUrl(previewImage()!)"
+            class="px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-white flex items-center gap-1.5 shadow-xl border border-white/20 transition-all cursor-pointer backdrop-blur-sm group text-xs font-semibold"
+            [matTooltip]="'ទាញយក (Download)'">
+            <mat-icon svgIcon="mdi:download" class="icon-size-4 group-hover:scale-110 transition-transform"></mat-icon>
+            <span>ទាញយក</span>
+        </button>
+        <button type="button" (click)="closeModal.emit()"
+            class="w-10 h-10 rounded-xl bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center shadow-xl border border-white/20 transition-all cursor-pointer backdrop-blur-sm group"
+            [matTooltip]="'បិទផ្ទាំង (Close)'">
+            <mat-icon svgIcon="mdi:close" class="icon-size-5 group-hover:scale-110 transition-transform"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Image Container -->
+    <div class="relative max-w-5xl max-h-[90vh] flex items-center justify-center" (click)="$event.stopPropagation()">
+        <img [src]="previewImage()" alt="Image Preview"
+            class="max-w-full max-h-[88vh] rounded-2xl object-contain shadow-2xl border border-white/15 animate-in zoom-in-95 duration-150" />
+    </div>
+</div>
+
+<!-- 2. Fullscreen PDF / File Preview Modal (When previewFile is set) -->
 <div *ngIf="previewFile()" class="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-150 select-none">
     
-    <!-- 1. Fullscreen Native PDF Viewer -->
+    <!-- 2a. Fullscreen Native PDF Viewer -->
     <div *ngIf="isPdfFile(previewFile())" class="relative w-full h-full flex flex-col bg-slate-900 overflow-hidden">
         
         <!-- Floating Close Button on top-right -->
-        <button (click)="closeModal.emit()"
+        <button type="button" (click)="closeModal.emit()"
             class="absolute top-3 right-4 z-50 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center shadow-xl border border-white/20 transition-all cursor-pointer backdrop-blur-sm group"
             [matTooltip]="'បិទផ្ទាំង (Close)'">
             <mat-icon svgIcon="mdi:close" class="icon-size-5 group-hover:scale-110 transition-transform"></mat-icon>
@@ -121,7 +147,7 @@
         </div>
     </div>
 
-    <!-- 2. Image File Preview Modal -->
+    <!-- 2b. Image File Preview Modal -->
     <div *ngIf="isImageFile(previewFile())" (click)="closeModal.emit()"
         class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
         <div class="relative max-w-4xl max-h-[90vh] bg-white dark:bg-slate-850 shadow-2xl border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden flex flex-col w-full transition-all duration-200"
@@ -141,13 +167,13 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button (click)="downloadFile.emit(previewFile()!)"
+                    <button type="button" (click)="downloadFile.emit(previewFile()!)"
                         class="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-colors"
                         [matTooltip]="'ទាញយក (Download)'">
                         <mat-icon svgIcon="mdi:download" class="icon-size-4"></mat-icon>
                         <span>ទាញយក</span>
                     </button>
-                    <button (click)="closeModal.emit()"
+                    <button type="button" (click)="closeModal.emit()"
                         class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                         <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
                     </button>
@@ -162,7 +188,7 @@
         </div>
     </div>
 
-    <!-- 3. Non-PDF / Non-Image File Preview (Binary, Text, etc.) -->
+    <!-- 2c. Non-PDF / Non-Image File Preview (Binary, Text, etc.) -->
     <div *ngIf="!isPdfFile(previewFile()) && !isImageFile(previewFile())" (click)="closeModal.emit()"
         class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
         <div class="relative bg-white dark:bg-slate-850 shadow-2xl border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden flex flex-col max-w-lg w-full transition-all duration-200"
@@ -181,14 +207,32 @@
                         <span class="text-[12px] text-slate-400">{{ previewFile()?.size }}</span>
                     </div>
                 </div>
-                <button (click)="closeModal.emit()"
+                <button type="button" (click)="closeModal.emit()"
                     class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                     <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
                 </button>
             </div>
 
-
-            <img [src]="previewImage()" alt="Image Preview"
-            class="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl border border-white/15" />
+            <!-- Body -->
+            <div class="p-6 text-center space-y-4">
+                <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center" [ngClass]="getFileIconColor(previewFile()!.name)">
+                    <mat-icon [svgIcon]="getFileIcon(previewFile()!.name, previewFile()!.type)" class="icon-size-8"></mat-icon>
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-slate-800 dark:text-slate-200">{{ previewFile()?.name }}</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ previewFile()?.size }} • {{ previewFile()?.type || 'ឯកសារភ្ជាប់' }}</p>
+                </div>
+                <div *ngIf="previewFile()?.textContent" class="max-h-48 overflow-y-auto text-left p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                    {{ previewFile()?.textContent }}
+                </div>
+                <div class="pt-2 flex justify-center">
+                    <button type="button" (click)="downloadFile.emit(previewFile()!)"
+                        class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 text-sm font-semibold shadow-xs transition-colors cursor-pointer">
+                        <mat-icon svgIcon="mdi:download" class="icon-size-4"></mat-icon>
+                        <span>ទាញយកឯកសារនេះ (Download)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

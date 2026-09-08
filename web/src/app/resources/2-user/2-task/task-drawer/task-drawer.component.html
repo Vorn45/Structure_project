@@ -247,8 +247,9 @@
                             <span class="text-[10px] text-slate-400">{{ msg.time }}</span>
                         </div>
 
-                        <!-- Text bubble -->
-                        <div *ngIf="msg.text && msg.text.trim()" class="p-3 rounded-2xl text-[15px] leading-relaxed shadow-2xs"
+                        <!-- Text bubble (Hide redundant generic placeholder text if image attachment is present) -->
+                        <div *ngIf="msg.text && msg.text.trim() && (msg.text !== 'បានផ្ញើឯកសារ' || !msg.attachments || msg.attachments.length === 0)"
+                            class="p-3 rounded-2xl text-[15px] leading-relaxed shadow-2xs"
                             [ngClass]="msg.is_self ? 'bg-blue-600 text-white rounded-tr-xs' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 rounded-tl-xs'">
                             {{ msg.text }}
                         </div>
@@ -256,19 +257,36 @@
                         <!-- Attachments previews -->
                         <div *ngIf="msg.attachments && msg.attachments.length > 0" class="space-y-2 pt-0.5">
                             <div *ngFor="let att of msg.attachments">
-                                <!-- Image Card Preview -->
-                                <div *ngIf="att.isImage && att.url"
-                                    (click)="previewImage.emit(att.url)"
-                                    class="group relative max-w-sm rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-xs hover:shadow-md transition-shadow">
-                                    <img [src]="att.url" [alt]="att.name"
-                                        class="max-h-48 w-auto object-cover rounded-xl group-hover:scale-102 transition-transform duration-200" />
-                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                        <mat-icon svgIcon="mdi:magnify-plus-outline" class="text-white opacity-0 group-hover:opacity-100 transition-opacity icon-size-6"></mat-icon>
+                                <!-- Modern Photo / Image Chat Bubble -->
+                                <div *ngIf="isImageAttachment(att)"
+                                    (click)="previewImage.emit(att.url || '')"
+                                    class="group relative max-w-[280px] sm:max-w-xs rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 cursor-pointer shadow-xs hover:shadow-md transition-all">
+                                    <img [src]="att.url || '/images/placeholder/task-doc.png'" [alt]="att.name"
+                                        class="max-h-64 w-full object-cover rounded-2xl group-hover:scale-102 transition-transform duration-200" />
+                                    
+                                    <!-- Photo Overlay Gradient with Details & Download button -->
+                                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-6 flex items-center justify-between text-white">
+                                        <div class="min-w-0 flex-1 mr-2">
+                                            <p class="text-[12px] font-medium truncate drop-shadow-xs">{{ att.name }}</p>
+                                            <p class="text-[10px] text-slate-300 drop-shadow-xs">{{ att.size }}</p>
+                                        </div>
+                                        <button type="button" (click)="$event.stopPropagation(); downloadFile.emit(att)"
+                                            class="w-7 h-7 rounded-lg bg-black/40 hover:bg-blue-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                                            [matTooltip]="'ទាញយក (Download)'">
+                                            <mat-icon svgIcon="mdi:download" class="icon-size-4"></mat-icon>
+                                        </button>
+                                    </div>
+
+                                    <!-- Center Zoom Icon on hover -->
+                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center pointer-events-none">
+                                        <div class="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:scale-110">
+                                            <mat-icon svgIcon="mdi:magnify-plus-outline" class="icon-size-5.5"></mat-icon>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Document / File Card -->
-                                <div *ngIf="!att.isImage || !att.url"
+                                <!-- Document / Non-Image File Card -->
+                                <div *ngIf="!isImageAttachment(att)"
                                     (click)="viewFile.emit(att)"
                                     class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs text-[13px] hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer group/file">
                                     <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" [ngClass]="getFileIconColor(att.name)">
@@ -279,10 +297,10 @@
                                         <p class="text-[11px] text-slate-400">{{ att.size }}</p>
                                     </div>
                                     <div class="flex items-center gap-1 shrink-0">
-                                        <button (click)="$event.stopPropagation(); viewFile.emit(att)" class="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 flex items-center justify-center">
+                                        <button type="button" (click)="$event.stopPropagation(); viewFile.emit(att)" class="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-center transition-colors cursor-pointer" [matTooltip]="'មើលឯកសារ (View)'">
                                             <mat-icon svgIcon="mdi:eye-outline" class="icon-size-4"></mat-icon>
                                         </button>
-                                        <button (click)="$event.stopPropagation(); downloadFile.emit(att)" class="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 flex items-center justify-center">
+                                        <button type="button" (click)="$event.stopPropagation(); downloadFile.emit(att)" class="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-center transition-colors cursor-pointer" [matTooltip]="'ទាញយក (Download)'">
                                             <mat-icon svgIcon="mdi:download" class="icon-size-4"></mat-icon>
                                         </button>
                                     </div>
