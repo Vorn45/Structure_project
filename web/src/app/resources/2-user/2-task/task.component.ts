@@ -133,9 +133,10 @@ export class UserTaskComponent implements OnInit {
         { id: 'wms-digitech', name: 'WMS Digitech' },
     ]);
 
-    // Task Chat Drawer & File Modal State
+    // Task Dialogs & File Modal State (Dialog 1: Details, Dialog 2: Chat)
     selectedTask = signal<TaskItem | null>(null);
     showChatRoom = signal<boolean>(false);
+    dialogMode = signal<'details' | 'chat'>('details');
     chatMessages = signal<TaskChatMessage[]>([]);
     previewImageModal = signal<string | null>(null);
     previewFileModal = signal<TaskAttachment | null>(null);
@@ -955,37 +956,83 @@ export class UserTaskComponent implements OnInit {
         });
     }
 
-    openTaskChat(task: TaskItem): void {
+    openTaskDetails(task: TaskItem): void {
         if (this.isDragging()) return;
         this.selectedTask.set(task);
+        this.dialogMode.set('details');
         this.showChatRoom.set(true);
+        this.loadTaskChat(task);
+    }
+
+    openTaskChat(task: TaskItem, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        if (this.isDragging()) return;
+        this.selectedTask.set(task);
+        this.dialogMode.set('chat');
+        this.showChatRoom.set(true);
+        this.loadTaskChat(task);
+    }
+
+    switchToChat(): void {
+        this.dialogMode.set('chat');
+    }
+
+    switchToDetails(): void {
+        this.dialogMode.set('details');
+    }
+
+    loadTaskChat(task: TaskItem): void {
+        const reporterName = task.reporter?.name || 'អ្នកគ្រប់គ្រង';
+        const reporterAvatar = task.reporter?.avatar || null;
+        const reporterId = task.reporter?.id || 1;
+        const assignees = this.getTaskAssignees(task);
+        const hasAssignee = assignees.length > 0;
+        const assigneeName = hasAssignee ? assignees[0].name : '';
+
+        const currentUser: any = this._userService.getUser();
+        const currentUserName = (currentUser?.en_name || currentUser?.name || currentUser?.kh_name || '').toLowerCase().trim();
+        const currentUserId = currentUser?.id;
+
+        const isReporterMe = Boolean(
+            (currentUserId && reporterId && Number(currentUserId) === Number(reporterId)) ||
+            (currentUserName && reporterName && (
+                reporterName.toLowerCase().trim() === currentUserName ||
+                currentUserName.includes(reporterName.toLowerCase().trim()) ||
+                reporterName.toLowerCase().trim().includes(currentUserName)
+            ))
+        );
+
+        const initialMessages: TaskChatMessage[] = [
+            {
+                id: 1,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: hasAssignee && assigneeName
+                    ? `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
+                    : `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
+                time: '8:30 AM',
+                is_self: false,
+                is_system: true,
+            },
+        ];
+
+        if (hasAssignee && assigneeName) {
+            initialMessages.push({
+                id: 2,
+                sender_id: reporterId,
+                sender_name: reporterName,
+                sender_avatar: reporterAvatar,
+                text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task.title}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
+                time: '8:45 AM',
+                is_self: isReporterMe,
+            });
+        }
 
         const cached = this.taskChatHistoryMap.get(task.id);
         if (cached && cached.length > 0) {
             this.chatMessages.set([...cached]);
         } else {
-            const reporterName = task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
-            const reporterAvatar = task.reporter?.avatar || null;
-            const assigneeName = task.assignee?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
-
-            const initialMessages: TaskChatMessage[] = [
-                {
-                    id: 1,
-                    sender_name: 'ប្រព័ន្ធ (System)',
-                    text: `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`,
-                    time: '8:30 AM',
-                    is_self: false,
-                    is_system: true,
-                },
-                {
-                    id: 2,
-                    sender_name: reporterName,
-                    sender_avatar: reporterAvatar,
-                    text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task.title}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
-                    time: '8:45 AM',
-                    is_self: false,
-                },
-            ];
             this.chatMessages.set(initialMessages);
             this.taskChatHistoryMap.set(task.id, initialMessages);
         }
@@ -994,16 +1041,13 @@ export class UserTaskComponent implements OnInit {
         this._taskService.getTaskComments(task.id).subscribe({
             next: (res) => {
                 if (res?.data?.comments && res.data.comments.length > 0) {
-                    const currentUser: any = this._userService.getUser();
-                    const currentUserName = (currentUser?.en_name || currentUser?.name || currentUser?.kh_name || '').toLowerCase().trim();
-
                     const mapped = (res.data.comments as TaskChatMessage[]).map((c) => {
                         if (c.is_system) {
                             return { ...c, is_self: false, is_system: true };
                         }
                         const senderName = (c.sender_name || '').toLowerCase().trim();
                         const isSelf = Boolean(
-                            (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName))) ||
+                            (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName) || senderName.includes(currentUserName))) ||
                             (currentUser?.id && c.sender_id === currentUser.id) ||
                             c.is_self
                         );
