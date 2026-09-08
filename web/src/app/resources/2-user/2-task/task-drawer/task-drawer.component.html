@@ -456,7 +456,20 @@
                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" />
             </div>
 
-            <div class="space-y-2.5">
+            <!-- Empty State when no files attached -->
+            <div *ngIf="allFiles().length === 0" class="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center mb-3 text-slate-400">
+                    <mat-icon svgIcon="mdi:file-document-outline" class="!w-7 !h-7"></mat-icon>
+                </div>
+                <h4 class="text-[13.5px] font-medium text-slate-700 dark:text-slate-200 mb-1">មិនទាន់មានឯកសារភ្ជាប់ទេ</h4>
+                <p class="text-[12px] text-slate-400 max-w-[240px] mb-4">ឯកសារដែលបានផ្ញើក្នុងសារសន្ទនា ឬបញ្ចូលផ្ទាល់នឹងបង្ហាញនៅទីនេះ</p>
+                <button mat-stroked-button (click)="fileInputTab.click()" class="!rounded-xl !h-8 !text-[12.5px] cursor-pointer text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900">
+                    <mat-icon svgIcon="mdi:upload" class="icon-size-4 mr-1"></mat-icon>
+                    <span>បញ្ចូលឯកសារ</span>
+                </button>
+            </div>
+
+            <div *ngIf="allFiles().length > 0" class="space-y-2.5">
                 <div *ngFor="let file of allFiles()"
                     (click)="viewFile.emit(file)"
                     class="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-750 transition-all cursor-pointer group">

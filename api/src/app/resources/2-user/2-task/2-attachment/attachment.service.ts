@@ -19,23 +19,7 @@ export class TaskAttachmentService {
 
         const commentsRes = await this._taskService.getTaskComments(user, taskId);
         const comments = commentsRes?.data?.comments || [];
-        const attachments: any[] = [
-            {
-                name: 'គោលការណ៍ណែនាំបច្ចេកទេសភារកិច្ច.pdf',
-                size: '2.4 MB',
-                type: 'application/pdf',
-                url: '/assets/docs/guideline.pdf',
-                uploaded_by: 'Ratha Vuth',
-                created_at: task.data.created_at,
-            },
-            {
-                name: 'ទម្រង់គម្រោង_PMS_v2.xlsx',
-                size: '850 KB',
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                uploaded_by: 'System',
-                created_at: task.data.created_at,
-            },
-        ];
+        const attachments: any[] = [];
 
         for (const c of comments) {
             if (c.attachments && Array.isArray(c.attachments)) {

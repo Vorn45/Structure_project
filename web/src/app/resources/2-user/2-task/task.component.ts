@@ -148,33 +148,31 @@ export class UserTaskComponent implements OnInit {
         { id: 3, name: 'THA WINNER', role: 'Backend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'thawinner@example.com' },
     ]);
 
-    // Aggregated list of all files for the task (defaults + uploaded in chat)
+    // Aggregated list of all files for the task (task attachments + uploaded in chat)
     allTaskFiles = computed<TaskAttachment[]>(() => {
-        const defaultFiles: TaskAttachment[] = [
-            {
-                name: 'Task_Requirement_Specification.pdf',
-                size: '2.4 MB',
-                type: 'application/pdf',
-                isImage: false,
-                url: '',
-            },
-            {
-                name: 'Design_Mockup_V2.png',
-                size: '1.8 MB',
-                type: 'image/png',
-                isImage: true,
-                url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-            },
-        ];
+        const files: TaskAttachment[] = [];
+        const currentTask = this.selectedTask();
 
-        const chatFiles: TaskAttachment[] = [];
+        // Include attachments belonging directly to current task if present
+        if (currentTask && (currentTask as any).attachments && Array.isArray((currentTask as any).attachments)) {
+            files.push(...(currentTask as any).attachments);
+        }
+
+        // Include attachments sent in comments/chat
         this.chatMessages().forEach((m) => {
-            if (m.attachments) {
-                chatFiles.push(...m.attachments);
+            if (m.attachments && Array.isArray(m.attachments)) {
+                files.push(...m.attachments);
             }
         });
 
-        return [...defaultFiles, ...chatFiles];
+        // Deduplicate attachments by name/url
+        const seen = new Set<string>();
+        return files.filter((f) => {
+            const key = f.url || f.name;
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
     });
 
     constructor(
