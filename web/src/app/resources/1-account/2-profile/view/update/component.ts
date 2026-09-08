@@ -90,6 +90,12 @@ export class UpdateProfileDialogComponent implements OnInit {
         this.src = this.avatarUrl(user);
     }
 
+    /** Dismisses the dialog without saving. Kept separate from the submit path so the footer Cancel and the header X behave identically. */
+    close(): void {
+        if (this.isLoading) return;
+        this._dialogRef.close();
+    }
+
     onEnInput(event: Event): void {
         const input = event.target as HTMLInputElement;
         const value = filterLatinName(input.value);

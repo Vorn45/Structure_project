@@ -11,3 +11,9 @@
 ::ng-deep .mat-mdc-form-field-icon-prefix {
     padding: 0px !important;
 }
+
+/* The indeterminate spinner renders in the theme primary, which is almost invisible
+   against the navy submit button — force it white while saving. */
+.submit-button ::ng-deep circle {
+    stroke: #ffffff !important;
+}

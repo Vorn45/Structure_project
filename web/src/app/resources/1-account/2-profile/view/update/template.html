@@ -5,7 +5,10 @@
 <shared-side-dialog-close-button [isReturn]="true"></shared-side-dialog-close-button>
 
 <mat-dialog-content class="bg-white dark:bg-slate-900 font-kantumruy">
-    <form [formGroup]="form" class="md-form-field-appearance-outline flex flex-col">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="md-form-field-appearance-outline flex flex-col">
+        <!-- Enables Enter-to-submit: browsers only do implicit submission when the form contains a submit button. -->
+        <button type="submit" class="hidden" [disabled]="form.invalid || form.pristine || isLoading"></button>
+
         <div class="flex justify-center pb-4">
             <div
                 class="relative w-[120px] h-[120px] rounded-full overflow-visible border border-gray-300 dark:border-white/10 flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
@@ -96,11 +99,18 @@
     </form>
 </mat-dialog-content>
 
-<mat-dialog-actions class="flex items-center justify-end border-t border-slate-200 dark:border-white/10">
-    <button class="bg-blue-900" mat-flat-button (click)="submit()" [disabled]="form.invalid || isLoading">
-        <span *ngIf="!isLoading" class="text-white">
-            {{ 'Common.Update' | transloco }}
-        </span>
-        <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+<!-- Footer: mirrors the button language of the account drawer footer -->
+<mat-dialog-actions
+    class="w-full flex items-center gap-3 !p-4 !m-0 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shrink-0 font-kantumruy">
+    <button type="button" (click)="close()" [disabled]="isLoading"
+        class="flex-1 h-11 px-4 rounded-xl font-medium text-[15px] flex items-center justify-center gap-2 text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+        <span>{{ 'Common.Cancel' | transloco }}</span>
+    </button>
+
+    <button type="button" (click)="submit()" [disabled]="form.invalid || form.pristine || isLoading"
+        class="submit-button flex-1 h-11 px-4 rounded-xl font-medium text-[15px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#1c2b6b] disabled:active:scale-100">
+        <mat-progress-spinner *ngIf="isLoading" class="shrink-0" [diameter]="20"
+            [mode]="'indeterminate'"></mat-progress-spinner>
+        <span>{{ 'Common.Update' | transloco }}</span>
     </button>
 </mat-dialog-actions>
