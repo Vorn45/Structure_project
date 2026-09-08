@@ -25,6 +25,13 @@ export class IconsService {
                 'icons/arcticons--google-authenticator.svg',
             ),
         );
+        // Boxicons pencil used by the profile drawer's edit button (mdi's pencil
+        // reads lighter next to the 24px name).
+        matIconRegistry.addSvgIconInNamespace(
+            'bx',
+            'edit-alt',
+            domSanitizer.bypassSecurityTrustResourceUrl('icons/bx--edit-alt.svg'),
+        );
         matIconRegistry.addSvgIcon(
             'heroicons--building-office-2-solid',
             domSanitizer.bypassSecurityTrustResourceUrl(

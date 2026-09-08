@@ -207,13 +207,13 @@
 
         <!-- Right: Edit Profile (inline from sm: and up; lives in the top-right menu on mobile) -->
         <div class="hidden sm:flex items-center self-stretch shrink-0 pt-[52px]">
+            <!-- Icon only, so the tooltip and aria-label carry the name for
+                 pointer and screen-reader users alike. -->
             <button type="button" (click)="updateProfile()"
                 [matTooltip]="'ProfileView.EditAccountInfo' | transloco"
                 [attr.aria-label]="'ProfileView.EditAccountInfo' | transloco"
-                class="h-9 px-3.5 rounded-xl flex items-center gap-1.5 text-[14px] font-medium text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all duration-200 active:scale-[0.98] cursor-pointer">
-                <mat-icon svgIcon="mdi:pencil-outline"
-                    class="!w-4 !h-4 shrink-0 text-slate-600 dark:text-slate-300"></mat-icon>
-                <span>{{ 'ProfileView.Edit' | transloco }}</span>
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-[#1c2b6b] hover:bg-[#152254] shadow-sm shadow-[#1c2b6b]/25 transition-all duration-200 active:scale-[0.96] cursor-pointer">
+                <mat-icon svgIcon="bx:edit-alt" class="!w-5 !h-5 shrink-0 !text-white"></mat-icon>
             </button>
         </div>
     </div>
