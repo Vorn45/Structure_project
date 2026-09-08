@@ -694,16 +694,7 @@ export class TaskService {
             }
         }
 
-        if (assigneesList.length === 0) {
-            assigneesList = [{
-                id: user.id,
-                name: user.name_en || user.name_kh || 'PISETH PANHAVORN',
-                avatar: (user.avatar as any)?.uri || null,
-                role: 'Assignee',
-            }];
-        }
-
-        const primaryAssignee = assigneesList[0];
+        const primaryAssignee = assigneesList.length > 0 ? assigneesList[0] : null;
 
         // Process reporter
         let taskReporter = {

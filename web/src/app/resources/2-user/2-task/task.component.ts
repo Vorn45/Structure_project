@@ -667,9 +667,9 @@ export class UserTaskComponent implements OnInit {
                         role: result.assignees[0].role || 'Assignee',
                         avatar: result.assignees[0].avatar || null,
                     }
-                    : (typeof result.assignee === 'object' && result.assignee
+                    : (typeof result.assignee === 'object' && result.assignee && result.assignee.name
                         ? result.assignee
-                        : { id: 1, name: result.assignee || 'PISETH PANHAVORN', role: 'Assignee' });
+                        : (typeof result.assignee === 'string' && result.assignee.trim() ? { id: 1, name: result.assignee.trim(), role: 'Assignee' } : null));
 
                 const assigneesList = result.assignees && result.assignees.length > 0
                     ? result.assignees.map((a: any) => ({
@@ -678,7 +678,7 @@ export class UserTaskComponent implements OnInit {
                         role: a.role || 'Assignee',
                         avatar: a.avatar || null,
                     }))
-                    : [primaryAssignee];
+                    : (primaryAssignee ? [primaryAssignee] : []);
 
                 const reporterObj = typeof result.reporter === 'object' && result.reporter
                     ? {

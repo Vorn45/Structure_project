@@ -584,7 +584,7 @@ export class CreateTaskDialogComponent implements OnInit {
         const title = this.taskTitle.trim();
         if (!title) return;
 
-        const assignees = this.selectedAssignees.map((m) => m.name).join(', ') || 'ពុំ ប្រុសមុន្នី';
+        const assignees = this.selectedAssignees.map((m) => m.name).join(', ');
         const selectedProj = this.projectList.find((p) => p.id === this.selectedProjectId);
         const primaryAssignee = this.selectedAssignees.length > 0 ? this.selectedAssignees[0] : null;
 
@@ -600,7 +600,7 @@ export class CreateTaskDialogComponent implements OnInit {
                 role: this.reporterRole,
             },
             reporterName: this.reporterName,
-            assignee: primaryAssignee || { id: 1, name: assignees, role: 'Assignee' },
+            assignee: primaryAssignee,
             assignees: this.selectedAssignees,
             assigneeNames: assignees,
             project_id: this.selectedProjectId,
