@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Head, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DataSource } from 'typeorm';
 import { User } from './app/model/user/users.entity';
@@ -21,6 +21,8 @@ export class AppController {
 
     @Get('healthz')
     @Get('health')
+    @Head('healthz')
+    @Head('health')
     getHealth() {
         return {
             status: 'healthy',
