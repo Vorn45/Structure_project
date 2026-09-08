@@ -11,6 +11,7 @@ import { ForgetPasswordModule } from './resources/1-account/1-auth/2-forgot-pass
 import { SignUpModule } from './resources/1-account/1-auth/3-signup/signup.module';
 import { UserModule } from './resources/2-user/user.module';
 import { AdminModule } from './resources/3-admin/admin.module';
+import { NotificationModule } from './shared/notification/notification.module';
 
 export const appRoutes: Routes = [
     {
@@ -38,6 +39,10 @@ export const appRoutes: Routes = [
     {
         path: 'admin',
         module: AdminModule,
+    },
+    {
+        path: 'shared',
+        module: NotificationModule,
     },
 ];
 

@@ -1,3 +1,4 @@
+
 // ===========================================================================>> Core Library
 import { Body, Controller, Get, HttpCode, Param, Post, Put, Query, Req, Res, UploadedFiles, UseInterceptors, ValidationPipe, } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -14,7 +15,7 @@ import { IMAGE_UPLOAD_OPTIONS } from 'src/app/shared/file/file-upload.util';
 // ======================================= >> Code Starts Here << ========================== //
 const transformValidationPipe = new ValidationPipe({ transform: true });
 
-@Controller('')
+@Controller(['', 'profile'])
 export class AccountController {
     constructor(private _service: AccountService) { }
 
@@ -23,7 +24,7 @@ export class AccountController {
         return await this._service.getExistingRoles(res.locals.user);
     }
 
-    @Get('info')
+    @Get(['', 'info'])
     async getOwnProfileInfo(@Res({ passthrough: true }) res: express.Response) {
         return await this._service.getOwnProfileInfo(res.locals.user);
     }
@@ -41,7 +42,7 @@ export class AccountController {
         return await this._service.getOrganizations(res.locals.user);
     }
 
-    @Put('')
+    @Put(['', 'profile', 'info', 'update'])
     @UseInterceptors(
         FileFieldsInterceptor(
             [
@@ -52,7 +53,7 @@ export class AccountController {
         ),
     )
     async updateOwnProfileInfo(
-        @Body(new ValidationPipe()) dto: UpdateOwnProfileInfoDto,
+        @Body(new ValidationPipe({ transform: true, whitelist: false })) dto: UpdateOwnProfileInfoDto,
         @UploadedFiles() files: Record<string, any[]>,
         @Res({ passthrough: true }) res: express.Response,
     ) {
@@ -158,3 +159,5 @@ export class AccountController {
         return await this._service.changeOwnPassword(res.locals.user, dto);
     }
 }
+
+

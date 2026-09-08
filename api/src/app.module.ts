@@ -25,6 +25,8 @@ import { AuthModule } from './app/resources/1-account/1-auth/auth.module';
 import { AccountModule } from './app/resources/1-account/2-profile/account.module';
 import { UserModule } from './app/resources/2-user/user.module';
 import { AdminModule } from './app/resources/3-admin/admin.module';
+import { NotificationModule } from './app/shared/notification/notification.module';
+import { RealtimeModule } from './app/shared/realtime/realtime.module';
 import { SharedModule } from './app/shared/shared.module';
 import { typeOrmConfig } from './config/database.config';
 
@@ -38,6 +40,8 @@ import { typeOrmConfig } from './config/database.config';
         }),
         ScheduleModule.forRoot(),
         SharedModule,
+        RealtimeModule,
+        NotificationModule,
         AuthModule,
         AccountModule,
         UserModule,

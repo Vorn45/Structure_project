@@ -24,6 +24,14 @@ export class UpdateOwnProfileInfoDto {
     name_kh?: string;
 
     @IsOptional()
+    @IsString()
+    en_name?: string;
+
+    @IsOptional()
+    @IsString()
+    kh_name?: string;
+
+    @IsOptional()
     gender?: number | string;
 
     @IsOptional()

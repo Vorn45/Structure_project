@@ -375,7 +375,7 @@ export class PlanService {
             status: dto.status || 'new',
             priority: dto.priority || 'medium',
             due_date: dto.due_date,
-            assignee: dto.assignee || { id: user?.id || 1, name: user?.name_en || 'Assignee', role: 'Member' },
+            assignee: dto.assignee || null,
             reporter: dto.reporter || { id: 1, name: 'Admin', role: 'Project Manager' },
             subtasks: dto.subtasks || [],
             links: dto.links || [],

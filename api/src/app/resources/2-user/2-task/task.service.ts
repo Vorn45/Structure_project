@@ -11,6 +11,8 @@ import { User } from 'src/app/model/user/users.entity';
 import { TaskStore } from 'src/app/model/user/task-store.entity';
 import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { NotificationService, NotificationItem } from 'src/app/shared/notification/notification.service';
+import { RealtimeGateway } from 'src/app/shared/realtime/realtime.gateway';
 import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateTaskDto } from './task.dto';
 
 // In-memory / mock store to serve user task operations
@@ -69,10 +71,8 @@ const INITIAL_TASKS: TaskItem[] = [
         project_id: 'wms-digitech',
         project_name: 'WMS Digitech',
         reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin' },
-        assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' },
-        assignees: [
-            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', avatar: null, role: 'Super Admin & User' }
-        ],
+        assignee: null as any,
+        assignees: [],
         created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
         updated_at: new Date().toISOString(),
     },
@@ -258,6 +258,8 @@ export class TaskService {
         private readonly _taskStoreRepo: Repository<TaskStore>,
         @InjectRepository(TelegramThread)
         private readonly _threadRepo: Repository<TelegramThread>,
+        private readonly _notificationService?: NotificationService,
+        private readonly _realtimeGateway?: RealtimeGateway,
     ) {
         this.loadFromDisk();
         this.initDbStore();
@@ -334,37 +336,77 @@ export class TaskService {
         created_at: string;
     }> {
         let comments = this.taskComments.get(taskId);
-        if (!comments || comments.length === 0) {
-            const task = this.tasks.find((t) => t.id === taskId);
-            const reporterName = task?.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
-            const reporterAvatar = task?.reporter?.avatar || null;
-            const assigneeName = task?.assignee?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+        const task = this.tasks.find((t) => t.id === taskId);
+        const reporterName = task?.reporter?.name || 'អ្នកគ្រប់គ្រង';
+        const reporterAvatar = task?.reporter?.avatar || null;
+        const reporterId = task?.reporter?.id || 1;
+        const hasAssignee = Boolean(task?.assignee?.name || (task?.assignees && task.assignees.length > 0));
+        const assigneeName = task?.assignee?.name || (task?.assignees && task.assignees.length > 0 ? task.assignees[0].name : '');
 
-            comments = [
+        if (!comments || comments.length === 0) {
+            const initialComments: any[] = [
                 {
                     id: 1,
                     sender_id: 0,
                     sender_name: 'ប្រព័ន្ធ (System)',
                     sender_avatar: null,
-                    text: `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`,
+                    text: hasAssignee && assigneeName
+                        ? `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
+                        : `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
                     time: '8:30 AM',
                     is_self: false,
                     is_system: true,
-                    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+                    created_at: task?.created_at || new Date(Date.now() - 3600000 * 4).toISOString(),
                 },
-                {
+            ];
+
+            // Default intro assignment message from real reporter to assignee
+            if (hasAssignee && assigneeName) {
+                initialComments.push({
                     id: 2,
-                    sender_id: 999,
+                    sender_id: reporterId,
                     sender_name: reporterName,
                     sender_avatar: reporterAvatar,
                     text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
                     time: '8:45 AM',
                     is_self: false,
-                    created_at: new Date(Date.now() - 3600000 * 3.5).toISOString(),
-                },
-            ];
+                    created_at: task?.created_at || new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                });
+            }
+
+            comments = initialComments;
             this.taskComments.set(taskId, comments);
             this.saveStore();
+        } else if (task && hasAssignee && assigneeName) {
+            // Ensure default intro exists and is updated with real task info
+            const introIndex = comments.findIndex(c => !c.is_system && typeof c.text === 'string' && c.text.includes('ខ្ញុំបានចាត់តាំងភារកិច្ច'));
+            if (introIndex >= 0) {
+                comments[introIndex].sender_name = reporterName;
+                comments[introIndex].sender_avatar = reporterAvatar;
+                comments[introIndex].sender_id = reporterId;
+                comments[introIndex].text = `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`;
+                this.taskComments.set(taskId, comments);
+                this.saveStore();
+            } else {
+                const introMsg = {
+                    id: 2,
+                    sender_id: reporterId,
+                    sender_name: reporterName,
+                    sender_avatar: reporterAvatar,
+                    text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
+                    time: '8:45 AM',
+                    is_self: false,
+                    created_at: task?.created_at || new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                };
+                // Insert after system message or at start
+                if (comments.length > 0 && comments[0].is_system) {
+                    comments.splice(1, 0, introMsg);
+                } else {
+                    comments.unshift(introMsg);
+                }
+                this.taskComments.set(taskId, comments);
+                this.saveStore();
+            }
         }
         return comments;
     }
@@ -746,7 +788,51 @@ export class TaskService {
         const creatorName = taskReporter?.name || user?.name_kh || user?.name_en || 'អ្នកប្រើប្រាស់';
         const taskCode = newTask.code || `#${prefix}-0000`;
         const firstLine = `📌 ${creatorName} បានបង្កើតការងារថ្មី ${taskCode}`;
-        this.sendTelegramNotification(firstLine, newTask, [user?.id, ...assigneesList.map((a) => a.id)].filter(Boolean) as number[]);
+        const targetIds = [user?.id, ...assigneesList.map((a) => a.id)].filter(Boolean) as number[];
+        this.sendTelegramNotification(firstLine, newTask, targetIds);
+
+        // Push in-app real-time notification
+        if (this._notificationService) {
+            const notif: NotificationItem = {
+                id: 'notif_task_' + Date.now(),
+                type: 'task_assigned',
+                title: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
+                title_kh: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
+                title_en: 'New task assigned',
+                message: `${creatorName} បានបង្កើត និងចាត់តាំងភារកិច្ច "${taskCode}: ${newTask.title}"`,
+                message_kh: `${creatorName} បានបង្កើត និងចាត់តាំងភារកិច្ច "${taskCode}: ${newTask.title}"`,
+                message_en: `${creatorName} created and assigned task "${taskCode}: ${newTask.title}"`,
+                is_unread: true,
+                read_at: null,
+                created_at: new Date().toISOString(),
+                project: {
+                    id: newTask.project_id,
+                    name_en: newTask.project_name,
+                    name_kh: newTask.project_name,
+                    short_name_en: newTask.project_name,
+                    short_name_kh: newTask.project_name,
+                },
+                task: {
+                    id: newTask.id,
+                    task_code: newTask.code,
+                    title: newTask.title,
+                },
+                last_message: {
+                    source: 'activity',
+                    id: 'msg_' + Date.now(),
+                    content: 'បានចាត់តាំងភារកិច្ចថ្មី',
+                    sender_id: user?.id || 1,
+                    chat_message_type_id: 1,
+                    created_at: new Date().toISOString(),
+                    sender: { id: user?.id || 1, name_en: creatorName, name_kh: creatorName },
+                },
+            };
+            this._notificationService.pushNotification(notif, targetIds);
+        }
+
+        if (this._realtimeGateway) {
+            this._realtimeGateway.emitTaskUpdated({ task_id: newTask.id, project_id: newTask.project_id });
+        }
 
         return {
             status_code: 201,
@@ -1181,6 +1267,49 @@ export class TaskService {
         ].filter(Boolean) as number[];
 
         this.sendTelegramNotification(firstLine, task, targetIds);
+
+        // Push in-app real-time notification
+        if (this._notificationService) {
+            const commentNotif: NotificationItem = {
+                id: 'notif_comment_' + Date.now(),
+                type: 'chat_task',
+                title: 'សារថ្មីក្នុងភារកិច្ច',
+                title_kh: 'សារថ្មីក្នុងភារកិច្ច',
+                title_en: 'New comment in task',
+                message: `${senderName}: ${commentText || 'បានផ្ញើឯកសារភ្ជាប់'} (${task.code || ''})`,
+                message_kh: `${senderName}: ${commentText || 'បានផ្ញើឯកសារភ្ជាប់'} (${task.code || ''})`,
+                message_en: `${senderName}: ${commentText || 'sent an attachment'} (${task.code || ''})`,
+                is_unread: true,
+                read_at: null,
+                created_at: new Date().toISOString(),
+                project: {
+                    id: task.project_id,
+                    name_en: task.project_name,
+                    name_kh: task.project_name,
+                    short_name_en: task.project_name,
+                    short_name_kh: task.project_name,
+                },
+                task: {
+                    id: task.id,
+                    task_code: task.code,
+                    title: task.title,
+                },
+                last_message: {
+                    source: 'message',
+                    id: 'msg_' + Date.now(),
+                    content: commentText || 'បានផ្ញើឯកសារភ្ជាប់',
+                    sender_id: user.id,
+                    chat_message_type_id: 1,
+                    created_at: new Date().toISOString(),
+                    sender: { id: user.id, name_en: user.name_en || senderName, name_kh: user.name_kh || senderName },
+                },
+            };
+            this._notificationService.pushNotification(commentNotif, targetIds);
+        }
+
+        if (this._realtimeGateway) {
+            this._realtimeGateway.emitTaskUpdated({ task_id: task.id, project_id: task.project_id });
+        }
 
         return {
             status_code: 201,

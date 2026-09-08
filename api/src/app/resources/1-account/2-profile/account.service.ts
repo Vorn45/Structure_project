@@ -640,8 +640,8 @@ export class AccountService {
         const activeTokenRoleId = activeToken?.user_role_id;
         if (!activeTokenRoleId)
             throw new BadRequestException('User does not have any valid roles');
-        const nameEn = dto.name_en ?? dto.name;
-        const nameKh = dto.name_kh ?? dto.name;
+        const nameEn = dto.name_en ?? dto.en_name ?? dto.name;
+        const nameKh = dto.name_kh ?? dto.kh_name ?? dto.name;
 
         await this.dataSource.transaction(async (manager) => {
             const genderValue = dto.gender ?? dto.sex_id;

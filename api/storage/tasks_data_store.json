@@ -212,14 +212,22 @@
           "name": "ស៊ន់ ​លាង",
           "role": "អ្នកអភិវឌ្ឍន៍ Backend ជាន់ខ្ពស់",
           "avatar": null
+        },
+        {
+          "id": 64,
+          "name": "PISETH PANHAVORN",
+          "role": "អភិបាលប្រព័ន្ធ",
+          "email": "pisethpanhavorn544@gmail.com",
+          "avatar": null,
+          "colorClass": "bg-blue-600"
         }
       ],
       "created_at": "2026-08-21T11:42:12.187Z",
       "project_id": "proj-003",
-      "updated_at": "2026-09-04T11:42:12.187Z",
+      "updated_at": "2026-09-08T14:17:12.500Z",
       "description": "Render interactive comparison charts comparing weekly member work hours and sprint deliverables.",
       "project_name": "Analytics & Reporting",
-      "comments_count": 0,
+      "comments_count": 8,
       "attachments_count": 1
     },
     {
@@ -509,6 +517,77 @@
         "created_at": "2026-09-04T23:20:50.958Z",
         "sender_name": "ឡេង សុខឆាយ",
         "sender_avatar": "/images/placeholder/avatar.jpg"
+      },
+      {
+        "id": 1788875784856,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ស៊ន់ ​លាង, PISETH PANHAVORN",
+        "time": "08:56 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T13:56:24.852Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788875820738,
+        "text": "check task",
+        "time": "08:57 PM",
+        "is_self": true,
+        "is_system": false,
+        "sender_id": 64,
+        "created_at": "2026-09-08T13:57:00.738Z",
+        "attachments": [],
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg"
+      },
+      {
+        "id": 1788876852738,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "hii",
+        "time": "09:14 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:14:12.739Z"
+      },
+      {
+        "id": 1788876978802,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "check task",
+        "time": "09:16 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:16:18.802Z"
+      },
+      {
+        "id": 1788877019484,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "hii",
+        "time": "09:16 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:16:59.484Z"
+      },
+      {
+        "id": 1788877032499,
+        "sender_id": 64,
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": "/images/placeholder/avatar.jpg",
+        "text": "hii",
+        "time": "09:17 PM",
+        "is_self": true,
+        "is_system": false,
+        "attachments": [],
+        "created_at": "2026-09-08T14:17:12.500Z"
       }
     ],
     "7": [
@@ -558,5 +637,5 @@
       }
     ]
   },
-  "updated_at": "2026-09-08T08:58:41.102Z"
+  "updated_at": "2026-09-08T14:17:12.500Z"
 }
