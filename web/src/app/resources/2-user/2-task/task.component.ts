@@ -92,8 +92,8 @@ export class UserTaskComponent implements OnInit {
     taskTypes = TASK_TYPES_LIST;
 
     getTaskTypeInfo(type?: string): TaskTypeOption {
-        const found = this.taskTypes.find((t) => t.id === type);
-        return found || this.taskTypes[2]; // Default to 'bug' (កំហុស)
+        const found = this.taskTypes.find((t) => t.id === type || t.id.toLowerCase() === type?.toLowerCase());
+        return found || this.taskTypes[0]; // Default to 'feature' (មុខងារ)
     }
 
     loading = signal<boolean>(true);
@@ -657,6 +657,51 @@ export class UserTaskComponent implements OnInit {
         });
     }
 
+    updateTaskReporter(task: TaskItem, member: TaskMember): void {
+        const newReporter: TaskMember = {
+            id: member.id,
+            name: member.name,
+            avatar: member.avatar || null,
+            role: member.role || 'អ្នករាយការណ៍',
+            email: member.email || '',
+            colorClass: member.colorClass || 'bg-blue-600',
+        };
+
+        const updatedTask: TaskItem = {
+            ...task,
+            reporter: newReporter,
+        };
+
+        this.tasks.update((list) => list.map((t) => (t.id === task.id ? updatedTask : t)));
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.set({ ...updatedTask });
+        }
+
+        const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        this.appendChatMessage(task.id, {
+            id: Date.now(),
+            sender_name: 'ប្រព័ន្ធ (System)',
+            text: `បានប្តូរអ្នកបង្កើតទៅកាន់៖ "${member.name}"`,
+            time: nowTime,
+            is_self: false,
+            is_system: true,
+        });
+
+        this._taskService.updateTask(task.id, {
+            reporter: newReporter as any,
+        }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    this.tasks.update((list) => list.map((t) => (t.id === task.id ? { ...t, ...res.data } : t)));
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.set({ ...updatedTask, ...res.data });
+                    }
+                }
+            },
+            error: (err) => console.error('Failed to update task reporter', err),
+        });
+    }
+
     onTaskDrop(event: CdkDragDrop<string>, targetStatus: string): void {
         const task = event.item.data as TaskItem;
         if (!task) return;
@@ -760,7 +805,7 @@ export class UserTaskComponent implements OnInit {
                     .createTask({
                         title: result.title,
                         code: result.code,
-                        task_type: result.task_type || 'bug',
+                        task_type: result.task_type || 'feature',
                         status: result.status || 'new',
                         priority: result.priority || 'medium',
                         due_date: result.due_date,

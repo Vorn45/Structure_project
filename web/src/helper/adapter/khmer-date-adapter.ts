@@ -36,6 +36,18 @@ export class KhmerDateAdapter extends NativeDateAdapter {
         'December'
     ];
 
+    private khmerDaysNarrow = ['អា', 'ច', 'អ', 'ព', 'ព្រ', 'សុ', 'ស'];
+    private khmerDaysShort = ['អាទិត្យ', 'ចន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហ', 'សុក្រ', 'សៅរ៍'];
+    private khmerDaysLong = [
+        'ថ្ងៃអាទិត្យ',
+        'ថ្ងៃចន្ទ',
+        'ថ្ងៃអង្គារ',
+        'ថ្ងៃពុធ',
+        'ថ្ងៃព្រហស្បតិ៍',
+        'ថ្ងៃសុក្រ',
+        'ថ្ងៃសៅរ៍'
+    ];
+
     private get _isKhmer(): boolean {
         return this._transloco.getActiveLang() === 'kh';
     }
@@ -53,6 +65,19 @@ export class KhmerDateAdapter extends NativeDateAdapter {
 
     override getMonthNames(style: 'long' | 'short' | 'narrow'): string[] {
         return this._isKhmer ? this.khmerMonths : super.getMonthNames(style);
+    }
+
+    override getDayOfWeekNames(style: 'long' | 'short' | 'narrow'): string[] {
+        if (!this._isKhmer) {
+            return super.getDayOfWeekNames(style);
+        }
+        if (style === 'narrow') return this.khmerDaysNarrow;
+        if (style === 'short') return this.khmerDaysShort;
+        return this.khmerDaysLong;
+    }
+
+    override getFirstDayOfWeek(): number {
+        return 0;
     }
 
 

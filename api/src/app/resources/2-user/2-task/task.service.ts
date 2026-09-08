@@ -60,6 +60,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'Org Admin | Structure',
         title: 'Org Admin | Structure | Department',
         description: 'Manage departmental structures, permissions, and organizational units in core hierarchy.',
+        task_type: 'feature',
         status: TaskStatusEnum.IN_REVIEW,
         priority: TaskPriorityEnum.HIGH,
         progress: 85,
@@ -80,6 +81,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'Project | Folder',
         title: 'Project | Folder | Drag & Drop',
         description: 'Implement intuitive drag and drop folder organization for project documents.',
+        task_type: 'feature',
         status: TaskStatusEnum.DONE,
         priority: TaskPriorityEnum.HIGH,
         progress: 100,
@@ -102,6 +104,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'Project | Folder',
         title: 'Project | Folder | Cannot Scroll PDF',
         description: 'Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.',
+        task_type: 'bug',
         status: TaskStatusEnum.CONFIRMED,
         priority: TaskPriorityEnum.URGENT,
         progress: 100,
@@ -124,6 +127,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'My Work | Profile',
         title: 'My Work | Profile | Missing Cover',
         description: 'Provide fallback default cover gradient when user cover photo URL is empty or unverified.',
+        task_type: 'bug',
         status: TaskStatusEnum.REOPENED,
         priority: TaskPriorityEnum.URGENT,
         progress: 40,
@@ -146,6 +150,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'Security Settings',
         title: 'Security setting UI improvements',
         description: 'Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.',
+        task_type: 'improvement',
         status: TaskStatusEnum.NEW,
         priority: TaskPriorityEnum.HIGH,
         progress: 10,
@@ -168,6 +173,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'User | Report',
         title: 'User | Report | Progress Compare',
         description: 'Render interactive comparison charts comparing weekly member work hours and sprint deliverables.',
+        task_type: 'feature',
         status: TaskStatusEnum.IN_PROGRESS,
         priority: TaskPriorityEnum.MEDIUM,
         progress: 55,
@@ -190,6 +196,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'User | Report',
         title: 'User | Report | Progress',
         description: 'Real-time sync of task milestone updates and aggregated department productivity scorecards.',
+        task_type: 'feature',
         status: TaskStatusEnum.CONFIRMED,
         priority: TaskPriorityEnum.MEDIUM,
         progress: 88,
@@ -212,6 +219,7 @@ const INITIAL_TASKS: TaskItem[] = [
         module: 'Profile | Switch Org',
         title: 'Profile | Switch Org | Exit Org',
         description: 'Provide safe confirmation step and revoke tenant session when member switches workspace.',
+        task_type: 'feature',
         status: TaskStatusEnum.UNCONFIRMED,
         priority: TaskPriorityEnum.LOW,
         progress: 0,
@@ -287,7 +295,10 @@ export class TaskService {
             const dbStore = await this._taskStoreRepo.findOne({ where: { key: 'default_tasks_store' } });
             if (dbStore) {
                 if (Array.isArray(dbStore.tasks) && dbStore.tasks.length > 0) {
-                    this.tasks = dbStore.tasks;
+                    this.tasks = dbStore.tasks.map((t: any) => ({
+                        ...t,
+                        task_type: t.task_type || this.inferTaskType(t),
+                    }));
                 }
                 if (dbStore.comments && typeof dbStore.comments === 'object') {
                     for (const [k, v] of Object.entries(dbStore.comments)) {
@@ -413,7 +424,10 @@ export class TaskService {
                 const raw = fs.readFileSync(this.storeFilePath, 'utf8');
                 const data = JSON.parse(raw);
                 if (data && Array.isArray(data.tasks) && data.tasks.length > 0) {
-                    this.tasks = data.tasks;
+                    this.tasks = data.tasks.map((t: any) => ({
+                        ...t,
+                        task_type: t.task_type || this.inferTaskType(t),
+                    }));
                 }
                 if (data && data.comments && typeof data.comments === 'object') {
                     for (const [k, v] of Object.entries(data.comments)) {
@@ -761,7 +775,7 @@ export class TaskService {
             title: dto.title,
             description: dto.description || '',
             module: 'Task Management',
-            task_type: (dto as any).task_type || 'bug',
+            task_type: dto.task_type || 'feature',
             status: dto.status || TaskStatusEnum.TODO,
             priority: dto.priority || TaskPriorityEnum.MEDIUM,
             progress: 0,
@@ -830,6 +844,31 @@ export class TaskService {
             case 'low': return 'ទាប';
             default: return priority || '';
         }
+    }
+
+    private getTaskTypeLabel(type?: string): string {
+        switch (type?.toLowerCase()) {
+            case 'feature': return 'មុខងារ';
+            case 'improvement': return 'ការកែលម្អ';
+            case 'bug': return 'កំហុស';
+            case 'documentation': return 'ឯកសារ';
+            case 'research': return 'ស្រាវជ្រាវ';
+            case 'refactor': return 'ប្លង់កម្មវិធី';
+            case 'core_task': return 'កិច្ចការចម្បង';
+            default: return type || 'មុខងារ';
+        }
+    }
+
+    private inferTaskType(task: any): string {
+        if (task.task_type) return task.task_type;
+        const text = `${task.title || ''} ${task.description || ''} ${task.module || ''}`.toLowerCase();
+        if (text.includes('bug') || text.includes('cannot scroll') || text.includes('missing') || text.includes('fix')) {
+            return 'bug';
+        }
+        if (text.includes('improvement') || text.includes('refactor') || text.includes('security setting')) {
+            return 'improvement';
+        }
+        return 'feature';
     }
 
     private escapeHtml(text: string): string {
@@ -951,7 +990,7 @@ export class TaskService {
             title: dto.title ?? current.title,
             description: dto.description ?? current.description,
             status: dto.status ?? current.status,
-            task_type: (dto as any).task_type !== undefined ? (dto as any).task_type : current.task_type,
+            task_type: dto.task_type !== undefined ? dto.task_type : (current.task_type || 'feature'),
             priority: dto.priority ?? current.priority,
             progress: dto.progress !== undefined ? dto.progress : (dto.status === TaskStatusEnum.DONE ? 100 : current.progress),
             due_date: dto.due_date !== undefined ? dto.due_date : current.due_date,
@@ -961,6 +1000,20 @@ export class TaskService {
         // Record action history in task comments
         const comments = this.ensureTaskComments(id);
         const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        if (dto.task_type && dto.task_type !== current.task_type) {
+            comments.push({
+                id: Date.now() + 5,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `បានប្តូរប្រភេទការងារពី "${this.getTaskTypeLabel(current.task_type)}" ទៅជា "${this.getTaskTypeLabel(dto.task_type)}"`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
 
         if (dto.status && dto.status !== current.status) {
             comments.push({
@@ -1047,6 +1100,21 @@ export class TaskService {
             });
         }
 
+        if (dto.reporter) {
+            updated.reporter = dto.reporter;
+            comments.push({
+                id: Date.now() + 6,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `បានប្តូរអ្នកបង្កើតទៅកាន់៖ "${dto.reporter.name}"`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
+
         this.taskComments.set(id, comments);
         updated.comments_count = comments.length;
 
@@ -1062,7 +1130,10 @@ export class TaskService {
             ...(updated.assignees?.map((a) => a.id) || []),
         ].filter(Boolean) as number[];
 
-        if (dto.status && dto.status !== current.status) {
+        if (dto.task_type && dto.task_type !== current.task_type) {
+            const firstLine = `🏷️ ${updaterName} ប្តូរប្រភេទការងារទៅ << ${this.getTaskTypeLabel(dto.task_type)} >>`;
+            this.sendTelegramNotification(firstLine, updated, targetIds);
+        } else if (dto.status && dto.status !== current.status) {
             const firstLine = `🔄 ${updaterName} ប្តូរស្ថានភាពការងារទៅ << ${this.getStatusLabel(dto.status)} >>`;
             this.sendTelegramNotification(firstLine, updated, targetIds);
         } else if (dto.priority && dto.priority !== current.priority) {

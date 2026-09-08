@@ -777,6 +777,7 @@
         (priorityChange)="updateTaskPriority($event.task, $event.priority)"
         (dueDateChange)="updateTaskDueDate($event.task, $event.dueDate)"
         (assigneeToggle)="toggleTaskAssignee($event.task, $event.member)"
+        (reporterChange)="updateTaskReporter($event.task, $event.member)"
         (sendMessage)="sendChatMessage($event)"
         (viewFile)="viewFile($event)"
         (previewImage)="openImagePreview($event)"

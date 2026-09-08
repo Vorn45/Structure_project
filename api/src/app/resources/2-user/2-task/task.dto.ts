@@ -71,6 +71,10 @@ export class CreateTaskDto {
 
     @IsOptional()
     @IsString()
+    task_type?: string;
+
+    @IsOptional()
+    @IsString()
     due_date?: string;
 
     @IsOptional()
@@ -93,6 +97,10 @@ export class UpdateTaskDto {
     description?: string;
 
     @IsOptional()
+    @IsString()
+    task_type?: string;
+
+    @IsOptional()
     @IsEnum(TaskPriorityEnum)
     priority?: TaskPriorityEnum;
 
@@ -113,6 +121,9 @@ export class UpdateTaskDto {
 
     @IsOptional()
     assignees?: any[];
+
+    @IsOptional()
+    reporter?: any;
 }
 
 export class CreateTaskCommentDto {
