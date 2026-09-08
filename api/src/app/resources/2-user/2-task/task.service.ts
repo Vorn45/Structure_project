@@ -19,6 +19,7 @@ export interface TaskItem {
     code?: string;
     title: string;
     description: string;
+    task_type?: string;
     module?: string;
     status: TaskStatusEnum;
     priority: TaskPriorityEnum;
