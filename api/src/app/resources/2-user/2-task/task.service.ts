@@ -1215,6 +1215,8 @@ export class TaskService {
         } else if (dto.description && dto.description !== current.description) {
             const firstLine = `📝 ${updaterName} បានកែប្រែការពិពណ៌នាការងារ`;
             this.sendTelegramNotification(firstLine, updated, targetIds);
+        }
+
         if (this._notificationService) {
             let updateMsgKh = `${updaterName} បានធ្វើបច្ចុប្បន្នភាពភារកិច្ច "${updated.code}: ${updated.title}"`;
             if (dto.status && dto.status !== current.status) {
@@ -1261,7 +1263,7 @@ export class TaskService {
         }
 
         if (this._realtimeGateway) {
-            this._realtimeGateway.emitTaskUpdated({ task_id: updated.id, status_id: updated.status, project_id: updated.project_id });
+            this._realtimeGateway.emitTaskUpdated({ task_id: updated.id, status_id: updated.status as any, project_id: updated.project_id });
         }
 
         return {
