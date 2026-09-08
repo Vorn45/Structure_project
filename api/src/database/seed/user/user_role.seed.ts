@@ -55,7 +55,7 @@ export class UserRoleSeeder {
                 SELECT "user"."id", "role"."id", NULL
                 FROM "user"
                 CROSS JOIN "role"
-                WHERE "user"."phone" = '010843612'
+                WHERE "user"."phone" IN ('010843612', '087280875')
                 AND "role"."slug" IN ('superadmin', 'user')
                 ON CONFLICT ("user_id", "role_id") WHERE "organization_id" IS NULL DO NOTHING
             `);
@@ -65,7 +65,7 @@ export class UserRoleSeeder {
                 SELECT "user"."id", "role"."id", NULL
                 FROM "user"
                 CROSS JOIN "role"
-                WHERE "user"."phone" IN ('087280875', '067776682', '011242425')
+                WHERE "user"."phone" IN ('067776682', '011242425')
                 AND "role"."slug" = 'user'
                 ON CONFLICT ("user_id", "role_id") WHERE "organization_id" IS NULL DO NOTHING
             `);

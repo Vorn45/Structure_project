@@ -35,11 +35,10 @@
 <!-- While the chrome is tucked away both reserve vars drop to 0 so the page below grows into
      the space it vacated — otherwise sliding the header/nav out would just leave blank strips,
      since every page sizes itself as `100dvh - header - bottom-reserved`. -->
-<div class="flex w-full min-w-0 flex-col bg-white dark:bg-[#111827] lg:bg-transparent"
-    [ngClass]="isPersonalWorkspace ? 'h-screen overflow-hidden' : 'min-h-screen'"
-    [style.--layout-header-height]="isPersonalWorkspace || chrome.hidden() ? '0px' : '3.5rem'"
+<div class="flex w-full min-w-0 flex-col bg-white dark:bg-[#111827] lg:bg-transparent min-h-screen"
+    [style.--layout-header-height]="chrome.hidden() ? '0px' : '3.5rem'"
     [style.--layout-bottom-reserved]="chrome.hidden() ? '0px' : null">
-    <div *ngIf="!isPersonalWorkspace"
+    <div
         class="bg-card sticky top-0 z-49 flex w-full flex-0 items-center pl-2 lg:pl-4 pr-4 shadow dark:border-b dark:shadow-none print:hidden overflow-hidden transition-[height] duration-200 ease-out lg:!h-14"
         [ngClass]="chrome.hidden() ? 'h-0' : 'h-14'">
         <button class="!flex !h-10 !w-10 !p-0 !items-center !justify-center lg:hidden mr-2" mat-icon-button
@@ -72,14 +71,13 @@
     </div>
 
     <!-- Content -->
-    <div class="min-w-0"
-        [ngClass]="isPersonalWorkspace ? 'flex-1 min-h-0 overflow-hidden pb-[var(--layout-bottom-reserved,0px)] lg:pb-0' : 'flex-grow pb-[var(--layout-bottom-reserved,0px)] lg:pb-0'">
+    <div class="min-w-0 flex-grow pb-[var(--layout-bottom-reserved,0px)] lg:pb-0">
         @if (true) {
         <router-outlet></router-outlet>
         }
     </div>
 
     <!-- Mobile bottom nav -->
-    <mobile-bottom-nav [navigations]="navigations" [showMore]="!isPersonalWorkspace"
+    <mobile-bottom-nav [navigations]="navigations" [showMore]="true"
         [hidden]="chrome.hidden()"></mobile-bottom-nav>
 </div>

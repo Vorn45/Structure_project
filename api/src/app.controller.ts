@@ -77,7 +77,7 @@ export class AppController {
                     name_en: 'PUM BRUSMUNY',
                     name_kh: 'ពុំ ប្រុសមុន្នី',
                     email: 'pumprusmuny@example.com',
-                    roles: ['user'],
+                    roles: ['superadmin', 'user'],
                     telegram_id: null,
                 },
                 {

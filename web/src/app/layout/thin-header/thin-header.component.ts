@@ -175,6 +175,17 @@ export class ThinHeaderLayoutComponent implements OnInit, OnDestroy {
             return;
         }
 
+        if (activeRole?.slug === 'personal_workspace') {
+            this._headerLabelNames = {
+                name_en: activeRole.name_en ?? 'Personal Workspace',
+                name_kh: activeRole.name_kh ?? 'កន្លែងធ្វើការផ្ទាល់ខ្លួន',
+                fallback: 'កន្លែងធ្វើការផ្ទាល់ខ្លួន',
+            };
+            this._applyHeaderLabel();
+            this._changeDetectorRef.markForCheck();
+            return;
+        }
+
         this._userService
             .getOrganizations()
             .pipe(takeUntil(this._unsubscribeAll))

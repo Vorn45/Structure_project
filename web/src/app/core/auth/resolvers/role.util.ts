@@ -52,7 +52,7 @@ export const pickActiveRole = (payload: any, preferredId?: number | null): any =
         return { slug: 'org_admin' };
     }
     const activeId = preferredId ?? payload?.user?.is_active;
-    return roles.find((role: any) => role?.id === activeId) ?? roles[0];
+    return roles.find((role: any) => role?.id === activeId) ?? pickPrimaryRole(payload) ?? roles[0];
 };
 
 /** Highest-privilege first — used to choose the default role on a fresh login. */
