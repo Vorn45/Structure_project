@@ -54,22 +54,42 @@ import { UserTaskService } from './task.service';
                 flex-direction: column;
                 flex: 1 1 auto;
                 width: 100%;
-                min-height: 100vh;
+                height: calc(100vh - 3.5rem);
+                max-height: calc(100vh - 3.5rem);
+                overflow: hidden;
             }
             *:not(.mat-icon):not([class*='material-icons']):not([class*='icon-']):not([class*='mdi']) {
                 font-family: 'Kantumruy Pro', sans-serif !important;
             }
-            /* Completely hide all scrollbars while preserving full left/right scrolling */
-            .kanban-scroll-container,
-            .kanban-scroll-container * {
+            /* Hide board horizontal scrollbar while preserving full scrolling */
+            .kanban-scroll-container {
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
             }
-            .kanban-scroll-container::-webkit-scrollbar,
-            .kanban-scroll-container *::-webkit-scrollbar {
+            .kanban-scroll-container::-webkit-scrollbar {
                 display: none !important;
                 width: 0 !important;
                 height: 0 !important;
+            }
+            /* Sleek modern vertical scrollbar for column tasks */
+            .kanban-column-scroll {
+                scrollbar-width: thin !important;
+                scrollbar-color: rgba(156, 163, 175, 0.45) transparent !important;
+                -ms-overflow-style: auto !important;
+            }
+            .kanban-column-scroll::-webkit-scrollbar {
+                display: block !important;
+                width: 5px !important;
+            }
+            .kanban-column-scroll::-webkit-scrollbar-track {
+                background: transparent !important;
+            }
+            .kanban-column-scroll::-webkit-scrollbar-thumb {
+                background: rgba(156, 163, 175, 0.4) !important;
+                border-radius: 9999px !important;
+            }
+            .kanban-column-scroll::-webkit-scrollbar-thumb:hover {
+                background: rgba(107, 114, 128, 0.7) !important;
             }
             ::ng-deep .cdk-drag-preview {
                 box-sizing: border-box;
@@ -421,6 +441,17 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     onKanbanWheel(event: WheelEvent, el: HTMLElement): void {
+        const target = event.target as HTMLElement | null;
+        const scrollableCol = target?.closest('.kanban-column-scroll') as HTMLElement | null;
+
+        if (scrollableCol) {
+            const hasVerticalScroll = scrollableCol.scrollHeight > scrollableCol.clientHeight;
+            if (hasVerticalScroll) {
+                // Allow native vertical scroll inside the column
+                return;
+            }
+        }
+
         if (event.deltaY !== 0 && !event.shiftKey) {
             el.scrollLeft += event.deltaY * 0.8;
             event.preventDefault();
