@@ -47,7 +47,10 @@ jobs:
         id: start_time
         run: echo "start_epoch=$(date +%s)" >> "$GITHUB_OUTPUT"
 
-      - name: Notify Telegram Deployment Started
+      # ----------------------------------------------------
+      # 1. Telegram Event: Push / Merge
+      # ----------------------------------------------------
+      - name: Notify Telegram Push or Merge Event
         continue-on-error: true
         uses: appleboy/telegram-action@master
         with:
@@ -56,9 +59,8 @@ jobs:
           format: html
           disable_web_page_preview: true
           message: |
-            ⏳ <b>${{ github.actor }}</b> started deployment for <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>
-            📦 Branch: <code>${{ github.ref_name }}</code> | Commit: <a href="${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}">${{ github.sha }}</a>
-            🛠️ Rebuilding containers on Synology NAS...
+            ${{ contains(github.event.head_commit.message, 'Merge') && '🔀' || '🚀' }} <b>${{ github.actor }}</b> ${{ contains(github.event.head_commit.message, 'Merge') && 'merged into' || 'pushed to' }} <code>${{ github.ref_name }}</code> in <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>
+            📦 Commit: <a href="${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}">${{ github.sha }}</a>
 
       - name: Checkout main commit
         uses: actions/checkout@v6
@@ -103,12 +105,35 @@ jobs:
             done < "$RUNNER_TEMP/wms-changed-files.txt"
           fi
 
+          if [ "$rebuild_api" = "true" ] && [ "$rebuild_web" = "true" ]; then
+            target="Both (API & Web)"
+          elif [ "$rebuild_api" = "true" ]; then
+            target="API Service (NestJS)"
+          elif [ "$rebuild_web" = "true" ]; then
+            target="Web Frontend (Angular)"
+          else
+            target="Gateway / Config Only"
+          fi
+
           echo "api=$rebuild_api" >> "$GITHUB_OUTPUT"
           echo "web=$rebuild_web" >> "$GITHUB_OUTPUT"
           echo "gateway=$reload_gateway" >> "$GITHUB_OUTPUT"
-          echo "API rebuild: $rebuild_api"
-          echo "Web rebuild: $rebuild_web"
-          echo "Gateway reload: $reload_gateway"
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "Target: $target"
+
+      # ----------------------------------------------------
+      # 2. Telegram Event: Pipeline Running
+      # ----------------------------------------------------
+      - name: Notify Telegram Pipeline Running
+        continue-on-error: true
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: html
+          disable_web_page_preview: true
+          message: |
+            ⏳ <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} is <b>running</b> (<code>${{ steps.changes.outputs.target }}</code>)...
 
       - name: Create protected production environment file
         shell: bash
@@ -222,7 +247,7 @@ jobs:
           echo "formatted=${mins}:${secs}" >> "$GITHUB_OUTPUT"
 
       # ----------------------------------------------------
-      # Telegram: Success Notification
+      # 3. Telegram: Passed / Success Notification
       # ----------------------------------------------------
       - name: Notify Telegram on Success
         if: success()
@@ -234,12 +259,10 @@ jobs:
           format: html
           disable_web_page_preview: true
           message: |
-            ✅ <b>${{ github.event.repository.name }}</b> deployed successfully to Synology NAS!
-            🚀 Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of <b>${{ github.ref_name }}</b> passed in ${{ steps.duration.outputs.formatted }}.
-            🌐 Gateway: Port <code>4500</code>
+            ✅ <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>passed</b> in ${{ steps.duration.outputs.formatted }} 🚀
 
       # ----------------------------------------------------
-      # Telegram: Failure Notification
+      # 4. Telegram: Failure Notification
       # ----------------------------------------------------
       - name: Notify Telegram on Failure
         if: failure()
@@ -251,5 +274,4 @@ jobs:
           format: html
           disable_web_page_preview: true
           message: |
-            ❌ <b>${{ github.event.repository.name }}</b> NAS deployment failed!
-            ⚠️ Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of <b>${{ github.ref_name }}</b> failed after ${{ steps.duration.outputs.formatted }}.
+            ❌ <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>: Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>failed</b> in ${{ steps.duration.outputs.formatted }}
