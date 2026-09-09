@@ -329,23 +329,21 @@ export class LocalPasscodeService {
     }
 
     /** Records that the passcode was just successfully verified (or a
-     *  passcode was just set) — persisted to sessionStorage so a reload
-     *  moments later can skip the lock screen, matching Telegram. Only ever
-     *  written from an actual `verify()`/`setPasscode()` success, never from
-     *  general page activity — activity alone (sitting on the lock screen,
-     *  browsing right before a reload) must never be mistaken for having
-     *  proven the passcode. sessionStorage (not localStorage) so this never
-     *  survives past closing the tab, and is never a substitute for the
-     *  server-side passcode check itself — it only ever widens or narrows
-     *  how eagerly the *client* re-prompts. */
+     *  passcode was just set) — persisted to localStorage so a reload
+     *  (including Angular dev-server hot rebuilds) can skip the lock screen,
+     *  matching Telegram. Only ever written from an actual `verify()`/
+     *  `setPasscode()` success, never from general page activity — activity
+     *  alone (sitting on the lock screen, browsing right before a reload)
+     *  must never be mistaken for having proven the passcode. Cleared on
+     *  sign-out so it never leaks to the next account. */
     private _markVerified(): void {
         const key = this._lastVerifiedStorageKey;
         if (!key) return;
         try {
-            sessionStorage.setItem(key, String(Date.now()));
+            localStorage.setItem(key, String(Date.now()));
         } catch {
-            // sessionStorage unavailable (private browsing, etc.) — falls back
-            // to always re-locking on reload, i.e. the safe default.
+            // localStorage unavailable — falls back to always re-locking on
+            // reload, i.e. the safe default.
         }
     }
 
@@ -353,7 +351,7 @@ export class LocalPasscodeService {
         const key = this._lastVerifiedStorageKey;
         if (!key) return;
         try {
-            sessionStorage.removeItem(key);
+            localStorage.removeItem(key);
         } catch {
             // Ignore.
         }
@@ -365,7 +363,7 @@ export class LocalPasscodeService {
         const key = this._lastVerifiedStorageKey;
         if (!key) return null;
         try {
-            const stored = sessionStorage.getItem(key);
+            const stored = localStorage.getItem(key);
             if (!stored) return null;
             return Date.now() - Number(stored);
         } catch {
