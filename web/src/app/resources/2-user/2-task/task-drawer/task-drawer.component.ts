@@ -378,14 +378,6 @@ export class TaskDrawerComponent {
         this.dueDateChange.emit({ task, dueDate: iso });
     }
 
-    isModuleRedundantWithTitle(): boolean {
-        const mod = (this.task()?.module || '').toLowerCase().trim();
-        const title = (this.task()?.title || '').toLowerCase().trim();
-        if (!mod) return true;
-        const cleanMod = mod.replace(/s$/, '').replace(/\|/g, '').trim();
-        return title.startsWith(mod) || title.startsWith(cleanMod) || title.includes(mod);
-    }
-
     getStatusClass(status?: string): string {
         switch (status?.toLowerCase()) {
             case 'new':

@@ -152,12 +152,8 @@
 
             <!-- Left Pane Content Body -->
             <div class="p-4 sm:p-5 space-y-4 flex-1">
-                <!-- Task Title & Module -->
+                <!-- Task Title -->
                 <div class="space-y-1">
-                    <div *ngIf="task()?.module && !isModuleRedundantWithTitle()" class="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">
-                        <mat-icon svgIcon="mdi:folder-outline" class="!w-3.5 !h-3.5"></mat-icon>
-                        <span>{{ task()?.module }}</span>
-                    </div>
                     <h2 class="text-[16px] font-bold text-slate-600 dark:text-slate-300 leading-snug font-kantumruy select-text">
                         {{ task()?.title }}
                     </h2>
