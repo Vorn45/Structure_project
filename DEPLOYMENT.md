@@ -45,7 +45,7 @@ Synology NAS Docker Engine (DSM 7.3)
 | **GitHub Repository** | `https://github.com/BrusmunyPum/digitech-wms` | Dedicated repo |
 | **Development Branch** | `dev` | Normal development |
 | **Production Branch** | `main` | Production release |
-| **Runner Host Directory** | `/volume1/docker/actions-runner-wms` | Distinct from `/volume1/docker/actions-runner` |
+| **Runner Host Directory** | `/volume1/docker/digitechkh/wms-runner` | Distinct from `/volume1/docker/actions-runner` |
 | **Runner Container Name** | `wms-github-runner` | Distinct from `ossp-github-runner` |
 | **Runner Labels** | `self-hosted`, `nas-wms` | Avoids job collision with `nas` |
 | **Compose Project Name** | `digitech-wms` | Isolated network & volumes |
@@ -53,7 +53,7 @@ Synology NAS Docker Engine (DSM 7.3)
 | **Redis Volume** | `digitech-wms_redis_data` | Strictly preserved |
 | **Gateway Host Port** | `4500` | Single entrypoint for NAS |
 | **Database External Port** | `5433` | Host port for pgAdmin/direct access |
-| **GitHub Environment** | `production` | Holds environment secret |
+| **GitHub Environment** | `production_ENV` | Holds environment secret |
 | **GitHub Secret Name** | `PRODUCTION_ENV_FILE` | Contains the production `.env` |
 | **Docker API Version** | `1.43` | Synology Docker Engine 24.0.2 |
 
@@ -65,14 +65,14 @@ Synology NAS Docker Engine (DSM 7.3)
 Run this on your Synology NAS terminal before modifying anything:
 
 ```bash
-mkdir -p /volume1/docker/actions-runner-wms/backups
+mkdir -p /volume1/docker/digitechkh/wms-runner/backups
 
 # Backup current PostgreSQL database
 sudo docker exec $(sudo docker ps -qf "name=postgres" | head -n 1) \
-  pg_dump -U Muny -d wfm_db -Fc > /volume1/docker/actions-runner-wms/backups/wfm_db-before-ci-$(date +%Y%m%d-%H%M%S).dump
+  pg_dump -U Muny -d wfm_db -Fc > /volume1/docker/digitechkh/wms-runner/backups/wfm_db-before-ci-$(date +%Y%m%d-%H%M%S).dump
 
 # Verify backup size
-ls -lh /volume1/docker/actions-runner-wms/backups/
+ls -lh /volume1/docker/digitechkh/wms-runner/backups/
 ```
 
 ---
@@ -81,9 +81,9 @@ ls -lh /volume1/docker/actions-runner-wms/backups/
 Run on your Synology NAS terminal:
 
 ```bash
-cd /volume1/docker
-sudo mkdir -p actions-runner-wms
-cd actions-runner-wms
+cd /volume1/docker/digitechkh
+sudo mkdir -p wms-runner
+cd wms-runner
 
 # Download official GitHub Actions runner package
 sudo curl -o actions-runner-linux-x64-2.336.0.tar.gz -L \
@@ -122,7 +122,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ENV RUNNER_ALLOW_RUNASROOT=1
-WORKDIR /volume1/docker/actions-runner-wms
+WORKDIR /volume1/docker/digitechkh/wms-runner
 ENTRYPOINT ["/bin/bash", "-lc"]
 CMD ["if [ ! -f .runner ]; then ./config.sh --unattended --url \"$RUNNER_URL\" --token \"$RUNNER_TOKEN\" --name \"wms-synology-nas\" --labels \"nas-wms\" --work \"_work\" --replace; fi; exec ./run.sh"]
 EOF
@@ -150,7 +150,7 @@ sudo docker run -d \
   --restart unless-stopped \
   -e RUNNER_URL="https://github.com/BrusmunyPum/digitech-wms" \
   -e RUNNER_TOKEN="$RUNNER_TOKEN" \
-  -v /volume1/docker/actions-runner-wms:/volume1/docker/actions-runner-wms \
+  -v /volume1/docker/digitechkh/wms-runner:/volume1/docker/digitechkh/wms-runner \
   -v /var/run/docker.sock:/var/run/docker.sock \
   wms-actions-runner:2.336.0
 
@@ -174,7 +174,7 @@ Listening for Jobs
 ---
 
 ### Step 5: Clean Up Token & Set Synology Docker API Override
-The runner configuration is now saved permanently in `/volume1/docker/actions-runner-wms/.runner`.  
+The runner configuration is now saved permanently in `/volume1/docker/digitechkh/wms-runner/.runner`.  
 Recreate the container to remove the token from container metadata and lock `DOCKER_API_VERSION=1.43` (Synology DSM Docker version):
 
 ```bash
@@ -185,7 +185,7 @@ sudo docker run -d \
   --restart unless-stopped \
   -e RUNNER_URL="https://github.com/BrusmunyPum/digitech-wms" \
   -e DOCKER_API_VERSION="1.43" \
-  -v /volume1/docker/actions-runner-wms:/volume1/docker/actions-runner-wms \
+  -v /volume1/docker/digitechkh/wms-runner:/volume1/docker/digitechkh/wms-runner \
   -v /var/run/docker.sock:/var/run/docker.sock \
   wms-actions-runner:2.336.0
 ```
@@ -203,7 +203,7 @@ sudo docker exec wms-github-runner docker compose version
 
 1. Open your repository on GitHub:  
    👉 `https://github.com/BrusmunyPum/digitech-wms/settings/environments`
-2. Click **New environment**, name it **`production`**, and click **Configure environment**.
+2. Open the **`production_ENV`** environment.
 3. Under **Environment secrets**, click **Add secret**:
    - **Name**: `PRODUCTION_ENV_FILE`
    - **Value**: Paste the exact contents of your production `.env` file from the NAS.
