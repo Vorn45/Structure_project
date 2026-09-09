@@ -1,20 +1,17 @@
-name: CI/CD Pipeline & Notification
+name: CI Code Verification
 
 on:
   push:
     branches:
-      - main
-      - master
       - dev
   pull_request:
     branches:
       - main
-      - master
       - dev
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  verify-build:
     runs-on: ubuntu-latest
 
     steps:

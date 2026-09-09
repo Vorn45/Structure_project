@@ -36,8 +36,10 @@ postgres_data/
 api/storage/
 storage/
 
-# Temp
+# Temp & Backups
 *.ps1
+*.sql
+*.dump
 
 # AI Agents & IDE metadata
 .agents/

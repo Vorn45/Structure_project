@@ -1,0 +1,189 @@
+name: Deploy main to NAS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "api/**"
+      - "web/**"
+      - "nginx/**"
+      - "docker-compose.yml"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Container to rebuild
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - api
+          - web
+
+permissions:
+  contents: read
+
+env:
+  COMPOSE_PROJECT_NAME: digitech-wms
+
+concurrency:
+  group: digitech-wms-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-production:
+    name: Rebuild changed containers on NAS
+    runs-on:
+      - self-hosted
+      - nas-wms
+    environment: production
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout main commit
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Select containers to rebuild
+        id: changes
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          SELECTED_SERVICE: ${{ inputs.service }}
+        run: |
+          rebuild_api=false
+          rebuild_web=false
+          reload_gateway=false
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            case "$SELECTED_SERVICE" in
+              api) rebuild_api=true ;;
+              web) rebuild_web=true ;;
+              both) rebuild_api=true; rebuild_web=true ;;
+            esac
+          elif [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            rebuild_api=true
+            rebuild_web=true
+            reload_gateway=true
+          else
+            git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" > "$RUNNER_TEMP/wms-changed-files.txt"
+
+            while IFS= read -r changed_file; do
+              case "$changed_file" in
+                api/*) rebuild_api=true ;;
+                web/*) rebuild_web=true ;;
+                nginx/*) reload_gateway=true ;;
+                docker-compose.yml)
+                  rebuild_api=true
+                  rebuild_web=true
+                  reload_gateway=true
+                  ;;
+              esac
+            done < "$RUNNER_TEMP/wms-changed-files.txt"
+          fi
+
+          echo "api=$rebuild_api" >> "$GITHUB_OUTPUT"
+          echo "web=$rebuild_web" >> "$GITHUB_OUTPUT"
+          echo "gateway=$reload_gateway" >> "$GITHUB_OUTPUT"
+          echo "API rebuild: $rebuild_api"
+          echo "Web rebuild: $rebuild_web"
+          echo "Gateway reload: $reload_gateway"
+
+      - name: Create protected production environment file
+        shell: bash
+        env:
+          PRODUCTION_ENV_FILE: ${{ secrets.PRODUCTION_ENV_FILE }}
+        run: |
+          if [ -z "$PRODUCTION_ENV_FILE" ]; then
+            echo "::error::PRODUCTION_ENV_FILE is missing from the GitHub production environment secrets." >&2
+            exit 1
+          fi
+
+          umask 077
+          printf '%s\n' "$PRODUCTION_ENV_FILE" > "$RUNNER_TEMP/wms-production.env"
+
+      - name: Validate production Compose configuration
+        shell: bash
+        run: >-
+          docker compose
+          --project-name "$COMPOSE_PROJECT_NAME"
+          --env-file "$RUNNER_TEMP/wms-production.env"
+          -f docker-compose.yml
+          config --quiet
+
+      - name: Verify existing production data volumes
+        shell: bash
+        run: |
+          docker volume inspect "${COMPOSE_PROJECT_NAME}_postgres_data" >/dev/null
+          echo "Using existing database volume: ${COMPOSE_PROJECT_NAME}_postgres_data"
+          if docker volume inspect "${COMPOSE_PROJECT_NAME}_redis_data" >/dev/null 2>&1; then
+            echo "Using existing redis volume: ${COMPOSE_PROJECT_NAME}_redis_data"
+          fi
+
+      - name: Build selected containers
+        shell: bash
+        env:
+          REBUILD_API: ${{ steps.changes.outputs.api }}
+          REBUILD_WEB: ${{ steps.changes.outputs.web }}
+        run: |
+          services=()
+          [ "$REBUILD_API" = "true" ] && services+=(api)
+          [ "$REBUILD_WEB" = "true" ] && services+=(web)
+
+          if [ "${#services[@]}" -eq 0 ]; then
+            echo "No API or Web changes require a rebuild."
+            exit 0
+          fi
+
+          echo "Building services: ${services[*]}"
+          docker compose \
+            --project-name "$COMPOSE_PROJECT_NAME" \
+            --env-file "$RUNNER_TEMP/wms-production.env" \
+            -f docker-compose.yml \
+            build "${services[@]}"
+
+      - name: Restart selected containers
+        shell: bash
+        env:
+          REBUILD_API: ${{ steps.changes.outputs.api }}
+          REBUILD_WEB: ${{ steps.changes.outputs.web }}
+          RELOAD_GATEWAY: ${{ steps.changes.outputs.gateway }}
+        run: |
+          services=()
+          [ "$REBUILD_API" = "true" ] && services+=(api)
+          [ "$REBUILD_WEB" = "true" ] && services+=(web)
+          [ "$RELOAD_GATEWAY" = "true" ] && services+=(load_balancer)
+
+          if [ "${#services[@]}" -eq 0 ]; then
+            echo "No services need to be recreated."
+            exit 0
+          fi
+
+          echo "Restarting services: ${services[*]}"
+          docker compose \
+            --project-name "$COMPOSE_PROJECT_NAME" \
+            --env-file "$RUNNER_TEMP/wms-production.env" \
+            -f docker-compose.yml \
+            up -d --no-build --remove-orphans "${services[@]}"
+
+      - name: Show deployed container status
+        shell: bash
+        run: >-
+          docker compose
+          --project-name "$COMPOSE_PROJECT_NAME"
+          --env-file "$RUNNER_TEMP/wms-production.env"
+          -f docker-compose.yml
+          ps
+
+      - name: Remove dangling Docker images
+        run: docker image prune --force
+
+      - name: Remove temporary files
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/wms-production.env"
+          rm -f "$RUNNER_TEMP/wms-changed-files.txt"
