@@ -49,7 +49,7 @@ import { UserTaskService } from './task.service';
         `
             :host {
                 font-family: 'Kantumruy Pro', sans-serif !important;
-                font-size: 16px;
+                font-size: 14px;
                 display: flex;
                 flex-direction: column;
                 flex: 1 1 auto;
