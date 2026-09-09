@@ -3,6 +3,7 @@ services:
   # Nginx Reverse Proxy & Load Balancer Gateway
   # ===================================================
   load_balancer:
+    container_name: digitechkh-wms-load_balancer
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
@@ -28,6 +29,7 @@ services:
   # NestJS Backend API Service (Scalable Replicas)
   # ===================================================
   api:
+    container_name: digitechkh-wms-api
     build:
       context: ./api
       dockerfile: Dockerfile
@@ -48,6 +50,7 @@ services:
   # Angular Frontend Web Application
   # ===================================================
   web:
+    container_name: digitechkh-wms-web
     build:
       context: ./web
       dockerfile: Dockerfile
@@ -61,6 +64,7 @@ services:
   # PostgreSQL Database Service
   # ===================================================
   postgres:
+    container_name: digitechkh-wms-postgres
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -84,6 +88,7 @@ services:
   # Redis Cache & Session Store
   # ===================================================
   redis:
+    container_name: digitechkh-wms-redis
     image: redis:7-alpine
     restart: unless-stopped
     volumes:
