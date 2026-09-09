@@ -1,13 +1,58 @@
 {
   "tasks": [
     {
+      "id": 1788882595357,
+      "code": "#BMS-0004",
+      "title": "test",
+      "module": "Task Management",
+      "status": "new",
+      "assignee": {
+        "id": 3,
+        "name": "THA WINNER",
+        "role": "អ្នកប្រើប្រាស់",
+        "email": "",
+        "avatar": null
+      },
+      "due_date": "2026-09-15",
+      "priority": "medium",
+      "progress": 0,
+      "reporter": {
+        "id": 1,
+        "name": "PISETH PANHAVORN",
+        "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 3,
+          "name": "THA WINNER",
+          "role": "អ្នកប្រើប្រាស់",
+          "email": "",
+          "avatar": null
+        }
+      ],
+      "task_type": "feature",
+      "created_at": "2026-09-08T15:49:55.357Z",
+      "project_id": "bms-digitech",
+      "updated_at": "2026-09-08T15:49:55.357Z",
+      "description": "test",
+      "project_name": "BMS Digitech",
+      "comments_count": 0,
+      "attachments_count": 0
+    },
+    {
       "id": 1,
       "code": "#WMS-0000",
       "title": "Org Admin | Structure | Department",
       "module": "Org Admin | Structure",
       "status": "in_review",
-      "assignee": null,
-      "due_date": "2026-09-15T05:14:27.511Z",
+      "assignee": {
+        "id": 1,
+        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "role": "Super Admin & User",
+        "avatar": null
+      },
+      "due_date": "2026-09-13T12:00:00.000Z",
       "priority": "high",
       "progress": 85,
       "reporter": {
@@ -16,11 +61,18 @@
         "role": "Super Admin",
         "avatar": null
       },
-      "assignees": [],
+      "assignees": [
+        {
+          "id": 1,
+          "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+          "role": "Super Admin & User",
+          "avatar": null
+        }
+      ],
       "task_type": "feature",
-      "created_at": "2026-09-03T05:14:27.511Z",
+      "created_at": "2026-09-01T08:00:00.000Z",
       "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-07T08:00:00.000Z",
       "description": "Manage departmental structures, permissions, and organizational units in core hierarchy.",
       "project_name": "WMS Digitech",
       "comments_count": 1,
@@ -38,7 +90,7 @@
         "role": "User",
         "avatar": null
       },
-      "due_date": "2026-09-07T05:14:27.511Z",
+      "due_date": "2026-09-15T15:14:11.796Z",
       "priority": "high",
       "progress": 100,
       "reporter": {
@@ -56,12 +108,12 @@
         }
       ],
       "task_type": "feature",
-      "created_at": "2026-09-02T05:14:27.511Z",
+      "created_at": "2026-08-31T08:00:00.000Z",
       "project_id": "bms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-08T15:14:11.808Z",
       "description": "Implement intuitive drag and drop folder organization for project documents.",
       "project_name": "BMS Digitech",
-      "comments_count": 0,
+      "comments_count": 10,
       "attachments_count": 2
     },
     {
@@ -76,7 +128,7 @@
         "role": "User",
         "avatar": null
       },
-      "due_date": "2026-09-06T05:14:27.511Z",
+      "due_date": "2026-09-04T12:00:00.000Z",
       "priority": "urgent",
       "progress": 100,
       "reporter": {
@@ -94,9 +146,9 @@
         }
       ],
       "task_type": "bug",
-      "created_at": "2026-09-02T05:14:27.511Z",
+      "created_at": "2026-08-31T08:00:00.000Z",
       "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-07T08:00:00.000Z",
       "description": "Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.",
       "project_name": "WMS Digitech",
       "comments_count": 2,
@@ -114,7 +166,7 @@
         "role": "Super Admin & User",
         "avatar": null
       },
-      "due_date": "2026-09-04T05:14:27.511Z",
+      "due_date": "2026-09-02T12:00:00.000Z",
       "priority": "urgent",
       "progress": 40,
       "reporter": {
@@ -132,9 +184,9 @@
         }
       ],
       "task_type": "bug",
-      "created_at": "2026-09-02T05:14:27.511Z",
+      "created_at": "2026-08-31T08:00:00.000Z",
       "project_id": "bms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-07T08:00:00.000Z",
       "description": "Provide fallback default cover gradient when user cover photo URL is empty or unverified.",
       "project_name": "BMS Digitech",
       "comments_count": 1,
@@ -152,7 +204,7 @@
         "role": "User",
         "avatar": null
       },
-      "due_date": "2026-09-03T05:14:27.511Z",
+      "due_date": null,
       "priority": "high",
       "progress": 10,
       "reporter": {
@@ -167,15 +219,39 @@
           "name": "ពុំ ប្រុសមុន្នី",
           "role": "User",
           "avatar": null
+        },
+        {
+          "id": 3,
+          "name": "THA WINNER",
+          "role": "អ្នកប្រើប្រាស់",
+          "email": "thawinner@example.com",
+          "avatar": null,
+          "color_class": "bg-blue-600"
+        },
+        {
+          "id": 4,
+          "name": "Phuong Sovannara",
+          "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
+          "email": "phuongsovannara@gmail.com",
+          "avatar": null,
+          "color_class": "bg-blue-600"
+        },
+        {
+          "id": 1,
+          "name": "PISETH PANHAVORN",
+          "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
+          "email": "pisethpanhavorn544@gmail.com",
+          "avatar": null,
+          "colorClass": "bg-blue-600"
         }
       ],
       "task_type": "improvement",
-      "created_at": "2026-09-02T05:14:27.511Z",
+      "created_at": "2026-08-31T08:00:00.000Z",
       "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-08T16:35:24.341Z",
       "description": "Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.",
       "project_name": "WMS Digitech",
-      "comments_count": 1,
+      "comments_count": 12,
       "attachments_count": 1
     },
     {
@@ -190,7 +266,7 @@
         "role": "User",
         "avatar": null
       },
-      "due_date": "2026-09-13T05:14:27.511Z",
+      "due_date": "2026-09-11T12:00:00.000Z",
       "priority": "medium",
       "progress": 55,
       "reporter": {
@@ -208,9 +284,9 @@
         }
       ],
       "task_type": "feature",
-      "created_at": "2026-08-26T05:14:27.511Z",
+      "created_at": "2026-08-24T08:00:00.000Z",
       "project_id": "bms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-07T08:00:00.000Z",
       "description": "Render interactive comparison charts comparing weekly member work hours and sprint deliverables.",
       "project_name": "BMS Digitech",
       "comments_count": 0,
@@ -228,7 +304,7 @@
         "role": "Super Admin & User",
         "avatar": null
       },
-      "due_date": "2026-09-11T05:14:27.511Z",
+      "due_date": "2026-09-09T12:00:00.000Z",
       "priority": "medium",
       "progress": 88,
       "reporter": {
@@ -246,9 +322,9 @@
         }
       ],
       "task_type": "feature",
-      "created_at": "2026-08-26T05:14:27.511Z",
+      "created_at": "2026-08-24T08:00:00.000Z",
       "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-07T08:00:00.000Z",
       "description": "Real-time sync of task milestone updates and aggregated department productivity scorecards.",
       "project_name": "WMS Digitech",
       "comments_count": 2,
@@ -262,12 +338,14 @@
       "status": "unconfirmed",
       "assignee": {
         "id": 2,
-        "name": "ពុំ ប្រុសមុន្នី",
-        "role": "User",
-        "avatar": null
+        "name": "PUM BRUSMUNY",
+        "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
+        "email": "pumprusmuny@example.com",
+        "avatar": null,
+        "color_class": "bg-blue-600"
       },
-      "due_date": "2026-09-17T05:14:27.511Z",
-      "priority": "low",
+      "due_date": "2026-09-26",
+      "priority": "high",
       "progress": 0,
       "reporter": {
         "id": 1,
@@ -278,18 +356,20 @@
       "assignees": [
         {
           "id": 2,
-          "name": "ពុំ ប្រុសមុន្នី",
-          "role": "User",
-          "avatar": null
+          "name": "PUM BRUSMUNY",
+          "role": "កន្លែងធ្វើការផ្ទាល់ខ្លួន",
+          "email": "pumprusmuny@example.com",
+          "avatar": null,
+          "color_class": "bg-blue-600"
         }
       ],
-      "task_type": "feature",
-      "created_at": "2026-08-26T05:14:27.511Z",
+      "task_type": "improvement",
+      "created_at": "2026-08-24T08:00:00.000Z",
       "project_id": "bms-digitech",
-      "updated_at": "2026-09-09T05:14:27.511Z",
+      "updated_at": "2026-09-08T15:53:10.048Z",
       "description": "Provide safe confirmation step and revoke tenant session when member switches workspace.",
       "project_name": "BMS Digitech",
-      "comments_count": 1,
+      "comments_count": 21,
       "attachments_count": 0
     }
   ],
@@ -297,70 +377,158 @@
     "1": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #PMS-675 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
+        "text": "ភារកិច្ច #WMS-0000 ត្រូវបានបង្កើតដោយ ពិសិដ្ឋ បញ្ញាវ័ន្ត និងចាត់តាំងទៅកាន់ ពិសិដ្ឋ បញ្ញាវ័ន្ត",
         "time": "8:30 AM",
         "is_self": false,
         "is_system": true,
         "sender_id": 0,
-        "created_at": "2026-09-04T07:42:50.922Z",
+        "created_at": "2026-09-08T05:24:18.470Z",
         "sender_name": "ប្រព័ន្ធ (System)",
         "sender_avatar": null
       },
       {
         "id": 2,
-        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Org Admin | Structure | Department\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ពិសិដ្ឋ បញ្ញាវ័ន្ត! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Org Admin | Structure | Department\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "sender_id": 999,
-        "created_at": "2026-09-04T08:12:50.923Z",
-        "sender_name": "ឡេង សុខឆាយ",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
+        "sender_id": 1,
+        "created_at": "2026-09-08T05:54:18.470Z",
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": null
       }
     ],
     "2": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #PMS-671 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ស៊ន់ ​លាង",
+        "text": "ភារកិច្ច #BMS-0000 ត្រូវបានបង្កើតដោយ ពិសិដ្ឋ បញ្ញាវ័ន្ត និងចាត់តាំងទៅកាន់ ពុំ ប្រុសមុន្នី",
         "time": "8:30 AM",
         "is_self": false,
         "is_system": true,
         "sender_id": 0,
-        "created_at": "2026-09-04T22:50:50.945Z",
+        "created_at": "2026-09-08T05:24:18.473Z",
         "sender_name": "ប្រព័ន្ធ (System)",
         "sender_avatar": null
       },
       {
         "id": 2,
-        "text": "សួស្តី @ស៊ន់ ​លាង! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Drag & Drop\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Drag & Drop\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "sender_id": 999,
-        "created_at": "2026-09-04T23:20:50.945Z",
-        "sender_name": "ឡេង សុខឆាយ",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
+        "sender_id": 1,
+        "created_at": "2026-08-31T08:00:00.000Z",
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788879780907,
+        "text": "បានប្តូរប្រភេទការងារពី \"មុខងារ\" ទៅជា \"កំហុស\"",
+        "time": "10:03 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:03:00.902Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788879782867,
+        "text": "បានប្តូរប្រភេទការងារពី \"កំហុស\" ទៅជា \"ការកែលម្អ\"",
+        "time": "10:03 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:03:02.862Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880406851,
+        "text": "បានប្តូរប្រភេទការងារពី \"ការកែលម្អ\" ទៅជា \"កំហុស\"",
+        "time": "10:13 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:13:26.846Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880408482,
+        "text": "បានប្តូរប្រភេទការងារពី \"កំហុស\" ទៅជា \"មុខងារ\"",
+        "time": "10:13 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:13:28.477Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880410581,
+        "text": "បានប្តូរប្រភេទការងារពី \"មុខងារ\" ទៅជា \"ឯកសារ\"",
+        "time": "10:13 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:13:30.576Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880412215,
+        "text": "បានប្តូរប្រភេទការងារពី \"ឯកសារ\" ទៅជា \"ប្លង់កម្មវិធី\"",
+        "time": "10:13 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:13:32.210Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880413680,
+        "text": "បានប្តូរប្រភេទការងារពី \"ប្លង់កម្មវិធី\" ទៅជា \"មុខងារ\"",
+        "time": "10:13 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:13:33.675Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880451824,
+        "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 15/09/2026",
+        "time": "10:14 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:14:11.821Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       }
     ],
     "3": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #PMS-670 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
+        "text": "ភារកិច្ច #WMS-0001 ត្រូវបានបង្កើតដោយ ពិសិដ្ឋ បញ្ញាវ័ន្ត និងចាត់តាំងទៅកាន់ ថា វីនណឺរ",
         "time": "8:30 AM",
         "is_self": false,
         "is_system": true,
         "sender_id": 0,
-        "created_at": "2026-09-04T22:50:50.952Z",
+        "created_at": "2026-09-08T05:24:18.474Z",
         "sender_name": "ប្រព័ន្ធ (System)",
         "sender_avatar": null
       },
       {
         "id": 2,
-        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Cannot Scroll PDF\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ថា វីនណឺរ! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Cannot Scroll PDF\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "sender_id": 999,
-        "created_at": "2026-09-04T23:20:50.952Z",
-        "sender_name": "ឡេង សុខឆាយ",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
+        "sender_id": 1,
+        "created_at": "2026-09-08T05:54:18.474Z",
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": null
       }
     ],
     "4": [
@@ -475,13 +643,123 @@
       },
       {
         "id": 2,
-        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Security setting UI improvements\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Security setting UI improvements\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "sender_id": 999,
-        "created_at": "2026-09-04T08:12:40.850Z",
-        "sender_name": "ឡេង សុខឆាយ",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
+        "sender_id": 1,
+        "created_at": "2026-08-31T08:00:00.000Z",
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880698380,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ពុំ ប្រុសមុន្នី, THA WINNER",
+        "time": "10:18 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:18:18.376Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880701160,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ពុំ ប្រុសមុន្នី, THA WINNER, Phuong Sovannara",
+        "time": "10:18 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:18:21.156Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788880705878,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ពុំ ប្រុសមុន្នី, THA WINNER, Phuong Sovannara, PISETH PANHAVORN",
+        "time": "10:18 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:18:25.874Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881851144,
+        "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
+        "time": "10:37 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:31.141Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881853034,
+        "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 16/09/2026",
+        "time": "10:37 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:33.031Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881854368,
+        "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
+        "time": "10:37 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:34.365Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881857200,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ពុំ ប្រុសមុន្នី, THA WINNER, Phuong Sovannara",
+        "time": "10:37 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:37.196Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881858561,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ពុំ ប្រុសមុន្នី, THA WINNER, Phuong Sovannara, PISETH PANHAVORN",
+        "time": "10:37 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:37:38.557Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788885321486,
+        "text": "បានប្តូរប្រភេទការងារពី \"ការកែលម្អ\" ទៅជា \"កំហុស\"",
+        "time": "11:35 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T16:35:21.481Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788885324358,
+        "text": "បានប្តូរប្រភេទការងារពី \"កំហុស\" ទៅជា \"ការកែលម្អ\"",
+        "time": "11:35 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T16:35:24.353Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       }
     ],
     "6": [
@@ -498,78 +776,12 @@
       },
       {
         "id": 2,
-        "text": "សួស្តី @ស៊ន់ ​លាង! ខ្ញុំបានចាត់តាំងភារកិច្ច \"User | Report | Progress Compare\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ថា វីនណឺរ! ខ្ញុំបានចាត់តាំងភារកិច្ច \"User | Report | Progress Compare\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "sender_id": 999,
+        "sender_id": 1,
         "created_at": "2026-09-04T23:20:50.958Z",
-        "sender_name": "ឡេង សុខឆាយ",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788864312860,
-        "text": "បានប្តូរស្ថានភាពពី \"កំពុងធ្វើ\" ទៅជា \"មិនបញ្ជាក់\"",
-        "time": "05:45 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T10:45:12.859Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788864314359,
-        "text": "បានប្តូរស្ថានភាពពី \"មិនបញ្ជាក់\" ទៅជា \"កំពុងធ្វើ\"",
-        "time": "05:45 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T10:45:14.358Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788864319936,
-        "text": "បានប្តូរស្ថានភាពពី \"កំពុងធ្វើ\" ទៅជា \"មិនបញ្ជាក់\"",
-        "time": "05:45 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T10:45:19.935Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788864321863,
-        "text": "បានប្តូរស្ថានភាពពី \"មិនបញ្ជាក់\" ទៅជា \"កំពុងធ្វើ\"",
-        "time": "05:45 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T10:45:21.862Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788864328803,
-        "text": "បានប្តូរស្ថានភាពពី \"កំពុងធ្វើ\" ទៅជា \"មិនបញ្ជាក់\"",
-        "time": "05:45 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T10:45:28.802Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788864332132,
-        "text": "បានប្តូរស្ថានភាពពី \"មិនបញ្ជាក់\" ទៅជា \"កំពុងធ្វើ\"",
-        "time": "05:45 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T10:45:32.131Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
         "sender_avatar": null
       }
     ],
@@ -610,13 +822,223 @@
       },
       {
         "id": 2,
-        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Profile | Switch Org | Exit Org\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @PUM BRUSMUNY! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Profile | Switch Org | Exit Org\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "sender_id": 999,
-        "created_at": "2026-09-04T08:12:48.356Z",
-        "sender_name": "ឡេង សុខឆាយ",
+        "sender_id": 1,
+        "created_at": "2026-08-24T08:00:00.000Z",
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788874096405,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ",
+        "time": "08:28 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T13:28:16.401Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788874099142,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ PUM BRUSMUNY",
+        "time": "08:28 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T13:28:19.138Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881950115,
+        "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
+        "time": "10:39 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:10.112Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881956940,
+        "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 08/09/2026",
+        "time": "10:39 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:16.937Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881962282,
+        "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 17/09/2026",
+        "time": "10:39 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:22.279Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881963313,
+        "text": "បានសម្អាតកាលបរិច្ឆេទកំណត់",
+        "time": "10:39 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:23.310Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788881967353,
+        "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 08/09/2026",
+        "time": "10:39 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:39:27.350Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882145514,
+        "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 09/09/2026",
+        "time": "10:42 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:42:25.511Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882299323,
+        "text": "បានប្តូរអាទិភាពពី \"ទាប\" ទៅជា \"បន្ទាន់\"",
+        "time": "10:44 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:44:59.321Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882300470,
+        "text": "បានប្តូរអាទិភាពពី \"បន្ទាន់\" ទៅជា \"ខ្ពស់\"",
+        "time": "10:45 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:45:00.468Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882303051,
+        "text": "បានប្តូរស្ថានភាពពី \"មិនបញ្ជាក់\" ទៅជា \"កំពុងធ្វើ\"",
+        "time": "10:45 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:45:03.050Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882625345,
+        "text": "🙏",
+        "time": "10:50 PM",
+        "is_self": true,
+        "is_system": false,
+        "sender_id": 2,
+        "created_at": "2026-09-08T15:50:25.345Z",
+        "attachments": [],
+        "sender_name": "ពុំ ប្រុសមុន្នី",
         "sender_avatar": "/images/placeholder/avatar.jpg"
+      },
+      {
+        "id": 1788882698392,
+        "text": "បានប្តូរស្ថានភាពពី \"កំពុងធ្វើ\" ទៅជា \"ថ្មី\"",
+        "time": "10:51 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:38.391Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882701578,
+        "text": "បានប្តូរស្ថានភាពពី \"ថ្មី\" ទៅជា \"មិនបញ្ជាក់\"",
+        "time": "10:51 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:41.577Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882702680,
+        "text": "បានប្តូរប្រភេទការងារពី \"មុខងារ\" ទៅជា \"កំហុស\"",
+        "time": "10:51 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:42.675Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882704182,
+        "text": "បានប្តូរប្រភេទការងារពី \"កំហុស\" ទៅជា \"ការកែលម្អ\"",
+        "time": "10:51 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:51:44.177Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882776090,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ PUM BRUSMUNY, PISETH PANHAVORN",
+        "time": "10:52 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:52:56.086Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882778510,
+        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ PUM BRUSMUNY",
+        "time": "10:52 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:52:58.506Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
+      },
+      {
+        "id": 1788882790059,
+        "text": "បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ 26/09/2026",
+        "time": "10:53 PM",
+        "is_self": false,
+        "is_system": true,
+        "sender_id": 0,
+        "created_at": "2026-09-08T15:53:10.056Z",
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null
       }
     ],
     "1788882595357": [
@@ -643,5 +1065,5 @@
       }
     ]
   },
-  "updated_at": "2026-09-09T05:51:18.219Z"
+  "updated_at": "2026-09-09T06:24:58.453Z"
 }
