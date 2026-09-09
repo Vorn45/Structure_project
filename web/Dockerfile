@@ -1,28 +1,36 @@
-# Stage 1
-FROM node:20-alpine as node
+# ===================================================
+# Multi-stage Dockerfile for Angular Frontend
+# ===================================================
 
-# Get Variables
-ARG API_BASE_URL
-ARG FILE_BASE_URL
-ARG SOCKET_URL
-# ARG RecaptchaSiteKey
-
+# 1. Build Stage
+FROM node:20-alpine AS builder
 
 WORKDIR /usr/app
 
-COPY ./package.json /usr/app/package.json
+# Configure npm network resilience against ECONNRESET and dropouts
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-timeout 300000
 
-# Install Dependencies
-RUN npm install --legacy-peer-deps
+# Copy package and lock files to leverage Docker layer caching
+COPY package*.json ./
 
-COPY ./ /usr/app
+# Install dependencies using pinned lockfile (with fallback)
+RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
-# Build
+# Copy source code
+COPY . .
+
+# Build production Angular bundle
 RUN npm run build --prod
 
-# Stage 2
-FROM nginx:alpine
+# 2. Production Runtime Stage (Nginx)
+FROM nginx:1.27-alpine
 
-COPY --from=node /usr/app/default.conf /etc/nginx/conf.d/default.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /usr/app/dist /usr/share/nginx/html
 
-COPY --from=node /usr/app/dist /usr/share/nginx/html
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

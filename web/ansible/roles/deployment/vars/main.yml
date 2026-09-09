@@ -1,5 +1,0 @@
----
-# vars file for dev deployment
-container_name: pms_web_dev
-publish_port: 2411
-container_port: 80

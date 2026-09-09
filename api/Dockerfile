@@ -7,9 +7,15 @@ FROM node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
+# Configure npm network resilience against ECONNRESET and dropouts
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-timeout 300000
+
 # Install build dependencies
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
 # Copy source and build
 COPY . .

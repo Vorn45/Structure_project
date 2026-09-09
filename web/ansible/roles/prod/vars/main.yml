@@ -1,5 +1,0 @@
----
-# vars file for prod
-container_name: nextask_web_prod
-publish_port: 2511
-container_port: 80
