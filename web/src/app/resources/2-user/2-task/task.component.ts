@@ -338,7 +338,16 @@ export class UserTaskComponent implements OnInit {
                                 (targetCode && t.code && t.code.toLowerCase().includes(targetCode)),
                         );
                         if (found) {
-                            setTimeout(() => this.openTaskChat(found), 100);
+                            setTimeout(() => {
+                                this.openTaskChat(found);
+                                // Clean query params from URL so reloading or filtering won't re-trigger opening
+                                this._router.navigate([], {
+                                    relativeTo: this._route,
+                                    queryParams: { taskId: null, taskCode: null },
+                                    queryParamsHandling: 'merge',
+                                    replaceUrl: true,
+                                });
+                            }, 100);
                         }
                     }
                 },
@@ -1172,6 +1181,15 @@ export class UserTaskComponent implements OnInit {
     closeTaskChat(): void {
         this.showChatRoom.set(false);
         this.selectedTask.set(null);
+        const q = this._route.snapshot.queryParams;
+        if (q['taskId'] || q['taskCode']) {
+            this._router.navigate([], {
+                relativeTo: this._route,
+                queryParams: { taskId: null, taskCode: null },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+        }
     }
 
     sendChatMessage(payload: { text: string; attachments: TaskAttachment[] }): void {
