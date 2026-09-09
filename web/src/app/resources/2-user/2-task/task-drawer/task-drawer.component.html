@@ -632,16 +632,13 @@
 
                             <!-- Real Seen User Avatars -->
                             <ng-container *ngIf="msg.seen_by && msg.seen_by.length > 0">
-                                <div class="flex items-center -space-x-1.5 ml-1">
+                                <div class="flex items-center -space-x-1.5 ml-1" [matTooltip]="'បានមើលដោយ៖ ' + getSeenTooltip(msg.seen_by)">
                                     <div *ngFor="let viewer of msg.seen_by.slice(0, 3)"
-                                        class="w-4 h-4 min-w-[16px] min-h-[16px] rounded-full border border-white dark:border-[#090f1e] bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden shadow-2xs cursor-pointer"
-                                        [matTooltip]="'បានមើលដោយ៖ ' + viewer.name">
-                                        <img *ngIf="viewer.avatar" [src]="viewer.avatar" [alt]="viewer.name" class="w-full h-full object-cover" />
-                                        <mat-icon *ngIf="!viewer.avatar" svgIcon="mdi:account" class="!w-2.5 !h-2.5 text-slate-400 dark:text-slate-300"></mat-icon>
+                                        class="w-4.5 h-4.5 min-w-[18px] min-h-[18px] max-w-[18px] max-h-[18px] rounded-full border-1.5 border-white dark:border-[#090f1e] overflow-hidden shadow-2xs cursor-pointer bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                                        <img [src]="getViewerAvatar(viewer)" [alt]="viewer.name" class="w-full h-full object-cover" />
                                     </div>
                                     <div *ngIf="msg.seen_by.length > 3"
-                                        class="w-4 h-4 min-w-[16px] min-h-[16px] rounded-full border border-white dark:border-[#090f1e] bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center -ml-1 shadow-2xs"
-                                        [matTooltip]="'និង ' + (msg.seen_by.length - 3) + ' នាក់ទៀត'">
+                                        class="w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full border-1.5 border-white dark:border-[#090f1e] bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center -ml-1 shadow-2xs">
                                         +{{ msg.seen_by.length - 3 }}
                                     </div>
                                 </div>

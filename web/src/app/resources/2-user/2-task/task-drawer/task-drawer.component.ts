@@ -260,6 +260,27 @@ export class TaskDrawerComponent {
         return name.slice(0, 2).toUpperCase();
     }
 
+    getViewerAvatar(viewer: { avatar?: string | null; name?: string; id?: number }): string {
+        if (viewer?.avatar && viewer.avatar.trim()) {
+            return viewer.avatar;
+        }
+        if (viewer?.name || viewer?.id) {
+            const member = (this.teamMembers() || []).find(
+                (m) => (viewer.id && Number(m.id) === Number(viewer.id)) ||
+                       (viewer.name && m.name && m.name.toLowerCase().trim() === viewer.name.toLowerCase().trim())
+            );
+            if (member?.avatar && member.avatar.trim()) {
+                return member.avatar;
+            }
+        }
+        return '/images/placeholder/avatar.jpg';
+    }
+
+    getSeenTooltip(seenBy?: Array<{ name?: string }>): string {
+        if (!seenBy || seenBy.length === 0) return '';
+        return seenBy.map((v) => v.name || 'Member').join(', ');
+    }
+
     formatDate(dateStr?: string | null): string {
         if (!dateStr) return '';
         const d = new Date(dateStr);

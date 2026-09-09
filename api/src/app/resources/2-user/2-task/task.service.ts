@@ -586,10 +586,10 @@ export class TaskService {
         ];
 
         const defaultFallbacks = [
-            { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600', phone: '010843612' },
-            { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600', phone: '087280875' },
-            { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600', phone: '067776682' },
-            { id: 67, name: 'Phuong Sovannara', name_en: 'Phuong Sovannara', name_kh: 'ភួង សុវណ្ណារ៉ា', role: 'Developer', email: 'phuongsovannara@gmail.com', avatar: null, colorClass: 'bg-amber-600', phone: '011242425' },
+            { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', phone: '010843612' },
+            { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', phone: '087280875' },
+            { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', phone: '067776682' },
+            { id: 67, name: 'Phuong Sovannara', name_en: 'Phuong Sovannara', name_kh: 'ភួង សុវណ្ណារ៉ា', role: 'Developer', email: 'phuongsovannara@gmail.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', phone: '011242425' },
         ];
 
         let mapped = dbUsers.map((u, idx) => {
@@ -599,7 +599,7 @@ export class TaskService {
                 u.user_roles?.[0]?.role?.slug ||
                 'សមាជិក (Member)';
 
-            let avatarUrl: string | null = null;
+            let avatarUrl: string | null = '/images/placeholder/avatar.jpg';
             if (u.avatar_file?.uri) {
                 const domain = (u.avatar_file.file_domain || '').replace(/\/+$/, '');
                 const uri = u.avatar_file.uri.replace(/^\/+/, '');
