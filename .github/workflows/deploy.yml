@@ -26,11 +26,11 @@ permissions:
   contents: read
 
 env:
-  COMPOSE_PROJECT_NAME: digitech-wms
+  COMPOSE_PROJECT_NAME: digitechkh-wms
   DOCKER_API_VERSION: "1.43"
 
 concurrency:
-  group: digitech-wms-production
+  group: digitechkh-wms-production
   cancel-in-progress: false
 
 jobs:

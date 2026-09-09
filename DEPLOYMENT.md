@@ -48,9 +48,9 @@ Synology NAS Docker Engine (DSM 7.3)
 | **Runner Host Directory** | `/volume1/docker/digitechkh/wms-runner` | Distinct from `/volume1/docker/actions-runner` |
 | **Runner Container Name** | `wms-github-runner` | Distinct from `ossp-github-runner` |
 | **Runner Labels** | `self-hosted`, `nas-wms` | Avoids job collision with `nas` |
-| **Compose Project Name** | `digitech-wms` | Isolated network & volumes |
-| **Database Volume** | `digitech-wms_postgres_data` | Strictly preserved |
-| **Redis Volume** | `digitech-wms_redis_data` | Strictly preserved |
+| **Compose Project Name** | `digitechkh-wms` | Isolated network & volumes |
+| **Database Volume** | `digitechkh-wms_postgres_data` | Strictly preserved |
+| **Redis Volume** | `digitechkh-wms_redis_data` | Strictly preserved |
 | **Gateway Host Port** | `4500` | Single entrypoint for NAS |
 | **Database External Port** | `5433` | Host port for pgAdmin/direct access |
 | **GitHub Environment** | `production_ENV` | Holds environment secret |
