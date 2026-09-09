@@ -142,6 +142,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     viewMode = signal<'grid' | 'kanban' | 'list'>('kanban');
     activeStatus = signal<string>('all');
     activePriority = signal<string>('all');
+    // Set to the signed-in user in ngOnInit so the page opens on their own tasks;
+    // picking "ទាំងអស់ (All Members)" widens it to the whole team.
     selectedMemberFilter = signal<number | 'all'>('all');
     selectedProjectId = signal<string | 'all'>('all');
     searchQuery = signal<string>('');
@@ -228,6 +230,14 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // Default this page to the signed-in user's own tasks. Set before the
+        // queryParams subscription below fires, so the first fetch is already
+        // scoped and the board never flashes the whole team's tasks.
+        const currentUserId = this._userService.getUser()?.id;
+        if (currentUserId != null) {
+            this.selectedMemberFilter.set(currentUserId);
+        }
+
         this.loadTeamMembers();
 
         // Anyone moving a task on any board changes what these chips should read,
