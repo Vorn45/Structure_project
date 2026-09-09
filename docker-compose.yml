@@ -4,7 +4,6 @@ services:
   # ===================================================
   load_balancer:
     image: nginx:1.27-alpine
-    container_name: wfm_load_balancer
     restart: unless-stopped
     ports:
       - "${PORT_HTTP:-4500}:80"
@@ -63,7 +62,6 @@ services:
   # ===================================================
   postgres:
     image: postgres:16-alpine
-    container_name: wfm_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME is required in .env}
@@ -87,7 +85,6 @@ services:
   # ===================================================
   redis:
     image: redis:7-alpine
-    container_name: wfm_redis
     restart: unless-stopped
     volumes:
       - redis_data:/data
