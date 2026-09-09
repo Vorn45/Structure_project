@@ -223,7 +223,7 @@ export class QRDialogComponent implements OnDestroy, OnInit {
 
             this.cleanup();
             this.dialogRef.close();
-            this.router.navigateByUrl('');
+            this.router.navigateByUrl(this.authService.getRedirectUrl());
         } catch (error) {
             console.error('Authentication handling error:', error);
             this.snackbarService.openSnackBar('Authentication failed', GlobalConstants.error);

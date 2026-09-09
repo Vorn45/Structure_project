@@ -23,7 +23,8 @@ export class RedirectGuard implements CanActivate {
             return this.router.parseUrl('/auth/sign-in');
         }
 
-        return this.router.parseUrl('/profile');
+        const redirectUrl = this.authService.getRedirectUrl();
+        return this.router.parseUrl(redirectUrl || '/member/home');
     }
 }
 
