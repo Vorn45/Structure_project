@@ -537,7 +537,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
 
         confirmation.afterClosed().subscribe(result => {
             if (result === 'confirmed') {
-                this._dialogRef.close();
+                this._dialogRef?.close();
                 this._authService.signOut();
                 this._router.navigateByUrl('/auth/sign-in');
             }

@@ -51,10 +51,10 @@ export interface VerifiedMemberData {
                         </div>
                         <div class="flex flex-col">
                             <h1 class="text-[14px] font-medium leading-tight tracking-wide text-white">
-                                {{ member()?.organization_kh || 'ប្រព័ន្ធគ្រប់គ្រងការងារ WMS DIGITECHKH' }}
+                                {{ member()?.organization_kh || 'ប្រព័ន្ធគ្រប់គ្រងការងារ DIGITECHKH' }}
                             </h1>
                             <span class="text-[10px] text-blue-100/90 font-normal tracking-wide mt-0.5">
-                                {{ member()?.organization_en || 'WMS DIGITECHKH' }}
+                                {{ member()?.organization_en || 'DIGITECHKH' }}
                             </span>
                         </div>
                     </div>
