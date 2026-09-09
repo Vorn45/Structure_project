@@ -1,25 +1,20 @@
-<div class="planner-root flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
-    style="font-family: 'Kantumruy Pro', sans-serif !important; font-size: 16px !important; min-height: 100vh;">
+<div class="planner-root flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[14px] box-border relative select-none"
+    style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
 
     <!-- ===== FRAMED CONTENT CONTAINER (Matches other pages) ===== -->
-    <div class="flex flex-col flex-1 min-w-0 w-full bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+    <div class="flex flex-col flex-1 min-w-0 w-full bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-5"
         style="min-height: calc(100vh - 2rem);">
 
         <!-- ===== TOP HEADER ROW (Matches other pages) ===== -->
-        <div class="flex items-center justify-between gap-4 mb-6">
+        <div class="flex items-center justify-between gap-4 mb-4">
             <!-- Left: Home Icon, Title, and Count Pill -->
             <div class="flex items-center gap-3 shrink-0">
-                <button
-                    type="button"
-                    (click)="navigateHome()"
-                    class="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center cursor-pointer"
-                    [matTooltip]="'ទំព័រដើម (Home)'">
-                    <mat-icon svgIcon="mdi:home-outline" class="icon-size-5 text-slate-500 dark:text-slate-400"></mat-icon>
-                </button>
+                <mat-icon svgIcon="mdi:calendar-month-outline"
+                    class="icon-size-5 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
 
-                <span class="text-[19px] font-normal text-slate-800 dark:text-white">ផែនការ</span>
+                <span class="text-[17px] font-medium text-slate-800 dark:text-white">ផែនការ</span>
 
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13.5px] font-normal bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                     {{ filteredEvents().length }}
                 </span>
             </div>

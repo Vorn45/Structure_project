@@ -56,7 +56,7 @@ export interface DayColumn {
     styles: [`
         :host {
             font-family: 'Kantumruy Pro', sans-serif !important;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 400;
             display: flex;
             flex-direction: column;
