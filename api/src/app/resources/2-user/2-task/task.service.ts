@@ -883,7 +883,7 @@ export class TaskService {
             code: formattedCode,
             title: dto.title,
             description: dto.description || '',
-            module: 'Task Management',
+            module: (dto as any).module || dto.title || 'Task Management',
             task_type: dto.task_type || 'feature',
             status: dto.status || TaskStatusEnum.NEW,
             priority: dto.priority || TaskPriorityEnum.MEDIUM,
@@ -968,9 +968,7 @@ export class TaskService {
     }
 
     private getTaskContextLine(task: TaskItem): string {
-        const prefix = this.getProjectPrefix(task);
-        const label = task.module || task.title;
-        return `${prefix}: ${label}`;
+        return (task.title || task.code || 'Task').trim();
     }
 
     private getStatusLabel(status?: string): string {
