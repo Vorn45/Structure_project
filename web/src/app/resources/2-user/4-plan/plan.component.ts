@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, ElementRef, effect, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { merge, Subject, takeUntil } from 'rxjs';
+import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -755,12 +757,15 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         { name: 'កញ្ញា', startWeek: 36, weeksCount: 5, bgClass: 'bg-[#0369a1] text-white' },
     ];
 
+    private readonly _unsubscribeAll = new Subject<any>();
+
     constructor(
         private readonly _planService: UserPlanService,
         private readonly _router: Router,
         private readonly _matDialog: MatDialog,
         private readonly _dialogConfigService: DialogConfigService,
         private readonly _userService: UserService,
+        private readonly _taskSocket: TaskSocketService,
     ) {
         effect(() => {
             const project = this.selectedProject();
@@ -1210,6 +1215,15 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
             ngOnInit(): void {
                 this.loadPlans();
+
+                // Replaces the old manual refresh button: project progress is derived
+                // from task state, so both task and project events invalidate this list.
+                merge(
+                    this._taskSocket.taskUpdates(),
+                    this._taskSocket.projectUpdates(),
+                )
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe(() => this.loadPlans());
             }
 
             loadPlans(): void {
@@ -1731,6 +1745,38 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         this._router.navigate(['/member/activity']);
     }
 
+    /**
+     * Percentage of finished tasks, derived from the counts shown beside it.
+     *
+     * The API also carries a stored `progress` field, but it is seeded independently
+     * of `completed_tasks`/`total_tasks` and drifts from them — a card was reading
+     * "3 / 6 (55%)". Deriving it here keeps the number, the bar and the fraction
+     * telling the same story whatever the stored field says.
+     */
+    projectProgress(plan?: { completed_tasks?: number; total_tasks?: number } | null): number {
+        const total = plan?.total_tasks ?? 0;
+        const completed = plan?.completed_tasks ?? 0;
+        if (total <= 0) return 0;
+        return Math.round((Math.min(completed, total) / total) * 100);
+    }
+
+    /** Accent bar along the top of a project card — colour-coded so the bar carries
+     *  the project's status instead of being the same gradient on every card. */
+    getStatusBarClass(status: string): string {
+        switch (status) {
+            case 'active':
+                return 'bg-gradient-to-r from-emerald-400 to-emerald-600';
+            case 'completed':
+                return 'bg-gradient-to-r from-blue-400 to-blue-600';
+            case 'on_hold':
+                return 'bg-gradient-to-r from-amber-400 to-amber-600';
+            case 'planning':
+                return 'bg-gradient-to-r from-purple-400 to-purple-600';
+            default:
+                return 'bg-gradient-to-r from-slate-300 to-slate-400';
+        }
+    }
+
     getStatusClass(status: string): string {
         switch (status) {
             case 'active':
@@ -2236,6 +2282,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
         this._generalCharts.forEach((c) => c.dispose());
         if (this._resizeListener) {
             window.removeEventListener('resize', this._resizeListener);
