@@ -85,6 +85,13 @@ export interface TaskAttachment {
     fileBlob?: File | Blob;
 }
 
+export interface TaskSeenUser {
+    id: number;
+    name: string;
+    avatar?: string | null;
+    seen_at?: string;
+}
+
 export interface TaskChatMessage {
     id: number;
     sender_id?: number;
@@ -96,6 +103,7 @@ export interface TaskChatMessage {
     is_system?: boolean;
     attachments?: TaskAttachment[];
     created_at?: string;
+    seen_by?: TaskSeenUser[];
 }
 
 export interface TaskListResponse {
