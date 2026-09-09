@@ -174,12 +174,14 @@ jobs:
           services=()
           [ "$REBUILD_API" = "true" ] && services+=(api)
           [ "$REBUILD_WEB" = "true" ] && services+=(web)
-          [ "$RELOAD_GATEWAY" = "true" ] && services+=(load_balancer)
 
-          if [ "${#services[@]}" -eq 0 ]; then
+          if [ "${#services[@]}" -eq 0 ] && [ "$RELOAD_GATEWAY" != "true" ]; then
             echo "No services need to be recreated."
             exit 0
           fi
+
+          # Always restart load_balancer so Nginx immediately refreshes upstream container IPs
+          services+=(load_balancer)
 
           echo "Restarting services: ${services[*]}"
           docker compose \
