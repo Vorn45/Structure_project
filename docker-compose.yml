@@ -7,8 +7,7 @@ services:
     container_name: wfm_load_balancer
     restart: unless-stopped
     ports:
-      - "${PORT_HTTP:?PORT_HTTP is required in .env}:80"
-      - "${PORT_HTTPS:?PORT_HTTPS is required in .env}:443"
+      - "${PORT_HTTP:-4500}:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
