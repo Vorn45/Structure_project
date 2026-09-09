@@ -1115,8 +1115,8 @@ export class UserTaskComponent implements OnInit {
                 id: 1,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 text: hasAssignee && assigneeName
-                    ? `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
-                    : `ភារកិច្ច ${task.code || ('#PMS-' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
+                    ? `ភារកិច្ច ${task.code || ('#' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
+                    : `ភារកិច្ច ${task.code || ('#' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
                 time: '8:30 AM',
                 is_self: false,
                 is_system: true,
@@ -1283,9 +1283,9 @@ export class UserTaskComponent implements OnInit {
         } else {
             const dummyContent = `=====================================================
 ${file.name}
-Project: ${this.selectedTask()?.project_name || 'PMS Core'}
+Project: ${this.selectedTask()?.project_name || 'Core'}
 Task: ${this.selectedTask()?.title || 'Task Details'}
-Code: ${this.selectedTask()?.code || ('#PMS-' + this.selectedTask()?.id)}
+Code: ${this.selectedTask()?.code || ('#' + this.selectedTask()?.id)}
 Generated / Downloaded At: ${new Date().toLocaleString()}
 =====================================================
 

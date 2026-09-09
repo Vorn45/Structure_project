@@ -85,7 +85,7 @@ export interface DigitalCardDialogData {
                             <mat-icon svgIcon="mdi:contactless-payment" class="icon-size-6 text-blue-300"></mat-icon>
                         </div>
                         <span class="text-xs px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 uppercase tracking-wider font-mono">
-                            #PMS-2026
+                            #WFM-2026
                         </span>
                     </div>
 
