@@ -43,6 +43,24 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Record Start Time
+        id: start_time
+        run: echo "start_epoch=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Telegram Deployment Started
+        if: ${{ secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
+        continue-on-error: true
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: html
+          disable_web_page_preview: true
+          message: |
+            ⏳ <b>${{ github.actor }}</b> started deployment for <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>
+            📦 Branch: <code>${{ github.ref_name }}</code> | Commit: <a href="${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}">${{ github.sha }}</a>
+            🛠️ Rebuilding containers on Synology NAS...
+
       - name: Checkout main commit
         uses: actions/checkout@v6
         with:
@@ -190,3 +208,47 @@ jobs:
           rm -f .env
           rm -f "$RUNNER_TEMP/wms-production.env"
           rm -f "$RUNNER_TEMP/wms-changed-files.txt"
+
+      - name: Calculate Duration
+        if: always()
+        id: duration
+        run: |
+          end_epoch=$(date +%s)
+          start_epoch=${{ steps.start_time.outputs.start_epoch || 0 }}
+          diff=$((end_epoch - start_epoch))
+          mins=$(printf "%02d" $((diff / 60)))
+          secs=$(printf "%02d" $((diff % 60)))
+          echo "formatted=${mins}:${secs}" >> "$GITHUB_OUTPUT"
+
+      # ----------------------------------------------------
+      # Telegram: Success Notification
+      # ----------------------------------------------------
+      - name: Notify Telegram on Success
+        if: success() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        continue-on-error: true
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: html
+          disable_web_page_preview: true
+          message: |
+            ✅ <b>${{ github.event.repository.name }}</b> deployed successfully to Synology NAS!
+            🚀 Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of <b>${{ github.ref_name }}</b> passed in ${{ steps.duration.outputs.formatted }}.
+            🌐 Gateway: Port <code>4500</code>
+
+      # ----------------------------------------------------
+      # Telegram: Failure Notification
+      # ----------------------------------------------------
+      - name: Notify Telegram on Failure
+        if: failure() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        continue-on-error: true
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: html
+          disable_web_page_preview: true
+          message: |
+            ❌ <b>${{ github.event.repository.name }}</b> NAS deployment failed!
+            ⚠️ Pipeline <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">#${{ github.run_number }}</a> of <b>${{ github.ref_name }}</b> failed after ${{ steps.duration.outputs.formatted }}.
