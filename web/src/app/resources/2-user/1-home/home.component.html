@@ -76,95 +76,88 @@
 
                 <!-- 1. ថ្មី -->
                 <div
-                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[107px] sm:min-w-[117px] select-none">
                     <div class="flex items-center gap-2">
                         <mat-icon svgIcon="mdi:clipboard-text-outline"
                             class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0"></mat-icon>
                         <span>ថ្មី</span>
                     </div>
-                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                        <span>{{ overview()?.metrics?.pending_tasks || 4 }}</span>
-                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    <div class="font-medium tabular-nums">
+                        <span [ngClass]="(overview()?.my_task_counts?.new ?? 0) ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'">{{ overview()?.my_task_counts?.new ?? 0 }}</span>
                     </div>
                 </div>
 
                 <!-- 2. បញ្ជាក់ -->
                 <div
-                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[107px] sm:min-w-[117px] select-none">
                     <div class="flex items-center gap-2">
                         <mat-icon svgIcon="mdi:clipboard-check-outline"
                             class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0"></mat-icon>
                         <span>បញ្ជាក់</span>
                     </div>
-                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                        <span>{{ overview()?.metrics?.completed_tasks || 3 }}</span>
-                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    <div class="font-medium tabular-nums">
+                        <span [ngClass]="(overview()?.my_task_counts?.confirmed ?? 0) ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'">{{ overview()?.my_task_counts?.confirmed ?? 0 }}</span>
                     </div>
                 </div>
 
                 <!-- 3. មិនបញ្ជាក់ -->
                 <div
-                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[135px] sm:min-w-[145px] select-none">
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[117px] sm:min-w-[127px] select-none">
                     <div class="flex items-center gap-2">
                         <mat-icon svgIcon="mdi:clipboard-minus-outline"
                             class="icon-size-4.5 text-slate-600 dark:text-slate-400 shrink-0"></mat-icon>
                         <span>មិនបញ្ជាក់</span>
                     </div>
-                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                        <span>{{ overview()?.metrics?.pending_tasks || 4 }}</span>
-                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    <div class="font-medium tabular-nums">
+                        <span [ngClass]="(overview()?.my_task_counts?.unconfirmed ?? 0) ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'">{{ overview()?.my_task_counts?.unconfirmed ?? 0 }}</span>
                     </div>
                 </div>
 
                 <!-- 4. កំពុងធ្វើ -->
                 <div
-                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[130px] sm:min-w-[140px] select-none">
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[112px] sm:min-w-[122px] select-none">
                     <div class="flex items-center gap-2">
                         <mat-icon svgIcon="mdi:progress-clock" class="icon-size-4.5 text-amber-500 shrink-0"></mat-icon>
                         <span>កំពុងធ្វើ</span>
                     </div>
-                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                        <span>{{ overview()?.metrics?.in_progress_tasks || 5 }}</span>
-                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    <div class="font-medium tabular-nums">
+                        <span [ngClass]="(overview()?.my_task_counts?.in_progress ?? 0) ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'">{{ overview()?.my_task_counts?.in_progress ?? 0 }}</span>
                     </div>
                 </div>
 
                 <!-- 5. ស្នើសុំពិនិត្យ -->
                 <div
-                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[140px] sm:min-w-[155px] select-none">
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[122px] sm:min-w-[137px] select-none">
                     <div class="flex items-center gap-2">
                         <mat-icon svgIcon="mdi:magnify" class="icon-size-4.5 text-blue-500 shrink-0"></mat-icon>
                         <span>ស្នើសុំពិនិត្យ</span>
                     </div>
-                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                        <span>2</span>
-                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    <div class="font-medium tabular-nums">
+                        <span [ngClass]="(overview()?.my_task_counts?.in_review ?? 0) ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'">{{ overview()?.my_task_counts?.in_review ?? 0 }}</span>
                     </div>
                 </div>
 
                 <!-- 6. បើកឡើងវិញ -->
                 <div
-                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[135px] sm:min-w-[145px] select-none">
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[117px] sm:min-w-[127px] select-none">
                     <div class="flex items-center gap-2">
                         <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5 text-amber-500 shrink-0"></mat-icon>
                         <span>បើកឡើងវិញ</span>
                     </div>
-                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                        <span>1</span>
-                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    <div class="font-medium tabular-nums">
+                        <span [ngClass]="(overview()?.my_task_counts?.reopened ?? 0) ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'">{{ overview()?.my_task_counts?.reopened ?? 0 }}</span>
                     </div>
                 </div>
 
                 <!-- 7. បញ្ចប់ -->
                 <div
-                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[125px] sm:min-w-[135px] select-none">
+                    class="h-10 px-3.5 rounded-lg text-[14px] sm:text-[15px] font-normal flex-shrink-0 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center justify-between gap-3 shadow-2xs min-w-[107px] sm:min-w-[117px] select-none">
                     <div class="flex items-center gap-2">
                         <mat-icon svgIcon="mdi:check-circle" class="icon-size-4.5 text-emerald-500 shrink-0"></mat-icon>
                         <span>បញ្ចប់</span>
                     </div>
-                    <div class="flex items-center gap-1 font-medium text-slate-900 dark:text-white">
-                        <span>{{ overview()?.metrics?.completed_tasks || 3 }}</span>
-                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-3.5 text-slate-400"></mat-icon>
+                    <div class="font-medium tabular-nums">
+                        <span [ngClass]="(overview()?.my_task_counts?.done ?? 0) ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'">{{ overview()?.my_task_counts?.done ?? 0 }}</span>
                     </div>
                 </div>
 

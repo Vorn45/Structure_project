@@ -3,6 +3,17 @@ import { Injectable } from '@angular/core';
 import { env } from 'envs/env';
 import { Observable } from 'rxjs';
 
+export interface TaskStatusCounts {
+    all: number;
+    new: number;
+    confirmed: number;
+    unconfirmed: number;
+    in_progress: number;
+    in_review: number;
+    reopened: number;
+    done: number;
+}
+
 export interface HomeOverviewData {
     user: {
         id: number;
@@ -25,6 +36,10 @@ export interface HomeOverviewData {
         low_priority: number;
         completion_rate: number;
     };
+    /** Per-status totals for the signed-in user across every project — the same
+     *  shape the task list returns in `data.counts`, so the home pills and the
+     *  work page's status chips read from identical numbers. */
+    my_task_counts: TaskStatusCounts;
     recent_tasks: Array<{
         id: number;
         title: string;

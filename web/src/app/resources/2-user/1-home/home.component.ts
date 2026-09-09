@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -39,6 +41,18 @@ const DEFAULT_OVERVIEW_DATA: HomeOverviewData = {
         medium_priority: 7,
         low_priority: 3,
         completion_rate: 25,
+    },
+    // Zeroed on purpose: this placeholder renders before the overview request
+    // returns, and showing invented status counts there is worse than showing none.
+    my_task_counts: {
+        all: 0,
+        new: 0,
+        confirmed: 0,
+        unconfirmed: 0,
+        in_progress: 0,
+        in_review: 0,
+        reopened: 0,
+        done: 0,
     },
     recent_tasks: [
         {
@@ -105,7 +119,7 @@ const DEFAULT_OVERVIEW_DATA: HomeOverviewData = {
     ],
     templateUrl: './home.component.html',
 })
-export class UserHomeComponent implements OnInit {
+export class UserHomeComponent implements OnInit, OnDestroy {
     loading = signal<boolean>(false);
     overview = signal<HomeOverviewData | null>(DEFAULT_OVERVIEW_DATA);
     currentUser = signal<User | null>(null);
@@ -248,7 +262,10 @@ export class UserHomeComponent implements OnInit {
         private readonly _router: Router,
         private readonly _matDialog: MatDialog,
         private readonly _dialogConfigService: DialogConfigService,
+        private readonly _taskSocket: TaskSocketService,
     ) { }
+
+    private readonly _unsubscribeAll = new Subject<any>();
 
     ngOnInit(): void {
         const initialUser = this._userService.getUser();
@@ -263,6 +280,18 @@ export class UserHomeComponent implements OnInit {
         });
         this.generateMemberQrCode();
         this.loadOverview();
+
+        // The "ការងារខ្ញុំ" pills are counts of live task data, so refetch whenever
+        // any task changes — including ones moved by someone else on a board.
+        this._taskSocket
+            .taskUpdates()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(() => this.loadOverview());
+    }
+
+    ngOnDestroy(): void {
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     loadOverview(): void {

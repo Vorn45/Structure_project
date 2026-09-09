@@ -677,54 +677,90 @@ export class TaskService {
         return false;
     }
 
+    /** A query value only filters when it is set and is not one of the "no filter" sentinels the web sends. */
+    private isFilterActive(value?: string): boolean {
+        return Boolean(
+            value && value !== 'all' && value !== 'undefined' && value !== 'null' && value.trim(),
+        );
+    }
+
+    private matchesSearch(task: TaskItem, search?: string): boolean {
+        if (!this.isFilterActive(search)) return true;
+        const s = search!.trim().toLowerCase();
+        return Boolean(
+            (task.title && task.title.toLowerCase().includes(s)) ||
+            (task.description && task.description.toLowerCase().includes(s)) ||
+            (task.code && task.code.toLowerCase().includes(s)),
+        );
+    }
+
+    private matchesPriority(task: TaskItem, priority?: string): boolean {
+        if (!this.isFilterActive(priority)) return true;
+        return task.priority === priority;
+    }
+
+    private matchesProject(task: TaskItem, projectId?: string): boolean {
+        if (!this.isFilterActive(projectId)) return true;
+        const pid = projectId!.toLowerCase();
+        return Boolean(
+            (task.project_id && task.project_id.toLowerCase().includes(pid)) ||
+            (task.project_name && task.project_name.toLowerCase().includes(pid)),
+        );
+    }
+
+    private matchesMember(task: TaskItem, memberId?: string): boolean {
+        if (!this.isFilterActive(memberId)) return true;
+        const mId = Number(memberId);
+        return Boolean(
+            Number(task.assignee?.id) === mId ||
+            (task.assignees && task.assignees.some((a) => Number(a.id) === mId)) ||
+            Number(task.reporter?.id) === mId,
+        );
+    }
+
+    private matchesStatus(task: TaskItem, status?: string): boolean {
+        if (!this.isFilterActive(status)) return true;
+        return task.status === status;
+    }
+
+    /**
+     * Per-status totals for a set of tasks, keyed the way the web's status chips are.
+     * Shared by the task list and the home overview so both pages count identically.
+     */
+    countByStatus(tasks: TaskItem[]) {
+        return {
+            all: tasks.length,
+            new: tasks.filter((t) => t.status === TaskStatusEnum.NEW || (t.status as any) === 'pending').length,
+            confirmed: tasks.filter((t) => t.status === TaskStatusEnum.CONFIRMED).length,
+            unconfirmed: tasks.filter((t) => t.status === TaskStatusEnum.UNCONFIRMED || (t.status as any) === 'todo').length,
+            in_progress: tasks.filter((t) => t.status === TaskStatusEnum.IN_PROGRESS).length,
+            in_review: tasks.filter((t) => t.status === TaskStatusEnum.IN_REVIEW || (t.status as any) === 'review').length,
+            reopened: tasks.filter((t) => t.status === TaskStatusEnum.REOPENED).length,
+            done: tasks.filter((t) => t.status === TaskStatusEnum.DONE || (t.status as any) === 'completed').length,
+        };
+    }
+
+    /** Public wrapper so the home overview can scope its counts to the signed-in user. */
+    belongsToUser(task: TaskItem, user?: UserPayload): boolean {
+        return this.isTaskBelongToUser(task, user);
+    }
+
     async getTasks(user: UserPayload, query: QueryTasksDto) {
         await this.ensureStoreLoaded();
         const validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
-        let list = [...validTasks];
 
-        if (query.search && query.search !== 'undefined' && query.search !== 'null' && query.search.trim()) {
-            const s = query.search.trim().toLowerCase();
-            list = list.filter(
-                (t) =>
-                    (t.title && t.title.toLowerCase().includes(s)) ||
-                    (t.description && t.description.toLowerCase().includes(s)) ||
-                    (t.code && t.code.toLowerCase().includes(s)),
-            );
-        }
+        // Every active filter EXCEPT status. Each status chip shows how many tasks
+        // would match if that chip were picked, so the counted scope must not be
+        // narrowed by whichever status happens to be selected right now.
+        const countScope = validTasks.filter(
+            (t) =>
+                this.matchesSearch(t, query.search) &&
+                this.matchesPriority(t, query.priority) &&
+                this.matchesProject(t, query.project_id) &&
+                this.matchesMember(t, query.member_id),
+        );
 
-        if (query.status && query.status !== 'all' && query.status !== 'undefined' && query.status !== 'null') {
-            list = list.filter((t) => t.status === query.status);
-        }
-
-        if (query.priority && query.priority !== 'all' && query.priority !== 'undefined' && query.priority !== 'null') {
-            list = list.filter((t) => t.priority === query.priority);
-        }
-
-        if (query.project_id && query.project_id !== 'undefined' && query.project_id !== 'null' && query.project_id !== 'all') {
-            const pid = query.project_id.toLowerCase();
-            list = list.filter((t) =>
-                (t.project_id && t.project_id.toLowerCase().includes(pid)) ||
-                (t.project_name && t.project_name.toLowerCase().includes(pid))
-            );
-        }
-
-        if (query.member_id && query.member_id !== 'all' && query.member_id !== 'undefined' && query.member_id !== 'null') {
-            const mId = Number(query.member_id);
-            list = list.filter(
-                (t) =>
-                    Number(t.assignee?.id) === mId ||
-                    (t.assignees && t.assignees.some((a) => Number(a.id) === mId)) ||
-                    Number(t.reporter?.id) === mId,
-            );
-        }
-
-        const projectScope = (query.project_id && query.project_id !== 'all' && query.project_id !== 'undefined' && query.project_id !== 'null')
-            ? validTasks.filter((t) => {
-                const pid = query.project_id!.toLowerCase();
-                return (t.project_id && t.project_id.toLowerCase().includes(pid)) ||
-                       (t.project_name && t.project_name.toLowerCase().includes(pid));
-            })
-            : validTasks;
+        const list = countScope.filter((t) => this.matchesStatus(t, query.status));
 
         const limit = query.limit ? parseInt(query.limit, 10) : 100;
         const offset = query.offset ? parseInt(query.offset, 10) : 0;
@@ -738,16 +774,7 @@ export class TaskService {
                 total: list.length,
                 limit,
                 offset,
-                counts: {
-                    all: projectScope.length,
-                    new: projectScope.filter((t) => t.status === TaskStatusEnum.NEW || (t.status as any) === 'pending').length,
-                    confirmed: projectScope.filter((t) => t.status === TaskStatusEnum.CONFIRMED).length,
-                    unconfirmed: projectScope.filter((t) => t.status === TaskStatusEnum.UNCONFIRMED || (t.status as any) === 'todo').length,
-                    in_progress: projectScope.filter((t) => t.status === TaskStatusEnum.IN_PROGRESS).length,
-                    in_review: projectScope.filter((t) => t.status === TaskStatusEnum.IN_REVIEW || (t.status as any) === 'review').length,
-                    reopened: projectScope.filter((t) => t.status === TaskStatusEnum.REOPENED).length,
-                    done: projectScope.filter((t) => t.status === TaskStatusEnum.DONE || (t.status as any) === 'completed').length,
-                },
+                counts: this.countByStatus(countScope),
             },
         };
     }

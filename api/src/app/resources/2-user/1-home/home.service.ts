@@ -62,6 +62,13 @@ export class HomeService {
         const allTasks = this.taskService.getRawTasks();
         const allProjects = this.planService.getRawProjects();
 
+        // "ការងារខ្ញុំ" on the home page means this user's tasks across every project.
+        // Counted with the task service's own helper so the home pills and the work
+        // page's status chips (member = me, project = all) always agree.
+        const my_task_counts = this.taskService.countByStatus(
+            allTasks.filter((t) => this.taskService.belongsToUser(t, user)),
+        );
+
         // Dynamically compute real-time task metrics
         const total_tasks = allTasks.length;
         const pending_tasks = allTasks.filter(
@@ -207,6 +214,7 @@ export class HomeService {
                     low_priority,
                     completion_rate,
                 },
+                my_task_counts,
                 recent_tasks,
                 active_projects,
             },

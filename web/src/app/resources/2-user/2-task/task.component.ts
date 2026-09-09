@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +9,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { UserService } from 'app/core/user/user.service';
+import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { CreateTaskDialogComponent } from '../../3-admin/3-projects/dialogs/create-task-dialog.component';
 import { TaskDrawerComponent } from './task-drawer/task-drawer.component';
@@ -88,7 +90,7 @@ import { UserTaskService } from './task.service';
         `,
     ],
 })
-export class UserTaskComponent implements OnInit {
+export class UserTaskComponent implements OnInit, OnDestroy {
     taskTypes = TASK_TYPES_LIST;
 
     getTaskTypeInfo(type?: string): TaskTypeOption {
@@ -184,6 +186,8 @@ export class UserTaskComponent implements OnInit {
         });
     });
 
+    private readonly _unsubscribeAll = new Subject<any>();
+
     constructor(
         private readonly _taskService: UserTaskService,
         private readonly _userService: UserService,
@@ -191,6 +195,7 @@ export class UserTaskComponent implements OnInit {
         private readonly _router: Router,
         private readonly _matDialog: MatDialog,
         private readonly _dialogConfigService: DialogConfigService,
+        private readonly _taskSocket: TaskSocketService,
     ) {}
 
     getAvatarUrl(): string {
@@ -214,6 +219,14 @@ export class UserTaskComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadTeamMembers();
+
+        // Anyone moving a task on any board changes what these chips should read,
+        // so refresh from the server rather than guessing at the delta locally.
+        this._taskSocket
+            .taskUpdates()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(() => this.loadTasks());
+
         this._route.queryParams.subscribe((params) => {
             if (params['status']) {
                 this.activeStatus.set(params['status']);
@@ -228,31 +241,41 @@ export class UserTaskComponent implements OnInit {
         });
     }
 
+    ngOnDestroy(): void {
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
+
     computeCounts(tasks: TaskItem[], apiCounts?: any): void {
-        const isLocallyFiltered = Boolean(this.searchQuery() || this.selectedMemberFilter() !== 'all');
-        if (isLocallyFiltered) {
+        // The API counts over every active filter except status, so they stay correct
+        // while a status chip is selected. Recomputing from `tasks` here cannot do
+        // that — `tasks` is already narrowed to the active status, which would zero
+        // every other chip — so the local tally is only a fallback for a missing
+        // `counts` block, and then only meaningful when no status filter is on.
+        if (apiCounts) {
             this.counts.set({
-                all: tasks.length,
-                new: tasks.filter((t) => t.status === 'new' || t.status === 'pending').length,
-                confirmed: tasks.filter((t) => t.status === 'confirmed').length,
-                unconfirmed: tasks.filter((t) => t.status === 'unconfirmed' || t.status === 'todo').length,
-                in_progress: tasks.filter((t) => t.status === 'in_progress').length,
-                in_review: tasks.filter((t) => t.status === 'in_review' || t.status === 'review').length,
-                reopened: tasks.filter((t) => t.status === 'reopened').length,
-                done: tasks.filter((t) => t.status === 'done' || t.status === 'completed').length,
+                all: apiCounts.all ?? 0,
+                new: apiCounts.new ?? 0,
+                confirmed: apiCounts.confirmed ?? 0,
+                unconfirmed: apiCounts.unconfirmed ?? 0,
+                in_progress: apiCounts.in_progress ?? 0,
+                in_review: apiCounts.in_review ?? 0,
+                reopened: apiCounts.reopened ?? 0,
+                done: apiCounts.done ?? 0,
             });
-        } else {
-            this.counts.set({
-                all: apiCounts?.all ?? tasks.length,
-                new: apiCounts?.new ?? tasks.filter((t) => t.status === 'new' || t.status === 'pending').length,
-                confirmed: apiCounts?.confirmed ?? tasks.filter((t) => t.status === 'confirmed').length,
-                unconfirmed: apiCounts?.unconfirmed ?? tasks.filter((t) => t.status === 'unconfirmed' || t.status === 'todo').length,
-                in_progress: apiCounts?.in_progress ?? tasks.filter((t) => t.status === 'in_progress').length,
-                in_review: apiCounts?.in_review ?? tasks.filter((t) => t.status === 'in_review' || t.status === 'review').length,
-                reopened: apiCounts?.reopened ?? tasks.filter((t) => t.status === 'reopened').length,
-                done: apiCounts?.done ?? tasks.filter((t) => t.status === 'done' || t.status === 'completed').length,
-            });
+            return;
         }
+
+        this.counts.set({
+            all: tasks.length,
+            new: tasks.filter((t) => t.status === 'new' || t.status === 'pending').length,
+            confirmed: tasks.filter((t) => t.status === 'confirmed').length,
+            unconfirmed: tasks.filter((t) => t.status === 'unconfirmed' || t.status === 'todo').length,
+            in_progress: tasks.filter((t) => t.status === 'in_progress').length,
+            in_review: tasks.filter((t) => t.status === 'in_review' || t.status === 'review').length,
+            reopened: tasks.filter((t) => t.status === 'reopened').length,
+            done: tasks.filter((t) => t.status === 'done' || t.status === 'completed').length,
+        });
     }
 
     isTaskBelongToCurrentUser(task: TaskItem): boolean {
