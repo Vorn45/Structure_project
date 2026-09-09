@@ -49,7 +49,7 @@ import { UserTaskService } from './task.service';
         `
             :host {
                 font-family: 'Kantumruy Pro', sans-serif !important;
-                font-size: 16px;
+                font-size: 14px;
                 display: flex;
                 flex-direction: column;
                 flex: 1 1 auto;
@@ -71,25 +71,15 @@ import { UserTaskService } from './task.service';
                 width: 0 !important;
                 height: 0 !important;
             }
-            /* Sleek modern vertical scrollbar for column tasks */
+            /* Hide vertical scrollbar for column tasks while preserving full smooth scrolling */
             .kanban-column-scroll {
-                scrollbar-width: thin !important;
-                scrollbar-color: rgba(156, 163, 175, 0.45) transparent !important;
-                -ms-overflow-style: auto !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
             }
             .kanban-column-scroll::-webkit-scrollbar {
-                display: block !important;
-                width: 5px !important;
-            }
-            .kanban-column-scroll::-webkit-scrollbar-track {
-                background: transparent !important;
-            }
-            .kanban-column-scroll::-webkit-scrollbar-thumb {
-                background: rgba(156, 163, 175, 0.4) !important;
-                border-radius: 9999px !important;
-            }
-            .kanban-column-scroll::-webkit-scrollbar-thumb:hover {
-                background: rgba(107, 114, 128, 0.7) !important;
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
             }
             ::ng-deep .cdk-drag-preview {
                 box-sizing: border-box;
@@ -152,6 +142,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     viewMode = signal<'grid' | 'kanban' | 'list'>('kanban');
     activeStatus = signal<string>('all');
     activePriority = signal<string>('all');
+    // Set to the signed-in user in ngOnInit so the page opens on their own tasks;
+    // picking "ទាំងអស់ (All Members)" widens it to the whole team.
     selectedMemberFilter = signal<number | 'all'>('all');
     selectedProjectId = signal<string | 'all'>('all');
     searchQuery = signal<string>('');
@@ -226,6 +218,11 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         return '/images/placeholder/avatar.jpg';
     }
 
+    getCurrentActorName(): string {
+        const user = this._userService.getUser();
+        return (user?.kh_name || user?.name || user?.en_name || '').trim();
+    }
+
     loadTeamMembers(): void {
         this._taskService.getMembers().subscribe({
             next: (res) => {
@@ -238,6 +235,14 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // Default this page to the signed-in user's own tasks. Set before the
+        // queryParams subscription below fires, so the first fetch is already
+        // scoped and the board never flashes the whole team's tasks.
+        const currentUserId = this._userService.getUser()?.id;
+        if (currentUserId != null) {
+            this.selectedMemberFilter.set(currentUserId);
+        }
+
         this.loadTeamMembers();
 
         // Anyone moving a task on any board changes what these chips should read,
@@ -532,13 +537,15 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     updateTaskStatus(task: TaskItem, newStatus: string): void {
         const oldStatus = task.status;
         const targetStatus = newStatus as TaskStatus;
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
 
         if (this.selectedTask()?.id === task.id) {
             this.selectedTask.update((t) => (t ? { ...t, status: targetStatus } : null));
             const systemMsg: TaskChatMessage = {
                 id: Date.now(),
                 sender_name: 'ប្រព័ន្ធ (System)',
-                text: `បានប្តូរស្ថានភាពពី "${this.getStatusLabel(oldStatus)}" ទៅជា "${this.getStatusLabel(targetStatus)}"`,
+                text: `${actorPrefix}បានប្តូរស្ថានភាពពី "${this.getStatusLabel(oldStatus)}" ទៅជា "${this.getStatusLabel(targetStatus)}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
             };
@@ -578,13 +585,15 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     updateTaskPriority(task: TaskItem, newPriority: string): void {
         const oldPriority = task.priority;
         const targetPriority = newPriority as TaskPriority;
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
 
         if (this.selectedTask()?.id === task.id) {
             this.selectedTask.update((t) => (t ? { ...t, priority: targetPriority } : null));
             const systemMsg: TaskChatMessage = {
                 id: Date.now(),
                 sender_name: 'ប្រព័ន្ធ (System)',
-                text: `បានប្តូរអាទិភាពពី "${this.getPriorityLabel(oldPriority)}" ទៅជា "${this.getPriorityLabel(targetPriority)}"`,
+                text: `${actorPrefix}បានប្តូរអាទិភាពពី "${this.getPriorityLabel(oldPriority)}" ទៅជា "${this.getPriorityLabel(targetPriority)}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
             };
@@ -621,6 +630,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     updateTaskType(task: TaskItem, newType: string): void {
         const oldType = task.task_type;
         const targetType = newType;
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
 
         if (this.selectedTask()?.id === task.id) {
             this.selectedTask.update((t) => (t ? { ...t, task_type: targetType } : null));
@@ -629,7 +640,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             const systemMsg: TaskChatMessage = {
                 id: Date.now(),
                 sender_name: 'ប្រព័ន្ធ (System)',
-                text: `បានប្តូរប្រភេទការងារពី "${oldLabel}" ទៅជា "${newLabel}"`,
+                text: `${actorPrefix}បានប្តូរប្រភេទការងារពី "${oldLabel}" ទៅជា "${newLabel}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
             };
@@ -657,13 +668,15 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
     updateTaskDueDate(task: TaskItem, newDateStr: string | null): void {
         const formatted = newDateStr ? this.formatDate(newDateStr) : 'សម្អាត';
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
 
         if (this.selectedTask()?.id === task.id) {
             this.selectedTask.update((t) => (t ? { ...t, due_date: newDateStr } : null));
             const systemMsg: TaskChatMessage = {
                 id: Date.now(),
                 sender_name: 'ប្រព័ន្ធ (System)',
-                text: newDateStr ? `បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ ${formatted}` : `បានសម្អាតកាលបរិច្ឆេទកំណត់`,
+                text: newDateStr ? `${actorPrefix}បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ ${formatted}` : `${actorPrefix}បានសម្អាតកាលបរិច្ឆេទកំណត់`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
             };
@@ -694,6 +707,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         const exists = currentAssignees.some(
             (a) => Number(a.id) === Number(member.id) || (a.name && member.name && a.name.trim().toLowerCase() === member.name.trim().toLowerCase())
         );
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
 
         let updatedAssignees: TaskMember[];
         let actionNotice = '';
@@ -703,8 +718,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 (a) => Number(a.id) !== Number(member.id) && !(a.name && member.name && a.name.trim().toLowerCase() === member.name.trim().toLowerCase())
             );
             actionNotice = updatedAssignees.length > 0
-                ? `បានដកចេញអ្នកទទួលបន្ទុក៖ "${member.name}"`
-                : `បានដកចេញអ្នកទទួលបន្ទុកទាំងអស់ (គ្មានអ្នកទទួលបន្ទុក)`;
+                ? `${actorPrefix}បានដកចេញអ្នកទទួលបន្ទុក៖ "${member.name}"`
+                : `${actorPrefix}បានដកចេញអ្នកទទួលបន្ទុកទាំងអស់ (គ្មានអ្នកទទួលបន្ទុក)`;
         } else {
             const newMember: TaskMember = {
                 id: member.id,
@@ -715,7 +730,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 colorClass: member.colorClass || 'bg-blue-600',
             };
             updatedAssignees = [...currentAssignees, newMember];
-            actionNotice = `បានបន្ថែមអ្នកទទួលបន្ទុក៖ "${member.name}"`;
+            actionNotice = `${actorPrefix}បានបន្ថែមអ្នកទទួលបន្ទុក៖ "${member.name}"`;
         }
 
         const updatedTask: TaskItem = {
@@ -756,6 +771,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     updateTaskReporter(task: TaskItem, member: TaskMember): void {
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
         const newReporter: TaskMember = {
             id: member.id,
             name: member.name,
@@ -779,7 +796,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         this.appendChatMessage(task.id, {
             id: Date.now(),
             sender_name: 'ប្រព័ន្ធ (System)',
-            text: `បានប្តូរអ្នកបង្កើតទៅកាន់៖ "${member.name}"`,
+            text: `${actorPrefix}បានប្តូរអ្នកបង្កើតទៅកាន់៖ "${member.name}"`,
             time: nowTime,
             is_self: false,
             is_system: true,
@@ -1184,6 +1201,15 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         ];
 
         if (hasAssignee && assigneeName) {
+            const assignees = task.assignees && task.assignees.length > 0 
+                ? task.assignees 
+                : (task.assignee ? [task.assignee] : []);
+            const seenList = assignees.map((a) => ({
+                id: Number(a.id),
+                name: a.name,
+                avatar: a.avatar || null,
+            }));
+
             initialMessages.push({
                 id: 2,
                 sender_id: reporterId,
@@ -1192,6 +1218,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task.title}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
                 time: '8:45 AM',
                 is_self: isReporterMe,
+                seen_by: isReporterMe ? seenList : undefined,
             });
         }
 
@@ -1227,7 +1254,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                             }
                         }
 
-                        return { ...c, time: displayTime, is_self: isSelf };
+                        return { ...c, time: displayTime, is_self: isSelf, seen_by: c.seen_by || [] };
                     });
 
                     this.chatMessages.set(mapped);
@@ -1264,12 +1291,14 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
         const msg: TaskChatMessage = {
             id: tempId,
+            sender_id: user?.id,
             sender_name: user?.kh_name || user?.en_name || 'អ្នក (You)',
             sender_avatar: userAvatar,
             text: text || (attachments.length > 0 ? 'បានផ្ញើឯកសារ' : ''),
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             is_self: true,
             attachments: attachments.length > 0 ? [...attachments] : undefined,
+            seen_by: [],
         };
 
         if (currentTask) {
@@ -1290,7 +1319,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                         const serverComment = res.data;
                         this.chatMessages.update((msgs) => {
                             const updated = msgs.map((m) =>
-                                m.id === tempId ? { ...m, id: serverComment.id, created_at: serverComment.created_at } : m
+                                m.id === tempId ? { ...m, id: serverComment.id, created_at: serverComment.created_at, seen_by: serverComment.seen_by || [] } : m
                             );
                             this.taskChatHistoryMap.set(currentTask.id, updated);
                             return updated;

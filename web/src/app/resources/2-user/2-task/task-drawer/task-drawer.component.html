@@ -626,17 +626,28 @@
                             {{ msg.text }}
                         </div>
 
-                        <!-- Timestamp and Read Receipt Avatars -->
+                        <!-- Timestamp and Real Seen Read Receipts -->
                         <div class="flex items-center gap-1.5 pt-0.5 pr-1">
                             <span class="text-[10px] text-slate-400">{{ msg.time }}</span>
-                            <div class="flex items-center -space-x-1 ml-1">
-                                <div class="w-3.5 h-3.5 rounded-full border border-white dark:border-[#090f1e] bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden" title="Choeng Kimla">
-                                    <mat-icon svgIcon="mdi:account" class="!w-2.5 !h-2.5 text-slate-400 dark:text-slate-300"></mat-icon>
+
+                            <!-- Real Seen User Avatars -->
+                            <ng-container *ngIf="msg.seen_by && msg.seen_by.length > 0">
+                                <div class="flex items-center -space-x-1.5 ml-1" [matTooltip]="'បានមើលដោយ៖ ' + getSeenTooltip(msg.seen_by)">
+                                    <div *ngFor="let viewer of msg.seen_by.slice(0, 3)"
+                                        class="w-4.5 h-4.5 min-w-[18px] min-h-[18px] max-w-[18px] max-h-[18px] rounded-full border-1.5 border-white dark:border-[#090f1e] overflow-hidden shadow-2xs cursor-pointer bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                                        <img [src]="getViewerAvatar(viewer)" [alt]="viewer.name" class="w-full h-full object-cover" />
+                                    </div>
+                                    <div *ngIf="msg.seen_by.length > 3"
+                                        class="w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full border-1.5 border-white dark:border-[#090f1e] bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center -ml-1 shadow-2xs">
+                                        +{{ msg.seen_by.length - 3 }}
+                                    </div>
                                 </div>
-                                <div class="w-3.5 h-3.5 rounded-full border border-white dark:border-[#090f1e] bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden" title="Pum Brusmuny">
-                                    <mat-icon svgIcon="mdi:account" class="!w-2.5 !h-2.5 text-slate-400 dark:text-slate-300"></mat-icon>
-                                </div>
-                            </div>
+                            </ng-container>
+
+                            <!-- Single check icon if not yet seen -->
+                            <ng-container *ngIf="!msg.seen_by || msg.seen_by.length === 0">
+                                <mat-icon svgIcon="mdi:check" class="!w-3 !h-3 text-slate-400 dark:text-slate-500" [matTooltip]="'បានផ្ញើ (Sent)'"></mat-icon>
+                            </ng-container>
                         </div>
                     </div>
                 </ng-container>

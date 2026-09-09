@@ -55,6 +55,20 @@ export interface TaskItem {
     updated_at: string;
 }
 
+export interface TaskCommentItem {
+    id: number;
+    sender_id: number;
+    sender_name: string;
+    sender_avatar: string | null;
+    text: string;
+    time: string;
+    is_self: boolean;
+    is_system?: boolean;
+    attachments?: Array<{ name: string; size: string; url?: string; type?: string; isImage?: boolean; textContent?: string }>;
+    created_at: string;
+    seen_by?: Array<{ id: number; name: string; avatar?: string | null; seen_at?: string }>;
+}
+
 const INITIAL_TASKS: TaskItem[] = [
     {
         id: 1,
@@ -243,18 +257,7 @@ const INITIAL_TASKS: TaskItem[] = [
 @Injectable()
 export class TaskService {
     private tasks: TaskItem[] = [...INITIAL_TASKS];
-    private taskComments = new Map<number, Array<{
-        id: number;
-        sender_id: number;
-        sender_name: string;
-        sender_avatar: string | null;
-        text: string;
-        time: string;
-        is_self: boolean;
-        is_system?: boolean;
-        attachments?: Array<{ name: string; size: string; url?: string; type?: string; isImage?: boolean; textContent?: string }>;
-        created_at: string;
-    }>>();
+    private taskComments = new Map<number, TaskCommentItem[]>();
     private readonly storeFilePath = path.join(process.cwd(), 'storage', 'tasks_data_store.json');
 
     private isStoreLoaded = false;
@@ -357,18 +360,7 @@ export class TaskService {
         }
     }
 
-    private ensureTaskComments(taskId: number): Array<{
-        id: number;
-        sender_id: number;
-        sender_name: string;
-        sender_avatar: string | null;
-        text: string;
-        time: string;
-        is_self: boolean;
-        is_system?: boolean;
-        attachments?: Array<{ name: string; size: string; url?: string; type?: string; isImage?: boolean; textContent?: string }>;
-        created_at: string;
-    }> {
+    private ensureTaskComments(taskId: number): TaskCommentItem[] {
         let comments = this.taskComments.get(taskId);
         const task = this.tasks.find((t) => t.id === taskId);
         const reporterName = task?.reporter?.name || 'អ្នកគ្រប់គ្រង';
@@ -396,6 +388,10 @@ export class TaskService {
 
             // Default intro assignment message from real reporter to assignee
             if (hasAssignee && assigneeName) {
+                const seenList = (task?.assignees && task.assignees.length > 0)
+                    ? task.assignees.map((a: any) => ({ id: a.id, name: a.name, avatar: a.avatar || null }))
+                    : (task?.assignee ? [{ id: task.assignee.id, name: task.assignee.name, avatar: task.assignee.avatar || null }] : []);
+
                 initialComments.push({
                     id: 2,
                     sender_id: reporterId,
@@ -405,6 +401,7 @@ export class TaskService {
                     time: '8:45 AM',
                     is_self: false,
                     created_at: task?.created_at || new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                    seen_by: seenList,
                 });
             }
 
@@ -412,6 +409,10 @@ export class TaskService {
             this.taskComments.set(taskId, comments);
             this.saveStore();
         } else if (task && hasAssignee && assigneeName) {
+            const seenList = (task?.assignees && task.assignees.length > 0)
+                ? task.assignees.map((a: any) => ({ id: a.id, name: a.name, avatar: a.avatar || null }))
+                : (task?.assignee ? [{ id: task.assignee.id, name: task.assignee.name, avatar: task.assignee.avatar || null }] : []);
+
             // Ensure default intro exists and is updated with real task info
             const introIndex = comments.findIndex(c => !c.is_system && typeof c.text === 'string' && c.text.includes('ខ្ញុំបានចាត់តាំងភារកិច្ច'));
             if (introIndex >= 0) {
@@ -419,6 +420,9 @@ export class TaskService {
                 comments[introIndex].sender_avatar = reporterAvatar;
                 comments[introIndex].sender_id = reporterId;
                 comments[introIndex].text = `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task?.title || 'ការងារ'}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`;
+                if (!comments[introIndex].seen_by || comments[introIndex].seen_by.length === 0) {
+                    comments[introIndex].seen_by = seenList;
+                }
                 this.taskComments.set(taskId, comments);
                 this.saveStore();
             } else {
@@ -431,6 +435,7 @@ export class TaskService {
                     time: '8:45 AM',
                     is_self: false,
                     created_at: task?.created_at || new Date(Date.now() - 3600000 * 3.5).toISOString(),
+                    seen_by: seenList,
                 };
                 // Insert after system message or at start
                 if (comments.length > 0 && comments[0].is_system) {
@@ -581,10 +586,10 @@ export class TaskService {
         ];
 
         const defaultFallbacks = [
-            { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600', phone: '010843612' },
-            { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600', phone: '087280875' },
-            { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600', phone: '067776682' },
-            { id: 67, name: 'Phuong Sovannara', name_en: 'Phuong Sovannara', name_kh: 'ភួង សុវណ្ណារ៉ា', role: 'Developer', email: 'phuongsovannara@gmail.com', avatar: null, colorClass: 'bg-amber-600', phone: '011242425' },
+            { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', phone: '010843612' },
+            { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', phone: '087280875' },
+            { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', phone: '067776682' },
+            { id: 67, name: 'Phuong Sovannara', name_en: 'Phuong Sovannara', name_kh: 'ភួង សុវណ្ណារ៉ា', role: 'Developer', email: 'phuongsovannara@gmail.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', phone: '011242425' },
         ];
 
         let mapped = dbUsers.map((u, idx) => {
@@ -594,7 +599,7 @@ export class TaskService {
                 u.user_roles?.[0]?.role?.slug ||
                 'សមាជិក (Member)';
 
-            let avatarUrl: string | null = null;
+            let avatarUrl: string | null = '/images/placeholder/avatar.jpg';
             if (u.avatar_file?.uri) {
                 const domain = (u.avatar_file.file_domain || '').replace(/\/+$/, '');
                 const uri = u.avatar_file.uri.replace(/^\/+/, '');
@@ -883,7 +888,7 @@ export class TaskService {
             code: formattedCode,
             title: dto.title,
             description: dto.description || '',
-            module: 'Task Management',
+            module: (dto as any).module || dto.title || 'Task Management',
             task_type: dto.task_type || 'feature',
             status: dto.status || TaskStatusEnum.NEW,
             priority: dto.priority || TaskPriorityEnum.MEDIUM,
@@ -968,9 +973,7 @@ export class TaskService {
     }
 
     private getTaskContextLine(task: TaskItem): string {
-        const prefix = this.getProjectPrefix(task);
-        const label = task.module || task.title;
-        return `${prefix}: ${label}`;
+        return (task.title || task.code || 'Task').trim();
     }
 
     private getStatusLabel(status?: string): string {
@@ -1153,6 +1156,8 @@ export class TaskService {
         // Record action history in task comments
         const comments = this.ensureTaskComments(id);
         const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const updaterName = (user?.name_kh || user?.name_en || '').trim() || 'Piseth Panhavorn';
+        const actorPrefix = updaterName ? `${updaterName} ` : '';
 
         if (dto.task_type && dto.task_type !== current.task_type) {
             comments.push({
@@ -1160,7 +1165,7 @@ export class TaskService {
                 sender_id: 0,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 sender_avatar: null,
-                text: `បានប្តូរប្រភេទការងារពី "${this.getTaskTypeLabel(current.task_type)}" ទៅជា "${this.getTaskTypeLabel(dto.task_type)}"`,
+                text: `${actorPrefix}បានប្តូរប្រភេទការងារពី "${this.getTaskTypeLabel(current.task_type)}" ទៅជា "${this.getTaskTypeLabel(dto.task_type)}"`,
                 time: nowTime,
                 is_self: false,
                 is_system: true,
@@ -1174,7 +1179,7 @@ export class TaskService {
                 sender_id: 0,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 sender_avatar: null,
-                text: `បានប្តូរស្ថានភាពពី "${this.getStatusLabel(current.status)}" ទៅជា "${this.getStatusLabel(dto.status)}"`,
+                text: `${actorPrefix}បានប្តូរស្ថានភាពពី "${this.getStatusLabel(current.status)}" ទៅជា "${this.getStatusLabel(dto.status)}"`,
                 time: nowTime,
                 is_self: false,
                 is_system: true,
@@ -1188,7 +1193,7 @@ export class TaskService {
                 sender_id: 0,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 sender_avatar: null,
-                text: `បានប្តូរអាទិភាពពី "${this.getPriorityLabel(current.priority)}" ទៅជា "${this.getPriorityLabel(dto.priority)}"`,
+                text: `${actorPrefix}បានប្តូរអាទិភាពពី "${this.getPriorityLabel(current.priority)}" ទៅជា "${this.getPriorityLabel(dto.priority)}"`,
                 time: nowTime,
                 is_self: false,
                 is_system: true,
@@ -1212,7 +1217,7 @@ export class TaskService {
                 sender_id: 0,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 sender_avatar: null,
-                text: dto.due_date ? `បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ ${formatted}` : `បានសម្អាតកាលបរិច្ឆេទកំណត់`,
+                text: dto.due_date ? `${actorPrefix}បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ ${formatted}` : `${actorPrefix}បានសម្អាតកាលបរិច្ឆេទកំណត់`,
                 time: nowTime,
                 is_self: false,
                 is_system: true,
@@ -1231,7 +1236,7 @@ export class TaskService {
                 sender_id: 0,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 sender_avatar: null,
-                text: `បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ${names}`,
+                text: `${actorPrefix}បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ${names}`,
                 time: nowTime,
                 is_self: false,
                 is_system: true,
@@ -1245,7 +1250,7 @@ export class TaskService {
                 sender_id: 0,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 sender_avatar: null,
-                text: `បានចាត់តាំងភារកិច្ចទៅកាន់៖ ${dto.assignee.name}`,
+                text: `${actorPrefix}បានចាត់តាំងភារកិច្ចទៅកាន់៖ ${dto.assignee.name}`,
                 time: nowTime,
                 is_self: false,
                 is_system: true,
@@ -1260,7 +1265,7 @@ export class TaskService {
                 sender_id: 0,
                 sender_name: 'ប្រព័ន្ធ (System)',
                 sender_avatar: null,
-                text: `បានប្តូរអ្នកបង្កើតទៅកាន់៖ "${dto.reporter.name}"`,
+                text: `${actorPrefix}បានប្តូរអ្នកបង្កើតទៅកាន់៖ "${dto.reporter.name}"`,
                 time: nowTime,
                 is_self: false,
                 is_system: true,
@@ -1275,7 +1280,6 @@ export class TaskService {
         this.saveStore();
 
         // Send Telegram Notification (Exact PMS format)
-        const updaterName = user.name_kh || user.name_en || 'Piseth Panhavorn';
         const targetIds = [
             user.id,
             updated.reporter?.id,
@@ -1407,6 +1411,33 @@ export class TaskService {
 
         const comments = this.ensureTaskComments(taskId);
 
+        // Record current viewer into seen_by for comments sent by others
+        if (user && user.id) {
+            const viewerName = (user.name_kh || user.name_en || '').trim() || 'User';
+            const currentViewer = {
+                id: user.id,
+                name: viewerName,
+                avatar: (user.avatar as any)?.uri || null,
+                seen_at: new Date().toISOString(),
+            };
+            let changed = false;
+            for (const c of comments) {
+                if (!c.is_system && c.sender_id && c.sender_id !== user.id) {
+                    if (!Array.isArray(c.seen_by)) {
+                        c.seen_by = [];
+                    }
+                    if (!c.seen_by.some((s: any) => s.id === user.id)) {
+                        c.seen_by.push(currentViewer);
+                        changed = true;
+                    }
+                }
+            }
+            if (changed) {
+                this.taskComments.set(taskId, comments);
+                this.saveStore();
+            }
+        }
+
         const userNameEn = (user?.name_en || '').toLowerCase().trim();
         const userNameKh = (user?.name_kh || '').toLowerCase().trim();
         const userEmail = (user?.email || '').toLowerCase().trim();
@@ -1432,6 +1463,7 @@ export class TaskService {
                     return {
                         ...c,
                         is_self: isSelf,
+                        seen_by: Array.isArray(c.seen_by) ? c.seen_by : [],
                     };
                 }),
             },
@@ -1457,6 +1489,7 @@ export class TaskService {
             is_system: false,
             attachments: attachments || undefined,
             created_at: new Date().toISOString(),
+            seen_by: [],
         };
 
         comments.push(newComment);

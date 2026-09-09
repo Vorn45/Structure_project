@@ -8,17 +8,13 @@
         <!-- ========================================================================= -->
         <!-- SCENARIO A: ALL PROJECTS OVERVIEW (WHEN NO PROJECT IS SELECTED)           -->
         <!-- ========================================================================= -->
-        <div *ngIf="!selectedProject()" class="flex flex-col flex-1 p-4 sm:p-6 space-y-5">
+        <div *ngIf="!selectedProject()" class="flex flex-col flex-1 p-4 sm:p-5 space-y-4">
             <!-- Top Header Row -->
             <div class="flex items-center justify-between gap-4">
                 <!-- Left: Home Icon, Title, and Count Pill -->
                 <div class="flex items-center gap-3 shrink-0">
-                    <button (click)="navigateHome()"
-                        class="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center cursor-pointer"
-                        [matTooltip]="'ទំព័រដើម (Home)'">
-                        <mat-icon svgIcon="mdi:home-outline"
-                            class="icon-size-5 text-slate-500 dark:text-slate-400"></mat-icon>
-                    </button>
+                    <mat-icon svgIcon="mdi:file-document-outline"
+                    class="icon-size-5 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
 
                     <span class="text-[17px] font-medium text-slate-800 dark:text-white">គម្រោងទាំងអស់</span>
 
@@ -28,22 +24,32 @@
                     </span>
                 </div>
 
-                <!-- Right: Create Project, Refresh & More Menu -->
+                <!-- Right: Create Project & More Menu.
+                     No refresh button: the list re-fetches itself on task and project
+                     events from the realtime socket, so there is nothing to press. -->
                 <div class="flex items-center gap-2 shrink-0">
+                    <!-- Search sits on the header row with the primary action; the row
+                         below is left to the status filters alone. -->
+                    <div class="relative flex items-center">
+                        <mat-icon svgIcon="mdi:magnify"
+                            class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
+                        <input type="text" placeholder="ស្វែងរកគម្រោង..." [ngModel]="searchQuery()"
+                            (ngModelChange)="searchQuery.set($event); onSearchChange()"
+                            class="w-40 sm:w-56 h-9 pl-9 pr-3 text-[14px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
+                    </div>
+
                     <button type="button" (click)="openCreateProjectModal()"
                         class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
                         <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
                         <span>បង្កើតគម្រោង</span>
                     </button>
 
-                    <button type="button" (click)="loadPlans()"
-                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer"
-                        [matTooltip]="'ផ្ទុកឡើងវិញ (Refresh)'">
-                        <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
-                    </button>
-
+                    <!-- Bordered to match the search field: a borderless button here made
+                         the spacing read as lopsided (8px to the left of the CTA, but 24px
+                         of dead box + glyph inset to its right). Giving it the same edge as
+                         its neighbour makes an equal gap actually look equal. -->
                     <button type="button" [matMenuTriggerFor]="mainMoreMenu"
-                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer"
+                        class="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 flex items-center justify-center transition-all cursor-pointer"
                         [matTooltip]="'ជម្រើសបន្ថែម (More)'">
                         <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4.5"></mat-icon>
                     </button>
@@ -74,8 +80,8 @@
                 </div>
             </div>
 
-            <!-- Status Filter Tabs & Search Bar -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <!-- Status Filter Tabs (search now lives on the header row) -->
+            <div class="flex items-center">
                 <!-- Tabs -->
                 <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 [scrollbar-width:none]">
                     <button (click)="filterByStatus('all')"
@@ -129,14 +135,6 @@
                     </button>
                 </div>
 
-                <!-- Search Input -->
-                <div class="relative flex items-center shrink-0">
-                    <mat-icon svgIcon="mdi:magnify"
-                        class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
-                    <input type="text" placeholder="ស្វែងរកគម្រោង..." [ngModel]="searchQuery()"
-                        (ngModelChange)="searchQuery.set($event); onSearchChange()"
-                        class="w-full sm:w-60 pl-9 pr-3 py-1.5 text-[14px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
-                </div>
             </div>
 
             <!-- Loading Spinner -->
@@ -148,14 +146,14 @@
             <div *ngIf="!loading()"
                 class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy">
                 <div *ngFor="let plan of filteredPlans()" (click)="selectProject(plan)"
-                    class="group relative w-full max-w-[340px] rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy">
+                    class="group relative w-full rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy">
 
                     <!-- 1. Top Khmer Decorative Line (ក្បាច់បន្ទាត់លើ) -->
-                    <div class="h-1 w-full bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600"></div>
+                    <div class="h-1 w-full" [ngClass]="getStatusBarClass(plan.status)"></div>
 
                     <!-- 2. Subtle Traditional Kbach Watermark (ក្បាច់ភ្ញីទេសស្រទន់) -->
                     <div
-                        class="absolute right-0 top-1 w-24 h-24 pointer-events-none opacity-[0.04] dark:opacity-[0.08] text-blue-900 dark:text-blue-200">
+                        class="absolute -right-4 -top-4 w-28 h-28 pointer-events-none opacity-[0.05] dark:opacity-[0.09] text-blue-900 dark:text-blue-200">
                         <svg viewBox="0 0 120 120" fill="currentColor" class="w-full h-full">
                             <path
                                 d="M60 10 C65 25 80 35 95 35 C80 45 75 60 85 75 C70 70 60 85 60 105 C60 85 50 70 35 75 C45 60 40 45 25 35 C40 35 55 25 60 10 Z" />
@@ -184,7 +182,7 @@
                         <!-- Title & Description -->
                         <div class="space-y-0.5">
                             <h3
-                                class="text-[15px] font-medium text-slate-850 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate font-kantumruy">
+                                class="text-[15px] font-semibold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate font-kantumruy">
                                 {{ plan.name }}
                             </h3>
                             <p
@@ -205,12 +203,12 @@
                             <div class="flex justify-between items-center text-[12px] font-kantumruy">
                                 <span class="text-slate-500 dark:text-slate-400">កិច្ចការរួចរាល់</span>
                                 <span class="text-slate-700 dark:text-slate-300 font-medium">
-                                    {{ plan.completed_tasks }} / {{ plan.total_tasks }} ({{ plan.progress }}%)
+                                    {{ plan.completed_tasks }} / {{ plan.total_tasks }} ({{ projectProgress(plan) }}%)
                                 </span>
                             </div>
                             <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                                 <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
-                                    [style.width.%]="plan.progress"></div>
+                                    [style.width.%]="projectProgress(plan)"></div>
                             </div>
                         </div>
 
@@ -219,11 +217,16 @@
                             class="flex items-center gap-2 pt-0.5 font-kantumruy">
                             <span class="text-[12px] text-slate-400">សមាជិក៖</span>
                             <div class="flex -space-x-1.5 overflow-hidden items-center">
-                                <div *ngFor="let m of plan.members; let idx = index"
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold ring-1.5 ring-white dark:ring-slate-800 shadow-2xs"
+                                <div *ngFor="let m of plan.members.slice(0, 4); let idx = index"
+                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
                                     [ngClass]="idx % 4 === 0 ? 'bg-blue-600' : (idx % 4 === 1 ? 'bg-indigo-600' : (idx % 4 === 2 ? 'bg-purple-600' : 'bg-emerald-600'))"
                                     [matTooltip]="m.name + ' (' + m.role + ')'">
                                     {{ m.name.charAt(0) }}
+                                </div>
+                                <div *ngIf="plan.members.length > 4"
+                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
+                                    [matTooltip]="'+' + (plan.members.length - 4) + ' សមាជិក'">
+                                    +{{ plan.members.length - 4 }}
                                 </div>
                             </div>
                         </div>
@@ -232,9 +235,9 @@
                     <!-- Open Button -->
                     <div class="px-4 pb-4 pt-0 relative z-10">
                         <button type="button" (click)="selectProject(plan); $event.stopPropagation()"
-                            class="w-full h-8.5 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13.5px] font-kantumruy transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.99]">
+                            class="w-full h-9 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13.5px] font-kantumruy transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.99]">
                             <mat-icon svgIcon="mdi:view-dashboard-outline" class="icon-size-4"></mat-icon>
-                            <span>ចូលមើលគម្រោង ({{ plan.tasks.length }} កិច្ចការ)</span>
+                            <span>ចូលមើលគម្រោង ({{ plan.total_tasks }} កិច្ចការ)</span>
                         </button>
                     </div>
                 </div>
@@ -702,14 +705,14 @@
                                     <p class="text-[15.5px] text-blue-200/90 leading-relaxed mt-1 font-normal">{{ proj.description }}</p>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <span class="text-3xl font-bold text-white">{{ proj.progress }}%</span>
+                                    <span class="text-3xl font-bold text-white">{{ projectProgress(proj) }}%</span>
                                     <span class="text-[14px] text-blue-200 block mt-0.5">វឌ្ឍនភាពសរុប</span>
                                 </div>
                             </div>
 
                             <div class="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
                                 <div class="bg-gradient-to-r from-emerald-400 to-teal-300 h-full rounded-full transition-all duration-500"
-                                    [style.width.%]="proj.progress"></div>
+                                    [style.width.%]="projectProgress(proj)"></div>
                             </div>
 
                             <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between text-[14.5px] text-blue-200 gap-2">
@@ -1016,7 +1019,7 @@
                                 </div>
 
                                 <button type="button" (click)="openAddPlanDialog(proj)"
-                                    class="flex items-center gap-1.5 h-8.5 px-3.5 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13.5px] shadow-2xs transition-all cursor-pointer">
+                                    class="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13.5px] shadow-2xs transition-all cursor-pointer">
                                     <mat-icon svgIcon="mdi:plus" class="icon-size-4 text-white"></mat-icon>
                                     <span>បន្ថែមផែនការ</span>
                                 </button>
@@ -1028,7 +1031,7 @@
                             class="w-full overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xs select-none">
                             <div class="min-w-[1250px]">
                                 <!-- Header Row 1: Quarters -->
-                                <div class="flex border-b border-white dark:border-slate-800 h-8.5">
+                                <div class="flex border-b border-white dark:border-slate-800 h-9">
                                     <div
                                         class="w-[300px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] px-3.5 py-1 font-medium text-slate-900 dark:text-purple-100 uppercase text-[12.5px] flex items-center border-r border-white dark:border-slate-800">
                                         <span>ពិពណ៌នាកិច្ចការគម្រោង</span>
@@ -1547,7 +1550,7 @@
 
                     <!-- Assignee -->
                     <div class="flex items-center gap-1.5" *ngIf="currentTask.assignee?.name">
-                        <div class="w-5 h-5 rounded-full ring-1.5 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden shrink-0">
+                        <div class="w-5 h-5 rounded-full ring-2 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden shrink-0">
                             <img *ngIf="currentTask.assignee?.avatar" [src]="currentTask.assignee.avatar" class="w-full h-full object-cover" />
                             <span *ngIf="!currentTask.assignee?.avatar">{{ currentTask.assignee?.initial || currentTask.assignee?.name?.charAt(0) || 'U' }}</span>
                         </div>
