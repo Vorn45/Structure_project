@@ -21,8 +21,12 @@ export class AppController {
 
     @Get('healthz')
     @Get('health')
+    @Get('v1/healthz')
+    @Get('v1/health')
     @Head('healthz')
     @Head('health')
+    @Head('v1/healthz')
+    @Head('v1/health')
     getHealth() {
         return {
             status: 'healthy',

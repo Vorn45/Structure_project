@@ -67,6 +67,8 @@ export class AppModule implements NestModule {
                 { path: '', method: RequestMethod.GET },
                 { path: 'healthz', method: RequestMethod.ALL },
                 { path: 'health', method: RequestMethod.ALL },
+                { path: 'v1/healthz', method: RequestMethod.ALL },
+                { path: 'v1/health', method: RequestMethod.ALL },
                 { path: `${version}/*path`, method: RequestMethod.ALL },
                 { path: 'auth/*path', method: RequestMethod.POST },
                 { path: 'account/auth/*path', method: RequestMethod.POST },
