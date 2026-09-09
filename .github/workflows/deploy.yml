@@ -158,17 +158,18 @@ jobs:
           -f docker-compose.yml
           config --quiet
 
-      - name: Verify shared database and production data volumes
+      - name: Verify shared database and redis services
         shell: bash
         run: |
           docker inspect postgres18 >/dev/null 2>&1 || {
             echo "::error::Shared database container 'postgres18' is not running on the NAS!" >&2
             exit 1
           }
-          echo "Verified shared database container 'postgres18' is active."
-          if docker volume inspect "${COMPOSE_PROJECT_NAME}_redis_data" >/dev/null 2>&1; then
-            echo "Using existing redis volume: ${COMPOSE_PROJECT_NAME}_redis_data"
-          fi
+          docker inspect shared-redis >/dev/null 2>&1 || {
+            echo "::error::Shared cache container 'shared-redis' is not running on the NAS!" >&2
+            exit 1
+          }
+          echo "Verified shared infrastructure (postgres18 & shared-redis) is active."
 
       - name: Build selected containers
         shell: bash
