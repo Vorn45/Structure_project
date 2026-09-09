@@ -27,6 +27,7 @@ permissions:
 
 env:
   COMPOSE_PROJECT_NAME: digitech-wms
+  DOCKER_API_VERSION: "1.43"
 
 concurrency:
   group: digitech-wms-production
