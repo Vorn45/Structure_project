@@ -103,6 +103,7 @@ jobs:
           fi
 
           umask 077
+          printf '%s\n' "$PRODUCTION_ENV_FILE" > .env
           printf '%s\n' "$PRODUCTION_ENV_FILE" > "$RUNNER_TEMP/wms-production.env"
 
       - name: Validate production Compose configuration
@@ -185,5 +186,6 @@ jobs:
         if: always()
         shell: bash
         run: |
+          rm -f .env
           rm -f "$RUNNER_TEMP/wms-production.env"
           rm -f "$RUNNER_TEMP/wms-changed-files.txt"
