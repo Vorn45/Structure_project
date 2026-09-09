@@ -818,9 +818,9 @@ export class AccountService {
     }
 
     async scanQrLogin(dto: QrLoginDto, req: ClientRequest) {
-        const token = this.extractQrToken(dto.qr_token);
+        const qrToken = this.extractQrToken(dto.qr_token);
         const qrLogin = await this.qrLoginRepo.findOne({
-            where: { qr_token: token },
+            where: { qr_token: qrToken },
             relations: ['user'],
         });
 
