@@ -184,9 +184,9 @@ export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [
 export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     {
         id: 't1',
-        code: '#PMS-675',
+        code: '#WMS-0000',
         title: 'Org Admin | Structure | Department',
-        description: 'គ្រប់គ្រងរចនាសម្ព័ន្ធស្ថាប័ន និងការបែងចែកនាយកដ្ឋានក្នុងប្រព័ន្ធ PMS។',
+        description: 'គ្រប់គ្រងរចនាសម្ព័ន្ធស្ថាប័ន និងការបែងចែកនាយកដ្ឋានក្នុងប្រព័ន្ធ WFM។',
         priority: 'high',
         due_date: '2026-09-10',
         created_at: '2026-08-25',
@@ -203,7 +203,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'st-3', title: 'User assignment and roles modal', completed: false },
         ],
         links: [
-            { id: 'l-1', title: 'Figma: Department Hierarchy Spec', url: 'https://figma.com', type: 'figma', taskCode: '#PMS-675' },
+            { id: 'l-1', title: 'Figma: Department Hierarchy Spec', url: 'https://figma.com', type: 'figma', taskCode: '#WMS-0000' },
         ],
         documents: [
             { id: 'd-1', name: 'Org_Structure_SRS.pdf', size: '1.4 MB', type: 'pdf', upload_date: '២៦ សីហា ២០២៦' },
@@ -216,7 +216,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     },
     {
         id: 't2',
-        code: '#PMS-671',
+        code: '#BMS-0000',
         title: 'Project | Folder | Drag & Drop',
         description: 'មុខងារអូសទម្លាក់ Folder គម្រោង និងឯកសារដើម្បីផ្លាស់ប្តូរលំដាប់ដោយរលូន។',
         priority: 'high',
@@ -234,7 +234,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'st-5', title: 'Add drop placeholder animations', completed: true },
         ],
         links: [
-            { id: 'l-2', title: 'GitHub PR #481: Drag and Drop feature', url: 'https://github.com', type: 'github', taskCode: '#PMS-671' },
+            { id: 'l-2', title: 'GitHub PR #481: Drag and Drop feature', url: 'https://github.com', type: 'github', taskCode: '#BMS-0000' },
         ],
         documents: [
             { id: 'd-3', name: 'Folder_Dnd_Workflow.png', size: '1.2 MB', type: 'image', upload_date: '២៥ សីហា ២០២៦' },
@@ -245,7 +245,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     },
     {
         id: 't3',
-        code: '#PMS-670',
+        code: '#WMS-0001',
         title: 'Project | Folder | Cannot Scroll PDF',
         description: 'កែសម្រួលបញ្ហាមិនអាច Scroll មើលឯកសារ PDF នៅក្នុង Folder Preview Viewer។',
         priority: 'urgent',
@@ -263,7 +263,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'st-7', title: 'Test on Mobile Touch events', completed: false },
         ],
         links: [
-            { id: 'l-3', title: 'Bug Report Video Link', url: 'https://loom.com', type: 'external', taskCode: '#PMS-670' },
+            { id: 'l-3', title: 'Bug Report Video Link', url: 'https://loom.com', type: 'external', taskCode: '#WMS-0001' },
         ],
         documents: [
             { id: 'd-5', name: 'PDF_Viewer_Bug_Screenshot.png', size: '650 KB', type: 'image', upload_date: '២៤ សីហា ២០២៦' },
@@ -274,7 +274,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     },
     {
         id: 't4',
-        code: '#PMS-574',
+        code: '#BMS-0001',
         title: 'My Work | Profile | Missing Cover',
         description: 'រូបភាព Cover ក្នុងផ្ទាំង Profile ផ្ទាល់ខ្លួនមិនបង្ហាញនៅពេល User ចូលប្រើដំបូង។',
         priority: 'urgent',
@@ -299,7 +299,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     },
     {
         id: 't5',
-        code: '#PMS-554',
+        code: '#WMS-0002',
         title: 'Security setting UI improvements',
         description: 'កែលម្អលើទំព័រ Security Settings ដូចជា 2FA, Session Management, និង Password Expiry។',
         priority: 'high',
@@ -317,7 +317,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'st-11', title: 'Add Active Sessions IP listing', completed: false },
         ],
         links: [
-            { id: 'l-4', title: 'Figma Security Settings v2', url: 'https://figma.com', type: 'figma', taskCode: '#PMS-554' },
+            { id: 'l-4', title: 'Figma Security Settings v2', url: 'https://figma.com', type: 'figma', taskCode: '#WMS-0002' },
         ],
         documents: [
             { id: 'd-7', name: 'Security_Audit_Report.pdf', size: '2.1 MB', type: 'pdf', upload_date: '២០ សីហា ២០២៦' },
@@ -328,7 +328,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     },
     {
         id: 't6',
-        code: '#PMS-532',
+        code: '#BMS-0002',
         title: 'User | Report | Progress Compare',
         description: 'ផ្ទាំងប្រៀបធៀបវឌ្ឍនភាពការងាររវាងខែមុន និងខែបច្ចុប្បន្នរបស់សមាជិកម្នាក់ៗ។',
         priority: 'medium',
@@ -346,7 +346,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'st-13', title: 'Connect month selector dropdown', completed: true },
         ],
         links: [
-            { id: 'l-5', title: 'Report Formula Documentation', url: 'https://notion.so', type: 'doc', taskCode: '#PMS-532' },
+            { id: 'l-5', title: 'Report Formula Documentation', url: 'https://notion.so', type: 'doc', taskCode: '#BMS-0002' },
         ],
         documents: [],
         members: [
@@ -355,7 +355,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     },
     {
         id: 't7',
-        code: '#PMS-531',
+        code: '#WMS-0003',
         title: 'User | Report | Progress',
         description: 'ទំព័ររបាយការណ៍សរុបវឌ្ឍនភាពបុគ្គលិក ម៉ោងបំពេញការងារ និងភាគរយសម្រេច។',
         priority: 'medium',
@@ -373,7 +373,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
             { id: 'st-16', title: 'Daily activity bar breakdown', completed: true },
         ],
         links: [
-            { id: 'l-6', title: 'GitHub PR #412: User Progress Report', url: 'https://github.com', type: 'github', taskCode: '#PMS-531' },
+            { id: 'l-6', title: 'GitHub PR #412: User Progress Report', url: 'https://github.com', type: 'github', taskCode: '#WMS-0003' },
         ],
         documents: [],
         members: [
@@ -382,7 +382,7 @@ export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
     },
     {
         id: 't8',
-        code: '#PMS-513',
+        code: '#BMS-0003',
         title: 'Profile | Switch Org | Exit Org',
         description: 'មុខងារប្តូរស្ថាប័នការងារ (Switch Organization) និងការចាកចេញពីស្ថាប័នដោយសុវត្ថិភាព។',
         priority: 'low',
@@ -492,45 +492,45 @@ export const DEFAULT_PROJECT_MEETINGS: ProjectMeetingItem[] = [
 export const DEFAULT_PROJECT_LINKS: TaskLink[] = [
     {
         id: 'l-1',
-        title: 'Git Repository — PMS Enterprise V2',
-        url: 'https://github.com/vorn45/pms-v2',
+        title: 'Git Repository — WFM Enterprise V2',
+        url: 'https://github.com/vorn45/wfm-v2',
         type: 'github',
-        taskCode: '#PMS-CORE',
+        taskCode: '#WMS-CORE',
     },
     {
         id: 'l-2',
         title: 'Figma Design System & Token UI Kit',
-        url: 'https://figma.com/file/pms-design-v2',
+        url: 'https://figma.com/file/wfm-design-v2',
         type: 'figma',
-        taskCode: '#PMS-UI',
+        taskCode: '#BMS-UI',
     },
     {
         id: 'l-3',
         title: 'Swagger API Documentation & Specifications',
         url: 'http://localhost:3000/api/docs',
         type: 'doc',
-        taskCode: '#PMS-API',
+        taskCode: '#WMS-API',
     },
     {
         id: 'l-4',
         title: 'Security Compliance & Audit Checklist',
-        url: 'https://docs.google.com/spreadsheets/pms-security-audit',
+        url: 'https://docs.google.com/spreadsheets/wfm-security-audit',
         type: 'doc',
-        taskCode: '#PMS-554',
+        taskCode: '#WMS-0002',
     },
     {
         id: 'l-5',
         title: 'System Architecture & Database Schema Diagram',
-        url: 'https://dbdiagram.io/d/pms-enterprise-schema',
+        url: 'https://dbdiagram.io/d/wfm-enterprise-schema',
         type: 'external',
-        taskCode: '#PMS-675',
+        taskCode: '#WMS-0000',
     },
     {
         id: 'l-6',
         title: 'Sprint 2 Planning Board & Milestones',
-        url: 'https://jira.wfm.gov.kh/projects/PMS/boards/2',
+        url: 'https://jira.wfm.gov.kh/projects/WFM/boards/2',
         type: 'external',
-        taskCode: '#PMS-SPRINT2',
+        taskCode: '#BMS-SPRINT2',
     },
 ];
 
@@ -1219,7 +1219,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
-            taskCode: proj ? `#${proj.code}-001` : '#PMS-001',
+            taskCode: proj ? `#${proj.code}-001` : '#WMS-001',
             projectName: proj?.name,
         });
         const dialogRef = this._matDialog.open(CreateLinkDialogComponent, dialogConfig);
@@ -1230,7 +1230,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     title: result.title,
                     url: result.url,
                     type: result.type || 'figma',
-                    taskCode: result.taskCode || (proj ? `#${proj.code}-CORE` : '#PMS-CORE'),
+                    taskCode: result.taskCode || (proj ? `#${proj.code}-CORE` : '#WMS-CORE'),
                     createdAt: 'ថ្ងៃនេះ',
                 };
                 this.links.update((list) => [newLink, ...list]);
@@ -1719,7 +1719,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         this.isEditing.set(false);
         this.projectForm.reset({
             name: '',
-            code: `PMS-${Math.floor(100 + Math.random() * 900)}`,
+            code: `WFM-${Math.floor(100 + Math.random() * 900)}`,
             description: '',
             status: 'active',
             progress: 0,

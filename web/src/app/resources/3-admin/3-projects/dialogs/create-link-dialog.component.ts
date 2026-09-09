@@ -120,7 +120,7 @@ export interface CreateLinkDialogData {
                                     type="text"
                                     [ngModel]="linkTaskCode()"
                                     (ngModelChange)="linkTaskCode.set($event)"
-                                    placeholder="#PMS-001"
+                                    placeholder="#WMS-0001"
                                     class="w-full px-4 py-3 text-[16px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 />
                             </div>
@@ -151,7 +151,7 @@ export class CreateLinkDialogComponent {
     linkTitle = signal<string>('');
     linkUrl = signal<string>('');
     linkType = signal<'figma' | 'github' | 'doc' | 'external'>('figma');
-    linkTaskCode = signal<string>('#PMS-CORE');
+    linkTaskCode = signal<string>('#WMS-CORE');
 
     constructor(
         private readonly _dialogRef: MatDialogRef<CreateLinkDialogComponent>,
@@ -181,7 +181,7 @@ export class CreateLinkDialogComponent {
             title,
             url,
             type: this.linkType(),
-            taskCode: this.linkTaskCode().trim() || '#PMS-CORE',
+            taskCode: this.linkTaskCode().trim() || '#WMS-CORE',
         });
     }
 

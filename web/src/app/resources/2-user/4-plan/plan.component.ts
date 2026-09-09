@@ -780,7 +780,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             if (result?.created) {
                 const created = result.project;
                 if (created) {
-                    const projCode = created.code || `PMS-${Math.floor(100 + Math.random() * 900)}`;
+                    const projCode = created.code || `WFM-${Math.floor(100 + Math.random() * 900)}`;
                     const projName = created.name || result.name || 'គម្រោងថ្មី';
                     const projMembers = (result.assignees || []).map((a: any, idx: number) => ({
                         id: Number(a.id) || idx + 1,
@@ -1065,7 +1065,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         title: l.title,
                         url: l.url,
                         type: l.type,
-                        taskCode: `#${proj.code || 'PMS'}-001`,
+                        taskCode: `#${proj.code || 'WFM'}-001`,
                         taskTitle: proj.name || 'ឯកសារគម្រោង',
                     });
                 }
@@ -1083,7 +1083,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                 title: l.title,
                                 url: l.url,
                                 type: l.type,
-                                taskCode: t.code || `#${proj.code || 'PMS'}-001`,
+                                taskCode: t.code || `#${proj.code || 'WFM'}-001`,
                                 taskTitle: t.title || proj.name,
                                 task: t,
                             });
@@ -1371,7 +1371,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                 },
             ];
 
-            if (task.code === '#PMS-513') {
+            if (task.code === '#PMS-513' || task.code === '#BMS-0003') {
                 initialChats.push({
                     id: `msg-${Date.now()}-4`,
                     sender_name: 'សុខ សុភា',
@@ -1595,7 +1595,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
-            taskCode: proj ? `#${proj.code}-001` : '#PMS-001',
+            taskCode: proj ? `#${proj.code}-001` : '#WMS-001',
             projectName: proj?.name,
         });
         const dialogRef = this._matDialog.open(CreateLinkDialogComponent, dialogConfig);

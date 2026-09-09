@@ -293,16 +293,29 @@ export class TaskService {
         }
     }
 
+    private isPmsTask(t: any): boolean {
+        if (!t) return false;
+        const code = (t.code || '').toUpperCase();
+        const pid = (t.project_id || '').toLowerCase();
+        const pname = (t.project_name || '').toLowerCase();
+        return code.includes('PMS') || pid.includes('pms') || pname.includes('pms') || pid === 'proj-001' || pid === 'proj-002' || pid === 'proj-003';
+    }
+
     private async initDbStore(): Promise<void> {
         await this.ensureTableExists();
         try {
             const dbStore = await this._taskStoreRepo.findOne({ where: { key: 'default_tasks_store' } });
             if (dbStore) {
                 if (Array.isArray(dbStore.tasks) && dbStore.tasks.length > 0) {
-                    this.tasks = dbStore.tasks.map((t: any) => ({
-                        ...t,
-                        task_type: t.task_type || this.inferTaskType(t),
-                    }));
+                    const nonPms = dbStore.tasks.filter((t: any) => !this.isPmsTask(t));
+                    if (nonPms.length > 0) {
+                        this.tasks = nonPms.map((t: any) => ({
+                            ...t,
+                            task_type: t.task_type || this.inferTaskType(t),
+                        }));
+                    } else {
+                        this.tasks = [...INITIAL_TASKS];
+                    }
                 }
                 if (dbStore.comments && typeof dbStore.comments === 'object') {
                     for (const [k, v] of Object.entries(dbStore.comments)) {
@@ -313,15 +326,21 @@ export class TaskService {
                     }
                 }
                 // Heal any stored tasks that are missing a reporter so they are never orphaned
-                if (this.healMissingReporters()) {
-                    await this.saveToDb();
-                }
+                this.healMissingReporters();
+                await this.saveToDb();
+                this.saveToDisk();
             } else {
                 await this.saveToDb();
             }
             this.isStoreLoaded = true;
         } catch (err) {
             console.warn('Could not load task store from DB, falling back to disk:', err);
+        }
+
+        // Guarantee no PMS tasks exist in this.tasks
+        this.tasks = this.tasks.filter((t: any) => !this.isPmsTask(t));
+        if (this.tasks.length === 0) {
+            this.tasks = [...INITIAL_TASKS];
         }
 
         // Ensure all loaded tasks have default comment threads seeded
@@ -366,8 +385,8 @@ export class TaskService {
                     sender_name: 'ប្រព័ន្ធ (System)',
                     sender_avatar: null,
                     text: hasAssignee && assigneeName
-                        ? `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
-                        : `ភារកិច្ច ${task?.code || ('#PMS-' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
+                        ? `ភារកិច្ច ${task?.code || ('#' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
+                        : `ភារកិច្ច ${task?.code || ('#' + taskId)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
                     time: '8:30 AM',
                     is_self: false,
                     is_system: true,
@@ -432,10 +451,15 @@ export class TaskService {
                 const raw = fs.readFileSync(this.storeFilePath, 'utf8');
                 const data = JSON.parse(raw);
                 if (data && Array.isArray(data.tasks) && data.tasks.length > 0) {
-                    this.tasks = data.tasks.map((t: any) => ({
-                        ...t,
-                        task_type: t.task_type || this.inferTaskType(t),
-                    }));
+                    const nonPms = data.tasks.filter((t: any) => !this.isPmsTask(t));
+                    if (nonPms.length > 0) {
+                        this.tasks = nonPms.map((t: any) => ({
+                            ...t,
+                            task_type: t.task_type || this.inferTaskType(t),
+                        }));
+                    } else {
+                        this.tasks = [...INITIAL_TASKS];
+                    }
                 }
                 if (data && data.comments && typeof data.comments === 'object') {
                     for (const [k, v] of Object.entries(data.comments)) {
@@ -655,7 +679,8 @@ export class TaskService {
 
     async getTasks(user: UserPayload, query: QueryTasksDto) {
         await this.ensureStoreLoaded();
-        let list = [...this.tasks];
+        const validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
+        let list = [...validTasks];
 
         if (query.search && query.search !== 'undefined' && query.search !== 'null' && query.search.trim()) {
             const s = query.search.trim().toLowerCase();
@@ -694,12 +719,12 @@ export class TaskService {
         }
 
         const projectScope = (query.project_id && query.project_id !== 'all' && query.project_id !== 'undefined' && query.project_id !== 'null')
-            ? this.tasks.filter((t) => {
+            ? validTasks.filter((t) => {
                 const pid = query.project_id!.toLowerCase();
                 return (t.project_id && t.project_id.toLowerCase().includes(pid)) ||
                        (t.project_name && t.project_name.toLowerCase().includes(pid));
             })
-            : this.tasks;
+            : validTasks;
 
         const limit = query.limit ? parseInt(query.limit, 10) : 100;
         const offset = query.offset ? parseInt(query.offset, 10) : 0;
@@ -909,10 +934,10 @@ export class TaskService {
     }
 
     private getProjectPrefix(task?: TaskItem): string {
-        if (!task) return 'PMS';
+        if (!task) return 'WMS';
         if (task.project_id === 'bms-digitech' || task.code?.startsWith('#BMS') || task.project_name?.includes('BMS')) return 'BMS';
         if (task.project_id === 'wms-digitech' || task.code?.startsWith('#WMS') || task.project_name?.includes('WMS')) return 'WMS';
-        return 'PMS';
+        return 'WMS';
     }
 
     private getTaskContextLine(task: TaskItem): string {

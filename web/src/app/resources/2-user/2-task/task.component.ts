@@ -301,7 +301,13 @@ export class UserTaskComponent implements OnInit {
             })
             .subscribe({
                 next: (res) => {
-                    const results = res.data.results || [];
+                    const rawResults = res.data.results || [];
+                    const results = rawResults.filter((t) => {
+                        const code = (t.code || '').toUpperCase();
+                        const pid = (t.project_id || '').toLowerCase();
+                        const pname = (t.project_name || '').toLowerCase();
+                        return !code.includes('PMS') && !pid.includes('pms') && !pname.includes('pms') && pid !== 'proj-001' && pid !== 'proj-002' && pid !== 'proj-003';
+                    });
                     let finalTasks = results;
                     
                     if (this.selectedProjectId() !== 'all') {

@@ -196,9 +196,9 @@ export class DashboardService {
                     { name: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)', name_en: 'DevOps & Security', members: 4, progress: 70 },
                 ],
                 recent_activity: [
-                    { id: 'act-1', text: 'បានបង្កើតគម្រោងថ្មី PMS-V2 ជោគជ័យ', user: 'សុខ សុភា', time: '១០ នាទីមុន' },
+                    { id: 'act-1', text: 'បានបង្កើតគម្រោងថ្មី WFM-V2 ជោគជ័យ', user: 'សុខ សុភា', time: '១០ នាទីមុន' },
                     { id: 'act-2', text: 'បានអនុម័តច្បាប់ឈប់សម្រាករបស់ រ័ត្ន វិចិត្រ', user: 'Admin', time: '១ ម៉ោងមុន' },
-                    { id: 'act-3', text: 'បានបញ្ចប់ Task #PMS-104 នៅក្នុងប្រព័ន្ធ WMS', user: 'ចេង ច័ន្ទបញ្ញា', time: '៣ ម៉ោងមុន' },
+                    { id: 'act-3', text: 'បានបញ្ចប់ Task #WMS-0001 នៅក្នុងប្រព័ន្ធ WMS', user: 'ចេង ច័ន្ទបញ្ញា', time: '៣ ម៉ោងមុន' },
                 ],
             },
         };
