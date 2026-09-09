@@ -71,25 +71,15 @@ import { UserTaskService } from './task.service';
                 width: 0 !important;
                 height: 0 !important;
             }
-            /* Sleek modern vertical scrollbar for column tasks */
+            /* Hide vertical scrollbar for column tasks while preserving full smooth scrolling */
             .kanban-column-scroll {
-                scrollbar-width: thin !important;
-                scrollbar-color: rgba(156, 163, 175, 0.45) transparent !important;
-                -ms-overflow-style: auto !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
             }
             .kanban-column-scroll::-webkit-scrollbar {
-                display: block !important;
-                width: 5px !important;
-            }
-            .kanban-column-scroll::-webkit-scrollbar-track {
-                background: transparent !important;
-            }
-            .kanban-column-scroll::-webkit-scrollbar-thumb {
-                background: rgba(156, 163, 175, 0.4) !important;
-                border-radius: 9999px !important;
-            }
-            .kanban-column-scroll::-webkit-scrollbar-thumb:hover {
-                background: rgba(107, 114, 128, 0.7) !important;
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
             }
             ::ng-deep .cdk-drag-preview {
                 box-sizing: border-box;
