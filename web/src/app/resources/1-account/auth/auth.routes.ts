@@ -34,6 +34,10 @@ export default [
             {
                 path: 'otp',
                 component: AuthOTPForResetPasswordComponent
+            },
+            {
+                path: 'qr-login',
+                loadComponent: () => import('./qr-scan-confirm/qr-scan-confirm.component').then(m => m.QrScanConfirmComponent)
             }
         ]
     }

@@ -76,7 +76,7 @@ export class AppModule implements NestModule {
                 },
                 {
                     path: 'account/profile/qr-login/scan',
-                    method: RequestMethod.POST,
+                    method: RequestMethod.ALL,
                 },
                 {
                     path: 'auth/telegram-bot/webhook',

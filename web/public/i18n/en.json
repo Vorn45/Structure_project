@@ -125,6 +125,18 @@
         "Devices": "Devices",
         "LoginHistory": "Login history"
     },
+    "qr-login": {
+        "title": "Log in with QR Code",
+        "instructions": {
+            "title": "Instructions:",
+            "step1": "1. Open the mobile app on your phone",
+            "step2": "2. Navigate to Scan QR Code",
+            "step3": "3. Point your camera at this QR Code",
+            "step4": "4. Confirm the login on your mobile device",
+            "step5": "5. You will be logged in automatically"
+        },
+        "note": "Note: This QR Code is valid for 60 seconds only."
+    },
     "GoogleAuthenticator2FA": {
         "Email": "Email",
         "SetupInstruction": "Scan this QR code in the Google Authenticator app, then enter the 6-digit code below to verify.",

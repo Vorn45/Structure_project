@@ -776,9 +776,24 @@ export class AccountService {
         };
     }
 
+    private extractQrToken(rawToken: string): string {
+        if (!rawToken) return '';
+        let token = String(rawToken).trim();
+        if (token.includes('token=')) {
+            token = token.split('token=')[1].split('&')[0];
+        } else if (token.startsWith('{') && token.includes('"token"')) {
+            try {
+                const parsed = JSON.parse(token);
+                token = parsed.token || parsed.qr_token || token;
+            } catch {}
+        }
+        return token;
+    }
+
     async getQrLoginStatus(dto: QrLoginDto) {
+        const token = this.extractQrToken(dto.qr_token);
         const qrLogin = await this.qrLoginRepo.findOne({
-            where: { qr_token: dto.qr_token },
+            where: { qr_token: token },
         });
         if (!qrLogin) throw new NotFoundException('QR login not found');
 
@@ -803,8 +818,9 @@ export class AccountService {
     }
 
     async scanQrLogin(dto: QrLoginDto, req: ClientRequest) {
+        const token = this.extractQrToken(dto.qr_token);
         const qrLogin = await this.qrLoginRepo.findOne({
-            where: { qr_token: dto.qr_token },
+            where: { qr_token: token },
             relations: ['user'],
         });
 

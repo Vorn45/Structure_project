@@ -1,5 +1,43 @@
-<button class="mt-1" mat-icon-button (click)="viewUserDialog('គណនី')">
+<button class="mt-1 cursor-pointer" mat-icon-button [matMenuTriggerFor]="userMenu" [matMenuTriggerRestoreFocus]="false">
     <span class="relative border min-w-10 max-w-10 min-h-10 max-h-10 flex items-center justify-center rounded-full">
-        <img class="border border-blue-500 min-w-10 max-w-10 min-h-10 max-h-10 object-cover rounded-full" [src]="src">
+        <img class="border border-blue-500 min-w-10 max-w-10 min-h-10 max-h-10 object-cover rounded-full" [src]="src" alt="User Avatar">
     </span>
 </button>
+
+<mat-menu #userMenu="matMenu" [xPosition]="menuXPosition" [yPosition]="menuYPosition" class="user-dropdown-menu !rounded-lg !p-1 !min-w-[200px] font-kantumruy">
+    <!-- 1. គណនី (Account) -->
+    <button mat-menu-item (click)="viewUserDialog('គណនី')" class="!h-10 !rounded-md text-slate-600 dark:text-slate-300">
+        <div class="flex items-center gap-3 text-[14.5px] font-normal">
+            <mat-icon svgIcon="heroicons_outline:user-circle" class="icon-size-5 text-slate-600 dark:text-slate-400"></mat-icon>
+            <span>គណនី</span>
+        </div>
+    </button>
+
+    <mat-divider class="!my-1 border-slate-100 dark:border-slate-800"></mat-divider>
+
+    <!-- 2. ផ្លាស់ប្តូរការប្រើប្រាស់ (Switch Workspace / Role) -->
+    <button mat-menu-item (click)="openSwitchRoleDialog()" class="!h-10 !rounded-md text-slate-600 dark:text-slate-300">
+        <div class="flex items-center gap-3 text-[14.5px] font-normal">
+            <mat-icon svgIcon="heroicons_outline:arrows-right-left" class="icon-size-5 text-slate-600 dark:text-slate-400"></mat-icon>
+            <span>ផ្លាស់ប្តូរការប្រើប្រាស់</span>
+        </div>
+    </button>
+
+    <!-- 3. ចូលប្រើប្រាស់ (QR Code Login) -->
+    <button mat-menu-item (click)="openQrDialog()" class="!h-10 !rounded-md text-slate-600 dark:text-slate-300">
+        <div class="flex items-center gap-3 text-[14.5px] font-normal">
+            <mat-icon svgIcon="heroicons_outline:qr-code" class="icon-size-5 text-slate-600 dark:text-slate-400"></mat-icon>
+            <span>ចូលប្រើប្រាស់</span>
+        </div>
+    </button>
+
+    <mat-divider class="!my-1 border-slate-100 dark:border-slate-800"></mat-divider>
+
+    <!-- 4. ចាកចេញ (Sign Out) -->
+    <button mat-menu-item (click)="signOut()" class="!h-10 !rounded-md text-slate-600 dark:text-slate-300 hover:!text-rose-600 dark:hover:!text-rose-400">
+        <div class="flex items-center gap-3 text-[14.5px] font-normal">
+            <mat-icon svgIcon="heroicons_outline:arrow-right-on-rectangle" class="icon-size-5 text-slate-600 dark:text-slate-400"></mat-icon>
+            <span>ចាកចេញ</span>
+        </div>
+    </button>
+</mat-menu>

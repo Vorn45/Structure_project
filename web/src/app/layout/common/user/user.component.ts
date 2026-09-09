@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit }         from '
 import { MatButtonModule }                                              from '@angular/material/button';
 import { MatDividerModule }                                             from '@angular/material/divider';
 import { MatIconModule }                                                from '@angular/material/icon';
+import { MatMenuModule }                                                from '@angular/material/menu';
 import { Router, RouterLink }                                           from '@angular/router';
 import { AuthService }                                                  from 'app/core/auth/auth.service';
 import { UserService }                                                  from 'app/core/user/user.service';
@@ -14,6 +15,9 @@ import { TranslocoModule }                                              from '@n
 import { MatDialog }                                                    from '@angular/material/dialog';
 import { ProfileViewComponent }                                         from 'app/resources/1-account/2-profile/view/component';
 import { DialogConfigService }                                          from 'app/shared/dialog-config.service';
+import { SwitchRoleComponent }                                          from './switch-role/switch-role.component';
+import { QRDialogComponent }                                            from 'app/shared/qr/component';
+import { HelperConfirmationService }                                    from 'helper/services/confirmation';
 
 @Component({
     selector: 'user',
@@ -24,7 +28,26 @@ import { DialogConfigService }                                          from 'ap
         CommonModule,
         MatIconModule,
         MatDividerModule,
-        TranslocoModule
+        MatMenuModule,
+        TranslocoModule,
+    ],
+    styles: [
+        `
+            ::ng-deep .user-dropdown-menu.mat-mdc-menu-panel {
+                border-radius: 10px !important;
+                border: 1px solid rgba(226, 232, 240, 0.9) !important;
+                padding: 4px !important;
+            }
+            ::ng-deep .dark .user-dropdown-menu.mat-mdc-menu-panel {
+                border-color: rgba(51, 65, 85, 0.9) !important;
+                background-color: #0f172a !important;
+            }
+            ::ng-deep .user-dropdown-menu .mat-mdc-menu-item {
+                border-radius: 6px !important;
+                height: 40px !important;
+                min-height: 40px !important;
+            }
+        `,
     ],
 })
 export class UserComponent implements OnInit, OnDestroy {
@@ -44,7 +67,8 @@ export class UserComponent implements OnInit, OnDestroy {
         private _userService              : UserService,
         private _router                   : Router,
         private _matDialog                : MatDialog,
-        private _dialogConfigService      : DialogConfigService
+        private _dialogConfigService      : DialogConfigService,
+        private _confirmationService      : HelperConfirmationService,
     ) { }
 
     ngOnInit(): void {
@@ -87,7 +111,44 @@ export class UserComponent implements OnInit, OnDestroy {
 
         dialogRef.afterClosed().subscribe(result => {
         });
+    }
 
+    openSwitchRoleDialog(): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            data: this.user,
+            roles: this.user?.roles ?? [],
+        });
+        this._matDialog.open(SwitchRoleComponent, dialogConfig);
+    }
+
+    openQrDialog(): void {
+        this._matDialog.open(QRDialogComponent, {
+            autoFocus: false,
+            width: '100dvw',
+            maxWidth: '600px',
+            enterAnimationDuration: '0s',
+            data: { with_token: true },
+        });
+    }
+
+    signOut(): void {
+        const confirmation = this._confirmationService.open({
+            title: 'បញ្ជាក់ការចាកចេញ',
+            message: 'តើអ្នកប្រាកដថាចង់ចាកចេញពីប្រព័ន្ធមែនទេ?',
+            icon: { show: true, name: 'heroicons_outline:arrow-right-on-rectangle', color: 'warn' },
+            actions: {
+                confirm: { show: true, label: 'ចាកចេញ', color: 'warn' },
+                cancel: { show: true, label: 'បោះបង់' },
+            },
+            dismissible: true,
+        });
+
+        confirmation.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                this._authService.signOut();
+                this._router.navigateByUrl('/auth/sign-in');
+            }
+        });
     }
 
     ngOnDestroy(): void {

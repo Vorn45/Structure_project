@@ -1,9 +1,9 @@
 <!-- Notifications toggle button -->
-<button mat-icon-button (click)="openPanel()" #notificationsOrigin class="bg-slate-100 dark:bg-white/5 relative hover:bg-slate-200 dark:hover:bg-white/10 transition-colors" aria-label="ការជូនដំណឹង">
+<button mat-icon-button (click)="openPanel()" #notificationsOrigin class="relative" aria-label="ការជូនដំណឹង">
     @if (unreadCount > 0) {
     <span class="absolute left-0 right-0 top-0 flex h-3 items-center justify-center pointer-events-none">
         <span
-            class="ml-4 mt-2.5 flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white shadow-md animate-pulse"
+            class="ml-4 mt-2.5 flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
             [ngClass]="badgeClass">
             {{ unreadCountLabel }}
         </span>

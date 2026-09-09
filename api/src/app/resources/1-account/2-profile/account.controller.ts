@@ -151,6 +151,14 @@ export class AccountController {
         return await this._service.scanQrLogin(dto, req);
     }
 
+    @Get('qr-login/scan')
+    async scanQrLoginGet(
+        @Query(new ValidationPipe()) dto: QrLoginDto,
+        @Req() req: express.Request,
+    ) {
+        return await this._service.scanQrLogin(dto, req);
+    }
+
     @Put('change-password')
     async changeOwnPassword(
         @Body(new ValidationPipe()) dto: ChangeOwnPasswordDto,
