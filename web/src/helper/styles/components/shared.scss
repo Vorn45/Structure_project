@@ -255,12 +255,37 @@
         }
     }
 
+    &.no-padding,
+    &.p-0 {
+        .mat-mdc-dialog-container {
+            .mdc-dialog__surface {
+                padding: 0px !important;
+                border-radius: 1.5rem !important;
+                overflow: hidden !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+        }
+    }
+
     .mat-mdc-form-field-icon-prefix {
         padding: 0px !important;
     }
 
     .mat-mdc-form-field-icon-suffix {
         padding: 0px !important;
+    }
+}
+
+.take-attendance-panel {
+    .mat-mdc-dialog-container {
+        .mdc-dialog__surface {
+            padding: 0px !important;
+            border-radius: 1.5rem !important;
+            overflow: hidden !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
     }
 }
 

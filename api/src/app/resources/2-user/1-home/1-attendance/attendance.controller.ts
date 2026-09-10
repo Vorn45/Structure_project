@@ -14,7 +14,7 @@ export class AttendanceController {
 
     @Get()
     async getAttendance(@Res({ passthrough: true }) res: express.Response) {
-        return await this._service.getAttendance(res.locals.user);
+        return await this._service.getAttendance(res?.locals?.user);
     }
 
     @Post('check-in')
@@ -22,7 +22,15 @@ export class AttendanceController {
         @Body(new ValidationPipe({ transform: true })) dto: CheckInOutDto,
         @Res({ passthrough: true }) res: express.Response,
     ) {
-        return await this._service.recordCheckIn(res.locals.user, dto);
+        return await this._service.recordCheckIn(res?.locals?.user, dto);
+    }
+
+    @Post('scan-checkin')
+    async scanCheckIn(
+        @Body(new ValidationPipe({ transform: true })) dto: CheckInOutDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.recordCheckIn(res?.locals?.user, dto);
     }
 
     @Post('check-out')
@@ -30,6 +38,6 @@ export class AttendanceController {
         @Body(new ValidationPipe({ transform: true })) dto: CheckInOutDto,
         @Res({ passthrough: true }) res: express.Response,
     ) {
-        return await this._service.recordCheckOut(res.locals.user, dto);
+        return await this._service.recordCheckOut(res?.locals?.user, dto);
     }
 }

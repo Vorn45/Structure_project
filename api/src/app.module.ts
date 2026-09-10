@@ -81,6 +81,10 @@ export class AppModule implements NestModule {
                     method: RequestMethod.ALL,
                 },
                 {
+                    path: 'user/home/attendance/scan-checkin',
+                    method: RequestMethod.ALL,
+                },
+                {
                     path: 'auth/telegram-bot/webhook',
                     method: RequestMethod.POST,
                 },

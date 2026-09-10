@@ -56,7 +56,15 @@ export class HomeController {
         @Body(new ValidationPipe({ transform: true })) dto: CheckInOutDto,
         @Res({ passthrough: true }) res: express.Response,
     ) {
-        return await this._service.recordCheckIn(res.locals.user, dto);
+        return await this._service.recordCheckIn(res?.locals?.user, dto);
+    }
+
+    @Post('attendance/scan-checkin')
+    async recordScanCheckIn(
+        @Body(new ValidationPipe({ transform: true })) dto: CheckInOutDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.recordCheckIn(res?.locals?.user, dto);
     }
 
     @Post('attendance/check-out')

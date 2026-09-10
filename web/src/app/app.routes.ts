@@ -50,6 +50,20 @@ export const appRoutes: Route[] = [
         ],
     },
     {
+        path: 'attendance',
+        component: LayoutComponent,
+        data: { layout: 'empty' },
+        children: [
+            {
+                path: 'scan',
+                loadComponent: () =>
+                    import(
+                        'app/resources/2-user/1-home/attendance-dialog/mobile-attendance-scan.component'
+                    ).then((m) => m.MobileAttendanceScanComponent),
+            },
+        ],
+    },
+    {
         path: 'auth',
         canActivate: [NoAuthGuard],
         component: LayoutComponent,
