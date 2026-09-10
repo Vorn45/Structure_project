@@ -194,48 +194,62 @@ export interface TeamMember {
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-start">
                         
                         <!-- Reporter (អ្នករាយការណ៍) -->
-                        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/30 space-y-2">
+                        <div class="space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="text-[13px] font-medium text-slate-700 dark:text-slate-300 block">
-                                    អ្នករាយការណ៍
-                                </span>
-                                <button
-                                    *ngIf="reporterName"
-                                    type="button"
-                                    (click)="clearReporter()"
-                                    class="text-[12px] text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
-                                >
-                                    សម្អាត
-                                </button>
+                                <label class="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                    <span>អ្នករាយការណ៍</span>
+                                </label>
+                                <div class="flex items-center gap-1.5">
+                                    <button
+                                        *ngIf="reporterName"
+                                        type="button"
+                                        (click)="clearReporter()"
+                                        class="text-[12px] text-slate-400 hover:text-rose-500 transition-colors cursor-pointer mr-1"
+                                    >
+                                        សម្អាត
+                                    </button>
+                                    <button
+                                        type="button"
+                                        [matMenuTriggerFor]="reporterMenu"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer">
+                                        <mat-icon svgIcon="mdi:account-plus-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                                        <span>{{ reporterName ? 'ប្តូរ' : 'ចាត់តាំង' }}</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Selected Reporter Card -->
-                            <div *ngIf="reporterName" class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                            <div *ngIf="reporterName" class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
                                     <img *ngIf="reporterAvatar" [src]="reporterAvatar" alt="Avatar" class="w-full h-full object-cover" />
                                     <mat-icon *ngIf="!reporterAvatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-[14px] font-medium text-slate-800 dark:text-white truncate leading-tight">
+                                    <p class="text-[13px] font-medium text-slate-800 dark:text-white truncate leading-tight">
                                         {{ reporterName }}
                                     </p>
-                                    <p class="text-[11px] text-slate-400 truncate mt-0.5">
+                                    <p class="text-[11px] text-slate-400 truncate">
                                         {{ reporterRole || 'អ្នករាយការណ៍' }}
                                     </p>
                                 </div>
                                 <button
                                     type="button"
-                                    [matMenuTriggerFor]="reporterMenu"
-                                    class="text-[12px] text-blue-600 dark:text-blue-400 hover:underline px-1.5 py-1 rounded cursor-pointer"
+                                    (click)="clearReporter()"
+                                    class="text-slate-400 hover:text-rose-500 transition-colors p-1 cursor-pointer"
+                                    matTooltip="ដកចេញ"
                                 >
-                                    ប្តូរ
+                                    <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
                                 </button>
                             </div>
 
-                            <!-- Empty state for Reporter -->
-                            <div *ngIf="!reporterName" class="p-3 text-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
-                                <p class="text-xs text-slate-500 dark:text-slate-400">មិនទាន់បានកំណត់អ្នកបង្កើតនៅឡើយទេ</p>
-                            </div>
+                            <!-- Unselected Reporter Placeholder -->
+                            <button *ngIf="!reporterName"
+                                type="button"
+                                [matMenuTriggerFor]="reporterMenu"
+                                class="w-full py-2.5 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 bg-white dark:bg-slate-800 text-left flex items-center justify-between text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
+                                <span class="text-[13px] font-medium">+ ជ្រើសរើសអ្នករាយការណ៍</span>
+                                <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400"></mat-icon>
+                            </button>
                         </div>
 
                         <!-- Assignees Section -->
@@ -333,8 +347,11 @@ export interface TeamMember {
 
                     <!-- Menu for Reporter -->
                     <mat-menu #reporterMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
-                        <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1">
-                            <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសអ្នកបង្កើត</span>
+                        <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
+                            <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសអ្នករាយការណ៍</span>
+                            <span *ngIf="reporterName" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
+                                បានជ្រើសរើស
+                            </span>
                         </div>
                         <div class="max-h-60 overflow-y-auto space-y-0.5">
                             <button *ngFor="let m of teamMembers" mat-menu-item (click)="selectReporter(m)"
@@ -743,6 +760,7 @@ export class CreateTaskDialogComponent implements OnInit {
         { id: '1', name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin / Lead Developer' },
         { id: '2', name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead' },
         { id: '3', name: 'ថា វីនណឺរ', role: 'Backend Lead' },
+        { id: '4', name: 'ភឿង សុវណ្ណារ៉ា', role: 'Developer' },
     ];
     selectedAssigneeIds = signal<string[]>([]);
 
@@ -765,8 +783,12 @@ export class CreateTaskDialogComponent implements OnInit {
     }
 
     selectReporter(m: TeamMember): void {
+        if (this.reporterName === m.name || (this.reporterId && String(this.reporterId) === String(m.id))) {
+            this.clearReporter();
+            return;
+        }
         this.reporterName = m.name;
-        this.reporterRole = m.role || '';
+        this.reporterRole = m.role || 'អ្នករាយការណ៍';
         this.reporterAvatar = m.avatar || null;
         this.reporterId = m.id;
     }
@@ -839,6 +861,18 @@ export class CreateTaskDialogComponent implements OnInit {
                 role: m.role,
                 avatar: m.avatar,
             }));
+        }
+        if (this.data?.user) {
+            const u = this.data.user;
+            const uName = u.en_name || u.name || u.kh_name || '';
+            if (uName && !this.teamMembers.some((m) => m.name.toLowerCase() === uName.toLowerCase())) {
+                this.teamMembers.unshift({
+                    id: String(u.id || 'me'),
+                    name: uName,
+                    role: u.roles?.[0]?.name_en || u.roles?.[0]?.name_kh || 'User',
+                    avatar: u.avatar?.uri || null,
+                });
+            }
         }
         this.taskCode = this.generateNextCode(this.selectedProjectId);
         // Note: reporter and assignees deliberately start empty (no defaults) per user requirement
