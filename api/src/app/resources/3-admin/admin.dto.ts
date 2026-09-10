@@ -67,6 +67,10 @@ export class CreateAdminUserDto {
     @IsOptional()
     @IsString()
     password?: string;
+
+    @IsOptional()
+    @IsNumber()
+    is_active?: number;
 }
 
 export class UpdateAdminUserDto {
