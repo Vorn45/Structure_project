@@ -798,6 +798,12 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     onKanbanWheel(event: WheelEvent, el: HTMLElement): void {
+        if (this.showChatRoom() || this.selectedTask()) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
         const target = event.target as HTMLElement | null;
         const scrollableCol = target?.closest('.kanban-column-scroll') as HTMLElement | null;
 
