@@ -52,39 +52,26 @@
             <!-- Right: Project Selector, Stacked Avatars (+2), Search Box, and Plus Button -->
             <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
                 <!-- Project Filter: Circular Avatars Stack (Matching reference screenshot) -->
-                <div class="flex items-center -space-x-2 shrink-0">
-                    <!-- 1. BMS Digitech (CamCyber Logo) -->
-                    <button type="button"
-                        (click)="toggleProjectFilter(projects()[0].id)"
-                        [matTooltip]="projects()[0].name"
-                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105"
-                        [ngClass]="selectedProjectId() === projects()[0].id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10'">
-                        <img [src]="projects()[0].logo" [alt]="projects()[0].name" class="w-full h-full object-contain p-0.5" />
-                    </button>
+                <div class="flex items-center -space-x-1.5 shrink-0">
+                    <!-- Show first 3 projects as circular avatar buttons -->
+                    <ng-container *ngFor="let p of projects().slice(0, 3); let i = index">
+                        <button type="button"
+                            (click)="toggleProjectFilter(p.id)"
+                            [matTooltip]="p.name"
+                            class="relative inline-flex w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] items-center justify-center rounded-full ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105 shrink-0"
+                            [ngClass]="[p.bgClass || 'bg-slate-600 text-white', selectedProjectId() === p.id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10']">
+                            <!-- Icon if defined -->
+                            <mat-icon *ngIf="p.icon" [svgIcon]="p.icon" class="!w-4 !h-4 text-white"></mat-icon>
+                            <!-- Letter fallback -->
+                            <span *ngIf="!p.icon" class="text-[11px] font-bold text-white">{{ (p.code || p.name).slice(0, 2) }}</span>
+                        </button>
+                    </ng-container>
 
-                    <!-- 2. WMS Digitech (Olive Green with Dashboard/Monitor Icon) -->
-                    <button type="button"
-                        (click)="toggleProjectFilter(projects()[1].id)"
-                        [matTooltip]="projects()[1].name"
-                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full bg-[#3f6212] text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 hover:scale-105"
-                        [ngClass]="selectedProjectId() === projects()[1].id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10'">
-                        <mat-icon [svgIcon]="projects()[1].icon || 'mdi:monitor-dashboard'" class="icon-size-4.5 text-white"></mat-icon>
-                    </button>
-
-                    <!-- 3. Nursing Council Digital System (Cambodian Seal / Emblem Logo) -->
-                    <button type="button"
-                        (click)="toggleProjectFilter(projects()[2].id)"
-                        [matTooltip]="projects()[2].name"
-                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105"
-                        [ngClass]="selectedProjectId() === projects()[2].id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10'">
-                        <img [src]="projects()[2].logo" [alt]="projects()[2].name" class="w-full h-full object-contain p-0.5" />
-                    </button>
-
-                    <!-- 4. +2 Badge Pill Button (Opens menu for remaining projects & All projects) -->
+                    <!-- +N Badge Pill Button (Opens menu for remaining projects & All projects) -->
                     <button type="button"
                         [matMenuTriggerFor]="projectMenu"
                         [matTooltip]="isOtherProjectSelected() ? ('គម្រោងបច្ចុប្បន្ន: ' + getSelectedOtherProjectName()) : 'គម្រោងផ្សេងទៀត (Other Projects)'"
-                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full text-white text-[11px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 hover:scale-105"
+                        class="relative inline-flex w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] items-center justify-center rounded-full text-white text-[11px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 hover:scale-105 shrink-0"
                         [ngClass]="isOtherProjectSelected() ? 'bg-blue-600 ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'bg-slate-600 hover:bg-slate-500 hover:z-10'">
                         +{{ projects().length - 3 }}
                     </button>
@@ -106,12 +93,9 @@
 
                     <!-- List all projects -->
                     <button *ngFor="let p of projects()" mat-menu-item (click)="setProjectFilter(p.id)" class="!text-[14px]">
-                        <div *ngIf="p.logo" class="w-5 h-5 rounded-full bg-white border border-slate-200 overflow-hidden flex items-center justify-center mr-2 shrink-0">
-                            <img [src]="p.logo" [alt]="p.name" class="w-full h-full object-contain" />
-                        </div>
-                        <div *ngIf="!p.logo" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] mr-2 shrink-0" [ngClass]="p.bgClass || 'bg-blue-600 text-white'">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] mr-2 shrink-0" [ngClass]="p.bgClass || 'bg-blue-600 text-white'">
                             <mat-icon *ngIf="p.icon" [svgIcon]="p.icon" class="!w-3.5 !h-3.5 text-white"></mat-icon>
-                            <span *ngIf="!p.icon">{{ (p.code || p.name).slice(0, 2) }}</span>
+                            <span *ngIf="!p.icon" class="font-bold">{{ (p.code || p.name).slice(0, 2) }}</span>
                         </div>
                         <span class="truncate max-w-[220px]" [class.font-bold]="selectedProjectId() === p.id" [class.text-blue-600]="selectedProjectId() === p.id">
                             {{ p.name }}
