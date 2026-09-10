@@ -483,7 +483,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         this._taskSocket
             .taskUpdates()
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe(() => this.loadTasks());
+            .subscribe(() => this.loadTasks(true));
 
         this._route.queryParams.subscribe((params) => {
             if (params['status']) {
@@ -573,6 +573,34 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         });
     }
 
+    updateLocalCountDelta(oldStatus?: string, newStatus?: string): void {
+        if (!oldStatus || !newStatus || oldStatus === newStatus) return;
+
+        const normalize = (s: string) => {
+            const l = (s || '').toLowerCase();
+            if (l === 'pending') return 'new';
+            if (l === 'todo') return 'unconfirmed';
+            if (l === 'review') return 'in_review';
+            if (l === 'completed') return 'done';
+            return l;
+        };
+
+        const from = normalize(oldStatus);
+        const to = normalize(newStatus);
+        if (from === to) return;
+
+        this.counts.update((c) => {
+            const updated = { ...c };
+            if (from in updated && (updated as any)[from] > 0) {
+                (updated as any)[from]--;
+            }
+            if (to in updated) {
+                (updated as any)[to]++;
+            }
+            return updated;
+        });
+    }
+
     isTaskBelongToCurrentUser(task: TaskItem): boolean {
         const user = this._userService.getUser();
         const userNameEn = (user?.en_name || user?.name || '').toLowerCase().trim();
@@ -607,8 +635,10 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    loadTasks(): void {
-        this.loading.set(true);
+    loadTasks(silent = false): void {
+        if (!silent) {
+            this.loading.set(true);
+        }
         this._taskService
             .getTasks({
                 search: this.searchQuery() || undefined,
@@ -646,7 +676,16 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                         });
                     }
 
-                    this.tasks.set(finalTasks);
+                    // For silent background sync while filtering, retain currently visible tasks
+                    // so an in-flight or just-updated task does not abruptly vanish from under the user's cursor
+                    if (silent && this.activeStatus() !== 'all') {
+                        const currentTasks = this.tasks();
+                        const currentTaskIds = new Set(finalTasks.map((t) => t.id));
+                        const retainedTasks = currentTasks.filter((t) => !currentTaskIds.has(t.id));
+                        finalTasks = [...finalTasks, ...retainedTasks] as any;
+                    }
+
+                    this.tasks.set(finalTasks as any);
                     this.computeCounts(finalTasks, res.data.counts);
                     this.loading.set(false);
                     if (this.projects().length <= 2) {
@@ -851,6 +890,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     updateTaskStatus(task: TaskItem, newStatus: string): void {
         const oldStatus = task.status;
         const targetStatus = newStatus as TaskStatus;
+        if (oldStatus === targetStatus) return;
+
         const actorName = this.getCurrentActorName();
         const actorPrefix = actorName ? `${actorName} ` : '';
 
@@ -866,10 +907,12 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             this.appendChatMessage(task.id, systemMsg);
         }
 
+        // Optimistically update task in place
         this.tasks.update((tasks) =>
             tasks.map((t) => (t.id === task.id ? { ...t, status: targetStatus } : t))
         );
-        this.computeCounts(this.tasks());
+        // Smoothly adjust count chips without zeroing out other statuses
+        this.updateLocalCountDelta(oldStatus, targetStatus);
 
         this._taskService.updateTask(task.id, { status: targetStatus as any }).subscribe({
             next: (res) => {
@@ -880,7 +923,6 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     this.tasks.update((tasks) =>
                         tasks.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
                     );
-                    this.computeCounts(this.tasks());
                 }
             },
             error: (err) => {
@@ -891,7 +933,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 this.tasks.update((tasks) =>
                     tasks.map((t) => (t.id === task.id ? { ...t, status: oldStatus } : t))
                 );
-                this.computeCounts(this.tasks());
+                this.updateLocalCountDelta(targetStatus, oldStatus);
             },
         });
     }
@@ -1158,7 +1200,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         this.tasks.update((tasks) =>
             tasks.map((t) => (t.id === task.id ? updatedTask : t))
         );
-        this.computeCounts(this.tasks());
+        this.updateLocalCountDelta(originalStatus, targetStatus);
 
         this._taskService.updateTask(task.id, { status: targetStatus as any }).subscribe({
             next: (res) => {
@@ -1166,7 +1208,6 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     this.tasks.update((tasks) =>
                         tasks.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
                     );
-                    this.computeCounts(this.tasks());
                 }
             },
             error: (err) => {
@@ -1174,7 +1215,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 this.tasks.update((tasks) =>
                     tasks.map((t) => (t.id === task.id ? { ...t, status: originalStatus } : t))
                 );
-                this.computeCounts(this.tasks());
+                this.updateLocalCountDelta(targetStatus, originalStatus);
             },
         });
     }
