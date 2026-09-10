@@ -63,10 +63,13 @@ export interface ProjectFilterOption {
                 flex-direction: column;
                 flex: 1 1 auto;
                 width: 100%;
-                height: 100%;
+                height: 100vh;
+                height: 100dvh;
+                max-height: 100vh;
+                max-height: 100dvh;
                 min-height: 0;
-                max-height: 100%;
                 overflow: hidden;
+                box-sizing: border-box;
             }
             *:not(.mat-icon):not([class*='material-icons']):not([class*='icon-']):not([class*='mdi']) {
                 font-family: 'Kantumruy Pro', sans-serif !important;
@@ -85,6 +88,7 @@ export interface ProjectFilterOption {
             .kanban-column-scroll {
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
+                overscroll-behavior: contain !important;
             }
             .kanban-column-scroll::-webkit-scrollbar {
                 display: none !important;

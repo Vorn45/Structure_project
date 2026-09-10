@@ -1,5 +1,5 @@
-<div class="flex flex-col flex-1 min-w-0 w-full h-full max-h-full p-4 bg-slate-100/70 dark:bg-slate-900/60 select-none transition-colors text-[14px] box-border overflow-hidden"
-    style="font-family: 'Kantumruy Pro', sans-serif;">
+<div class="flex flex-col flex-1 min-w-0 min-h-0 w-full h-full max-h-full p-4 bg-slate-100/70 dark:bg-slate-900/60 select-none transition-colors text-[14px] box-border overflow-hidden"
+    style="font-family: 'Kantumruy Pro', sans-serif; height: 100%; max-height: 100%; min-height: 0;">
 
     <!-- ===== FRAMED CONTENT CONTAINER (Fit height to outer padding) ===== -->
     <div class="flex flex-col flex-1 min-w-0 min-h-0 w-full h-full max-h-full bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-5 overflow-hidden">
@@ -458,7 +458,7 @@
                     <!-- Cards Droplist (Vertical Scrollable) -->
                     <div cdkDropList [id]="col.key" [cdkDropListData]="col.key"
                         (cdkDropListDropped)="onTaskDrop($event, col.key)"
-                        class="kanban-column-scroll space-y-2 flex-1 min-h-[140px] overflow-y-auto overflow-x-hidden pt-2 pr-0.5">
+                        class="kanban-column-scroll space-y-2 flex-1 min-h-0 overflow-y-auto overflow-x-hidden pt-2 pb-2 pr-0.5">
 
                         <!-- Task Card -->
                         <div *ngFor="let task of getTasksByColumn(col.key); trackBy: trackByTaskId" cdkDrag
