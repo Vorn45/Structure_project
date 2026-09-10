@@ -285,7 +285,6 @@ export class TakeAttendanceDialogComponent implements OnInit, OnDestroy {
     ]);
 
     private timerInterval?: any;
-    private pollSubscription?: Subscription;
 
     constructor(
         public dialogRef: MatDialogRef<TakeAttendanceDialogComponent>,
@@ -324,14 +323,10 @@ export class TakeAttendanceDialogComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.generateQrCode();
-        this.startLivePolling();
     }
 
     ngOnDestroy(): void {
         this.stopTimer();
-        if (this.pollSubscription) {
-            this.pollSubscription.unsubscribe();
-        }
     }
 
     async generateQrCode(): Promise<void> {
@@ -357,9 +352,21 @@ export class TakeAttendanceDialogComponent implements OnInit, OnDestroy {
 
             this.qrCodeUrl.set(url);
             this.startTimer();
+            this.refreshAttendanceLogs();
         } catch (err) {
             console.error('Error generating attendance QR code:', err);
         }
+    }
+
+    refreshAttendanceLogs(): void {
+        this._homeService.getAttendance().subscribe({
+            next: (res) => {
+                if (res?.data?.realtime_logs && Array.isArray(res.data.realtime_logs)) {
+                    this.logs.set(res.data.realtime_logs);
+                }
+            },
+            error: () => {},
+        });
     }
 
     private startTimer(): void {
@@ -379,20 +386,6 @@ export class TakeAttendanceDialogComponent implements OnInit, OnDestroy {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-    }
-
-    private startLivePolling(): void {
-        // Poll every 2.5s for real-time mobile check-in updates
-        this.pollSubscription = interval(2500)
-            .pipe(switchMap(() => this._homeService.getAttendance()))
-            .subscribe({
-                next: (res) => {
-                    if (res?.data?.realtime_logs && Array.isArray(res.data.realtime_logs)) {
-                        this.logs.set(res.data.realtime_logs);
-                    }
-                },
-                error: () => {},
-            });
     }
 
     markInstantAttendance(): void {

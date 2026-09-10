@@ -55,6 +55,11 @@ export const appRoutes: Route[] = [
         data: { layout: 'empty' },
         children: [
             {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'scan',
+            },
+            {
                 path: 'scan',
                 loadComponent: () =>
                     import(
