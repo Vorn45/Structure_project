@@ -18,7 +18,8 @@ export interface ProjectStatusOption {
     id: 'planning' | 'active' | 'on_hold' | 'completed';
     label: string;
     sublabel: string;
-    icon: string;
+    icon?: string;
+    dotColor?: string;
     activeColor: string;
     activeBg: string;
     activeBorder: string;
@@ -44,6 +45,64 @@ export interface TeamMember {
         MatTooltipModule,
         MatDividerModule,
         SideDialogCloseButtonComponent,
+    ],
+    styles: [
+        `
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-content {
+                padding: 4px !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item {
+                border-radius: 12px !important;
+                min-height: 40px !important;
+                height: auto !important;
+                padding: 6px 12px !important;
+                transition: all 120ms ease !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item:hover,
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item.cdk-keyboard-focused,
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item.cdk-program-focused {
+                background-color: #f1f5f9 !important;
+                color: #0f172a !important;
+            }
+
+            :host-context(.dark) ::ng-deep .task-dropdown-menu .mat-mdc-menu-item,
+            .dark ::ng-deep .task-dropdown-menu .mat-mdc-menu-item {
+                color: #cbd5e1 !important;
+            }
+
+            :host-context(.dark) ::ng-deep .task-dropdown-menu .mat-mdc-menu-item:hover,
+            .dark ::ng-deep .task-dropdown-menu .mat-mdc-menu-item:hover {
+                background-color: #1c2b44 !important;
+                color: #ffffff !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mdc-list-item__primary-text {
+                color: inherit !important;
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mat-icon {
+                margin: 0 !important;
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+                margin-inline-end: 0 !important;
+                margin-inline-start: 0 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            ::ng-deep .task-dropdown-menu .mat-mdc-menu-item .mat-icon svg {
+                width: 100% !important;
+                height: 100% !important;
+                display: block !important;
+                margin: auto !important;
+            }
+        `,
     ],
     template: `
         <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-hidden" style="font-family: 'Kantumruy Pro', sans-serif;">
@@ -106,34 +165,30 @@ export interface TeamMember {
                             />
                         </div>
 
-                        <!-- 2. PROJECT STATUS SELECTION (4 Standard Project Statuses) -->
+                        <!-- 2. PROJECT STATUS SELECTION (Clean Minimal Dots) -->
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <label class="block font-normal text-slate-800 dark:text-slate-200 text-[16px]">
-                                    ស្ថានភាពគម្រោង (Project Status) <span class="text-red-500">*</span>
+                                <label class="block font-medium text-slate-700 dark:text-slate-300 text-[13.5px]">
+                                    ស្ថានភាពគម្រោង <span class="text-rose-500">*</span>
                                 </label>
-                                <span class="text-[13px] text-slate-400">ជ្រើសរើស ១ ក្នុងចំណោម ៤</span>
+                                <span class="text-[12px] text-slate-400">ជ្រើសរើស ១</span>
                             </div>
 
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-kantumruy">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-kantumruy">
                                 <button
                                     *ngFor="let s of statusList"
                                     type="button"
                                     (click)="selectedStatus.set(s.id)"
-                                    class="p-2.5 rounded-xl border text-left flex flex-col justify-center gap-1 transition-all cursor-pointer select-none font-kantumruy"
+                                    class="px-3 py-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer select-none font-kantumruy text-[13px]"
                                     [ngClass]="selectedStatus() === s.id
                                         ? s.activeBorder + ' ' + s.activeBg + ' ring-1 ' + s.activeBorder
-                                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
+                                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'"
                                 >
-                                    <div class="flex items-center gap-1.5">
-                                        <mat-icon [svgIcon]="s.icon" class="icon-size-4.5 shrink-0"
-                                            [ngClass]="selectedStatus() === s.id ? s.activeColor : 'text-slate-400'"></mat-icon>
-                                        <span class="text-[14px] truncate"
-                                            [ngClass]="selectedStatus() === s.id ? s.activeColor + ' font-medium' : 'font-normal'">
-                                            {{ s.label }}
-                                        </span>
-                                    </div>
-                                    <span class="text-[11.5px] text-slate-400 pl-6 truncate">{{ s.sublabel }}</span>
+                                    <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="s.dotColor || 'bg-slate-400'"></span>
+                                    <span class="truncate"
+                                        [ngClass]="selectedStatus() === s.id ? s.activeColor + ' font-medium' : 'font-normal'">
+                                        {{ s.label }}
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -142,122 +197,193 @@ export interface TeamMember {
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-start">
                             
                             <!-- Project Lead (ប្រធានគម្រោង) -->
-                            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 space-y-2.5">
+                            <div class="space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-[13px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                                        ប្រធានគម្រោង (PROJECT LEAD)
-                                    </span>
-                                    <button
-                                        type="button"
-                                        [matMenuTriggerFor]="leadMenu"
-                                        class="text-[12px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-kantumruy"
-                                    >
-                                        ផ្លាស់ប្តូរ
-                                    </button>
+                                    <label class="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                        <span>ប្រធានគម្រោង</span>
+                                    </label>
+                                    <div class="flex items-center gap-1.5">
+                                        <button
+                                            *ngIf="leadName"
+                                            type="button"
+                                            (click)="clearLead()"
+                                            class="text-[12px] text-slate-400 hover:text-rose-500 transition-colors cursor-pointer mr-1"
+                                        >
+                                            សម្អាត
+                                        </button>
+                                        <button
+                                            type="button"
+                                            [matMenuTriggerFor]="leadMenu"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer">
+                                            <mat-icon svgIcon="mdi:account-plus-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                                            <span>{{ leadName ? 'ប្តូរ' : 'ចាត់តាំង' }}</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3 bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xs">
-                                    <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium text-[16px] shrink-0">
-                                        {{ leadName.slice(0, 1) }}
+
+                                <!-- Selected Lead Card -->
+                                <div *ngIf="leadName" class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                    <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                        <img *ngIf="leadAvatar" [src]="leadAvatar" alt="Avatar" class="w-full h-full object-cover" />
+                                        <mat-icon *ngIf="!leadAvatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                     </div>
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-[15px] font-medium text-slate-900 dark:text-white truncate leading-tight">
+                                        <p class="text-[13px] font-medium text-slate-800 dark:text-white truncate leading-tight">
                                             {{ leadName }}
                                         </p>
-                                        <p class="text-[12px] text-slate-400 truncate mt-0.5">
-                                            {{ leadRole }}
+                                        <p class="text-[11px] text-slate-400 truncate">
+                                            {{ leadRole || 'ប្រធានគម្រោង' }}
                                         </p>
                                     </div>
-                                    <span class="px-2 py-0.5 rounded text-[11px] bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-medium shrink-0">
-                                        Lead
-                                    </span>
+                                    <button
+                                        type="button"
+                                        (click)="clearLead()"
+                                        class="text-slate-400 hover:text-rose-500 transition-colors p-1 cursor-pointer"
+                                        matTooltip="ដកចេញ"
+                                    >
+                                        <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
+                                    </button>
                                 </div>
+
+                                <!-- Unselected Lead Placeholder -->
+                                <button *ngIf="!leadName"
+                                    type="button"
+                                    [matMenuTriggerFor]="leadMenu"
+                                    class="w-full py-2.5 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 bg-white dark:bg-slate-800 text-left flex items-center justify-between text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
+                                    <span class="text-[13px] font-medium">+ ជ្រើសរើសប្រធានគម្រោង</span>
+                                    <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400"></mat-icon>
+                                </button>
                             </div>
 
-                            <!-- Team Members (សមាជិកក្រុមការងារ - Multi-Select) -->
-                            <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 space-y-2.5">
+                            <!-- Team Members (សមាជិកក្រុមការងារ) -->
+                            <div class="space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-[13px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                                        សមាជិកក្រុមការងារ (MEMBERS) ({{ selectedMembers.length }})
-                                    </span>
+                                    <label class="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                        <span>សមាជិកក្រុមការងារ</span>
+                                        <span *ngIf="selectedMembers.length > 0" class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 font-semibold">
+                                            {{ selectedMembers.length }} នាក់
+                                        </span>
+                                    </label>
                                     <button
                                         type="button"
                                         [matMenuTriggerFor]="membersMenu"
-                                        class="px-2.5 py-1 text-[13px] font-medium font-kantumruy text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                                    >
-                                        <mat-icon svgIcon="mdi:account-plus" class="icon-size-4"></mat-icon>
-                                        <span>+ ជ្រើសរើស</span>
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer">
+                                        <mat-icon svgIcon="mdi:account-plus-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                                        <span>ចាត់តាំង</span>
                                     </button>
                                 </div>
 
-                                <!-- Multi-selected Team Members -->
-                                <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                <!-- Selected Members List -->
+                                <div *ngIf="selectedMembers.length > 0" class="space-y-1.5 max-h-36 overflow-y-auto pr-0.5">
                                     <div *ngFor="let m of selectedMembers"
-                                        class="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-2xs">
-                                        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-[14px] shrink-0">
-                                            {{ m.name.slice(0, 1) }}
+                                        class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                            <img *ngIf="m.avatar" [src]="m.avatar" alt="Avatar" class="w-full h-full object-cover" />
+                                            <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <p class="text-[14px] font-medium text-slate-900 dark:text-white truncate leading-tight">
+                                            <p class="text-[13px] font-medium text-slate-800 dark:text-white truncate leading-tight">
                                                 {{ m.name }}
                                             </p>
-                                            <p class="text-[11px] text-slate-400 truncate mt-0.5">
-                                                {{ m.role }}
+                                            <p class="text-[11px] text-slate-400 truncate">
+                                                {{ m.role || 'សមាជិកក្រុមការងារ' }}
                                             </p>
                                         </div>
                                         <button
                                             type="button"
                                             (click)="toggleMember(m.id)"
-                                            class="text-slate-400 hover:text-red-500 transition-colors p-1"
+                                            class="text-slate-400 hover:text-rose-500 transition-colors p-1 cursor-pointer"
                                             matTooltip="ដកចេញ"
                                         >
-                                            <mat-icon svgIcon="mdi:close" class="icon-size-4"></mat-icon>
+                                            <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
                                         </button>
                                     </div>
-
-                                    <div *ngIf="!selectedMembers.length" class="text-center py-3 text-[13px] text-slate-400 font-kantumruy bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-                                        សូមចុច «+ ជ្រើសរើស» ដើម្បីបន្ថែមសមាជិក
-                                    </div>
                                 </div>
+
+                                <!-- Unselected Members Placeholder -->
+                                <button *ngIf="selectedMembers.length === 0"
+                                    type="button"
+                                    [matMenuTriggerFor]="membersMenu"
+                                    class="w-full py-2.5 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 bg-white dark:bg-slate-800 text-left flex items-center justify-between text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
+                                    <span class="text-[13px] font-medium">+ ជ្រើសរើសសមាជិកក្រុមការងារ</span>
+                                    <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400"></mat-icon>
+                                </button>
                             </div>
 
                         </div>
 
                         <!-- Dropdown Menu for Project Lead -->
-                        <mat-menu #leadMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
-                            <div class="px-3 py-1.5 text-[12px] font-medium text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-                                ជ្រើសរើសប្រធានគម្រោង (Project Lead)
+                        <mat-menu #leadMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
+                            <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
+                                <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសប្រធានគម្រោង</span>
+                                <span *ngIf="leadName" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
+                                    បានជ្រើសរើស
+                                </span>
                             </div>
-                            <div *ngFor="let m of availableMembers"
-                                (click)="leadName = m.name; leadRole = m.role"
-                                class="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-lg transition-colors font-kantumruy select-none">
-                                <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-[12px] font-medium shrink-0">
-                                    {{ m.name.slice(0, 1) }}
+                            <div class="max-h-60 overflow-y-auto space-y-0.5">
+                                <button *ngFor="let m of availableMembers" mat-menu-item (click)="selectLead(m)"
+                                    class="!text-[13px] !rounded-xl !h-auto !py-1.5 my-0.5">
+                                    <div class="flex items-center justify-between w-full">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                                <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
+                                                <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                                            </div>
+                                            <div class="min-w-0 text-left">
+                                                <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">{{ m.name }}</p>
+                                                <p class="text-[11px] text-slate-400 truncate leading-tight">{{ m.role || 'ប្រធានគម្រោង' }}</p>
+                                            </div>
+                                        </div>
+                                        <mat-icon *ngIf="leadName === m.name || (leadId && String(leadId) === String(m.id))" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 shrink-0 text-blue-500 ml-auto"></mat-icon>
+                                    </div>
+                                </button>
+
+                                <div *ngIf="availableMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
+                                    រកមិនឃើញសមាជិកទេ
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-[14px] font-medium text-slate-800 dark:text-white truncate">{{ m.name }}</p>
-                                    <p class="text-[11px] text-slate-400 truncate">{{ m.role }}</p>
-                                </div>
-                                <mat-icon *ngIf="leadName === m.name" svgIcon="mdi:check" class="icon-size-4 text-blue-600"></mat-icon>
+                            </div>
+                            <div *ngIf="leadName" class="border-t border-slate-100 dark:border-slate-700/80 mt-1 pt-1">
+                                <button mat-menu-item (click)="clearLead()"
+                                    class="!text-[12.5px] !rounded-xl !h-auto !py-1.5 !text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/30">
+                                    <div class="flex items-center gap-2">
+                                        <mat-icon svgIcon="mdi:account-off-outline" class="!w-4 !h-4 text-rose-500"></mat-icon>
+                                        <span>សម្អាត (មិនកំណត់)</span>
+                                    </div>
+                                </button>
                             </div>
                         </mat-menu>
 
                         <!-- Multi-Select Menu for Team Members -->
-                        <mat-menu #membersMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
-                            <div class="px-3 py-1.5 text-[12px] font-medium text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-                                ជ្រើសរើសសមាជិកក្រុមការងារ (Team Members)
+                        <mat-menu #membersMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
+                            <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
+                                <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសសមាជិកក្រុមការងារ</span>
+                                <span *ngIf="selectedMembers.length > 0" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
+                                    {{ selectedMembers.length }} នាក់
+                                </span>
                             </div>
-                            <div *ngFor="let m of availableMembers"
-                                (click)="toggleMember(m.id); $event.stopPropagation()"
-                                class="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-lg transition-colors font-kantumruy select-none">
-                                <mat-icon [svgIcon]="isMemberSelected(m.id) ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'"
-                                    class="icon-size-5 shrink-0"
-                                    [ngClass]="isMemberSelected(m.id) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'"></mat-icon>
-                                <div class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[12px] font-medium shrink-0">
-                                    {{ m.name.slice(0, 1) }}
+                            <div (click)="$event.stopPropagation()" class="max-h-60 overflow-y-auto space-y-0.5">
+                                <div *ngFor="let m of availableMembers"
+                                    (click)="toggleMember(m.id)"
+                                    class="flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors font-kantumruy select-none my-0.5">
+                                    <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                            <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
+                                            <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                                        </div>
+                                        <div class="min-w-0 text-left flex-1">
+                                            <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">
+                                                {{ m.name }}
+                                            </p>
+                                            <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate leading-tight">
+                                                {{ m.role || 'សមាជិកក្រុមការងារ' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <mat-icon *ngIf="isMemberSelected(m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 text-blue-500 shrink-0 ml-auto"></mat-icon>
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-[14px] font-medium text-slate-800 dark:text-white truncate">{{ m.name }}</p>
-                                    <p class="text-[11px] text-slate-400 truncate">{{ m.role }}</p>
+
+                                <div *ngIf="availableMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
+                                    រកមិនឃើញសមាជិកទេ
                                 </div>
                             </div>
                         </mat-menu>
@@ -397,18 +523,30 @@ export interface TeamMember {
 
             </mat-dialog-content>
 
-            <!-- Bottom Sticky Action -->
-            <div class="w-full flex items-center p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 font-kantumruy">
+            <!-- Bottom Sticky Action Bar -->
+            <div class="w-full flex items-center justify-between p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 font-kantumruy gap-2.5">
+                <!-- Cancel -->
                 <button
                     type="button"
-                    (click)="createProject()"
-                    [disabled]="isSubmitting() || !projectName.trim()"
-                    class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-2xs"
+                    (click)="dialogRef.close()"
+                    class="h-10 px-4 rounded-xl font-medium font-kantumruy text-[14px] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
-                    <mat-icon *ngIf="!isSubmitting()" svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
-                    <mat-icon *ngIf="isSubmitting()" svgIcon="mdi:loading" class="!w-5 !h-5 !text-white shrink-0 animate-spin"></mat-icon>
-                    <span>{{ isSubmitting() ? 'កំពុងបង្កើត...' : 'បង្កើតគម្រោង' }}</span>
+                    បោះបង់
                 </button>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        (click)="createProject()"
+                        [disabled]="isSubmitting() || !projectName.trim()"
+                        class="h-10 px-5 rounded-xl font-medium font-kantumruy text-[14px] text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                    >
+                        <mat-icon *ngIf="!isSubmitting()" svgIcon="mdi:plus" class="!w-4 !h-4 text-white shrink-0"></mat-icon>
+                        <mat-icon *ngIf="isSubmitting()" svgIcon="mdi:loading" class="!w-4 !h-4 text-white shrink-0 animate-spin"></mat-icon>
+                        <span>{{ isSubmitting() ? 'កំពុងបង្កើត...' : 'បង្កើតគម្រោង' }}</span>
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -433,8 +571,9 @@ export class CreateProjectDialogComponent implements OnInit {
             label: 'រៀបចំផែនការ',
             sublabel: 'Planning',
             icon: 'mdi:clock-outline',
+            dotColor: 'bg-blue-500',
             activeColor: 'text-blue-600 dark:text-blue-400',
-            activeBg: 'bg-blue-50/80 dark:bg-blue-950/40',
+            activeBg: 'bg-blue-50/70 dark:bg-blue-950/40',
             activeBorder: 'border-blue-500',
         },
         {
@@ -442,8 +581,9 @@ export class CreateProjectDialogComponent implements OnInit {
             label: 'កំពុងដំណើរការ',
             sublabel: 'In Progress',
             icon: 'mdi:progress-clock',
+            dotColor: 'bg-emerald-500',
             activeColor: 'text-emerald-600 dark:text-emerald-400',
-            activeBg: 'bg-emerald-50/80 dark:bg-emerald-950/40',
+            activeBg: 'bg-emerald-50/70 dark:bg-emerald-950/40',
             activeBorder: 'border-emerald-500',
         },
         {
@@ -451,8 +591,9 @@ export class CreateProjectDialogComponent implements OnInit {
             label: 'ផ្អាក',
             sublabel: 'On Hold',
             icon: 'mdi:pause-circle-outline',
+            dotColor: 'bg-amber-500',
             activeColor: 'text-amber-600 dark:text-amber-400',
-            activeBg: 'bg-amber-50/80 dark:bg-amber-950/40',
+            activeBg: 'bg-amber-50/70 dark:bg-amber-950/40',
             activeBorder: 'border-amber-500',
         },
         {
@@ -460,8 +601,9 @@ export class CreateProjectDialogComponent implements OnInit {
             label: 'បានបញ្ចប់',
             sublabel: 'Completed',
             icon: 'mdi:check-circle-outline',
+            dotColor: 'bg-purple-500',
             activeColor: 'text-purple-600 dark:text-purple-400',
-            activeBg: 'bg-purple-50/80 dark:bg-purple-950/40',
+            activeBg: 'bg-purple-50/70 dark:bg-purple-950/40',
             activeBorder: 'border-purple-500',
         },
     ];
@@ -469,31 +611,53 @@ export class CreateProjectDialogComponent implements OnInit {
 
     // Project Lead (ប្រធានគម្រោង)
     leadName: string = 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
-    leadRole: string = 'Super Admin & Lead';
+    leadRole: string = 'Super Admin / Lead Developer';
+    leadAvatar: string | null = null;
+    leadId: string | number | null = '1';
 
     // Team Members Available for Selection
     availableMembers: TeamMember[] = [
-        { id: '1', name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & Lead' },
-        { id: '2', name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Engineer' },
-        { id: '3', name: 'ថា វីនណឺរ', role: 'QA & DevOps Engineer' },
+        { id: '1', name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin / Lead Developer' },
+        { id: '2', name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead' },
+        { id: '3', name: 'ថា វីនណឺរ', role: 'Backend Lead' },
+        { id: '4', name: 'ភឿង សុវណ្ណារ៉ា', role: 'Developer' },
     ];
     selectedMemberIds = signal<string[]>(['1', '2']);
 
     get selectedMembers(): TeamMember[] {
-        return this.availableMembers.filter((m) => this.selectedMemberIds().includes(m.id));
+        return this.availableMembers.filter((m) => this.selectedMemberIds().includes(String(m.id)));
     }
 
-    isMemberSelected(id: string): boolean {
-        return this.selectedMemberIds().includes(id);
+    isMemberSelected(id: string | number): boolean {
+        return this.selectedMemberIds().includes(String(id));
     }
 
-    toggleMember(id: string): void {
+    toggleMember(id: string | number): void {
         const current = this.selectedMemberIds();
-        if (current.includes(id)) {
-            this.selectedMemberIds.set(current.filter((item) => item !== id));
+        const strId = String(id);
+        if (current.includes(strId)) {
+            this.selectedMemberIds.set(current.filter((item) => item !== strId));
         } else {
-            this.selectedMemberIds.set([...current, id]);
+            this.selectedMemberIds.set([...current, strId]);
         }
+    }
+
+    selectLead(m: TeamMember): void {
+        if (this.leadName === m.name || (this.leadId && String(this.leadId) === String(m.id))) {
+            this.clearLead();
+            return;
+        }
+        this.leadName = m.name;
+        this.leadRole = m.role || 'ប្រធានគម្រោង';
+        this.leadAvatar = m.avatar || null;
+        this.leadId = m.id;
+    }
+
+    clearLead(): void {
+        this.leadName = '';
+        this.leadRole = '';
+        this.leadAvatar = null;
+        this.leadId = null;
     }
 
     constructor(
@@ -503,6 +667,21 @@ export class CreateProjectDialogComponent implements OnInit {
     ) {
         if (this.data?.user?.kh_name) {
             this.leadName = this.data.user.kh_name;
+            this.leadRole = this.data.user.position || 'Super Admin & Lead';
+            if (this.data.user.avatar) {
+                this.leadAvatar = this.data.user.avatar;
+            }
+            if (this.data.user.id) {
+                this.leadId = this.data.user.id;
+            }
+            if (!this.availableMembers.some((m) => m.name === this.leadName)) {
+                this.availableMembers.unshift({
+                    id: String(this.leadId),
+                    name: this.leadName,
+                    role: this.leadRole,
+                    avatar: this.leadAvatar || undefined,
+                });
+            }
         }
     }
 
@@ -521,16 +700,16 @@ export class CreateProjectDialogComponent implements OnInit {
             id: Number(m.id) || 1,
             name: m.name,
             role: m.role,
-            avatar: null,
+            avatar: m.avatar || null,
         }));
 
-        // Ensure lead is in members list
-        if (!membersPayload.some((m) => m.name === this.leadName)) {
+        // Ensure lead is in members list if defined
+        if (this.leadName && !membersPayload.some((m) => m.name === this.leadName)) {
             membersPayload.unshift({
-                id: Date.now(),
+                id: Number(this.leadId) || Date.now(),
                 name: this.leadName,
-                role: this.leadRole,
-                avatar: null,
+                role: this.leadRole || 'ប្រធានគម្រោង',
+                avatar: this.leadAvatar || null,
             });
         }
 
@@ -558,7 +737,7 @@ export class CreateProjectDialogComponent implements OnInit {
                         project: res?.data || payload,
                         name: name,
                         status: this.selectedStatus(),
-                        lead: { name: this.leadName, role: this.leadRole },
+                        lead: this.leadName ? { name: this.leadName, role: this.leadRole, avatar: this.leadAvatar, id: this.leadId } : null,
                         members: membersPayload,
                     });
                 }, 800);
@@ -574,7 +753,7 @@ export class CreateProjectDialogComponent implements OnInit {
                         project: payload,
                         name: name,
                         status: this.selectedStatus(),
-                        lead: { name: this.leadName, role: this.leadRole },
+                        lead: this.leadName ? { name: this.leadName, role: this.leadRole, avatar: this.leadAvatar, id: this.leadId } : null,
                         members: membersPayload,
                     });
                 }, 800);
