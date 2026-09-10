@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // ===========================================================================>> Custom Library
 import { CommonModule } from 'src/app/common/common.module';
 import { User } from 'src/app/model/user/users.entity';
+import { Role } from 'src/app/model/user/role.entity';
+import { UserRole } from 'src/app/model/user/user_role.entity';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { UserModule } from '../2-user/user.module';
 
@@ -28,7 +30,7 @@ import { AdminSettingService } from './5-setting/setting.service';
         HttpModule,
         CommonModule,
         UserModule,
-        TypeOrmModule.forFeature([User, PlanStore]),
+        TypeOrmModule.forFeature([User, Role, UserRole, PlanStore]),
     ],
     controllers: [
         DashboardController,

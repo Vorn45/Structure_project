@@ -87,15 +87,16 @@ export class AdminAttendanceService {
         return {
             status_code: 200,
             data: {
-                total_staff: 5,
-                present_today: 4,
+                total_staff: 6,
+                present_today: 5,
                 late_today: 1,
                 on_leave: 1,
                 logs: [
                     { id: 'att-1', user_name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', user_en: 'Piseth Panhavorn', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '07:55 AM', check_out: '05:30 PM', status: 'on_time' },
-                    { id: 'att-2', user_name: 'សុខ សុភា', user_en: 'Sok Sopheak', department: 'គ្រប់គ្រងគម្រោង (PMO)', check_in: '07:58 AM', check_out: null, status: 'on_time' },
-                    { id: 'att-3', user_name: 'រ័ត្ន វិចិត្រ', user_en: 'Rath Vichet', department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)', check_in: '08:45 AM', check_out: null, status: 'late' },
-                    { id: 'att-4', user_name: 'លី ម៉េងហួរ', user_en: 'Ly Menghour', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '07:50 AM', check_out: null, status: 'on_time' },
+                    { id: 'att-2', user_name: 'ពុំ ប្រុសមុន្នី', user_en: 'Pum Brusmuny', department: 'គ្រប់គ្រងគម្រោង (PMO)', check_in: '07:58 AM', check_out: null, status: 'on_time' },
+                    { id: 'att-3', user_name: 'ថា វីនណឺរ', user_en: 'Tha Winner', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '08:02 AM', check_out: null, status: 'on_time' },
+                    { id: 'att-4', user_name: 'ភួង សុវណ្ណារ៉ា', user_en: 'Phuong Sovannara', department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)', check_in: '08:45 AM', check_out: null, status: 'late' },
+                    { id: 'att-5', user_name: 'លី ម៉េងហួរ', user_en: 'Ly Menghour', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '07:50 AM', check_out: null, status: 'on_time' },
                 ],
             },
         };

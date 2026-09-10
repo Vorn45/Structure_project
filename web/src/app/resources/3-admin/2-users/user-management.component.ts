@@ -48,7 +48,7 @@ export class UserManagementComponent implements OnInit {
     deleteTarget = signal<AdminUser | null>(null);
     showDeleteModal = signal<boolean>(false);
 
-    readonly roles = ['Admin', 'Manager', 'Team Lead', 'Member'];
+    readonly roles = ['Super Admin', 'Admin', 'Manager', 'Team Lead', 'Member'];
     readonly departments = [
         'ព័ត៌មានវិទ្យា (IT)',
         'គ្រប់គ្រងគម្រោង (PMO)',
@@ -226,6 +226,9 @@ export class UserManagementComponent implements OnInit {
 
     getRoleBadgeClass(role: string): string {
         switch (role.toLowerCase()) {
+            case 'super admin':
+            case 'superadmin':
+                return 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-200 dark:border-purple-700';
             case 'admin':
                 return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800';
             case 'manager':
