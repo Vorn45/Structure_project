@@ -548,8 +548,7 @@ export interface TeamMember {
                             (dragleave)="onDragLeave($event)"
                             (drop)="onFileDrop($event)"
                             class="py-4 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/20 dark:hover:bg-blue-950/20 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 group select-none shadow-2xs"
-                            [class.border-blue-500]="isDraggingOver()"
-                            [class.bg-blue-50/40]="isDraggingOver()"
+                            [ngClass]="{ 'border-blue-500 bg-blue-50/40': isDraggingOver() }"
                         >
                             <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 transition-colors">
                                 <mat-icon svgIcon="mdi:cloud-upload-outline" class="!w-5 !h-5"></mat-icon>
