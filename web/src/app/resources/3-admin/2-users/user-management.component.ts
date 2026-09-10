@@ -48,14 +48,14 @@ export class UserManagementComponent implements OnInit {
     deleteTarget = signal<AdminUser | null>(null);
     showDeleteModal = signal<boolean>(false);
 
-    readonly roles = ['Super Admin', 'Admin', 'Manager', 'Team Lead', 'Member'];
-    readonly departments = [
-        'ព័ត៌មានវិទ្យា (IT)',
-        'គ្រប់គ្រងគម្រោង (PMO)',
-        'រចនា និងបទពិសោធន៍ (UI/UX)',
-        'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)',
-        'ធនធានមនុស្ស និងរដ្ឋបាល (HR & Admin)',
-    ];
+    // Derived dynamically from loaded users — no hardcoded lists
+    readonly roles = computed(() =>
+        ['all', ...new Set(this.users().map((u) => u.role).filter(Boolean))],
+    );
+
+    readonly departments = computed(() =>
+        ['all', ...new Set(this.users().map((u) => u.department).filter(Boolean))],
+    );
 
     filteredUsers = computed(() => {
         let list = this.users();
@@ -97,8 +97,8 @@ export class UserManagementComponent implements OnInit {
             name_en: ['', [Validators.required]],
             email: ['', [Validators.required, Validators.email]],
             phone: ['', [Validators.required]],
-            role: ['Member', [Validators.required]],
-            department: ['ព័ត៌មានវិទ្យា (IT)', [Validators.required]],
+            role: ['', [Validators.required]],
+            department: ['', [Validators.required]],
             position: ['', [Validators.required]],
             is_active: [1],
         });

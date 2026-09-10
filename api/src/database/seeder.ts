@@ -5,11 +5,6 @@ import { DataSourceOptions } from 'typeorm';
 import { PermissionSeeder } from './seed/user/permission.seed';
 import { RolePermissionSeeder } from './seed/user/role-permission.seed';
 import { RoleSeeder } from './seed/user/role.seed';
-import { UserOTPSeeder } from './seed/user/user-otp.seed';
-import { UserSessionLogSeeder } from './seed/user/user-session-log.seed';
-import { UserSessionSeeder } from './seed/user/user-session.seed';
-import { UserSeeder } from './seed/user/user.seed';
-import { UserRoleSeeder } from './seed/user/user_role.seed';
 
 function confirm(question: string): Promise<boolean> {
     if (process.argv.includes('--yes') || process.argv.includes('-y')) {
@@ -83,15 +78,10 @@ class SeederInitializer {
             await this.ensureSchemaReady();
 
             await RoleSeeder.seed(this.dataSource);
-            await UserSeeder.seed(this.dataSource);
             await PermissionSeeder.seed(this.dataSource);
             await RolePermissionSeeder.seed(this.dataSource);
-            await UserRoleSeeder.seed(this.dataSource);
-            await UserOTPSeeder.seed(this.dataSource);
-            await UserSessionSeeder.seed(this.dataSource);
-            await UserSessionLogSeeder.seed(this.dataSource);
 
-            console.log('\x1b[32mAll user security seeders executed successfully.\x1b[0m');
+            console.log('\x1b[32mAll structural seeders executed successfully.\x1b[0m');
         } catch (error) {
             console.error('\x1b[31mSeeder failed:\x1b[0m', error);
         } finally {
@@ -104,7 +94,7 @@ class SeederInitializer {
 
 (async () => {
     const proceed = await confirm(
-        '\x1b[33mThis will synchronize the schema and seed the database, which may overwrite/modify existing data. Continue? (y/N): \x1b[0m',
+        '\x1b[33mThis will synchronize the schema and seed structural data (roles, permissions). Continue? (y/N): \x1b[0m',
     );
 
     if (!proceed) {

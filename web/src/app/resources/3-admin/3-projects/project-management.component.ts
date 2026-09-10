@@ -17,6 +17,18 @@ import { CreatePhaseDialogComponent } from './dialogs/create-phase-dialog.compon
 import { CreateMemberDialogComponent } from './dialogs/create-member-dialog.component';
 import { CreateLinkDialogComponent } from './dialogs/create-link-dialog.component';
 import { AdminService, AdminProject, AdminUser } from '../admin.service';
+import { TaskDrawerComponent } from 'app/resources/2-user/2-task/task-drawer/task-drawer.component';
+import { FilePreviewModalComponent } from 'app/resources/2-user/2-task/file-preview-modal/file-preview-modal.component';
+import {
+    TaskItem,
+    TaskMember,
+    TaskChatMessage,
+    TaskAttachment,
+    TaskStatus,
+    TaskPriority,
+    TaskType,
+} from 'app/resources/2-user/2-task/models/task.types';
+import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;
@@ -29,17 +41,6 @@ export interface AgilePlanTask {
     id: string;
     name: string;
     segments: AgilePlanSegment[];
-}
-
-export interface TaskMember {
-    id: number;
-    name: string;
-    role: string;
-    avatar?: string | null;
-    initial?: string;
-    bgClass?: string;
-    email?: string;
-    online?: boolean;
 }
 
 export interface TaskLink {
@@ -546,6 +547,8 @@ export const DEFAULT_PROJECT_LINKS: TaskLink[] = [
         MatMenuModule,
         MatDialogModule,
         MatButtonModule,
+        TaskDrawerComponent,
+        FilePreviewModalComponent,
     ],
     templateUrl: './project-management.component.html',
     styles: [`
@@ -562,6 +565,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     private readonly _matDialog = inject(MatDialog);
     private readonly _dialogConfigService = inject(DialogConfigService);
     private readonly _userService = inject(UserService);
+    private readonly _userTaskService = inject(UserTaskService);
 
     projects = signal<AdminProject[]>([]);
     users = signal<AdminUser[]>([]);
@@ -590,7 +594,52 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     linkTypeFilter = signal<string>('all');
     copiedLinkId = signal<string | null>(null);
 
-    // Active Task Modal / Drawer
+    // Unified Task Drawer & Chat Conversation State
+    selectedTaskDrawerItem = signal<TaskItem | null>(null);
+    showTaskDrawer = signal<boolean>(false);
+    taskDrawerDialogMode = signal<'details' | 'chat'>('chat');
+    taskDrawerChatMessages = signal<TaskChatMessage[]>([]);
+    previewImageModal = signal<string | null>(null);
+    previewFileModal = signal<TaskAttachment | null>(null);
+    private _drawerChatHistoryMap = new Map<string | number, TaskChatMessage[]>();
+
+    allTaskFiles = computed<TaskAttachment[]>(() => {
+        const files: TaskAttachment[] = [];
+        const currentTask = this.selectedTaskDrawerItem();
+        if (!currentTask) return [];
+
+        const adminTask = this.tasks().find((t) => t.id === currentTask.id);
+        if (adminTask?.documents && Array.isArray(adminTask.documents)) {
+            adminTask.documents.forEach((d) => {
+                files.push({
+                    name: d.name,
+                    size: d.size,
+                    type: d.type,
+                    url: d.url,
+                    isImage: d.type === 'image',
+                });
+            });
+        }
+        if (adminTask && (adminTask as any).attachments && Array.isArray((adminTask as any).attachments)) {
+            files.push(...(adminTask as any).attachments);
+        }
+
+        this.taskDrawerChatMessages().forEach((m) => {
+            if (m.attachments && Array.isArray(m.attachments)) {
+                files.push(...m.attachments);
+            }
+        });
+
+        const seen = new Set<string>();
+        return files.filter((f) => {
+            const key = f.url || f.name;
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    });
+
+    // Active Task Modal / Drawer (Legacy compatibility)
     activeTaskModal = signal<AdminTaskItem | null>(null);
     activeDetailTab = signal<'chat' | 'subtasks' | 'members' | 'links' | 'documents'>('chat');
     newChatMessageText = signal<string>('');
@@ -890,19 +939,367 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         }
     }
 
-    // Task details modal methods
-    openTaskModal(task: AdminTaskItem): void {
+    // Task details modal methods (Unified TaskDrawerComponent)
+    openTaskModal(task: AdminTaskItem, mode: 'details' | 'chat' = 'chat'): void {
         this.activeTaskModal.set(task);
-        this.activeDetailTab.set('chat');
+        this.activeDetailTab.set(mode === 'details' ? 'subtasks' : 'chat');
         this.showAddLinkForm.set(false);
         this.loadTaskChat(task);
+
+        const mappedTask = this.mapToTaskItem(task);
+        this.selectedTaskDrawerItem.set(mappedTask);
+        this.taskDrawerDialogMode.set(mode);
+        this.showTaskDrawer.set(true);
+        this.loadTaskDrawerChat(task);
     }
 
-    closeTaskModal(): void {
+    closeTaskDrawer(): void {
+        this.showTaskDrawer.set(false);
+        this.selectedTaskDrawerItem.set(null);
         this.activeTaskModal.set(null);
         this.showAddLinkForm.set(false);
         this.pendingChatAttachments.set([]);
         this.newChatMessageText.set('');
+    }
+
+    closeTaskModal(): void {
+        this.closeTaskDrawer();
+    }
+
+    mapToTaskItem(task: AdminTaskItem): TaskItem {
+        const proj = this.selectedProject();
+        const reporterMember: TaskMember = task.reporter ? {
+            id: task.reporter.id,
+            name: task.reporter.name,
+            role: task.reporter.role,
+            avatar: task.reporter.avatar || '/images/placeholder/avatar.jpg',
+            initial: task.reporter.initial,
+            bgClass: task.reporter.bgClass,
+            email: task.reporter.email,
+        } : {
+            id: 1,
+            name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+            role: 'Super Admin',
+            avatar: '/images/placeholder/avatar.jpg',
+        };
+
+        const assigneeMember: TaskMember = task.assignee ? {
+            id: task.assignee.id,
+            name: task.assignee.name,
+            role: task.assignee.role,
+            avatar: task.assignee.avatar || '/images/placeholder/avatar.jpg',
+            initial: task.assignee.initial,
+            bgClass: task.assignee.bgClass,
+            email: task.assignee.email,
+        } : {
+            id: 0,
+            name: 'មិនទាន់ចាត់តាំង',
+        };
+
+        const assigneesList: TaskMember[] = (task.members && task.members.length > 0)
+            ? task.members.map((m) => ({
+                  id: m.id,
+                  name: m.name,
+                  role: m.role,
+                  avatar: m.avatar || '/images/placeholder/avatar.jpg',
+                  initial: m.initial,
+                  bgClass: m.bgClass,
+                  email: m.email,
+              }))
+            : task.assignee
+            ? [assigneeMember]
+            : [];
+
+        return {
+            id: task.id,
+            code: task.code,
+            title: task.title,
+            description: task.description || '',
+            module: proj?.code || 'PROJECT',
+            task_type: 'feature',
+            status: task.status,
+            priority: task.priority,
+            progress: task.progress || 0,
+            comments_count: task.comments_count || 0,
+            attachments_count: task.attachments_count || 0,
+            due_date: task.due_date || null,
+            project_id: proj ? String(proj.id) : '1',
+            project_name: proj ? proj.name : 'Project',
+            reporter: reporterMember,
+            assignee: assigneeMember,
+            assignees: assigneesList,
+            created_at: task.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
+    }
+
+    loadTaskDrawerChat(task: AdminTaskItem): void {
+        const cached = this._drawerChatHistoryMap.get(task.id);
+        if (cached && cached.length > 0) {
+            this.taskDrawerChatMessages.set([...cached]);
+            return;
+        }
+
+        const reporterName = task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+        const assigneeName = task.assignee?.name || (task.members?.[0]?.name) || '';
+
+        const initialMsgs: TaskChatMessage[] = [
+            {
+                id: 1,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `កិច្ចការ ${task.code} ត្រូវបានបង្កើតឡើងកាលពី ${task.time_ago || 'ថ្មីៗ'}`,
+                time: task.time_ago || 'ថ្មីៗ',
+                is_self: false,
+                is_system: true,
+            },
+            {
+                id: 2,
+                sender_id: task.reporter?.id || 1,
+                sender_name: reporterName,
+                sender_avatar: task.reporter?.avatar || '/images/placeholder/avatar.jpg',
+                text: `សួស្តីក្រុមការងារ! សូមពិនិត្យមើលព័ត៌មានលម្អិត និងកិច្ចការសម្រាប់ ${task.title} នេះផង។`,
+                time: '១០ នាទីមុន',
+                is_self: false,
+                is_system: false,
+            },
+        ];
+
+        if (assigneeName) {
+            initialMsgs.push({
+                id: 3,
+                sender_id: task.assignee?.id || 2,
+                sender_name: assigneeName,
+                sender_avatar: task.assignee?.avatar || '/images/placeholder/avatar.jpg',
+                text: 'បានទទួលហើយបង! ខ្ញុំកំពុងត្រៀមអនុវត្ត និងធ្វើតេស្តតាមដំណាក់កាល។',
+                time: '៥ នាទីមុន',
+                is_self: false,
+                is_system: false,
+            });
+        }
+
+        this.taskDrawerChatMessages.set(initialMsgs);
+        this._drawerChatHistoryMap.set(task.id, initialMsgs);
+
+        // Fetch live comments from backend if available
+        const numericId = parseInt(task.id.replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.getTaskComments(numericId).subscribe({
+                next: (res) => {
+                    if (res?.data?.comments && res.data.comments.length > 0) {
+                        const currentUser = this._userService.getUser();
+                        const currentUserName = (currentUser?.en_name || currentUser?.name || currentUser?.kh_name || '').toLowerCase().trim();
+                        const currentUserId = currentUser?.id;
+
+                        const mapped = (res.data.comments as TaskChatMessage[]).map((c) => {
+                            if (c.is_system) return { ...c, is_self: false, is_system: true };
+                            const senderName = (c.sender_name || '').toLowerCase().trim();
+                            const isSelf = Boolean(
+                                (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName) || senderName.includes(currentUserName))) ||
+                                (currentUserId && c.sender_id === currentUserId) ||
+                                c.is_self
+                            );
+                            let displayTime = c.time;
+                            if (c.created_at) {
+                                const d = new Date(c.created_at);
+                                if (!isNaN(d.getTime())) {
+                                    displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                }
+                            }
+                            return { ...c, time: displayTime, is_self: isSelf };
+                        });
+                        this.taskDrawerChatMessages.set(mapped);
+                        this._drawerChatHistoryMap.set(task.id, mapped);
+                    }
+                },
+                error: () => {},
+            });
+        }
+    }
+
+    onTaskDrawerSendMessage(payload: { text: string; attachments: TaskAttachment[] }): void {
+        const text = payload.text.trim();
+        const attachments = payload.attachments || [];
+        if (!text && attachments.length === 0) return;
+
+        const currentTask = this.selectedTaskDrawerItem();
+        if (!currentTask) return;
+
+        const user = this._userService.getUser();
+        const userAvatar = this.getCurrentUserAvatar();
+        const tempId = Date.now();
+
+        const newMsg: TaskChatMessage = {
+            id: tempId,
+            sender_id: user?.id,
+            sender_name: user?.kh_name || user?.en_name || 'អ្នកគ្រប់គ្រង (Admin)',
+            sender_avatar: userAvatar,
+            text: text || (attachments.length > 0 ? 'បានផ្ញើឯកសារ' : ''),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            is_self: true,
+            attachments: attachments.length > 0 ? [...attachments] : undefined,
+            seen_by: [],
+        };
+
+        const currentList = this._drawerChatHistoryMap.get(currentTask.id) || [];
+        const updatedList = [...currentList, newMsg];
+        this._drawerChatHistoryMap.set(currentTask.id, updatedList);
+        this.taskDrawerChatMessages.set(updatedList);
+
+        // Update counts on task item
+        const newCommentsCount = (currentTask.comments_count || 0) + 1;
+        const newAttCount = (currentTask.attachments_count || 0) + attachments.length;
+
+        this.selectedTaskDrawerItem.update((t) =>
+            t ? { ...t, comments_count: newCommentsCount, attachments_count: newAttCount } : null
+        );
+
+        this.tasks.update((items) =>
+            items.map((t) =>
+                t.id === currentTask.id
+                    ? { ...t, comments_count: newCommentsCount, attachments_count: newAttCount }
+                    : t
+            )
+        );
+
+        // Attempt backend sync if valid ID
+        const numericId = parseInt(String(currentTask.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.createTaskComment(numericId, { text: newMsg.text, attachments }).subscribe({
+                next: (res) => {
+                    if (res?.data) {
+                        const serverComment = res.data;
+                        this.taskDrawerChatMessages.update((msgs) => {
+                            const updated = msgs.map((m) =>
+                                m.id === tempId ? { ...m, id: serverComment.id, created_at: serverComment.created_at } : m
+                            );
+                            this._drawerChatHistoryMap.set(currentTask.id, updated);
+                            return updated;
+                        });
+                    }
+                },
+                error: (err) => console.error('Failed to sync comment with server', err),
+            });
+        }
+    }
+
+    onTaskDrawerStatusChange(event: { task: TaskItem; status: string }): void {
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, status: event.status } : null));
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === event.task.id ? { ...t, status: event.status } : t))
+        );
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.updateTask(numericId, { status: event.status }).subscribe({ error: () => {} });
+        }
+    }
+
+    onTaskDrawerTypeChange(event: { task: TaskItem; taskType: string }): void {
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, task_type: event.taskType } : null));
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.updateTask(numericId, { task_type: event.taskType } as any).subscribe({ error: () => {} });
+        }
+    }
+
+    onTaskDrawerPriorityChange(event: { task: TaskItem; priority: string }): void {
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, priority: event.priority as any } : null));
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === event.task.id ? { ...t, priority: event.priority as any } : t))
+        );
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.updateTask(numericId, { priority: event.priority as any }).subscribe({ error: () => {} });
+        }
+    }
+
+    onTaskDrawerDueDateChange(event: { task: TaskItem; dueDate: string | null }): void {
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, due_date: event.dueDate } : null));
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === event.task.id ? { ...t, due_date: event.dueDate || undefined } : t))
+        );
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.updateTask(numericId, { due_date: event.dueDate }).subscribe({ error: () => {} });
+        }
+    }
+
+    onTaskDrawerAssigneeToggle(event: { task: TaskItem; member: TaskMember }): void {
+        const currentAssignees = event.task.assignees ? [...event.task.assignees] : [];
+        const index = currentAssignees.findIndex((m) => m.id === event.member.id);
+        let updatedAssignees: TaskMember[];
+        if (index >= 0) {
+            updatedAssignees = currentAssignees.filter((m) => m.id !== event.member.id);
+        } else {
+            updatedAssignees = [...currentAssignees, event.member];
+        }
+        const primaryAssignee = updatedAssignees[0] || { id: 0, name: 'មិនទាន់ចាត់តាំង' };
+
+        this.selectedTaskDrawerItem.update((t) =>
+            t ? { ...t, assignee: primaryAssignee, assignees: updatedAssignees } : null
+        );
+        this.tasks.update((items) =>
+            items.map((t) =>
+                t.id === event.task.id
+                    ? {
+                          ...t,
+                          assignee: primaryAssignee,
+                          members: updatedAssignees,
+                      }
+                    : t
+            )
+        );
+    }
+
+    onTaskDrawerReporterChange(event: { task: TaskItem; member: TaskMember }): void {
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, reporter: event.member } : null));
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === event.task.id ? { ...t, reporter: event.member } : t))
+        );
+    }
+
+    onTaskDrawerDelete(task: TaskItem): void {
+        this.tasks.update((items) => items.filter((t) => t.id !== task.id));
+        this.closeTaskDrawer();
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.deleteTask(numericId).subscribe({ error: () => {} });
+        }
+    }
+
+    viewTaskFile(file: TaskAttachment): void {
+        const isImg = file.isImage || /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(file.name || '') || (file.type ? file.type.startsWith('image/') : false);
+        if (isImg && file.url) {
+            this.openImagePreview(file.url);
+        } else {
+            this.previewFileModal.set(file);
+        }
+    }
+
+    openImagePreview(url: string): void {
+        this.previewImageModal.set(url);
+    }
+
+    closeFilePreview(): void {
+        this.previewFileModal.set(null);
+        this.previewImageModal.set(null);
+    }
+
+    downloadTaskFile(file: TaskAttachment): void {
+        if (!file.url) return;
+        const a = document.createElement('a');
+        a.href = file.url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    getCurrentUserAvatar(): string {
+        const user = this._userService.getUser();
+        if (user?.avatar?.uri && user?.avatar?.file_domain) {
+            return user.avatar.file_domain.replace(/\/+$/, '') + '/' + user.avatar.uri.replace(/^\/+/, '');
+        }
+        return '/images/placeholder/avatar.jpg';
     }
 
     loadTaskChat(task: AdminTaskItem): void {
@@ -1292,7 +1689,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     due_date: result.due_date || '15/09/2026',
                     time_ago: 'ទើបបង្កើត',
                     comments_count: 0,
-                    attachments_count: 0,
+                    attachments_count: result.attachments_count || (result.attachments?.length || 0),
                     progress: 0,
                     reporter: reporterName ? {
                         id: 1,
@@ -1709,6 +2106,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         this.disposeCharts();
         this.selectedProject.set(null);
         this.activeTaskModal.set(null);
+        this.showTaskDrawer.set(false);
+        this.selectedTaskDrawerItem.set(null);
     }
 
     filterByStatus(status: string): void {

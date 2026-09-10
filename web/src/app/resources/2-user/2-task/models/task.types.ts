@@ -51,10 +51,13 @@ export interface TaskMember {
     role?: string;
     email?: string;
     colorClass?: string;
+    initial?: string;
+    bgClass?: string;
+    online?: boolean;
 }
 
 export interface TaskItem {
-    id: number;
+    id: number | string;
     code?: string;
     title: string;
     description: string;

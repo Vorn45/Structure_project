@@ -21,90 +21,6 @@ import { HelpSupportDialogComponent } from './help-support-dialog/help-support-d
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { HomeOverviewData, UserHomeService } from './home.service';
 
-const DEFAULT_OVERVIEW_DATA: HomeOverviewData = {
-    user: {
-        id: 1,
-        name_en: 'PISETH PANHAVORN',
-        name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-        email: 'pisethpanhavorn544@gmail.com',
-        phone: '010843612',
-        active_role_id: 1,
-        organization_id: null,
-    },
-    metrics: {
-        total_tasks: 12,
-        pending_tasks: 4,
-        in_progress_tasks: 5,
-        completed_tasks: 3,
-        overdue_tasks: 1,
-        high_priority: 2,
-        medium_priority: 7,
-        low_priority: 3,
-        completion_rate: 25,
-    },
-    // Zeroed on purpose: this placeholder renders before the overview request
-    // returns, and showing invented status counts there is worse than showing none.
-    my_task_counts: {
-        all: 0,
-        new: 0,
-        confirmed: 0,
-        unconfirmed: 0,
-        in_progress: 0,
-        in_review: 0,
-        reopened: 0,
-        done: 0,
-    },
-    recent_tasks: [
-        {
-            id: 101,
-            title: 'Complete System Architecture Review',
-            status: 'in_progress',
-            priority: 'high',
-            due_date: new Date(Date.now() + 86400000 * 2).toISOString(),
-            progress: 60,
-            project_name: 'PMS Upgrade V2',
-        },
-        {
-            id: 102,
-            title: 'Refactor Authentication & Passkey Service',
-            status: 'in_progress',
-            priority: 'medium',
-            due_date: new Date(Date.now() + 86400000 * 4).toISOString(),
-            progress: 40,
-            project_name: 'PMS Upgrade V2',
-        },
-        {
-            id: 104,
-            title: 'Setup Notification & Realtime WebSocket Gateway',
-            status: 'new',
-            priority: 'high',
-            due_date: new Date(Date.now() + 86400000 * 7).toISOString(),
-            progress: 0,
-            project_name: 'PMS Upgrade V2',
-        },
-    ],
-    active_projects: [
-        {
-            id: 'proj-001',
-            name: 'PMS Upgrade V2',
-            total_tasks: 24,
-            completed_tasks: 14,
-            progress: 58,
-            members_count: 8,
-            status: 'active',
-        },
-        {
-            id: 'proj-002',
-            name: 'Design System & UI Library',
-            total_tasks: 12,
-            completed_tasks: 9,
-            progress: 75,
-            members_count: 5,
-            status: 'active',
-        },
-    ],
-};
-
 @Component({
     selector: 'user-home',
     standalone: true,
@@ -120,8 +36,8 @@ const DEFAULT_OVERVIEW_DATA: HomeOverviewData = {
     templateUrl: './home.component.html',
 })
 export class UserHomeComponent implements OnInit, OnDestroy {
-    loading = signal<boolean>(false);
-    overview = signal<HomeOverviewData | null>(DEFAULT_OVERVIEW_DATA);
+    loading = signal<boolean>(true);
+    overview = signal<HomeOverviewData | null>(null);
     currentUser = signal<User | null>(null);
     activeFilter = signal<string>('all');
     cardSide = signal<'front' | 'back'>('front');
