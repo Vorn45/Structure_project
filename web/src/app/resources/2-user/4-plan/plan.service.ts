@@ -14,6 +14,8 @@ export interface ProjectPlanItem {
     end_date: string;
     total_tasks: number;
     completed_tasks: number;
+    logo?: string | null;
+    image?: string | null;
     members: Array<{
         id: number;
         name: string;

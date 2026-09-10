@@ -552,6 +552,90 @@ export class TaskService {
         return this.tasks;
     }
 
+    async getProjects(user?: UserPayload) {
+        let planProjects: any[] = [];
+        try {
+            const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
+            if (fs.existsSync(planStorePath)) {
+                const raw = fs.readFileSync(planStorePath, 'utf8');
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.plans)) {
+                    planProjects = parsed.plans;
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to read plans_data_store.json for task projects:', e);
+        }
+
+        // Collect distinct projects from current tasks
+        const taskProjectMap = new Map<string, { id: string; name: string; code?: string }>();
+        for (const t of this.tasks) {
+            if (t.project_id || t.project_name) {
+                const key = (t.project_id || t.project_name).toLowerCase();
+                if (!taskProjectMap.has(key)) {
+                    taskProjectMap.set(key, {
+                        id: t.project_id || key,
+                        name: t.project_name || t.project_id || 'Project',
+                        code: t.code ? t.code.split('-')[0].replace('#', '') : undefined,
+                    });
+                }
+            }
+        }
+
+        const results: Array<{ id: string; name: string; code?: string; logo?: string; image?: string; status?: string }> = [];
+        const seen = new Set<string>();
+
+        for (const p of planProjects) {
+            const normName = (p.name || '').trim().toLowerCase();
+            if (normName && !seen.has(normName)) {
+                seen.add(normName);
+                const matchingTaskProj = Array.from(taskProjectMap.values()).find(
+                    (tp) => tp.name.toLowerCase() === normName || tp.id.toLowerCase().includes(p.code?.toLowerCase() || '___')
+                );
+                results.push({
+                    id: matchingTaskProj?.id || p.id || p.code,
+                    name: p.name,
+                    code: p.code || p.name.slice(0, 3).toUpperCase(),
+                    logo: p.logo || p.image || null,
+                    image: p.image || p.logo || null,
+                    status: p.status,
+                });
+                if (matchingTaskProj) {
+                    seen.add(matchingTaskProj.id.toLowerCase());
+                }
+            }
+        }
+
+        for (const tp of taskProjectMap.values()) {
+            const normName = tp.name.trim().toLowerCase();
+            const normId = tp.id.trim().toLowerCase();
+            if (!seen.has(normName) && !seen.has(normId)) {
+                seen.add(normName);
+                seen.add(normId);
+                results.push({
+                    id: tp.id,
+                    name: tp.name,
+                    code: tp.code || tp.name.slice(0, 3).toUpperCase(),
+                    logo: null,
+                    image: null,
+                });
+            }
+        }
+
+        if (results.length === 0) {
+            results.push(
+                { id: 'bms-digitech', name: 'BMS Digitech', code: 'BMS' },
+                { id: 'wms-digitech', name: 'WMS Digitech', code: 'WMS' },
+            );
+        }
+
+        return {
+            status_code: 200,
+            message: 'Projects retrieved successfully',
+            data: results,
+        };
+    }
+
     async getMembers(user: UserPayload) {
         let dbUsers: User[] = [];
         const allowedPhones = ['010843612', '087280875', '067776682', '011242425'];
@@ -708,8 +792,9 @@ export class TaskService {
         if (!this.isFilterActive(projectId)) return true;
         const pid = projectId!.toLowerCase();
         return Boolean(
-            (task.project_id && task.project_id.toLowerCase().includes(pid)) ||
-            (task.project_name && task.project_name.toLowerCase().includes(pid)),
+            (task.project_id && (task.project_id.toLowerCase().includes(pid) || pid.includes(task.project_id.toLowerCase()))) ||
+            (task.project_name && (task.project_name.toLowerCase().includes(pid) || pid.includes(task.project_name.toLowerCase()))) ||
+            (task.code && (task.code.toLowerCase().includes(pid) || pid.includes(task.code.toLowerCase()))),
         );
     }
 

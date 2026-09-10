@@ -21,6 +21,11 @@ export class TaskController {
         return await this._service.getTasks(res.locals.user, query);
     }
 
+    @Get('projects')
+    async getProjects(@Res({ passthrough: true }) res: express.Response) {
+        return await this._service.getProjects(res.locals.user);
+    }
+
     @Get('members')
     async getMembers(@Res({ passthrough: true }) res: express.Response) {
         return await this._service.getMembers(res.locals.user);

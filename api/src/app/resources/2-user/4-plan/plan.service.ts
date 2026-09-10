@@ -21,6 +21,8 @@ export interface ProjectPlanItem {
     end_date: string;
     total_tasks: number;
     completed_tasks: number;
+    logo?: string | null;
+    image?: string | null;
     members: Array<{
         id: number;
         name: string;
@@ -195,11 +197,51 @@ export class PlanService {
     }
 
     getRawProjects(): ProjectPlanItem[] {
+        this.syncTaskCounts(this.projects);
         return this.projects;
+    }
+
+    private syncTaskCounts(plans: ProjectPlanItem[]): void {
+        try {
+            const taskStorePath = path.join(process.cwd(), 'storage', 'tasks_data_store.json');
+            if (fs.existsSync(taskStorePath)) {
+                const raw = fs.readFileSync(taskStorePath, 'utf8');
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.tasks)) {
+                    const tasks: any[] = parsed.tasks;
+                    for (const p of plans) {
+                        const pid = (p.id || '').toLowerCase();
+                        const pcode = (p.code || '').toLowerCase().replace('#', '');
+                        const pname = (p.name || '').toLowerCase();
+
+                        const projectTasks = tasks.filter((t: any) => {
+                            const tPid = (t.project_id || '').toLowerCase();
+                            const tPname = (t.project_name || '').toLowerCase();
+                            const tCode = (t.code || '').toLowerCase().replace('#', '');
+
+                            return (
+                                (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
+                                (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
+                                (pname && (tPname.includes(pname) || pname.includes(tPname)))
+                            );
+                        });
+
+                        p.total_tasks = projectTasks.length;
+                        p.completed_tasks = projectTasks.filter((t: any) =>
+                            ['done', 'completed'].includes((t.status || '').toLowerCase())
+                        ).length;
+                        p.progress = p.total_tasks > 0 ? Math.round((p.completed_tasks / p.total_tasks) * 100) : 0;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to sync task counts:', e);
+        }
     }
 
     async getPlans(user: UserPayload, query: QueryPlanDto) {
         await this.ensureLoaded();
+        this.syncTaskCounts(this.projects);
         let list = [...this.projects];
 
         if (query.search) {
@@ -238,6 +280,7 @@ export class PlanService {
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
+        this.syncTaskCounts([plan]);
 
         return {
             status_code: 200,

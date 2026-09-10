@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, ElementRef, effect, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { merge, Subject, takeUntil } from 'rxjs';
+import { catchError, forkJoin, merge, of, Subject, takeUntil } from 'rxjs';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,8 +20,9 @@ import { CreateTaskDialogComponent } from 'app/resources/3-admin/3-projects/dial
 import { CreatePhaseDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-phase-dialog.component';
 import { CreateMemberDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-member-dialog.component';
 import { CreateLinkDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-link-dialog.component';
-import { ProfileViewComponent } from 'app/resources/1-account/2-profile/view/component';
 import { ProjectPlanItem, UserPlanService } from './plan.service';
+import { TaskItem, UserTaskService } from '../2-task/task.service';
+import { ProfileViewComponent } from 'app/resources/1-account/2-profile/view/component';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;
@@ -335,9 +336,9 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         category: 'Development',
         budget_allocated: 65000,
         budget_spent: 28000,
-        total_tasks: 6,
-        completed_tasks: 3,
-        progress: 55,
+        total_tasks: 5,
+        completed_tasks: 1,
+        progress: 20,
         start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
         team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer' },
@@ -526,9 +527,9 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         category: 'Workforce',
         budget_allocated: 80000,
         budget_spent: 56000,
-        total_tasks: 6,
-        completed_tasks: 4,
-        progress: 75,
+        total_tasks: 4,
+        completed_tasks: 0,
+        progress: 0,
         start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
         team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager' },
@@ -766,6 +767,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         private readonly _dialogConfigService: DialogConfigService,
         private readonly _userService: UserService,
         private readonly _taskSocket: TaskSocketService,
+        private readonly _taskService: UserTaskService,
     ) {
         effect(() => {
             const project = this.selectedProject();
@@ -1229,53 +1231,166 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             loadPlans(): void {
                 this.loading.set(true);
 
-                this._planService
-                    .getPlans({
+                forkJoin({
+                    plansRes: this._planService.getPlans({
                         search: this.searchQuery() || undefined,
                         status: this.statusFilter() !== 'all' ? this.statusFilter() : undefined,
-                    })
-                    .subscribe({
-                        next: (res) => {
-                            if (res?.data?.results?.length) {
-                                const items: ExtendedProjectItem[] = res.data.results.map((ap) => {
-                                    const existing = DEFAULT_INVITED_PROJECTS.find(
-                                        (p) => p.id === String(ap.id) || p.code === ap.code || p.name === ap.name
+                    }),
+                    tasksRes: this._taskService.getTasks().pipe(catchError(() => of(null))),
+                }).subscribe({
+                    next: ({ plansRes, tasksRes }) => {
+                        const allTasks: TaskItem[] = tasksRes?.data?.results || [];
+                        if (plansRes?.data?.results?.length) {
+                            const items: ExtendedProjectItem[] = plansRes.data.results.map((ap) => {
+                                const existing = DEFAULT_INVITED_PROJECTS.find(
+                                    (p) => p.id === String(ap.id) || p.code === ap.code || p.name === ap.name
+                                );
+
+                                const pid = String(ap.id || '').toLowerCase();
+                                const pcode = (ap.code || '').toLowerCase().replace('#', '');
+                                const pname = (ap.name || '').toLowerCase();
+
+                                const projectTasks = allTasks.filter((t) => {
+                                    const tPid = (t.project_id || '').toLowerCase();
+                                    const tPname = (t.project_name || '').toLowerCase();
+                                    const tCode = (t.code || '').toLowerCase().replace('#', '');
+
+                                    return (
+                                        (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
+                                        (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
+                                        (pname && (tPname.includes(pname) || pname.includes(tPname)))
                                     );
-                                    return {
-                                        id: String(ap.id),
-                                        code: ap.code,
-                                        name: ap.name,
-                                        description: ap.description || existing?.description || '',
-                                        status: (ap.status as any) || existing?.status || 'active',
-                                        priority: (ap as any).priority || existing?.priority || 'high',
-                                        category: (ap as any).category || existing?.category || 'Development',
-                                        budget_allocated: (ap as any).budget_allocated || existing?.budget_allocated || 50000,
-                                        budget_spent: (ap as any).budget_spent || existing?.budget_spent || 20000,
-                                        total_tasks: ap.total_tasks || existing?.total_tasks || 0,
-                                        completed_tasks: ap.completed_tasks || existing?.completed_tasks || 0,
-                                        progress: ap.progress || existing?.progress || 0,
-                                        start_date: ap.start_date || existing?.start_date || new Date().toISOString(),
-                                        end_date: ap.end_date || existing?.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
-                                        team_lead: (ap as any).team_lead || existing?.team_lead || { id: 1, name: 'Project Lead', role: 'Leader' },
-                                        members: (ap as any).members?.length ? (ap as any).members : (existing?.members || []),
-                                        tasks: (ap as any).tasks?.length ? (ap as any).tasks : (existing?.tasks || []),
-                                        phases: (ap as any).phases?.length ? (ap as any).phases : (existing?.phases || []),
-                                        meetings: (ap as any).meetings?.length ? (ap as any).meetings : (existing?.meetings || []),
-                                        agileTasks: (ap as any).agileTasks?.length ? (ap as any).agileTasks : (existing?.agileTasks || [...DEFAULT_AGILE_TASKS]),
-                                        links: (ap as any).links?.length ? (ap as any).links : (existing?.links || []),
-                                    };
                                 });
-                                this.plans.set(items);
-                            } else {
-                                this.plans.set(DEFAULT_INVITED_PROJECTS);
+
+                                const mappedTasks: IndividualTaskItem[] =
+                                    projectTasks.length > 0
+                                        ? projectTasks.map((t) => ({
+                                              id: String(t.id),
+                                              code: t.code || `#TASK-${t.id}`,
+                                              title: t.title,
+                                              description: t.description || '',
+                                              priority: t.priority || 'medium',
+                                              status: t.status || 'todo',
+                                              due_date: t.due_date ? new Date(t.due_date).toISOString().split('T')[0] : '',
+                                              created_at: t.created_at || new Date().toISOString(),
+                                              time_ago: '',
+                                              comments_count: t.comments_count || 0,
+                                              attachments_count: t.attachments_count || 0,
+                                              assignee: t.assignee
+                                                  ? {
+                                                        id: t.assignee.id,
+                                                        name: t.assignee.name,
+                                                        role: t.assignee.role || '',
+                                                        initial: (t.assignee.name || '?')[0].toUpperCase(),
+                                                        bgClass: 'bg-indigo-600',
+                                                    }
+                                                  : undefined,
+                                              members:
+                                                  t.assignees?.map((a) => ({
+                                                      id: a.id,
+                                                      name: a.name,
+                                                      role: a.role || '',
+                                                      initial: (a.name || '?')[0].toUpperCase(),
+                                                      bgClass: 'bg-slate-600',
+                                                  })) || [],
+                                              progress:
+                                                  t.progress ||
+                                                  (['done', 'completed'].includes((t.status || '').toLowerCase())
+                                                      ? 100
+                                                      : 0),
+                                          }))
+                                        : (ap as any).tasks?.length
+                                        ? (ap as any).tasks
+                                        : existing?.tasks || [];
+
+                                const total =
+                                    projectTasks.length > 0
+                                        ? projectTasks.length
+                                        : typeof ap.total_tasks === 'number'
+                                        ? ap.total_tasks
+                                        : existing?.total_tasks ?? 0;
+
+                                const completed =
+                                    projectTasks.length > 0
+                                        ? projectTasks.filter((t) =>
+                                              ['done', 'completed'].includes((t.status || '').toLowerCase())
+                                          ).length
+                                        : typeof ap.completed_tasks === 'number'
+                                        ? ap.completed_tasks
+                                        : existing?.completed_tasks ?? 0;
+
+                                const progress =
+                                    total > 0
+                                        ? Math.round((completed / total) * 100)
+                                        : typeof ap.progress === 'number'
+                                        ? ap.progress
+                                        : existing?.progress ?? 0;
+
+                                return {
+                                    id: String(ap.id),
+                                    code: ap.code,
+                                    name: ap.name,
+                                    logo:
+                                        (ap as any).logo ||
+                                        (ap as any).image ||
+                                        (existing as any)?.logo ||
+                                        (existing as any)?.image ||
+                                        null,
+                                    image:
+                                        (ap as any).image ||
+                                        (ap as any).logo ||
+                                        (existing as any)?.image ||
+                                        (existing as any)?.logo ||
+                                        null,
+                                    description: ap.description || existing?.description || '',
+                                    status: (ap.status as any) || existing?.status || 'active',
+                                    priority: (ap as any).priority || existing?.priority || 'high',
+                                    category: (ap as any).category || existing?.category || 'Development',
+                                    budget_allocated: (ap as any).budget_allocated || existing?.budget_allocated || 50000,
+                                    budget_spent: (ap as any).budget_spent || existing?.budget_spent || 20000,
+                                    total_tasks: total,
+                                    completed_tasks: completed,
+                                    progress: progress,
+                                    start_date: ap.start_date || existing?.start_date || new Date().toISOString(),
+                                    end_date:
+                                        ap.end_date ||
+                                        existing?.end_date ||
+                                        new Date(Date.now() + 86400000 * 30).toISOString(),
+                                    team_lead:
+                                        (ap as any).team_lead ||
+                                        existing?.team_lead || { id: 1, name: 'Project Lead', role: 'Leader' },
+                                    members: (ap as any).members?.length ? (ap as any).members : existing?.members || [],
+                                    tasks: mappedTasks,
+                                    phases: (ap as any).phases?.length ? (ap as any).phases : existing?.phases || [],
+                                    meetings: (ap as any).meetings?.length
+                                        ? (ap as any).meetings
+                                        : existing?.meetings || [],
+                                    agileTasks: (ap as any).agileTasks?.length
+                                        ? (ap as any).agileTasks
+                                        : existing?.agileTasks || [...DEFAULT_AGILE_TASKS],
+                                    links: (ap as any).links?.length ? (ap as any).links : existing?.links || [],
+                                };
+                            });
+                            this.plans.set(items);
+                            if (this.selectedProject()) {
+                                const currentSel = this.selectedProject();
+                                const matchingSel = items.find(
+                                    (p) => p.id === currentSel?.id || p.code === currentSel?.code
+                                );
+                                if (matchingSel) {
+                                    this.selectedProject.set(matchingSel);
+                                }
                             }
-                            this.loading.set(false);
-                        },
-                        error: () => {
+                        } else {
                             this.plans.set(DEFAULT_INVITED_PROJECTS);
-                            this.loading.set(false);
-                        },
-                    });
+                        }
+                        this.loading.set(false);
+                    },
+                    error: () => {
+                        this.plans.set(DEFAULT_INVITED_PROJECTS);
+                        this.loading.set(false);
+                    },
+                });
             }
 
             saveProjectChanges(proj?: ExtendedProjectItem | null): void {

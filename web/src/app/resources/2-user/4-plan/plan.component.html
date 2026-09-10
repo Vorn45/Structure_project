@@ -143,53 +143,58 @@
             </div>
 
             <!-- Projects Grid (Compact & Proportioned Sizing) -->
-            <div *ngIf="!loading()"
+            <div *ngIf="!loading() && filteredPlans().length > 0"
                 class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy">
                 <div *ngFor="let plan of filteredPlans()" (click)="selectProject(plan)"
-                    class="group relative w-full rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy">
+                    class="group relative w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600/70 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy p-4 sm:p-4.5 space-y-3.5 hover:-translate-y-0.5">
 
-                    <!-- 1. Top Khmer Decorative Line (ក្បាច់បន្ទាត់លើ) -->
-                    <div class="h-1 w-full" [ngClass]="getStatusBarClass(plan.status)"></div>
+                    <!-- Top Card Content -->
+                    <div class="space-y-3">
+                        <!-- Header: Project Icon/Avatar + Code & Status -->
+                        <div class="flex items-start justify-between gap-3">
+                            <!-- Left: Icon & Names -->
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <!-- Project Logo or Default Icon -->
+                                <div *ngIf="plan.logo || plan.image; else defaultPlanIcon"
+                                    class="w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 shadow-2xs group-hover:scale-105 transition-transform duration-200">
+                                    <img [src]="plan.logo || plan.image" class="w-full h-full object-cover" [alt]="plan.name" />
+                                </div>
+                                <ng-template #defaultPlanIcon>
+                                    <div
+                                        class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-blue-600/10 dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-blue-600/20 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/50 shrink-0 shadow-2xs group-hover:scale-105 group-hover:border-blue-300 dark:group-hover:border-blue-700 transition-all duration-200">
+                                        <mat-icon svgIcon="default-project" class="icon-size-5.5"></mat-icon>
+                                    </div>
+                                </ng-template>
 
-                    <!-- 2. Subtle Traditional Kbach Watermark (ក្បាច់ភ្ញីទេសស្រទន់) -->
-                    <div
-                        class="absolute -right-4 -top-4 w-28 h-28 pointer-events-none opacity-[0.05] dark:opacity-[0.09] text-blue-900 dark:text-blue-200">
-                        <svg viewBox="0 0 120 120" fill="currentColor" class="w-full h-full">
-                            <path
-                                d="M60 10 C65 25 80 35 95 35 C80 45 75 60 85 75 C70 70 60 85 60 105 C60 85 50 70 35 75 C45 60 40 45 25 35 C40 35 55 25 60 10 Z" />
-                            <circle cx="60" cy="55" r="12" fill="none" stroke="currentColor" stroke-width="3" />
-                        </svg>
-                    </div>
+                                <!-- Title & Code -->
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <span
+                                            class="text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-900/40 px-1.5 py-0.2 rounded font-mono">
+                                            #{{ plan.code }}
+                                        </span>
+                                    </div>
+                                    <h3
+                                        class="text-[14.5px] font-semibold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate font-kantumruy">
+                                        {{ plan.name }}
+                                    </h3>
+                                </div>
+                            </div>
 
-                    <div class="p-4 space-y-3 relative z-10">
-                        <!-- Code & Status Header -->
-                        <div class="flex items-center justify-between gap-2">
-                            <!-- Project Code Badge -->
+                            <!-- Right: Status Pill with Icon -->
                             <span
-                                class="text-[11.5px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-900/40 px-2 py-0.5 rounded-md shadow-2xs font-mono">
-                                {{ plan.code }}
-                            </span>
-
-                            <!-- Status Pill with Icon -->
-                            <span
-                                class="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs font-kantumruy"
+                                class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2 py-0.5 rounded-full border shadow-2xs shrink-0 font-kantumruy"
                                 [ngClass]="getStatusClass(plan.status)">
                                 <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
                                 <span>{{ getStatusLabel(plan.status) }}</span>
                             </span>
                         </div>
 
-                        <!-- Title & Description -->
-                        <div class="space-y-0.5">
-                            <h3
-                                class="text-[15px] font-semibold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate font-kantumruy">
-                                {{ plan.name }}
-                            </h3>
-                            <p
-                                class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-1 font-kantumruy font-normal">
-                                {{ plan.description }}
-                            </p>
-                        </div>
+                        <!-- Description -->
+                        <p
+                            class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 min-h-[2.4rem] font-kantumruy font-normal">
+                            {{ plan.description || 'គ្មានការពិពណ៌នាអំពីគម្រោងនេះទេ។' }}
+                        </p>
 
                         <!-- Dates with Calendar Icon -->
                         <div
@@ -199,11 +204,12 @@
                         </div>
 
                         <!-- Progress Bar & Task Count -->
-                        <div class="space-y-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700/60">
+                        <div class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
                             <div class="flex justify-between items-center text-[12px] font-kantumruy">
-                                <span class="text-slate-500 dark:text-slate-400">កិច្ចការរួចរាល់</span>
-                                <span class="text-slate-700 dark:text-slate-300 font-medium">
-                                    {{ plan.completed_tasks }} / {{ plan.total_tasks }} ({{ projectProgress(plan) }}%)
+                                <span class="text-slate-500 dark:text-slate-400 font-medium">កិច្ចការរួចរាល់</span>
+                                <span class="text-slate-700 dark:text-slate-300 font-medium font-mono">
+                                    {{ plan.completed_tasks }} / {{ plan.total_tasks }}
+                                    <span class="text-blue-600 dark:text-blue-400 font-semibold font-kantumruy">({{ projectProgress(plan) }}%)</span>
                                 </span>
                             </div>
                             <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -215,7 +221,7 @@
                         <!-- Members Avatar Stack -->
                         <div *ngIf="plan.members && plan.members.length > 0"
                             class="flex items-center gap-2 pt-0.5 font-kantumruy">
-                            <span class="text-[12px] text-slate-400">សមាជិក៖</span>
+                            <span class="text-[11.5px] text-slate-400">សមាជិក៖</span>
                             <div class="flex -space-x-1.5 overflow-hidden items-center">
                                 <div *ngFor="let m of plan.members.slice(0, 4); let idx = index"
                                     class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
@@ -233,14 +239,29 @@
                     </div>
 
                     <!-- Open Button -->
-                    <div class="px-4 pb-4 pt-0 relative z-10">
+                    <div class="pt-2">
                         <button type="button" (click)="selectProject(plan); $event.stopPropagation()"
-                            class="w-full h-9 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13.5px] font-kantumruy transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.99]">
+                            class="w-full h-9 rounded-xl bg-blue-50/80 hover:bg-blue-600 text-blue-700 hover:text-white dark:bg-blue-950/40 dark:hover:bg-blue-600 dark:text-blue-300 dark:hover:text-white border border-blue-200/70 hover:border-blue-600 dark:border-blue-900/60 font-medium text-[13px] font-kantumruy transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 active:scale-[0.99]">
                             <mat-icon svgIcon="mdi:view-dashboard-outline" class="icon-size-4"></mat-icon>
                             <span>ចូលមើលគម្រោង ({{ plan.total_tasks }} កិច្ចការ)</span>
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading() && filteredPlans().length === 0"
+                class="flex flex-col items-center justify-center py-20 px-4 text-center font-kantumruy">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-500 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50 shadow-xs">
+                    <mat-icon svgIcon="default-project" class="icon-size-8"></mat-icon>
+                </div>
+                <h4 class="text-[16px] font-semibold text-slate-800 dark:text-white mb-1">
+                    រកមិនឃើញគម្រោងទេ
+                </h4>
+                <p class="text-[13px] text-slate-500 dark:text-slate-400 max-w-sm">
+                    មិនមានគម្រោងដែលត្រូវគ្នានឹងការស្វែងរក ឬការច្រោះទិន្នន័យរបស់អ្នកឡើយ។
+                </p>
             </div>
         </div>
 
@@ -260,10 +281,27 @@
                         <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
                     </button>
 
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-[17px] font-medium text-slate-800 dark:text-white truncate">
-                            {{ proj.name }}
-                        </h2>
+                    <div class="flex items-center gap-2.5">
+                        <div *ngIf="proj.logo || proj.image; else defaultWorkspaceProjIcon"
+                            class="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 shadow-2xs">
+                            <img [src]="proj.logo || proj.image" class="w-full h-full object-cover" [alt]="proj.name" />
+                        </div>
+                        <ng-template #defaultWorkspaceProjIcon>
+                            <div
+                                class="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/50 shrink-0 shadow-2xs">
+                                <mat-icon svgIcon="default-project" class="icon-size-4.5"></mat-icon>
+                            </div>
+                        </ng-template>
+
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-[17px] font-medium text-slate-800 dark:text-white truncate">
+                                {{ proj.name }}
+                            </h2>
+                            <span
+                                class="text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-900/40 px-1.5 py-0.2 rounded font-mono">
+                                #{{ proj.code }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

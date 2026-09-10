@@ -49,6 +49,17 @@ export class IconsService {
                 'icons/People search-amico.svg',
             ),
         );
+        // Default Project Icon (Fluent / App window icon requested by user)
+        matIconRegistry.addSvgIcon(
+            'default-project',
+            domSanitizer.bypassSecurityTrustResourceUrl('icons/default-project.svg'),
+        );
+        matIconRegistry.addSvgIconLiteral(
+            'default-project',
+            domSanitizer.bypassSecurityTrustHtml(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M0 0h16v16H0z" fill="none" /><path fill="currentColor" d="M4 1a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V4a3 3 0 0 0-3-3zM2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zm0 1h12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" /></svg>'
+            ),
+        );
         matIconRegistry.addSvgIconSet(
             domSanitizer.bypassSecurityTrustResourceUrl(
                 'icons/material-twotone.svg',

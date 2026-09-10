@@ -259,44 +259,99 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         },
     ];
 
-    // Available Projects list (First 3 are shown in circular avatar stack; +2 button opens the full menu)
+    // Available Projects list (Loaded dynamically from database / tasks; default icon used when no image)
     projects = signal<ProjectFilterOption[]>([
         {
             id: 'bms-digitech',
-            name: 'BMS Digitech (CamCyber)',
+            name: 'BMS Digitech',
             code: 'BMS',
-            icon: 'mdi:shield-account-outline',
             bgClass: 'bg-sky-600 text-white',
         },
         {
             id: 'wms-digitech',
             name: 'WMS Digitech',
             code: 'WMS',
-            icon: 'mdi:monitor-dashboard',
             bgClass: 'bg-emerald-700 text-white',
         },
-        {
-            id: 'nursing-council',
-            name: 'ប្រព័ន្ធឌីជីថលចុះបញ្ជីកា និងផ្តល់អាជ្ញាបណ្ណវិជ្ជាជីវៈគិលានុបដ្ឋាកកម្ពុជា',
-            code: 'NC',
-            icon: 'mdi:hospital-box-outline',
-            bgClass: 'bg-rose-600 text-white',
-        },
-        {
-            id: 'pms-upgrade',
-            name: 'PMS Upgrade V2',
-            code: 'PMS',
-            icon: 'mdi:layers-triple-outline',
-            bgClass: 'bg-indigo-600 text-white',
-        },
-        {
-            id: 'nextask',
-            name: 'NexTask Management Platform',
-            code: 'NT',
-            icon: 'mdi:check-circle-outline',
-            bgClass: 'bg-blue-600 text-white',
-        },
     ]);
+
+    loadProjects(): void {
+        this._taskService.getProjects().subscribe({
+            next: (res) => {
+                if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+                    const bgColors = [
+                        'bg-sky-600 text-white',
+                        'bg-emerald-700 text-white',
+                        'bg-rose-600 text-white',
+                        'bg-indigo-600 text-white',
+                        'bg-amber-600 text-white',
+                        'bg-purple-600 text-white',
+                        'bg-teal-600 text-white',
+                        'bg-blue-600 text-white',
+                    ];
+                    const mapped: ProjectFilterOption[] = res.data.map((p: any, idx: number) => ({
+                        id: String(p.id),
+                        code: p.code || p.name?.slice(0, 3)?.toUpperCase() || 'PRJ',
+                        name: p.name,
+                        logo: p.logo || p.image || null,
+                        image: p.image || p.logo || null,
+                        bgClass: p.bgClass || bgColors[idx % bgColors.length],
+                    }));
+                    this.projects.set(mapped);
+                } else {
+                    this.deriveProjectsFromTasks();
+                }
+            },
+            error: () => {
+                this.deriveProjectsFromTasks();
+            },
+        });
+    }
+
+    deriveProjectsFromTasks(): void {
+        const currentTasks = this.tasks();
+        if (!currentTasks || currentTasks.length === 0) return;
+
+        const bgColors = [
+            'bg-sky-600 text-white',
+            'bg-emerald-700 text-white',
+            'bg-rose-600 text-white',
+            'bg-indigo-600 text-white',
+            'bg-amber-600 text-white',
+            'bg-purple-600 text-white',
+            'bg-teal-600 text-white',
+            'bg-blue-600 text-white',
+        ];
+
+        const pMap = new Map<string, ProjectFilterOption>();
+        // Keep known projects first
+        for (const p of this.projects()) {
+            pMap.set(p.id.toLowerCase(), p);
+            pMap.set(p.name.toLowerCase(), p);
+        }
+
+        currentTasks.forEach((t) => {
+            const id = t.project_id || t.project_name;
+            if (id && !pMap.has(id.toLowerCase())) {
+                const name = t.project_name || t.project_id || 'Project';
+                const code = t.code ? t.code.split('-')[0].replace('#', '') : name.slice(0, 3).toUpperCase();
+                const option: ProjectFilterOption = {
+                    id: t.project_id || id,
+                    name: name,
+                    code: code,
+                    bgClass: bgColors[pMap.size % bgColors.length],
+                };
+                pMap.set(id.toLowerCase(), option);
+                pMap.set(name.toLowerCase(), option);
+            }
+        });
+
+        // Deduplicate
+        const unique = Array.from(new Set(pMap.values()));
+        if (unique.length > 0) {
+            this.projects.set(unique);
+        }
+    }
 
     // Task Dialogs & File Modal State (Dialog 1: Details, Dialog 2: Chat)
     selectedTask = signal<TaskItem | null>(null);
@@ -379,6 +434,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadTeamMembers();
+        this.loadProjects();
 
         // Anyone moving a task on any board changes what these chips should read,
         // so refresh from the server rather than guessing at the delta locally.
@@ -531,16 +587,29 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     
                     if (this.selectedProjectId() !== 'all') {
                         const pid = this.selectedProjectId().toLowerCase();
-                        finalTasks = finalTasks.filter(
-                            (t) =>
-                                (t.project_id && t.project_id.toLowerCase().includes(pid)) ||
-                                (t.project_name && t.project_name.toLowerCase().includes(pid))
-                        );
+                        const selectedProj = this.projects().find((p) => p.id === this.selectedProjectId());
+                        const pCode = (selectedProj?.code || '').toLowerCase();
+                        const pName = (selectedProj?.name || '').toLowerCase();
+
+                        finalTasks = finalTasks.filter((t) => {
+                            const tPid = (t.project_id || '').toLowerCase();
+                            const tPname = (t.project_name || '').toLowerCase();
+                            const tCode = (t.code || '').toLowerCase();
+
+                            return (
+                                (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
+                                (pCode && (tCode.includes(pCode) || tPid.includes(pCode))) ||
+                                (pName && (tPname.includes(pName) || pName.includes(tPname)))
+                            );
+                        });
                     }
 
                     this.tasks.set(finalTasks);
                     this.computeCounts(finalTasks, res.data.counts);
                     this.loading.set(false);
+                    if (this.projects().length <= 2) {
+                        this.deriveProjectsFromTasks();
+                    }
 
                     // Auto-open task if navigating from notification with taskId/taskCode
                     const q = this._route.snapshot.queryParams;
@@ -597,6 +666,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     isOtherProjectSelected(): boolean {
         const id = this.selectedProjectId();
         if (id === 'all') return false;
+        if (this.projects().length <= 3) return false;
         const top3Ids = this.projects().slice(0, 3).map((p) => p.id);
         return !top3Ids.includes(id);
     }
