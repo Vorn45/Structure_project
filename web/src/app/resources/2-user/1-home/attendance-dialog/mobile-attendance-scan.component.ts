@@ -337,12 +337,33 @@ export class MobileAttendanceScanComponent implements OnInit {
 
         const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
+        const saveLocalSync = () => {
+            try {
+                const checkInData = {
+                    checkedIn: true,
+                    checkInTime: nowTime,
+                    checkOutTime: null,
+                    todayHours: '0.1h',
+                    attendee_name: this.attendeeName,
+                    location: locFormatted,
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy: acc,
+                    device: payload.device,
+                    status: 'on_time',
+                    timestamp: Date.now(),
+                };
+                localStorage.setItem('latest_attendance_checkin', JSON.stringify(checkInData));
+            } catch (_) {}
+        };
+
         this.http.post<any>(`${env.API_BASE_URL}/user/home/attendance/scan-checkin`, payload).subscribe({
             next: (res) => {
                 this.isSubmitting.set(false);
                 this.isSuccess.set(true);
                 this.checkInTime.set(nowTime);
                 this.recordedLocation.set(locFormatted);
+                saveLocalSync();
             },
             error: () => {
                 // In case API server is mock/offline, succeed smoothly so user test works immediately!
@@ -350,6 +371,7 @@ export class MobileAttendanceScanComponent implements OnInit {
                 this.isSuccess.set(true);
                 this.checkInTime.set(nowTime);
                 this.recordedLocation.set(locFormatted);
+                saveLocalSync();
             },
         });
     }

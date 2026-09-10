@@ -321,12 +321,38 @@ export class TakeAttendanceDialogComponent implements OnInit, OnDestroy {
         this.todayDay = `${dayKhmer[dayIdx]}`;
     }
 
+    private _onStorageEvent = (event: StorageEvent) => {
+        if (event.key === 'latest_attendance_checkin' && event.newValue) {
+            try {
+                const item = JSON.parse(event.newValue);
+                const newLog: AttendanceLogItem = {
+                    id: String(Date.now()),
+                    name: item.attendee_name || 'អ្នកប្រើប្រាស់ទូរស័ព្ទ',
+                    time: item.checkInTime || new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    location: item.location || 'Phnom Penh HQ',
+                    latitude: item.latitude,
+                    longitude: item.longitude,
+                    accuracy: item.accuracy,
+                    device: item.device || 'Phone Scanner',
+                    status: 'on_time',
+                };
+                this.logs.set([newLog, ...this.logs()]);
+            } catch (_) {}
+        }
+    };
+
     ngOnInit(): void {
         this.generateQrCode();
+        if (typeof window !== 'undefined') {
+            window.addEventListener('storage', this._onStorageEvent);
+        }
     }
 
     ngOnDestroy(): void {
         this.stopTimer();
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('storage', this._onStorageEvent);
+        }
     }
 
     async generateQrCode(): Promise<void> {
@@ -337,8 +363,9 @@ export class TakeAttendanceDialogComponent implements OnInit, OnDestroy {
         try {
             this.currentSessionToken = Math.random().toString(36).substring(2, 10);
             
-            // Clean, compact scan URL so the QR code generates big and crisp
-            const scanUrl = `${window.location.origin}/attendance/scan?token=${this.currentSessionToken}`;
+            // Format with hash routing /#/attendance/scan for Angular withHashLocation()
+            const base = window.location.href.split('#')[0].replace(/\/+$/, '');
+            const scanUrl = `${base}/#/attendance/scan?token=${this.currentSessionToken}`;
             this.mobileScanUrl.set(scanUrl);
 
             const url = await QRCode.toDataURL(scanUrl, {

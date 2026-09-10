@@ -17,6 +17,17 @@ export class RedirectGuard implements CanActivate {
     ) {}
 
     canActivate(_route: ActivatedRouteSnapshot): UrlTree {
+        if (typeof window !== 'undefined') {
+            const pathname = window.location.pathname || '';
+            const search = window.location.search || '';
+            if (pathname.includes('/attendance/scan') || pathname.includes('/attendance')) {
+                return this.router.parseUrl(`/attendance/scan${search}`);
+            }
+            if (pathname.includes('/verify/member')) {
+                return this.router.parseUrl(`/verify/member${search}`);
+            }
+        }
+
         const token = this.authService.accessToken;
 
         if (!token) {

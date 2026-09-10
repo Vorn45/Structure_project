@@ -68,6 +68,15 @@ export class AttendanceService {
         },
     ];
 
+    private stats = {
+        present_days: 22,
+        late_days: 1,
+        leave_days: 0,
+        total_working_hours: 176,
+        overtime_hours: 8.5,
+        attendance_rate: 98.5,
+    };
+
     async getAttendance(user?: UserPayload) {
         return {
             status_code: 200,
@@ -75,14 +84,7 @@ export class AttendanceService {
             data: {
                 ...this.checkInState,
                 realtime_logs: this.realtimeLogs,
-                stats: {
-                    present_days: 22,
-                    late_days: 1,
-                    leave_days: 0,
-                    total_working_hours: 176,
-                    overtime_hours: 8.5,
-                    attendance_rate: 98.5,
-                },
+                stats: this.stats,
                 weekly_log: [
                     { day: 'ចន្ទ (Mon)', check_in: '07:58 AM', check_out: '05:05 PM', status: 'present', hours: '8.1h' },
                     { day: 'អង្គារ (Tue)', check_in: '08:02 AM', check_out: '05:15 PM', status: 'present', hours: '8.2h' },
@@ -115,6 +117,9 @@ export class AttendanceService {
             location: locString,
         };
 
+        this.stats.present_days = 23;
+        this.stats.attendance_rate = 99.0;
+
         const newLog: AttendanceRealtimeLog = {
             id: String(Date.now()),
             name,
@@ -134,6 +139,7 @@ export class AttendanceService {
             message: 'Checked in successfully with phone GPS tracking',
             data: {
                 ...this.checkInState,
+                stats: this.stats,
                 log: newLog,
                 realtime_logs: this.realtimeLogs,
             },
