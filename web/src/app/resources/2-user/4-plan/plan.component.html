@@ -38,7 +38,7 @@
                             class="w-40 sm:w-56 h-9 pl-9 pr-3 text-[14px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
                     </div>
 
-                    <button type="button" (click)="openCreateProjectModal()"
+                    <button *ngIf="canCreatePlan()" type="button" (click)="openCreateProjectModal()"
                         class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
                         <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
                         <span>បង្កើតគម្រោង</span>
@@ -146,36 +146,36 @@
             <div *ngIf="!loading() && filteredPlans().length > 0"
                 class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy">
                 <div *ngFor="let plan of filteredPlans()" (click)="selectProject(plan)"
-                    class="group relative w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600/70 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy p-4 sm:p-4.5 space-y-3.5 hover:-translate-y-0.5">
+                    class="relative w-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:bg-slate-50/60 dark:hover:bg-slate-800/60 shadow-xs hover:shadow-sm transition-colors duration-150 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy p-5 space-y-4">
 
                     <!-- Top Card Content -->
-                    <div class="space-y-3">
-                        <!-- Header: Project Icon/Avatar + Code & Status -->
+                    <div class="space-y-3.5">
+                        <!-- Header: Project Icon + Code & Status -->
                         <div class="flex items-start justify-between gap-3">
                             <!-- Left: Icon & Names -->
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <!-- Project Logo or Default Icon -->
                                 <div *ngIf="plan.logo || plan.image; else defaultPlanIcon"
-                                    class="w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 shadow-2xs group-hover:scale-105 transition-transform duration-200">
+                                    class="w-11 h-11 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shrink-0 shadow-2xs">
                                     <img [src]="plan.logo || plan.image" class="w-full h-full object-cover" [alt]="plan.name" />
                                 </div>
                                 <ng-template #defaultPlanIcon>
                                     <div
-                                        class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-blue-600/10 dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-blue-600/20 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/50 shrink-0 shadow-2xs group-hover:scale-105 group-hover:border-blue-300 dark:group-hover:border-blue-700 transition-all duration-200">
-                                        <mat-icon svgIcon="default-project" class="icon-size-5.5"></mat-icon>
+                                        class="w-11 h-11 rounded-2xl flex items-center justify-center bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 shrink-0 shadow-2xs">
+                                        <mat-icon svgIcon="default-project" class="icon-size-6"></mat-icon>
                                     </div>
                                 </ng-template>
 
                                 <!-- Title & Code -->
                                 <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                    <div class="flex items-center gap-1.5">
                                         <span
-                                            class="text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-900/40 px-1.5 py-0.2 rounded font-mono">
+                                            class="text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50/90 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-900/40 px-2 py-0.5 rounded-md font-mono">
                                             #{{ plan.code }}
                                         </span>
                                     </div>
                                     <h3
-                                        class="text-[14.5px] font-semibold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate font-kantumruy">
+                                        class="text-[15.5px] font-medium text-slate-900 dark:text-white leading-snug truncate font-kantumruy mt-1">
                                         {{ plan.name }}
                                     </h3>
                                 </div>
@@ -183,7 +183,7 @@
 
                             <!-- Right: Status Pill with Icon -->
                             <span
-                                class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2 py-0.5 rounded-full border shadow-2xs shrink-0 font-kantumruy"
+                                class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs shrink-0 font-kantumruy"
                                 [ngClass]="getStatusClass(plan.status)">
                                 <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
                                 <span>{{ getStatusLabel(plan.status) }}</span>
@@ -198,31 +198,34 @@
 
                         <!-- Dates with Calendar Icon -->
                         <div
-                            class="flex items-center gap-2 text-[12px] text-slate-500 dark:text-slate-400 font-kantumruy">
-                            <mat-icon svgIcon="mdi:calendar-range" class="icon-size-3.5 text-slate-400"></mat-icon>
+                            class="flex items-center gap-2 text-[12px] text-slate-400 dark:text-slate-500 font-kantumruy">
+                            <mat-icon svgIcon="mdi:calendar-range" class="icon-size-3.5 text-slate-400 dark:text-slate-500"></mat-icon>
                             <span>{{ plan.start_date | date:'d MMM y' }} — {{ plan.end_date | date:'d MMM y' }}</span>
                         </div>
 
                         <!-- Progress Bar & Task Count -->
-                        <div class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                        <div class="space-y-1.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                             <div class="flex justify-between items-center text-[12px] font-kantumruy">
-                                <span class="text-slate-500 dark:text-slate-400 font-medium">កិច្ចការរួចរាល់</span>
+                                <span class="text-slate-600 dark:text-slate-400 font-medium">កិច្ចការរួចរាល់</span>
                                 <span class="text-slate-700 dark:text-slate-300 font-medium font-mono">
                                     {{ plan.completed_tasks }} / {{ plan.total_tasks }}
                                     <span class="text-blue-600 dark:text-blue-400 font-semibold font-kantumruy">({{ projectProgress(plan) }}%)</span>
                                 </span>
                             </div>
-                            <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
+                            <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-500"
                                     [style.width.%]="projectProgress(plan)"></div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Members Avatar Stack -->
-                        <div *ngIf="plan.members && plan.members.length > 0"
-                            class="flex items-center gap-2 pt-0.5 font-kantumruy">
-                            <span class="text-[11.5px] text-slate-400">សមាជិក៖</span>
-                            <div class="flex -space-x-1.5 overflow-hidden items-center">
+                    <!-- Footer: Members Avatar Stack & Tasks Pill Badge -->
+                    <div class="flex items-center justify-between pt-2 font-kantumruy">
+                        <!-- Members -->
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-[11.5px] text-slate-400 shrink-0">សមាជិក៖</span>
+                            <div *ngIf="plan.members && plan.members.length > 0; else noMembers"
+                                class="flex -space-x-1.5 overflow-hidden items-center">
                                 <div *ngFor="let m of plan.members.slice(0, 4); let idx = index"
                                     class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
                                     [ngClass]="idx % 4 === 0 ? 'bg-blue-600' : (idx % 4 === 1 ? 'bg-indigo-600' : (idx % 4 === 2 ? 'bg-purple-600' : 'bg-emerald-600'))"
@@ -235,16 +238,16 @@
                                     +{{ plan.members.length - 4 }}
                                 </div>
                             </div>
+                            <ng-template #noMembers>
+                                <span class="text-[11px] text-slate-400 italic">គ្មានសមាជិក</span>
+                            </ng-template>
                         </div>
-                    </div>
 
-                    <!-- Open Button -->
-                    <div class="pt-2">
-                        <button type="button" (click)="selectProject(plan); $event.stopPropagation()"
-                            class="w-full h-9 rounded-xl bg-blue-50/80 hover:bg-blue-600 text-blue-700 hover:text-white dark:bg-blue-950/40 dark:hover:bg-blue-600 dark:text-blue-300 dark:hover:text-white border border-blue-200/70 hover:border-blue-600 dark:border-blue-900/60 font-medium text-[13px] font-kantumruy transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 active:scale-[0.99]">
-                            <mat-icon svgIcon="mdi:view-dashboard-outline" class="icon-size-4"></mat-icon>
-                            <span>ចូលមើលគម្រោង ({{ plan.total_tasks }} កិច្ចការ)</span>
-                        </button>
+                        <!-- Total Tasks Count Badge -->
+                        <div class="flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shrink-0">
+                            <mat-icon svgIcon="mdi:checkbox-marked-circle-outline" class="icon-size-3.5 text-blue-500"></mat-icon>
+                            <span>{{ plan.total_tasks }} កិច្ចការ</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1933,5 +1936,43 @@
 
         </div>
     </div>
+
+    <!-- ========================================================================= -->
+    <!-- UNIFIED TASK DRAWER & CHAT CONVERSATION (matching /member/tasks Image 1)  -->
+    <!-- ========================================================================= -->
+    <task-drawer
+        [task]="selectedTaskDrawerItem()"
+        [show]="showTaskDrawer()"
+        [dialogMode]="taskDrawerDialogMode()"
+        [messages]="taskDrawerChatMessages()"
+        [teamMembers]="teamMembersForDrawer()"
+        [allFiles]="allTaskFiles()"
+        [currentUserAvatar]="getCurrentUserAvatar()"
+        (closeDrawer)="closeTaskDrawer()"
+        (switchToChat)="taskDrawerDialogMode.set('chat')"
+        (switchToDetails)="taskDrawerDialogMode.set('details')"
+        (statusChange)="onTaskDrawerStatusChange($event)"
+        (typeChange)="onTaskDrawerTypeChange($event)"
+        (priorityChange)="onTaskDrawerPriorityChange($event)"
+        (dueDateChange)="onTaskDrawerDueDateChange($event)"
+        (assigneeToggle)="onTaskDrawerAssigneeToggle($event)"
+        (reporterChange)="onTaskDrawerReporterChange($event)"
+        (sendMessage)="onTaskDrawerSendMessage($event)"
+        (viewFile)="viewTaskFile($event)"
+        (previewImage)="openImagePreview($event)"
+        (downloadFile)="downloadTaskFile($event)"
+        (deleteTask)="onTaskDrawerDelete($event)">
+    </task-drawer>
+
+    <!-- ========================================================================= -->
+    <!-- FULLSCREEN FILE / PDF PREVIEW & LIGHTBOX MODAL                            -->
+    <!-- ========================================================================= -->
+    <task-file-preview-modal
+        [previewFile]="selectedPreviewFile()"
+        [previewImage]="selectedPreviewImage()"
+        [task]="selectedTaskDrawerItem()"
+        (closeModal)="closeFilePreview()"
+        (downloadFile)="downloadTaskFile($event)">
+    </task-file-preview-modal>
 
 </div>

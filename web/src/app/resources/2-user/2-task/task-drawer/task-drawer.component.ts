@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, input, output, signal } from '@angular/core';
+import { Component, computed, effect, HostListener, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -158,6 +158,15 @@ export class TaskDrawerComponent {
     taskTypes = TASK_TYPES_LIST;
 
     mobileTab = signal<'details' | 'chat'>('chat');
+    isClosing = signal<boolean>(false);
+    isVisible = signal<boolean>(false);
+
+    @HostListener('document:keydown.escape')
+    onEscapeKey(): void {
+        if (this.show() && !this.isClosing()) {
+            this.triggerClose();
+        }
+    }
 
     constructor() {
         effect(() => {
@@ -166,6 +175,29 @@ export class TaskDrawerComponent {
                 this.mobileTab.set(mode);
             }
         }, { allowSignalWrites: true });
+
+        effect(() => {
+            const isShow = this.show();
+            if (isShow) {
+                this.isClosing.set(false);
+                setTimeout(() => {
+                    this.isVisible.set(true);
+                }, 10);
+            } else {
+                this.isVisible.set(false);
+                this.isClosing.set(false);
+            }
+        }, { allowSignalWrites: true });
+    }
+
+    triggerClose(): void {
+        if (this.isClosing()) return;
+        this.isClosing.set(true);
+        this.isVisible.set(false);
+        setTimeout(() => {
+            this.closeDrawer.emit();
+            this.isClosing.set(false);
+        }, 220);
     }
 
     taskDueDate = computed<Date | null>(() => {

@@ -763,8 +763,9 @@ export class CreateTaskDialogComponent implements OnInit {
     ];
     selectedProjectId: string = 'bms-digitech';
 
-    // State for continuous creation and notifications
+    // State for continuous creation, notifications, and smooth closing
     isSubmitting = signal<boolean>(false);
+    isClosing = signal<boolean>(false);
     successNotice = signal<string>('');
     private hasCreatedAnyTask = false;
 
@@ -957,6 +958,18 @@ export class CreateTaskDialogComponent implements OnInit {
         @Inject(MAT_DIALOG_DATA) public data: CreateTaskDialogData,
         private readonly _userTaskService: UserTaskService,
     ) {
+        // Enable custom smooth closing on backdrop click & escape key
+        this.dialogRef.disableClose = true;
+        this.dialogRef.backdropClick().subscribe(() => {
+            this.cancel();
+        });
+        this.dialogRef.keydownEvents().subscribe((e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.cancel();
+            }
+        });
+
         if (this.data?.projectCode) {
             const found = this.projectList.find(
                 (p) => p.code.toLowerCase() === this.data.projectCode?.toLowerCase() || p.id.toLowerCase() === this.data.projectCode?.toLowerCase()
@@ -1037,7 +1050,7 @@ export class CreateTaskDialogComponent implements OnInit {
 
     submitAndAddAnother(): void {
         const title = this.taskTitle.trim();
-        if (!title || this.isSubmitting()) return;
+        if (!title || this.isSubmitting() || this.isClosing()) return;
 
         this.isSubmitting.set(true);
         const payload = this.buildPayload();
@@ -1066,9 +1079,31 @@ export class CreateTaskDialogComponent implements OnInit {
         });
     }
 
+    private performSmoothClose(result: any = null): void {
+        if (this.isClosing()) return;
+        this.isClosing.set(true);
+
+        try {
+            this.dialogRef.addPanelClass('side-dialog-closing');
+            const backdrop =
+                ((this.dialogRef as any)._overlayRef?.backdropElement as HTMLElement) ||
+                (document.querySelector('.cdk-overlay-backdrop.cdk-overlay-backdrop-showing') as HTMLElement);
+            if (backdrop) {
+                backdrop.style.transition = 'opacity 200ms cubic-bezier(0.2, 0, 0, 1)';
+                backdrop.style.opacity = '0';
+            }
+        } catch (e) {
+            console.warn('Error during smooth close animation', e);
+        }
+
+        setTimeout(() => {
+            this.dialogRef.close(result);
+        }, 190);
+    }
+
     submitAndClose(): void {
         const title = this.taskTitle.trim();
-        if (!title || this.isSubmitting()) return;
+        if (!title || this.isSubmitting() || this.isClosing()) return;
 
         this.isSubmitting.set(true);
         const payload = this.buildPayload();
@@ -1079,7 +1114,7 @@ export class CreateTaskDialogComponent implements OnInit {
                 if (this.data?.onTaskCreated) {
                     this.data.onTaskCreated();
                 }
-                this.dialogRef.close({
+                this.performSmoothClose({
                     alreadyCreated: true,
                     ...payload,
                 });
@@ -1087,13 +1122,13 @@ export class CreateTaskDialogComponent implements OnInit {
             error: (err) => {
                 console.error('Failed to create task', err);
                 this.isSubmitting.set(false);
-                this.dialogRef.close(payload);
+                this.performSmoothClose(payload);
             },
         });
     }
 
     cancel(): void {
-        this.dialogRef.close(this.hasCreatedAnyTask ? { alreadyCreated: true } : null);
+        this.performSmoothClose(this.hasCreatedAnyTask ? { alreadyCreated: true } : null);
     }
 
     // =========================================================================

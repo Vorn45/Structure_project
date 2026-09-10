@@ -56,6 +56,32 @@ export class CreatePlanDto {
     end_date?: string;
 
     @IsOptional()
+    lead?: any;
+
+    @IsOptional()
+    team_lead?: any;
+
+    @IsOptional()
+    @IsString()
+    reporter?: string;
+
+    @IsOptional()
+    @IsArray()
+    assignees?: any[];
+
+    @IsOptional()
+    @IsNumber()
+    budget?: number;
+
+    @IsOptional()
+    @IsArray()
+    attachments?: any[];
+
+    @IsOptional()
+    @IsNumber()
+    attachments_count?: number;
+
+    @IsOptional()
     @IsArray()
     members?: Array<{ id: number; name: string; role: string; avatar?: string | null }>;
 

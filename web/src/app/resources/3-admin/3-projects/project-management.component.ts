@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import * as echarts from 'echarts';
 import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
@@ -547,6 +548,7 @@ export const DEFAULT_PROJECT_LINKS: TaskLink[] = [
         MatMenuModule,
         MatDialogModule,
         MatButtonModule,
+        MatProgressSpinnerModule,
         TaskDrawerComponent,
         FilePreviewModalComponent,
     ],
@@ -1515,14 +1517,13 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     openCreateProjectModal(): void {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
+            existingProjects: this.projects().map((p) => ({ id: p.id, code: p.code })),
+            onProjectCreated: () => this.loadData(),
         });
         const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result?.created) {
-                const created = result.project;
-                if (created) {
-                    this.loadData();
-                }
+                this.loadData();
             }
         });
     }
@@ -2306,5 +2307,15 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             case 'planning': return 'រៀបចំផែនការ';
             default: return status;
         }
+    }
+
+    projectProgress(plan?: { completed_tasks?: number; total_tasks?: number; progress?: number } | null): number {
+        if (!plan) return 0;
+        const total = plan.total_tasks ?? 0;
+        const completed = plan.completed_tasks ?? 0;
+        if (total > 0) {
+            return Math.round((Math.min(completed, total) / total) * 100);
+        }
+        return plan.progress ?? 0;
     }
 }

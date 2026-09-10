@@ -1,11 +1,12 @@
 // ===========================================================================>> Core Library
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 
 // ===========================================================================>> Custom Library
+import { RoleEnum } from 'src/app/enum/role.enum';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { QueryPlanDto } from './plan.dto';
@@ -309,26 +310,167 @@ export class PlanService {
     }
 
     async createPlan(user: UserPayload, dto: any) {
+        const roles = Array.isArray(user?.roles) ? user.roles : [];
+        const activeRole: any =
+            roles.find((r: any) => r.is_default) ??
+            roles.find((r: any) => Number(r.id) === Number(user?.is_active)) ??
+            roles[0];
+
+        const slug = (activeRole?.slug || '').toLowerCase().trim();
+        const nameEn = (activeRole?.name_en || '').toLowerCase().trim();
+        const nameKh = (activeRole?.name_kh || '').trim();
+
+        const isUserRole =
+            slug === 'user' ||
+            slug === 'personal_workspace' ||
+            slug === 'member' ||
+            nameKh === 'អ្នកប្រើប្រាស់';
+
+        const isAdmin =
+            !isUserRole &&
+            (
+                slug.includes('admin') ||
+                slug.includes('owner') ||
+                slug.includes('super') ||
+                nameEn.includes('admin') ||
+                nameEn.includes('owner') ||
+                nameKh === 'អភិបាលប្រព័ន្ធ' ||
+                nameKh === 'រដ្ឋបាល' ||
+                user?.is_active === RoleEnum.ORG_ADMIN ||
+                user?.is_active === RoleEnum.ORG_OWNER ||
+                user?.is_active === RoleEnum.SUPER_ADMIN
+            );
+
+        if (!isAdmin) {
+            throw new ForbiddenException('មានតែ Administrator ឬ Super Administrator ប៉ុណ្ណោះដែលអាចបង្កើតគម្រោងថ្មីបាន (Only Admin or Super Admin can create a new project plan).');
+        }
+
         await this.ensureLoaded();
+        const projName = dto.name;
+        const projCode = dto.code || `PMS-${Math.floor(100 + Math.random() * 900)}`;
+
+        const effectiveLead = dto.team_lead || dto.lead || (dto.members?.[0] ? {
+            id: Number(dto.members[0].id) || 1,
+            name: dto.members[0].name,
+            role: dto.members[0].role || 'Leader',
+            avatar: dto.members[0].avatar || null,
+        } : {
+            id: user?.id || 1,
+            name: user?.name_en || user?.name_kh || 'Project Lead',
+            role: 'Leader',
+            avatar: null,
+        });
+
+        const starterTasks = [
+            {
+                id: `task-${Date.now()}-1`,
+                code: `#${projCode}-001`,
+                title: `${projName} | ការរៀបចំស្ថាបត្យកម្ម & ផែនការអនុវត្ត`,
+                description: `រៀបចំផែនការអនុវត្តគម្រោង ${projName} បែងចែកភារកិច្ច និងកំណត់កាលវិភាគ Sprint។`,
+                priority: 'high',
+                status: 'in_progress',
+                due_date: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
+                created_at: new Date().toISOString().split('T')[0],
+                time_ago: 'ទើបបង្កើត',
+                comments_count: 0,
+                attachments_count: 0,
+                assignee: dto.members?.[0] || effectiveLead,
+                members: dto.members?.length ? dto.members : [effectiveLead],
+                progress: 50,
+                subtasks: [
+                    { id: `st-${Date.now()}-1`, title: 'កំណត់គោលដៅ និងតម្រូវការប្រព័ន្ធ (SRS)', completed: true },
+                    { id: `st-${Date.now()}-2`, title: 'បែងចែកការងារជូនសមាជិកក្រុម', completed: false },
+                ],
+                links: [],
+                documents: [],
+            },
+            {
+                id: `task-${Date.now()}-2`,
+                code: `#${projCode}-002`,
+                title: `${projName} | ការរចនា UI/UX & Prototypes`,
+                description: `រចនាទម្រង់ផ្ទៃមុខងារប្រព័ន្ធ (UI Components) ក្នុង Figma សម្រាប់គម្រោង ${projName}។`,
+                priority: 'medium',
+                status: 'new',
+                due_date: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
+                created_at: new Date().toISOString().split('T')[0],
+                time_ago: 'ទើបបង្កើត',
+                comments_count: 0,
+                attachments_count: 0,
+                assignee: dto.members?.[1] || dto.members?.[0] || effectiveLead,
+                members: dto.members?.length ? dto.members : [effectiveLead],
+                progress: 0,
+                subtasks: [
+                    { id: `st-${Date.now()}-3`, title: 'Design Layout & Mobile responsive mockups', completed: false },
+                ],
+                links: [],
+                documents: [],
+            },
+        ];
+
+        const starterPhases = [
+            {
+                id: `ph-${Date.now()}-1`,
+                number: 1,
+                title: 'ដំណាក់កាលទី ១៖ ការរៀបចំ និងរចនាប្លង់ប្រព័ន្ធ (Design & Planning)',
+                quarter: 'ត្រីមាសទី ២ (Q2)',
+                status: 'in_progress',
+                progress: 50,
+                startDate: new Date().toISOString().split('T')[0],
+                endDate: new Date(Date.now() + 86400000 * 30).toISOString().split('T')[0],
+                tasksCount: 2,
+            },
+            {
+                id: `ph-${Date.now()}-2`,
+                number: 2,
+                title: 'ដំណាក់កាលទី ២៖ ការអភិវឌ្ឍមុខងារស្នូល (Core Development)',
+                quarter: 'ត្រីមាសទី ៣ (Q3)',
+                status: 'planned',
+                progress: 0,
+                startDate: new Date(Date.now() + 86400000 * 31).toISOString().split('T')[0],
+                endDate: new Date(Date.now() + 86400000 * 90).toISOString().split('T')[0],
+                tasksCount: 0,
+            },
+        ];
+
+        const starterMeetings = [
+            {
+                id: `m-${Date.now()}-1`,
+                title: `${projName} Kickoff & Sprint Planning Sync`,
+                description: `កិច្ចប្រជុំបើកដំណើរការគម្រោង ${projName} និងតម្រង់ទិសក្រុមការងារ។`,
+                date: 'ថ្ងៃស្អែក (Tomorrow)',
+                time: 'ម៉ោង ១០:០០ ព្រឹក - ១១:០០ ព្រឹក',
+                platform: 'Google Meet',
+                link: 'https://meet.google.com/new-project-sync',
+                status: 'upcoming',
+                attendees: dto.members?.length ? dto.members : [effectiveLead],
+            },
+        ];
+
         const newPlan: any = {
             ...dto,
             id: dto.id || `proj-${Date.now().toString().slice(-4)}`,
-            code: dto.code || `PMS-${Math.floor(100 + Math.random() * 900)}`,
-            name: dto.name,
+            code: projCode,
+            name: projName,
             description: dto.description || '',
             status: dto.status || 'active',
+            priority: dto.priority || 'medium',
+            category: dto.category || 'it',
+            budget_allocated: Number(dto.budget_allocated || dto.budget || 5000),
+            budget_spent: Number(dto.budget_spent || 0),
             progress: dto.progress || 0,
             start_date: dto.start_date || new Date().toISOString(),
             end_date: dto.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
-            total_tasks: dto.tasks?.length || dto.total_tasks || 0,
-            completed_tasks: dto.tasks?.filter((t: any) => t.status === 'done' || t.status === 'completed')?.length || dto.completed_tasks || 0,
-            members: dto.members || [
-                { id: user?.id || 1, name: user?.name_en || user?.name_kh || 'Project Lead', role: 'Leader', avatar: null },
-            ],
-            tasks: dto.tasks || [],
-            phases: dto.phases || [],
-            meetings: dto.meetings || [],
-            agileTasks: dto.agileTasks || [],
+            team_lead: effectiveLead,
+            lead: effectiveLead,
+            total_tasks: dto.tasks?.length || starterTasks.length,
+            completed_tasks: dto.tasks?.filter((t: any) => t.status === 'done' || t.status === 'completed')?.length || 0,
+            members: dto.members?.length ? dto.members : [effectiveLead],
+            tasks: dto.tasks?.length ? dto.tasks : starterTasks,
+            phases: dto.phases?.length ? dto.phases : starterPhases,
+            meetings: dto.meetings?.length ? dto.meetings : starterMeetings,
+            agileTasks: dto.agileTasks?.length ? dto.agileTasks : [],
+            attachments: dto.attachments || [],
+            attachments_count: dto.attachments?.length || 0,
         };
 
         this.projects.unshift(newPlan);

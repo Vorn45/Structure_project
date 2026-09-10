@@ -9,24 +9,32 @@
         <!-- SCENARIO A: ALL PROJECTS OVERVIEW (WHEN NO PROJECT IS SELECTED)           -->
         <!-- ========================================================================= -->
         @if (!selectedProject()) {
-        <div class="flex flex-col flex-1 p-4 sm:p-6 space-y-5">
+        <div class="flex flex-col flex-1 p-4 sm:p-5 space-y-4">
             <!-- Top Header Row -->
             <div class="flex items-center justify-between gap-4">
-                <!-- Left: Title & Count -->
+                <!-- Left: Document Icon, Title, and Count Pill -->
                 <div class="flex items-center gap-3 shrink-0">
-                    <div
-                        class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200 dark:border-blue-800">
-                        <mat-icon svgIcon="mdi:home" class="icon-size-5"></mat-icon>
-                    </div>
-                    <span class="text-[18px] font-medium text-slate-800 dark:text-white">គម្រោង</span>
+                    <mat-icon svgIcon="mdi:file-document-outline"
+                        class="icon-size-5 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+
+                    <span class="text-[17px] font-medium text-slate-800 dark:text-white">គម្រោងទាំងអស់</span>
+
                     <span
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                         {{ filteredProjects().length }}
                     </span>
                 </div>
 
-                <!-- Right: Create Project -->
+                <!-- Right: Search & Create Project -->
                 <div class="flex items-center gap-2 shrink-0">
+                    <div class="relative flex items-center">
+                        <mat-icon svgIcon="mdi:magnify"
+                            class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
+                        <input type="text" placeholder="ស្វែងរកគម្រោង..." [ngModel]="searchQuery()"
+                            (ngModelChange)="searchQuery.set($event)"
+                            class="w-40 sm:w-56 h-9 pl-9 pr-3 text-[14px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
+                    </div>
+
                     <button type="button" (click)="openCreateProjectModal()"
                         class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
                         <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
@@ -35,9 +43,8 @@
                 </div>
             </div>
 
-            <!-- Status Filter Tabs & Search Bar -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <!-- Tabs -->
+            <!-- Status Filter Tabs -->
+            <div class="flex items-center">
                 <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 [scrollbar-width:none]">
                     <button (click)="filterByStatus('all')"
                         class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
@@ -89,124 +96,134 @@
                         </span>
                     </button>
                 </div>
-
-                <!-- Search Input -->
-                <div class="relative flex items-center shrink-0">
-                    <mat-icon svgIcon="mdi:magnify"
-                        class="icon-size-4.5 absolute left-3 text-slate-400 pointer-events-none"></mat-icon>
-                    <input type="text" placeholder="ស្វែងរកគម្រោង..." [ngModel]="searchQuery()"
-                        (ngModelChange)="searchQuery.set($event)"
-                        class="w-full sm:w-60 pl-9 pr-3 py-1.5 text-[14px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 dark:text-white placeholder-slate-400" />
-                </div>
             </div>
 
-            <!-- Projects Grid (PMS Standard Card Design) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy">
-                @for (plan of filteredProjects(); track plan.id) {
-                <div (click)="selectProject(plan)"
-                    class="group relative w-full rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy">
+            <!-- Loading Spinner -->
+            <div *ngIf="loading()" class="flex justify-center items-center py-24">
+                <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+            </div>
 
-                    <!-- Top Khmer Decorative Line -->
-                    <div class="h-1 w-full bg-gradient-to-r from-amber-500 via-blue-600 to-indigo-600"></div>
+            <!-- Projects Grid (Compact & Proportioned Sizing) -->
+            <div *ngIf="!loading() && filteredProjects().length > 0"
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy">
+                <div *ngFor="let plan of filteredProjects()" (click)="selectProject(plan)"
+                    class="relative w-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:bg-slate-50/60 dark:hover:bg-slate-800/60 shadow-xs hover:shadow-sm transition-colors duration-150 flex flex-col justify-between cursor-pointer overflow-hidden font-kantumruy p-5 space-y-4">
 
-                    <!-- Subtle Watermark -->
-                    <div
-                        class="absolute right-0 top-1 w-24 h-24 pointer-events-none opacity-[0.04] dark:opacity-[0.08] text-blue-900 dark:text-blue-200">
-                        <svg viewBox="0 0 120 120" fill="currentColor" class="w-full h-full">
-                            <path
-                                d="M60 10 C65 25 80 35 95 35 C80 45 75 60 85 75 C70 70 60 85 60 105 C60 85 50 70 35 75 C45 60 40 45 25 35 C40 35 55 25 60 10 Z" />
-                            <circle cx="60" cy="55" r="12" fill="none" stroke="currentColor" stroke-width="3" />
-                        </svg>
-                    </div>
+                    <!-- Top Card Content -->
+                    <div class="space-y-3.5">
+                        <!-- Header: Project Icon + Code & Status -->
+                        <div class="flex items-start justify-between gap-3">
+                            <!-- Left: Icon & Names -->
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <!-- Project Logo or Default Icon -->
+                                <div *ngIf="plan.logo || plan.image; else defaultPlanIcon"
+                                    class="w-11 h-11 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shrink-0 shadow-2xs">
+                                    <img [src]="plan.logo || plan.image" class="w-full h-full object-cover" [alt]="plan.name" />
+                                </div>
+                                <ng-template #defaultPlanIcon>
+                                    <div
+                                        class="w-11 h-11 rounded-2xl flex items-center justify-center bg-blue-50/80 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 shrink-0 shadow-2xs">
+                                        <mat-icon svgIcon="default-project" class="icon-size-6"></mat-icon>
+                                    </div>
+                                </ng-template>
 
-                    <div class="p-4 space-y-3 relative z-10">
-                        <!-- Code & Status Header -->
-                        <div class="flex items-center justify-between gap-2">
+                                <!-- Title & Code -->
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span
+                                            class="text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50/90 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-900/40 px-2 py-0.5 rounded-md font-mono">
+                                            #{{ plan.code }}
+                                        </span>
+                                    </div>
+                                    <h3
+                                        class="text-[15.5px] font-medium text-slate-900 dark:text-white leading-snug truncate font-kantumruy mt-1">
+                                        {{ plan.name }}
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <!-- Right: Status Pill with Icon -->
                             <span
-                                class="text-[11.5px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-900/40 px-2 py-0.5 rounded-md shadow-2xs font-mono">
-                                {{ plan.code }}
-                            </span>
-
-                            <span
-                                class="inline-flex items-center gap-1.5 text-[12px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs"
+                                class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs shrink-0 font-kantumruy"
                                 [ngClass]="getStatusClass(plan.status)">
                                 <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
                                 <span>{{ getStatusLabel(plan.status) }}</span>
                             </span>
                         </div>
 
-                        <!-- Title & Description -->
-                        <div class="space-y-0.5">
-                            <h3
-                                class="text-[15px] font-medium text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug truncate">
-                                {{ plan.name }}
-                            </h3>
-                            <p
-                                class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-1 font-normal">
-                                {{ plan.description || 'មិនមានការពិពណ៌នាបន្ថែម' }}
-                            </p>
-                        </div>
+                        <!-- Description -->
+                        <p
+                            class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 min-h-[2.4rem] font-kantumruy font-normal">
+                            {{ plan.description || 'គ្មានការពិពណ៌នាអំពីគម្រោងនេះទេ។' }}
+                        </p>
 
-                        <!-- Lead & Budget Info -->
+                        <!-- Dates with Calendar Icon -->
                         <div
-                            class="flex items-center justify-between text-[12px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                            <div class="flex items-center gap-1">
-                                <span>ប្រធាន:</span>
-                                <button (click)="openLeadModal(plan, $event)"
-                                    class="font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 flex items-center gap-0.5 cursor-pointer">
-                                    <span>{{ plan.members?.[0]?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }}</span>
-                                    <mat-icon svgIcon="mdi:pencil-outline"
-                                        class="icon-size-3 text-slate-400"></mat-icon>
-                                </button>
-                            </div>
-                            <button (click)="openBudgetModal(plan, $event)"
-                                class="font-mono text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer">
-                                ${{ plan.budget || 5000 | number }}
-                            </button>
+                            class="flex items-center gap-2 text-[12px] text-slate-400 dark:text-slate-500 font-kantumruy">
+                            <mat-icon svgIcon="mdi:calendar-range" class="icon-size-3.5 text-slate-400 dark:text-slate-500"></mat-icon>
+                            <span>{{ plan.start_date | date:'d MMM y' }} — {{ plan.end_date | date:'d MMM y' }}</span>
                         </div>
 
                         <!-- Progress Bar & Task Count -->
-                        <div class="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                            <div class="flex justify-between items-center text-[12px]">
-                                <span class="text-slate-500 dark:text-slate-400">កិច្ចការរួចរាល់</span>
-                                <span class="text-slate-700 dark:text-slate-300 font-medium">
-                                    {{ plan.completed_tasks || 14 }} / {{ plan.total_tasks || 24 }} ({{ plan.progress || 58 }}%)
+                        <div class="space-y-1.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                            <div class="flex justify-between items-center text-[12px] font-kantumruy">
+                                <span class="text-slate-600 dark:text-slate-400 font-medium">កិច្ចការរួចរាល់</span>
+                                <span class="text-slate-700 dark:text-slate-300 font-medium font-mono">
+                                    {{ plan.completed_tasks || 0 }} / {{ plan.total_tasks || 0 }}
+                                    <span class="text-blue-600 dark:text-blue-400 font-semibold font-kantumruy">({{ projectProgress(plan) }}%)</span>
                                 </span>
                             </div>
-                            <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
-                                    [style.width.%]="plan.progress || 58"></div>
+                            <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-500"
+                                    [style.width.%]="projectProgress(plan)"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Open Button & Admin Actions -->
-                    <div class="px-4 pb-4 pt-0 relative z-10 flex items-center gap-2">
-                        <button type="button" (click)="selectProject(plan); $event.stopPropagation()"
-                            class="flex-1 h-8.5 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13px] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
-                            <mat-icon svgIcon="mdi:view-dashboard-outline" class="icon-size-4"></mat-icon>
-                            <span>ចូលមើលគម្រោង ({{ tasks().length }} ការងារ)</span>
-                        </button>
-                        <button type="button" (click)="openEditDrawer(plan); $event.stopPropagation()"
-                            class="w-8.5 h-8.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-500 flex items-center justify-center cursor-pointer"
-                            [matTooltip]="'កែប្រែគម្រោង'">
-                            <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4"></mat-icon>
-                        </button>
-                        <button type="button" (click)="confirmDelete(plan, $event)"
-                            class="w-8.5 h-8.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center cursor-pointer"
-                            [matTooltip]="'លុបគម្រោង'">
-                            <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
-                        </button>
+                    <!-- Footer: Members Avatar Stack & Tasks Pill Badge -->
+                    <div class="flex items-center justify-between pt-2 font-kantumruy">
+                        <!-- Members -->
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-[11.5px] text-slate-400 shrink-0">សមាជិក៖</span>
+                            <div *ngIf="plan.members && plan.members.length > 0; else noMembers"
+                                class="flex -space-x-1.5 overflow-hidden items-center">
+                                <div *ngFor="let m of plan.members.slice(0, 4); let idx = index"
+                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
+                                    [ngClass]="idx % 4 === 0 ? 'bg-blue-600' : (idx % 4 === 1 ? 'bg-indigo-600' : (idx % 4 === 2 ? 'bg-purple-600' : 'bg-emerald-600'))"
+                                    [matTooltip]="m.name + (m.role ? ' (' + m.role + ')' : '')">
+                                    {{ m.name.charAt(0) }}
+                                </div>
+                                <div *ngIf="plan.members.length > 4"
+                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
+                                    [matTooltip]="'+' + (plan.members.length - 4) + ' សមាជិក'">
+                                    +{{ plan.members.length - 4 }}
+                                </div>
+                            </div>
+                            <ng-template #noMembers>
+                                <span class="text-[11px] text-slate-400 italic">គ្មានសមាជិក</span>
+                            </ng-template>
+                        </div>
+
+                        <!-- Total Tasks Count Badge -->
+                        <div class="flex items-center gap-1.5 text-[11.5px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/90 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shrink-0">
+                            <mat-icon svgIcon="mdi:checkbox-marked-circle-outline" class="icon-size-3.5 text-blue-500"></mat-icon>
+                            <span>{{ plan.total_tasks || 0 }} កិច្ចការ</span>
+                        </div>
                     </div>
                 </div>
-                } @empty {
-                <div class="col-span-full py-16 text-center text-slate-400">
-                    <mat-icon svgIcon="mdi:folder-open-outline"
-                        class="icon-size-10 text-slate-300 dark:text-slate-600"></mat-icon>
-                    <h4 class="mt-2 text-[15px] font-medium text-slate-700 dark:text-slate-300">
-                        មិនមានគម្រោងត្រូវនឹងការស្វែងរកឡើយ</h4>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading() && filteredProjects().length === 0"
+                class="flex flex-col items-center justify-center py-20 px-4 text-center font-kantumruy">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-500 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50 shadow-xs">
+                    <mat-icon svgIcon="default-project" class="icon-size-8"></mat-icon>
                 </div>
-                }
+                <h3 class="text-base font-semibold text-slate-800 dark:text-white">រកមិនឃើញគម្រោងទេ</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
+                    មិនមានគម្រោងណាត្រូវនឹងលក្ខខណ្ឌស្វែងរក ឬប្រភេទដែលបានជ្រើសរើសឡើយ។
+                </p>
             </div>
         </div>
         }

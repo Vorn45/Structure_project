@@ -22,7 +22,19 @@ import { CreateMemberDialogComponent } from 'app/resources/3-admin/3-projects/di
 import { CreateLinkDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-link-dialog.component';
 import { ProjectPlanItem, UserPlanService } from './plan.service';
 import { TaskItem, UserTaskService } from '../2-task/task.service';
+import { TaskDrawerComponent } from '../2-task/task-drawer/task-drawer.component';
+import { FilePreviewModalComponent } from '../2-task/file-preview-modal/file-preview-modal.component';
+import {
+    TaskItem as DrawerTaskItem,
+    TaskMember as DrawerTaskMember,
+    TaskChatMessage,
+    TaskAttachment,
+    TaskStatus,
+    TaskPriority,
+    TaskType,
+} from '../2-task/models/task.types';
 import { ProfileViewComponent } from 'app/resources/1-account/2-profile/view/component';
+import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;
@@ -721,6 +733,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         MatMenuModule,
         MatProgressSpinnerModule,
         MatDialogModule,
+        TaskDrawerComponent,
+        FilePreviewModalComponent,
     ],
     templateUrl: './plan.component.html',
 })
@@ -743,6 +757,39 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     // View Style for tasks: 'list' (exact match with screenshot) or 'board'
     taskViewStyle = signal<'list' | 'board'>('list');
+
+    // Unified Task Drawer State (matching /member/tasks Image 1)
+    selectedTaskDrawerItem = signal<DrawerTaskItem | null>(null);
+    showTaskDrawer = signal<boolean>(false);
+    taskDrawerDialogMode = signal<'details' | 'chat'>('details');
+    taskDrawerChatMessages = signal<TaskChatMessage[]>([]);
+    allTaskFiles = signal<TaskAttachment[]>([]);
+    selectedPreviewImage = signal<string | null>(null);
+    selectedPreviewFile = signal<TaskAttachment | null>(null);
+
+    getCurrentUserAvatar(): string {
+        const u = this._userService.getUser();
+        if (u?.avatar && typeof u.avatar === 'object' && (u.avatar as any).uri) {
+            const domain = (u.avatar as any).file_domain || '';
+            const uri = (u.avatar as any).uri || '';
+            return domain ? `${domain}/${uri}` : uri;
+        }
+        if (typeof u?.avatar === 'string' && u.avatar) return u.avatar;
+        return '/images/placeholder/avatar.jpg';
+    }
+
+    teamMembersForDrawer = computed<DrawerTaskMember[]>(() => {
+        const proj = this.selectedProject();
+        if (!proj || !proj.members) return [];
+        return proj.members.map((m) => ({
+            id: m.id,
+            name: m.name,
+            avatar: m.avatar,
+            role: m.role,
+            initial: m.initial,
+            colorClass: m.bgClass,
+        }));
+    });
 
     // Timeline configuration (Weeks 14 to 40 = 27 weeks total)
     readonly DEFAULT_AGILE_TASKS = DEFAULT_AGILE_TASKS;
@@ -786,9 +833,74 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         });
     }
 
+    canCreatePlan(): boolean {
+        const u: any = this._userService.getUser();
+        if (!u) return false;
+
+        const preferredRoleId = readPreferredRoleId();
+        const roles = Array.isArray(u.roles) ? u.roles : [];
+
+        let activeRole: any = null;
+        if (preferredRoleId) {
+            activeRole = roles.find((r: any) => Number(r.id) === preferredRoleId);
+        }
+        if (!activeRole) {
+            activeRole = roles.find((r: any) => r.is_default);
+        }
+        if (!activeRole && (u.is_active || u.active_role_id)) {
+            const activeId = Number(u.is_active || u.active_role_id);
+            activeRole = roles.find((r: any) => Number(r.id) === activeId);
+        }
+        if (!activeRole && roles.length > 0) {
+            activeRole = roles[0];
+        }
+
+        if (!activeRole) return false;
+
+        const slug = (activeRole.slug || '').toLowerCase().trim();
+        const nameEn = (activeRole.name_en || activeRole.name || '').toLowerCase().trim();
+        const nameKh = (activeRole.name_kh || '').trim();
+
+        // If acting as regular user, member, or personal workspace, creation is forbidden
+        if (slug === 'user' || slug === 'member' || slug === 'personal_workspace' || nameKh === 'អ្នកប្រើប្រាស់') {
+            return false;
+        }
+
+        const isAdminSlug =
+            slug === 'superadmin' ||
+            slug === 'super-admin' ||
+            slug === 'admin' ||
+            slug === 'org_admin' ||
+            slug === 'org-admin' ||
+            slug === 'owner' ||
+            slug === 'org_owner';
+
+        const isAdminName =
+            nameEn.includes('admin') ||
+            nameEn.includes('owner') ||
+            nameEn.includes('super') ||
+            nameKh === 'អភិបាលប្រព័ន្ធ' ||
+            nameKh === 'រដ្ឋបាល';
+
+        return isAdminSlug || isAdminName;
+    }
+
     openCreateProjectModal(): void {
+        if (!this.canCreatePlan()) return;
+        const allMembersMap = new Map<string, any>();
+        for (const p of this.plans()) {
+            for (const m of p.members || []) {
+                if (m.name && !allMembersMap.has(m.name)) {
+                    allMembersMap.set(m.name, m);
+                }
+            }
+        }
+        const existingMembers = Array.from(allMembersMap.values());
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
+            members: existingMembers.length ? existingMembers : undefined,
+            existingProjects: this.plans().map((p) => ({ id: p.id, code: p.code })),
+            onProjectCreated: () => this.loadPlans(),
         });
         const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
@@ -797,13 +909,15 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                 if (created) {
                     const projCode = created.code || `WFM-${Math.floor(100 + Math.random() * 900)}`;
                     const projName = created.name || result.name || 'គម្រោងថ្មី';
-                    const projMembers = (result.assignees || []).map((a: any, idx: number) => ({
+                    const projMembers = (result.assignees || result.members || []).map((a: any, idx: number) => ({
                         id: Number(a.id) || idx + 1,
                         name: a.name,
                         role: a.role || 'Member',
                         initial: a.name ? a.name.charAt(0) : 'M',
                         bgClass: 'bg-blue-600',
                     }));
+
+                    const leadObj = result.lead || (result.reporter ? { id: 1, name: result.reporter, role: 'Leader' } : (projMembers[0] || { id: 1, name: 'Project Lead', role: 'Leader' }));
 
                     const starterTasks: IndividualTaskItem[] = [
                         {
@@ -818,8 +932,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                             time_ago: 'ទើបបង្កើត',
                             comments_count: 0,
                             attachments_count: 0,
-                            assignee: projMembers[0] || { id: 1, name: 'Project Lead', role: 'Leader' },
-                            members: projMembers.length ? projMembers : [{ id: 1, name: 'Project Lead', role: 'Leader', initial: 'L', bgClass: 'bg-blue-600' }],
+                            assignee: projMembers[0] || { id: 1, name: leadObj.name, role: leadObj.role || 'Leader' },
+                            members: projMembers.length ? projMembers : [{ id: 1, name: leadObj.name, role: leadObj.role || 'Leader', initial: 'L', bgClass: 'bg-blue-600' }],
                             progress: 50,
                             subtasks: [
                                 { id: `st-${Date.now()}-1`, title: 'កំណត់គោលដៅ និងតម្រូវការប្រព័ន្ធ (SRS)', completed: true },
@@ -886,7 +1000,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                             platform: 'Google Meet',
                             link: 'https://meet.google.com/new-project-sync',
                             status: 'upcoming',
-                            attendees: projMembers.length ? projMembers : [{ id: 1, name: 'Project Lead', role: 'Leader' }],
+                            attendees: projMembers.length ? projMembers : [{ id: 1, name: leadObj.name, role: leadObj.role || 'Leader' }],
                         },
                     ];
 
@@ -896,27 +1010,28 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         name: projName,
                         description: created.description || '',
                         status: created.status || result.status || 'active',
-                        priority: 'high',
-                        category: 'Development',
-                        budget_allocated: 50000,
+                        priority: created.priority || result.priority || 'high',
+                        category: created.category || result.category || 'Development',
+                        budget_allocated: Number(created.budget_allocated || created.budget || result.budget || 5000),
                         budget_spent: 0,
                         total_tasks: starterTasks.length,
                         completed_tasks: 0,
                         progress: 25,
                         start_date: created.start_date || new Date().toISOString(),
                         end_date: created.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
-                        team_lead: { id: 1, name: result.reporter || 'Project Lead', role: 'Leader' },
-                        members: projMembers,
-                        tasks: starterTasks,
-                        phases: starterPhases,
-                        meetings: starterMeetings,
+                        team_lead: created.team_lead || { id: Number(leadObj.id) || 1, name: leadObj.name, role: leadObj.role || 'Leader' },
+                        members: projMembers.length ? projMembers : (created.members || []),
+                        tasks: created.tasks?.length ? created.tasks : starterTasks,
+                        phases: created.phases?.length ? created.phases : starterPhases,
+                        meetings: created.meetings?.length ? created.meetings : starterMeetings,
                         agileTasks: [...DEFAULT_AGILE_TASKS],
                         links: [],
                     };
                     this.plans.set([newProj, ...this.plans()]);
+                    this.selectedProject.set(newProj);
                     this.saveProjectChanges(newProj);
+                    setTimeout(() => this.loadPlans(), 250);
                 }
-                this.loadPlans();
             }
         });
     }
@@ -1590,14 +1705,226 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     clearSelectedProject(): void {
         this.selectedProject.set(null);
         this.activeTaskModal.set(null);
+        this.closeTaskDrawer();
     }
 
-    // Open task detail & chat modal for selected project task
-    openTaskModal(task: IndividualTaskItem): void {
-        this.activeTaskModal.set(task);
-        this.activeDetailTab.set('chat');
-        this.showAddLinkForm.set(false);
-        this.loadTaskChat(task);
+    // Open unified Task Drawer (matching /member/tasks Image 1)
+    openTaskModal(task: IndividualTaskItem, mode: 'details' | 'chat' = 'details'): void {
+        const drawerTask: DrawerTaskItem = {
+            id: task.id,
+            code: task.code,
+            title: task.title,
+            description: task.description || task.title,
+            task_type: (task.type as any) || 'feature',
+            status: (task.status as any) || 'new',
+            priority: (task.priority as any) || 'medium',
+            progress: task.progress || 0,
+            due_date: task.due_date || null,
+            project_id: this.selectedProject()?.id || 'bms-digitech',
+            project_name: this.selectedProject()?.name || 'BMS Digitech',
+            reporter: task.reporter ? {
+                id: task.reporter.id,
+                name: task.reporter.name,
+                avatar: task.reporter.avatar,
+                role: task.reporter.role,
+            } : undefined,
+            assignee: task.assignee ? {
+                id: task.assignee.id,
+                name: task.assignee.name,
+                avatar: task.assignee.avatar,
+                role: task.assignee.role,
+                email: task.assignee.email,
+            } : { id: 1, name: 'Unassigned' },
+            assignees: task.members && task.members.length > 0 ? task.members.map((m) => ({
+                id: m.id,
+                name: m.name,
+                avatar: m.avatar,
+                role: m.role,
+                email: m.email,
+            })) : (task.assignee ? [{
+                id: task.assignee.id,
+                name: task.assignee.name,
+                avatar: task.assignee.avatar,
+                role: task.assignee.role,
+            }] : []),
+            created_at: task.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            comments_count: task.comments_count || 0,
+            attachments_count: task.attachments_count || 0,
+        };
+
+        this.selectedTaskDrawerItem.set(drawerTask);
+        this.taskDrawerDialogMode.set(mode);
+        this.showTaskDrawer.set(true);
+
+        const msgs: TaskChatMessage[] = [
+            {
+                id: 1,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `កិច្ចការ ${task.code} ត្រូវបានបង្កើតឡើងកាលពី ${task.time_ago || 'ថ្មីៗ'}`,
+                time: task.time_ago || 'ថ្មីៗ',
+                is_self: false,
+                is_system: true,
+            },
+            {
+                id: 2,
+                sender_name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+                sender_avatar: '/images/placeholder/avatar.jpg',
+                text: `សួស្តី! សូមពិនិត្យមើលព័ត៌មានលម្អិត និងកិច្ចការរងសម្រាប់ "${task.title}" នេះផង។`,
+                time: '02:00 PM',
+                is_self: false,
+                is_system: false,
+            },
+        ];
+        if (task.status) {
+            msgs.push({
+                id: 3,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `បានប្តូរស្ថានភាពទៅជា "${this.getTaskStatusLabel(task.status)}"`,
+                time: '10:37 PM',
+                is_self: false,
+                is_system: true,
+            });
+        }
+        this.taskDrawerChatMessages.set(msgs);
+
+        if (task.documents && task.documents.length > 0) {
+            this.allTaskFiles.set(task.documents.map((d) => ({
+                name: d.name,
+                size: d.size,
+                type: d.type,
+                url: d.url,
+                isImage: d.type === 'image',
+            })));
+        } else {
+            this.allTaskFiles.set([]);
+        }
+    }
+
+    closeTaskDrawer(): void {
+        this.showTaskDrawer.set(false);
+        this.selectedTaskDrawerItem.set(null);
+    }
+
+    onTaskDrawerStatusChange(event: { task: DrawerTaskItem; status: string }): void {
+        const proj = this.selectedProject();
+        if (proj?.tasks) {
+            const target = proj.tasks.find((t) => t.id === event.task.id || t.code === event.task.code);
+            if (target) {
+                target.status = event.status;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => t ? { ...t, status: event.status } : null);
+        this.taskDrawerChatMessages.update((msgs) => [
+            ...msgs,
+            {
+                id: Date.now(),
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `បានប្តូរស្ថានភាពទៅជា "${this.getTaskStatusLabel(event.status)}"`,
+                time: 'ទើបតែផ្ញើ',
+                is_self: false,
+                is_system: true,
+            }
+        ]);
+    }
+
+    onTaskDrawerTypeChange(event: { task: DrawerTaskItem; taskType: string }): void {
+        const proj = this.selectedProject();
+        if (proj?.tasks) {
+            const target = proj.tasks.find((t) => t.id === event.task.id || t.code === event.task.code);
+            if (target) {
+                target.type = event.taskType as any;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => t ? { ...t, task_type: event.taskType } : null);
+    }
+
+    onTaskDrawerPriorityChange(event: { task: DrawerTaskItem; priority: string }): void {
+        const proj = this.selectedProject();
+        if (proj?.tasks) {
+            const target = proj.tasks.find((t) => t.id === event.task.id || t.code === event.task.code);
+            if (target) {
+                target.priority = event.priority as any;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => t ? { ...t, priority: event.priority as any } : null);
+    }
+
+    onTaskDrawerDueDateChange(event: { task: DrawerTaskItem; dueDate: string | null }): void {
+        const proj = this.selectedProject();
+        if (proj?.tasks) {
+            const target = proj.tasks.find((t) => t.id === event.task.id || t.code === event.task.code);
+            if (target) {
+                target.due_date = event.dueDate || undefined;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => t ? { ...t, due_date: event.dueDate } : null);
+    }
+
+    onTaskDrawerAssigneeToggle(event: { task: DrawerTaskItem; member: DrawerTaskMember }): void {
+        this.selectedTaskDrawerItem.update((t) => {
+            if (!t) return null;
+            const current = t.assignees || [];
+            const exists = current.some((a) => a.id === event.member.id);
+            const updated = exists
+                ? current.filter((a) => a.id !== event.member.id)
+                : [...current, event.member];
+            return {
+                ...t,
+                assignee: updated[0] || t.assignee,
+                assignees: updated,
+            };
+        });
+    }
+
+    onTaskDrawerReporterChange(event: { task: DrawerTaskItem; member: DrawerTaskMember }): void {
+        this.selectedTaskDrawerItem.update((t) => t ? { ...t, reporter: event.member } : null);
+    }
+
+    onTaskDrawerSendMessage(event: { text: string; attachments: TaskAttachment[] }): void {
+        const user = this._userService.getUser();
+        const userName = user?.name || (user as any)?.name_kh || (user as any)?.kh_name || 'ខ្ញុំ (Me)';
+        const newMsg: TaskChatMessage = {
+            id: Date.now(),
+            sender_name: userName,
+            sender_avatar: this.getCurrentUserAvatar(),
+            text: event.text,
+            time: 'ទើបតែផ្ញើ',
+            is_self: true,
+            is_system: false,
+            attachments: event.attachments && event.attachments.length > 0 ? event.attachments : undefined,
+        };
+        this.taskDrawerChatMessages.update((msgs) => [...msgs, newMsg]);
+    }
+
+    viewTaskFile(file: TaskAttachment): void {
+        this.selectedPreviewFile.set(file);
+        if (file.isImage && file.url) {
+            this.selectedPreviewImage.set(file.url);
+        }
+    }
+
+    openImagePreview(url: string): void {
+        this.selectedPreviewImage.set(url);
+    }
+
+    downloadTaskFile(file: TaskAttachment): void {
+        if (file.url) {
+            window.open(file.url, '_blank');
+        }
+    }
+
+    closeFilePreview(): void {
+        this.selectedPreviewFile.set(null);
+        this.selectedPreviewImage.set(null);
+    }
+
+    onTaskDrawerDelete(task: DrawerTaskItem): void {
+        const proj = this.selectedProject();
+        if (proj?.tasks) {
+            proj.tasks = proj.tasks.filter((t) => t.id !== task.id && t.code !== task.code);
+        }
+        this.closeTaskDrawer();
     }
 
     closeTaskModal(): void {
