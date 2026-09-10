@@ -420,10 +420,14 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             } else {
                 try {
                     const savedProject = localStorage.getItem('user_tasks_project_filter');
-                    if (savedProject) {
+                    // Validate: only restore if it's 'all' or matches a known project ID
+                    const validIds = ['all', ...this.projects().map((p) => p.id)];
+                    if (savedProject && validIds.includes(savedProject)) {
                         this.selectedProjectId.set(savedProject);
                     } else {
+                        // Stale/unknown project ID — reset to 'all' and clean up
                         this.selectedProjectId.set('all');
+                        try { localStorage.removeItem('user_tasks_project_filter'); } catch {}
                     }
                 } catch {
                     this.selectedProjectId.set('all');
