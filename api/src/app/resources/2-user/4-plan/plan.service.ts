@@ -44,11 +44,11 @@ const PROJECTS: ProjectPlanItem[] = [
         name: 'BMS Digitech',
         description: 'Business Management System - Digitech Project Management & Workflow.',
         status: 'active',
-        progress: 45,
+        progress: 20,
         start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
-        total_tasks: 10,
-        completed_tasks: 4,
+        total_tasks: 5,
+        completed_tasks: 1,
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
@@ -62,11 +62,11 @@ const PROJECTS: ProjectPlanItem[] = [
         name: 'WMS Digitech',
         description: 'Workforce & Attendance Management System - Digitech.',
         status: 'active',
-        progress: 70,
+        progress: 0,
         start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
-        total_tasks: 14,
-        completed_tasks: 9,
+        total_tasks: 4,
+        completed_tasks: 0,
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
@@ -231,6 +231,7 @@ export class PlanService {
                             ['done', 'completed'].includes((t.status || '').toLowerCase())
                         ).length;
                         p.progress = p.total_tasks > 0 ? Math.round((p.completed_tasks / p.total_tasks) * 100) : 0;
+                        p.tasks = projectTasks;
                     }
                 }
             }
@@ -398,6 +399,7 @@ export class PlanService {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        this.syncTaskCounts([plan]);
         return {
             status_code: 200,
             data: plan.tasks || [],
