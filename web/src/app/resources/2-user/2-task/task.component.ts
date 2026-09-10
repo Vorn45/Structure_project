@@ -83,13 +83,16 @@ import { UserTaskService } from './task.service';
             }
             ::ng-deep .cdk-drag-preview {
                 box-sizing: border-box;
-                border-radius: 0.75rem !important;
-                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+                border-radius: 1rem !important;
+                box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.2), 0 8px 10px -6px rgba(15, 23, 42, 0.1) !important;
                 background-color: white !important;
+                border: 2px solid #3b82f6 !important;
                 opacity: 0.96;
+                transform: rotate(1.5deg);
             }
             ::ng-deep .cdk-drag-placeholder {
-                opacity: 0.35;
+                opacity: 0.4;
+                border-radius: 1rem !important;
             }
             ::ng-deep .cdk-drag-animating {
                 transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
@@ -139,7 +142,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         done: 0,
     });
 
-    viewMode = signal<'grid' | 'kanban' | 'list'>('kanban');
+    viewMode = signal<'grid' | 'kanban' | 'list'>('list');
     activeStatus = signal<string>('all');
     activePriority = signal<string>('all');
     // Set to the signed-in user in ngOnInit so the page opens on their own tasks;
@@ -147,6 +150,66 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     selectedMemberFilter = signal<number | 'all'>('all');
     selectedProjectId = signal<string | 'all'>('all');
     searchQuery = signal<string>('');
+
+    // Kanban Columns Configuration
+    kanbanColumns = [
+        {
+            key: 'new',
+            label: 'ថ្មី',
+            icon: 'mdi:clipboard-text-outline',
+            color: 'bg-blue-500',
+            barColor: 'bg-blue-500',
+            badgeClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40',
+        },
+        {
+            key: 'confirmed',
+            label: 'បញ្ជាក់',
+            icon: 'mdi:clipboard-check-outline',
+            color: 'bg-indigo-500',
+            barColor: 'bg-indigo-500',
+            badgeClass: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40',
+        },
+        {
+            key: 'unconfirmed',
+            label: 'មិនបញ្ជាក់',
+            icon: 'mdi:clipboard-minus-outline',
+            color: 'bg-slate-400',
+            barColor: 'bg-slate-400',
+            badgeClass: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60',
+        },
+        {
+            key: 'in_progress',
+            label: 'កំពុងធ្វើ',
+            icon: 'mdi:progress-clock',
+            color: 'bg-amber-500',
+            barColor: 'bg-amber-500',
+            badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40',
+        },
+        {
+            key: 'in_review',
+            label: 'ស្នើពិនិត្យ',
+            icon: 'mdi:magnify',
+            color: 'bg-sky-500',
+            barColor: 'bg-sky-500',
+            badgeClass: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/40',
+        },
+        {
+            key: 'reopened',
+            label: 'បើកឡើងវិញ',
+            icon: 'mdi:restore',
+            color: 'bg-rose-500',
+            barColor: 'bg-rose-500',
+            badgeClass: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/40',
+        },
+        {
+            key: 'done',
+            label: 'បញ្ចប់',
+            icon: 'mdi:check-circle',
+            color: 'bg-emerald-500',
+            barColor: 'bg-emerald-500',
+            badgeClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40',
+        },
+    ];
 
     // Available Projects list
     projects = signal<{ id: string; name: string }[]>([
@@ -259,9 +322,42 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             if (params['priority']) {
                 this.activePriority.set(params['priority']);
             }
+
+            // View mode: URL parameter > saved in localStorage > default 'list' (table view)
             if (params['view'] && (params['view'] === 'grid' || params['view'] === 'kanban' || params['view'] === 'list')) {
                 this.viewMode.set(params['view']);
+                try { localStorage.setItem('user_tasks_view_mode', params['view']); } catch {}
+            } else {
+                try {
+                    const savedView = localStorage.getItem('user_tasks_view_mode') as 'grid' | 'kanban' | 'list';
+                    if (savedView && (savedView === 'grid' || savedView === 'kanban' || savedView === 'list')) {
+                        this.viewMode.set(savedView);
+                    } else {
+                        this.viewMode.set('list');
+                    }
+                } catch {
+                    this.viewMode.set('list');
+                }
             }
+
+            // Project filter: URL parameter > saved in localStorage > default 'all'
+            const projectParam = params['project'] || params['project_id'];
+            if (projectParam) {
+                this.selectedProjectId.set(projectParam);
+                try { localStorage.setItem('user_tasks_project_filter', projectParam); } catch {}
+            } else {
+                try {
+                    const savedProject = localStorage.getItem('user_tasks_project_filter');
+                    if (savedProject) {
+                        this.selectedProjectId.set(savedProject);
+                    } else {
+                        this.selectedProjectId.set('all');
+                    }
+                } catch {
+                    this.selectedProjectId.set('all');
+                }
+            }
+
             this.loadTasks();
         });
     }
@@ -414,6 +510,14 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
     setProjectFilter(projectId: string | 'all'): void {
         this.selectedProjectId.set(projectId);
+        try {
+            localStorage.setItem('user_tasks_project_filter', projectId);
+        } catch {}
+        this._router.navigate([], {
+            relativeTo: this._route,
+            queryParams: { project: projectId !== 'all' ? projectId : null },
+            queryParamsHandling: 'merge',
+        });
         this.loadTasks();
     }
 
@@ -439,6 +543,14 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
     setViewMode(mode: 'grid' | 'kanban' | 'list'): void {
         this.viewMode.set(mode);
+        try {
+            localStorage.setItem('user_tasks_view_mode', mode);
+        } catch {}
+        this._router.navigate([], {
+            relativeTo: this._route,
+            queryParams: { view: mode },
+            queryParamsHandling: 'merge',
+        });
     }
 
     onSearchChange(): void {
@@ -531,6 +643,11 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         this.activeStatus.set('all');
         this.activePriority.set('all');
         this.searchQuery.set('');
+        this._router.navigate([], {
+            relativeTo: this._route,
+            queryParams: { status: null, priority: null },
+            queryParamsHandling: 'merge',
+        });
         this.loadTasks();
     }
 
@@ -861,7 +978,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         return task.id;
     }
 
-    openCreateModal(): void {
+    openCreateModal(defaultStatus?: string): void {
         const currentProj = this.projects().find((p) => p.id === this.selectedProjectId() && p.id !== 'all');
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
@@ -921,7 +1038,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                         title: result.title,
                         code: result.code,
                         task_type: result.task_type || 'feature',
-                        status: result.status || 'new',
+                        status: result.status || defaultStatus || 'new',
                         priority: result.priority || 'medium',
                         due_date: result.due_date,
                         reporter: reporterObj,

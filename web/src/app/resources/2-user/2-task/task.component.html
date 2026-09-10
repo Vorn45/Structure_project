@@ -269,141 +269,169 @@
         </div>
 
         <!-- ===================================================================== -->
-        <!-- VIEW 1: EXECUTIVE MODERN LIST VIEW (Default - Reference Match)        -->
+        <!-- VIEW 1: EXECUTIVE MODERN TABLE / LIST VIEW (Default View)              -->
         <!-- ===================================================================== -->
         <div *ngIf="!loading() && viewMode() === 'list' && tasks().length > 0"
-            class="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
-            <div *ngFor="let task of tasks(); trackBy: trackByTaskId" (click)="openTaskDetails(task)"
-                class="group py-4 sm:py-4.5 px-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3.5">
-                <!-- Left Info: Priority Icon, Equal sign, Code, Title -->
+            class="flex-1 min-h-0 flex flex-col overflow-hidden">
+
+            <!-- Table Header Bar -->
+            <div class="sticky top-0 z-10 flex items-center justify-between px-3.5 py-2.5 mb-1.5 bg-slate-50/90 dark:bg-slate-900/60 backdrop-blur-xs rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-[12.5px] font-semibold text-slate-500 dark:text-slate-400 shrink-0 select-none font-kantumruy">
+                <!-- Left Header: Priority, Code & Title, Reporter -->
                 <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <!-- Priority Icon without box/shadow, just colored icon -->
-                    <mat-icon [svgIcon]="getPriorityIcon(task.priority)" class="icon-size-5 shrink-0"
-                        [ngClass]="getPriorityColor(task.priority)"
-                        [matTooltip]="getPriorityLabel(task.priority)"></mat-icon>
-
-                    <!-- Equal sign indicator as seen in reference -->
-                    <span class="text-amber-500 font-bold text-sm select-none shrink-0">=</span>
-
-                    <!-- Code -->
-                    <span class="font-mono font-medium text-[14px] text-slate-500 dark:text-slate-400 shrink-0">
-                        {{ task.code || ('#' + task.id) }}
-                    </span>
-
-                    <span class="text-slate-300 dark:text-slate-600 shrink-0">•</span>
-
-                    <!-- Title & Module Hierarchy -->
-                    <p
-                        class="min-w-0 text-[14.5px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
-                        {{ task.title }}
-                    </p>
-
-                    <!-- Reporter Avatar with small R note badge (Moved right after title) -->
-                    <div class="relative shrink-0 cursor-pointer ml-2"
-                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'មិនបានបញ្ជាក់')">
-                        <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
-                            <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover block" />
-                            <mat-icon *ngIf="!task.reporter?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
-                        </div>
-                        <span class="absolute -bottom-1 -right-1 bg-emerald-600 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
-                    </div>
+                    <span class="w-6 text-center shrink-0" matTooltip="អាទិភាព (Priority)">អាទិភាព</span>
+                    <span class="font-mono text-center w-24 shrink-0">កូដ</span>
+                    <span class="flex-1 min-w-0">កិច្ចការ / ចំណងជើង</span>
+                    <span class="hidden sm:inline-block w-8 text-center shrink-0" matTooltip="អ្នកបង្កើត (Reporter)">អ្នកបង្កើត</span>
                 </div>
 
-                <!-- Right Meta: Date (No BG), Comments/Attachments, Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
-                <div class="flex items-center gap-3 self-end md:self-center shrink-0">
-                    <!-- Date to do (Fixed width for straight vertical column alignment) -->
-                    <div class="hidden md:flex items-center gap-1.5 text-[13px] font-kantumruy font-normal w-28 shrink-0"
-                        [ngClass]="getDaysRemainingInfo(task.due_date).isOverdue 
-                            ? 'text-rose-600 dark:text-rose-400' 
-                            : 'text-slate-500 dark:text-slate-400'">
-                        <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-4 opacity-80 shrink-0"></mat-icon>
-                        <span>{{ getTaskDateToDo(task.due_date, task.created_at) }}</span>
-                    </div>
+                <!-- Right Header: Due Date, Chat/Files, Assignee, Status, Relative Time, Actions -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <span class="hidden md:inline-block w-28 text-left shrink-0">កាលបរិច្ឆេទ</span>
+                    <span class="hidden sm:inline-block w-14 text-center shrink-0">ពិភាក្សា</span>
+                    <span class="w-10 text-center shrink-0">អ្នកទទួល</span>
+                    <span class="w-28 text-center shrink-0">ស្ថានភាព</span>
+                    <span class="text-[12.5px] text-right w-16 shrink-0">បង្កើត</span>
+                    <span class="w-7 shrink-0"></span>
+                </div>
+            </div>
 
-                    <!-- Comments & Attachments (Fixed width) -->
-                    <div class="hidden sm:flex items-center gap-2 text-slate-400 text-[13px] w-14 shrink-0">
-                        <span (click)="$event.stopPropagation(); openTaskChat(task, $event)"
-                            class="flex items-center gap-1 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                            [matTooltip]="'បើកបន្ទប់ពិភាក្សា (Open Chat)'">
-                            <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5"></mat-icon>
-                            <span>{{ (task.comments_count || 0) + 1 }}</span>
-                        </span>
-                        <span *ngIf="(task.attachments_count || 0) > 0" class="flex items-center gap-1">
-                            <mat-icon svgIcon="mdi:paperclip" class="icon-size-3.5"></mat-icon>
-                            <span>{{ task.attachments_count }}</span>
-                        </span>
-                    </div>
+            <!-- Table Rows List -->
+            <div class="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
+                <div *ngFor="let task of tasks(); trackBy: trackByTaskId" (click)="openTaskDetails(task)"
+                    class="group py-3.5 px-3.5 hover:bg-slate-50/90 dark:hover:bg-slate-700/30 rounded-xl cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+                    <!-- Left Info: Priority Icon, Equal sign, Code, Title -->
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <!-- Priority Icon without box/shadow, just colored icon -->
+                        <mat-icon [svgIcon]="getPriorityIcon(task.priority)" class="icon-size-5 shrink-0"
+                            [ngClass]="getPriorityColor(task.priority)"
+                            [matTooltip]="getPriorityLabel(task.priority)"></mat-icon>
 
-                    <!-- Assignee Avatar (Single avatar column) -->
-                    <div class="w-10 shrink-0 flex items-center justify-center">
-                        <div class="relative shrink-0 cursor-pointer"
-                            [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក: ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
-                            <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
-                                <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
-                                <mat-icon *ngIf="!task.assignee?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
+                        <!-- Code -->
+                        <span class="font-mono font-medium text-[13.5px] text-slate-500 dark:text-slate-400 w-24 text-center shrink-0">
+                            {{ task.code || ('#' + task.id) }}
+                        </span>
+
+                        <span class="text-slate-300 dark:text-slate-600 shrink-0">•</span>
+
+                        <!-- Title & Task Type Badge -->
+                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                            <span class="w-4 h-4 rounded flex items-center justify-center shrink-0"
+                                [matTooltip]="getTaskTypeInfo(task.task_type).label">
+                                <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-3.5 !h-3.5"
+                                    [ngClass]="getTaskTypeInfo(task.task_type).iconColor"></mat-icon>
+                            </span>
+                            <p class="min-w-0 text-[14.5px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
+                                {{ task.title }}
+                            </p>
+                        </div>
+
+                        <!-- Reporter Avatar with small R note badge -->
+                        <div class="relative shrink-0 cursor-pointer ml-2"
+                            [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'មិនបានបញ្ជាក់')">
+                            <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
+                                <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover block" />
+                                <mat-icon *ngIf="!task.reporter?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
                             </div>
-                            <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
-                                <mat-icon svgIcon="mdi:account-outline" class="!w-3.5 !h-3.5"></mat-icon>
-                            </div>
+                            <span class="absolute -bottom-1 -right-1 bg-emerald-600 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
                         </div>
                     </div>
 
-                    <!-- Status Badge Pill matching reference buttons (Fixed width) -->
-                    <div class="w-28 shrink-0 flex justify-center">
-                        <button [matMenuTriggerFor]="listStatusMenu" (click)="$event.stopPropagation()"
-                            class="w-full inline-flex items-center justify-center gap-1.5 text-[14px] font-medium py-1.5 px-2 rounded-xl border select-none transition-all shadow-2xs cursor-pointer"
-                            [ngClass]="getStatusClass(task.status)">
-                            <mat-icon [svgIcon]="getStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
-                            <span>{{ getStatusLabel(task.status) }}</span>
+                    <!-- Right Meta: Date (No BG), Comments/Attachments, Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
+                    <div class="flex items-center gap-3 self-end md:self-center shrink-0">
+                        <!-- Date to do (Fixed width for straight vertical column alignment) -->
+                        <div class="hidden md:flex items-center gap-1.5 text-[13px] font-kantumruy font-normal w-28 shrink-0"
+                            [ngClass]="getDaysRemainingInfo(task.due_date).isOverdue 
+                                ? 'text-rose-600 dark:text-rose-400' 
+                                : 'text-slate-500 dark:text-slate-400'">
+                            <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-4 opacity-80 shrink-0"></mat-icon>
+                            <span>{{ getTaskDateToDo(task.due_date, task.created_at) }}</span>
+                        </div>
+
+                        <!-- Comments & Attachments (Fixed width) -->
+                        <div class="hidden sm:flex items-center gap-2 text-slate-400 text-[13px] w-14 shrink-0 justify-center">
+                            <span (click)="$event.stopPropagation(); openTaskChat(task, $event)"
+                                class="flex items-center gap-1 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                [matTooltip]="'បើកបន្ទប់ពិភាក្សា (Open Chat)'">
+                                <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5"></mat-icon>
+                                <span>{{ (task.comments_count || 0) + 1 }}</span>
+                            </span>
+                            <span *ngIf="(task.attachments_count || 0) > 0" class="flex items-center gap-1">
+                                <mat-icon svgIcon="mdi:paperclip" class="icon-size-3.5"></mat-icon>
+                                <span>{{ task.attachments_count }}</span>
+                            </span>
+                        </div>
+
+                        <!-- Assignee Avatar (Single avatar column) -->
+                        <div class="w-10 shrink-0 flex items-center justify-center">
+                            <div class="relative shrink-0 cursor-pointer"
+                                [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក: ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
+                                <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
+                                    <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
+                                    <mat-icon *ngIf="!task.assignee?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
+                                </div>
+                                <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
+                                    <mat-icon svgIcon="mdi:account-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge Pill matching reference buttons (Fixed width) -->
+                        <div class="w-28 shrink-0 flex justify-center">
+                            <button [matMenuTriggerFor]="listStatusMenu" (click)="$event.stopPropagation()"
+                                class="w-full inline-flex items-center justify-center gap-1.5 text-[14px] font-medium py-1.5 px-2 rounded-xl border select-none transition-all shadow-2xs cursor-pointer"
+                                [ngClass]="getStatusClass(task.status)">
+                                <mat-icon [svgIcon]="getStatusIcon(task.status)" class="icon-size-3.5"></mat-icon>
+                                <span>{{ getStatusLabel(task.status) }}</span>
+                            </button>
+                        </div>
+                        <mat-menu #listStatusMenu="matMenu" class="min-w-[170px]">
+                            <button mat-menu-item (click)="updateTaskStatus(task, 'new')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>ថ្មី (New)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(task, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>បញ្ជាក់ (Confirmed)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(task, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>មិនបញ្ជាក់ (Unconfirmed)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>កំពុងធ្វើ (In Progress)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(task, 'in_review')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>ស្នើពិនិត្យ (In Review)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(task, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>បើកឡើងវិញ (Reopened)</span>
+                            </button>
+                            <button mat-menu-item (click)="updateTaskStatus(task, 'done')" class="!text-[14px] flex items-center gap-2.5">
+                                <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
+                                <span>បញ្ចប់ (Done)</span>
+                            </button>
+                        </mat-menu>
+
+                        <!-- Relative Time (Fixed width) -->
+                        <span class="text-[13px] text-slate-400 w-16 text-right shrink-0">
+                            {{ getRelativeTime(task.created_at) }}
+                        </span>
+
+                        <!-- Three-Dots Menu (hidden by default, revealed on hover) -->
+                        <button mat-icon-button [matMenuTriggerFor]="rowActionsMenu" (click)="$event.stopPropagation()"
+                            class="!w-7 !h-7 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                            <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
                         </button>
+                        <mat-menu #rowActionsMenu="matMenu">
+                            <button mat-menu-item (click)="confirmDelete(task)" class="text-rose-600 !text-[15px]">
+                                <mat-icon svgIcon="mdi:trash-can-outline" class="text-rose-600"></mat-icon>
+                                <span>លុបការងារ</span>
+                            </button>
+                        </mat-menu>
                     </div>
-                    <mat-menu #listStatusMenu="matMenu" class="min-w-[170px]">
-                        <button mat-menu-item (click)="updateTaskStatus(task, 'new')" class="!text-[14px] flex items-center gap-2.5">
-                            <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
-                            <span>ថ្មី (New)</span>
-                        </button>
-                        <button mat-menu-item (click)="updateTaskStatus(task, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
-                            <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
-                            <span>បញ្ជាក់ (Confirmed)</span>
-                        </button>
-                        <button mat-menu-item (click)="updateTaskStatus(task, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
-                            <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
-                            <span>មិនបញ្ជាក់ (Unconfirmed)</span>
-                        </button>
-                        <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
-                            <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
-                            <span>កំពុងធ្វើ (In Progress)</span>
-                        </button>
-                        <button mat-menu-item (click)="updateTaskStatus(task, 'in_review')" class="!text-[14px] flex items-center gap-2.5">
-                            <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
-                            <span>ស្នើពិនិត្យ (In Review)</span>
-                        </button>
-                        <button mat-menu-item (click)="updateTaskStatus(task, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
-                            <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
-                            <span>បើកឡើងវិញ (Reopened)</span>
-                        </button>
-                        <button mat-menu-item (click)="updateTaskStatus(task, 'done')" class="!text-[14px] flex items-center gap-2.5">
-                            <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
-                            <span>បញ្ចប់ (Done)</span>
-                        </button>
-                    </mat-menu>
-
-                    <!-- Relative Time (Fixed width) -->
-                    <span class="text-[13px] text-slate-400 w-16 text-right shrink-0">
-                        {{ getRelativeTime(task.created_at) }}
-                    </span>
-
-                    <!-- Three-Dots Menu (hidden by default, revealed on hover) -->
-                    <button mat-icon-button [matMenuTriggerFor]="rowActionsMenu" (click)="$event.stopPropagation()"
-                        class="!w-7 !h-7 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                        <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
-                    </button>
-                    <mat-menu #rowActionsMenu="matMenu">
-                        <button mat-menu-item (click)="confirmDelete(task)" class="text-rose-600 !text-[15px]">
-                            <mat-icon svgIcon="mdi:trash-can-outline" class="text-rose-600"></mat-icon>
-                            <span>លុបការងារ</span>
-                        </button>
-                    </mat-menu>
                 </div>
             </div>
         </div>
@@ -414,98 +442,155 @@
         <!-- ===================================================================== -->
         <div #kanbanContainer *ngIf="!loading() && viewMode() === 'kanban'" cdkDropListGroup
             (wheel)="onKanbanWheel($event, kanbanContainer)"
-            class="kanban-scroll-container flex-1 min-h-0 flex gap-4 overflow-x-auto overflow-y-hidden pb-1 items-stretch w-full min-w-0 select-none">
-            <ng-container *ngFor="let col of [
-            { key: 'new', label: 'ថ្មី', color: 'bg-blue-500', headerBg: 'border-t-blue-500' },
-            { key: 'confirmed', label: 'បញ្ជាក់', color: 'bg-indigo-500', headerBg: 'border-t-indigo-500' },
-            { key: 'unconfirmed', label: 'មិនបញ្ជាក់', color: 'bg-slate-500', headerBg: 'border-t-slate-500' },
-            { key: 'in_progress', label: 'កំពុងធ្វើ', color: 'bg-amber-500', headerBg: 'border-t-amber-500' },
-            { key: 'in_review', label: 'ស្នើពិនិត្យ', color: 'bg-sky-500', headerBg: 'border-t-sky-500' },
-            { key: 'reopened', label: 'បើកឡើងវិញ', color: 'bg-rose-500', headerBg: 'border-t-rose-500' },
-            { key: 'done', label: 'បញ្ចប់', color: 'bg-emerald-500', headerBg: 'border-t-emerald-500' }
-        ]">
-                <div class="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-800/40 p-3.5 w-72 min-w-[280px] max-w-[280px] shrink-0 border-t-4 flex flex-col h-full max-h-full min-h-0"
-                    [ngClass]="col.headerBg">
-                    <div
-                        class="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-slate-700 shrink-0">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full" [ngClass]="col.color"></span>
-                            <h3 class="text-[16px] font-medium text-slate-800 dark:text-slate-200">
+            class="kanban-scroll-container flex-1 min-h-0 flex gap-4 overflow-x-auto overflow-y-hidden pb-1 items-stretch w-full min-w-0 select-none font-kantumruy">
+            <ng-container *ngFor="let col of kanbanColumns">
+                <div class="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 p-3 w-80 min-w-[295px] max-w-[295px] shrink-0 flex flex-col h-full max-h-full min-h-0 shadow-2xs">
+                    <!-- Top Accent Color Bar -->
+                    <div class="h-1 w-full rounded-full mb-2.5" [ngClass]="col.barColor"></div>
+
+                    <!-- Column Header -->
+                    <div class="flex items-center justify-between pb-2 px-1 border-b border-slate-200/70 dark:border-slate-700/60 shrink-0">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <mat-icon [svgIcon]="col.icon" class="!w-4.5 !h-4.5 shrink-0 text-slate-500 dark:text-slate-400"></mat-icon>
+                            <h3 class="text-[15px] font-semibold text-slate-800 dark:text-slate-200 truncate">
                                 {{ col.label }}
                             </h3>
+                            <span class="text-[11.5px] font-bold px-2 py-0.5 rounded-full" [ngClass]="col.badgeClass">
+                                {{ getTasksByColumn(col.key).length }}
+                            </span>
                         </div>
-                        <span
-                            class="text-[13px] font-semibold px-2 py-0.5 rounded-full bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 shadow-2xs">
-                            {{ getTasksByColumn(col.key).length }}
-                        </span>
+
+                        <!-- Quick Add Button for this Column -->
+                        <button (click)="openCreateModal(col.key)" [matTooltip]="'បង្កើតការងារថ្មីក្នុង ' + col.label"
+                            class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                            <mat-icon svgIcon="mdi:plus" class="!w-4 !h-4"></mat-icon>
+                        </button>
                     </div>
 
+                    <!-- Cards Droplist (Vertical Scrollable) -->
                     <div cdkDropList [id]="col.key" [cdkDropListData]="col.key"
                         (cdkDropListDropped)="onTaskDrop($event, col.key)"
-                        class="kanban-column-scroll space-y-3 flex-1 min-h-0 overflow-y-auto overflow-x-hidden transition-colors rounded-xl p-1 pr-1.5 mt-2">
+                        class="kanban-column-scroll space-y-2.5 flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-1 pr-1.5 mt-2">
                         <div *ngFor="let task of getTasksByColumn(col.key); trackBy: trackByTaskId" cdkDrag
                             [cdkDragData]="task" (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()"
                             (click)="openTaskDetails(task)"
-                            class="group rounded-xl border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 shadow-2xs hover:shadow-md cursor-grab active:cursor-grabbing space-y-2.5 transition-shadow select-none">
+                            class="group relative rounded-2xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800/95 p-3.5 shadow-2xs hover:shadow-md hover:border-blue-400/80 dark:hover:border-blue-500/80 cursor-grab active:cursor-grabbing transition-all duration-150 select-none flex flex-col justify-between gap-2.5">
 
                             <!-- CDK drag placeholder -->
                             <div *cdkDragPlaceholder
-                                class="rounded-xl border-2 border-dashed border-blue-400/60 bg-blue-50/50 dark:bg-blue-950/20 min-h-[90px] my-1">
+                                class="rounded-2xl border-2 border-dashed border-blue-400/60 bg-blue-50/50 dark:bg-blue-950/20 min-h-[96px] my-1">
                             </div>
 
-                            <div class="flex items-center justify-between gap-1.5">
-                                <span class="font-mono text-[12px] font-semibold text-slate-400">
-                                    {{ task.code || ('#' + task.id) }}
-                                </span>
-                                <span class="text-[13px] px-2 py-0.5 rounded-md font-medium"
-                                    [ngClass]="getPriorityClass(task.priority)">
-                                    {{ getPriorityLabel(task.priority) }}
-                                </span>
+                            <!-- Card Top: Task Type + Code on Left, Priority Badge & Quick Chat on Right -->
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <!-- Task Type Icon Badge -->
+                                    <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
+                                        [matTooltip]="getTaskTypeInfo(task.task_type).label">
+                                        <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-4 !h-4"
+                                            [ngClass]="getTaskTypeInfo(task.task_type).iconColor"></mat-icon>
+                                    </div>
+                                    <!-- Task Code -->
+                                    <span class="font-mono text-[12px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+                                        {{ task.code || ('#' + task.id) }}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <!-- Priority Badge -->
+                                    <span class="inline-flex items-center gap-1 text-[11.5px] px-2 py-0.5 rounded-md font-medium shadow-2xs"
+                                        [ngClass]="getPriorityClass(task.priority)">
+                                        <mat-icon [svgIcon]="getPriorityIcon(task.priority)" class="icon-size-3"></mat-icon>
+                                        <span>{{ getPriorityLabel(task.priority) }}</span>
+                                    </span>
+
+                                    <!-- Quick Chat Button (Reveals on Hover) -->
+                                    <button (click)="$event.stopPropagation(); openTaskChat(task, $event)"
+                                        class="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                                        [matTooltip]="'បើកបន្ទប់ពិភាក្សា (Chat)'">
+                                        <mat-icon svgIcon="mdi:comment-outline" class="icon-size-3.5"></mat-icon>
+                                    </button>
+                                </div>
                             </div>
 
-                            <p
-                                class="min-w-0 text-[14px] font-medium text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 font-kantumruy">
+                            <!-- Card Title -->
+                            <p class="text-[13.5px] font-medium text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 font-kantumruy">
                                 {{ task.title }}
                             </p>
 
-                            <div
-                                class="flex items-center justify-between text-[12px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-700">
-                                <div class="flex items-center gap-2">
-                                    <!-- Reporter Avatar with R note badge -->
-                                    <div class="relative shrink-0 cursor-pointer"
-                                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'មិនបានបញ្ជាក់')">
-                                        <div class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
-                                            <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter?.name || 'Reporter'" class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] object-cover block rounded-full" />
-                                            <mat-icon *ngIf="!task.reporter?.avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-400 dark:text-slate-500"></mat-icon>
-                                        </div>
-                                        <span class="absolute -bottom-1 -right-1 bg-emerald-600 text-white text-[7px] font-extrabold px-0.5 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
+                            <!-- Card Footer: Meta (Date, Comments, Attachments) on Left & Assignees Avatar Stack on Right -->
+                            <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[12px]">
+                                <!-- Left: Date & Meta Counters -->
+                                <div class="flex items-center gap-2 text-slate-400">
+                                    <!-- Due Date Pill (if available) -->
+                                    <div *ngIf="task.due_date"
+                                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium"
+                                        [ngClass]="getDaysRemainingInfo(task.due_date).isOverdue 
+                                            ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400' 
+                                            : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300'"
+                                        [matTooltip]="'កាលបរិច្ឆេទកំណត់: ' + formatDate(task.due_date)">
+                                        <mat-icon svgIcon="mdi:calendar-outline" class="!w-3 !h-3"></mat-icon>
+                                        <span>{{ formatDate(task.due_date) }}</span>
                                     </div>
-                                    <!-- Assignee Avatar & Name -->
-                                    <div class="flex items-center gap-1.5" *ngIf="getTaskAssignees(task).length > 0"
-                                        [matTooltip]="'អ្នកទទួលបន្ទុក: ' + getTaskAssignees(task)[0].name">
-                                        <div
-                                            class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
-                                            <img *ngIf="getTaskAssignees(task)[0].avatar" [src]="getTaskAssignees(task)[0].avatar" [alt]="getTaskAssignees(task)[0].name" class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] object-cover block rounded-full" />
-                                            <mat-icon *ngIf="!getTaskAssignees(task)[0].avatar" svgIcon="mdi:account" class="!w-3.5 !h-3.5 text-slate-400 dark:text-slate-500"></mat-icon>
+
+                                    <!-- Comments Count -->
+                                    <span *ngIf="(task.comments_count || 0) > 0"
+                                        class="inline-flex items-center gap-0.5 text-slate-400 hover:text-blue-500 transition-colors"
+                                        [matTooltip]="(task.comments_count || 0) + ' មតិយោបល់'">
+                                        <mat-icon svgIcon="mdi:comment-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                                        <span class="text-[11.5px] font-medium">{{ task.comments_count }}</span>
+                                    </span>
+
+                                    <!-- Attachments Count -->
+                                    <span *ngIf="(task.attachments_count || 0) > 0"
+                                        class="inline-flex items-center gap-0.5 text-slate-400"
+                                        [matTooltip]="(task.attachments_count || 0) + ' ឯកសារភ្ជាប់'">
+                                        <mat-icon svgIcon="mdi:paperclip" class="!w-3.5 !h-3.5"></mat-icon>
+                                        <span class="text-[11.5px] font-medium">{{ task.attachments_count }}</span>
+                                    </span>
+                                </div>
+
+                                <!-- Right: Assignee Avatar(s) -->
+                                <div class="flex items-center shrink-0">
+                                    <ng-container *ngIf="getTaskAssignees(task).length > 0">
+                                        <div class="flex items-center -space-x-1.5">
+                                            <div *ngFor="let m of getTaskAssignees(task).slice(0, 2)"
+                                                class="w-6 h-6 min-w-[24px] min-h-[24px] rounded-full ring-2 ring-white dark:ring-slate-800 overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center shadow-2xs cursor-pointer"
+                                                [matTooltip]="'អ្នកទទួលបន្ទុក: ' + m.name">
+                                                <img *ngIf="m.avatar" [src]="m.avatar" [alt]="m.name" class="w-full h-full object-cover block" />
+                                                <span *ngIf="!m.avatar" class="text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                                    {{ m.name ? m.name.charAt(0).toUpperCase() : 'U' }}
+                                                </span>
+                                            </div>
+                                            <div *ngIf="getTaskAssignees(task).length > 2"
+                                                class="w-5 h-5 rounded-full ring-2 ring-white dark:ring-slate-800 bg-slate-600 text-white text-[9px] font-bold flex items-center justify-center shadow-2xs">
+                                                +{{ getTaskAssignees(task).length - 2 }}
+                                            </div>
                                         </div>
-                                        <span class="truncate max-w-[80px] text-[11px] font-medium">{{ getTaskAssignees(task)[0].name }}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 text-slate-400" *ngIf="getTaskAssignees(task).length === 0"
+                                    </ng-container>
+
+                                    <!-- Unassigned placeholder -->
+                                    <div *ngIf="getTaskAssignees(task).length === 0"
+                                        class="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                                         [matTooltip]="'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
-                                        <div class="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
-                                            <mat-icon svgIcon="mdi:account-outline" class="!w-3 !h-3"></mat-icon>
+                                        <div class="w-5 h-5 rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
+                                            <mat-icon svgIcon="mdi:account-plus-outline" class="!w-3 !h-3"></mat-icon>
                                         </div>
-                                        <span class="text-[11px]">គ្មានអ្នកទទួលបន្ទុក</span>
+                                        <span class="text-[11px] font-normal">មិនទាន់ចាត់តាំង</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Modern Empty Drop Zone -->
                         <div *ngIf="getTasksByColumn(col.key).length === 0"
-                            class="text-center py-12 text-slate-400 text-xs border border-dashed border-slate-200 dark:border-slate-700/60 rounded-xl flex flex-col items-center justify-center gap-1">
-                            <mat-icon svgIcon="mdi:tray-arrow-down"
-                                class="icon-size-5 text-slate-300 dark:text-slate-600"></mat-icon>
-                            <span>ទម្លាក់ការងារនៅទីនេះ</span>
+                            (click)="openCreateModal(col.key)"
+                            class="group py-9 px-4 text-slate-400 text-xs border border-dashed border-slate-200 dark:border-slate-700/80 hover:border-blue-400/80 dark:hover:border-blue-500/80 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-colors bg-white/40 dark:bg-slate-800/30">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 group-hover:text-blue-600 flex items-center justify-center transition-colors">
+                                <mat-icon svgIcon="mdi:tray-arrow-down" class="!w-4 !h-4 text-slate-400 group-hover:text-blue-500"></mat-icon>
+                            </div>
+                            <span class="font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">ទម្លាក់ការងារនៅទីនេះ</span>
+                            <span class="text-[11px] text-slate-400 font-normal">ឬចុច + ដើម្បីបន្ថែម</span>
                         </div>
                     </div>
                 </div>
