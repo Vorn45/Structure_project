@@ -121,6 +121,11 @@ export class NotificationSettingsComponent implements OnInit {
         return row.enabled && !this._mutedUntil(row);
     }
 
+    /** Whether the master notification switch is currently active */
+    get isMasterActive(): boolean {
+        return this.isOn(this.master);
+    }
+
     /** Remaining snooze, as the short label shown beside the switch. */
     muteHint(row: NotificationSettingRow): string {
         const until = this._mutedUntil(row);

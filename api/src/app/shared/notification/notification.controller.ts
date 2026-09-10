@@ -109,7 +109,7 @@ export class NotificationController {
         @Body() body: UpdateNotificationSettingDto,
         @Query('scope') scope?: string,
     ) {
-        return await this._service.updateSettings(res.locals.user, body, scope);
+        return await this._service.updateSettings(res.locals.user, body, scope || body?.scope);
     }
 
     @Patch('setting')
@@ -118,7 +118,7 @@ export class NotificationController {
         @Body() body: UpdateNotificationSettingDto,
         @Query('scope') scope?: string,
     ) {
-        return await this._service.updateSettings(res.locals.user, body, scope);
+        return await this._service.updateSettings(res.locals.user, body, scope || body?.scope);
     }
 
     @Patch('mark-all-as-read')

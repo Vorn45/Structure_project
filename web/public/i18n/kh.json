@@ -407,5 +407,30 @@
         "Pattern": "ទម្រង់មិនត្រឹមត្រូវ"
     },
     "Switch-Role": "ប្តូរអង្គភាព",
-    "Version": "ជំនាន់"
+    "Version": "ជំនាន់",
+    "NotificationSettings": {
+        "Title": "ការកំណត់ការជូនដំណឹង",
+        "GroupChatTitle": "ការកំណត់ការជូនដំណឹងជជែកជាក្រុម",
+        "OrganizationChatTitle": "ការកំណត់ការជូនដំណឹងស្ថាប័ន",
+        "Info": "ព័ត៌មានការជូនដំណឹង",
+        "Notification": "ការជូនដំណឹង",
+        "Sound": "សំឡេងជូនដំណឹង",
+        "Channels": "បណ្តាញជូនដំណឹង",
+        "Web": "គេហទំព័រ (Web)",
+        "Mobile": "ទូរស័ព្ទ (Mobile)",
+        "Email": "អ៊ីមែល (Email)",
+        "Telegram": "តេឡេក្រាម (Telegram)",
+        "How": "របៀបកំណត់"
+    },
+    "NotificationMute": {
+        "Title": "ផ្អាកការជូនដំណឹង",
+        "TitleFrom": "ផ្អាកការជូនដំណឹង {{channel}}",
+        "Hour": "1 ម៉ោង",
+        "Day": "1 ថ្ងៃ",
+        "Until": "រហូតដល់ថ្ងៃកំណត់",
+        "Forever": "រហូតដល់បើកឡើងវិញ",
+        "Date": "កាលបរិច្ឆេទ",
+        "SelectDate": "ជ្រើសរើសកាលបរិច្ឆេទ",
+        "Submit": "យល់ព្រម"
+    }
 }

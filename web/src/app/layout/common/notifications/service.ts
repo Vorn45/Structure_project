@@ -247,13 +247,31 @@ export class NotificationsService implements OnDestroy {
         this.playIphoneChime();
     }
 
+    private _getStoredSetting(scope: NotificationSettingScope): NotificationSettingData | null {
+        try {
+            const raw = localStorage.getItem(`notification_setting_${scope}`);
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
+    }
+
+    private _setStoredSetting(scope: NotificationSettingScope, data: NotificationSettingData): void {
+        try {
+            localStorage.setItem(`notification_setting_${scope}`, JSON.stringify(data));
+        } catch {}
+    }
+
     /**
      * The chime follows the settings dialog: off when the sound switch is off,
-     * and silent while notifications themselves are off or snoozed. Unknown
-     * settings (request failed, never loaded) fall back to playing.
+     * and silent while notifications themselves are off or snoozed.
      */
     private _soundAllowed(scope: NotificationSettingScope = 'general'): boolean {
-        const setting = this._settingCache.get(scope);
+        let setting = this._settingCache.get(scope);
+        if (!setting) {
+            setting = this._getStoredSetting(scope);
+            if (setting) this._settingCache.set(scope, setting);
+        }
         if (!setting) return true;
         if (!setting.sound || !setting.enabled) return false;
         return !(setting.muted_until && new Date(setting.muted_until).getTime() > Date.now());
@@ -604,35 +622,69 @@ export class NotificationsService implements OnDestroy {
     // @ Settings
     // -------------------------------------------------------------------------
 
-    /** GET /notification/setting — one row per scope; `null` when the request fails. */
+    /** GET /notification/setting — one row per scope; returns local or server setting. */
     getSetting(scope: NotificationSettingScope = 'general'): Observable<NotificationSettingData | null> {
+        const stored = this._getStoredSetting(scope);
+        if (stored) {
+            this._cacheSetting(scope, stored);
+        }
+
         return this._httpClient
             .get<{ data: NotificationSettingData }>(`${this._baseUrl}/setting`, {
                 params: { scope },
             })
             .pipe(
                 timeout(8000),
-                map((res) => this._cacheSetting(scope, res?.data ?? null)),
+                map((res) => {
+                    const data = res?.data ?? stored;
+                    if (data) this._setStoredSetting(scope, data);
+                    return this._cacheSetting(scope, data);
+                }),
                 catchError((err) => {
-                    console.warn('Error fetching notification setting:', err?.message || err);
-                    return of(null);
+                    console.warn('Error fetching notification setting, using cached setting:', err?.message || err);
+                    return of(stored || this._settingCache.get(scope) || null);
                 }),
             );
     }
 
-    /** PATCH /notification/setting — returns the saved state, or `null` on failure. */
+    /** PATCH /notification/setting — returns the saved state, persisting locally immediately. */
     updateSetting(
         payload: NotificationSettingPayload,
         scope: NotificationSettingScope = 'general',
     ): Observable<NotificationSettingData | null> {
+        const current = this._settingCache.get(scope) || this._getStoredSetting(scope) || {
+            enabled: true,
+            muted_until: null,
+            sound: true,
+            web: true,
+            web_muted_until: null,
+            mobile: true,
+            email: false,
+            telegram: true,
+        };
+        const optimistic: NotificationSettingData = {
+            ...current,
+            ...payload,
+        };
+        this._cacheSetting(scope, optimistic);
+        this._setStoredSetting(scope, optimistic);
+
         return this._httpClient
-            .patch<{ data: NotificationSettingData }>(`${this._baseUrl}/setting`, { ...payload, scope })
+            .patch<{ data: NotificationSettingData }>(
+                `${this._baseUrl}/setting`,
+                { ...payload, scope },
+                { params: { scope } }
+            )
             .pipe(
                 timeout(8000),
-                map((res) => this._cacheSetting(scope, res?.data ?? null)),
+                map((res) => {
+                    const data = res?.data ?? optimistic;
+                    this._setStoredSetting(scope, data);
+                    return this._cacheSetting(scope, data);
+                }),
                 catchError((err) => {
-                    console.warn('Error saving notification setting:', err?.message || err);
-                    return of(null);
+                    console.warn('Error saving notification setting remotely, preserved locally:', err?.message || err);
+                    return of(optimistic);
                 }),
             );
     }

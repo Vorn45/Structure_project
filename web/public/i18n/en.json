@@ -403,5 +403,30 @@
     },
     "Switch-Role": "Switch role",
     "Log-Out": "Log out",
-    "Version": "Version"
+    "Version": "Version",
+    "NotificationSettings": {
+        "Title": "Notification Settings",
+        "GroupChatTitle": "Group Chat Notifications",
+        "OrganizationChatTitle": "Organization Notifications",
+        "Info": "Notification Preferences",
+        "Notification": "Notifications",
+        "Sound": "Sound",
+        "Channels": "Channels",
+        "Web": "Web",
+        "Mobile": "Mobile",
+        "Email": "Email",
+        "Telegram": "Telegram",
+        "How": "Configure"
+    },
+    "NotificationMute": {
+        "Title": "Mute Notifications",
+        "TitleFrom": "Mute {{channel}}",
+        "Hour": "1 Hour",
+        "Day": "1 Day",
+        "Until": "Until Date",
+        "Forever": "Until I turn it back on",
+        "Date": "Date",
+        "SelectDate": "Select date",
+        "Submit": "Confirm"
+    }
 }

@@ -1,9 +1,9 @@
 <shared-side-dialog-close-button></shared-side-dialog-close-button>
 
 <div
-    class="relative min-h-14 max-h-14 flex gap-2 px-12 md:px-3 justify-center items-center border-b border-gray-300 dark:border-gray-700"
+    class="relative min-h-14 max-h-14 flex gap-2 px-12 md:px-3 justify-center items-center border-b border-gray-300 dark:border-gray-700 font-kantumruy"
 >
-    <span class="font-medium text-center text-slate-500 text-2xl">
+    <span class="font-medium text-center text-slate-700 dark:text-slate-200 text-xl">
         {{ titleKey | transloco }}
     </span>
 
@@ -14,34 +14,34 @@
     ></mat-icon>
 </div>
 
-<div class="p-4 flex flex-col gap-4 ">
+<div class="p-4 flex flex-col gap-4 font-kantumruy">
     <!-- Master switch -->
-    <div class="border rounded-xl ">
+    <div class="border rounded-xl">
         <ng-container *ngTemplateOutlet="settingRow; context: { item: master }"></ng-container>
     </div>
 
     <!-- Sound -->
-    <div class="border rounded-xl ">
-        <ng-container *ngTemplateOutlet="settingRow; context: { item: sound }"></ng-container>
+    <div class="border rounded-xl transition-opacity" [ngClass]="{ 'opacity-60 bg-slate-50/50 dark:bg-slate-800/20': !isMasterActive }">
+        <ng-container *ngTemplateOutlet="settingRow; context: { item: sound, parentDisabled: !isMasterActive }"></ng-container>
     </div>
 
     <!-- Delivery channels -->
-    <div class="border rounded-xl">
+    <div class="border rounded-xl transition-opacity" [ngClass]="{ 'opacity-60 bg-slate-50/50 dark:bg-slate-800/20': !isMasterActive }">
         <div class="px-3 py-2 text-xl text-slate-500 font-medium">
             {{ "NotificationSettings.Channels" | transloco }}
         </div>
 
         <div class="divide-y">
             @for (channel of channels; track channel.field) {
-                <ng-container *ngTemplateOutlet="settingRow; context: { item: channel }"></ng-container>
+                <ng-container *ngTemplateOutlet="settingRow; context: { item: channel, parentDisabled: !isMasterActive }"></ng-container>
             }
         </div>
     </div>
 </div>
 
 <!-- Switch row -->
-<ng-template #settingRow let-item="item">
-    <div class="flex gap-3 py-3.5 px-3 items-center" [ngClass]="{ 'opacity-50': item.disabled }">
+<ng-template #settingRow let-item="item" let-parentDisabled="parentDisabled">
+    <div class="flex gap-3 py-3.5 px-3 items-center" [ngClass]="{ 'opacity-50': item.disabled || parentDisabled }">
         <mat-icon class="icon-size-6 text-slate-500" [svgIcon]="item.icon"></mat-icon>
 
         <span class="flex-1 text-lg truncate">{{ item.labelKey | transloco }}</span>
@@ -49,16 +49,16 @@
         <button
             type="button"
             role="switch"
-            [disabled]="item.disabled"
-            [attr.aria-checked]="isOn(item)"
+            [disabled]="item.disabled || parentDisabled"
+            [attr.aria-checked]="isOn(item) && !parentDisabled"
             [attr.aria-label]="item.labelKey | transloco"
             (click)="toggle(item)"
             class="relative h-5 w-10 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed"
-            [ngClass]="isOn(item) ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'"
+            [ngClass]="isOn(item) && !parentDisabled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'"
         >
             <span
                 class="absolute top-[3px] h-3.5 w-3.5 rounded-full shadow-sm transition-all"
-                [ngClass]="isOn(item) ? 'left-[23px] bg-white' : 'left-[3px] bg-slate-500 dark:bg-slate-400'"
+                [ngClass]="isOn(item) && !parentDisabled ? 'left-[23px] bg-white' : 'left-[3px] bg-slate-500 dark:bg-slate-400'"
             ></span>
         </button>
 
@@ -69,7 +69,7 @@
         } @else if (item.muteField) {
             <button
                 type="button"
-                [disabled]="item.disabled"
+                [disabled]="item.disabled || parentDisabled"
                 [matTooltip]="'NotificationMute.Title' | transloco"
                 (click)="openMute(item)"
                 class="w-12 shrink-0 flex justify-end text-md text-slate-400 hover:text-primary disabled:cursor-not-allowed"
