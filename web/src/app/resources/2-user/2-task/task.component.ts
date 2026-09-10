@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -101,24 +101,37 @@ export interface ProjectFilterOption {
                 width: 0 !important;
                 height: 0 !important;
             }
+            /* CDK Drag & Drop Smooth Transitions & Styling */
             ::ng-deep .cdk-drag-preview {
-                box-sizing: border-box;
-                border-radius: 1rem !important;
-                box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.2), 0 8px 10px -6px rgba(15, 23, 42, 0.1) !important;
-                background-color: white !important;
+                box-sizing: border-box !important;
+                border-radius: 0.75rem !important;
+                box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.25), 0 10px 10px -5px rgba(15, 23, 42, 0.1) !important;
+                background-color: #ffffff !important;
                 border: 2px solid #3b82f6 !important;
-                opacity: 0.96;
-                transform: rotate(1.5deg);
+                opacity: 0.95 !important;
+                cursor: grabbing !important;
+                pointer-events: none !important;
+                z-index: 99999 !important;
+                font-family: 'Kantumruy Pro', sans-serif !important;
+            }
+            :host-context(.dark) ::ng-deep .cdk-drag-preview,
+            ::ng-deep html.dark .cdk-drag-preview,
+            ::ng-deep .dark .cdk-drag-preview {
+                background-color: #1e293b !important;
+                border-color: #3b82f6 !important;
+                color: #f1f5f9 !important;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
             }
             ::ng-deep .cdk-drag-placeholder {
-                opacity: 0.4;
-                border-radius: 1rem !important;
+                opacity: 0.35 !important;
+                border-radius: 0.875rem !important;
+                transition: transform 250ms cubic-bezier(0.2, 0, 0, 1) !important;
             }
             ::ng-deep .cdk-drag-animating {
-                transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+                transition: transform 250ms cubic-bezier(0.2, 0, 0, 1) !important;
             }
-            ::ng-deep .cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
-                transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+            ::ng-deep .cdk-drop-list-dragging .cdk-drag {
+                transition: transform 250ms cubic-bezier(0.2, 0, 0, 1) !important;
             }
         `,
     ],
@@ -133,6 +146,35 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
     loading = signal<boolean>(true);
     tasks = signal<TaskItem[]>([]);
+
+    tasksByColumn = computed<Record<string, TaskItem[]>>(() => {
+        const all = this.tasks();
+        const map: Record<string, TaskItem[]> = {
+            new: [],
+            confirmed: [],
+            unconfirmed: [],
+            in_progress: [],
+            in_review: [],
+            reopened: [],
+            done: [],
+        };
+        for (const t of all) {
+            const s = (t.status || '').toLowerCase();
+            if (s === 'new' || s === 'pending') map['new'].push(t);
+            else if (s === 'confirmed') map['confirmed'].push(t);
+            else if (s === 'unconfirmed' || s === 'todo') map['unconfirmed'].push(t);
+            else if (s === 'in_progress') map['in_progress'].push(t);
+            else if (s === 'in_review' || s === 'review') map['in_review'].push(t);
+            else if (s === 'reopened') map['reopened'].push(t);
+            else if (s === 'done' || s === 'completed') map['done'].push(t);
+            else {
+                if (!map[s]) map[s] = [];
+                map[s].push(t);
+            }
+        }
+        return map;
+    });
+
     isDragging = signal<boolean>(false);
     showDeleteModal = signal<boolean>(false);
     deleteTarget = signal<TaskItem | null>(null);
@@ -1089,16 +1131,32 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         });
     }
 
-    onTaskDrop(event: CdkDragDrop<string>, targetStatus: string): void {
+    onTaskDrop(event: CdkDragDrop<any>, targetStatus: string): void {
         const task = event.item.data as TaskItem;
         if (!task) return;
 
-        const previousStatus = event.previousContainer.data;
-        if (previousStatus === targetStatus) return;
+        const previousContainer = event.previousContainer;
+        const currentContainer = event.container;
+
+        if (previousContainer === currentContainer) {
+            // Smooth reorder inside the same column
+            if (event.previousIndex === event.currentIndex) return;
+            const currentList = [...(this.tasksByColumn()[targetStatus] || [])];
+            moveItemInArray(currentList, event.previousIndex, event.currentIndex);
+
+            // Reconstruct tasks maintaining new order in this column
+            const otherTasks = this.tasks().filter(
+                (t) => (t.status || '').toLowerCase() !== targetStatus
+            );
+            this.tasks.set([...otherTasks, ...currentList]);
+            return;
+        }
 
         const originalStatus = task.status;
+        const updatedTask: TaskItem = { ...task, status: targetStatus as TaskStatus };
+
         this.tasks.update((tasks) =>
-            tasks.map((t) => (t.id === task.id ? { ...t, status: targetStatus as TaskStatus } : t))
+            tasks.map((t) => (t.id === task.id ? updatedTask : t))
         );
         this.computeCounts(this.tasks());
 
@@ -1106,7 +1164,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             next: (res) => {
                 if (res?.data) {
                     this.tasks.update((tasks) =>
-                        tasks.map((t) => (t.id === task.id ? res.data : t))
+                        tasks.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
                     );
                     this.computeCounts(this.tasks());
                 }
@@ -1234,24 +1292,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     getTasksByColumn(colKey: string): TaskItem[] {
-        switch (colKey) {
-            case 'new':
-                return this.tasks().filter((t) => t.status === 'new' || t.status === 'pending');
-            case 'confirmed':
-                return this.tasks().filter((t) => t.status === 'confirmed');
-            case 'unconfirmed':
-                return this.tasks().filter((t) => t.status === 'unconfirmed' || t.status === 'todo');
-            case 'in_progress':
-                return this.tasks().filter((t) => t.status === 'in_progress');
-            case 'in_review':
-                return this.tasks().filter((t) => t.status === 'in_review' || t.status === 'review');
-            case 'reopened':
-                return this.tasks().filter((t) => t.status === 'reopened');
-            case 'done':
-                return this.tasks().filter((t) => t.status === 'done' || t.status === 'completed');
-            default:
-                return this.tasks().filter((t) => t.status === colKey);
-        }
+        return this.tasksByColumn()[colKey] || [];
     }
 
     getStatusLabel(status: string): string {

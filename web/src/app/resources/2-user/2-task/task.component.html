@@ -458,17 +458,17 @@
                     <!-- Cards Droplist (Vertical Scrollable) -->
                     <div cdkDropList [id]="col.key" [cdkDropListData]="col.key"
                         (cdkDropListDropped)="onTaskDrop($event, col.key)"
-                        class="kanban-column-scroll space-y-2 flex-1 min-h-0 overflow-y-auto overflow-x-hidden pt-2 pr-0.5">
+                        class="kanban-column-scroll space-y-2 flex-1 min-h-[140px] overflow-y-auto overflow-x-hidden pt-2 pr-0.5">
 
                         <!-- Task Card -->
                         <div *ngFor="let task of getTasksByColumn(col.key); trackBy: trackByTaskId" cdkDrag
                             [cdkDragData]="task" (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()"
                             (click)="openTaskDetails(task)"
-                            class="group relative rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-white dark:bg-slate-800/80 p-3 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 cursor-grab active:cursor-grabbing transition-all duration-150 select-none flex flex-col gap-2.5">
+                            class="group relative rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-white dark:bg-slate-800/80 p-3 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 cursor-grab active:cursor-grabbing transition-[box-shadow,border-color,background-color] duration-150 select-none flex flex-col gap-2.5">
 
                             <!-- CDK drag placeholder -->
                             <div *cdkDragPlaceholder
-                                class="rounded-xl border-2 border-dashed border-blue-400/50 bg-blue-50/40 dark:bg-blue-950/20 min-h-[88px] my-0.5">
+                                class="rounded-xl border-2 border-dashed border-blue-400/60 bg-blue-50/50 dark:bg-blue-950/30 min-h-[92px] my-1 transition-all duration-200 ease-out">
                             </div>
 
                             <!-- Card Top: Type Icon + Code | Priority + Chat -->
