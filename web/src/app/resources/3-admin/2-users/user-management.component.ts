@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { AdminService, AdminUser } from '../admin.service';
 
 @Component({
@@ -16,13 +18,20 @@ import { AdminService, AdminUser } from '../admin.service';
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
+        MatMenuModule,
+        SideDialogCloseButtonComponent,
     ],
     templateUrl: './user-management.component.html',
     styles: [`
         :host {
             display: block;
             font-family: 'Kantumruy Pro', sans-serif !important;
-            font-size: 16px;
+        }
+        :host *, :host ::ng-deep * {
+            font-family: 'Kantumruy Pro', sans-serif !important;
+        }
+        input, select, textarea, button, label, span, p, div, table, th, td, h1, h2, h3 {
+            font-family: 'Kantumruy Pro', sans-serif !important;
         }
     `],
 })
@@ -36,6 +45,33 @@ export class UserManagementComponent implements OnInit {
     selectedRole = signal<string>('all');
     selectedDepartment = signal<string>('all');
     selectedStatus = signal<string>('all');
+    sortBy = signal<'name_asc' | 'name_desc' | 'default'>('default');
+    isFilterOpen = signal<boolean>(false);
+
+    toggleFilterBar(): void {
+        this.isFilterOpen.update((v) => !v);
+    }
+
+    hasActiveFilters = computed(() => {
+        return this.selectedRole() !== 'all' || this.selectedDepartment() !== 'all' || this.selectedStatus() !== 'all' || this.sortBy() !== 'default';
+    });
+
+    resetFilters(): void {
+        this.selectedRole.set('all');
+        this.selectedDepartment.set('all');
+        this.selectedStatus.set('all');
+        this.sortBy.set('default');
+    }
+
+    setSort(sort: 'name_asc' | 'name_desc' | 'default'): void {
+        this.sortBy.set(sort);
+    }
+
+    toggleSort(): void {
+        if (this.sortBy() === 'default') this.sortBy.set('name_asc');
+        else if (this.sortBy() === 'name_asc') this.sortBy.set('name_desc');
+        else this.sortBy.set('default');
+    }
 
     // Drawer state
     isDrawerOpen = signal<boolean>(false);
@@ -43,6 +79,11 @@ export class UserManagementComponent implements OnInit {
     selectedUser = signal<AdminUser | null>(null);
     userForm: FormGroup;
     saving = signal<boolean>(false);
+    showPassword = signal<boolean>(false);
+
+    togglePasswordVisibility(): void {
+        this.showPassword.update((v) => !v);
+    }
 
     // Delete confirmation
     deleteTarget = signal<AdminUser | null>(null);
@@ -63,6 +104,7 @@ export class UserManagementComponent implements OnInit {
         const role = this.selectedRole();
         const dept = this.selectedDepartment();
         const status = this.selectedStatus();
+        const sort = this.sortBy();
 
         if (search) {
             list = list.filter(
@@ -88,6 +130,12 @@ export class UserManagementComponent implements OnInit {
             list = list.filter((u) => u.is_active === activeVal);
         }
 
+        if (sort === 'name_asc') {
+            list = [...list].sort((a, b) => a.name_kh.localeCompare(b.name_kh, 'km'));
+        } else if (sort === 'name_desc') {
+            list = [...list].sort((a, b) => b.name_kh.localeCompare(a.name_kh, 'km'));
+        }
+
         return list;
     });
 
@@ -97,11 +145,35 @@ export class UserManagementComponent implements OnInit {
             name_en: ['', [Validators.required]],
             email: ['', [Validators.required, Validators.email]],
             phone: ['', [Validators.required]],
+            password: ['wms@1234', [Validators.minLength(6)]],
             role: ['Member', [Validators.required]],
             department: ['ព័ត៌មានវិទ្យា (IT)', [Validators.required]],
             position: ['', [Validators.required]],
             is_active: [1],
+            avatar: [''],
+            gender: ['male'],
+            date_of_birth: [''],
+            telegram_username: [''],
+            address: [''],
+            join_date: [new Date().toISOString().split('T')[0]],
+            note: [''],
         });
+    }
+
+    onAvatarSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.userForm.patchValue({ avatar: e.target?.result as string });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    removeAvatar(): void {
+        this.userForm.patchValue({ avatar: '' });
     }
 
     ngOnInit(): void {
@@ -127,10 +199,24 @@ export class UserManagementComponent implements OnInit {
     openCreateDrawer(): void {
         this.isEditing.set(false);
         this.selectedUser.set(null);
+        this.showPassword.set(false);
         this.userForm.reset({
+            name_kh: '',
+            name_en: '',
+            email: '',
+            phone: '',
+            password: 'wms@1234',
             role: 'Member',
             department: 'ព័ត៌មានវិទ្យា (IT)',
+            position: '',
             is_active: 1,
+            avatar: '',
+            gender: 'male',
+            date_of_birth: '',
+            telegram_username: '',
+            address: '',
+            join_date: new Date().toISOString().split('T')[0],
+            note: '',
         });
         this.isDrawerOpen.set(true);
     }
@@ -138,15 +224,24 @@ export class UserManagementComponent implements OnInit {
     openEditDrawer(user: AdminUser): void {
         this.isEditing.set(true);
         this.selectedUser.set(user);
+        this.showPassword.set(false);
         this.userForm.patchValue({
             name_kh: user.name_kh,
             name_en: user.name_en,
             email: user.email,
             phone: user.phone,
+            password: '',
             role: user.role,
             department: user.department,
             position: user.position,
             is_active: user.is_active,
+            avatar: user.avatar || '',
+            gender: user.gender || 'male',
+            date_of_birth: user.date_of_birth || '',
+            telegram_username: user.telegram_username || '',
+            address: user.address || '',
+            join_date: user.join_date || (user.created_at ? user.created_at.split('T')[0] : ''),
+            note: user.note || '',
         });
         this.isDrawerOpen.set(true);
     }
@@ -163,9 +258,17 @@ export class UserManagementComponent implements OnInit {
         }
 
         this.saving.set(true);
-        const formVal = this.userForm.value;
+        const formVal = { ...this.userForm.value };
+        if (formVal.email) formVal.email = formVal.email.trim();
+        if (formVal.phone) formVal.phone = formVal.phone.trim();
 
         if (this.isEditing() && this.selectedUser()) {
+            if (!formVal.password || !formVal.password.trim()) {
+                delete formVal.password;
+            } else {
+                formVal.password = formVal.password.trim();
+            }
+
             this._adminService.updateUser(this.selectedUser()!.id, formVal).subscribe({
                 next: (res) => {
                     this.users.update((list) =>
@@ -180,6 +283,12 @@ export class UserManagementComponent implements OnInit {
                 },
             });
         } else {
+            if (!formVal.password || !formVal.password.trim()) {
+                formVal.password = 'wms@1234';
+            } else {
+                formVal.password = formVal.password.trim();
+            }
+
             this._adminService.createUser(formVal).subscribe({
                 next: (res) => {
                     this.users.update((list) => [res.data, ...list]);
@@ -224,8 +333,34 @@ export class UserManagementComponent implements OnInit {
         });
     }
 
+    readonly roleList = [
+        { key: 'Super Admin', label: 'អភិបាលជាន់ខ្ពស់' },
+        { key: 'Admin', label: 'អភិបាល' },
+        { key: 'Manager', label: 'អ្នកចាត់ការ' },
+        { key: 'Team Lead', label: 'ប្រធានក្រុម' },
+        { key: 'Member', label: 'សមាជិក' },
+    ];
+
+    getRoleKhmer(role: string): string {
+        switch (role?.toLowerCase()?.trim()) {
+            case 'super admin':
+            case 'superadmin':
+                return 'អភិបាលជាន់ខ្ពស់';
+            case 'admin':
+                return 'អភិបាល';
+            case 'manager':
+                return 'អ្នកចាត់ការ';
+            case 'team lead':
+                return 'ប្រធានក្រុម';
+            case 'member':
+                return 'សមាជិក';
+            default:
+                return role || 'សមាជិក';
+        }
+    }
+
     getRoleBadgeClass(role: string): string {
-        switch (role.toLowerCase()) {
+        switch (role?.toLowerCase()?.trim()) {
             case 'super admin':
             case 'superadmin':
                 return 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-200 dark:border-purple-700';

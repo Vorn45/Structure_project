@@ -136,13 +136,20 @@ export class UsernameService {
     async login(loginDto: LoginRequestDto, req: Request) {
         try {
             const { username, password } = loginDto;
+            const cleanUsername = username ? username.trim() : '';
+            const phoneDigits = cleanUsername.replace(/\s+/g, '');
 
-            const user = await this.userRepo
+            const qb = this.userRepo
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.avatar_file', 'avatar_file')
-                .where('user.phone = :username', { username })
-                .orWhere('LOWER(user.email) = LOWER(:username)', { username })
-                .getOne();
+                .where('user.phone = :cleanUsername', { cleanUsername })
+                .orWhere('LOWER(user.email) = LOWER(:cleanUsername)', { cleanUsername });
+
+            if (phoneDigits) {
+                qb.orWhere("REPLACE(user.phone, ' ', '') = :phoneDigits", { phoneDigits });
+            }
+
+            const user = await qb.getOne();
 
             if (!user)
                 throw new BadRequestException('Invalid username or password');

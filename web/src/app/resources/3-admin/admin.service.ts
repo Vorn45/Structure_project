@@ -100,6 +100,13 @@ export interface AdminUser {
     is_active: number;
     projects_count: number;
     created_at: string;
+    telegram_username?: string | null;
+    gender?: string | null;
+    date_of_birth?: string | null;
+    address?: string | null;
+    join_date?: string | null;
+    note?: string | null;
+    password?: string;
 }
 
 export interface AdminProject {

@@ -7,35 +7,45 @@
 
         <!-- Top Header Row -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-200 dark:border-purple-800">
-                    <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-5.5"></mat-icon>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-xl sm:text-2xl font-medium text-slate-900 dark:text-white tracking-tight">
-                            គ្រប់គ្រងបុគ្គលិក (Staff & Users)
-                        </h1>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                            {{ filteredUsers().length }}
-                        </span>
-                    </div>
-                    <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        ចាត់ចែងគណនី តួនាទី នាយកដ្ឋាន និងសិទ្ធិអនុញ្ញាតប្រើប្រាស់ប្រព័ន្ធ
-                    </p>
+            <!-- Left: Title & Count -->
+            <div class="flex items-center gap-3 shrink-0">
+                <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-5 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+
+                <span class="text-[17px] font-medium text-slate-800 dark:text-white">បុគ្គលិក</span>
+
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    {{ filteredUsers().length }}
+                </span>
+            </div>
+
+            <!-- Center: Search bar with clickable tune-variant icon on right -->
+            <div class="flex-1 flex items-center justify-center max-w-sm sm:max-w-md mx-auto w-full">
+                <div class="relative w-full flex items-center">
+                    <mat-icon svgIcon="mdi:magnify" class="absolute left-3 text-slate-400 icon-size-4.5 pointer-events-none"></mat-icon>
+                    <input
+                        type="text"
+                        [ngModel]="searchQuery()"
+                        (ngModelChange)="searchQuery.set($event)"
+                        placeholder="ឈ្មោះ:..."
+                        class="w-full pl-9 pr-9 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" />
+
+                    <!-- Filter Toggle Button inside search input -->
+                    <button
+                        type="button"
+                        (click)="toggleFilterBar()"
+                        class="absolute right-1.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                        [ngClass]="(isFilterOpen() || hasActiveFilters()) ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-2xs' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'"
+                        [matTooltip]="isFilterOpen() ? 'លាក់តម្រង (Hide Filters)' : 'បង្ហាញតម្រង (Show Filters)'">
+                        <mat-icon svgIcon="mdi:tune-variant" class="icon-size-4"></mat-icon>
+                        @if (hasActiveFilters()) {
+                            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 border border-white dark:border-slate-800"></span>
+                        }
+                    </button>
                 </div>
             </div>
 
             <!-- Header Actions -->
             <div class="flex items-center gap-2 shrink-0">
-                <button
-                    type="button"
-                    (click)="loadUsers()"
-                    class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
-                    matTooltip="ផ្ទុកឡើងវិញ">
-                    <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
-                </button>
-
                 <button
                     type="button"
                     (click)="openCreateDrawer()"
@@ -46,53 +56,167 @@
             </div>
         </div>
 
-        <!-- Search & Filter Controls -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <!-- Search bar -->
-            <div class="relative w-full sm:w-80">
-                <mat-icon svgIcon="mdi:magnify" class="absolute left-3 top-2 text-slate-400 icon-size-4.5"></mat-icon>
-                <input
-                    type="text"
-                    [ngModel]="searchQuery()"
-                    (ngModelChange)="searchQuery.set($event)"
-                    placeholder="ស្វែងរកតាមឈ្មោះ អ៊ីមែល ទូរស័ព្ទ..."
-                    class="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
-            </div>
+        <!-- Filter Controls Row (Shown directly under header when clicking filter icon) -->
+        @if (isFilterOpen()) {
+            <div class="flex items-center justify-between gap-2 overflow-x-auto pb-3 pt-1 border-b border-slate-100 dark:border-slate-700/60 [scrollbar-width:none] animate-in fade-in slide-in-from-top-1 duration-150">
+                <div class="flex items-center gap-2">
+                    <!-- 1. Sort Button -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="sortMenu"
+                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                        [class.!border-blue-500]="sortBy() !== 'default'"
+                        [class.!text-blue-600]="sortBy() !== 'default'"
+                        matTooltip="តម្រៀប (Sort)">
+                        <mat-icon svgIcon="mdi:swap-vertical" class="icon-size-4.5"></mat-icon>
+                    </button>
+                    <mat-menu #sortMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="setSort('default')" class="!text-[14px]">
+                            <span>លំនាំដើម (Default)</span>
+                        </button>
+                        <button mat-menu-item (click)="setSort('name_asc')" class="!text-[14px]">
+                            <span>ឈ្មោះ (ក - អ)</span>
+                        </button>
+                        <button mat-menu-item (click)="setSort('name_desc')" class="!text-[14px]">
+                            <span>ឈ្មោះ (អ - ក)</span>
+                        </button>
+                    </mat-menu>
 
-            <div class="flex flex-wrap items-center gap-2">
-                <!-- Role filter -->
-                <select
-                    [ngModel]="selectedRole()"
-                    (ngModelChange)="selectedRole.set($event)"
-                    class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-medium text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer">
-                    <option value="all">តួនាទីទាំងអស់</option>
-                    @for (r of roles; track r) {
-                        <option [value]="r">{{ r }}</option>
+                    <!-- 2. Layout Button -->
+                    <button
+                        type="button"
+                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                        matTooltip="ប្លង់បង្ហាញ (Layout)">
+                        <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5"></mat-icon>
+                    </button>
+
+                    <!-- 3. Status Filter Dropdown -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="statusMenu"
+                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                        [class.!border-blue-500]="selectedStatus() !== 'all'"
+                        [class.!text-blue-600]="selectedStatus() !== 'all'">
+                        <mat-icon svgIcon="mdi:account-clock-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                            [class.!text-blue-600]="selectedStatus() !== 'all'"></mat-icon>
+                        <span>{{ selectedStatus() === 'all' ? 'អនុញ្ញាត' : (selectedStatus() === 'active' ? 'សកម្ម' : 'ផ្អាក') }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                    </button>
+                    <mat-menu #statusMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="selectedStatus.set('all')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>ស្ថានភាពទាំងអស់</span>
+                                @if (selectedStatus() === 'all') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('active')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>សកម្ម (Active)</span>
+                                @if (selectedStatus() === 'active') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('inactive')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>ផ្អាក (Suspended)</span>
+                                @if (selectedStatus() === 'inactive') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                    </mat-menu>
+
+                    <!-- 4. Department / Office Filter Dropdown -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="deptMenu"
+                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                        [class.!border-blue-500]="selectedDepartment() !== 'all'"
+                        [class.!text-blue-600]="selectedDepartment() !== 'all'">
+                        <mat-icon svgIcon="mdi:domain" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                            [class.!text-blue-600]="selectedDepartment() !== 'all'"></mat-icon>
+                        <span>{{ selectedDepartment() === 'all' ? 'ការិយាល័យ-ផ្នែក' : selectedDepartment() }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                    </button>
+                    <mat-menu #deptMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="selectedDepartment.set('all')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>ការិយាល័យ-ផ្នែកទាំងអស់</span>
+                                @if (selectedDepartment() === 'all') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        @for (d of departments; track d) {
+                            <button mat-menu-item (click)="selectedDepartment.set(d)" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>{{ d }}</span>
+                                    @if (selectedDepartment() === d) {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                        }
+                    </mat-menu>
+
+                    <!-- 5. Role / Position Filter Dropdown -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="roleMenu"
+                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                        [class.!border-blue-500]="selectedRole() !== 'all'"
+                        [class.!text-blue-600]="selectedRole() !== 'all'">
+                        <mat-icon svgIcon="mdi:account-star-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                            [class.!text-blue-600]="selectedRole() !== 'all'"></mat-icon>
+                        <span>{{ selectedRole() === 'all' ? 'មុខតំណែង' : getRoleKhmer(selectedRole()) }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                    </button>
+                    <mat-menu #roleMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="selectedRole.set('all')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>មុខតំណែងទាំងអស់</span>
+                                @if (selectedRole() === 'all') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        @for (r of roleList; track r.key) {
+                            <button mat-menu-item (click)="selectedRole.set(r.key)" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>{{ r.label }} ({{ r.key }})</span>
+                                    @if (selectedRole() === r.key) {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                        }
+                    </mat-menu>
+                </div>
+
+                <!-- Right: Reset button & Archive button -->
+                <div class="flex items-center gap-2 shrink-0">
+                    @if (hasActiveFilters()) {
+                        <button
+                            type="button"
+                            (click)="resetFilters()"
+                            class="h-9 px-2.5 rounded-xl border border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-[12.5px] font-medium flex items-center gap-1 hover:bg-red-100 transition-all cursor-pointer"
+                            matTooltip="សម្អាតតម្រងទាំងអស់">
+                            <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
+                            <span>សម្អាត</span>
+                        </button>
                     }
-                </select>
-
-                <!-- Department filter -->
-                <select
-                    [ngModel]="selectedDepartment()"
-                    (ngModelChange)="selectedDepartment.set($event)"
-                    class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-medium text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer">
-                    <option value="all">នាយកដ្ឋានទាំងអស់</option>
-                    @for (d of departments; track d) {
-                        <option [value]="d">{{ d }}</option>
-                    }
-                </select>
-
-                <!-- Status filter -->
-                <select
-                    [ngModel]="selectedStatus()"
-                    (ngModelChange)="selectedStatus.set($event)"
-                    class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-medium text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer">
-                    <option value="all">ស្ថានភាពទាំងអស់</option>
-                    <option value="active">សកម្ម (Active)</option>
-                    <option value="inactive">ផ្អាក (Suspended)</option>
-                </select>
+                    <button
+                        type="button"
+                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                        matTooltip="ប័ណ្ណសារ (Archive)">
+                        <mat-icon svgIcon="mdi:archive-outline" class="icon-size-4.5"></mat-icon>
+                    </button>
+                </div>
             </div>
-        </div>
+        }
 
         <!-- Users Table -->
         <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
@@ -113,11 +237,16 @@
                         @for (user of filteredUsers(); track user.id) {
                             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
                                 <!-- Name & Avatar -->
+                                <!-- Name & Avatar -->
                                 <td class="py-3 px-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-[13px] border border-blue-200 dark:border-blue-800 shrink-0">
-                                            {{ user.name_kh.slice(0, 1) }}
-                                        </div>
+                                        @if (user.avatar) {
+                                            <img [src]="user.avatar" [alt]="user.name_kh" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0" />
+                                        } @else {
+                                            <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-[13px] border border-blue-200 dark:border-blue-800 shrink-0">
+                                                {{ user.name_kh.slice(0, 1) }}
+                                            </div>
+                                        }
                                         <div>
                                             <div class="font-medium text-slate-900 dark:text-white">{{ user.name_kh }}</div>
                                             <div class="text-[12px] text-slate-400">{{ user.name_en }}</div>
@@ -128,13 +257,21 @@
                                 <!-- Contact -->
                                 <td class="py-3 px-4 text-[13px]">
                                     <div class="text-slate-800 dark:text-slate-200 font-medium">{{ user.email }}</div>
-                                    <div class="text-slate-400 font-mono mt-0.5">{{ user.phone }}</div>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <span class="text-slate-400 font-mono">{{ user.phone }}</span>
+                                        @if (user.telegram_username) {
+                                            <span class="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-mono bg-sky-50 dark:bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-200/60 dark:border-sky-800/60">
+                                                <mat-icon svgIcon="mdi:telegram" class="icon-size-3"></mat-icon>
+                                                {{ user.telegram_username.startsWith('@') ? user.telegram_username : '@' + user.telegram_username }}
+                                            </span>
+                                        }
+                                    </div>
                                 </td>
 
-                                <!-- Role Badge -->
+                                <!-- Role Badge (in Khmer) -->
                                 <td class="py-3 px-4">
                                     <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium border ' + getRoleBadgeClass(user.role)">
-                                        {{ user.role }}
+                                        {{ getRoleKhmer(user.role) }}
                                     </span>
                                 </td>
 
@@ -165,21 +302,26 @@
                                     </button>
                                 </td>
 
-                                <!-- Actions -->
+                                <!-- Actions: 3-dot Menu -->
                                 <td class="py-3 px-4 text-right">
-                                    <div class="flex items-center justify-end gap-1">
+                                    <div class="flex items-center justify-end">
                                         <button
                                             type="button"
-                                            (click)="openEditDrawer(user)"
-                                            class="w-8 h-8 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all cursor-pointer">
-                                            <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4.5"></mat-icon>
+                                            [matMenuTriggerFor]="rowActionMenu"
+                                            class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all cursor-pointer"
+                                            matTooltip="សកម្មភាព">
+                                            <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4.5"></mat-icon>
                                         </button>
-                                        <button
-                                            type="button"
-                                            (click)="confirmDelete(user)"
-                                            class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all cursor-pointer">
-                                            <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
-                                        </button>
+                                        <mat-menu #rowActionMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                                            <button mat-menu-item (click)="openEditDrawer(user)" class="!text-[13.5px]">
+                                                <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4 text-slate-500 mr-2"></mat-icon>
+                                                <span>កែសម្រួល</span>
+                                            </button>
+                                            <button mat-menu-item (click)="confirmDelete(user)" class="!text-[13.5px] !text-rose-600">
+                                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4 text-rose-600 mr-2"></mat-icon>
+                                                <span>លុបគណនី</span>
+                                            </button>
+                                        </mat-menu>
                                     </div>
                                 </td>
                             </tr>
@@ -200,114 +342,287 @@
 
     <!-- Create / Edit User Side Drawer -->
     @if (isDrawerOpen()) {
-        <!-- Backdrop -->
-        <div (click)="closeDrawer()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-40 transition-opacity"></div>
+        <!-- Backdrop: No blur, subtle clear dismiss overlay so the page behind stays sharp and visible -->
+        <div (click)="closeDrawer()" class="fixed inset-0 bg-slate-900/15 dark:bg-black/30 z-40 transition-opacity"></div>
 
-        <!-- Drawer Content -->
-        <div class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800">
-            <!-- Floating Circular Close Button -->
-            <button
-                (click)="closeDrawer()"
-                class="-left-5 top-4 absolute z-50 w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white shadow-md hover:scale-105 transition-all cursor-pointer">
-                <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
-            </button>
+        <!-- Drawer Content: Exactly 600px width matching standard side dialog, overflow-visible for the X button tab -->
+        <div class="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[600px] max-w-[600px] bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy"
+            style="font-family: 'Kantumruy Pro', sans-serif !important;">
+            <!-- Standard Side Dialog Close Button (X sticking out on left, matching Profile Dialog) -->
+            <shared-side-dialog-close-button
+                [isReturn]="false"
+                [closeOnClick]="false"
+                (buttonClick)="closeDrawer()">
+            </shared-side-dialog-close-button>
 
-            <!-- 56px Header -->
-            <div class="min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between">
-                <h2 class="text-[16px] font-medium text-slate-900 dark:text-white">
+            <!-- 56px Header: Matching Profile Dialog header style with centered title -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 bg-white dark:bg-slate-900 relative px-4 shrink-0 font-kantumruy">
+                <span class="w-full text-center text-xl sm:text-2xl font-medium text-slate-600 dark:text-slate-300">
                     {{ isEditing() ? 'កែប្រែព័ត៌មានបុគ្គលិក' : 'បង្កើតគណនីបុគ្គលិកថ្មី' }}
-                </h2>
-                <span class="text-[12px] text-slate-400 font-mono">WFM USER</span>
+                </span>
             </div>
 
             <!-- Drawer Form Body -->
-            <form [formGroup]="userForm" (ngSubmit)="submitUserForm()" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <!-- Name KH -->
+            <form [formGroup]="userForm" (ngSubmit)="submitUserForm()" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Centered Circular Avatar with Camera Badge -->
+                <div class="flex flex-col items-center justify-center pb-2">
+                    <div
+                        class="relative w-[120px] h-[120px] rounded-full overflow-visible border border-gray-300 dark:border-white/10 flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                        (click)="avatarFileInput.click()">
+                        <img
+                            class="w-full h-full object-cover rounded-full bg-slate-100 dark:bg-white/10 transition duration-300"
+                            [src]="userForm.get('avatar')?.value || '/images/placeholder/avatar.jpg'"
+                            alt="User Avatar">
+
+                        <div class="absolute bottom-1 right-1 flex items-center justify-center border rounded-full border-primary p-1 bg-slate-100 dark:bg-slate-800 shadow-sm">
+                            <mat-icon class="icon-size-5 text-primary" svgIcon="mdi:camera"></mat-icon>
+                        </div>
+                    </div>
+                    <input #avatarFileInput id="avatarFileInput" type="file" accept="image/*" (change)="onAvatarSelected($event)" class="hidden" />
+                    @if (userForm.get('avatar')?.value) {
+                        <button type="button" (click)="removeAvatar()" class="mt-2 text-[12px] font-medium text-rose-500 hover:underline cursor-pointer">
+                            លុបរូបថត
+                        </button>
+                    }
+                </div>
+
+                <!-- Section 1: ព័ត៌មានផ្ទាល់ខ្លួន (Personal Information) -->
                 <div>
-                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        ឈ្មោះជាភាសាខ្មែរ <span class="text-rose-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        formControlName="name_kh"
-                        placeholder="ឧ. ពិសិដ្ឋ បញ្ញាវ័ន្ត"
-                        class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                    <div class="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-[13px] font-semibold text-slate-900 dark:text-white">
+                        <mat-icon svgIcon="mdi:account-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>ព័ត៌មានផ្ទាល់ខ្លួន</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Name KH -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ឈ្មោះជាភាសាខ្មែរ <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="name_kh"
+                                placeholder="ឧ. ពិសិដ្ឋ បញ្ញាវ័ន្ត"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <!-- Name EN -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ឈ្មោះជាអក្សរឡាតាំង (English Name) <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="name_en"
+                                placeholder="ឧ. Piseth Panhavorn"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <!-- Gender -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ភេទ (Gender)
+                            </label>
+                            <select
+                                formControlName="gender"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                                <option value="male">ប្រុស (Male)</option>
+                                <option value="female">ស្រី (Female)</option>
+                                <option value="other">ផ្សេងៗ (Other)</option>
+                            </select>
+                        </div>
+
+                        <!-- Date of Birth -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ថ្ងៃខែឆ្នាំកំណើត (Date of Birth)
+                            </label>
+                            <input
+                                type="date"
+                                formControlName="date_of_birth"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Name EN -->
+                <!-- Section 2: ព័ត៌មានទំនាក់ទំនង (Contact Information) -->
                 <div>
-                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        ឈ្មោះជាអក្សរឡាតាំង (English Name) <span class="text-rose-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        formControlName="name_en"
-                        placeholder="ឧ. Piseth Panhavorn"
-                        class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                    <div class="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-[13px] font-semibold text-slate-900 dark:text-white">
+                        <mat-icon svgIcon="mdi:phone-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>ព័ត៌មានទំនាក់ទំនង</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                អ៊ីមែល <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                formControlName="email"
+                                placeholder="user@wfm.kh"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <!-- Phone -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                លេខទូរស័ព្ទ <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="phone"
+                                placeholder="012 345 678"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <!-- Password with Show/Hide Toggle -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-[13px] font-medium text-slate-700 dark:text-slate-300">
+                                    {{ isEditing() ? 'ពាក្យសម្ងាត់ថ្មី' : 'ពាក្យសម្ងាត់ចូលប្រព័ន្ធ' }}
+                                    @if (!isEditing()) {
+                                        <span class="text-rose-500">*</span>
+                                    }
+                                </label>
+                                <span class="text-[11px] text-slate-400 dark:text-slate-500 font-normal">
+                                    {{ isEditing() ? '(ទុកទំនេរ បើមិនប្តូរ)' : '(លំនាំដើម៖ wms@1234)' }}
+                                </span>
+                            </div>
+                            <div class="relative">
+                                <input
+                                    [type]="showPassword() ? 'text' : 'password'"
+                                    formControlName="password"
+                                    [placeholder]="isEditing() ? 'បញ្ចូលពាក្យសម្ងាត់ថ្មី...' : 'wms@1234'"
+                                    class="w-full pl-9 pr-10 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none font-mono" />
+                                <mat-icon svgIcon="mdi:lock-outline" class="icon-size-4 text-slate-400 absolute left-3 top-2.5"></mat-icon>
+                                <button
+                                    type="button"
+                                    (click)="togglePasswordVisibility()"
+                                    class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer"
+                                    [matTooltip]="showPassword() ? 'លាក់ពាក្យសម្ងាត់' : 'បង្ហាញពាក្យសម្ងាត់'">
+                                    <mat-icon [svgIcon]="showPassword() ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" class="icon-size-4.5"></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Telegram Username -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                តេឡេក្រាម (Telegram)
+                            </label>
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    formControlName="telegram_username"
+                                    placeholder="@username"
+                                    class="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none font-mono" />
+                                <mat-icon svgIcon="mdi:telegram" class="icon-size-4 text-sky-500 absolute left-3 top-2.5"></mat-icon>
+                            </div>
+                        </div>
+
+                        <!-- Current Address -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                អាសយដ្ឋានបច្ចុប្បន្ន (Address)
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="address"
+                                placeholder="ឧ. រាជធានីភ្នំពេញ..."
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Email & Phone Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            អ៊ីមែល <span class="text-rose-500">*</span>
-                        </label>
-                        <input
-                            type="email"
-                            formControlName="email"
-                            placeholder="user@wfm.kh"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
-                    </div>
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            លេខទូរស័ព្ទ <span class="text-rose-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            formControlName="phone"
-                            placeholder="012 345 678"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
-                    </div>
-                </div>
-
-                <!-- Role & Department Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            តួនាទី <span class="text-rose-500">*</span>
-                        </label>
-                        <select
-                            formControlName="role"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
-                            @for (r of roles; track r) {
-                                <option [value]="r">{{ r }}</option>
-                            }
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            នាយកដ្ឋាន <span class="text-rose-500">*</span>
-                        </label>
-                        <select
-                            formControlName="department"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
-                            @for (d of departments; track d) {
-                                <option [value]="d">{{ d }}</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Position -->
+                <!-- Section 3: ព័ត៌មានការងារ និងស្ថាប័ន (Work & Organization) -->
                 <div>
-                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        មុខតំណែង (Position) <span class="text-rose-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        formControlName="position"
-                        placeholder="ឧ. Senior Software Engineer..."
-                        class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                    <div class="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-[13px] font-semibold text-slate-900 dark:text-white">
+                        <mat-icon svgIcon="mdi:briefcase-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>ព័ត៌មានការងារ និងស្ថាប័ន</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Role -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                តួនាទី <span class="text-rose-500">*</span>
+                            </label>
+                            <select
+                                formControlName="role"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                                @for (r of roles; track r) {
+                                    <option [value]="r">{{ getRoleKhmer(r) }} ({{ r }})</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Department -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                នាយកដ្ឋាន <span class="text-rose-500">*</span>
+                            </label>
+                            <select
+                                formControlName="department"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                                @for (d of departments; track d) {
+                                    <option [value]="d">{{ d }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Position -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                មុខតំណែង (Position) <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="position"
+                                placeholder="ឧ. Senior Software Engineer..."
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <!-- Join Date -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                កាលបរិច្ឆេទចូលបម្រើការងារ
+                            </label>
+                            <input
+                                type="date"
+                                formControlName="join_date"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                        </div>
+
+                        <!-- Account Status -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ស្ថានភាពគណនី (Status)
+                            </label>
+                            <select
+                                formControlName="is_active"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                                <option [value]="1">សកម្ម (Active) - អាចចូលប្រើប្រព័ន្ធបានធម្មតា</option>
+                                <option [value]="0">ផ្អាកដំណើរការ (Suspended) - មិនអាចចូលប្រើប្រព័ន្ធបានទេ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: កំណត់សម្គាល់បន្ថែម (Note / Remarks) -->
+                <div>
+                    <div class="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-[13px] font-semibold text-slate-900 dark:text-white">
+                        <mat-icon svgIcon="mdi:text-box-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>កំណត់សម្គាល់បន្ថែម</span>
+                    </div>
+                    <div>
+                        <textarea
+                            formControlName="note"
+                            rows="2"
+                            placeholder="កំណត់សម្គាល់បន្ថែមអំពីបុគ្គលិក ឬការទទួលខុសត្រូវ..."
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none resize-none"></textarea>
+                    </div>
                 </div>
             </form>
 
@@ -323,8 +638,7 @@
                     (click)="submitUserForm()"
                     type="button"
                     [disabled]="saving() || userForm.invalid"
-                    class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
-                    <mat-icon svgIcon="mdi:content-save-outline" class="icon-size-4.5"></mat-icon>
+                    class="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center justify-center shadow-2xs transition-all cursor-pointer">
                     <span>{{ isEditing() ? 'រក្សាទុកការកែប្រែ' : 'បង្កើតគណនី' }}</span>
                 </button>
             </div>
@@ -333,7 +647,8 @@
 
     <!-- Delete Confirmation Modal -->
     @if (showDeleteModal()) {
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/30 z-50 flex items-center justify-center p-4 font-kantumruy"
+            style="font-family: 'Kantumruy Pro', sans-serif !important;">
             <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
                 <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4 border border-rose-100 dark:border-rose-900">
                     <mat-icon svgIcon="mdi:alert-outline" class="icon-size-6"></mat-icon>

@@ -105,6 +105,10 @@ export class UpdateAdminUserDto {
     @IsOptional()
     @IsNumber()
     is_active?: number;
+
+    @IsOptional()
+    @IsString()
+    password?: string;
 }
 
 export class UpdateProjectBudgetDto {

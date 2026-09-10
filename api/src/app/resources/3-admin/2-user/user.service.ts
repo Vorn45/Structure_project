@@ -28,6 +28,12 @@ export interface AdminUserItem {
     is_active: number;
     projects_count: number;
     created_at: string;
+    telegram_username?: string | null;
+    gender?: string | null;
+    date_of_birth?: string | null;
+    address?: string | null;
+    join_date?: string | null;
+    note?: string | null;
 }
 
 const DEFAULT_USERS: AdminUserItem[] = [
@@ -44,6 +50,12 @@ const DEFAULT_USERS: AdminUserItem[] = [
         is_active: 1,
         projects_count: 2,
         created_at: '2026-01-10T08:00:00.000Z',
+        telegram_username: '@piseth_p',
+        gender: 'male',
+        date_of_birth: '1996-05-12',
+        address: 'រាជធានីភ្នំពេញ',
+        join_date: '2024-01-10',
+        note: 'ប្រធានផ្នែកបច្ចេកទេស និងស្ថាបត្យកម្មប្រព័ន្ធ',
     },
     {
         id: 2,
@@ -58,6 +70,12 @@ const DEFAULT_USERS: AdminUserItem[] = [
         is_active: 1,
         projects_count: 2,
         created_at: '2026-01-15T08:00:00.000Z',
+        telegram_username: '@brusmuny',
+        gender: 'male',
+        date_of_birth: '1994-08-20',
+        address: 'រាជធានីភ្នំពេញ',
+        join_date: '2024-01-15',
+        note: 'ដឹកនាំគម្រោង និងការគ្រប់គ្រងទូទៅ',
     },
     {
         id: 3,
@@ -72,6 +90,12 @@ const DEFAULT_USERS: AdminUserItem[] = [
         is_active: 1,
         projects_count: 2,
         created_at: '2026-02-01T08:00:00.000Z',
+        telegram_username: '@thawinner',
+        gender: 'male',
+        date_of_birth: '1998-11-03',
+        address: 'រាជធានីភ្នំពេញ',
+        join_date: '2024-02-01',
+        note: 'ឯកទេសខាង Angular, Web Architecture',
     },
     {
         id: 4,
@@ -86,6 +110,12 @@ const DEFAULT_USERS: AdminUserItem[] = [
         is_active: 1,
         projects_count: 1,
         created_at: '2026-02-15T08:00:00.000Z',
+        telegram_username: '@sovannara_devops',
+        gender: 'male',
+        date_of_birth: '1997-03-15',
+        address: 'ខេត្តកណ្ដាល',
+        join_date: '2024-02-15',
+        note: 'មើលការខុសត្រូវ CI/CD និង Cloud Security',
     },
     {
         id: 5,
@@ -100,6 +130,12 @@ const DEFAULT_USERS: AdminUserItem[] = [
         is_active: 1,
         projects_count: 1,
         created_at: '2026-03-01T08:00:00.000Z',
+        telegram_username: '@ly_menghour',
+        gender: 'male',
+        date_of_birth: '1995-09-28',
+        address: 'រាជធានីភ្នំពេញ',
+        join_date: '2024-03-01',
+        note: 'មើលការខុសត្រូវ API & Database Performance',
     },
     {
         id: 6,
@@ -114,13 +150,31 @@ const DEFAULT_USERS: AdminUserItem[] = [
         is_active: 1,
         projects_count: 2,
         created_at: '2026-03-10T08:00:00.000Z',
+        telegram_username: '@thida_keo',
+        gender: 'female',
+        date_of_birth: '1999-07-19',
+        address: 'ខេត្តសៀមរាប',
+        join_date: '2024-03-10',
+        note: 'រចនា Design System និងបទពិសោធន៍អ្នកប្រើប្រាស់',
     },
 ];
 
 @Injectable()
 export class AdminUserService {
     private localUsers: AdminUserItem[] = [...DEFAULT_USERS];
-    private userMeta: Record<string, { department?: string; position?: string; role?: string; projects_count?: number }> = {};
+    private userMeta: Record<string, {
+        department?: string;
+        position?: string;
+        role?: string;
+        projects_count?: number;
+        telegram_username?: string;
+        gender?: string;
+        date_of_birth?: string;
+        address?: string;
+        join_date?: string;
+        note?: string;
+        avatar?: string;
+    }> = {};
     private readonly metaFilePath = path.join(process.cwd(), 'storage', 'admin_users_meta.json');
     private readonly storeFilePath = path.join(process.cwd(), 'storage', 'admin_users_store.json');
 
@@ -275,10 +329,16 @@ export class AdminUserService {
                         role: detectedRole,
                         department: meta.department || 'ព័ត៌មានវិទ្យា (IT)',
                         position: meta.position || 'Software Engineer',
-                        avatar: u.avatar_file?.uri || u.telegram_photo_url || null,
+                        avatar: u.avatar_file?.uri || u.telegram_photo_url || meta.avatar || null,
                         is_active: u.is_active !== undefined ? u.is_active : 1,
                         projects_count: projectsCount,
                         created_at: u.created_at ? u.created_at.toISOString() : new Date().toISOString(),
+                        telegram_username: u.telegram_username || meta.telegram_username || null,
+                        gender: meta.gender || (u.sex_id === 2 ? 'female' : 'male'),
+                        date_of_birth: meta.date_of_birth || (u.date_of_birth ? new Date(u.date_of_birth).toISOString().split('T')[0] : null),
+                        address: meta.address || null,
+                        join_date: meta.join_date || (u.created_at ? u.created_at.toISOString().split('T')[0] : null),
+                        note: meta.note || null,
                     };
                 });
             }
@@ -334,14 +394,20 @@ export class AdminUserService {
 
         try {
             const salt = await bcrypt.genSalt(10);
-            const passwordHash = await bcrypt.hash('wms@1234', salt);
+            const plainPassword = dto.password?.trim() || 'wms@1234';
+            const passwordHash = await bcrypt.hash(plainPassword, salt);
+
+            const cleanPhone = dto.phone?.trim() || '012 000 000';
+            const cleanEmail = (dto.email?.trim() || `${dto.name_en.toLowerCase().replace(/\s+/g, '.')}@wfm.kh`).toLowerCase();
 
             const newUser = this._userRepo.create({
-                name_kh: dto.name_kh,
-                name_en: dto.name_en,
-                email: dto.email || `${dto.name_en.toLowerCase().replace(/\s+/g, '.')}@wfm.kh`,
-                phone: dto.phone || '012 000 000',
-                sex_id: 1,
+                name_kh: dto.name_kh.trim(),
+                name_en: dto.name_en.trim(),
+                email: cleanEmail,
+                phone: cleanPhone,
+                sex_id: dto.gender === 'female' || dto.gender === 'ស្រី' ? 2 : 1,
+                date_of_birth: dto.date_of_birth ? new Date(dto.date_of_birth) : undefined,
+                telegram_username: dto.telegram_username ? dto.telegram_username.trim() : undefined,
                 password: passwordHash,
                 is_active: dto.is_active !== undefined ? dto.is_active : 1,
                 auth_provider: AuthProvider.LOCAL,
@@ -350,21 +416,43 @@ export class AdminUserService {
             const savedUser = await this._userRepo.save(newUser);
             createdId = savedUser.id;
 
-            // Associate Role
+            // Associate Role with is_default: true so the user can immediately log in
+            const availableRoles = await this._roleRepo.find();
+            let matchedRole: Role | undefined;
+
             if (dto.role) {
-                const targetSlug = dto.role.toLowerCase().replace(/\s+/g, '');
-                const availableRoles = await this._roleRepo.find();
-                const matchedRole = availableRoles.find(
-                    (r) => r.slug === targetSlug || r.name_en?.toLowerCase() === dto.role.toLowerCase(),
+                const targetSlug = dto.role.toLowerCase().replace(/[\s_-]+/g, '');
+                matchedRole = availableRoles.find(
+                    (r) =>
+                        r.slug === targetSlug ||
+                        r.slug.replace(/[\s_-]+/g, '') === targetSlug ||
+                        r.name_en?.toLowerCase() === dto.role!.toLowerCase() ||
+                        r.name_kh === dto.role,
                 );
-                if (matchedRole) {
-                    await this._userRoleRepo.save(
-                        this._userRoleRepo.create({
-                            user_id: savedUser.id,
-                            role_id: matchedRole.id,
-                        }),
-                    );
+
+                if (!matchedRole) {
+                    if (targetSlug.includes('superadmin') || targetSlug.includes('super')) {
+                        matchedRole = availableRoles.find((r) => r.slug === 'superadmin');
+                    } else if (targetSlug.includes('admin')) {
+                        matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'superadmin');
+                    } else if (targetSlug.includes('manager') || targetSlug.includes('lead')) {
+                        matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'user');
+                    }
                 }
+            }
+
+            if (!matchedRole) {
+                matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles[0];
+            }
+
+            if (matchedRole) {
+                await this._userRoleRepo.save(
+                    this._userRoleRepo.create({
+                        user_id: savedUser.id,
+                        role_id: matchedRole.id,
+                        is_default: true,
+                    }),
+                );
             }
 
             createdItem = {
@@ -376,10 +464,16 @@ export class AdminUserService {
                 role: dto.role || 'Member',
                 department: dto.department || 'ព័ត៌មានវិទ្យា (IT)',
                 position: dto.position || 'Software Engineer',
-                avatar: null,
+                avatar: dto.avatar || null,
                 is_active: savedUser.is_active,
                 projects_count: 0,
                 created_at: savedUser.created_at ? savedUser.created_at.toISOString() : new Date().toISOString(),
+                telegram_username: dto.telegram_username || null,
+                gender: dto.gender || 'male',
+                date_of_birth: dto.date_of_birth || null,
+                address: dto.address || null,
+                join_date: dto.join_date || null,
+                note: dto.note || null,
             };
         } catch (err: any) {
             console.warn('[AdminUserService] DB user creation failed, saving to local store:', err?.message || err);
@@ -395,10 +489,16 @@ export class AdminUserService {
                 role: dto.role || 'Member',
                 department: dto.department || 'ព័ត៌មានវិទ្យា (IT)',
                 position: dto.position || 'Software Engineer',
-                avatar: null,
+                avatar: dto.avatar || null,
                 is_active: dto.is_active !== undefined ? dto.is_active : 1,
                 projects_count: 0,
                 created_at: new Date().toISOString(),
+                telegram_username: dto.telegram_username || null,
+                gender: dto.gender || 'male',
+                date_of_birth: dto.date_of_birth || null,
+                address: dto.address || null,
+                join_date: dto.join_date || null,
+                note: dto.note || null,
             };
         }
 
@@ -408,6 +508,13 @@ export class AdminUserService {
             department: createdItem.department,
             position: createdItem.position,
             projects_count: 0,
+            telegram_username: createdItem.telegram_username || undefined,
+            gender: createdItem.gender || undefined,
+            date_of_birth: createdItem.date_of_birth || undefined,
+            address: createdItem.address || undefined,
+            join_date: createdItem.join_date || undefined,
+            note: createdItem.note || undefined,
+            avatar: createdItem.avatar || undefined,
         };
 
         this.localUsers.unshift(createdItem);
@@ -417,106 +524,148 @@ export class AdminUserService {
             status_code: 201,
             message: 'User created successfully',
             data: createdItem,
-        };
-    }
+            };
+        }
 
-    async updateUser(user: UserPayload, id: number, dto: UpdateAdminUserDto) {
-        let updatedItem: AdminUserItem | null = null;
+        async updateUser(user: UserPayload, id: number, dto: UpdateAdminUserDto) {
+            let updatedItem: AdminUserItem | null = null;
 
-        try {
-            const dbUser = await this._userRepo.findOne({
-                where: { id: Number(id) },
-                relations: { user_roles: { role: true } },
-            });
+            try {
+                const dbUser = await this._userRepo.findOne({
+                    where: { id: Number(id) },
+                    relations: { user_roles: { role: true } },
+                });
 
-            if (dbUser) {
-                if (dto.name_kh !== undefined) dbUser.name_kh = dto.name_kh;
-                if (dto.name_en !== undefined) dbUser.name_en = dto.name_en;
-                if (dto.email !== undefined) dbUser.email = dto.email;
-                if (dto.phone !== undefined) dbUser.phone = dto.phone;
-                if (dto.is_active !== undefined) dbUser.is_active = dto.is_active;
+                if (dbUser) {
+                    if (dto.name_kh !== undefined) dbUser.name_kh = dto.name_kh;
+                    if (dto.name_en !== undefined) dbUser.name_en = dto.name_en;
+                    if (dto.email !== undefined) dbUser.email = dto.email;
+                    if (dto.phone !== undefined) dbUser.phone = dto.phone;
+                    if (dto.is_active !== undefined) dbUser.is_active = dto.is_active;
+                    if (dto.telegram_username !== undefined) dbUser.telegram_username = dto.telegram_username;
+                    if (dto.gender !== undefined) dbUser.sex_id = dto.gender === 'female' || dto.gender === 'ស្រី' ? 2 : 1;
+                    if (dto.date_of_birth !== undefined) dbUser.date_of_birth = dto.date_of_birth ? new Date(dto.date_of_birth) : null;
+                    if (dto.password && dto.password.trim()) {
+                        const salt = await bcrypt.genSalt(10);
+                        dbUser.password = await bcrypt.hash(dto.password.trim(), salt);
+                        dbUser.password_changed_at = new Date();
+                    }
 
-                await this._userRepo.save(dbUser);
+                    await this._userRepo.save(dbUser);
 
-                if (dto.role) {
-                    const targetSlug = dto.role.toLowerCase().replace(/\s+/g, '');
-                    const availableRoles = await this._roleRepo.find();
-                    const matchedRole = availableRoles.find(
-                        (r) => r.slug === targetSlug || r.name_en?.toLowerCase() === dto.role!.toLowerCase(),
-                    );
-                    if (matchedRole) {
-                        const existingUr = await this._userRoleRepo.findOne({
-                            where: { user_id: dbUser.id },
-                        });
-                        if (existingUr) {
-                            existingUr.role_id = matchedRole.id;
-                            await this._userRoleRepo.save(existingUr);
-                        } else {
-                            await this._userRoleRepo.save(
-                                this._userRoleRepo.create({
-                                    user_id: dbUser.id,
-                                    role_id: matchedRole.id,
-                                }),
-                            );
+                    if (dto.role) {
+                        const targetSlug = dto.role.toLowerCase().replace(/[\s_-]+/g, '');
+                        const availableRoles = await this._roleRepo.find();
+                        let matchedRole = availableRoles.find(
+                            (r) =>
+                                r.slug === targetSlug ||
+                                r.slug.replace(/[\s_-]+/g, '') === targetSlug ||
+                                r.name_en?.toLowerCase() === dto.role!.toLowerCase() ||
+                                r.name_kh === dto.role,
+                        );
+
+                        if (!matchedRole) {
+                            if (targetSlug.includes('superadmin') || targetSlug.includes('super')) {
+                                matchedRole = availableRoles.find((r) => r.slug === 'superadmin');
+                            } else if (targetSlug.includes('admin')) {
+                                matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'superadmin');
+                            } else if (targetSlug.includes('manager') || targetSlug.includes('lead')) {
+                                matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'user');
+                            }
+                        }
+
+                        if (!matchedRole) {
+                            matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles[0];
+                        }
+
+                        if (matchedRole) {
+                            const existingUr = await this._userRoleRepo.findOne({
+                                where: { user_id: dbUser.id },
+                            });
+                            if (existingUr) {
+                                existingUr.role_id = matchedRole.id;
+                                existingUr.is_default = true;
+                                await this._userRoleRepo.save(existingUr);
+                            } else {
+                                await this._userRoleRepo.save(
+                                    this._userRoleRepo.create({
+                                        user_id: dbUser.id,
+                                        role_id: matchedRole.id,
+                                        is_default: true,
+                                    }),
+                                );
+                            }
                         }
                     }
                 }
+            } catch (err: any) {
+                console.warn('[AdminUserService] DB user update failed:', err?.message || err);
             }
-        } catch (err: any) {
-            console.warn('[AdminUserService] DB user update failed:', err?.message || err);
+
+            // Update local metadata
+            const existingMeta = this.getUserMeta(id);
+            this.userMeta[String(id)] = {
+                ...existingMeta,
+                department: dto.department ?? existingMeta.department,
+                position: dto.position ?? existingMeta.position,
+                role: dto.role ?? existingMeta.role,
+                telegram_username: dto.telegram_username ?? existingMeta.telegram_username,
+                gender: dto.gender ?? existingMeta.gender,
+                date_of_birth: dto.date_of_birth ?? existingMeta.date_of_birth,
+                address: dto.address ?? existingMeta.address,
+                join_date: dto.join_date ?? existingMeta.join_date,
+                note: dto.note ?? existingMeta.note,
+                avatar: dto.avatar ?? existingMeta.avatar,
+            };
+
+            const localIdx = this.localUsers.findIndex((u) => u.id === Number(id));
+            if (localIdx > -1) {
+                this.localUsers[localIdx] = {
+                    ...this.localUsers[localIdx],
+                    ...dto,
+                    department: dto.department ?? this.localUsers[localIdx].department,
+                    position: dto.position ?? this.localUsers[localIdx].position,
+                    role: dto.role ?? this.localUsers[localIdx].role,
+                };
+                updatedItem = this.localUsers[localIdx];
+            } else {
+                updatedItem = {
+                    id: Number(id),
+                    name_kh: dto.name_kh || '',
+                    name_en: dto.name_en || '',
+                    email: dto.email || '',
+                    phone: dto.phone || '',
+                    role: dto.role || existingMeta.role || 'Member',
+                    department: dto.department || existingMeta.department || 'ព័ត៌មានវិទ្យា (IT)',
+                    position: dto.position || existingMeta.position || 'Software Engineer',
+                    avatar: dto.avatar || null,
+                    is_active: dto.is_active ?? 1,
+                    projects_count: existingMeta.projects_count ?? 1,
+                    created_at: new Date().toISOString(),
+                    telegram_username: dto.telegram_username || existingMeta.telegram_username || null,
+                    gender: dto.gender || existingMeta.gender || 'male',
+                    date_of_birth: dto.date_of_birth || existingMeta.date_of_birth || null,
+                    address: dto.address || existingMeta.address || null,
+                    join_date: dto.join_date || existingMeta.join_date || null,
+                    note: dto.note || existingMeta.note || null,
+                };
+                this.localUsers.unshift(updatedItem);
+            }
+
+            this.saveToDisk();
+
+            return {
+                status_code: 200,
+                message: 'User updated successfully',
+                data: updatedItem,
+            };
         }
 
-        // Update local metadata
-        const existingMeta = this.getUserMeta(id);
-        this.userMeta[String(id)] = {
-            ...existingMeta,
-            department: dto.department ?? existingMeta.department,
-            position: dto.position ?? existingMeta.position,
-            role: dto.role ?? existingMeta.role,
-        };
+        async toggleStatus(user: UserPayload, id: number) {
+            let newStatus = 1;
 
-        const localIdx = this.localUsers.findIndex((u) => u.id === Number(id));
-        if (localIdx > -1) {
-            this.localUsers[localIdx] = {
-                ...this.localUsers[localIdx],
-                ...dto,
-                department: dto.department ?? this.localUsers[localIdx].department,
-                position: dto.position ?? this.localUsers[localIdx].position,
-                role: dto.role ?? this.localUsers[localIdx].role,
-            };
-            updatedItem = this.localUsers[localIdx];
-        } else {
-            updatedItem = {
-                id: Number(id),
-                name_kh: dto.name_kh || '',
-                name_en: dto.name_en || '',
-                email: dto.email || '',
-                phone: dto.phone || '',
-                role: dto.role || existingMeta.role || 'Member',
-                department: dto.department || existingMeta.department || 'ព័ត៌មានវិទ្យា (IT)',
-                position: dto.position || existingMeta.position || 'Software Engineer',
-                avatar: null,
-                is_active: dto.is_active ?? 1,
-                projects_count: existingMeta.projects_count ?? 1,
-                created_at: new Date().toISOString(),
-            };
-            this.localUsers.unshift(updatedItem);
-        }
-
-        this.saveToDisk();
-
-        return {
-            status_code: 200,
-            message: 'User updated successfully',
-            data: updatedItem,
-        };
-    }
-
-    async toggleStatus(user: UserPayload, id: number) {
-        let newStatus = 1;
-
-        try {
-            const dbUser = await this._userRepo.findOne({ where: { id: Number(id) } });
+            try {
+                const dbUser = await this._userRepo.findOne({ where: { id: Number(id) } });
             if (dbUser) {
                 dbUser.is_active = dbUser.is_active === 1 ? 0 : 1;
                 await this._userRepo.save(dbUser);

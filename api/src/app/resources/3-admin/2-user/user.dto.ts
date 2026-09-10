@@ -50,6 +50,38 @@ export class CreateAdminUserDto {
     @IsOptional()
     @IsNumber()
     is_active?: number;
+
+    @IsOptional()
+    @IsString()
+    avatar?: string;
+
+    @IsOptional()
+    @IsString()
+    telegram_username?: string;
+
+    @IsOptional()
+    @IsString()
+    gender?: string;
+
+    @IsOptional()
+    @IsString()
+    date_of_birth?: string;
+
+    @IsOptional()
+    @IsString()
+    address?: string;
+
+    @IsOptional()
+    @IsString()
+    join_date?: string;
+
+    @IsOptional()
+    @IsString()
+    note?: string;
+
+    @IsOptional()
+    @IsString()
+    password?: string;
 }
 
 export class UpdateAdminUserDto {
@@ -84,4 +116,36 @@ export class UpdateAdminUserDto {
     @IsOptional()
     @IsNumber()
     is_active?: number;
+
+    @IsOptional()
+    @IsString()
+    avatar?: string;
+
+    @IsOptional()
+    @IsString()
+    telegram_username?: string;
+
+    @IsOptional()
+    @IsString()
+    gender?: string;
+
+    @IsOptional()
+    @IsString()
+    date_of_birth?: string;
+
+    @IsOptional()
+    @IsString()
+    address?: string;
+
+    @IsOptional()
+    @IsString()
+    join_date?: string;
+
+    @IsOptional()
+    @IsString()
+    note?: string;
+
+    @IsOptional()
+    @IsString()
+    password?: string;
 }
