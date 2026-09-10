@@ -107,19 +107,27 @@ export interface AttendanceHistoryRow {
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                                     <tr *ngFor="let row of dynamicHistory()" class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
                                         <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">
-                                            <span [class.text-emerald-600]="row.is_today" [class.dark:text-emerald-400]="row.is_today">
+                                            <span [class.text-emerald-600]="row.is_today && row.status !== 'មិនទាន់កត់ត្រា'" [class.dark:text-emerald-400]="row.is_today && row.status !== 'មិនទាន់កត់ត្រា'">
                                                 {{ row.date }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy">{{ row.check_in }}</td>
-                                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy">{{ row.check_out }}</td>
+                                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy font-medium">{{ row.check_in }}</td>
+                                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy">
+                                            <span *ngIf="row.check_out === 'កំពុងបំពេញការងារ'" class="inline-flex items-center gap-1.5 text-[12px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/30">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                <span>កំពុងបំពេញការងារ</span>
+                                            </span>
+                                            <span *ngIf="row.check_out !== 'កំពុងបំពេញការងារ'">{{ row.check_out }}</span>
+                                        </td>
                                         <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy">{{ row.hours }}</td>
                                         <td class="px-4 py-3 text-right">
                                             <span
                                                 class="px-2 py-0.5 rounded text-[11px] font-medium font-kantumruy"
-                                                [ngClass]="row.is_late 
-                                                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200 dark:border-amber-800/40' 
-                                                    : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-200 dark:border-emerald-800/40'"
+                                                [ngClass]="row.status === 'មិនទាន់កត់ត្រា'
+                                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700'
+                                                    : row.is_late 
+                                                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200 dark:border-amber-800/40' 
+                                                        : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-200 dark:border-emerald-800/40'"
                                             >
                                                 {{ row.status }}
                                             </span>
@@ -184,12 +192,30 @@ export class AttendanceDialogComponent {
         this._loadAttendance();
     }
 
+    private _onStorageEvent = (event: StorageEvent) => {
+        if (event.key === 'latest_attendance_checkin') {
+            this._loadAttendance();
+        }
+    };
+
+    ngOnInit(): void {
+        if (typeof window !== 'undefined') {
+            window.addEventListener('storage', this._onStorageEvent);
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('storage', this._onStorageEvent);
+        }
+    }
+
     displayCheckInTime(): string {
-        return this.attendance()?.checkInTime || '07:55 ព្រឹក';
+        return this._formatTimeKh(this.attendance()?.checkInTime) || '--:--';
     }
 
     displayCheckOutTime(): string {
-        return this.attendance()?.checkOutTime || '17:05 ល្ងាច';
+        return this._formatTimeKh(this.attendance()?.checkOutTime) || '--:--';
     }
 
     fullPresentDays(): number {
@@ -198,27 +224,83 @@ export class AttendanceDialogComponent {
         return Math.max(0, total - late);
     }
 
+    private _formatTimeKh(timeStr?: string | null): string {
+        if (!timeStr) return '';
+        if (timeStr.includes('ព្រឹក') || timeStr.includes('រសៀល') || timeStr.includes('ល្ងាច')) {
+            return timeStr;
+        }
+        const match = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);
+        if (!match) return timeStr;
+        const hour = parseInt(match[1], 10);
+        const min = match[2];
+        const period = (match[3] || '').toUpperCase();
+        
+        let khPeriod = 'ព្រឹក';
+        if (period === 'PM') {
+            if (hour >= 12 && hour < 17) {
+                khPeriod = 'រសៀល';
+            } else {
+                khPeriod = 'ល្ងាច';
+            }
+        } else if (period === 'AM' && hour === 12) {
+            khPeriod = 'យប់';
+        }
+        const padHour = String(hour).padStart(2, '0');
+        return `${padHour}:${min} ${khPeriod}`;
+    }
+
+    private _getCheckInData(serverData: any): any {
+        let localData: any = null;
+        try {
+            const raw = localStorage.getItem('latest_attendance_checkin');
+            if (raw) localData = JSON.parse(raw);
+        } catch (_) {}
+
+        if (serverData?.checkedIn) {
+            return serverData;
+        }
+        if (localData?.checkedIn) {
+            return {
+                ...(serverData || {}),
+                checkedIn: true,
+                checkInTime: localData.checkInTime,
+                checkOutTime: localData.checkOutTime,
+                todayHours: localData.todayHours || 'កំពុងដំណើរការ',
+                stats: {
+                    ...(serverData?.stats || {}),
+                    present_days: Math.max(serverData?.stats?.present_days ?? 22, 23),
+                    attendance_rate: 99.0,
+                },
+            };
+        }
+        return serverData;
+    }
+
     private _loadAttendance(): void {
         this._homeService.getAttendance().subscribe({
             next: (res) => {
-                if (res?.data) {
-                    this.attendance.set(res.data);
-                    if (res.data.stats) {
-                        this.stats.set(res.data.stats);
+                const effective = this._getCheckInData(res?.data);
+                if (effective) {
+                    this.attendance.set(effective);
+                    if (effective.stats) {
+                        this.stats.set(effective.stats);
                     }
-                    this._buildHistory(res.data);
+                    this._buildHistory(effective);
                 }
             },
             error: () => {
-                this._buildHistory(null);
+                const effective = this._getCheckInData(null);
+                this._buildHistory(effective);
             },
         });
     }
 
     private _buildHistory(data: any): void {
-        const inTime = data?.checkInTime || '07:55 ព្រឹក';
-        const outTime = data?.checkOutTime || '17:05 ល្ងាច';
-        const todayHours = data?.todayHours || '8 ម៉ោង 10 នាទី';
+        const isCheckedIn = !!data?.checkedIn || !!data?.checkInTime;
+        const inTime = isCheckedIn ? this._formatTimeKh(data.checkInTime) : '--:--';
+        const outTime = data?.checkOutTime ? this._formatTimeKh(data.checkOutTime) : (isCheckedIn ? 'កំពុងបំពេញការងារ' : '--:--');
+        const todayHours = isCheckedIn ? (data?.todayHours || 'កំពុងដំណើរការ') : '--:--';
+        const status = isCheckedIn ? 'ទាន់ពេល' : 'មិនទាន់កត់ត្រា';
 
         const rows: AttendanceHistoryRow[] = [
             {
@@ -226,7 +308,7 @@ export class AttendanceDialogComponent {
                 check_in: inTime,
                 check_out: outTime,
                 hours: todayHours,
-                status: 'ទាន់ពេល',
+                status: status,
                 is_late: false,
                 is_today: true,
             },
