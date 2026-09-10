@@ -627,9 +627,9 @@
                                         <img [src]="att.url || '/images/placeholder/task-doc.png'" [alt]="att.name" class="w-full max-h-48 object-cover" />
                                     </div>
                                     <div *ngIf="!isImageAttachment(att)" (click)="viewFile.emit(att)"
-                                        class="flex items-center gap-2 p-2.5 rounded-xl border border-blue-200/80 dark:border-slate-700 bg-blue-50/60 dark:bg-[#152033] cursor-pointer max-w-[240px] shadow-2xs">
-                                        <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-600"></mat-icon>
-                                        <span class="text-xs text-slate-800 dark:text-slate-200 truncate font-medium">{{ att.name }}</span>
+                                        class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#152033] cursor-pointer max-w-[240px] shadow-2xs">
+                                        <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-500"></mat-icon>
+                                        <span class="text-xs text-slate-800 dark:text-slate-200 truncate">{{ att.name }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -646,16 +646,16 @@
                                     <img [src]="att.url || '/images/placeholder/task-doc.png'" [alt]="att.name" class="w-full max-h-48 object-cover" />
                                 </div>
                                 <div *ngIf="!isImageAttachment(att)" (click)="viewFile.emit(att)"
-                                    class="flex items-center gap-2 p-2.5 rounded-xl border border-blue-200 dark:border-slate-700 bg-blue-50 dark:bg-[#132036] cursor-pointer max-w-[240px] shadow-2xs">
-                                    <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-600"></mat-icon>
-                                    <span class="text-xs text-slate-800 dark:text-slate-200 truncate font-medium">{{ att.name }}</span>
+                                    class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#132036] cursor-pointer max-w-[240px] shadow-2xs">
+                                    <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-500"></mat-icon>
+                                    <span class="text-xs text-slate-800 dark:text-slate-200 truncate">{{ att.name }}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Modern Gradient Bubble -->
+                        <!-- Blue Bubble -->
                         <div *ngIf="msg.text && (msg.text !== 'បានផ្ញើឯកសារ' || !msg.attachments || msg.attachments.length === 0)"
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-xs px-4 py-2.5 text-[13.5px] leading-relaxed shadow-sm font-kantumruy select-text">
+                            class="bg-blue-600 text-white rounded-2xl rounded-tr-xs px-4 py-2.5 text-[13.5px] leading-relaxed shadow-sm font-kantumruy select-text">
                             {{ msg.text }}
                         </div>
 
@@ -687,7 +687,7 @@
 
                 <!-- Clean Empty State when no user discussion messages exist yet -->
                 <div *ngIf="!hasUserChatMessages()" class="flex flex-col items-center justify-center py-10 px-4 text-center my-auto">
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-slate-800/80 border border-blue-200/60 dark:border-slate-700/80 flex items-center justify-center text-blue-500 dark:text-blue-400 mb-3 shadow-2xs">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3 shadow-2xs">
                         <mat-icon svgIcon="mdi:chat-processing-outline" class="!w-6 !h-6"></mat-icon>
                     </div>
                     <p class="text-[13px] font-medium text-slate-700 dark:text-slate-300 font-kantumruy mb-1">មិនទាន់មានសារពិភាក្សា</p>
@@ -709,14 +709,14 @@
             </div>
 
             <!-- Bottom Chat Input Bar -->
-            <div class="p-3 sm:p-4 bg-slate-50/95 dark:bg-[#090f1e] border-t border-slate-200/90 dark:border-slate-800/80 shrink-0">
-                <div class="flex items-center gap-2 bg-white dark:bg-[#121c2e] rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700/80 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-2xs">
+            <div class="p-3 sm:p-4 bg-white dark:bg-[#090f1e] border-t border-slate-200/90 dark:border-slate-800/80 shrink-0">
+                <div class="flex items-center gap-2 bg-slate-100/90 dark:bg-[#121c2e] rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-800 focus-within:border-blue-500 focus-within:bg-white dark:focus-within:bg-[#121c2e] transition-all shadow-2xs">
                     <!-- Hidden file input -->
                     <input #chatFileInput type="file" multiple (change)="onFileInputChange($event)" class="hidden" />
 
                     <!-- '+' Button -->
                     <button type="button" (click)="chatFileInput.click()"
-                        class="w-7 h-7 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400 dark:hover:bg-blue-900/60 flex items-center justify-center transition-colors cursor-pointer"
+                        class="w-7 h-7 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
                         [matTooltip]="'ភ្ជាប់ឯកសារ ឬរូបភាព'">
                         <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5"></mat-icon>
                     </button>
@@ -729,7 +729,7 @@
 
                     <!-- Emoji Menu Button -->
                     <button type="button" [matMenuTriggerFor]="emojiMenu"
-                        class="w-7 h-7 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+                        class="w-7 h-7 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
                         [matTooltip]="'ជ្រើសរើស Emoji'">
                         <mat-icon svgIcon="mdi:emoticon-happy-outline" class="!w-4.5 !h-4.5"></mat-icon>
                     </button>
@@ -746,9 +746,9 @@
                     <!-- Send Button -->
                     <button type="button" (click)="submitChatMessage()"
                         [disabled]="!newChatMessage.trim() && pendingAttachments().length === 0"
-                        class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-800 dark:disabled:text-slate-600 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                        class="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
                         [matTooltip]="'ផ្ញើសារ'">
-                        <mat-icon svgIcon="mdi:send" class="!w-4 !h-4"></mat-icon>
+                        <mat-icon svgIcon="mdi:send" class="!w-4.5 !h-4.5"></mat-icon>
                     </button>
                 </div>
             </div>
