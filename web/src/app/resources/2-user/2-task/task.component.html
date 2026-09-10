@@ -51,65 +51,72 @@
 
             <!-- Right: Project Selector, Stacked Avatars (+2), Search Box, and Plus Button -->
             <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
-                <!-- Project Selector Dropdown Button -->
-                <button [matMenuTriggerFor]="projectMenu"
-                    class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-1.5 text-[14px] font-medium shadow-2xs transition-all cursor-pointer"
-                    [matTooltip]="'ជ្រើសរើសគម្រោង (Select Project)'">
-                    <mat-icon svgIcon="mdi:folder-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
-                    <span class="max-w-[130px] truncate">{{ getSelectedProjectLabel() }}</span>
-                    <mat-icon svgIcon="mdi:chevron-down" class="icon-size-3.5 text-slate-400"></mat-icon>
-                </button>
+                <!-- Project Filter: Circular Avatars Stack (Matching reference screenshot) -->
+                <div class="flex items-center -space-x-2 shrink-0">
+                    <!-- 1. BMS Digitech (CamCyber Logo) -->
+                    <button type="button"
+                        (click)="toggleProjectFilter(projects()[0].id)"
+                        [matTooltip]="projects()[0].name"
+                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105"
+                        [ngClass]="selectedProjectId() === projects()[0].id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10'">
+                        <img [src]="projects()[0].logo" [alt]="projects()[0].name" class="w-full h-full object-contain p-0.5" />
+                    </button>
 
-                <!-- Project Menu -->
+                    <!-- 2. WMS Digitech (Olive Green with Dashboard/Monitor Icon) -->
+                    <button type="button"
+                        (click)="toggleProjectFilter(projects()[1].id)"
+                        [matTooltip]="projects()[1].name"
+                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full bg-[#3f6212] text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 hover:scale-105"
+                        [ngClass]="selectedProjectId() === projects()[1].id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10'">
+                        <mat-icon [svgIcon]="projects()[1].icon || 'mdi:monitor-dashboard'" class="icon-size-4.5 text-white"></mat-icon>
+                    </button>
+
+                    <!-- 3. Nursing Council Digital System (Cambodian Seal / Emblem Logo) -->
+                    <button type="button"
+                        (click)="toggleProjectFilter(projects()[2].id)"
+                        [matTooltip]="projects()[2].name"
+                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105"
+                        [ngClass]="selectedProjectId() === projects()[2].id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10'">
+                        <img [src]="projects()[2].logo" [alt]="projects()[2].name" class="w-full h-full object-contain p-0.5" />
+                    </button>
+
+                    <!-- 4. +2 Badge Pill Button (Opens menu for remaining projects & All projects) -->
+                    <button type="button"
+                        [matMenuTriggerFor]="projectMenu"
+                        [matTooltip]="isOtherProjectSelected() ? ('គម្រោងបច្ចុប្បន្ន: ' + getSelectedOtherProjectName()) : 'គម្រោងផ្សេងទៀត (Other Projects)'"
+                        class="relative inline-flex h-8.5 w-8.5 items-center justify-center rounded-full text-white text-[11px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 hover:scale-105"
+                        [ngClass]="isOtherProjectSelected() ? 'bg-blue-600 ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'bg-slate-600 hover:bg-slate-500 hover:z-10'">
+                        +{{ projects().length - 3 }}
+                    </button>
+                </div>
+
+                <!-- Project Menu for +2 and All Projects -->
                 <mat-menu #projectMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
                     <div class="px-3 py-1.5 text-[12px] font-semibold text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
                         ជ្រើសរើសគម្រោង (Select Project)
                     </div>
+                    <!-- Option: All Projects -->
                     <button mat-menu-item (click)="setProjectFilter('all')" class="!text-[14px]">
                         <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5 mr-2 text-slate-500"></mat-icon>
-                        <span [class.font-bold]="selectedProjectId() === 'all'">គម្រោងទាំងអស់ (All Projects)</span>
+                        <span [class.font-bold]="selectedProjectId() === 'all'" [class.text-blue-600]="selectedProjectId() === 'all'">
+                            គម្រោងទាំងអស់ (All Projects)
+                        </span>
+                        <mat-icon *ngIf="selectedProjectId() === 'all'" svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-auto"></mat-icon>
                     </button>
-                    <button *ngFor="let p of projects().slice(1)" mat-menu-item (click)="setProjectFilter(p.id)" class="!text-[14px]">
-                        <mat-icon svgIcon="mdi:circle-medium" class="icon-size-4.5 mr-2 text-blue-500"></mat-icon>
-                        <span [class.font-bold]="selectedProjectId() === p.id">{{ p.name }}</span>
-                    </button>
-                </mat-menu>
 
-                <!-- Stacked Team Member Avatars with +2 Count Badge (Matching reference screenshot) -->
-                <div class="flex items-center -space-x-2 overflow-hidden shrink-0 cursor-pointer"
-                    [matMenuTriggerFor]="memberMenu" [matTooltip]="'តម្រងតាមសមាជិក (Filter by Member)'">
-                    <!-- 1. Robot / Bot Avatar -->
-                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs">
-                        <mat-icon svgIcon="mdi:robot-outline" class="icon-size-4.5 text-white"></mat-icon>
-                    </div>
-                    <!-- 2. DigiTech / Team Avatar -->
-                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs">
-                        <mat-icon svgIcon="mdi:domain" class="icon-size-4 text-white"></mat-icon>
-                    </div>
-                    <!-- 3. User Avatar -->
-                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600 text-white ring-2 ring-white dark:ring-slate-800 shadow-2xs overflow-hidden">
-                        <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
-                    </div>
-                    <!-- 4. +2 Badge Pill -->
-                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-600 text-white text-[11px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs">
-                        +2
-                    </div>
-                </div>
-
-                <!-- Member Selection Menu -->
-                <mat-menu #memberMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
-                    <div class="px-3 py-1.5 text-[12px] font-semibold text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-                        សមាជិកក្រុម (Team Members)
-                    </div>
-                    <button mat-menu-item (click)="setMemberFilter('all')" class="!text-[14px]">
-                        <mat-icon svgIcon="mdi:account-group" class="icon-size-4.5 mr-2 text-slate-500"></mat-icon>
-                        <span [class.font-bold]="selectedMemberFilter() === 'all'">ទាំងអស់ (All Members)</span>
-                    </button>
-                    <button *ngFor="let m of teamMembers().slice(0, 10)" mat-menu-item (click)="setMemberFilter(m.id)" class="!text-[14px]">
-                        <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[11px] mr-2 shrink-0">
-                            {{ m.name.slice(0, 1) }}
+                    <!-- List all projects -->
+                    <button *ngFor="let p of projects()" mat-menu-item (click)="setProjectFilter(p.id)" class="!text-[14px]">
+                        <div *ngIf="p.logo" class="w-5 h-5 rounded-full bg-white border border-slate-200 overflow-hidden flex items-center justify-center mr-2 shrink-0">
+                            <img [src]="p.logo" [alt]="p.name" class="w-full h-full object-contain" />
                         </div>
-                        <span [class.font-bold]="selectedMemberFilter() === m.id">{{ m.name }}</span>
+                        <div *ngIf="!p.logo" class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] mr-2 shrink-0" [ngClass]="p.bgClass || 'bg-blue-600 text-white'">
+                            <mat-icon *ngIf="p.icon" [svgIcon]="p.icon" class="!w-3.5 !h-3.5 text-white"></mat-icon>
+                            <span *ngIf="!p.icon">{{ (p.code || p.name).slice(0, 2) }}</span>
+                        </div>
+                        <span class="truncate max-w-[220px]" [class.font-bold]="selectedProjectId() === p.id" [class.text-blue-600]="selectedProjectId() === p.id">
+                            {{ p.name }}
+                        </span>
+                        <mat-icon *ngIf="selectedProjectId() === p.id" svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-auto"></mat-icon>
                     </button>
                 </mat-menu>
 
@@ -154,88 +161,95 @@
             class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 shrink-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden font-kantumruy">
             <!-- 1. All -->
             <button (click)="setStatusFilter('all')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-semibold' : 'bg-slate-100/90 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200/90 dark:border-slate-700 hover:bg-slate-200/80 dark:hover:bg-slate-700/80'">
                 <span>ទាំងអស់</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'all' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'all' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-slate-200/80 text-slate-700 dark:bg-slate-700 dark:text-slate-300'">
                     {{ counts().all }}
                 </span>
             </button>
 
             <!-- 2. New (ថ្មី) -->
             <button (click)="setStatusFilter('new')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'new' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'new' ? 'bg-blue-600 text-white border-blue-600 shadow-xs font-semibold ring-2 ring-blue-500/20' : 'bg-blue-50/80 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-900/50 hover:bg-blue-100/70 dark:hover:bg-blue-900/40'">
+                <span class="w-2 h-2 rounded-full bg-blue-500 shrink-0" *ngIf="activeStatus() !== 'new'"></span>
                 <span>ថ្មី</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'new' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'new' ? 'bg-white/20 text-white' : 'bg-blue-100/80 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200'">
                     {{ counts().new }}
                 </span>
             </button>
 
             <!-- 3. Confirmed (បញ្ជាក់) -->
             <button (click)="setStatusFilter('confirmed')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'confirmed' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'confirmed' ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs font-semibold ring-2 ring-indigo-500/20' : 'bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-900/50 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/40'">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0" *ngIf="activeStatus() !== 'confirmed'"></span>
                 <span>បញ្ជាក់</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'confirmed' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'confirmed' ? 'bg-white/20 text-white' : 'bg-indigo-100/80 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200'">
                     {{ counts().confirmed }}
                 </span>
             </button>
 
             <!-- 4. Unconfirmed (មិនបញ្ជាក់) -->
             <button (click)="setStatusFilter('unconfirmed')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'unconfirmed' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'unconfirmed' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 border-slate-800 dark:border-white shadow-xs font-semibold ring-2 ring-slate-500/20' : 'bg-slate-100/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700/60 hover:bg-slate-200/70 dark:hover:bg-slate-700/60'">
+                <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0" *ngIf="activeStatus() !== 'unconfirmed'"></span>
                 <span>មិនបញ្ជាក់</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'unconfirmed' ? 'text-white/80 dark:text-slate-900/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'unconfirmed' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-slate-200/80 text-slate-800 dark:bg-slate-700 dark:text-slate-200'">
                     {{ counts().unconfirmed }}
                 </span>
             </button>
 
             <!-- 5. In Progress (កំពុងធ្វើ) -->
             <button (click)="setStatusFilter('in_progress')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'in_progress' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'in_progress' ? 'bg-amber-500 text-white border-amber-500 shadow-xs font-semibold ring-2 ring-amber-500/20' : 'bg-amber-50/80 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-900/50 hover:bg-amber-100/70 dark:hover:bg-amber-900/40'">
+                <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0" *ngIf="activeStatus() !== 'in_progress'"></span>
                 <span>កំពុងធ្វើ</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'in_progress' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'in_progress' ? 'bg-white/20 text-white' : 'bg-amber-100/80 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200'">
                     {{ counts().in_progress }}
                 </span>
             </button>
 
             <!-- 6. In Review (ស្នើពិនិត្យ) -->
             <button (click)="setStatusFilter('in_review')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'in_review' ? 'bg-sky-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'in_review' ? 'bg-sky-500 text-white border-sky-500 shadow-xs font-semibold ring-2 ring-sky-500/20' : 'bg-sky-50/80 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-900/50 hover:bg-sky-100/70 dark:hover:bg-sky-900/40'">
+                <span class="w-2 h-2 rounded-full bg-sky-500 shrink-0" *ngIf="activeStatus() !== 'in_review'"></span>
                 <span>ស្នើពិនិត្យ</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'in_review' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'in_review' ? 'bg-white/20 text-white' : 'bg-sky-100/80 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200'">
                     {{ counts().in_review }}
                 </span>
             </button>
 
             <!-- 7. Reopened (បើកឡើងវិញ) -->
             <button (click)="setStatusFilter('reopened')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'reopened' ? 'bg-rose-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'reopened' ? 'bg-rose-600 text-white border-rose-600 shadow-xs font-semibold ring-2 ring-rose-500/20' : 'bg-rose-50/80 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-900/50 hover:bg-rose-100/70 dark:hover:bg-rose-900/40'">
+                <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0" *ngIf="activeStatus() !== 'reopened'"></span>
                 <span>បើកឡើងវិញ</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'reopened' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'reopened' ? 'bg-white/20 text-white' : 'bg-rose-100/80 text-rose-800 dark:bg-rose-900/60 dark:text-rose-200'">
                     {{ counts().reopened }}
                 </span>
             </button>
 
             <!-- 8. Done (បញ្ចប់) -->
             <button (click)="setStatusFilter('done')"
-                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                [ngClass]="activeStatus() === 'done' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'">
+                class="px-3.5 py-1.5 rounded-xl text-[13.5px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs"
+                [ngClass]="activeStatus() === 'done' ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs font-semibold ring-2 ring-emerald-500/20' : 'bg-emerald-50/80 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-900/50 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/40'">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0" *ngIf="activeStatus() !== 'done'"></span>
                 <span>បញ្ចប់</span>
-                <span class="text-[12px] font-normal"
-                    [ngClass]="activeStatus() === 'done' ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'">
+                <span class="text-[12px] font-bold px-1.5 py-0.2 rounded-full"
+                    [ngClass]="activeStatus() === 'done' ? 'bg-white/20 text-white' : 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200'">
                     {{ counts().done }}
                 </span>
             </button>
@@ -274,29 +288,8 @@
         <div *ngIf="!loading() && viewMode() === 'list' && tasks().length > 0"
             class="flex-1 min-h-0 flex flex-col overflow-hidden">
 
-            <!-- Table Header Bar -->
-            <div class="sticky top-0 z-10 flex items-center justify-between px-3.5 py-2.5 mb-1.5 bg-slate-50/90 dark:bg-slate-900/60 backdrop-blur-xs rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-[12.5px] font-semibold text-slate-500 dark:text-slate-400 shrink-0 select-none font-kantumruy">
-                <!-- Left Header: Priority, Code & Title, Reporter -->
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <span class="w-6 text-center shrink-0" matTooltip="អាទិភាព (Priority)">អាទិភាព</span>
-                    <span class="font-mono text-center w-24 shrink-0">កូដ</span>
-                    <span class="flex-1 min-w-0">កិច្ចការ / ចំណងជើង</span>
-                    <span class="hidden sm:inline-block w-8 text-center shrink-0" matTooltip="អ្នកបង្កើត (Reporter)">អ្នកបង្កើត</span>
-                </div>
-
-                <!-- Right Header: Due Date, Chat/Files, Assignee, Status, Relative Time, Actions -->
-                <div class="flex items-center gap-3 shrink-0">
-                    <span class="hidden md:inline-block w-28 text-left shrink-0">កាលបរិច្ឆេទ</span>
-                    <span class="hidden sm:inline-block w-14 text-center shrink-0">ពិភាក្សា</span>
-                    <span class="w-10 text-center shrink-0">អ្នកទទួល</span>
-                    <span class="w-28 text-center shrink-0">ស្ថានភាព</span>
-                    <span class="text-[12.5px] text-right w-16 shrink-0">បង្កើត</span>
-                    <span class="w-7 shrink-0"></span>
-                </div>
-            </div>
-
-            <!-- Table Rows List -->
-            <div class="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
+            <!-- Table Rows List (Scrollbar hidden per request) -->
+            <div class="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden table-scroll-container">
                 <div *ngFor="let task of tasks(); trackBy: trackByTaskId" (click)="openTaskDetails(task)"
                     class="group py-3.5 px-3.5 hover:bg-slate-50/90 dark:hover:bg-slate-700/30 rounded-xl cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3.5">
                     <!-- Left Info: Priority Icon, Equal sign, Code, Title -->
@@ -444,25 +437,26 @@
             (wheel)="onKanbanWheel($event, kanbanContainer)"
             class="kanban-scroll-container flex-1 min-h-0 flex gap-4 overflow-x-auto overflow-y-hidden pb-1 items-stretch w-full min-w-0 select-none font-kantumruy">
             <ng-container *ngFor="let col of kanbanColumns">
-                <div class="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 p-3 w-80 min-w-[295px] max-w-[295px] shrink-0 flex flex-col h-full max-h-full min-h-0 shadow-2xs">
+                <div class="rounded-2xl border p-3 w-80 min-w-[295px] max-w-[295px] shrink-0 flex flex-col h-full max-h-full min-h-0 shadow-2xs transition-colors duration-150"
+                    [ngClass]="[col.panelBg, col.panelBorder]">
                     <!-- Top Accent Color Bar -->
-                    <div class="h-1 w-full rounded-full mb-2.5" [ngClass]="col.barColor"></div>
+                    <div class="h-1.5 w-full rounded-full mb-2.5 shadow-2xs" [ngClass]="col.barColor"></div>
 
                     <!-- Column Header -->
-                    <div class="flex items-center justify-between pb-2 px-1 border-b border-slate-200/70 dark:border-slate-700/60 shrink-0">
+                    <div class="flex items-center justify-between pb-2.5 px-1 border-b border-black/5 dark:border-white/5 shrink-0">
                         <div class="flex items-center gap-2 min-w-0">
-                            <mat-icon [svgIcon]="col.icon" class="!w-4.5 !h-4.5 shrink-0 text-slate-500 dark:text-slate-400"></mat-icon>
-                            <h3 class="text-[15px] font-semibold text-slate-800 dark:text-slate-200 truncate">
+                            <mat-icon [svgIcon]="col.icon" class="!w-4.5 !h-4.5 shrink-0" [ngClass]="col.textColor"></mat-icon>
+                            <h3 class="text-[15px] font-bold text-slate-800 dark:text-slate-100 truncate">
                                 {{ col.label }}
                             </h3>
-                            <span class="text-[11.5px] font-bold px-2 py-0.5 rounded-full" [ngClass]="col.badgeClass">
+                            <span class="text-[11.5px] font-bold px-2 py-0.5 rounded-full shadow-2xs" [ngClass]="col.badgeClass">
                                 {{ getTasksByColumn(col.key).length }}
                             </span>
                         </div>
 
                         <!-- Quick Add Button for this Column -->
                         <button (click)="openCreateModal(col.key)" [matTooltip]="'បង្កើតការងារថ្មីក្នុង ' + col.label"
-                            class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                            class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800 transition-colors cursor-pointer shadow-2xs">
                             <mat-icon svgIcon="mdi:plus" class="!w-4 !h-4"></mat-icon>
                         </button>
                     </div>
@@ -474,7 +468,8 @@
                         <div *ngFor="let task of getTasksByColumn(col.key); trackBy: trackByTaskId" cdkDrag
                             [cdkDragData]="task" (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()"
                             (click)="openTaskDetails(task)"
-                            class="group relative rounded-2xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800/95 p-3.5 shadow-2xs hover:shadow-md hover:border-blue-400/80 dark:hover:border-blue-500/80 cursor-grab active:cursor-grabbing transition-all duration-150 select-none flex flex-col justify-between gap-2.5">
+                            class="group relative rounded-2xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800/95 p-3.5 shadow-2xs hover:shadow-md hover:border-blue-400/80 dark:hover:border-blue-500/80 cursor-grab active:cursor-grabbing transition-all duration-150 select-none flex flex-col justify-between gap-2.5"
+                            [ngClass]="col.cardBorder">
 
                             <!-- CDK drag placeholder -->
                             <div *cdkDragPlaceholder
@@ -488,7 +483,7 @@
                                     <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
                                         [matTooltip]="getTaskTypeInfo(task.task_type).label">
                                         <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-4 !h-4"
-                                            [ngClass]="getTaskTypeInfo(task.task_type).iconColor"></mat-icon>
+                                             [ngClass]="getTaskTypeInfo(task.task_type).iconColor"></mat-icon>
                                     </div>
                                     <!-- Task Code -->
                                     <span class="font-mono text-[12px] font-semibold text-slate-500 dark:text-slate-400 truncate">
@@ -535,18 +530,18 @@
 
                                     <!-- Comments Count -->
                                     <span *ngIf="(task.comments_count || 0) > 0"
-                                        class="inline-flex items-center gap-0.5 text-slate-400 hover:text-blue-500 transition-colors"
+                                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/60 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-900/50 transition-colors"
                                         [matTooltip]="(task.comments_count || 0) + ' មតិយោបល់'">
-                                        <mat-icon svgIcon="mdi:comment-outline" class="!w-3.5 !h-3.5"></mat-icon>
-                                        <span class="text-[11.5px] font-medium">{{ task.comments_count }}</span>
+                                        <mat-icon svgIcon="mdi:comment-outline" class="!w-3 !h-3"></mat-icon>
+                                        <span>{{ task.comments_count }}</span>
                                     </span>
 
                                     <!-- Attachments Count -->
                                     <span *ngIf="(task.attachments_count || 0) > 0"
-                                        class="inline-flex items-center gap-0.5 text-slate-400"
+                                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-900/50"
                                         [matTooltip]="(task.attachments_count || 0) + ' ឯកសារភ្ជាប់'">
-                                        <mat-icon svgIcon="mdi:paperclip" class="!w-3.5 !h-3.5"></mat-icon>
-                                        <span class="text-[11.5px] font-medium">{{ task.attachments_count }}</span>
+                                        <mat-icon svgIcon="mdi:paperclip" class="!w-3 !h-3"></mat-icon>
+                                        <span>{{ task.attachments_count }}</span>
                                     </span>
                                 </div>
 
@@ -582,15 +577,16 @@
                             </div>
                         </div>
 
-                        <!-- Modern Empty Drop Zone -->
+                        <!-- Modern Empty Drop Zone styled with column theme -->
                         <div *ngIf="getTasksByColumn(col.key).length === 0"
                             (click)="openCreateModal(col.key)"
-                            class="group py-9 px-4 text-slate-400 text-xs border border-dashed border-slate-200 dark:border-slate-700/80 hover:border-blue-400/80 dark:hover:border-blue-500/80 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-colors bg-white/40 dark:bg-slate-800/30">
-                            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 group-hover:text-blue-600 flex items-center justify-center transition-colors">
-                                <mat-icon svgIcon="mdi:tray-arrow-down" class="!w-4 !h-4 text-slate-400 group-hover:text-blue-500"></mat-icon>
+                            class="group py-8 px-4 text-xs border border-dashed rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all duration-150 bg-white/40 dark:bg-slate-800/30 shadow-2xs"
+                            [ngClass]="col.emptyBorder">
+                            <div class="w-8 h-8 rounded-full bg-white/90 dark:bg-slate-800 flex items-center justify-center shadow-2xs transition-transform group-hover:scale-110">
+                                <mat-icon svgIcon="mdi:plus" class="!w-4 !h-4"></mat-icon>
                             </div>
-                            <span class="font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">ទម្លាក់ការងារនៅទីនេះ</span>
-                            <span class="text-[11px] text-slate-400 font-normal">ឬចុច + ដើម្បីបន្ថែម</span>
+                            <span class="font-semibold">គ្មានការងារនៅឡើយ</span>
+                            <span class="text-[11px] opacity-75 font-normal">+ បង្កើតការងារថ្មី</span>
                         </div>
                     </div>
                 </div>

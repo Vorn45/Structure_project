@@ -73,6 +73,16 @@
                     <span class="font-mono text-[14px] font-bold text-slate-800 dark:text-slate-100 select-all truncate">
                         {{ task()?.code || ('#WMS-' + task()?.id) }}
                     </span>
+
+                    <!-- Status Pill in Drawer Header -->
+                    <button [matMenuTriggerFor]="detailsStatusMenu"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border cursor-pointer transition-all shadow-2xs"
+                        [ngClass]="getStatusPillClass(task()?.status)">
+                        <mat-icon *ngIf="isStatusDone(task()?.status)" svgIcon="mdi:check" class="!w-3 !h-3"></mat-icon>
+                        <span *ngIf="!isStatusDone(task()?.status)" class="w-1.5 h-1.5 rounded-full shrink-0" [ngClass]="getStatusDot(task()?.status)"></span>
+                        <span>{{ getStatusLabel(task()?.status) }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="!w-3 !h-3 opacity-70"></mat-icon>
+                    </button>
                 </div>
 
                 <div class="flex items-center gap-1 shrink-0">
@@ -529,38 +539,61 @@
             [class.hidden]="mobileTab() !== 'chat'"
             [class.md:flex]="true">
 
-            <!-- Right Pane Header -->
-            <div class="h-14 px-5 border-b border-slate-200/90 dark:border-slate-800/60 bg-white dark:bg-[#090f1e] flex items-center justify-center shrink-0 relative">
-                <div class="absolute left-4 md:hidden">
-                    <button (click)="mobileTab.set('details')" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+            <!-- Right Pane Header (Colored Modern Header Bar) -->
+            <div class="h-14 px-5 border-b border-blue-100/80 dark:border-slate-800/80 bg-gradient-to-r from-blue-50/80 via-slate-50 to-indigo-50/60 dark:from-[#0d1627] dark:via-[#090f1e] dark:to-[#11192e] flex items-center justify-between shrink-0 relative">
+                <div class="flex items-center gap-2.5">
+                    <button (click)="mobileTab.set('details')" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white md:hidden">
                         <mat-icon svgIcon="mdi:arrow-left" class="!w-5 !h-5"></mat-icon>
                     </button>
+                    <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                        <mat-icon svgIcon="mdi:forum-outline" class="!w-4.5 !h-4.5 text-white"></mat-icon>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-[14.5px] font-bold text-slate-800 dark:text-slate-100 font-kantumruy">
+                                បន្ទប់ពិភាក្សា
+                            </h3>
+                            <span *ngIf="messages().length > 0" class="px-2 py-0.2 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
+                                {{ messages().length }}
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-kantumruy">ការពិភាក្សា & សកម្មភាពការងារ</p>
+                    </div>
                 </div>
 
-                <!-- Centered 'ជជែក' (Chat) Header Title -->
-                <h3 class="text-[15px] font-semibold text-slate-600 dark:text-slate-300 font-kantumruy">
-                    ជជែក
-                </h3>
+                <!-- Right Side: Current Status Badge in Chat Header -->
+                <div class="flex items-center gap-1">
+                    <button [matMenuTriggerFor]="detailsStatusMenu"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border cursor-pointer transition-all shadow-2xs"
+                        [ngClass]="getStatusPillClass(task()?.status)"
+                        [matTooltip]="'ប្តូរស្ថានភាពការងារ'">
+                        <span class="w-1.5 h-1.5 rounded-full" [ngClass]="getStatusDot(task()?.status)"></span>
+                        <span>{{ getStatusLabel(task()?.status) }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="!w-3 !h-3 opacity-70"></mat-icon>
+                    </button>
+                </div>
             </div>
 
             <!-- Chat Messages Timeline (Dedicated Scroll Area) -->
-            <div class="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 font-kantumruy">
+            <div class="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 font-kantumruy bg-slate-50/70 dark:bg-[#070d19]">
                 <!-- Centered Date Badge -->
                 <div class="flex justify-center my-1">
-                    <span class="px-3 py-1 rounded-full text-xs bg-white dark:bg-[#162338] text-slate-600 dark:text-slate-400 border border-slate-200/90 dark:border-slate-800/80 font-kantumruy shadow-2xs">
-                        {{ getKhmerDateLabel(task()?.created_at) }}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-kantumruy shadow-2xs">
+                        <mat-icon svgIcon="mdi:calendar-outline" class="!w-3.5 !h-3.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>{{ getKhmerDateLabel(task()?.created_at) }}</span>
                     </span>
                 </div>
 
                 <!-- Messages & Events Timeline Stream -->
                 <ng-container *ngFor="let msg of messages()">
-                    <!-- System Activity Event Row (Clean horizontal line) -->
+                    <!-- System Activity Event Row (Info Banner Card) -->
                     <div *ngIf="msg.is_system"
-                        class="flex items-center justify-between gap-2 py-1.5 px-1 text-[13px] text-slate-700 dark:text-slate-300 font-medium border-b border-slate-200/80 dark:border-slate-800/80">
-                        <div class="truncate flex-1 pr-2 leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
-                            {{ msg.text }}
+                        class="flex items-center justify-between gap-2.5 py-2 px-3 text-[12.5px] rounded-xl bg-blue-50/65 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/40 text-blue-950 dark:text-blue-200 font-medium shadow-2xs">
+                        <div class="flex items-center gap-2 truncate">
+                            <mat-icon svgIcon="mdi:information-outline" class="!w-4 !h-4 text-blue-600 dark:text-blue-400 shrink-0"></mat-icon>
+                            <span class="truncate leading-relaxed">{{ msg.text }}</span>
                         </div>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium shrink-0">{{ msg.time }}</span>
+                        <span class="text-[11px] text-blue-600/80 dark:text-blue-400/80 font-medium shrink-0">{{ msg.time }}</span>
                     </div>
 
                     <!-- Left / Incoming Chat Bubble -->
@@ -575,15 +608,15 @@
                         </div>
 
                         <div class="space-y-1 max-w-[calc(100%-2.5rem)]">
-                            <div class="bg-white dark:bg-[#152033] border border-slate-200/90 dark:border-slate-700/60 rounded-2xl rounded-tl-xs px-3.5 py-2.5 shadow-xs space-y-1">
-                                <p class="text-blue-600 dark:text-blue-400 font-semibold text-[12px]">{{ msg.sender_name }}</p>
+                            <div class="bg-white dark:bg-[#141f33] border border-blue-100/90 dark:border-slate-700/70 rounded-2xl rounded-tl-xs px-4 py-2.5 shadow-2xs space-y-1 border-l-[3.5px] border-l-blue-500">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="text-blue-600 dark:text-blue-400 font-bold text-[12.5px]">{{ msg.sender_name }}</p>
+                                    <span class="text-[10px] text-slate-400">{{ msg.time }}</span>
+                                </div>
                                 <p *ngIf="msg.text && (msg.text !== 'បានផ្ញើឯកសារ' || !msg.attachments || msg.attachments.length === 0)"
                                     class="text-slate-800 dark:text-slate-200 text-[13.5px] leading-relaxed select-text whitespace-pre-line font-kantumruy">
                                     {{ msg.text }}
                                 </p>
-                                <div class="flex justify-end pt-0.5">
-                                    <span class="text-[10px] text-slate-400">{{ msg.time }}</span>
-                                </div>
                             </div>
 
                             <!-- Image Attachments inside incoming message -->
@@ -594,9 +627,9 @@
                                         <img [src]="att.url || '/images/placeholder/task-doc.png'" [alt]="att.name" class="w-full max-h-48 object-cover" />
                                     </div>
                                     <div *ngIf="!isImageAttachment(att)" (click)="viewFile.emit(att)"
-                                        class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#152033] cursor-pointer max-w-[240px] shadow-2xs">
-                                        <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-500"></mat-icon>
-                                        <span class="text-xs text-slate-800 dark:text-slate-200 truncate">{{ att.name }}</span>
+                                        class="flex items-center gap-2 p-2.5 rounded-xl border border-blue-200/80 dark:border-slate-700 bg-blue-50/60 dark:bg-[#152033] cursor-pointer max-w-[240px] shadow-2xs">
+                                        <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-600"></mat-icon>
+                                        <span class="text-xs text-slate-800 dark:text-slate-200 truncate font-medium">{{ att.name }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -613,16 +646,16 @@
                                     <img [src]="att.url || '/images/placeholder/task-doc.png'" [alt]="att.name" class="w-full max-h-48 object-cover" />
                                 </div>
                                 <div *ngIf="!isImageAttachment(att)" (click)="viewFile.emit(att)"
-                                    class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#132036] cursor-pointer max-w-[240px] shadow-2xs">
-                                    <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-500"></mat-icon>
-                                    <span class="text-xs text-slate-800 dark:text-slate-200 truncate">{{ att.name }}</span>
+                                    class="flex items-center gap-2 p-2.5 rounded-xl border border-blue-200 dark:border-slate-700 bg-blue-50 dark:bg-[#132036] cursor-pointer max-w-[240px] shadow-2xs">
+                                    <mat-icon [svgIcon]="getFileIcon(att.name, att.type)" class="!w-4 !h-4 text-blue-600"></mat-icon>
+                                    <span class="text-xs text-slate-800 dark:text-slate-200 truncate font-medium">{{ att.name }}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Blue Bubble -->
+                        <!-- Modern Gradient Bubble -->
                         <div *ngIf="msg.text && (msg.text !== 'បានផ្ញើឯកសារ' || !msg.attachments || msg.attachments.length === 0)"
-                            class="bg-blue-600 text-white rounded-2xl rounded-tr-xs px-4 py-2.5 text-[13.5px] leading-relaxed shadow-sm font-kantumruy select-text">
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-xs px-4 py-2.5 text-[13.5px] leading-relaxed shadow-sm font-kantumruy select-text">
                             {{ msg.text }}
                         </div>
 
@@ -654,7 +687,7 @@
 
                 <!-- Clean Empty State when no user discussion messages exist yet -->
                 <div *ngIf="!hasUserChatMessages()" class="flex flex-col items-center justify-center py-10 px-4 text-center my-auto">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3 shadow-2xs">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-slate-800/80 border border-blue-200/60 dark:border-slate-700/80 flex items-center justify-center text-blue-500 dark:text-blue-400 mb-3 shadow-2xs">
                         <mat-icon svgIcon="mdi:chat-processing-outline" class="!w-6 !h-6"></mat-icon>
                     </div>
                     <p class="text-[13px] font-medium text-slate-700 dark:text-slate-300 font-kantumruy mb-1">មិនទាន់មានសារពិភាក្សា</p>
@@ -676,14 +709,14 @@
             </div>
 
             <!-- Bottom Chat Input Bar -->
-            <div class="p-3 sm:p-4 bg-white dark:bg-[#090f1e] border-t border-slate-200/90 dark:border-slate-800/80 shrink-0">
-                <div class="flex items-center gap-2 bg-slate-100/90 dark:bg-[#121c2e] rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-800 focus-within:border-blue-500 focus-within:bg-white dark:focus-within:bg-[#121c2e] transition-all shadow-2xs">
+            <div class="p-3 sm:p-4 bg-slate-50/95 dark:bg-[#090f1e] border-t border-slate-200/90 dark:border-slate-800/80 shrink-0">
+                <div class="flex items-center gap-2 bg-white dark:bg-[#121c2e] rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700/80 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-2xs">
                     <!-- Hidden file input -->
                     <input #chatFileInput type="file" multiple (change)="onFileInputChange($event)" class="hidden" />
 
                     <!-- '+' Button -->
                     <button type="button" (click)="chatFileInput.click()"
-                        class="w-7 h-7 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+                        class="w-7 h-7 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400 dark:hover:bg-blue-900/60 flex items-center justify-center transition-colors cursor-pointer"
                         [matTooltip]="'ភ្ជាប់ឯកសារ ឬរូបភាព'">
                         <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5"></mat-icon>
                     </button>
@@ -696,7 +729,7 @@
 
                     <!-- Emoji Menu Button -->
                     <button type="button" [matMenuTriggerFor]="emojiMenu"
-                        class="w-7 h-7 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+                        class="w-7 h-7 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
                         [matTooltip]="'ជ្រើសរើស Emoji'">
                         <mat-icon svgIcon="mdi:emoticon-happy-outline" class="!w-4.5 !h-4.5"></mat-icon>
                     </button>
@@ -713,9 +746,9 @@
                     <!-- Send Button -->
                     <button type="button" (click)="submitChatMessage()"
                         [disabled]="!newChatMessage.trim() && pendingAttachments().length === 0"
-                        class="w-7 h-7 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-40 flex items-center justify-center transition-colors cursor-pointer"
+                        class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-800 dark:disabled:text-slate-600 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
                         [matTooltip]="'ផ្ញើសារ'">
-                        <mat-icon svgIcon="mdi:send" class="!w-4.5 !h-4.5"></mat-icon>
+                        <mat-icon svgIcon="mdi:send" class="!w-4 !h-4"></mat-icon>
                     </button>
                 </div>
             </div>
