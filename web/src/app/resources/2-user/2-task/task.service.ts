@@ -20,7 +20,7 @@ export type TaskStatus =
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface TaskItem {
-    id: number;
+    id: number | string;
     code?: string;
     title: string;
     description: string;
@@ -131,7 +131,7 @@ export class UserTaskService {
         });
     }
 
-    getTaskById(id: number): Observable<{ status_code: number; data: TaskItem }> {
+    getTaskById(id: number | string): Observable<{ status_code: number; data: TaskItem }> {
         return this._http.get<{ status_code: number; data: TaskItem }>(`${this.baseUrl}/${id}`, {
             withCredentials: true,
         });
@@ -143,25 +143,25 @@ export class UserTaskService {
         });
     }
 
-    updateTask(id: number, payload: Partial<TaskItem>): Observable<{ status_code: number; data: TaskItem }> {
+    updateTask(id: number | string, payload: Partial<TaskItem>): Observable<{ status_code: number; data: TaskItem }> {
         return this._http.patch<{ status_code: number; data: TaskItem }>(`${this.baseUrl}/${id}`, payload, {
             withCredentials: true,
         });
     }
 
-    deleteTask(id: number): Observable<{ status_code: number; message: string }> {
+    deleteTask(id: number | string): Observable<{ status_code: number; message: string }> {
         return this._http.delete<{ status_code: number; message: string }>(`${this.baseUrl}/${id}`, {
             withCredentials: true,
         });
     }
 
-    getTaskComments(id: number): Observable<{ status_code: number; data: { comments: any[] } }> {
+    getTaskComments(id: number | string): Observable<{ status_code: number; data: { comments: any[] } }> {
         return this._http.get<{ status_code: number; data: { comments: any[] } }>(`${this.baseUrl}/${id}/comments`, {
             withCredentials: true,
         });
     }
 
-    createTaskComment(id: number, payload: { text: string; attachments?: any[] }): Observable<{ status_code: number; data: any }> {
+    createTaskComment(id: number | string, payload: { text: string; attachments?: any[] }): Observable<{ status_code: number; data: any }> {
         return this._http.post<{ status_code: number; data: any }>(`${this.baseUrl}/${id}/comments`, payload, {
             withCredentials: true,
         });

@@ -89,6 +89,9 @@ export class CreateTaskDto {
 
     @IsOptional()
     reporter?: any;
+
+    @IsOptional()
+    attachments?: any[];
 }
 
 export class UpdateTaskDto {

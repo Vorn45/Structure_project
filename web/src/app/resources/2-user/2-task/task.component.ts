@@ -406,7 +406,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     chatMessages = signal<TaskChatMessage[]>([]);
     previewImageModal = signal<string | null>(null);
     previewFileModal = signal<TaskAttachment | null>(null);
-    private taskChatHistoryMap = new Map<number, TaskChatMessage[]>();
+    private taskChatHistoryMap = new Map<number | string, TaskChatMessage[]>();
 
     // Team Members Pool for Multi-Assignee Selection (Loaded dynamically from DB)
     teamMembers = signal<TaskMember[]>([
@@ -1232,7 +1232,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         setTimeout(() => this.isDragging.set(false), 80);
     }
 
-    trackByTaskId(_index: number, task: TaskItem): number {
+    trackByTaskId(_index: number, task: TaskItem): number | string {
         return task.id;
     }
 
@@ -1305,6 +1305,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                         project_id: result.project_id || (this.selectedProjectId() !== 'all' ? this.selectedProjectId() : 'bms-digitech'),
                         project_name: result.project_name || (currentProj?.name || 'BMS Digitech'),
                         description: result.description || result.title,
+                        attachments: result.attachments || [],
+                        attachments_count: result.attachments_count || (result.attachments?.length || 0),
                     } as any)
                     .subscribe({
                         next: () => this.loadTasks(),
@@ -1489,7 +1491,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         return `${months} ខែមុន`;
     }
 
-    appendChatMessage(taskId: number, message: TaskChatMessage): void {
+    appendChatMessage(taskId: number | string, message: TaskChatMessage): void {
         this.chatMessages.update((msgs) => {
             const updated = [...msgs, message];
             this.taskChatHistoryMap.set(taskId, updated);

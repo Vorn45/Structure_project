@@ -1955,7 +1955,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                     due_date: result.due_date || '15/09/2026',
                     due_days_left: 7,
                     comments_count: 0,
-                    attachments_count: 0,
+                    attachments_count: result.attachments_count || (result.attachments?.length || 0),
                     reporter: {
                         id: 1,
                         name: reporterName,

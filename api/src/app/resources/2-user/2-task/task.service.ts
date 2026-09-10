@@ -51,6 +51,7 @@ export interface TaskItem {
         role?: string;
         email?: string;
     }>;
+    attachments?: Array<{ name: string; size: string; url?: string; type?: string; isImage?: boolean; textContent?: string }>;
     created_at: string;
     updated_at: string;
 }
@@ -968,6 +969,8 @@ export class TaskService {
             };
         }
 
+        const initialAttachments = (dto.attachments && Array.isArray(dto.attachments)) ? dto.attachments : [];
+
         const newTask: TaskItem = {
             id: Date.now(),
             code: formattedCode,
@@ -979,7 +982,7 @@ export class TaskService {
             priority: dto.priority || TaskPriorityEnum.MEDIUM,
             progress: 0,
             comments_count: 0,
-            attachments_count: 0,
+            attachments_count: initialAttachments.length,
             due_date: dto.due_date || null,
             project_id: dto.project_id || (prefix === 'WMS' ? 'wms-digitech' : 'bms-digitech'),
             project_name: prefix === 'BMS' ? 'BMS Digitech' : 'WMS Digitech',
@@ -988,15 +991,39 @@ export class TaskService {
             assignees: assigneesList,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            attachments: initialAttachments,
         };
 
         this.tasks.unshift(newTask);
+
+        if (initialAttachments.length > 0) {
+            const comments = this.ensureTaskComments(newTask.id);
+            comments.push({
+                id: Date.now() + 1,
+                sender_id: user?.id || taskReporter?.id || 1,
+                sender_name: taskReporter?.name || user?.name_kh || user?.name_en || 'អ្នកប្រើប្រាស់',
+                sender_avatar: taskReporter?.avatar || (user?.avatar as any)?.uri || '/images/placeholder/avatar.jpg',
+                text: 'បានភ្ជាប់ឯកសារពេលបង្កើតការងារថ្មី',
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                is_self: true,
+                is_system: false,
+                attachments: initialAttachments,
+                created_at: new Date().toISOString(),
+                seen_by: [],
+            });
+            this.taskComments.set(newTask.id, comments);
+            newTask.comments_count = comments.length;
+        }
+
         this.saveStore();
 
         // Dispatch Telegram Notification (Exact PMS format)
         const creatorName = taskReporter?.name || user?.name_kh || user?.name_en || 'អ្នកប្រើប្រាស់';
         const taskCode = newTask.code || `#${prefix}-0000`;
-        const firstLine = `📌 ${creatorName} បានបង្កើតការងារថ្មី ${taskCode}`;
+        let firstLine = `📌 ${creatorName} បានបង្កើតការងារថ្មី ${taskCode}`;
+        if (initialAttachments.length > 0) {
+            firstLine += `\n📎 ឯកសារភ្ជាប់ (${initialAttachments.length})`;
+        }
         const targetIds = [user?.id, ...assigneesList.map((a) => a.id)].filter(Boolean) as number[];
         this.sendTelegramNotification(firstLine, newTask, targetIds);
 

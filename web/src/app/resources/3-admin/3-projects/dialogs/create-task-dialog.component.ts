@@ -12,7 +12,7 @@ import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, MAT_NATIVE_DATE_FOR
 import { MatInputModule } from '@angular/material/input';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
-import { TASK_TYPES_LIST, TaskTypeOption } from 'app/resources/2-user/2-task/models/task.types';
+import { TASK_TYPES_LIST, TaskAttachment, TaskTypeOption } from 'app/resources/2-user/2-task/models/task.types';
 import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
 
 export interface CreateTaskDialogData {
@@ -63,25 +63,18 @@ export interface TeamMember {
         { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
     ],
     template: `
-        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[15px] font-normal relative overflow-hidden">
+        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[15px] font-normal relative overflow-visible">
             
-            <!-- Clean Header (Human-Designed SaaS Layout) -->
+            <!-- Clean Header (Centered like Profile Dialog) -->
             <div mat-dialog-title
-                class="w-full flex items-center justify-between min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 px-5 font-kantumruy bg-white dark:bg-slate-900 relative shrink-0">
-                <h2 class="text-[17px] font-semibold text-slate-900 dark:text-white leading-tight">
+                class="w-full relative flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 px-4 font-kantumruy bg-white dark:bg-slate-900 shrink-0">
+                <span class="w-full text-center text-[18px] sm:text-[20px] font-semibold font-kantumruy text-slate-800 dark:text-slate-100">
                     បង្កើតការងារថ្មី
-                </h2>
-
-                <!-- Close Button -->
-                <button
-                    type="button"
-                    (click)="cancel()"
-                    class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
-                    matTooltip="បិទ"
-                >
-                    <mat-icon svgIcon="mdi:close" class="icon-size-4.5"></mat-icon>
-                </button>
+                </span>
             </div>
+
+            <!-- Standard Side Drawer Close Button (Exact Profile Dialog Style) -->
+            <shared-side-dialog-close-button [isReturn]="false" [closeOnClick]="false" (buttonClick)="cancel()"></shared-side-dialog-close-button>
 
             <!-- Inline Success Toast Notice for Continuous Creation -->
             <div *ngIf="successNotice()" class="mx-5 mt-3 px-4 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-[14px] flex items-center justify-between shadow-2xs">
@@ -524,6 +517,110 @@ export interface TeamMember {
                         ></textarea>
                     </div>
 
+                    <!-- 8. Attachments Section (ឯកសារភ្ជាប់) -->
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <label class="block font-medium text-slate-800 dark:text-slate-200 text-[14px]">
+                                    ឯកសារភ្ជាប់
+                                </label>
+                                <span *ngIf="attachedFiles().length > 0" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60">
+                                    {{ attachedFiles().length }} ឯកសារ
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                (click)="fileInput.click()"
+                                class="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
+                            >
+                                <mat-icon svgIcon="mdi:paperclip" class="!w-3.5 !h-3.5"></mat-icon>
+                                <span>+ ភ្ជាប់ឯកសារ</span>
+                            </button>
+                            <input #fileInput type="file" multiple (change)="onFileInputChange($event)" class="hidden" />
+                        </div>
+
+                        <!-- Dropzone when empty -->
+                        <div
+                            *ngIf="attachedFiles().length === 0"
+                            (click)="fileInput.click()"
+                            (dragover)="onDragOver($event)"
+                            (dragenter)="onDragEnter($event)"
+                            (dragleave)="onDragLeave($event)"
+                            (drop)="onFileDrop($event)"
+                            class="py-4 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/20 dark:hover:bg-blue-950/20 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 group select-none shadow-2xs"
+                            [class.border-blue-500]="isDraggingOver()"
+                            [class.bg-blue-50/40]="isDraggingOver()"
+                        >
+                            <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 transition-colors">
+                                <mat-icon svgIcon="mdi:cloud-upload-outline" class="!w-5 !h-5"></mat-icon>
+                            </div>
+                            <div class="text-[13px] text-slate-600 dark:text-slate-300 font-medium">
+                                ចុច ឬទម្លាក់ឯកសារនៅទីនេះ
+                            </div>
+                            <div class="text-[11px] text-slate-400 dark:text-slate-500">
+                                រូបភាព (PNG, JPG), PDF, Word, Excel ឬឯកសារផ្សេងៗ
+                            </div>
+                        </div>
+
+                        <!-- Attached Files Preview Grid / List -->
+                        <div
+                            *ngIf="attachedFiles().length > 0"
+                            (dragover)="onDragOver($event)"
+                            (dragenter)="onDragEnter($event)"
+                            (dragleave)="onDragLeave($event)"
+                            (drop)="onFileDrop($event)"
+                            class="space-y-2 p-2.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-700/80 bg-slate-50/40 dark:bg-slate-900/30"
+                            [class.border-blue-500]="isDraggingOver()"
+                        >
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div
+                                    *ngFor="let file of attachedFiles(); let idx = index"
+                                    class="flex items-center gap-2.5 p-2 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-2xs group relative"
+                                >
+                                    <!-- Image thumbnail or file icon -->
+                                    <div class="w-9 h-9 rounded-lg shrink-0 overflow-hidden flex items-center justify-center border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
+                                        <img *ngIf="isImageAttachment(file) && file.url" [src]="file.url" [alt]="file.name" class="w-full h-full object-cover" />
+                                        <div *ngIf="!isImageAttachment(file) || !file.url" class="w-full h-full flex items-center justify-center" [ngClass]="getFileIconColor(file.name)">
+                                            <mat-icon [svgIcon]="getFileIcon(file.name, file.type)" class="!w-4.5 !h-4.5"></mat-icon>
+                                        </div>
+                                    </div>
+
+                                    <!-- File Info -->
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug" [matTooltip]="file.name">
+                                            {{ file.name }}
+                                        </p>
+                                        <p class="text-[10.5px] text-slate-400 truncate">
+                                            {{ file.size }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Remove Button -->
+                                    <button
+                                        type="button"
+                                        (click)="removeAttachment(idx)"
+                                        class="text-slate-400 hover:text-rose-500 transition-colors p-1 cursor-pointer shrink-0"
+                                        matTooltip="ដកចេញ"
+                                    >
+                                        <mat-icon svgIcon="mdi:close" class="!w-4 !h-4"></mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Mini Add More button row -->
+                            <div class="flex justify-end pt-0.5">
+                                <button
+                                    type="button"
+                                    (click)="fileInput.click()"
+                                    class="text-[12px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer inline-flex items-center gap-1 font-medium"
+                                >
+                                    <mat-icon svgIcon="mdi:plus" class="!w-3.5 !h-3.5"></mat-icon>
+                                    <span>បន្ថែមឯកសារទៀត</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </mat-dialog-content>
@@ -565,6 +662,16 @@ export interface TeamMember {
     `,
     styles: [
         `
+            ::ng-deep .side-dialog-close-button {
+                z-index: 50 !important;
+                box-shadow: -4px 0 10px rgba(0, 0, 0, 0.08) !important;
+            }
+
+            :host-context(.dark) ::ng-deep .side-dialog-close-button,
+            .dark ::ng-deep .side-dialog-close-button {
+                box-shadow: -4px 0 12px rgba(0, 0, 0, 0.4) !important;
+            }
+
             ::ng-deep .task-dropdown-menu.mat-mdc-menu-panel {
                 background-color: #ffffff !important;
                 border: 1px solid #e2e8f0 !important;
@@ -645,6 +752,11 @@ export class CreateTaskDialogComponent implements OnInit {
     endDate: Date | string | null = new Date(Date.now() + 86400000 * 7);
     priority = signal<'low' | 'medium' | 'high'>('medium');
     description: string = '';
+
+    // File attachments
+    attachedFiles = signal<TaskAttachment[]>([]);
+    isDraggingOver = signal<boolean>(false);
+    private dragCounter = 0;
 
     projectList = [
         { id: 'bms-digitech', name: 'BMS Digitech', code: 'BMS' },
@@ -919,6 +1031,8 @@ export class CreateTaskDialogComponent implements OnInit {
             project_id: this.selectedProjectId,
             project_name: selectedProj?.name || 'BMS Digitech',
             description: this.description.trim() || title,
+            attachments: this.attachedFiles(),
+            attachments_count: this.attachedFiles().length,
         };
     }
 
@@ -941,6 +1055,7 @@ export class CreateTaskDialogComponent implements OnInit {
                 this.incrementTaskCode();
                 this.taskTitle = '';
                 this.description = '';
+                this.attachedFiles.set([]);
                 setTimeout(() => {
                     this.taskTitleInput?.nativeElement?.focus();
                 }, 100);
@@ -980,5 +1095,163 @@ export class CreateTaskDialogComponent implements OnInit {
 
     cancel(): void {
         this.dialogRef.close(this.hasCreatedAnyTask ? { alreadyCreated: true } : null);
+    }
+
+    // =========================================================================
+    // ATTACHMENT DRAG & DROP AND FILE HANDLING
+    // =========================================================================
+    onDragOver(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    }
+
+    onDragEnter(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.dragCounter++;
+        if (event.dataTransfer?.types?.includes('Files')) {
+            this.isDraggingOver.set(true);
+        }
+    }
+
+    onDragLeave(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.dragCounter--;
+        if (this.dragCounter <= 0) {
+            this.dragCounter = 0;
+            this.isDraggingOver.set(false);
+        }
+    }
+
+    onFileDrop(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.dragCounter = 0;
+        this.isDraggingOver.set(false);
+        if (event.dataTransfer?.files?.length) {
+            this.handleIncomingFiles(event.dataTransfer.files);
+        }
+    }
+
+    onFileInputChange(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files?.length) {
+            this.handleIncomingFiles(input.files);
+            input.value = '';
+        }
+    }
+
+    handleIncomingFiles(fileList: FileList | File[]): void {
+        const filesArray = Array.from(fileList);
+        const processed: TaskAttachment[] = [];
+        let remaining = filesArray.length;
+
+        const checkDone = () => {
+            if (remaining === 0 && processed.length > 0) {
+                this.attachedFiles.update((prev) => [...prev, ...processed]);
+            }
+        };
+
+        for (const file of filesArray) {
+            const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/i.test(file.name);
+            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+            const isText = file.type.startsWith('text/') || /\.(txt|json|csv|md|js|ts|html|xml|sql|log)$/i.test(file.name);
+            const sizeStr = this.formatFileSize(file.size);
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = (e.target?.result as string) || '';
+                const item: TaskAttachment = {
+                    name: file.name,
+                    size: sizeStr,
+                    type: file.type || (isPdf ? 'application/pdf' : isImage ? 'image/png' : 'application/octet-stream'),
+                    url: dataUrl,
+                    isImage: isImage,
+                    fileBlob: file,
+                };
+
+                if (isText) {
+                    file.text()
+                        .then((txt) => {
+                            item.textContent = txt;
+                            processed.push(item);
+                            remaining--;
+                            checkDone();
+                        })
+                        .catch(() => {
+                            processed.push(item);
+                            remaining--;
+                            checkDone();
+                        });
+                } else {
+                    processed.push(item);
+                    remaining--;
+                    checkDone();
+                }
+            };
+            reader.onerror = () => {
+                const blobUrl = URL.createObjectURL(file);
+                processed.push({
+                    name: file.name,
+                    size: sizeStr,
+                    type: file.type || 'application/octet-stream',
+                    url: blobUrl,
+                    isImage: isImage,
+                    fileBlob: file,
+                });
+                remaining--;
+                checkDone();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    removeAttachment(index: number): void {
+        this.attachedFiles.update((prev) => prev.filter((_, i) => i !== index));
+    }
+
+    formatFileSize(bytes: number): string {
+        if (!bytes || bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+    }
+
+    isImageAttachment(att?: TaskAttachment | null): boolean {
+        if (!att) return false;
+        if (att.isImage) return true;
+        const name = (att.name || '').toLowerCase();
+        const type = (att.type || '').toLowerCase();
+        return (
+            type.startsWith('image/') ||
+            /\.(png|jpe?g|gif|webp|svg|bmp|ico)$/i.test(name) ||
+            (!!att.url && att.url.startsWith('data:image/'))
+        );
+    }
+
+    getFileIcon(name: string, type?: string): string {
+        const lower = name.toLowerCase();
+        if (lower.endsWith('.pdf') || type?.includes('pdf')) return 'mdi:file-pdf-box';
+        if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || type?.includes('excel') || type?.includes('spreadsheet'))
+            return 'mdi:file-excel-box';
+        if (lower.endsWith('.doc') || lower.endsWith('.docx') || type?.includes('word') || type?.includes('document'))
+            return 'mdi:file-word-box';
+        if (lower.endsWith('.zip') || lower.endsWith('.rar') || lower.endsWith('.7z') || type?.includes('zip'))
+            return 'mdi:folder-zip-outline';
+        if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.webp'))
+            return 'mdi:file-image';
+        return 'mdi:file-document-outline';
+    }
+
+    getFileIconColor(name: string): string {
+        const lower = name.toLowerCase();
+        if (lower.endsWith('.pdf')) return 'text-rose-500 bg-rose-50 dark:bg-rose-950/40';
+        if (lower.endsWith('.xls') || lower.endsWith('.xlsx')) return 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40';
+        if (lower.endsWith('.doc') || lower.endsWith('.docx')) return 'text-blue-500 bg-blue-50 dark:bg-blue-950/40';
+        if (lower.endsWith('.zip') || lower.endsWith('.rar')) return 'text-amber-500 bg-amber-50 dark:bg-amber-950/40';
+        return 'text-blue-500 bg-blue-50 dark:bg-blue-950/40';
     }
 }

@@ -48,18 +48,18 @@ export interface ScheduledMeeting {
     extraCount: number;
 }
 
-const INITIAL_STATS: AdminStats = {
+const EMPTY_STATS: AdminStats = {
     kpi: {
-        total_projects: 3,
-        active_projects: 2,
+        total_projects: 0,
+        active_projects: 0,
         completed_projects: 0,
-        planning_projects: 1,
-        total_tasks: 4235,
-        completed_tasks: 3480,
-        task_completion_rate: 82,
-        active_users: 18,
-        total_users: 22,
-        pending_leaves: 3,
+        planning_projects: 0,
+        total_tasks: 0,
+        completed_tasks: 0,
+        task_completion_rate: 0,
+        active_users: 0,
+        total_users: 0,
+        pending_leaves: 0,
     },
     projects_summary: [],
     department_stats: [],
@@ -111,18 +111,18 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     private _sparklineCharts: echarts.ECharts[] = [];
     private _resizeObserver?: ResizeObserver;
 
-    userName = signal<string>('ពិសិទ្ធិ បញ្ញាវន្ត័');
+    userName = signal<string>('');
     userGreeting = signal<string>('អរុណសួស្តី');
     userAvatarUrl = signal<string | null>(null);
-    userInitials = signal<string>('PP');
+    userInitials = signal<string>('');
 
-    stats = signal<AdminStats>(INITIAL_STATS);
-    loading = signal<boolean>(false);
+    stats = signal<AdminStats>(EMPTY_STATS);
+    loading = signal<boolean>(true);
 
     // Filter controls
     activePerformerPeriod = signal<'1d' | '7d' | '1m' | '1y' | 'all'>('7d');
-    calendarBaseDate = signal<Date>(new Date(2026, 0, 19)); // 19 Jan 2026
-    activeCalendarDay = signal<number>(19);
+    calendarBaseDate = signal<Date>(new Date());
+    activeCalendarDay = signal<number>(new Date().getDate());
 
     get calendarMonthLabel(): string {
         const d = this.calendarBaseDate();
@@ -156,10 +156,15 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     // Date Range Filter Popover State matching reference
     isDateFilterOpen = signal<boolean>(false);
     activePreset = signal<string>('this_month');
-    selectedDateRangeLabel = signal<string>('1 កញ្ញា - 30 កញ្ញា 2026');
-    tempStartDate = signal<Date>(new Date(2026, 8, 1)); // 1 Sep 2026
-    tempEndDate = signal<Date>(new Date(2026, 8, 30)); // 30 Sep 2026
-    pickerMonthDate = signal<Date>(new Date(2026, 8, 1));
+    selectedDateRangeLabel = signal<string>((() => {
+        const now = new Date();
+        const khmerMonths = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        return `1 ${khmerMonths[now.getMonth()]} - ${lastDay} ${khmerMonths[now.getMonth()]} ${now.getFullYear()}`;
+    })());
+    tempStartDate = signal<Date>(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+    tempEndDate = signal<Date>(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
+    pickerMonthDate = signal<Date>(new Date());
 
     datePresets = [
         { id: 'today', label: 'ថ្ងៃនេះ' },
@@ -244,7 +249,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
 
     selectPreset(presetId: string): void {
         this.activePreset.set(presetId);
-        const ref = new Date(2026, 8, 30);
+        const ref = new Date();
         let s = new Date(ref);
         let e = new Date(ref);
 
@@ -317,14 +322,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
         this.closeDateFilter();
     }
 
-    // Top 3 Metric Cards representing core admin pillars
+    // KPI metric cards — values start at '—' and are updated from the API in loadStats()
     kpiCards: DashboardMetricCard[] = [
         {
             id: 'members',
             title: 'Total Members',
             title_kh: 'បុគ្គលិកសរុប',
-            value: '5',
-            change: '+12%',
+            value: '—',
+            change: '',
             badgeClass: 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400',
             icon: 'mdi:account-group-outline',
             iconBg: '',
@@ -332,14 +337,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
             linkUrl: '/admin/users',
             sparklineColor: '#2563eb',
             sparklineFill: 'rgba(37, 99, 235, 0.18)',
-            sparklineData: [4, 6, 5, 8, 7, 10, 12],
+            sparklineData: [],
         },
         {
             id: 'projects',
             title: 'Active Projects',
             title_kh: 'គម្រោងសកម្ម',
-            value: '2',
-            change: '+8%',
+            value: '—',
+            change: '',
             badgeClass: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400',
             icon: 'mdi:folder-outline',
             iconBg: '',
@@ -347,14 +352,14 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
             linkUrl: '/admin/projects',
             sparklineColor: '#10b981',
             sparklineFill: 'rgba(16, 185, 129, 0.18)',
-            sparklineData: [3, 5, 4, 7, 6, 8, 9],
+            sparklineData: [],
         },
         {
             id: 'leaves',
             title: 'Pending Leaves',
             title_kh: 'សំណើសុំច្បាប់',
-            value: '1',
-            change: '3 ថ្មី',
+            value: '—',
+            change: '',
             badgeClass: 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400',
             icon: 'mdi:clipboard-text-outline',
             iconBg: '',
@@ -362,110 +367,15 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
             linkUrl: '/admin/attendance',
             sparklineColor: '#f59e0b',
             sparklineFill: 'rgba(245, 158, 11, 0.18)',
-            sparklineData: [2, 4, 3, 5, 4, 6, 5],
+            sparklineData: [],
         },
     ];
 
-    // Meetings & Schedules matching reference layout
-    scheduledMeetings: ScheduledMeeting[] = [
-        {
-            id: 'm1',
-            title: 'កិច្ចប្រជុំជាមួយក្រុមដឹកនាំ',
-            time: '12:00 - 01:00 PM',
-            dateGroup: 'today',
-            dateLabel: 'ថ្ងៃនេះ',
-            badgeColor: '#0f766e',
-            borderClass: 'border-l-4 border-emerald-600',
-            members: ['PP', 'CS', 'LM'],
-            extraCount: 3,
-        },
-        {
-            id: 'm2',
-            title: 'ត្រួតពិនិត្យគម្រោង WFM Core V2',
-            time: '10:00 - 11:30 AM',
-            dateGroup: 'upcoming',
-            dateLabel: 'សៅរ៍, 20 មករា',
-            badgeColor: '#3b82f6',
-            borderClass: 'border-l-4 border-blue-600',
-            members: ['SS', 'RV', 'CK'],
-            extraCount: 3,
-        },
-        {
-            id: 'm3',
-            title: 'ពិភាក្សាលំហូរអនុម័តច្បាប់ឈប់សម្រាក',
-            time: '02:00 - 03:00 PM',
-            dateGroup: 'upcoming',
-            dateLabel: 'សៅរ៍, 20 មករា',
-            badgeColor: '#f97316',
-            borderClass: 'border-l-4 border-amber-500',
-            members: ['PP', 'IT'],
-            extraCount: 2,
-        },
-    ];
+    // Populated from API in loadStats()
+    scheduledMeetings: ScheduledMeeting[] = [];
 
-    // Top Performers / Team Members Grid (6 members)
-    performers: TeamMemberPerformer[] = [
-        {
-            id: 'p1',
-            name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត (Piseth Panhavorn)',
-            name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-            email: 'pisethpanhavorn544@gmail.com',
-            role: 'Super Admin',
-            avatar: '',
-            initials: 'PP',
-            avatarBg: 'bg-slate-700 text-white',
-        },
-        {
-            id: 'p2',
-            name: 'សុខ សុភា (Sopheak)',
-            name_kh: 'សុខ សុភា',
-            email: 'sok.sopheak@gmail.com',
-            role: 'Lead Project Manager',
-            avatar: '',
-            initials: 'SP',
-            avatarBg: 'bg-teal-700 text-white',
-        },
-        {
-            id: 'p3',
-            name: 'រ័ត្ន វិចិត្រ (Vichet)',
-            name_kh: 'រ័ត្ន វិចិត្រ',
-            email: 'rath.vichet@gmail.com',
-            role: 'DevOps & Cloud Engineer',
-            avatar: '',
-            initials: 'VC',
-            avatarBg: 'bg-indigo-700 text-white',
-        },
-        {
-            id: 'p4',
-            name: 'លី ម៉េងហួរ (Menghour)',
-            name_kh: 'លី ម៉េងហួរ',
-            email: 'menghour.ly@gmail.com',
-            role: 'Senior Backend Engineer',
-            avatar: '',
-            initials: 'MH',
-            avatarBg: 'bg-purple-700 text-white',
-        },
-        {
-            id: 'p5',
-            name: 'គង់ ចរិយា (Chariya)',
-            name_kh: 'គង់ ចរិយា',
-            email: 'chariya.kong@gmail.com',
-            role: 'QA & Automation Lead',
-            avatar: '',
-            initials: 'CY',
-            avatarBg: 'bg-amber-600 text-white',
-        },
-        {
-            id: 'p6',
-            name: 'ហេង ពិសាល (Piseth)',
-            name_kh: 'ហេង ពិសាល',
-            email: 'piseth.heng@gmail.com',
-            role: 'Mobile App Developer',
-            avatar: '',
-            initials: 'PS',
-            avatarBg: 'bg-emerald-700 text-white',
-        },
-    ];
+    // Populated from API in loadStats()
+    performers: TeamMemberPerformer[] = [];
 
     ngOnInit(): void {
         this.initGreeting();
