@@ -1068,6 +1068,83 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         });
     }
 
+    updateTaskTitle(task: TaskItem, newTitle: string): void {
+        const trimmed = newTitle.trim();
+        if (!trimmed || task.title === trimmed) return;
+
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
+
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.update((t) => (t ? { ...t, title: trimmed } : null));
+            const systemMsg: TaskChatMessage = {
+                id: Date.now(),
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `${actorPrefix}បានប្តូរចំណងជើងការងារទៅជា "${trimmed}"`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                is_system: true,
+            };
+            this.appendChatMessage(task.id, systemMsg);
+        }
+
+        this.tasks.update((list) =>
+            list.map((t) => (t.id === task.id ? { ...t, title: trimmed } : t))
+        );
+
+        this._taskService.updateTask(task.id, { title: trimmed }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.update((t) => (t ? { ...t, ...res.data } : null));
+                    }
+                    this.tasks.update((list) =>
+                        list.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
+                    );
+                }
+            },
+            error: (err) => console.error('Failed to update task title', err),
+        });
+    }
+
+    updateTaskDescription(task: TaskItem, newDescription: string): void {
+        const trimmed = newDescription.trim();
+        const currentDesc = (task.description || '').trim();
+        if (trimmed === currentDesc) return;
+
+        const actorName = this.getCurrentActorName();
+        const actorPrefix = actorName ? `${actorName} ` : '';
+
+        if (this.selectedTask()?.id === task.id) {
+            this.selectedTask.update((t) => (t ? { ...t, description: trimmed } : null));
+            const systemMsg: TaskChatMessage = {
+                id: Date.now(),
+                sender_name: 'ប្រព័ន្ធ (System)',
+                text: `${actorPrefix}បានកែប្រែការពិពណ៌នាការងារ`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                is_system: true,
+            };
+            this.appendChatMessage(task.id, systemMsg);
+        }
+
+        this.tasks.update((list) =>
+            list.map((t) => (t.id === task.id ? { ...t, description: trimmed } : t))
+        );
+
+        this._taskService.updateTask(task.id, { description: trimmed }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    if (this.selectedTask()?.id === task.id) {
+                        this.selectedTask.update((t) => (t ? { ...t, ...res.data } : null));
+                    }
+                    this.tasks.update((list) =>
+                        list.map((t) => (t.id === task.id ? { ...t, ...res.data } : t))
+                    );
+                }
+            },
+            error: (err) => console.error('Failed to update task description', err),
+        });
+    }
+
     toggleTaskAssignee(task: TaskItem, member: TaskMember): void {
         const currentAssignees = this.getTaskAssignees(task);
         const exists = currentAssignees.some(

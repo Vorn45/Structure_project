@@ -909,6 +909,8 @@
         (typeChange)="updateTaskType($event.task, $event.taskType)"
         (priorityChange)="updateTaskPriority($event.task, $event.priority)"
         (dueDateChange)="updateTaskDueDate($event.task, $event.dueDate)"
+        (titleChange)="updateTaskTitle($event.task, $event.title)"
+        (descriptionChange)="updateTaskDescription($event.task, $event.description)"
         (assigneeToggle)="toggleTaskAssignee($event.task, $event.member)"
         (reporterChange)="updateTaskReporter($event.task, $event.member)"
         (sendMessage)="sendChatMessage($event)"

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, HostListener, input, output, signal } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, input, output, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -147,6 +147,8 @@ export class TaskDrawerComponent {
     typeChange = output<{ task: TaskItem; taskType: string }>();
     priorityChange = output<{ task: TaskItem; priority: string }>();
     dueDateChange = output<{ task: TaskItem; dueDate: string | null }>();
+    titleChange = output<{ task: TaskItem; title: string }>();
+    descriptionChange = output<{ task: TaskItem; description: string }>();
     assigneeToggle = output<{ task: TaskItem; member: TaskMember }>();
     reporterChange = output<{ task: TaskItem; member: TaskMember }>();
     sendMessage = output<{ text: string; attachments: TaskAttachment[] }>();
@@ -161,14 +163,38 @@ export class TaskDrawerComponent {
     isClosing = signal<boolean>(false);
     isVisible = signal<boolean>(false);
 
-    @HostListener('document:keydown.escape')
-    onEscapeKey(): void {
+    @ViewChild('titleInputRef') titleInputRef?: ElementRef<HTMLTextAreaElement>;
+    @ViewChild('descriptionInputRef') descriptionInputRef?: ElementRef<HTMLTextAreaElement>;
+
+    isEditingTitle = signal<boolean>(false);
+    editingTitle = signal<string>('');
+    isEditingDescription = signal<boolean>(false);
+    editingDescription = signal<string>('');
+
+    @HostListener('document:keydown.escape', ['$event'])
+    onEscapeKey(event?: KeyboardEvent): void {
+        if (this.isEditingTitle()) {
+            this.cancelEditTitle(event);
+            return;
+        }
+        if (this.isEditingDescription()) {
+            this.cancelEditDescription(event);
+            return;
+        }
         if (this.show() && !this.isClosing()) {
             this.triggerClose();
         }
     }
 
     constructor() {
+        effect(() => {
+            const currentTask = this.task();
+            if (currentTask) {
+                this.isEditingTitle.set(false);
+                this.isEditingDescription.set(false);
+            }
+        }, { allowSignalWrites: true });
+
         effect(() => {
             const mode = this.dialogMode();
             if (mode) {
@@ -186,8 +212,81 @@ export class TaskDrawerComponent {
             } else {
                 this.isVisible.set(false);
                 this.isClosing.set(false);
+                this.isEditingTitle.set(false);
+                this.isEditingDescription.set(false);
             }
         }, { allowSignalWrites: true });
+    }
+
+    startEditTitle(): void {
+        this.editingTitle.set(this.task()?.title || '');
+        this.isEditingTitle.set(true);
+        setTimeout(() => {
+            if (this.titleInputRef?.nativeElement) {
+                this.titleInputRef.nativeElement.focus();
+                this.titleInputRef.nativeElement.select();
+            }
+        }, 50);
+    }
+
+    saveTitle(): void {
+        const currentTask = this.task();
+        if (!currentTask) {
+            this.isEditingTitle.set(false);
+            return;
+        }
+        const trimmed = this.editingTitle().trim();
+        if (trimmed && trimmed !== currentTask.title) {
+            (currentTask as any).title = trimmed;
+            this.titleChange.emit({ task: currentTask, title: trimmed });
+        }
+        this.isEditingTitle.set(false);
+    }
+
+    cancelEditTitle(event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.isEditingTitle.set(false);
+    }
+
+    onTitleKeydown(event: KeyboardEvent): void {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            this.saveTitle();
+        }
+    }
+
+    startEditDescription(): void {
+        this.editingDescription.set(this.task()?.description || '');
+        this.isEditingDescription.set(true);
+        setTimeout(() => {
+            if (this.descriptionInputRef?.nativeElement) {
+                this.descriptionInputRef.nativeElement.focus();
+            }
+        }, 50);
+    }
+
+    saveDescription(): void {
+        const currentTask = this.task();
+        if (!currentTask) {
+            this.isEditingDescription.set(false);
+            return;
+        }
+        const trimmed = this.editingDescription().trim();
+        const currentDesc = (currentTask.description || '').trim();
+        if (trimmed !== currentDesc) {
+            (currentTask as any).description = trimmed;
+            this.descriptionChange.emit({ task: currentTask, description: trimmed });
+        }
+        this.isEditingDescription.set(false);
+    }
+
+    cancelEditDescription(event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.isEditingDescription.set(false);
     }
 
     triggerClose(): void {

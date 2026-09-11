@@ -1657,6 +1657,36 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         this.selectedTaskDrawerItem.update((t) => t ? { ...t, due_date: event.dueDate } : null);
     }
 
+    onTaskDrawerTitleChange(event: { task: DrawerTaskItem; title: string }): void {
+        const proj = this.selectedProject();
+        if (proj?.tasks) {
+            const target = proj.tasks.find((t) => t.id === event.task.id || t.code === event.task.code);
+            if (target) {
+                target.title = event.title;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, title: event.title } : null));
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._taskService.updateTask(numericId, { title: event.title }).subscribe({ error: () => {} });
+        }
+    }
+
+    onTaskDrawerDescriptionChange(event: { task: DrawerTaskItem; description: string }): void {
+        const proj = this.selectedProject();
+        if (proj?.tasks) {
+            const target = proj.tasks.find((t) => t.id === event.task.id || t.code === event.task.code);
+            if (target) {
+                target.description = event.description;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, description: event.description } : null));
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._taskService.updateTask(numericId, { description: event.description }).subscribe({ error: () => {} });
+        }
+    }
+
     onTaskDrawerAssigneeToggle(event: { task: DrawerTaskItem; member: DrawerTaskMember }): void {
         this.selectedTaskDrawerItem.update((t) => {
             if (!t) return null;

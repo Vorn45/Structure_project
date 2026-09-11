@@ -1271,6 +1271,34 @@ export class TaskService {
         const updaterName = (user?.name_kh || user?.name_en || '').trim() || 'Piseth Panhavorn';
         const actorPrefix = updaterName ? `${updaterName} ` : '';
 
+        if (dto.title && dto.title.trim() !== current.title) {
+            comments.push({
+                id: Date.now() + 7,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `${actorPrefix}បានប្តូរចំណងជើងការងារទៅជា "${dto.title.trim()}"`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
+
+        if (dto.description !== undefined && dto.description.trim() !== (current.description || '').trim()) {
+            comments.push({
+                id: Date.now() + 8,
+                sender_id: 0,
+                sender_name: 'ប្រព័ន្ធ (System)',
+                sender_avatar: null,
+                text: `${actorPrefix}បានកែប្រែការពិពណ៌នាការងារ`,
+                time: nowTime,
+                is_self: false,
+                is_system: true,
+                created_at: new Date().toISOString(),
+            });
+        }
+
         if (dto.task_type && dto.task_type !== current.task_type) {
             comments.push({
                 id: Date.now() + 5,

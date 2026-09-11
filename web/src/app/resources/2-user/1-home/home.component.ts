@@ -755,6 +755,30 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         this._taskService.updateTask(event.task.id, { due_date: event.dueDate }).subscribe();
     }
 
+    onTaskDrawerTitleChange(event: { task: TaskItem; title: string }): void {
+        const currentOverview = this.overview();
+        if (currentOverview?.recent_tasks) {
+            const t = currentOverview.recent_tasks.find((item) => item.id === Number(event.task.id));
+            if (t) {
+                t.title = event.title;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, title: event.title } : null));
+        this._taskService.updateTask(event.task.id, { title: event.title }).subscribe();
+    }
+
+    onTaskDrawerDescriptionChange(event: { task: TaskItem; description: string }): void {
+        const currentOverview = this.overview();
+        if (currentOverview?.recent_tasks) {
+            const t = currentOverview.recent_tasks.find((item) => item.id === Number(event.task.id));
+            if (t) {
+                t.description = event.description;
+            }
+        }
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, description: event.description } : null));
+        this._taskService.updateTask(event.task.id, { description: event.description }).subscribe();
+    }
+
     onTaskDrawerAssigneeToggle(event: { task: TaskItem; member: TaskMember }): void {
         this.selectedTaskDrawerItem.update((t) => {
             if (!t) return null;

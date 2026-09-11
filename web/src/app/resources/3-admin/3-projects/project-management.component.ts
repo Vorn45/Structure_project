@@ -1023,6 +1023,28 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         }
     }
 
+    onTaskDrawerTitleChange(event: { task: TaskItem; title: string }): void {
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, title: event.title } : null));
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === event.task.id ? { ...t, title: event.title } : t))
+        );
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.updateTask(numericId, { title: event.title }).subscribe({ error: () => {} });
+        }
+    }
+
+    onTaskDrawerDescriptionChange(event: { task: TaskItem; description: string }): void {
+        this.selectedTaskDrawerItem.update((t) => (t ? { ...t, description: event.description } : null));
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === event.task.id ? { ...t, description: event.description } : t))
+        );
+        const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._userTaskService.updateTask(numericId, { description: event.description }).subscribe({ error: () => {} });
+        }
+    }
+
     onTaskDrawerAssigneeToggle(event: { task: TaskItem; member: TaskMember }): void {
         const currentAssignees = event.task.assignees ? [...event.task.assignees] : [];
         const index = currentAssignees.findIndex((m) => m.id === event.member.id);
