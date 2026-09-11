@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, inject, signal, computed } from '@angular/core';
+import { catchError, finalize, of } from 'rxjs';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -183,231 +184,7 @@ export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [
     },
 ];
 
-export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [
-    {
-        id: 't1',
-        code: '#WMS-0000',
-        title: 'Org Admin | Structure | Department',
-        description: 'គ្រប់គ្រងរចនាសម្ព័ន្ធស្ថាប័ន និងការបែងចែកនាយកដ្ឋានក្នុងប្រព័ន្ធ WFM។',
-        priority: 'high',
-        due_date: '2026-09-10',
-        created_at: '2026-08-25',
-        comments_count: 1,
-        attachments_count: 2,
-        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'review',
-        time_ago: '6 ថ្ងៃមុន',
-        progress: 80,
-        subtasks: [
-            { id: 'st-1', title: 'Setup Department Hierarchy DB table', completed: true },
-            { id: 'st-2', title: 'Connect tree view in Angular Signals', completed: true },
-            { id: 'st-3', title: 'User assignment and roles modal', completed: false },
-        ],
-        links: [
-            { id: 'l-1', title: 'Figma: Department Hierarchy Spec', url: 'https://figma.com', type: 'figma', taskCode: '#WMS-0000' },
-        ],
-        documents: [
-            { id: 'd-1', name: 'Org_Structure_SRS.pdf', size: '1.4 MB', type: 'pdf', upload_date: '២៦ សីហា ២០២៦' },
-            { id: 'd-2', name: 'Department_Tree_Sample.xlsx', size: '340 KB', type: 'sheet', upload_date: '២៧ សីហា ២០២៦' },
-        ],
-        members: [
-            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
-        ],
-    },
-    {
-        id: 't2',
-        code: '#BMS-0000',
-        title: 'Project | Folder | Drag & Drop',
-        description: 'មុខងារអូសទម្លាក់ Folder គម្រោង និងឯកសារដើម្បីផ្លាស់ប្តូរលំដាប់ដោយរលូន។',
-        priority: 'high',
-        due_date: '2026-09-08',
-        created_at: '2026-08-22',
-        comments_count: 0,
-        attachments_count: 2,
-        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white', email: 'thawinner@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'done',
-        time_ago: '1 សប្តាហ៍មុន',
-        progress: 100,
-        subtasks: [
-            { id: 'st-4', title: 'Integrate CDK DragDropModule', completed: true },
-            { id: 'st-5', title: 'Add drop placeholder animations', completed: true },
-        ],
-        links: [
-            { id: 'l-2', title: 'GitHub PR #481: Drag and Drop feature', url: 'https://github.com', type: 'github', taskCode: '#BMS-0000' },
-        ],
-        documents: [
-            { id: 'd-3', name: 'Folder_Dnd_Workflow.png', size: '1.2 MB', type: 'image', upload_date: '២៥ សីហា ២០២៦' },
-        ],
-        members: [
-            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white' },
-        ],
-    },
-    {
-        id: 't3',
-        code: '#WMS-0001',
-        title: 'Project | Folder | Cannot Scroll PDF',
-        description: 'កែសម្រួលបញ្ហាមិនអាច Scroll មើលឯកសារ PDF នៅក្នុង Folder Preview Viewer។',
-        priority: 'urgent',
-        due_date: '2026-09-01',
-        created_at: '2026-08-20',
-        comments_count: 5,
-        attachments_count: 1,
-        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'confirmed',
-        time_ago: '1 សប្តាហ៍មុន',
-        progress: 60,
-        subtasks: [
-            { id: 'st-6', title: 'Fix overflow-y-auto on PDF container', completed: true },
-            { id: 'st-7', title: 'Test on Mobile Touch events', completed: false },
-        ],
-        links: [
-            { id: 'l-3', title: 'Bug Report Video Link', url: 'https://loom.com', type: 'external', taskCode: '#WMS-0001' },
-        ],
-        documents: [
-            { id: 'd-5', name: 'PDF_Viewer_Bug_Screenshot.png', size: '650 KB', type: 'image', upload_date: '២៤ សីហា ២០២៦' },
-        ],
-        members: [
-            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
-        ],
-    },
-    {
-        id: 't4',
-        code: '#BMS-0001',
-        title: 'My Work | Profile | Missing Cover',
-        description: 'រូបភាព Cover ក្នុងផ្ទាំង Profile ផ្ទាល់ខ្លួនមិនបង្ហាញនៅពេល User ចូលប្រើដំបូង។',
-        priority: 'urgent',
-        due_date: '2026-08-30',
-        created_at: '2026-08-18',
-        comments_count: 3,
-        attachments_count: 1,
-        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-800 text-white', email: 'thawinner@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'reopened',
-        time_ago: '1 សប្តាហ៍មុន',
-        progress: 40,
-        subtasks: [
-            { id: 'st-8', title: 'Add default gradient fallback cover', completed: true },
-            { id: 'st-9', title: 'Check S3 presigned URL expiration', completed: false },
-        ],
-        links: [],
-        documents: [],
-        members: [
-            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-800 text-white' },
-        ],
-    },
-    {
-        id: 't5',
-        code: '#WMS-0002',
-        title: 'Security setting UI improvements',
-        description: 'កែលម្អលើទំព័រ Security Settings ដូចជា 2FA, Session Management, និង Password Expiry។',
-        priority: 'high',
-        due_date: '2026-08-29',
-        created_at: '2026-08-16',
-        comments_count: 4,
-        attachments_count: 1,
-        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'new',
-        time_ago: '1 សប្តាហ៍មុន',
-        progress: 0,
-        subtasks: [
-            { id: 'st-10', title: 'Design 2FA QR verification modal', completed: false },
-            { id: 'st-11', title: 'Add Active Sessions IP listing', completed: false },
-        ],
-        links: [
-            { id: 'l-4', title: 'Figma Security Settings v2', url: 'https://figma.com', type: 'figma', taskCode: '#WMS-0002' },
-        ],
-        documents: [
-            { id: 'd-7', name: 'Security_Audit_Report.pdf', size: '2.1 MB', type: 'pdf', upload_date: '២០ សីហា ២០២៦' },
-        ],
-        members: [
-            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
-        ],
-    },
-    {
-        id: 't6',
-        code: '#BMS-0002',
-        title: 'User | Report | Progress Compare',
-        description: 'ផ្ទាំងប្រៀបធៀបវឌ្ឍនភាពការងាររវាងខែមុន និងខែបច្ចុប្បន្នរបស់សមាជិកម្នាក់ៗ។',
-        priority: 'medium',
-        due_date: '2026-09-15',
-        created_at: '2026-08-28',
-        comments_count: 0,
-        attachments_count: 1,
-        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white', email: 'thawinner@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'in_progress',
-        time_ago: '2 សប្តាហ៍មុន',
-        progress: 65,
-        subtasks: [
-            { id: 'st-12', title: 'Build comparison chart with ChartJS', completed: true },
-            { id: 'st-13', title: 'Connect month selector dropdown', completed: true },
-        ],
-        links: [
-            { id: 'l-5', title: 'Report Formula Documentation', url: 'https://notion.so', type: 'doc', taskCode: '#BMS-0002' },
-        ],
-        documents: [],
-        members: [
-            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700 text-white' },
-        ],
-    },
-    {
-        id: 't7',
-        code: '#WMS-0003',
-        title: 'User | Report | Progress',
-        description: 'ទំព័ររបាយការណ៍សរុបវឌ្ឍនភាពបុគ្គលិក ម៉ោងបំពេញការងារ និងភាគរយសម្រេច។',
-        priority: 'medium',
-        due_date: '2026-09-06',
-        created_at: '2026-08-15',
-        comments_count: 19,
-        attachments_count: 1,
-        assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'done',
-        time_ago: '2 សប្តាហ៍មុន',
-        progress: 100,
-        subtasks: [
-            { id: 'st-15', title: 'User Progress Overview metrics cards', completed: true },
-            { id: 'st-16', title: 'Daily activity bar breakdown', completed: true },
-        ],
-        links: [
-            { id: 'l-6', title: 'GitHub PR #412: User Progress Report', url: 'https://github.com', type: 'github', taskCode: '#WMS-0003' },
-        ],
-        documents: [],
-        members: [
-            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600 text-white' },
-        ],
-    },
-    {
-        id: 't8',
-        code: '#BMS-0003',
-        title: 'Profile | Switch Org | Exit Org',
-        description: 'មុខងារប្តូរស្ថាប័នការងារ (Switch Organization) និងការចាកចេញពីស្ថាប័នដោយសុវត្ថិភាព។',
-        priority: 'low',
-        due_date: '2026-09-12',
-        created_at: '2026-08-14',
-        comments_count: 10,
-        attachments_count: 0,
-        assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-600 text-white', email: 'thawinner@example.com' },
-        reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600 text-white' },
-        status: 'unconfirmed',
-        time_ago: '2 សប្តាហ៍មុន',
-        progress: 20,
-        subtasks: [
-            { id: 'st-17', title: 'Clear active tokens and cookies', completed: true },
-            { id: 'st-18', title: 'Redirect to SSO logout flow', completed: false },
-        ],
-        links: [],
-        documents: [],
-        members: [
-            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-600 text-white' },
-        ],
-    },
-];
+export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [];
 
 export const DEFAULT_PROJECT_PHASES: ProjectPhaseItem[] = [
     {
@@ -584,7 +361,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     subtaskFilter = signal<string>('all');
 
     // Collections
-    tasks = signal<AdminTaskItem[]>(DEFAULT_PROJECT_TASKS);
+    tasks = signal<AdminTaskItem[]>([]);
+    isTasksLoading = signal<boolean>(false);
     phases = signal<ProjectPhaseItem[]>(DEFAULT_PROJECT_PHASES);
     teamMembers = signal<TaskMember[]>(DEFAULT_PROJECT_TEAM_MEMBERS);
     meetings = signal<ProjectMeetingItem[]>(DEFAULT_PROJECT_MEETINGS);
@@ -2098,9 +1876,131 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         });
     }
 
+    private mapTaskToAdminTaskItem(t: any): AdminTaskItem {
+        const rawStatus = (t.status || 'new').toLowerCase().trim();
+        let status: any = rawStatus;
+        if (rawStatus === 'completed') status = 'done';
+        if (rawStatus === 'in-progress') status = 'in_progress';
+        if (rawStatus === 'in_review') status = 'review';
+
+        const priority = (t.priority || 'medium').toLowerCase().trim();
+
+        const reporterName = t.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
+        const reporterInitial = (reporterName.charAt(0) || 'P').toUpperCase();
+
+        let assigneeObj: TaskMember | null = null;
+        if (t.assignee) {
+            const aName = t.assignee.name || 'Member';
+            assigneeObj = {
+                id: t.assignee.id || 1,
+                name: aName,
+                role: t.assignee.role || 'Member',
+                initial: aName.charAt(0).toUpperCase(),
+                bgClass: t.assignee.bgClass || t.assignee.colorClass || 'bg-blue-600 text-white',
+                avatar: t.assignee.avatar || null,
+                email: t.assignee.email || '',
+            };
+        } else if (Array.isArray(t.assignees) && t.assignees.length > 0) {
+            const first = t.assignees[0];
+            const aName = first.name || 'Member';
+            assigneeObj = {
+                id: first.id || 1,
+                name: aName,
+                role: first.role || 'Member',
+                initial: aName.charAt(0).toUpperCase(),
+                bgClass: first.bgClass || first.colorClass || 'bg-blue-600 text-white',
+                avatar: first.avatar || null,
+                email: first.email || '',
+            };
+        }
+
+        const members: TaskMember[] = (t.assignees || []).map((a: any) => ({
+            id: a.id || 1,
+            name: a.name || 'Member',
+            role: a.role || 'Member',
+            initial: (a.name || 'M').charAt(0).toUpperCase(),
+            bgClass: a.bgClass || a.colorClass || 'bg-slate-600 text-white',
+            avatar: a.avatar || null,
+            email: a.email || '',
+        }));
+
+        let dueDateStr = '';
+        if (t.due_date) {
+            try {
+                dueDateStr = new Date(t.due_date).toISOString().split('T')[0];
+            } catch {
+                dueDateStr = String(t.due_date);
+            }
+        }
+
+        return {
+            id: String(t.id),
+            code: t.code || `#TASK-${t.id}`,
+            title: t.title || '',
+            description: t.description || '',
+            priority: (['urgent', 'high', 'medium', 'low'].includes(priority) ? priority : 'medium') as any,
+            status: status,
+            due_date: dueDateStr,
+            created_at: t.created_at || new Date().toISOString(),
+            time_ago: t.time_ago || '',
+            comments_count: t.comments_count || 0,
+            attachments_count: t.attachments_count || 0,
+            reporter: {
+                id: t.reporter?.id || 1,
+                name: reporterName,
+                role: t.reporter?.role || 'Super Admin',
+                initial: reporterInitial,
+                bgClass: 'bg-emerald-600 text-white',
+                avatar: t.reporter?.avatar || null,
+            },
+            assignee: assigneeObj,
+            members: members.length > 0 ? members : (assigneeObj ? [assigneeObj] : []),
+            progress: t.progress || (['done', 'completed'].includes(status) ? 100 : 0),
+            subtasks: t.subtasks || [],
+            links: t.links || [],
+            documents: t.documents || [],
+        };
+    }
+
     selectProject(project: AdminProject): void {
         this.selectedProject.set(project);
         this.projectNavTab.set('tasks');
+        this.taskSearchQuery.set('');
+        this.subtaskFilter.set('all');
+        this.isTasksLoading.set(true);
+
+        this._userTaskService
+            .getTasks()
+            .pipe(
+                catchError(() => of(null)),
+                finalize(() => this.isTasksLoading.set(false))
+            )
+            .subscribe((res) => {
+                if (res?.data?.results?.length) {
+                    const allTasks = res.data.results;
+                    const pid = String(project.id || '').toLowerCase();
+                    const pcode = (project.code || '').toLowerCase().replace('#', '');
+                    const pname = (project.name || '').toLowerCase();
+                    const pPrefix = pcode.split('-')[0];
+
+                    const projectTasks = allTasks.filter((t: any) => {
+                        const tPid = (t.project_id || '').toLowerCase();
+                        const tPname = (t.project_name || '').toLowerCase();
+                        const tCode = (t.code || '').toLowerCase().replace('#', '');
+
+                        return (
+                            (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
+                            (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
+                            (pPrefix && (tCode.startsWith(pPrefix + '-') || tPid.startsWith(pPrefix))) ||
+                            (pname && (tPname.includes(pname) || pname.includes(tPname)))
+                        );
+                    });
+
+                    this.tasks.set(projectTasks.map((t: any) => this.mapTaskToAdminTaskItem(t)));
+                } else {
+                    this.tasks.set([]);
+                }
+            });
     }
 
     clearSelectedProject(): void {

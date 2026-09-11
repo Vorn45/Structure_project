@@ -137,9 +137,47 @@
 
             </div>
 
-            <!-- Loading Spinner -->
-            <div *ngIf="loading()" class="flex justify-center items-center py-24">
-                <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+            <!-- Loading Skeleton Grid -->
+            <div *ngIf="loading()"
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 font-kantumruy animate-pulse">
+                <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]"
+                    class="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 space-y-4 shadow-xs">
+                    <div class="space-y-3.5">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <div class="w-11 h-11 rounded-2xl bg-slate-200 dark:bg-slate-800 shrink-0"></div>
+                                <div class="space-y-1.5 flex-1 min-w-0">
+                                    <div class="h-3.5 w-16 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                                    <div class="h-4.5 w-28 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                                </div>
+                            </div>
+                            <div class="h-6 w-16 bg-slate-200 dark:bg-slate-800 rounded-full shrink-0"></div>
+                        </div>
+                        <div class="space-y-1.5 py-1">
+                            <div class="h-3 w-full bg-slate-200 dark:bg-slate-800 rounded"></div>
+                            <div class="h-3 w-4/5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                        </div>
+                        <div class="h-3 w-36 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                        <div class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                            <div class="flex justify-between items-center">
+                                <div class="h-3 w-20 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                                <div class="h-3 w-16 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-2">
+                        <div class="flex items-center gap-2">
+                            <div class="h-3 w-12 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                            <div class="flex -space-x-1.5">
+                                <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-slate-900"></div>
+                                <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-slate-900"></div>
+                                <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-slate-900"></div>
+                            </div>
+                        </div>
+                        <div class="h-6 w-20 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Projects Grid (Compact & Proportioned Sizing) -->
@@ -499,8 +537,32 @@
                             </div>
                         </div>
 
-                        <!-- LIST VIEW -->
-                        <div *ngIf="taskViewStyle() === 'list'"
+                        <!-- SKELETON LIST VIEW -->
+                        <div *ngIf="isTasksLoading() && taskViewStyle() === 'list'"
+                            class="divide-y divide-slate-100 dark:divide-slate-800 animate-pulse">
+                            <div *ngFor="let i of [1, 2, 3, 4, 5, 6]"
+                                class="py-4 sm:py-4.5 px-3 flex flex-col md:flex-row md:items-center justify-between gap-3.5 rounded-xl">
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
+                                    <div class="w-5 h-5 rounded bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+                                    <div class="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+                                    <div class="w-20 h-4 rounded bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+                                    <span class="text-slate-300 dark:text-slate-600 shrink-0">•</span>
+                                    <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded flex-1 max-w-sm"></div>
+                                    <div class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 ml-2"></div>
+                                </div>
+                                <div class="flex items-center gap-3 self-end md:self-center shrink-0">
+                                    <div class="hidden md:block w-24 h-4 bg-slate-200 dark:bg-slate-700 rounded shrink-0"></div>
+                                    <div class="hidden sm:block w-12 h-4 bg-slate-200 dark:bg-slate-700 rounded shrink-0"></div>
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+                                    <div class="w-24 h-7 rounded-xl bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+                                    <div class="w-14 h-3 bg-slate-200 dark:bg-slate-700 rounded shrink-0"></div>
+                                    <div class="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- REAL LIST VIEW -->
+                        <div *ngIf="!isTasksLoading() && taskViewStyle() === 'list' && filteredProjectTasks().length > 0"
                             class="divide-y divide-slate-100 dark:divide-slate-800">
                             <div *ngFor="let task of filteredProjectTasks()" (click)="openTaskModal(task)"
                                 class="group py-4 sm:py-4.5 px-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3.5 rounded-xl">
@@ -659,8 +721,40 @@
                             </div>
                         </div>
 
-                        <!-- BOARD VIEW -->
-                        <div *ngIf="taskViewStyle() === 'board'"
+                        <!-- SKELETON BOARD VIEW -->
+                        <div *ngIf="isTasksLoading() && taskViewStyle() === 'board'"
+                            class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start pt-2 animate-pulse">
+                            <div *ngFor="let col of [1, 2, 3, 4]"
+                                class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex flex-col gap-2.5 min-h-[320px]">
+                                <div class="flex items-center justify-between px-1 pb-1">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                                        <div class="w-20 h-4 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                    </div>
+                                    <div class="w-6 h-4 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                                </div>
+                                <div class="flex flex-col gap-2 flex-1">
+                                    <div *ngFor="let card of [1, 2, 3]"
+                                        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 space-y-2.5 shadow-2xs">
+                                        <div class="flex items-center justify-between">
+                                            <div class="w-16 h-3.5 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                            <div class="w-4 h-4 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="w-full h-3.5 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                            <div class="w-3/4 h-3.5 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                        </div>
+                                        <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                                            <div class="w-12 h-3 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                                            <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- REAL BOARD VIEW -->
+                        <div *ngIf="!isTasksLoading() && taskViewStyle() === 'board' && filteredProjectTasks().length > 0"
                             class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start pt-2">
                             <div *ngFor="let col of boardColumns()"
                                 class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex flex-col gap-2.5 min-h-[320px]">
@@ -717,6 +811,25 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- EMPTY TASKS STATE -->
+                        <div *ngIf="!isTasksLoading() && filteredProjectTasks().length === 0"
+                            class="text-center py-16 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-8 my-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center mx-auto mb-3 shadow-xs">
+                                <mat-icon svgIcon="mdi:clipboard-text-outline" class="icon-size-7"></mat-icon>
+                            </div>
+                            <h3 class="text-[17px] font-medium text-slate-800 dark:text-white">មិនទាន់មានកិច្ចការនៅឡើយទេ</h3>
+                            <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+                                ពុំមានកិច្ចការណាមួយត្រូវបានបង្កើតក្នុងគម្រោងនេះ ឬត្រូវតាមលក្ខខណ្ឌស្វែងរកឡើយ។
+                            </p>
+                            <div class="mt-4">
+                                <button type="button" (click)="openCreateTaskModal()"
+                                    class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-medium inline-flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                                    <mat-icon svgIcon="mdi:plus" class="icon-size-4"></mat-icon>
+                                    <span>បង្កើតការងារថ្មី</span>
+                                </button>
                             </div>
                         </div>
 

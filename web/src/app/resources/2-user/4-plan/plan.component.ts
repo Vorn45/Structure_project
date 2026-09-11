@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, ElementRef, effect, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { catchError, forkJoin, merge, of, Subject, takeUntil } from 'rxjs';
+import { catchError, finalize, forkJoin, merge, of, Subject, takeUntil } from 'rxjs';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -349,9 +349,9 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         category: 'Development',
         budget_allocated: 65000,
         budget_spent: 28000,
-        total_tasks: 5,
-        completed_tasks: 1,
-        progress: 20,
+        total_tasks: 0,
+        completed_tasks: 0,
+        progress: 0,
         start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
         team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer' },
@@ -361,134 +361,7 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
             { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
             { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-purple-600', email: 'phuongsovannara@gmail.com' },
         ],
-        tasks: [
-            {
-                id: '1788882595357',
-                code: '#BMS-0004',
-                title: 'test',
-                description: 'test',
-                type: 'feature',
-                status: 'new',
-                priority: 'medium',
-                due_date: '2026-09-15',
-                created_at: '2026-09-08T15:49:55.357Z',
-                time_ago: '២ ថ្ងៃមុន',
-                comments_count: 0,
-                attachments_count: 0,
-                reporter: { id: 1, name: 'PISETH PANHAVORN', role: 'Super Admin', initial: 'P', bgClass: 'bg-emerald-600' },
-                assignee: { id: 3, name: 'THA WINNER', role: 'អ្នកប្រើប្រាស់', initial: 'T', bgClass: 'bg-amber-600' },
-                members: [
-                    { id: 3, name: 'THA WINNER', role: 'អ្នកប្រើប្រាស់', initial: 'T', bgClass: 'bg-amber-600' },
-                ],
-                progress: 0,
-                subtasks: [],
-                links: [],
-                documents: [],
-            },
-            {
-                id: '2',
-                code: '#BMS-0000',
-                title: 'Project | Folder | Drag & Drop',
-                description: 'Implement intuitive drag and drop folder organization for project documents.',
-                type: 'feature',
-                status: 'done',
-                priority: 'high',
-                due_date: '2026-09-15',
-                created_at: '2026-08-31T08:00:00.000Z',
-                time_ago: '១០ ថ្ងៃមុន',
-                comments_count: 10,
-                attachments_count: 2,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-emerald-600' },
-                assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'P', bgClass: 'bg-blue-600' },
-                members: [
-                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'P', bgClass: 'bg-blue-600' },
-                ],
-                progress: 100,
-                subtasks: [
-                    { id: 'bms-st-1', title: 'Design drag-drop upload zone with animation', completed: true },
-                    { id: 'bms-st-2', title: 'Connect directory reorder with NestJS API', completed: true },
-                ],
-                links: [
-                    { id: 'bms-l-1', title: 'Figma: Folder UI Specs', url: 'https://figma.com', type: 'figma' },
-                ],
-                documents: [
-                    { id: 'bms-d-1', name: 'Folder_Architecture_Specs.pdf', size: '1.4 MB', type: 'pdf', upload_date: '៣១ សីហា ២០២៦' },
-                ],
-            },
-            {
-                id: '4',
-                code: '#BMS-0001',
-                title: 'My Work | Profile | Missing Cover',
-                description: 'Provide fallback default cover gradient when user cover photo URL is empty or unverified.',
-                type: 'bug',
-                status: 'reopened',
-                priority: 'urgent',
-                due_date: '2026-09-02',
-                created_at: '2026-08-31T08:00:00.000Z',
-                time_ago: '១០ ថ្ងៃមុន',
-                comments_count: 1,
-                attachments_count: 1,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-emerald-600' },
-                assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & User', initial: 'P', bgClass: 'bg-emerald-600' },
-                members: [
-                    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & User', initial: 'P', bgClass: 'bg-emerald-600' },
-                ],
-                progress: 40,
-                subtasks: [
-                    { id: 'bms-st-3', title: 'Provide CSS fallback gradient for profile header', completed: false },
-                ],
-                links: [],
-                documents: [],
-            },
-            {
-                id: '6',
-                code: '#BMS-0002',
-                title: 'User | Report | Progress Compare',
-                description: 'Render interactive comparison charts comparing weekly member work hours and sprint deliverables.',
-                type: 'feature',
-                status: 'in_progress',
-                priority: 'medium',
-                due_date: '2026-09-11',
-                created_at: '2026-08-24T08:00:00.000Z',
-                time_ago: '១៧ ថ្ងៃមុន',
-                comments_count: 0,
-                attachments_count: 1,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-emerald-600' },
-                assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'T', bgClass: 'bg-amber-600' },
-                members: [
-                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'T', bgClass: 'bg-amber-600' },
-                ],
-                progress: 55,
-                subtasks: [
-                    { id: 'bms-st-4', title: 'Integrate echarts comparison series', completed: true },
-                ],
-                links: [],
-                documents: [],
-            },
-            {
-                id: '8',
-                code: '#BMS-0003',
-                title: 'Profile | Switch Org | Exit Org',
-                description: 'Provide safe confirmation step and revoke tenant session when member switches workspace.',
-                type: 'improvement',
-                status: 'unconfirmed',
-                priority: 'high',
-                due_date: '2026-09-26',
-                created_at: '2026-08-24T08:00:00.000Z',
-                time_ago: '១៧ ថ្ងៃមុន',
-                comments_count: 21,
-                attachments_count: 0,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-emerald-600' },
-                assignee: { id: 2, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-blue-600' },
-                members: [
-                    { id: 2, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-blue-600' },
-                ],
-                progress: 0,
-                subtasks: [],
-                links: [],
-                documents: [],
-            },
-        ],
+        tasks: [],
         phases: [
             {
                 id: 'bms-ph-1',
@@ -557,7 +430,7 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         category: 'Workforce',
         budget_allocated: 80000,
         budget_spent: 56000,
-        total_tasks: 4,
+        total_tasks: 0,
         completed_tasks: 0,
         progress: 0,
         start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
@@ -569,99 +442,7 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
             { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
             { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-rose-600', email: 'phuongsovannara@gmail.com' },
         ],
-        tasks: [
-            {
-                id: '1',
-                code: '#WMS-0000',
-                title: 'Org Admin | Structure | Department',
-                description: 'Manage departmental structures, permissions, and organizational units in core hierarchy.',
-                priority: 'high',
-                status: 'in_review',
-                due_date: '2026-09-13',
-                created_at: '2026-09-01T08:00:00.000Z',
-                time_ago: '៩ ថ្ងៃមុន',
-                comments_count: 1,
-                attachments_count: 2,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-indigo-600' },
-                assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & User', initial: 'P', bgClass: 'bg-indigo-600' },
-                members: [
-                    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & User', initial: 'P', bgClass: 'bg-indigo-600' },
-                ],
-                progress: 85,
-                subtasks: [],
-                links: [],
-                documents: [],
-            },
-            {
-                id: '3',
-                code: '#WMS-0001',
-                title: 'Project | Folder | Cannot Scroll PDF',
-                description: 'Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.',
-                priority: 'urgent',
-                status: 'confirmed',
-                due_date: '2026-09-04',
-                created_at: '2026-08-31T08:00:00.000Z',
-                time_ago: '១០ ថ្ងៃមុន',
-                comments_count: 2,
-                attachments_count: 1,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-indigo-600' },
-                assignee: { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'T', bgClass: 'bg-amber-600' },
-                members: [
-                    { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'T', bgClass: 'bg-amber-600' },
-                ],
-                progress: 100,
-                subtasks: [],
-                links: [],
-                documents: [],
-            },
-            {
-                id: '5',
-                code: '#WMS-0002',
-                title: 'Security setting UI improvements',
-                description: 'Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.',
-                priority: 'high',
-                status: 'new',
-                due_date: '2026-09-15',
-                created_at: '2026-08-31T08:00:00.000Z',
-                time_ago: '១០ ថ្ងៃមុន',
-                comments_count: 12,
-                attachments_count: 1,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-indigo-600' },
-                assignee: { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'P', bgClass: 'bg-emerald-600' },
-                members: [
-                    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'P', bgClass: 'bg-emerald-600' },
-                    { id: 3, name: 'THA WINNER', role: 'User', initial: 'T', bgClass: 'bg-amber-600' },
-                    { id: 4, name: 'Phuong Sovannara', role: 'User', initial: 'P', bgClass: 'bg-rose-600' },
-                    { id: 1, name: 'PISETH PANHAVORN', role: 'Super Admin', initial: 'P', bgClass: 'bg-indigo-600' },
-                ],
-                progress: 10,
-                subtasks: [],
-                links: [],
-                documents: [],
-            },
-            {
-                id: '7',
-                code: '#WMS-0003',
-                title: 'User | Report | Progress',
-                description: 'Real-time sync of task milestone updates and aggregated department productivity scorecards.',
-                priority: 'medium',
-                status: 'confirmed',
-                due_date: '2026-09-09',
-                created_at: '2026-08-24T08:00:00.000Z',
-                time_ago: '១៧ ថ្ងៃមុន',
-                comments_count: 2,
-                attachments_count: 1,
-                reporter: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'P', bgClass: 'bg-indigo-600' },
-                assignee: { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & User', initial: 'P', bgClass: 'bg-indigo-600' },
-                members: [
-                    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & User', initial: 'P', bgClass: 'bg-indigo-600' },
-                ],
-                progress: 88,
-                subtasks: [],
-                links: [],
-                documents: [],
-            },
-        ],
+        tasks: [],
         phases: [
             {
                 id: 'wms-ph-1',
@@ -745,6 +526,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     private _resizeListener?: () => void;
 
     loading = signal<boolean>(false);
+    isTasksLoading = signal<boolean>(false);
     plans = signal<ExtendedProjectItem[]>(DEFAULT_INVITED_PROJECTS);
     searchQuery = signal<string>('');
     statusFilter = signal<string>('all');
@@ -1650,10 +1432,14 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         this.projectNavTab.set('tasks');
         this.subtaskFilter.set('all');
         this.taskSearchQuery.set('');
+        this.isTasksLoading.set(true);
 
         this._taskService
             .getTasks()
-            .pipe(catchError(() => of(null)))
+            .pipe(
+                catchError(() => of(null)),
+                finalize(() => this.isTasksLoading.set(false))
+            )
             .subscribe((res) => {
                 if (res?.data?.results?.length) {
                     const allTasks: TaskItem[] = res.data.results;
@@ -1675,28 +1461,38 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         );
                     });
 
-                    if (projectTasks.length > 0) {
-                        const mapped = projectTasks.map((t) => this.mapTaskToIndividualTaskItem(t));
-                        const current = this.selectedProject();
-                        if (current && (current.id === latest.id || current.code === latest.code)) {
-                            const updatedProject: ExtendedProjectItem = {
-                                ...current,
-                                tasks: mapped,
-                                total_tasks: mapped.length,
-                                completed_tasks: mapped.filter((t) =>
-                                    ['done', 'completed'].includes((t.status || '').toLowerCase())
-                                ).length,
-                            };
-                            updatedProject.progress =
-                                updatedProject.total_tasks > 0
-                                    ? Math.round((updatedProject.completed_tasks / updatedProject.total_tasks) * 100)
-                                    : 0;
+                    const mapped = projectTasks.map((t) => this.mapTaskToIndividualTaskItem(t));
+                    const current = this.selectedProject();
+                    if (current && (current.id === latest.id || current.code === latest.code)) {
+                        const updatedProject: ExtendedProjectItem = {
+                            ...current,
+                            tasks: mapped,
+                            total_tasks: mapped.length,
+                            completed_tasks: mapped.filter((t) =>
+                                ['done', 'completed'].includes((t.status || '').toLowerCase())
+                            ).length,
+                        };
+                        updatedProject.progress =
+                            updatedProject.total_tasks > 0
+                                ? Math.round((updatedProject.completed_tasks / updatedProject.total_tasks) * 100)
+                                : 0;
 
-                            this.selectedProject.set(updatedProject);
-                            this.plans.update((list) =>
-                                list.map((p) => (p.id === updatedProject.id ? updatedProject : p))
-                            );
-                        }
+                        this.selectedProject.set(updatedProject);
+                        this.plans.update((list) =>
+                            list.map((p) => (p.id === updatedProject.id ? updatedProject : p))
+                        );
+                    }
+                } else {
+                    const current = this.selectedProject();
+                    if (current && (current.id === latest.id || current.code === latest.code)) {
+                        const updatedProject: ExtendedProjectItem = {
+                            ...current,
+                            tasks: [],
+                            total_tasks: 0,
+                            completed_tasks: 0,
+                            progress: 0,
+                        };
+                        this.selectedProject.set(updatedProject);
                     }
                 }
             });
