@@ -167,30 +167,17 @@
                         </h2>
                     </div>
 
-                    <!-- Title Inline Editor -->
-                    <div *ngIf="isEditingTitle()" class="space-y-2 w-full animate-in fade-in duration-150">
+                    <!-- Title Inline Editor (Auto-Saves while typing & on blur / Enter) -->
+                    <div *ngIf="isEditingTitle()" class="w-full animate-in fade-in duration-150">
                         <textarea #titleInputRef
                             rows="2"
                             [ngModel]="editingTitle()"
-                            (ngModelChange)="editingTitle.set($event)"
+                            (ngModelChange)="onTitleInput($event)"
+                            (blur)="finishEditTitle()"
                             (keydown)="onTitleKeydown($event)"
                             (keydown.escape)="cancelEditTitle($event)"
                             class="w-full text-[15px] font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-[#131e33] border border-blue-500 rounded-xl px-3 py-2 outline-none ring-2 ring-blue-500/20 shadow-xs font-kantumruy leading-snug resize-none"
                             placeholder="បញ្ចូលចំណងជើងការងារ..."></textarea>
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] text-slate-400 dark:text-slate-500">ចុច Enter ដើម្បីរក្សាទុក ឬ Esc ដើម្បីបោះបង់</span>
-                            <div class="flex items-center gap-1.5">
-                                <button type="button" (click)="cancelEditTitle($event)"
-                                    class="px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
-                                    បោះបង់
-                                </button>
-                                <button type="button" (click)="saveTitle()"
-                                    class="px-2.5 py-1 text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-2xs transition-colors cursor-pointer flex items-center gap-1">
-                                    <mat-icon svgIcon="mdi:check" class="!w-3.5 !h-3.5"></mat-icon>
-                                    <span>រក្សាទុក</span>
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -509,31 +496,16 @@
                         </p>
                     </div>
 
-                    <!-- Description Edit Mode -->
-                    <div *ngIf="isEditingDescription()" class="space-y-2 w-full animate-in fade-in duration-150">
+                    <!-- Description Edit Mode (Auto-Saves while typing & on blur) -->
+                    <div *ngIf="isEditingDescription()" class="w-full animate-in fade-in duration-150">
                         <textarea #descriptionInputRef
                             rows="4"
                             [ngModel]="editingDescription()"
-                            (ngModelChange)="editingDescription.set($event)"
-                            (keydown.ctrl.enter)="saveDescription()"
-                            (keydown.meta.enter)="saveDescription()"
+                            (ngModelChange)="onDescriptionInput($event)"
+                            (blur)="finishEditDescription()"
                             (keydown.escape)="cancelEditDescription($event)"
                             class="w-full text-[13px] text-slate-800 dark:text-slate-200 bg-white dark:bg-[#131e33] border border-blue-500 rounded-xl p-3 outline-none ring-2 ring-blue-500/20 shadow-xs font-kantumruy leading-relaxed resize-y min-h-[90px]"
                             placeholder="បញ្ចូលការពិពណ៌នាលម្អិតនៅទីនេះ..."></textarea>
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] text-slate-400 dark:text-slate-500">ចុច Ctrl+Enter ដើម្បីរក្សាទុក ឬ Esc ដើម្បីបោះបង់</span>
-                            <div class="flex items-center gap-1.5">
-                                <button type="button" (click)="cancelEditDescription($event)"
-                                    class="px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
-                                    បោះបង់
-                                </button>
-                                <button type="button" (click)="saveDescription()"
-                                    class="px-2.5 py-1 text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-2xs transition-colors cursor-pointer flex items-center gap-1">
-                                    <mat-icon svgIcon="mdi:check" class="!w-3.5 !h-3.5"></mat-icon>
-                                    <span>រក្សាទុក</span>
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
 

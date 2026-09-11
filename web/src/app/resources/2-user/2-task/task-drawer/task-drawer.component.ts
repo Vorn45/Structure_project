@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, ElementRef, HostListener, input, output, signal, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, input, OnDestroy, output, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -130,7 +130,7 @@ import {
         `,
     ],
 })
-export class TaskDrawerComponent {
+export class TaskDrawerComponent implements OnDestroy {
     task = input<TaskItem | null>(null);
     show = input<boolean>(false);
     messages = input<TaskChatMessage[]>([]);
@@ -171,6 +171,11 @@ export class TaskDrawerComponent {
     isEditingDescription = signal<boolean>(false);
     editingDescription = signal<string>('');
 
+    private _titleDebounceTimer?: any;
+    private _descriptionDebounceTimer?: any;
+    private _lastEmittedTitle = '';
+    private _lastEmittedDescription = '';
+
     @HostListener('document:keydown.escape', ['$event'])
     onEscapeKey(event?: KeyboardEvent): void {
         if (this.isEditingTitle()) {
@@ -190,6 +195,10 @@ export class TaskDrawerComponent {
         effect(() => {
             const currentTask = this.task();
             if (currentTask) {
+                clearTimeout(this._titleDebounceTimer);
+                clearTimeout(this._descriptionDebounceTimer);
+                this._lastEmittedTitle = currentTask.title || '';
+                this._lastEmittedDescription = (currentTask.description || '').trim();
                 this.isEditingTitle.set(false);
                 this.isEditingDescription.set(false);
             }
@@ -212,14 +221,23 @@ export class TaskDrawerComponent {
             } else {
                 this.isVisible.set(false);
                 this.isClosing.set(false);
+                clearTimeout(this._titleDebounceTimer);
+                clearTimeout(this._descriptionDebounceTimer);
                 this.isEditingTitle.set(false);
                 this.isEditingDescription.set(false);
             }
         }, { allowSignalWrites: true });
     }
 
+    ngOnDestroy(): void {
+        clearTimeout(this._titleDebounceTimer);
+        clearTimeout(this._descriptionDebounceTimer);
+    }
+
     startEditTitle(): void {
-        this.editingTitle.set(this.task()?.title || '');
+        const t = this.task()?.title || '';
+        this.editingTitle.set(t);
+        this._lastEmittedTitle = t;
         this.isEditingTitle.set(true);
         setTimeout(() => {
             if (this.titleInputRef?.nativeElement) {
@@ -229,23 +247,57 @@ export class TaskDrawerComponent {
         }, 50);
     }
 
-    saveTitle(): void {
+    onTitleInput(val: string): void {
+        this.editingTitle.set(val);
         const currentTask = this.task();
-        if (!currentTask) {
-            this.isEditingTitle.set(false);
-            return;
-        }
-        const trimmed = this.editingTitle().trim();
-        if (trimmed && trimmed !== currentTask.title) {
+        if (!currentTask) return;
+
+        const trimmed = val.trim();
+        if (trimmed) {
             (currentTask as any).title = trimmed;
-            this.titleChange.emit({ task: currentTask, title: trimmed });
+        }
+
+        clearTimeout(this._titleDebounceTimer);
+        this._titleDebounceTimer = setTimeout(() => {
+            if (trimmed && trimmed !== this._lastEmittedTitle) {
+                this._lastEmittedTitle = trimmed;
+                this.titleChange.emit({ task: currentTask, title: trimmed });
+            }
+        }, 700);
+    }
+
+    finishEditTitle(): void {
+        clearTimeout(this._titleDebounceTimer);
+        const currentTask = this.task();
+        if (currentTask) {
+            const trimmed = this.editingTitle().trim();
+            if (trimmed) {
+                (currentTask as any).title = trimmed;
+                if (trimmed !== this._lastEmittedTitle) {
+                    this._lastEmittedTitle = trimmed;
+                    this.titleChange.emit({ task: currentTask, title: trimmed });
+                }
+            } else {
+                this.editingTitle.set(this._lastEmittedTitle || currentTask.title || '');
+                (currentTask as any).title = this._lastEmittedTitle || currentTask.title || '';
+            }
         }
         this.isEditingTitle.set(false);
+    }
+
+    saveTitle(): void {
+        this.finishEditTitle();
     }
 
     cancelEditTitle(event?: Event): void {
         if (event) {
             event.stopPropagation();
+        }
+        clearTimeout(this._titleDebounceTimer);
+        const currentTask = this.task();
+        if (currentTask) {
+            this.editingTitle.set(this._lastEmittedTitle || currentTask.title || '');
+            (currentTask as any).title = this._lastEmittedTitle || currentTask.title || '';
         }
         this.isEditingTitle.set(false);
     }
@@ -253,12 +305,14 @@ export class TaskDrawerComponent {
     onTitleKeydown(event: KeyboardEvent): void {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            this.saveTitle();
+            this.finishEditTitle();
         }
     }
 
     startEditDescription(): void {
-        this.editingDescription.set(this.task()?.description || '');
+        const d = this.task()?.description || '';
+        this.editingDescription.set(d);
+        this._lastEmittedDescription = d.trim();
         this.isEditingDescription.set(true);
         setTimeout(() => {
             if (this.descriptionInputRef?.nativeElement) {
@@ -267,24 +321,51 @@ export class TaskDrawerComponent {
         }, 50);
     }
 
-    saveDescription(): void {
+    onDescriptionInput(val: string): void {
+        this.editingDescription.set(val);
         const currentTask = this.task();
-        if (!currentTask) {
-            this.isEditingDescription.set(false);
-            return;
-        }
-        const trimmed = this.editingDescription().trim();
-        const currentDesc = (currentTask.description || '').trim();
-        if (trimmed !== currentDesc) {
-            (currentTask as any).description = trimmed;
-            this.descriptionChange.emit({ task: currentTask, description: trimmed });
+        if (!currentTask) return;
+
+        const trimmed = val.trim();
+        (currentTask as any).description = val;
+
+        clearTimeout(this._descriptionDebounceTimer);
+        this._descriptionDebounceTimer = setTimeout(() => {
+            if (trimmed !== this._lastEmittedDescription) {
+                this._lastEmittedDescription = trimmed;
+                this.descriptionChange.emit({ task: currentTask, description: val });
+            }
+        }, 800);
+    }
+
+    finishEditDescription(): void {
+        clearTimeout(this._descriptionDebounceTimer);
+        const currentTask = this.task();
+        if (currentTask) {
+            const rawVal = this.editingDescription();
+            const trimmed = rawVal.trim();
+            (currentTask as any).description = rawVal;
+            if (trimmed !== this._lastEmittedDescription) {
+                this._lastEmittedDescription = trimmed;
+                this.descriptionChange.emit({ task: currentTask, description: rawVal });
+            }
         }
         this.isEditingDescription.set(false);
+    }
+
+    saveDescription(): void {
+        this.finishEditDescription();
     }
 
     cancelEditDescription(event?: Event): void {
         if (event) {
             event.stopPropagation();
+        }
+        clearTimeout(this._descriptionDebounceTimer);
+        const currentTask = this.task();
+        if (currentTask) {
+            this.editingDescription.set(this._lastEmittedDescription || currentTask.description || '');
+            (currentTask as any).description = this._lastEmittedDescription || currentTask.description || '';
         }
         this.isEditingDescription.set(false);
     }
