@@ -18,6 +18,16 @@ export interface AdminStats {
         total_users: number;
         pending_leaves: number;
     };
+    kpi_badges?: {
+        members: string;
+        projects: string;
+        leaves: string;
+    };
+    sparklines?: {
+        members: number[];
+        projects: number[];
+        leaves: number[];
+    };
     task_distribution?: {
         completed: number;
         in_progress: number;
@@ -62,6 +72,11 @@ export interface AdminStats {
         initials: string;
         avatarBg: string;
         tasks_completed?: number;
+        tasks_1d?: number;
+        tasks_7d?: number;
+        tasks_1m?: number;
+        tasks_1y?: number;
+        tasks_all?: number;
     }>;
     projects_summary: Array<{
         id: string;

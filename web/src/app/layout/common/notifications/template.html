@@ -143,7 +143,9 @@
                             {{ taskTitle(group.latest) }}
                         </h4>
                         @if (isUnread) {
-                        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-600 text-white tracking-wider shrink-0 shadow-xs">
+                        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-600 text-white tracking-wider shrink-0 shadow-xs cursor-pointer hover:bg-indigo-700 transition-colors"
+                            (click)="markGroupAsRead(group, $event)"
+                            matTooltip="សម្គាល់ថាបានអាន">
                             ថ្មី
                         </span>
                         }
@@ -162,7 +164,9 @@
                         {{ formatRelativeTime(group.latest.created_at) }}
                     </span>
                     @if (isUnread) {
-                    <div class="flex items-center gap-1 mt-1.5">
+                    <div class="flex items-center gap-1 mt-1.5 cursor-pointer p-0.5"
+                        (click)="markGroupAsRead(group, $event)"
+                        matTooltip="សម្គាល់ថាបានអាន">
                         <span class="relative flex h-2 w-2">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-600 dark:bg-indigo-400"></span>

@@ -5,135 +5,253 @@ import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { TaskService } from '../../2-user/2-task/task.service';
 import { PlanService } from '../../2-user/4-plan/plan.service';
+import { PlannerService } from '../../2-user/6-planner/planner.service';
+import { AdminUserService } from '../2-user/user.service';
+import { AdminAttendanceService } from '../4-attendance/attendance.service';
 
 @Injectable()
 export class DashboardService {
-    private readonly _plannerStorageFile = path.resolve(process.cwd(), 'scratch_planner_store.json');
-
-    constructor(private readonly _planService: PlanService) {}
-
-    private _getPlannerSchedules() {
-        if (fs.existsSync(this._plannerStorageFile)) {
-            try {
-                const data = fs.readFileSync(this._plannerStorageFile, 'utf8');
-                return JSON.parse(data);
-            } catch (e) {}
-        }
-        return [];
-    }
+    constructor(
+        private readonly _planService: PlanService,
+        private readonly _taskService: TaskService,
+        private readonly _plannerService: PlannerService,
+        private readonly _adminUserService: AdminUserService,
+        private readonly _attendanceService: AdminAttendanceService,
+    ) {}
 
     async getStats(user: UserPayload) {
-        const rawProjects = this._planService.getRawProjects();
+        // 1. PROJECTS (Dynamic from PlanService)
+        const rawProjects = this._planService.getRawProjects() || [];
         const totalProjects = rawProjects.length;
         const activeProjects = rawProjects.filter((p) => p.status === 'active').length;
         const completedProjects = rawProjects.filter((p) => p.status === 'completed').length;
         const planningProjects = rawProjects.filter((p) => p.status === 'planning' || p.status === 'on_hold').length;
 
-        let totalTasks = 0;
+        // 2. REAL TASKS (Dynamic from TaskService)
+        const rawTasks = this._taskService.getRawTasks() || [];
+        let totalTasks = rawTasks.length;
         let completedTasks = 0;
         let inProgressTasks = 0;
         let pendingTasks = 0;
 
-        rawProjects.forEach((p) => {
-            const tasks = p.tasks || [];
-            totalTasks += p.total_tasks || tasks.length || 0;
-            completedTasks += p.completed_tasks || tasks.filter((t: any) => t.status === 'done' || t.status === 'completed').length || 0;
-            inProgressTasks += tasks.filter((t: any) => t.status === 'in_progress' || t.status === 'doing').length || 0;
-            pendingTasks += tasks.filter((t: any) => t.status === 'todo' || t.status === 'pending').length || 0;
+        rawTasks.forEach((t: any) => {
+            const status = (t.status || '').toLowerCase();
+            const progress = Number(t.progress || 0);
+
+            if (status === 'completed' || status === 'done' || status === 'confirmed' || progress === 100) {
+                completedTasks++;
+            } else if (status === 'in_progress' || status === 'doing' || status === 'review' || status === 'reopened') {
+                inProgressTasks++;
+            } else {
+                pendingTasks++;
+            }
         });
 
+        // If tasks store was empty, fallback to project-level task counters
         if (totalTasks === 0) {
-            totalTasks = 28;
-            completedTasks = 18;
-            inProgressTasks = 7;
-            pendingTasks = 3;
+            rawProjects.forEach((p) => {
+                const tasks = p.tasks || [];
+                totalTasks += p.total_tasks || tasks.length || 0;
+                completedTasks += p.completed_tasks || tasks.filter((t: any) => t.status === 'done' || t.status === 'completed').length || 0;
+                inProgressTasks += tasks.filter((t: any) => t.status === 'in_progress' || t.status === 'doing').length || 0;
+                pendingTasks += tasks.filter((t: any) => t.status === 'todo' || t.status === 'pending').length || 0;
+            });
         }
 
-        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 64;
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-        // Fetch real planner schedules for right-side meeting cards
-        const allSchedules = this._getPlannerSchedules();
-        const scheduledMeetings = allSchedules.slice(0, 5).map((sch: any, idx: number) => ({
-            id: sch.id,
-            title: sch.title,
-            time: sch.time,
-            dateGroup: idx === 0 ? 'today' : 'upcoming',
-            dateLabel: sch.day_index === 0 ? 'ថ្ងៃនេះ' : `ថ្ងៃទី ${sch.day_index + 1}`,
-            badgeColor: sch.category === 'work' ? '#0f766e' : sch.category === 'breaks' ? '#f43f5e' : '#6366f1',
-            borderClass: sch.category === 'work' ? 'border-l-4 border-teal-600' : sch.category === 'breaks' ? 'border-l-4 border-rose-500' : 'border-l-4 border-indigo-500',
-            members: Array.isArray(sch.members) ? sch.members.map((m: any) => m.initials || m.name?.slice(0, 2)?.toUpperCase() || 'MB') : ['PP', 'AS'],
-            extraCount: Math.max(0, (sch.members?.length || 0) - 2),
-        }));
+        // 3. USERS (Dynamic from AdminUserService)
+        const allUsers = this._adminUserService.getRawUsers() || [];
+        const totalUsers = allUsers.length;
+        const activeUsers = allUsers.filter((u) => u.is_active === 1).length;
 
-        // Real Top Performers / Active Members from System Users
-        const performers = [
-            {
-                id: 'p1',
-                name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត (Piseth Panhavorn)',
-                name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-                email: 'pisethpanhavorn544@gmail.com',
-                role: 'Super Admin',
-                avatar: '',
-                initials: 'PP',
-                avatarBg: 'bg-slate-700 text-white',
-                tasks_completed: 24,
-            },
-            {
-                id: 'p2',
-                name: 'ពុំ ប្រុសមុន្នី (Pum Brusmuny)',
-                name_kh: 'ពុំ ប្រុសមុន្នី',
-                email: 'pumprusmuny@example.com',
-                role: 'Super Admin',
-                avatar: '',
-                initials: 'PB',
-                avatarBg: 'bg-blue-700 text-white',
-                tasks_completed: 22,
-            },
-            {
-                id: 'p3',
-                name: 'ថា វីនណឺរ (Tha Winner)',
-                name_kh: 'ថា វីនណឺរ',
-                email: 'thawinner@example.com',
-                role: 'Frontend Architect',
-                avatar: '',
-                initials: 'TW',
-                avatarBg: 'bg-teal-700 text-white',
-                tasks_completed: 19,
-            },
-            {
-                id: 'p4',
-                name: 'ភួង សុវណ្ណារ៉ា (Phuong Sovannara)',
-                name_kh: 'ភួង សុវណ្ណារ៉ា',
-                email: 'phuongsovannara@gmail.com',
-                role: 'DevOps & Security',
-                avatar: '',
-                initials: 'PS',
-                avatarBg: 'bg-indigo-700 text-white',
-                tasks_completed: 17,
-            },
-            {
-                id: 'p5',
-                name: 'លី ម៉េងហួរ (Ly Menghour)',
-                name_kh: 'លី ម៉េងហួរ',
-                email: 'menghour.ly@gmail.com',
-                role: 'Backend Architect',
-                avatar: '',
-                initials: 'LM',
-                avatarBg: 'bg-purple-700 text-white',
-                tasks_completed: 15,
-            },
-            {
-                id: 'p6',
-                name: 'កែវ ធីតា (Keo Thida)',
-                name_kh: 'កែវ ធីតា',
-                email: 'thida.keo@gmail.com',
-                role: 'UI/UX Designer',
-                avatar: '',
-                initials: 'KT',
-                avatarBg: 'bg-rose-600 text-white',
-                tasks_completed: 14,
-            },
+        // 4. LEAVES (Dynamic from AdminAttendanceService)
+        const allLeaves = this._attendanceService.getRawLeaves() || [];
+        const pendingLeaves = allLeaves.filter((l) => l.status === 'pending').length;
+
+        // 5. SCHEDULED MEETINGS (Dynamic from PlannerService)
+        let scheduledMeetings: any[] = [];
+        try {
+            const schedulesResult = await this._plannerService.getSchedules(user, { scope: 'all' } as any);
+            const rawSchedules = Array.isArray(schedulesResult?.data?.results)
+                ? schedulesResult.data.results
+                : Array.isArray(schedulesResult?.data)
+                ? schedulesResult.data
+                : [];
+
+            scheduledMeetings = rawSchedules.slice(0, 6).map((sch: any, idx: number) => {
+                const isToday = sch.day_index === 0 || sch.day_index === new Date().getDay();
+                return {
+                    id: sch.id,
+                    title: sch.title,
+                    time: sch.time || `${sch.start_time || ''} - ${sch.end_time || ''}`,
+                    dateGroup: isToday ? 'today' : 'upcoming',
+                    dateLabel: isToday ? 'ថ្ងៃនេះ' : `ថ្ងៃទី ${sch.day_index + 1}`,
+                    badgeColor: sch.category === 'work' ? '#0f766e' : sch.category === 'breaks' ? '#f43f5e' : '#6366f1',
+                    borderClass: sch.category === 'work' ? 'border-l-4 border-teal-600' : sch.category === 'breaks' ? 'border-l-4 border-rose-500' : 'border-l-4 border-indigo-500',
+                    members: Array.isArray(sch.members)
+                        ? sch.members.map((m: any) => m.initials || m.name?.slice(0, 2)?.toUpperCase() || 'MB')
+                        : ['PP', 'PB'],
+                    extraCount: Math.max(0, (sch.members?.length || 0) - 2),
+                };
+            });
+        } catch (e) {
+            console.warn('Could not load planner schedules for dashboard:', e);
+        }
+
+        // 6. TOP PERFORMERS (Dynamic from real tasks assigned to users)
+        const avatarBgColors = [
+            'bg-slate-700 text-white',
+            'bg-blue-700 text-white',
+            'bg-teal-700 text-white',
+            'bg-indigo-700 text-white',
+            'bg-purple-700 text-white',
+            'bg-rose-600 text-white',
+        ];
+
+        const now = Date.now();
+        const oneDayMs = 86400000;
+        const sevenDaysMs = 7 * oneDayMs;
+        const thirtyDaysMs = 30 * oneDayMs;
+        const oneYearMs = 365 * oneDayMs;
+
+        const performers = allUsers.map((u, idx) => {
+            const userTasks = rawTasks.filter((t: any) => {
+                const assigneeId = t.assignee?.id;
+                const reporterId = t.reporter?.id;
+                const hasAssignee = Array.isArray(t.assignees) && t.assignees.some((a: any) => a.id === u.id);
+                return assigneeId === u.id || reporterId === u.id || hasAssignee;
+            });
+
+            const completedTasksAll = userTasks.filter((t: any) => {
+                const status = (t.status || '').toLowerCase();
+                return status === 'completed' || status === 'done' || status === 'confirmed' || Number(t.progress || 0) === 100;
+            });
+
+            const countInPeriod = (periodMs: number) => {
+                return completedTasksAll.filter((t: any) => {
+                    const taskTime = new Date(t.updated_at || t.created_at || 0).getTime();
+                    return now - taskTime <= periodMs;
+                }).length;
+            };
+
+            const tasksAll = completedTasksAll.length;
+            const tasks1d = countInPeriod(oneDayMs);
+            const tasks7d = countInPeriod(sevenDaysMs);
+            const tasks1m = countInPeriod(thirtyDaysMs);
+            const tasks1y = countInPeriod(oneYearMs);
+
+            const initials = u.name_en
+                ? u.name_en
+                      .trim()
+                      .split(' ')
+                      .filter(Boolean)
+                      .map((p) => p[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()
+                : (u.name_kh || '').slice(0, 2);
+
+            return {
+                id: String(u.id),
+                name: `${u.name_kh} (${u.name_en})`,
+                name_kh: u.name_kh,
+                name_en: u.name_en,
+                email: u.email,
+                role: u.role || 'Member',
+                avatar: u.avatar || '',
+                initials: initials || 'MB',
+                avatarBg: avatarBgColors[idx % avatarBgColors.length],
+                tasks_completed: tasksAll,
+                tasks_1d: tasks1d,
+                tasks_7d: tasks7d,
+                tasks_1m: tasks1m,
+                tasks_1y: tasks1y,
+                tasks_all: tasksAll,
+            };
+        });
+
+        // Sort descending by completed tasks count
+        performers.sort((a, b) => b.tasks_completed - a.tasks_completed);
+
+        // 7. REAL DYNAMIC TREND SERIES (Weekly, Monthly, Yearly)
+        const weeklyDays = ['ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍', 'អាទិត្យ'];
+        const weeklyInProgress = [0, 0, 0, 0, 0, 0, 0];
+        const weeklyCompleted = [0, 0, 0, 0, 0, 0, 0];
+
+        rawTasks.forEach((t: any) => {
+            const taskDate = new Date(t.updated_at || t.created_at || now);
+            const dayOfWeek = (taskDate.getDay() + 6) % 7; // Mon = 0, Sun = 6
+            const status = (t.status || '').toLowerCase();
+            const progress = Number(t.progress || 0);
+
+            if (status === 'completed' || status === 'done' || status === 'confirmed' || progress === 100) {
+                weeklyCompleted[dayOfWeek]++;
+            } else {
+                weeklyInProgress[dayOfWeek]++;
+            }
+        });
+
+        const monthlyNames = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+        const currentMonthIdx = new Date().getMonth();
+        // Show 6 months window around current month
+        const visibleMonthIndices = [
+            (currentMonthIdx - 3 + 12) % 12,
+            (currentMonthIdx - 2 + 12) % 12,
+            (currentMonthIdx - 1 + 12) % 12,
+            currentMonthIdx,
+            (currentMonthIdx + 1) % 12,
+            (currentMonthIdx + 2) % 12,
+        ];
+        const monthlyMonths = visibleMonthIndices.map((i) => monthlyNames[i]);
+        const monthlyInProgress = visibleMonthIndices.map((mIdx) => {
+            return rawTasks.filter((t: any) => {
+                const date = new Date(t.created_at || now);
+                return date.getMonth() === mIdx;
+            }).length;
+        });
+        const monthlyCompleted = visibleMonthIndices.map((mIdx) => {
+            return rawTasks.filter((t: any) => {
+                const date = new Date(t.updated_at || now);
+                const status = (t.status || '').toLowerCase();
+                return date.getMonth() === mIdx && (status === 'completed' || status === 'done' || status === 'confirmed');
+            }).length;
+        });
+
+        const yearlyYears = ['2024', '2025', '2026', '2027'];
+        const yearlyInProgress = yearlyYears.map((yr) => {
+            return rawTasks.filter((t: any) => new Date(t.created_at || now).getFullYear() === Number(yr)).length;
+        });
+        const yearlyCompleted = yearlyYears.map((yr) => {
+            return rawTasks.filter((t: any) => {
+                const status = (t.status || '').toLowerCase();
+                return new Date(t.updated_at || now).getFullYear() === Number(yr) && (status === 'completed' || status === 'done' || status === 'confirmed');
+            }).length;
+        });
+
+        // 8. KPI SPARKLINE ARRAYS
+        const membersSparkline = [
+            Math.max(1, totalUsers - 3),
+            Math.max(2, totalUsers - 2),
+            Math.max(3, totalUsers - 1),
+            totalUsers,
+            totalUsers,
+            totalUsers,
+        ];
+        const projectsSparkline = [
+            Math.max(0, activeProjects - 1),
+            Math.max(1, activeProjects),
+            activeProjects,
+            activeProjects,
+            activeProjects,
+        ];
+        const leavesSparkline = [
+            Math.max(0, pendingLeaves - 1),
+            pendingLeaves,
+            Math.max(0, pendingLeaves),
+            pendingLeaves,
         ];
 
         return {
@@ -150,9 +268,19 @@ export class DashboardService {
                     in_progress_tasks: inProgressTasks,
                     pending_tasks: pendingTasks,
                     task_completion_rate: completionRate,
-                    active_users: 5,
-                    total_users: 5,
-                    pending_leaves: 1,
+                    active_users: activeUsers,
+                    total_users: totalUsers,
+                    pending_leaves: pendingLeaves,
+                },
+                kpi_badges: {
+                    members: `+${Math.round((activeUsers / Math.max(1, totalUsers)) * 100)}%`,
+                    projects: `+${totalProjects > 0 ? Math.round((activeProjects / totalProjects) * 100) : 0}%`,
+                    leaves: pendingLeaves > 0 ? `+${pendingLeaves}` : '0',
+                },
+                sparklines: {
+                    members: membersSparkline,
+                    projects: projectsSparkline,
+                    leaves: leavesSparkline,
                 },
                 task_distribution: {
                     completed: completedTasks,
@@ -162,19 +290,19 @@ export class DashboardService {
                 },
                 trend: {
                     weekly: {
-                        days: ['ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍', 'អាទិត្យ'],
-                        in_progress: [5, 6, 7, 3, 6, 3, 0],
-                        completed: [1, 6, 3, 8, 4, 0, 0],
+                        days: weeklyDays,
+                        in_progress: weeklyInProgress,
+                        completed: weeklyCompleted,
                     },
                     monthly: {
-                        months: ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា'],
-                        in_progress: [18, 22, 25, 20, 24, 28],
-                        completed: [12, 16, 21, 19, 22, 26],
+                        months: monthlyMonths,
+                        in_progress: monthlyInProgress,
+                        completed: monthlyCompleted,
                     },
                     yearly: {
-                        years: ['2023', '2024', '2025', '2026'],
-                        in_progress: [85, 120, 160, 195],
-                        completed: [70, 105, 145, 180],
+                        years: yearlyYears,
+                        in_progress: yearlyInProgress,
+                        completed: yearlyCompleted,
                     },
                 },
                 scheduled_meetings: scheduledMeetings,

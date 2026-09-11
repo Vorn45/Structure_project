@@ -410,25 +410,33 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.closePanel();
     }
 
-    /** Mark the group read and navigate to the related task / page. */
-    onGroupClick(group: NotificationGroup): void {
-        const unreadIds = new Set(group.items.filter((n) => !n.read).map((n) => n.id));
+    /** Mark a specific group as read without navigating */
+    markGroupAsRead(group: NotificationGroup, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        const unreadIds = new Set(group.items.filter((n) => !n.read).map((n) => String(n.id)));
         if (!group.latest.read) {
-            unreadIds.add(group.latest.id);
+            unreadIds.add(String(group.latest.id));
         }
 
         if (unreadIds.size) {
+            const idList = [...unreadIds];
             this.notifications = this.notifications.map((n) =>
-                unreadIds.has(n.id) ? { ...n, read: true, read_at: new Date() } : n,
+                unreadIds.has(String(n.id)) ? { ...n, read: true, read_at: new Date() } : n,
             );
-            this.unreadNotifications = this.unreadNotifications.filter((n) => !unreadIds.has(n.id));
+            this.unreadNotifications = this.unreadNotifications.filter((n) => !unreadIds.has(String(n.id)));
             group.unreadCount = 0;
             group.latest.read = true;
             this.unreadCount = Math.max(0, this.unreadCount - unreadIds.size);
-            this._notificationsService.decrementUnreadCount(unreadIds.size);
             this._changeDetectorRef.markForCheck();
-            this._notificationsService.markReadMany([...unreadIds]).subscribe();
+            this._notificationsService.markReadMany(idList).subscribe();
         }
+    }
+
+    /** Mark the group read and navigate to the related task / page. */
+    onGroupClick(group: NotificationGroup): void {
+        this.markGroupAsRead(group);
 
         const invitationId = group.latest.data?.['invitation_id'];
         const isInvitee = group.latest.type === 'organization_invitation_received';
@@ -469,7 +477,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             this._router.navigate([isAdmin ? '/admin/projects' : '/member/projects']);
         } else {
             // Task assigned, task comments, error alerts
-            this._router.navigate([isAdmin ? '/admin/planner' : '/member/tasks'], {
+            this._router.navigate([isAdmin ? '/admin/projects' : '/member/tasks'], {
                 queryParams: {
                     ...(taskId ? { taskId: String(taskId) } : {}),
                     ...(taskCode ? { taskCode: String(taskCode) } : {}),
