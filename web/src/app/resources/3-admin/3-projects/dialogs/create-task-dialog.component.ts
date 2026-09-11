@@ -228,8 +228,9 @@ export interface TeamMember {
                                 <button
                                     type="button"
                                     (click)="clearReporter()"
-                                    class="text-slate-400 hover:text-rose-500 transition-colors p-1 cursor-pointer"
+                                    class="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
                                     matTooltip="ដកចេញ"
+                                    matTooltipPosition="above"
                                 >
                                     <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
                                 </button>
@@ -282,8 +283,9 @@ export interface TeamMember {
                                     <button
                                         type="button"
                                         (click)="toggleAssignee(m.id)"
-                                        class="text-slate-400 hover:text-rose-500 transition-colors p-1 cursor-pointer"
+                                        class="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
                                         matTooltip="ដកចេញ"
+                                        matTooltipPosition="above"
                                     >
                                         <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
                                     </button>
@@ -598,8 +600,9 @@ export interface TeamMember {
                                     <button
                                         type="button"
                                         (click)="removeAttachment(idx)"
-                                        class="text-slate-400 hover:text-rose-500 transition-colors p-1 cursor-pointer shrink-0"
+                                        class="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer shrink-0"
                                         matTooltip="ដកចេញ"
+                                        matTooltipPosition="above"
                                     >
                                         <mat-icon svgIcon="mdi:close" class="!w-4 !h-4"></mat-icon>
                                     </button>
