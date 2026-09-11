@@ -211,6 +211,10 @@ export class AdminUserService {
         }
     }
 
+    getRawUsers(): AdminUserItem[] {
+        return this.localUsers;
+    }
+
     private saveToDisk(): void {
         try {
             const dir = path.dirname(this.storeFilePath);

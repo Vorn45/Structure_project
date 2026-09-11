@@ -61,6 +61,10 @@ export class AdminAttendanceService {
         this.loadFromDisk();
     }
 
+    getRawLeaves(): AdminLeaveItem[] {
+        return this.leaves;
+    }
+
     private loadFromDisk(): void {
         try {
             if (fs.existsSync(this.storeFilePath)) {

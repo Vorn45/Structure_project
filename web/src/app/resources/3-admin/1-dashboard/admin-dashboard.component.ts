@@ -377,6 +377,24 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     // Populated from API in loadStats()
     performers: TeamMemberPerformer[] = [];
 
+    get displayedPerformers(): any[] {
+        const period = this.activePerformerPeriod();
+        const list = [...this.performers];
+        return list
+            .map((p: any) => {
+                let count = p.tasks_all ?? p.tasks_completed ?? 0;
+                if (period === '1d') count = p.tasks_1d ?? count;
+                else if (period === '7d') count = p.tasks_7d ?? count;
+                else if (period === '1m') count = p.tasks_1m ?? count;
+                else if (period === '1y') count = p.tasks_1y ?? count;
+                return {
+                    ...p,
+                    displayCount: count,
+                };
+            })
+            .sort((a, b) => b.displayCount - a.displayCount);
+    }
+
     ngOnInit(): void {
         this.initGreeting();
         this._userService.user$.subscribe((u) => {
@@ -451,15 +469,38 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
                     this.stats.set(res.data);
                     const k = res.data.kpi;
                     if (k) {
-                        this.kpiCards[0].value = String(k.total_users ?? 5);
-                        this.kpiCards[1].value = String(k.active_projects ?? 2);
-                        this.kpiCards[2].value = String(k.pending_leaves ?? 1);
+                        this.kpiCards[0].value = String(k.total_users ?? 0);
+                        this.kpiCards[1].value = String(k.active_projects ?? 0);
+                        this.kpiCards[2].value = String(k.pending_leaves ?? 0);
+                    }
+                    if (res.data.kpi_badges) {
+                        this.kpiCards[0].change = res.data.kpi_badges.members || '+100%';
+                        this.kpiCards[1].change = res.data.kpi_badges.projects || '+100%';
+                        this.kpiCards[2].change = res.data.kpi_badges.leaves || '0';
+                    }
+                    if (res.data.sparklines) {
+                        this.kpiCards[0].sparklineData = res.data.sparklines.members || [1, 2, 3, 4, 5];
+                        this.kpiCards[1].sparklineData = res.data.sparklines.projects || [1, 2, 1, 2, 2];
+                        this.kpiCards[2].sparklineData = res.data.sparklines.leaves || [0, 1, 0, 1, 1];
                     }
                     if (res.data.scheduled_meetings && res.data.scheduled_meetings.length > 0) {
-                        this.scheduledMeetings = res.data.scheduled_meetings;
+                        this.scheduledMeetings = res.data.scheduled_meetings.map((m: any) => ({
+                            id: m.id,
+                            title: m.title,
+                            time: m.time,
+                            dateGroup: m.date_group || m.dateGroup || 'today',
+                            dateLabel: m.date_label || m.dateLabel || 'ថ្ងៃនេះ',
+                            badgeColor: m.badge_color || m.badgeColor || '#0f766e',
+                            borderClass: m.border_class || m.borderClass || '',
+                            members: m.members || [],
+                            extraCount: m.extra_count ?? m.extraCount ?? 0,
+                        }));
                     }
                     if (res.data.top_performers && res.data.top_performers.length > 0) {
-                        this.performers = res.data.top_performers;
+                        this.performers = res.data.top_performers.map((p: any) => ({
+                            ...p,
+                            avatarBg: p.avatar_bg || p.avatarBg || 'bg-slate-700 text-white',
+                        }));
                     }
                 }
                 this.loading.set(false);
@@ -619,25 +660,25 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
 
         if (period === 'W') {
             xAxisData = trend?.weekly?.days || ['ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍', 'អាទិត្យ'];
-            inProgressData = trend?.weekly?.in_progress || [5, 6, 7, 3, 6, 3, 0];
-            completedData = trend?.weekly?.completed || [1, 6, 3, 8, 4, 0, 0];
-            const maxVal = Math.max(...inProgressData, ...completedData, 8);
-            yMax = Math.ceil(maxVal / 5) * 5;
+            inProgressData = trend?.weekly?.in_progress || [0, 0, 0, 0, 0, 0, 0];
+            completedData = trend?.weekly?.completed || [0, 0, 0, 0, 0, 0, 0];
+            const maxVal = Math.max(...inProgressData, ...completedData, 4);
+            yMax = Math.ceil(maxVal / 2) * 2;
             yInterval = Math.max(1, Math.floor(yMax / 2));
         } else if (period === 'M') {
             xAxisData = trend?.monthly?.months || ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា'];
-            inProgressData = trend?.monthly?.in_progress || [18, 22, 25, 20, 24, 28];
-            completedData = trend?.monthly?.completed || [12, 16, 21, 19, 22, 26];
-            const maxVal = Math.max(...inProgressData, ...completedData, 30);
-            yMax = Math.ceil(maxVal / 10) * 10;
-            yInterval = Math.max(5, Math.floor(yMax / 4));
+            inProgressData = trend?.monthly?.in_progress || [0, 0, 0, 0, 0, 0];
+            completedData = trend?.monthly?.completed || [0, 0, 0, 0, 0, 0];
+            const maxVal = Math.max(...inProgressData, ...completedData, 6);
+            yMax = Math.ceil(maxVal / 5) * 5;
+            yInterval = Math.max(1, Math.floor(yMax / 2));
         } else {
-            xAxisData = trend?.yearly?.years || ['2023', '2024', '2025', '2026'];
-            inProgressData = trend?.yearly?.in_progress || [85, 120, 160, 195];
-            completedData = trend?.yearly?.completed || [70, 105, 145, 180];
-            const maxVal = Math.max(...inProgressData, ...completedData, 100);
-            yMax = Math.ceil(maxVal / 50) * 50;
-            yInterval = Math.max(25, Math.floor(yMax / 4));
+            xAxisData = trend?.yearly?.years || ['2024', '2025', '2026', '2027'];
+            inProgressData = trend?.yearly?.in_progress || [0, 0, 0, 0];
+            completedData = trend?.yearly?.completed || [0, 0, 0, 0];
+            const maxVal = Math.max(...inProgressData, ...completedData, 8);
+            yMax = Math.ceil(maxVal / 5) * 5;
+            yInterval = Math.max(2, Math.floor(yMax / 2));
         }
 
         const option: echarts.EChartsOption = {
@@ -776,10 +817,22 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
 
         const kpi = this.stats().kpi;
         const dist = this.stats().task_distribution;
-        const completed = dist?.completed ?? kpi?.completed_tasks ?? 18;
-        const inProgress = dist?.in_progress ?? kpi?.in_progress_tasks ?? 7;
-        const pending = dist?.pending ?? kpi?.pending_tasks ?? 3;
+        const completed = dist?.completed ?? kpi?.completed_tasks ?? 0;
+        const inProgress = dist?.in_progress ?? kpi?.in_progress_tasks ?? 0;
+        const pending = dist?.pending ?? kpi?.pending_tasks ?? 0;
+        const total = completed + inProgress + pending;
         const overdue = 0;
+
+        const chartData = total > 0
+            ? [
+                  ...(completed > 0 ? [{ value: completed, name: 'បានបញ្ចប់', itemStyle: { color: '#10b981' } }] : []),
+                  ...(inProgress > 0 ? [{ value: inProgress, name: 'កំពុងដំណើរការ', itemStyle: { color: '#f59e0b' } }] : []),
+                  ...(pending > 0 ? [{ value: pending, name: 'គ្រោងទុក', itemStyle: { color: '#3b82f6' } }] : []),
+                  ...(overdue > 0 ? [{ value: overdue, name: 'ផុតកំណត់', itemStyle: { color: '#ef4444' } }] : []),
+              ]
+            : [
+                  { value: 1, name: 'មិនទាន់មានទិន្នន័យ', itemStyle: { color: '#cbd5e1' } },
+              ];
 
         const option: echarts.EChartsOption = {
             backgroundColor: 'transparent',
@@ -819,12 +872,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
                             show: false,
                         },
                     },
-                    data: [
-                        { value: completed, name: 'បានបញ្ចប់', itemStyle: { color: '#10b981' } },
-                        { value: inProgress, name: 'កំពុងដំណើរការ', itemStyle: { color: '#f59e0b' } },
-                        { value: pending, name: 'គ្រោងទុក', itemStyle: { color: '#3b82f6' } },
-                        ...(overdue > 0 ? [{ value: overdue, name: 'ផុតកំណត់', itemStyle: { color: '#ef4444' } }] : []),
-                    ],
+                    data: chartData,
                 },
             ],
         };
