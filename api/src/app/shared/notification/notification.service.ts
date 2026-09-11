@@ -245,7 +245,7 @@ export class NotificationService {
     }
 
     async markRead(user: UserPayload, id: string) {
-        const notif = this.notifications.find((n) => n.id === id);
+        const notif = this.notifications.find((n) => String(n.id) === String(id));
         if (notif) {
             notif.is_unread = false;
             notif.read_at = new Date().toISOString();
@@ -258,9 +258,10 @@ export class NotificationService {
     }
 
     async markReadMany(user: UserPayload, dto: MarkReadManyDto) {
-        const ids = dto?.ids || [];
+        const rawIds = dto?.ids || (dto?.id ? [dto.id] : []);
+        const ids = rawIds.map((id) => String(id));
         for (const n of this.notifications) {
-            if (ids.includes(n.id)) {
+            if (ids.includes(String(n.id))) {
                 n.is_unread = false;
                 n.read_at = new Date().toISOString();
             }
@@ -393,7 +394,7 @@ export class NotificationService {
         const existing = this.settingsMap.get(key) || {
             enabled: true,
             muted_until: null,
-            sound: true,
+            sound: false,
             web: true,
             web_muted_until: null,
             mobile: true,
@@ -412,7 +413,7 @@ export class NotificationService {
         const current = this.settingsMap.get(key) || {
             enabled: true,
             muted_until: null,
-            sound: true,
+            sound: false,
             web: true,
             web_muted_until: null,
             mobile: true,

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, inject, signal, computed } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -568,6 +569,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     private readonly _dialogConfigService = inject(DialogConfigService);
     private readonly _userService = inject(UserService);
     private readonly _userTaskService = inject(UserTaskService);
+    private readonly _route = inject(ActivatedRoute);
 
     projects = signal<AdminProject[]>([]);
     users = signal<AdminUser[]>([]);
@@ -893,6 +895,24 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     ngOnInit(): void {
         this.loadData();
+        this._route.queryParams.subscribe((params) => {
+            const taskCode = (params['taskCode'] || params['task_code'] || '').trim().toLowerCase();
+            const taskId = (params['taskId'] || params['task_id'] || '').trim();
+            if (taskCode || taskId) {
+                setTimeout(() => {
+                    const matched = this.tasks().find(
+                        (t) => (taskCode && t.code?.toLowerCase() === taskCode) || (taskId && String(t.id) === taskId)
+                    );
+                    if (matched) {
+                        if (!this.selectedProject() && this.projects().length > 0) {
+                            this.selectProject(this.projects()[0]);
+                        }
+                        this.setNavTab('tasks');
+                        this.openTaskModal(matched, 'chat');
+                    }
+                }, 300);
+            }
+        });
     }
 
     ngAfterViewInit(): void {

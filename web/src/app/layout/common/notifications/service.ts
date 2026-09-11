@@ -272,7 +272,7 @@ export class NotificationsService implements OnDestroy {
             setting = this._getStoredSetting(scope);
             if (setting) this._settingCache.set(scope, setting);
         }
-        if (!setting) return true;
+        if (!setting) return false;
         if (!setting.sound || !setting.enabled) return false;
         return !(setting.muted_until && new Date(setting.muted_until).getTime() > Date.now());
     }
@@ -501,13 +501,17 @@ export class NotificationsService implements OnDestroy {
             );
     }
 
-    /** PATCH /notification/:id/read — fires the request only, no cache/refresh side effects. */
+    /** PATCH /notification/:id/read — fires the request only, with optimistic local updates. */
     markRead(id: string): Observable<boolean> {
+        this.markLocalAsRead([id]);
         return this._httpClient
             .patch<unknown>(`${this._baseUrl}/${id}/read`, {})
             .pipe(
                 timeout(8000),
-                map(() => true),
+                map(() => {
+                    this.refreshUnreadCount();
+                    return true;
+                }),
                 catchError(() => of(false)),
             );
     }
@@ -519,8 +523,9 @@ export class NotificationsService implements OnDestroy {
      * per id hammered the server with N concurrent requests for a single click.
      */
     markReadMany(ids: string[]): Observable<boolean> {
-        const uniqueIds = [...new Set(ids)];
+        const uniqueIds = [...new Set(ids.map((id) => String(id)))];
         if (!uniqueIds.length) return of(true);
+        this.markLocalAsRead(uniqueIds);
         return this._httpClient
             .patch<unknown>(`${this._baseUrl}/read-many`, { ids: uniqueIds })
             .pipe(
@@ -531,6 +536,22 @@ export class NotificationsService implements OnDestroy {
                 }),
                 catchError(() => of(false)),
             );
+    }
+
+    markLocalAsRead(ids: string[]): void {
+        const idSet = new Set(ids.map((id) => String(id)));
+        let updatedCount = 0;
+        this._notificationsCache = this._notificationsCache.map((n) => {
+            if (idSet.has(String(n.id)) && !n.read) {
+                updatedCount++;
+                return { ...n, read: true, read_at: new Date() };
+            }
+            return n;
+        });
+        if (updatedCount > 0) {
+            this._notifications.next(this._notificationsCache);
+            this.decrementUnreadCount(updatedCount);
+        }
     }
 
     refreshUnreadCount(): void {
@@ -550,6 +571,10 @@ export class NotificationsService implements OnDestroy {
 
     /** PATCH /notification/read-all — resyncs page one from the server afterward. */
     markAllRead(): Observable<boolean> {
+        this._notificationsCache = this._notificationsCache.map((n) => ({ ...n, read: true, read_at: new Date() }));
+        this._notifications.next(this._notificationsCache);
+        this._currentUnreadCount = 0;
+        this._unreadCount.next(0);
         return this._httpClient
             .patch<unknown>(`${this._baseUrl}/read-all`, {})
             .pipe(
@@ -655,7 +680,7 @@ export class NotificationsService implements OnDestroy {
         const current = this._settingCache.get(scope) || this._getStoredSetting(scope) || {
             enabled: true,
             muted_until: null,
-            sound: true,
+            sound: false,
             web: true,
             web_muted_until: null,
             mobile: true,
