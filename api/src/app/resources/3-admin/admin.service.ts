@@ -1,11 +1,12 @@
 // ===========================================================================>> Core Library
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 
 // ===========================================================================>> Custom Library
+import { RoleEnum } from 'src/app/enum/role.enum';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { User } from 'src/app/model/user/users.entity';
 import { PlanService } from '../2-user/4-plan/plan.service';
@@ -17,7 +18,30 @@ import {
     UpdateProjectLeadDto,
     LeaveActionDto,
     UpdateSettingsDto,
+    QueryAdminClientDto,
+    CreateAdminClientDto,
+    UpdateAdminClientDto,
 } from './admin.dto';
+
+export interface AdminClientItem {
+    id: number;
+    company_name: string;
+    name_kh: string;
+    name_en: string;
+    email: string;
+    phone: string;
+    industry: string;
+    contact_person: string;
+    contact_phone?: string;
+    contact_email?: string;
+    status: 'active' | 'inactive' | 'lead' | 'contracted';
+    projects_count: number;
+    address?: string;
+    website?: string;
+    logo?: string | null;
+    note?: string;
+    created_at: string;
+}
 
 export interface AdminUserItem {
     id: number;
@@ -166,9 +190,108 @@ const DEFAULT_LEAVES: LeaveRequestItem[] = [
     },
 ];
 
+const DEFAULT_CLIENTS: AdminClientItem[] = [
+    {
+        id: 1,
+        company_name: 'Canadia Bank Plc.',
+        name_kh: 'ធនាគារ កាណាឌីយ៉ា',
+        name_en: 'Canadia Bank',
+        email: 'info@canadiabank.com.kh',
+        phone: '023 868 222',
+        industry: 'ធនាគារ និងហិរញ្ញវត្ថុ (Banking & Finance)',
+        contact_person: 'លោក ជា វណ្ណា (VP of Technology)',
+        contact_phone: '012 345 678',
+        contact_email: 'vanna.chea@canadiabank.com.kh',
+        status: 'active',
+        projects_count: 2,
+        address: 'អគារ Canadia Tower មហាវិថីព្រះមុនីវង្ស រាជធានីភ្នំពេញ',
+        website: 'https://www.canadiabank.com.kh',
+        logo: null,
+        note: 'ដៃគូបច្ចេកវិទ្យាស្នូលសម្រាប់ប្រព័ន្ធគ្រប់គ្រង និងស្វ័យប្រវត្តិកម្ម។',
+        created_at: '2026-01-10T08:00:00.000Z',
+    },
+    {
+        id: 2,
+        company_name: 'Wing Bank (Cambodia) Plc.',
+        name_kh: 'ធនាគារ វីង (ខេមបូឌា)',
+        name_en: 'Wing Bank',
+        email: 'digital@wingmoney.com',
+        phone: '023 999 989',
+        industry: 'ធនាគារឌីជីថល (Fintech & Digital Banking)',
+        contact_person: 'អ្នកស្រី កែវ សុខា (Head of Product)',
+        contact_phone: '010 987 654',
+        contact_email: 'sokha.keo@wingmoney.com',
+        status: 'active',
+        projects_count: 1,
+        address: 'អគារ Wing Tower មហាវិថីព្រះមុនីវង្ស កែងផ្លូវកម្ពុជាក្រោម',
+        website: 'https://www.wingmoney.com',
+        logo: null,
+        note: 'កិច្ចសហការលើប្រព័ន្ធ Mobile Integration & Payments API។',
+        created_at: '2026-01-20T08:00:00.000Z',
+    },
+    {
+        id: 3,
+        company_name: 'Chip Mong Group',
+        name_kh: 'ក្រុមហ៊ុន ជីប ម៉ុង គ្រុប',
+        name_en: 'Chip Mong Group',
+        email: 'info@chipmong.com',
+        phone: '023 218 060',
+        industry: 'ពាណិជ្ជកម្ម និងអចលនទ្រព្យ (Retail & Real Estate)',
+        contact_person: 'លោក ហេង សំណាង (IT Director)',
+        contact_phone: '077 555 666',
+        contact_email: 'samnang.heng@chipmong.com',
+        status: 'contracted',
+        projects_count: 3,
+        address: 'មហាវិថីសហព័ន្ធរុស្ស៊ី រាជធានីភ្នំពេញ',
+        website: 'https://www.chipmong.com',
+        logo: null,
+        note: 'គម្រោង WMS Warehouse & Inventory Enterprise System។',
+        created_at: '2026-02-05T08:00:00.000Z',
+    },
+    {
+        id: 4,
+        company_name: 'EDC (Electricite du Cambodge)',
+        name_kh: 'អគ្គិសនីកម្ពុជា (EDC)',
+        name_en: 'Electricite du Cambodge',
+        email: 'contact@edc.com.kh',
+        phone: '023 724 771',
+        industry: 'សេវាសាធារណៈ និងថាមពល (Public Utilities)',
+        contact_person: 'លោក ស៊ុន មុនី (Project Coordinator)',
+        contact_phone: '011 223 344',
+        contact_email: 'mony.sun@edc.com.kh',
+        status: 'active',
+        projects_count: 1,
+        address: 'ផ្លូវលេខ ១៩ វត្តភ្នំ ដូនពេញ រាជធានីភ្នំពេញ',
+        website: 'https://www.edc.com.kh',
+        logo: null,
+        note: 'ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យ និងរបាយការណ៍បច្ចេកទេស។',
+        created_at: '2026-02-18T08:00:00.000Z',
+    },
+    {
+        id: 5,
+        company_name: 'Khmer Beverages Co., Ltd.',
+        name_kh: 'ក្រុមហ៊ុន ខ្មែរ ប៊ែវើរីជីស',
+        name_en: 'Khmer Beverages',
+        email: 'sales@khmerbeverages.com',
+        phone: '023 424 555',
+        industry: 'ផលិតកម្ម និងចែកចាយ (F&B / Manufacturing)',
+        contact_person: 'លោកស្រី ម៉េង ចរិយា (Supply Chain Manager)',
+        contact_phone: '089 778 899',
+        contact_email: 'chariya.meng@khmerbeverages.com',
+        status: 'lead',
+        projects_count: 0,
+        address: 'ផ្លូវលេខ ២១៧ ជើងឯក ដង្កោ រាជធានីភ្នំពេញ',
+        website: 'https://www.khmerbeverages.com',
+        logo: null,
+        note: 'កំពុងពិភាក្សាលើដំណោះស្រាយ Supply Chain & Logistics Automation។',
+        created_at: '2026-03-01T08:00:00.000Z',
+    },
+];
+
 @Injectable()
 export class AdminService {
     private users: AdminUserItem[] = [...DEFAULT_USERS];
+    private clients: AdminClientItem[] = [...DEFAULT_CLIENTS];
     private leaves: LeaveRequestItem[] = [...DEFAULT_LEAVES];
     private organizationSettings = {
         organization_name_kh: 'ប្រព័ន្ធគ្រប់គ្រងការងារ និងគម្រោងឌីជីថល',
@@ -201,6 +324,7 @@ export class AdminService {
                 const raw = fs.readFileSync(this.storeFilePath, 'utf8');
                 const data = JSON.parse(raw);
                 if (data.users && Array.isArray(data.users)) this.users = data.users;
+                if (data.clients && Array.isArray(data.clients)) this.clients = data.clients;
                 if (data.leaves && Array.isArray(data.leaves)) this.leaves = data.leaves;
                 if (data.settings) this.organizationSettings = { ...this.organizationSettings, ...data.settings };
             }
@@ -215,6 +339,7 @@ export class AdminService {
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
             const data = {
                 users: this.users,
+                clients: this.clients,
                 leaves: this.leaves,
                 settings: this.organizationSettings,
                 updated_at: new Date().toISOString(),
@@ -222,6 +347,40 @@ export class AdminService {
             fs.writeFileSync(this.storeFilePath, JSON.stringify(data, null, 2), 'utf8');
         } catch (e) {
             console.warn('Failed to save admin data to disk:', e);
+        }
+    }
+
+    public assertAdminOrSuperAdmin(user: UserPayload, actionDesc: string): void {
+        const activeRole = (user as any)?.role || (user as any)?.active_role;
+        const slug = (activeRole?.slug || '').toLowerCase().trim();
+        const nameEn = (activeRole?.name_en || '').toLowerCase().trim();
+        const nameKh = (activeRole?.name_kh || '').trim();
+
+        const isUserRole =
+            slug === 'user' ||
+            slug === 'personal_workspace' ||
+            slug === 'member' ||
+            nameKh === 'អ្នកប្រើប្រាស់';
+
+        const isAdmin =
+            !isUserRole &&
+            (
+                slug.includes('admin') ||
+                slug.includes('owner') ||
+                slug.includes('super') ||
+                nameEn.includes('admin') ||
+                nameEn.includes('owner') ||
+                nameKh === 'អភិបាលប្រព័ន្ធ' ||
+                nameKh === 'រដ្ឋបាល' ||
+                user?.is_active === RoleEnum.ORG_ADMIN ||
+                user?.is_active === RoleEnum.ORG_OWNER ||
+                user?.is_active === RoleEnum.SUPER_ADMIN
+            );
+
+        if (!isAdmin) {
+            throw new ForbiddenException(
+                `មានតែ Administrator ឬ Super Administrator ប៉ុណ្ណោះដែលអាច${actionDesc}បាន (Only Admin or Super Admin can perform this action).`,
+            );
         }
     }
 
@@ -408,6 +567,8 @@ export class AdminService {
     }
 
     async createUser(user: UserPayload, dto: CreateAdminUserDto) {
+        this.assertAdminOrSuperAdmin(user, 'បង្កើតបុគ្គលិកថ្មី');
+
         const newUser: AdminUserItem = {
             id: Date.now(),
             name_kh: dto.name_kh,
@@ -434,6 +595,8 @@ export class AdminService {
     }
 
     async updateUser(user: UserPayload, id: number, dto: UpdateAdminUserDto) {
+        this.assertAdminOrSuperAdmin(user, 'កែប្រែព័ត៌មានបុគ្គលិក');
+
         const index = this.users.findIndex((u) => u.id === Number(id));
         if (index === -1) throw new NotFoundException(`User with ID ${id} not found`);
 
@@ -460,6 +623,8 @@ export class AdminService {
     }
 
     async deleteUser(user: UserPayload, id: number) {
+        this.assertAdminOrSuperAdmin(user, 'លុបគណនីបុគ្គលិក');
+
         const index = this.users.findIndex((u) => u.id === Number(id));
         if (index === -1) throw new NotFoundException(`User with ID ${id} not found`);
 
@@ -473,6 +638,8 @@ export class AdminService {
     }
 
     async toggleUserStatus(user: UserPayload, id: number) {
+        this.assertAdminOrSuperAdmin(user, 'ផ្លាស់ប្តូរស្ថានភាពបុគ្គលិក');
+
         const index = this.users.findIndex((u) => u.id === Number(id));
         if (index === -1) throw new NotFoundException(`User with ID ${id} not found`);
 
@@ -485,6 +652,156 @@ export class AdminService {
             data: this.users[index],
         };
     }
+
+    // =========================================================================
+    // CLIENTS MANAGEMENT (អតិថិជន)
+    // =========================================================================
+    async getClients(user: UserPayload, query: QueryAdminClientDto) {
+        let list = [...this.clients];
+
+        if (query.search) {
+            const s = query.search.toLowerCase().trim();
+            list = list.filter(
+                (c) =>
+                    c.company_name?.toLowerCase().includes(s) ||
+                    c.name_kh?.toLowerCase().includes(s) ||
+                    c.name_en?.toLowerCase().includes(s) ||
+                    c.email?.toLowerCase().includes(s) ||
+                    c.phone?.includes(s) ||
+                    c.contact_person?.toLowerCase().includes(s) ||
+                    c.industry?.toLowerCase().includes(s),
+            );
+        }
+
+        if (query.status && query.status !== 'all') {
+            list = list.filter((c) => c.status === query.status);
+        }
+
+        if (query.industry && query.industry !== 'all') {
+            list = list.filter((c) => c.industry?.toLowerCase().includes(query.industry.toLowerCase()));
+        }
+
+        return {
+            status_code: 200,
+            message: 'Clients retrieved successfully',
+            data: {
+                results: list,
+                total: list.length,
+            },
+        };
+    }
+
+    async getClientById(user: UserPayload, id: number) {
+        const client = this.clients.find((c) => c.id === Number(id));
+        if (!client) throw new NotFoundException(`Client with ID ${id} not found`);
+
+        return {
+            status_code: 200,
+            message: 'Client retrieved successfully',
+            data: client,
+        };
+    }
+
+    async createClient(user: UserPayload, dto: CreateAdminClientDto) {
+        this.assertAdminOrSuperAdmin(user, 'បង្កើតអតិថិជនថ្មី');
+
+        const newClient: AdminClientItem = {
+            id: Date.now(),
+            company_name: dto.company_name,
+            name_kh: dto.name_kh || dto.company_name,
+            name_en: dto.name_en || dto.company_name,
+            email: dto.email || '',
+            phone: dto.phone || '',
+            industry: dto.industry || 'ទូទៅ (General)',
+            contact_person: dto.contact_person || '',
+            contact_phone: dto.contact_phone || dto.phone || '',
+            contact_email: dto.contact_email || dto.email || '',
+            status: dto.status || 'active',
+            projects_count: Number(dto.projects_count) || 0,
+            address: dto.address || '',
+            website: dto.website || '',
+            logo: dto.logo || null,
+            note: dto.note || '',
+            created_at: new Date().toISOString(),
+        };
+
+        this.clients.unshift(newClient);
+        this.saveToDisk();
+
+        return {
+            status_code: 201,
+            message: 'Client created successfully',
+            data: newClient,
+        };
+    }
+
+    async updateClient(user: UserPayload, id: number, dto: UpdateAdminClientDto) {
+        this.assertAdminOrSuperAdmin(user, 'កែប្រែព័ត៌មានអតិថិជន');
+
+        const index = this.clients.findIndex((c) => c.id === Number(id));
+        if (index === -1) throw new NotFoundException(`Client with ID ${id} not found`);
+
+        this.clients[index] = {
+            ...this.clients[index],
+            ...dto,
+            company_name: dto.company_name ?? this.clients[index].company_name,
+            name_kh: dto.name_kh ?? this.clients[index].name_kh,
+            name_en: dto.name_en ?? this.clients[index].name_en,
+            email: dto.email ?? this.clients[index].email,
+            phone: dto.phone ?? this.clients[index].phone,
+            industry: dto.industry ?? this.clients[index].industry,
+            contact_person: dto.contact_person ?? this.clients[index].contact_person,
+            contact_phone: dto.contact_phone ?? this.clients[index].contact_phone,
+            contact_email: dto.contact_email ?? this.clients[index].contact_email,
+            status: dto.status ?? this.clients[index].status,
+            projects_count: dto.projects_count !== undefined ? Number(dto.projects_count) : this.clients[index].projects_count,
+            address: dto.address ?? this.clients[index].address,
+            website: dto.website ?? this.clients[index].website,
+            logo: dto.logo !== undefined ? dto.logo : this.clients[index].logo,
+            note: dto.note ?? this.clients[index].note,
+        };
+
+        this.saveToDisk();
+
+        return {
+            status_code: 200,
+            message: 'Client updated successfully',
+            data: this.clients[index],
+        };
+    }
+
+    async toggleClientStatus(user: UserPayload, id: number) {
+        this.assertAdminOrSuperAdmin(user, 'ផ្លាស់ប្តូរស្ថានភាពអតិថិជន');
+
+        const index = this.clients.findIndex((c) => c.id === Number(id));
+        if (index === -1) throw new NotFoundException(`Client with ID ${id} not found`);
+
+        const currentStatus = this.clients[index].status;
+        this.clients[index].status = currentStatus === 'active' ? 'inactive' : 'active';
+        this.saveToDisk();
+
+        return {
+            status_code: 200,
+            message: `Client status changed to ${this.clients[index].status}`,
+            data: this.clients[index],
+        };
+    }
+
+    async deleteClient(user: UserPayload, id: number) {
+        this.assertAdminOrSuperAdmin(user, 'លុបអតិថិជន');
+
+        const index = this.clients.findIndex((c) => c.id === Number(id));
+        if (index === -1) throw new NotFoundException(`Client with ID ${id} not found`);
+
+        this.clients.splice(index, 1);
+        this.saveToDisk();
+
+        return {
+            status_code: 200,
+            message: 'Client deleted successfully',
+        };
+    }
+
 
     // =========================================================================
     // ATTENDANCE & LEAVES

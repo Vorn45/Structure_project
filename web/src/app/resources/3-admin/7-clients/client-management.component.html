@@ -1,0 +1,546 @@
+<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
+    style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
+
+    <!-- ===== FRAMED MAIN CONTAINER ===== -->
+    <div class="flex flex-col flex-1 min-w-0 space-y-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+        style="min-height: calc(100vh - 2rem);">
+
+        <!-- Top Header Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+            <!-- Left: Title & Count -->
+            <div class="flex items-center gap-3 shrink-0">
+                <mat-icon svgIcon="mdi:account-multiple-outline" class="icon-size-5 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+                <span class="text-[17px] font-medium text-slate-800 dark:text-white">អតិថិជន</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    {{ filteredClients().length }}
+                </span>
+            </div>
+
+            <!-- Center: Search bar with clickable tune-variant icon on right -->
+            <div class="flex-1 flex items-center justify-center max-w-sm sm:max-w-md mx-auto w-full">
+                <div class="relative w-full flex items-center">
+                    <mat-icon svgIcon="mdi:magnify" class="absolute left-3 text-slate-400 icon-size-4.5 pointer-events-none"></mat-icon>
+                    <input
+                        type="text"
+                        [ngModel]="searchQuery()"
+                        (ngModelChange)="searchQuery.set($event)"
+                        placeholder="ស្វែងរកអតិថិជន ក្រុមហ៊ុន ឬអ្នកទំនាក់ទំនង:..."
+                        class="w-full pl-9 pr-9 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" />
+
+                    <!-- Filter Toggle Button inside search input -->
+                    <button
+                        type="button"
+                        (click)="toggleFilterBar()"
+                        class="absolute right-1.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                        [ngClass]="(isFilterOpen() || hasActiveFilters()) ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-2xs' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'"
+                        [matTooltip]="isFilterOpen() ? 'លាក់តម្រង (Hide Filters)' : 'បង្ហាញតម្រង (Show Filters)'">
+                        <mat-icon svgIcon="mdi:tune-variant" class="icon-size-4"></mat-icon>
+                        @if (hasActiveFilters()) {
+                            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 border border-white dark:border-slate-800"></span>
+                        }
+                    </button>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button
+                    type="button"
+                    (click)="openCreateDrawer()"
+                    class="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                    <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+                    <span>បង្កើតអតិថិជនថ្មី</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Controls Row -->
+        @if (isFilterOpen()) {
+            <div class="flex items-center justify-between gap-2 overflow-x-auto pb-3 pt-1 border-b border-slate-100 dark:border-slate-700/60 [scrollbar-width:none] animate-in fade-in slide-in-from-top-1 duration-150">
+                <div class="flex items-center gap-2">
+                    <!-- 1. Sort Button -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="sortMenu"
+                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                        [class.!border-blue-500]="sortBy() !== 'default'"
+                        [class.!text-blue-600]="sortBy() !== 'default'"
+                        matTooltip="តម្រៀប (Sort)">
+                        <mat-icon svgIcon="mdi:swap-vertical" class="icon-size-4.5"></mat-icon>
+                    </button>
+                    <mat-menu #sortMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="setSort('default')" class="!text-[14px]">
+                            <span>លំនាំដើម (Default)</span>
+                        </button>
+                        <button mat-menu-item (click)="setSort('name_asc')" class="!text-[14px]">
+                            <span>ឈ្មោះ (ក - អ)</span>
+                        </button>
+                        <button mat-menu-item (click)="setSort('name_desc')" class="!text-[14px]">
+                            <span>ឈ្មោះ (អ - ក)</span>
+                        </button>
+                    </mat-menu>
+
+                    <!-- 2. Status Filter Dropdown -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="statusMenu"
+                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                        [class.!border-blue-500]="selectedStatus() !== 'all'"
+                        [class.!text-blue-600]="selectedStatus() !== 'all'">
+                        <mat-icon svgIcon="mdi:check-circle-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"></mat-icon>
+                        <span>ស្ថានភាព: {{ selectedStatus() === 'all' ? 'ទាំងអស់' : getStatusKhmer(selectedStatus()) }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                    </button>
+                    <mat-menu #statusMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="selectedStatus.set('all')" class="!text-[14px]">
+                            <span>ទាំងអស់ (All)</span>
+                        </button>
+                        @for (st of statusList; track st.key) {
+                            <button mat-menu-item (click)="selectedStatus.set(st.key)" class="!text-[14px]">
+                                <span>{{ st.label }}</span>
+                            </button>
+                        }
+                    </mat-menu>
+
+                    <!-- 3. Industry Filter Dropdown -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="industryMenu"
+                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                        [class.!border-blue-500]="selectedIndustry() !== 'all'"
+                        [class.!text-blue-600]="selectedIndustry() !== 'all'">
+                        <mat-icon svgIcon="mdi:domain" class="icon-size-4.5 text-slate-500 dark:text-slate-400"></mat-icon>
+                        <span class="max-w-[140px] truncate">វិស័យ: {{ selectedIndustry() === 'all' ? 'ទាំងអស់' : selectedIndustry() }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                    </button>
+                    <mat-menu #industryMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        @for (ind of industries(); track ind) {
+                            <button mat-menu-item (click)="selectedIndustry.set(ind)" class="!text-[14px]">
+                                <span>{{ ind === 'all' ? 'ទាំងអស់ (All Industries)' : ind }}</span>
+                            </button>
+                        }
+                    </mat-menu>
+                </div>
+
+                @if (hasActiveFilters()) {
+                    <button
+                        type="button"
+                        (click)="resetFilters()"
+                        class="h-9 px-3 text-[13px] text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-all flex items-center gap-1 cursor-pointer shrink-0">
+                        <mat-icon svgIcon="mdi:close-circle-outline" class="icon-size-4"></mat-icon>
+                        <span>សម្អាតតម្រង</span>
+                    </button>
+                }
+            </div>
+        }
+
+        <!-- Client List Table -->
+        <div class="flex-1 overflow-x-auto min-h-0 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xs">
+            <table class="w-full text-left text-[14px] text-slate-600 dark:text-slate-300">
+                <thead class="bg-slate-50 dark:bg-slate-900/50 text-[13px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                    <tr>
+                        <th class="py-3 px-4">ក្រុមហ៊ុន / អតិថិជន</th>
+                        <th class="py-3 px-4">អ្នកទំនាក់ទំនង</th>
+                        <th class="py-3 px-4">វិស័យ</th>
+                        <th class="py-3 px-4">ទំនាក់ទំនង</th>
+                        <th class="py-3 px-4 text-center">គម្រោង</th>
+                        <th class="py-3 px-4 text-center">ស្ថានភាព</th>
+                        <th class="py-3 px-4 text-right">សកម្មភាព</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700/60 bg-white dark:bg-slate-800">
+                    @if (loading()) {
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                <mat-icon svgIcon="mdi:loading" class="animate-spin icon-size-6 mx-auto mb-2 text-blue-600"></mat-icon>
+                                <span>កំពុងផ្ទុកទិន្នន័យអតិថិជន...</span>
+                            </td>
+                        </tr>
+                    } @else if (filteredClients().length === 0) {
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                <mat-icon svgIcon="mdi:account-off-outline" class="icon-size-8 mx-auto mb-2 text-slate-300 dark:text-slate-600"></mat-icon>
+                                <div class="text-[15px] font-medium text-slate-700 dark:text-slate-300">មិនមានទិន្នន័យអតិថិជនឡើយ</div>
+                                <div class="mt-1 text-[13px]">សូមពិនិត្យពាក្យស្វែងរក ឬបន្ថែមអតិថិជនថ្មី</div>
+                            </td>
+                        </tr>
+                    } @else {
+                        @for (client of filteredClients(); track client.id) {
+                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-750 transition-colors">
+                                <!-- 1. Company Name & Logo -->
+                                <td class="py-3.5 px-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] shrink-0 rounded-xl overflow-hidden bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 flex items-center justify-center font-bold text-blue-600 dark:text-blue-400 text-[14px]">
+                                            @if (client.logo) {
+                                                <img [src]="client.logo" [alt]="client.company_name" class="w-full h-full object-cover" />
+                                            } @else {
+                                                <span>{{ getClientInitials(client) }}</span>
+                                            }
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="font-medium text-slate-900 dark:text-white truncate text-[14px]">
+                                                {{ client.company_name }}
+                                            </span>
+                                            <span class="text-[12px] text-slate-400 truncate">
+                                                {{ client.name_kh || client.name_en }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- 2. Contact Person -->
+                                <td class="py-3.5 px-4">
+                                    <div class="flex flex-col">
+                                        <span class="font-medium text-slate-800 dark:text-slate-200 text-[13px]">
+                                            {{ client.contact_person || 'មិនទាន់កំណត់' }}
+                                        </span>
+                                        @if (client.contact_phone || client.contact_email) {
+                                            <span class="text-[12px] text-slate-400">
+                                                {{ client.contact_phone || client.contact_email }}
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+
+                                <!-- 3. Industry -->
+                                <td class="py-3.5 px-4">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[12px] font-medium border"
+                                        [ngClass]="getIndustryBadgeClass(client.industry)">
+                                        {{ client.industry }}
+                                    </span>
+                                </td>
+
+                                <!-- 4. Contact Details -->
+                                <td class="py-3.5 px-4">
+                                    <div class="flex flex-col gap-0.5 text-[12px]">
+                                        @if (client.phone) {
+                                            <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                                                <mat-icon svgIcon="mdi:phone-outline" class="icon-size-3.5 text-slate-400"></mat-icon>
+                                                <span>{{ client.phone }}</span>
+                                            </div>
+                                        }
+                                        @if (client.email) {
+                                            <div class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
+                                                <mat-icon svgIcon="mdi:email-outline" class="icon-size-3.5 text-slate-400 shrink-0"></mat-icon>
+                                                <span class="truncate">{{ client.email }}</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+
+                                <!-- 5. Projects Count -->
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-full text-[12px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                                        {{ client.projects_count || 0 }}
+                                    </span>
+                                </td>
+
+                                <!-- 6. Status -->
+                                <td class="py-3.5 px-4 text-center">
+                                    <button
+                                        type="button"
+                                        (click)="toggleStatus(client)"
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium border transition-all cursor-pointer"
+                                        [ngClass]="getStatusBadgeClass(client.status)"
+                                        [matTooltip]="'ចុចដើម្បីប្តូរស្ថានភាព (' + (client.status === 'active' ? 'ទៅអសកម្ម' : 'ទៅសកម្ម') + ')'">
+                                        <span class="w-1.5 h-1.5 rounded-full mr-1.5"
+                                            [ngClass]="client.status === 'active' ? 'bg-emerald-500' : client.status === 'contracted' ? 'bg-blue-500' : client.status === 'lead' ? 'bg-amber-500' : 'bg-slate-400'"></span>
+                                        {{ getStatusKhmer(client.status) }}
+                                    </button>
+                                </td>
+
+                                <!-- 7. Row Actions -->
+                                <td class="py-3.5 px-4 text-right">
+                                    <button
+                                        type="button"
+                                        [matMenuTriggerFor]="rowMenu"
+                                        class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-flex items-center justify-center transition-colors cursor-pointer">
+                                        <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4.5"></mat-icon>
+                                    </button>
+                                    <mat-menu #rowMenu="matMenu" yPosition="below" xPosition="before" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                                        <button mat-menu-item (click)="openEditDrawer(client)" class="!text-[14px]">
+                                            <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4 text-blue-600 mr-2"></mat-icon>
+                                            <span>កែប្រែព័ត៌មាន (Edit)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="toggleStatus(client)" class="!text-[14px]">
+                                            <mat-icon svgIcon="mdi:toggle-switch-outline" class="icon-size-4 text-emerald-600 mr-2"></mat-icon>
+                                            <span>ប្តូរស្ថានភាព (Toggle Status)</span>
+                                        </button>
+                                        <button mat-menu-item (click)="confirmDelete(client)" class="!text-[14px] !text-red-600">
+                                            <mat-icon svgIcon="mdi:delete-outline" class="icon-size-4 text-red-600 mr-2"></mat-icon>
+                                            <span>លុបអតិថិជន (Delete)</span>
+                                        </button>
+                                    </mat-menu>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ===== CREATE / EDIT CLIENT DRAWER ===== -->
+    @if (isDrawerOpen()) {
+        <div class="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
+            <div class="w-full max-w-xl bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-250">
+                
+                <!-- Drawer Header -->
+                <div class="w-full flex justify-between items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 px-6 shrink-0 bg-white dark:bg-slate-900">
+                    <div class="flex items-center gap-2">
+                        <mat-icon svgIcon="mdi:domain" class="icon-size-5 text-blue-600"></mat-icon>
+                        <span class="text-[18px] font-medium text-slate-800 dark:text-slate-200">
+                            {{ isEditing() ? 'កែប្រែព័ត៌មានអតិថិជន' : 'បង្កើតអតិថិជនថ្មី' }}
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        (click)="closeDrawer()"
+                        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer">
+                        <mat-icon svgIcon="mdi:close" class="icon-size-4.5"></mat-icon>
+                    </button>
+                </div>
+
+                <!-- Drawer Body / Form -->
+                <form [formGroup]="clientForm" (ngSubmit)="submitClientForm()" class="flex-1 overflow-y-auto p-6 space-y-4">
+                    
+                    <!-- Company Name -->
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ឈ្មោះក្រុមហ៊ុន / ស្ថាប័ន (Company Name) <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="company_name"
+                            placeholder="ឧ. Canadia Bank Plc., Chip Mong Group..."
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                    </div>
+
+                    <!-- Dual Name: Khmer & English -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ឈ្មោះជាភាសាខ្មែរ (Khmer Name)
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="name_kh"
+                                placeholder="ឧ. ធនាគារ កាណាឌីយ៉ា"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ឈ្មោះជាភាសាអង់គ្លេស (English Name)
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="name_en"
+                                placeholder="e.g. Canadia Bank"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        </div>
+                    </div>
+
+                    <!-- Industry & Status -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                វិស័យ / ប្រភេទ (Industry) <span class="text-red-500">*</span>
+                            </label>
+                            <select
+                                formControlName="industry"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 cursor-pointer">
+                                <option value="ធនាគារ និងហិរញ្ញវត្ថុ (Banking & Finance)">ធនាគារ និងហិរញ្ញវត្ថុ (Banking & Finance)</option>
+                                <option value="ធនាគារឌីជីថល (Fintech & Digital Banking)">ធនាគារឌីជីថល (Fintech & Digital Banking)</option>
+                                <option value="ពាណិជ្ជកម្ម និងអចលនទ្រព្យ (Retail & Real Estate)">ពាណិជ្ជកម្ម និងអចលនទ្រព្យ (Retail & Real Estate)</option>
+                                <option value="សេវាសាធារណៈ និងថាមពល (Public Utilities)">សេវាសាធារណៈ និងថាមពល (Public Utilities)</option>
+                                <option value="ផលិតកម្ម និងចែកចាយ (F&B / Manufacturing)">ផលិតកម្ម និងចែកចាយ (F&B / Manufacturing)</option>
+                                <option value="ព័ត៌មានវិទ្យា និងទូរគមនាគមន៍ (IT & Telecom)">ព័ត៌មានវិទ្យា និងទូរគមនាគមន៍ (IT & Telecom)</option>
+                                <option value="ដឹកជញ្ជូន និងឃ្លាំងស្តុក (Logistics & Supply Chain)">ដឹកជញ្ជូន និងឃ្លាំងស្តុក (Logistics & Supply Chain)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ស្ថានភាព (Status) <span class="text-red-500">*</span>
+                            </label>
+                            <select
+                                formControlName="status"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 cursor-pointer">
+                                <option value="active">សកម្ម (Active)</option>
+                                <option value="contracted">មានកិច្ចសន្យា (Contracted)</option>
+                                <option value="lead">សក្ដានុពល (Lead)</option>
+                                <option value="inactive">អសកម្ម (Inactive)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Contact Person Section -->
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+                        <div class="text-[13px] font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <mat-icon svgIcon="mdi:account-outline" class="icon-size-4 text-blue-600"></mat-icon>
+                            <span>ព័ត៌មានអ្នកទំនាក់ទំនងស្នូល (Primary Contact)</span>
+                        </div>
+                        <div>
+                            <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                ឈ្មោះអ្នកទំនាក់ទំនង (Contact Person) <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="contact_person"
+                                placeholder="ឧ. លោក ជា វណ្ណា (VP of Technology)"
+                                class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                    លេខទូរស័ព្ទអ្នកទំនាក់ទំនង
+                                </label>
+                                <input
+                                    type="text"
+                                    formControlName="contact_phone"
+                                    placeholder="012 345 678"
+                                    class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                            </div>
+                            <div>
+                                <label class="block text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                    អ៊ីមែលអ្នកទំនាក់ទំនង
+                                </label>
+                                <input
+                                    type="email"
+                                    formControlName="contact_email"
+                                    placeholder="contact@company.com"
+                                    class="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General Company Contact -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                លេខទូរស័ព្ទក្រុមហ៊ុន (Company Phone)
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="phone"
+                                placeholder="023 868 222"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                អ៊ីមែលក្រុមហ៊ុន (Company Email)
+                            </label>
+                            <input
+                                type="email"
+                                formControlName="email"
+                                placeholder="info@company.com.kh"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        </div>
+                    </div>
+
+                    <!-- Website & Active Projects Count -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                គេហទំព័រ (Website)
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="website"
+                                placeholder="https://www.company.com.kh"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        </div>
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ចំនួនគម្រោងសកម្ម (Active Projects)
+                            </label>
+                            <input
+                                type="number"
+                                formControlName="projects_count"
+                                min="0"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            អាសយដ្ឋាន (Address)
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="address"
+                            placeholder="អគារ រាជធានីភ្នំពេញ..."
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            កំណត់សម្គាល់បន្ថែម (Notes)
+                        </label>
+                        <textarea
+                            formControlName="note"
+                            rows="2"
+                            placeholder="ព័ត៌មានលម្អិតអំពីកិច្ចសន្យា ដៃគូ ឬគម្រោង..."
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100"></textarea>
+                    </div>
+
+                    <!-- Drawer Footer Buttons inside form -->
+                    <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2.5">
+                        <button
+                            type="button"
+                            (click)="closeDrawer()"
+                            class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-[14px] font-medium transition-all cursor-pointer">
+                            បោះបង់
+                        </button>
+                        <button
+                            type="submit"
+                            [disabled]="saving() || clientForm.invalid"
+                            class="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                            @if (saving()) {
+                                <mat-icon svgIcon="mdi:loading" class="animate-spin icon-size-4 text-white"></mat-icon>
+                            }
+                            <span>{{ isEditing() ? 'រក្សាទុកការកែប្រែ' : 'បង្កើតអតិថិជន' }}</span>
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    }
+
+    <!-- ===== DELETE CONFIRMATION MODAL ===== -->
+    @if (showDeleteModal()) {
+        <div class="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4 animate-in zoom-in-95 duration-150">
+                <div class="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
+                    <mat-icon svgIcon="mdi:alert-outline" class="icon-size-6"></mat-icon>
+                </div>
+                <div class="text-center space-y-1">
+                    <h3 class="text-[17px] font-semibold text-slate-900 dark:text-white">
+                        លុបអតិថិជននេះចេញ?
+                    </h3>
+                    <p class="text-[14px] text-slate-500 dark:text-slate-400">
+                        តើអ្នកពិតជាចង់លុបអតិថិជន <strong class="text-slate-700 dark:text-slate-200">"{{ deleteTarget()?.company_name }}"</strong> មែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានឡើយ។
+                    </p>
+                </div>
+                <div class="flex items-center justify-center gap-3 pt-2">
+                    <button
+                        type="button"
+                        (click)="showDeleteModal.set(false)"
+                        class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-750 text-[14px] font-medium transition-all cursor-pointer">
+                        បោះបង់
+                    </button>
+                    <button
+                        type="button"
+                        (click)="deleteClient()"
+                        class="h-9 px-5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[14px] font-medium transition-all shadow-2xs cursor-pointer">
+                        លុបអតិថិជន
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

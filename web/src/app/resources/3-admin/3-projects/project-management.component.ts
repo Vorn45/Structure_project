@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import * as echarts from 'echarts';
 import { UserService } from 'app/core/user/user.service';
+import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { CreateProjectDialogComponent } from 'app/resources/2-user/1-home/create-project-dialog/create-project-dialog.component';
 import { CreateMeetingDialogComponent } from 'app/resources/2-user/1-home/create-meeting-dialog/create-meeting-dialog.component';
@@ -361,6 +362,74 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     taskViewMode = signal<'list' | 'board'>('list');
     taskSearchQuery = signal<string>('');
     subtaskFilter = signal<string>('all');
+
+    isAdmin = computed(() => {
+        const u: any = this._userService.getUser();
+        if (!u) return true;
+
+        const preferredRoleId = readPreferredRoleId();
+        const roles = Array.isArray(u.roles) ? u.roles : [];
+
+        let activeRole: any = null;
+        if (preferredRoleId) {
+            activeRole = roles.find((r: any) => Number(r.id) === preferredRoleId);
+        }
+        if (!activeRole) {
+            activeRole = roles.find((r: any) => r.is_default);
+        }
+        if (!activeRole && (u.is_active || u.active_role_id)) {
+            const activeId = Number(u.is_active || u.active_role_id);
+            activeRole = roles.find((r: any) => Number(r.id) === activeId);
+        }
+        if (!activeRole && roles.length > 0) {
+            activeRole = roles[0];
+        }
+
+        if (!activeRole) return true;
+
+        const slug = (activeRole.slug || '').toLowerCase().trim();
+        const nameEn = (activeRole.name_en || activeRole.name || '').toLowerCase().trim();
+        const nameKh = (activeRole.name_kh || '').trim();
+
+        if (slug === 'user' || slug === 'member' || slug === 'personal_workspace' || nameKh === 'អ្នកប្រើប្រាស់') {
+            return false;
+        }
+
+        const isAdminSlug =
+            slug === 'superadmin' ||
+            slug === 'super-admin' ||
+            slug === 'admin' ||
+            slug === 'org_admin' ||
+            slug === 'org-admin' ||
+            slug === 'owner' ||
+            slug === 'org_owner';
+
+        const isAdminName =
+            nameEn.includes('admin') ||
+            nameEn.includes('owner') ||
+            nameEn.includes('super') ||
+            nameKh === 'អភិបាលប្រព័ន្ធ' ||
+            nameKh === 'រដ្ឋបាល';
+
+        return isAdminSlug || isAdminName;
+    });
+
+    taskCounts = computed(() => {
+        const list = this.tasks();
+        return {
+            all: list.length,
+            new: list.filter((t) => (t.status || '').toLowerCase() === 'new' || (t.status || '').toLowerCase() === 'pending').length,
+            confirmed: list.filter((t) => (t.status || '').toLowerCase() === 'confirmed').length,
+            unconfirmed: list.filter((t) => (t.status || '').toLowerCase() === 'unconfirmed' || (t.status || '').toLowerCase() === 'todo').length,
+            in_progress: list.filter((t) => (t.status || '').toLowerCase() === 'in_progress').length,
+            in_review: list.filter((t) => (t.status || '').toLowerCase() === 'in_review' || (t.status || '').toLowerCase() === 'review').length,
+            reopened: list.filter((t) => (t.status || '').toLowerCase() === 'reopened').length,
+            done: list.filter((t) => (t.status || '').toLowerCase() === 'done' || (t.status || '').toLowerCase() === 'completed').length,
+        };
+    });
+
+    taskToDelete = signal<AdminTaskItem | null>(null);
+    showDeleteTaskModal = signal<boolean>(false);
 
     // Collections
     tasks = signal<AdminTaskItem[]>([]);
@@ -1350,6 +1419,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     // Agile Plan Dialog
     openAddPlanDialog(proj?: AdminProject | null): void {
+        if (!this.isAdmin()) return;
         const p = proj || this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
@@ -1370,9 +1440,69 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         });
     }
 
+    openEditPlanDialog(task: AgilePlanTask, event?: Event): void {
+        if (event) event.stopPropagation();
+        if (!this.isAdmin()) return;
+        const p = this.selectedProject();
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+            totalWeeks: this.totalWeeks,
+            weeks: this.weeks,
+            projects: this.projects().map((item) => ({ id: item.id, code: item.code, name: item.name })),
+            selectedProjectId: p?.id,
+            selectedProjectName: p?.name,
+            task: task,
+            isEditing: true,
+        });
+
+        const dialogRef = this._matDialog.open(AddPlanDialogComponent, dialogConfig);
+
+        dialogRef.afterClosed().subscribe((result?: any) => {
+            if (result) {
+                const updated: AgilePlanTask = result.task || result;
+                this.agileTasks.update((list) =>
+                    list.map((t) => (t.id === task.id ? { ...t, ...updated } : t)),
+                );
+            }
+        });
+    }
+
     deleteAgileTask(taskId: string, event: Event): void {
         event.stopPropagation();
+        if (!this.isAdmin()) return;
         this.agileTasks.update((list) => list.filter((t) => t.id !== taskId));
+    }
+
+    confirmDeleteTask(task: AdminTaskItem, event?: Event): void {
+        if (event) event.stopPropagation();
+        this.taskToDelete.set(task);
+        this.showDeleteTaskModal.set(true);
+    }
+
+    deleteTask(): void {
+        const target = this.taskToDelete();
+        if (!target) return;
+
+        const numericId = Number(String(target.id).replace(/\D/g, '')) || Number(target.id);
+        if (numericId) {
+            this._userTaskService.deleteTask(numericId).subscribe({
+                next: () => {
+                    this.tasks.update((list) => list.filter((t) => t.id !== target.id));
+                    this.showDeleteTaskModal.set(false);
+                    this.taskToDelete.set(null);
+                },
+                error: (err) => {
+                    console.error('Failed to delete task on backend:', err);
+                    this.tasks.update((list) => list.filter((t) => t.id !== target.id));
+                    this.showDeleteTaskModal.set(false);
+                    this.taskToDelete.set(null);
+                },
+            });
+        } else {
+            this.tasks.update((list) => list.filter((t) => t.id !== target.id));
+            this.showDeleteTaskModal.set(false);
+            this.taskToDelete.set(null);
+        }
     }
 
     // Meeting management

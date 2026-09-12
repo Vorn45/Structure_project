@@ -206,6 +206,16 @@ export class PlanController {
         return await this._service.createAgileTask(res.locals.user, id, dto);
     }
 
+    @Patch(':id/agile-tasks/:taskId')
+    async updateAgileTask(
+        @Param('id') id: string,
+        @Param('taskId') taskId: string,
+        @Body() dto: any,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.updateAgileTask(res.locals.user, id, taskId, dto);
+    }
+
     @Delete(':id/agile-tasks/:taskId')
     async deleteAgileTask(
         @Param('id') id: string,

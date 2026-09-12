@@ -15,13 +15,15 @@ export interface AddPlanProjectOption {
 }
 
 export interface AddPlanDialogData {
-    currentWeek: number;
-    startWeek: number;
-    totalWeeks: number;
-    weeks: number[];
+    currentWeek?: number;
+    startWeek?: number;
+    totalWeeks?: number;
+    weeks?: number[];
     projects?: AddPlanProjectOption[];
     selectedProjectId?: string;
     selectedProjectName?: string;
+    task?: AgilePlanTask;
+    isEditing?: boolean;
 }
 
 const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
@@ -49,7 +51,7 @@ const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
             <div mat-dialog-title
                 class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900 relative px-4 shrink-0">
                 <span class="w-full text-center text-[20px] font-medium font-kantumruy text-slate-800 dark:text-slate-200">
-                    បង្កើតផែនការថ្មី
+                    {{ isEditing ? 'កែប្រែផែនការ' : 'បង្កើតផែនការថ្មី' }}
                 </span>
             </div>
 
@@ -64,14 +66,14 @@ const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
                     <!-- Cover Banner -->
                     <div class="rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-[#0f284e] text-white p-5 shadow-sm relative overflow-hidden font-kantumruy">
                         <div class="absolute right-0 top-0 text-white/5 pointer-events-none -mr-6 -mt-6">
-                            <mat-icon svgIcon="mdi:calendar-plus" class="icon-size-40"></mat-icon>
+                            <mat-icon [svgIcon]="isEditing ? 'mdi:calendar-edit' : 'mdi:calendar-plus'" class="icon-size-40"></mat-icon>
                         </div>
                         <div class="relative z-10">
                             <span class="text-[13px] font-medium tracking-wider uppercase bg-white/20 px-3 py-1 rounded-full text-blue-100">
-                                ផែនការថ្មី (NEW AGILE PLAN)
+                                {{ isEditing ? 'កែប្រែផែនការ (EDIT AGILE PLAN)' : 'ផែនការថ្មី (NEW AGILE PLAN)' }}
                             </span>
                             <h3 class="text-[20px] font-medium text-white mt-2.5 leading-tight">
-                                បង្កើត និង រៀបចំកាលវិភាគការងារ
+                                {{ isEditing ? 'កែប្រែកាលវិភាគ និងដំណាក់កាលការងារ' : 'បង្កើត និង រៀបចំកាលវិភាគការងារ' }}
                             </h3>
                             <p class="text-[14px] text-blue-200/90 mt-1.5 leading-normal">
                                 កំណត់គម្រោង ដំណាក់កាលការងារ វដ្ត Iteration និងរយៈពេលសប្តាហ៍អនុវត្ត
@@ -209,8 +211,8 @@ const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
                     [disabled]="!taskName.trim()"
                     class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] disabled:opacity-50 transition-all duration-200 active:scale-[0.98] cursor-pointer"
                 >
-                    <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
-                    <span>បង្កើតផែនការ</span>
+                    <mat-icon [svgIcon]="isEditing ? 'mdi:check' : 'mdi:plus'" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
+                    <span>{{ isEditing ? 'រក្សាទុកការកែប្រែ' : 'បង្កើតផែនការ' }}</span>
                 </button>
             </div>
 
@@ -218,6 +220,8 @@ const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
     `,
 })
 export class AddPlanDialogComponent {
+    isEditing = false;
+    existingTaskId: string | null = null;
     taskName = '';
     iteration: 1 | 2 | 3 = 1;
     startWeek = 14;
@@ -254,6 +258,17 @@ export class AddPlanDialogComponent {
                 this.selectedProjectName = data.selectedProjectName;
             }
         }
+        if (data?.isEditing && data?.task) {
+            this.isEditing = true;
+            this.existingTaskId = data.task.id;
+            this.taskName = data.task.name;
+            if (data.task.segments && data.task.segments.length > 0) {
+                const seg = data.task.segments[0];
+                this.iteration = seg.iteration;
+                this.startWeek = seg.startWeek;
+                this.durationWeeks = seg.durationWeeks;
+            }
+        }
     }
 
     onProjectChange(projectId: string): void {
@@ -288,7 +303,7 @@ export class AddPlanDialogComponent {
         const start = Number(this.startWeek) || 14;
         const iter = (Number(this.iteration) || 1) as 1 | 2 | 3;
         const newTask: AgilePlanTask = {
-            id: `task-${Date.now()}`,
+            id: this.existingTaskId || `task-${Date.now()}`,
             name: this.taskName.trim(),
             segments: [
                 {
@@ -303,6 +318,7 @@ export class AddPlanDialogComponent {
         this._dialogRef.close({
             task: newTask,
             projectId: this.selectedProjectId,
+            isEditing: this.isEditing,
         });
     }
 }

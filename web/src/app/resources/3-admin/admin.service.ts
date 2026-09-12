@@ -185,6 +185,26 @@ export interface AdminAttendanceData {
     }>;
 }
 
+export interface AdminClient {
+    id: number;
+    company_name: string;
+    name_kh: string;
+    name_en: string;
+    email: string;
+    phone: string;
+    industry: string;
+    contact_person: string;
+    contact_phone?: string;
+    contact_email?: string;
+    status: 'active' | 'inactive' | 'lead' | 'contracted';
+    projects_count: number;
+    address?: string;
+    website?: string;
+    logo?: string | null;
+    note?: string;
+    created_at: string;
+}
+
 export interface AdminSettingsData {
     organization_name_kh: string;
     organization_name_en: string;
@@ -251,6 +271,51 @@ export class AdminService {
 
     deleteUser(id: number): Observable<{ status_code: number; message: string }> {
         return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/users/${id}`);
+    }
+
+    // 2.1 Clients Management (អតិថិជន)
+    getClients(params?: any): Observable<{ status_code: number; data: { results: AdminClient[]; total: number } }> {
+        let httpParams = new HttpParams();
+        if (params) {
+            Object.keys(params).forEach((key) => {
+                if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+                    httpParams = httpParams.set(key, params[key]);
+                }
+            });
+        }
+        return this._http.get<{ status_code: number; data: { results: AdminClient[]; total: number } }>(
+            `${this._baseUrl}/clients`,
+            { params: httpParams },
+        );
+    }
+
+    getClientById(id: number): Observable<{ status_code: number; data: AdminClient }> {
+        return this._http.get<{ status_code: number; data: AdminClient }>(`${this._baseUrl}/clients/${id}`);
+    }
+
+    createClient(payload: Partial<AdminClient>): Observable<{ status_code: number; message: string; data: AdminClient }> {
+        return this._http.post<{ status_code: number; message: string; data: AdminClient }>(
+            `${this._baseUrl}/clients`,
+            payload,
+        );
+    }
+
+    updateClient(id: number, payload: Partial<AdminClient>): Observable<{ status_code: number; message: string; data: AdminClient }> {
+        return this._http.patch<{ status_code: number; message: string; data: AdminClient }>(
+            `${this._baseUrl}/clients/${id}`,
+            payload,
+        );
+    }
+
+    toggleClientStatus(id: number): Observable<{ status_code: number; message: string; data: AdminClient }> {
+        return this._http.patch<{ status_code: number; message: string; data: AdminClient }>(
+            `${this._baseUrl}/clients/${id}/toggle-status`,
+            {},
+        );
+    }
+
+    deleteClient(id: number): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/clients/${id}`);
     }
 
     // 3. Projects Governance (គម្រោង)

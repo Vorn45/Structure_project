@@ -170,3 +170,150 @@ export class UpdateSettingsDto {
     @IsOptional()
     work_categories?: string[];
 }
+
+export class QueryAdminClientDto {
+    @IsOptional()
+    @IsString()
+    search?: string;
+
+    @IsOptional()
+    @IsString()
+    status?: string;
+
+    @IsOptional()
+    @IsString()
+    industry?: string;
+
+    @IsOptional()
+    @IsString()
+    limit?: string;
+
+    @IsOptional()
+    @IsString()
+    offset?: string;
+}
+
+export class CreateAdminClientDto {
+    @IsNotEmpty()
+    @IsString()
+    company_name: string;
+
+    @IsOptional()
+    @IsString()
+    name_kh?: string;
+
+    @IsOptional()
+    @IsString()
+    name_en?: string;
+
+    @IsOptional()
+    @IsString()
+    email?: string;
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsOptional()
+    @IsString()
+    industry?: string;
+
+    @IsOptional()
+    @IsString()
+    contact_person?: string;
+
+    @IsOptional()
+    @IsString()
+    contact_phone?: string;
+
+    @IsOptional()
+    @IsString()
+    contact_email?: string;
+
+    @IsOptional()
+    @IsString()
+    status?: 'active' | 'inactive' | 'lead' | 'contracted';
+
+    @IsOptional()
+    @IsNumber()
+    projects_count?: number;
+
+    @IsOptional()
+    @IsString()
+    address?: string;
+
+    @IsOptional()
+    @IsString()
+    website?: string;
+
+    @IsOptional()
+    @IsString()
+    logo?: string;
+
+    @IsOptional()
+    @IsString()
+    note?: string;
+}
+
+export class UpdateAdminClientDto {
+    @IsOptional()
+    @IsString()
+    company_name?: string;
+
+    @IsOptional()
+    @IsString()
+    name_kh?: string;
+
+    @IsOptional()
+    @IsString()
+    name_en?: string;
+
+    @IsOptional()
+    @IsString()
+    email?: string;
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsOptional()
+    @IsString()
+    industry?: string;
+
+    @IsOptional()
+    @IsString()
+    contact_person?: string;
+
+    @IsOptional()
+    @IsString()
+    contact_phone?: string;
+
+    @IsOptional()
+    @IsString()
+    contact_email?: string;
+
+    @IsOptional()
+    @IsString()
+    status?: 'active' | 'inactive' | 'lead' | 'contracted';
+
+    @IsOptional()
+    @IsNumber()
+    projects_count?: number;
+
+    @IsOptional()
+    @IsString()
+    address?: string;
+
+    @IsOptional()
+    @IsString()
+    website?: string;
+
+    @IsOptional()
+    @IsString()
+    logo?: string;
+
+    @IsOptional()
+    @IsString()
+    note?: string;
+}
+

@@ -22,6 +22,9 @@ import {
     UpdateProjectLeadDto,
     LeaveActionDto,
     UpdateSettingsDto,
+    QueryAdminClientDto,
+    CreateAdminClientDto,
+    UpdateAdminClientDto,
 } from './admin.dto';
 
 @Controller('admin')
@@ -37,7 +40,7 @@ export class AdminController {
     }
 
     // =========================================================================
-    // 2. USERS MANAGEMENT
+    // 2. USERS MANAGEMENT (បុគ្គលិក)
     // =========================================================================
     @Get('users')
     async getUsers(
@@ -78,6 +81,58 @@ export class AdminController {
         @Res({ passthrough: true }) res: express.Response,
     ) {
         return this._adminService.deleteUser(res.locals.user, id);
+    }
+
+    // =========================================================================
+    // 2.1. CLIENTS MANAGEMENT (អតិថិជន)
+    // =========================================================================
+    @Get('clients')
+    async getClients(
+        @Query() query: QueryAdminClientDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return this._adminService.getClients(res.locals.user, query);
+    }
+
+    @Get('clients/:id')
+    async getClientById(
+        @Param('id') id: number,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return this._adminService.getClientById(res.locals.user, id);
+    }
+
+    @Post('clients')
+    async createClient(
+        @Body() dto: CreateAdminClientDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return this._adminService.createClient(res.locals.user, dto);
+    }
+
+    @Patch('clients/:id')
+    async updateClient(
+        @Param('id') id: number,
+        @Body() dto: UpdateAdminClientDto,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return this._adminService.updateClient(res.locals.user, id, dto);
+    }
+
+    @Patch('clients/:id/toggle-status')
+    async toggleClientStatus(
+        @Param('id') id: number,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return this._adminService.toggleClientStatus(res.locals.user, id);
+    }
+
+    @Delete('clients/:id')
+    async deleteClient(
+        @Param('id') id: number,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return this._adminService.deleteClient(res.locals.user, id);
     }
 
     // =========================================================================

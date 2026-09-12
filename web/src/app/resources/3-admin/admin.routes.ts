@@ -39,7 +39,7 @@ export default [
     {
         path: 'clients',
         loadComponent: () =>
-            import('./2-users/user-management.component').then((m) => m.UserManagementComponent),
+            import('./7-clients/client-management.component').then((m) => m.ClientManagementComponent),
     },
     {
         path: 'team',

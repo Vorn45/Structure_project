@@ -309,7 +309,7 @@ export class PlanService {
         };
     }
 
-    async createPlan(user: UserPayload, dto: any) {
+    assertAdminOrSuperAdmin(user: UserPayload, actionDesc: string = 'កែប្រែ ឬគ្រប់គ្រងគម្រោង'): void {
         const roles = Array.isArray(user?.roles) ? user.roles : [];
         const activeRole: any =
             roles.find((r: any) => r.is_default) ??
@@ -342,8 +342,12 @@ export class PlanService {
             );
 
         if (!isAdmin) {
-            throw new ForbiddenException('មានតែ Administrator ឬ Super Administrator ប៉ុណ្ណោះដែលអាចបង្កើតគម្រោងថ្មីបាន (Only Admin or Super Admin can create a new project plan).');
+            throw new ForbiddenException(`មានតែ Administrator ឬ Super Administrator ប៉ុណ្ណោះដែលអាច${actionDesc}បាន (Only Admin or Super Admin can perform this action).`);
         }
+    }
+
+    async createPlan(user: UserPayload, dto: any) {
+        this.assertAdminOrSuperAdmin(user, 'បង្កើតគម្រោងថ្មី');
 
         await this.ensureLoaded();
         const projName = dto.name;
@@ -484,6 +488,7 @@ export class PlanService {
     }
 
     async updatePlan(user: UserPayload, id: string, dto: any) {
+        this.assertAdminOrSuperAdmin(user, 'កែប្រែព័ត៌មានគម្រោង');
         await this.ensureLoaded();
         const index = this.projects.findIndex((p) => p.id === id || p.code === id);
         if (index === -1) {
@@ -519,6 +524,7 @@ export class PlanService {
     }
 
     async deletePlan(user: UserPayload, id: string) {
+        this.assertAdminOrSuperAdmin(user, 'លុបគម្រោង');
         await this.ensureLoaded();
         const index = this.projects.findIndex((p) => p.id === id || p.code === id);
         if (index === -1) {
@@ -753,6 +759,7 @@ export class PlanService {
     }
 
     async createAgileTask(user: UserPayload, id: string, dto: any) {
+        this.assertAdminOrSuperAdmin(user, 'បង្កើតផែនការអនុវត្ត');
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
@@ -774,7 +781,33 @@ export class PlanService {
         };
     }
 
+    async updateAgileTask(user: UserPayload, id: string, taskId: string, dto: any) {
+        this.assertAdminOrSuperAdmin(user, 'កែប្រែផែនការអនុវត្ត');
+        await this.ensureLoaded();
+        const plan = this.projects.find((p) => p.id === id || p.code === id);
+        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan.agileTasks) plan.agileTasks = [];
+
+        const idx = plan.agileTasks.findIndex((t: any) => t.id === taskId);
+        if (idx === -1) throw new NotFoundException(`Agile task "${taskId}" not found`);
+
+        plan.agileTasks[idx] = {
+            ...plan.agileTasks[idx],
+            ...dto,
+            name: dto.name ?? plan.agileTasks[idx].name,
+            segments: dto.segments ?? plan.agileTasks[idx].segments,
+        };
+        await this.saveStore();
+
+        return {
+            status_code: 200,
+            message: 'Agile task updated successfully',
+            data: plan.agileTasks[idx],
+        };
+    }
+
     async deleteAgileTask(user: UserPayload, id: string, taskId: string) {
+        this.assertAdminOrSuperAdmin(user, 'លុបផែនការអនុវត្ត');
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
