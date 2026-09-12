@@ -188,30 +188,16 @@
 }
 
 .side-dialog-close-button.mat-mdc-icon-button {
-    // visible on all screens: tucked inside (left-2 top-2) on mobile, sticking out (-left-10 top-8) on md+
-    @apply z-10 left-2 top-2 md:-left-10 md:top-8 absolute md:min-h-12 md:z-0 md:rounded-r-none rounded-full rounded-l-full bg-dialog;
-    width: 2.5rem !important;
-    min-width: 2.5rem !important;
-    height: 2.5rem !important;
-    min-height: 2.5rem !important;
-    max-height: 2.5rem !important;
-
-    @media (min-width: 960px) {
-        height: 3rem !important;
-        min-height: 3rem !important;
-        max-height: 3rem !important;
-    }
-
-    .mat-icon {
-        @apply icon-size-6;
-    }
-
+    // Protruding tab styling defined globally in styles.scss
     .mat-mdc-button-persistent-ripple {
         display: none !important;
     }
 
     .mat-mdc-button-ripple {
-        @apply rounded-full md:rounded-r-none #{'!important'};
+        border-top-left-radius: 9999px !important;
+        border-bottom-left-radius: 9999px !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
     }
 }
 

@@ -997,57 +997,79 @@ body.dark .helper-confirmation-dialog-panel,
 }
 
 /* ========================================================================= */
-/* Standard Side Dialog Protruding Close Button Tab (matching Image 1 spec)  */
-/* ========================================================================= */
+/* Standard Side Dialog Protruding Close Button Tab (matching Image 2 reference spec) */
+/* ====================================================================================== */
 .side-dialog-close-button.mat-mdc-icon-button,
 button.side-dialog-close-button {
     position: absolute !important;
     left: -2.5rem !important; /* -40px (-left-10) */
-    top: 1.5rem !important; /* 24px (top-6) */
+    top: 1.125rem !important; /* 18px (aligns cleanly across 56px header line) */
     width: 2.5rem !important; /* 40px */
+    min-width: 2.5rem !important;
+    max-width: 2.5rem !important;
     height: 3rem !important; /* 48px */
     min-height: 3rem !important;
     max-height: 3rem !important;
     background-color: #ffffff !important;
-    color: #475569 !important;
+    color: #5b6b82 !important;
     border-top-left-radius: 9999px !important;
     border-bottom-left-radius: 9999px !important;
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
-    box-shadow: -4px 0 14px rgba(0, 0, 0, 0.12) !important;
+    border: none !important;
+    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.06) !important;
     z-index: 60 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
     transition: background-color 150ms ease, color 150ms ease !important;
 
     .mat-icon {
         width: 1.25rem !important;
         height: 1.25rem !important;
         font-size: 1.25rem !important;
-        color: #475569 !important;
-        margin-left: 0.25rem !important;
+        line-height: 1.25rem !important;
+        color: #5b6b82 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     &:hover {
         background-color: #f8fafc !important;
-        color: #0f172a !important;
+        color: #1e293b !important;
 
         .mat-icon {
-            color: #0f172a !important;
+            color: #1e293b !important;
         }
+    }
+
+    .mat-mdc-button-persistent-ripple {
+        display: none !important;
+    }
+
+    .mat-mdc-button-ripple {
+        border-top-left-radius: 9999px !important;
+        border-bottom-left-radius: 9999px !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
     }
 }
 
 .dark .side-dialog-close-button.mat-mdc-icon-button,
 .dark button.side-dialog-close-button {
     background-color: #0f172a !important;
-    color: #cbd5e1 !important;
-    box-shadow: -4px 0 14px rgba(0, 0, 0, 0.45) !important;
+    color: #94a3b8 !important;
+    border: none !important;
+    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.35) !important;
 
     .mat-icon {
-        color: #cbd5e1 !important;
+        color: #94a3b8 !important;
     }
 
     &:hover {
@@ -1057,6 +1079,55 @@ button.side-dialog-close-button {
         .mat-icon {
             color: #ffffff !important;
         }
+    }
+}
+
+/* Mobile Side Dialog Close Button (inside header for viewport < 640px) */
+.side-dialog-close-button--mobile.mat-mdc-icon-button,
+button.side-dialog-close-button--mobile {
+    position: absolute !important;
+    left: 0.75rem !important;
+    top: 0.625rem !important;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-width: 2.25rem !important;
+    min-height: 2.25rem !important;
+    border-radius: 9999px !important;
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    z-index: 60 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+
+    .mat-icon {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        font-size: 1.25rem !important;
+        color: #475569 !important;
+        margin: 0 !important;
+    }
+
+    &:hover {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
+    }
+}
+
+.dark .side-dialog-close-button--mobile.mat-mdc-icon-button,
+.dark button.side-dialog-close-button--mobile {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+
+    .mat-icon {
+        color: #cbd5e1 !important;
+    }
+
+    &:hover {
+        background-color: #334155 !important;
+        color: #ffffff !important;
     }
 }
 

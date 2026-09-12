@@ -1,48 +1,48 @@
 
 @if (closeOnClick) {
-    <!-- mobile return/back -->
+    <!-- mobile return/back (screens < sm: 640px) -->
     <button
         [mat-dialog-close]="dialogCloseValue"
-        [matTooltip]="mobileTooltip | transloco"
-        class="absolute left-2 top-2 md:hidden z-10"
+        [matTooltip]="(isReturn ? mobileTooltip : tooltip) | transloco"
+        class="side-dialog-close-button--mobile sm:hidden"
         mat-icon-button
         type="button"
     >
-        <mat-icon [svgIcon]="mobileIcon"></mat-icon>
+        <mat-icon [svgIcon]="isReturn ? mobileIcon : icon"></mat-icon>
     </button>
 
-    <!-- desktop close -->
+    <!-- desktop/tablet protruding close button tab (sm: 640px and up) -->
     <button
         [mat-dialog-close]="dialogCloseValue"
         [matTooltip]="tooltip | transloco"
         matTooltipClass="side-dialog-close-button-tooltip"
         mat-icon-button
         type="button"
-        class="side-dialog-close-button group hidden md:inline-flex"
+        class="side-dialog-close-button group hidden sm:inline-flex"
     >
-        <mat-icon [svgIcon]="icon" class="ml-2"></mat-icon>
+        <mat-icon [svgIcon]="icon"></mat-icon>
     </button>
 } @else {
-    <!-- mobile custom back action -->
+    <!-- mobile custom back action (screens < sm: 640px) -->
     <button
-        [matTooltip]="mobileTooltip | transloco"
-        class="absolute left-2 top-2 md:hidden z-10"
+        [matTooltip]="(isReturn ? mobileTooltip : tooltip) | transloco"
+        class="side-dialog-close-button--mobile sm:hidden"
         mat-icon-button
         type="button"
         (click)="buttonClick.emit()"
     >
-        <mat-icon [svgIcon]="mobileIcon"></mat-icon>
+        <mat-icon [svgIcon]="isReturn ? mobileIcon : icon"></mat-icon>
     </button>
 
-    <!-- desktop custom back action -->
+    <!-- desktop/tablet protruding close button tab (sm: 640px and up) -->
     <button
         [matTooltip]="tooltip | transloco"
         matTooltipClass="side-dialog-close-button-tooltip"
         mat-icon-button
         type="button"
-        class="side-dialog-close-button group hidden md:inline-flex"
+        class="side-dialog-close-button group hidden sm:inline-flex"
         (click)="buttonClick.emit()"
     >
-        <mat-icon [svgIcon]="icon" class="ml-2"></mat-icon>
+        <mat-icon [svgIcon]="icon"></mat-icon>
     </button>
 }

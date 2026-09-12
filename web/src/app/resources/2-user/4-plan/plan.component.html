@@ -836,10 +836,11 @@
                                                 </span>
                                             </div>
 
-                                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-2xs"
-                                                [ngClass]="task.assignee.bgClass || 'bg-slate-300 text-slate-700'"
-                                                [matTooltip]="task.assignee.name">
-                                                {{ task.assignee.initial || 'A' }}
+                                            <div class="w-5 h-5 min-w-[20px] min-h-[20px] max-w-[20px] max-h-[20px] overflow-hidden rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-2xs"
+                                                [ngClass]="task.assignee?.bgClass || 'bg-slate-300 text-slate-700'"
+                                                [matTooltip]="task.assignee?.name || ''">
+                                                <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee?.name" class="w-full h-full object-cover block" />
+                                                <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.initial || 'A' }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1104,7 +1105,7 @@
                                             <!-- Assignee -->
                                             <td class="py-3.5 px-3 min-w-[140px]">
                                                 <div class="flex items-center gap-2">
-                                                    <div class="w-6.5 h-6.5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-2xs shrink-0"
+                                                    <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-2xs shrink-0"
                                                         [ngClass]="task.assignee?.bgClass || 'bg-blue-600'">
                                                         {{ task.assignee?.initial || task.assignee?.name?.charAt(0) || 'A' }}
                                                     </div>
