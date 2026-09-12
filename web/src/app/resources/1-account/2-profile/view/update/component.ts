@@ -330,6 +330,13 @@ export class UpdateProfileDialogComponent implements OnInit {
         return user?.avatar?.uri || null;
     }
 
+    onAvatarError(event: Event): void {
+        const img = event.target as HTMLImageElement;
+        if (img && !img.src.endsWith('/images/placeholder/avatar.jpg')) {
+            img.src = '/images/placeholder/avatar.jpg';
+        }
+    }
+
     private avatarUrl(user: any): string {
         const avatar = this.avatarValue(user);
 
@@ -337,11 +344,21 @@ export class UpdateProfileDialogComponent implements OnInit {
             return '/images/placeholder/avatar.jpg';
         }
 
-        if (avatar.startsWith('data:image/') || avatar.startsWith('http')) {
+        if (avatar.startsWith('data:image/')) {
             return avatar;
         }
 
-        const fileDomain = user?.avatar?.file_domain || this._fileBaseUrl || '';
-        return `${fileDomain}${avatar.startsWith('/') ? avatar : `/${avatar}`}`;
+        if (avatar.startsWith('/images/') || avatar.startsWith('images/') || avatar.startsWith('/assets/') || avatar.startsWith('assets/')) {
+            return avatar.startsWith('/') ? avatar : `/${avatar}`;
+        }
+
+        if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+            return avatar;
+        }
+
+        const rawDomain = user?.avatar?.file_domain || this._fileBaseUrl || '';
+        const fileDomain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
+        const cleanPath = avatar.replace(/^\/+/, '');
+        return fileDomain ? `${fileDomain}/${cleanPath}` : `/${cleanPath}`;
     }
 }

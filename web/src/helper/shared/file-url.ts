@@ -13,6 +13,11 @@ export function resolveFileUrl(file: { uri?: string; url?: string; file_domain?:
 
     if (/^(https?:|data:)/i.test(uri)) return uri;
 
+    // Static local frontend assets should be served directly without domain prefix
+    if (/^(\/)?(images|assets|icons|fonts)\//i.test(uri)) {
+        return uri.startsWith('/') ? uri : `/${uri}`;
+    }
+
     const rawDomain = (typeof file === 'string' ? '' : file.file_domain) || env.FILE_BASE_URL || '';
     const domain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
     const path = uri.replace(/^\/+/, '');

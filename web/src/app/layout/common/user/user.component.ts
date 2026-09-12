@@ -101,6 +101,13 @@ export class UserComponent implements OnInit, OnDestroy {
         });
     }
 
+    onImgError(event: Event): void {
+        const img = event.target as HTMLImageElement;
+        if (img && !img.src.endsWith('/images/placeholder/avatar.jpg')) {
+            img.src = '/images/placeholder/avatar.jpg';
+        }
+    }
+
     viewUserDialog(type: string): void {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             data      : this.user,

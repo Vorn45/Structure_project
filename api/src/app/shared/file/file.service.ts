@@ -98,6 +98,17 @@ export class FileService {
 
         await fs.promises.writeFile(filePath, buffer);
 
+        // Also sync to alternate uploads directory if available
+        try {
+            const altDir = process.cwd().endsWith('api')
+                ? path.join(process.cwd(), '..', 'uploads', safeFolder)
+                : path.join(process.cwd(), 'api', 'uploads', safeFolder);
+            if (!fs.existsSync(altDir)) {
+                fs.mkdirSync(altDir, { recursive: true });
+            }
+            await fs.promises.writeFile(path.join(altDir, uniqueFilename), buffer);
+        } catch {}
+
         const uri = `uploads/${safeFolder}/${uniqueFilename}`;
         return {
             name: uniqueFilename,

@@ -62,6 +62,12 @@
         app.useStaticAssets(uploadsDir, {
             prefix: '/uploads/',
         });
+        const altUploadsDir = join(process.cwd(), 'api', 'uploads');
+        if (fs.existsSync(altUploadsDir)) {
+            app.useStaticAssets(altUploadsDir, {
+                prefix: '/uploads/',
+            });
+        }
         app.use(snakeCaseRequestAliasMiddleware);
 
         app.setGlobalPrefix(appConfig.APP.GLOBAL_PREFIX);

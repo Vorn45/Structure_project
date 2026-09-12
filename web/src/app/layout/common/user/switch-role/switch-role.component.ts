@@ -396,11 +396,28 @@ export class SwitchRoleComponent implements OnInit {
         window.location.reload();
     }
 
+    onLogoError(event: Event): void {
+        const img = event.target as HTMLImageElement;
+        if (img) {
+            img.style.display = 'none';
+        }
+    }
+
+    onAvatarError(event: Event): void {
+        const img = event.target as HTMLImageElement;
+        if (img && !img.src.endsWith(SwitchRoleComponent.DEFAULT_AVATAR)) {
+            img.src = SwitchRoleComponent.DEFAULT_AVATAR;
+        }
+    }
+
     private _fileUrl(file: any): string | null {
         if (!file) return null;
         const uri = file.uri ?? file.url;
         if (!uri) return null;
-        if (/^https?:\/\//i.test(uri)) return uri;
+        if (/^(https?:|data:)/i.test(uri)) return uri;
+        if (/^(\/)?(images|assets|icons|fonts)\//i.test(uri)) {
+            return uri.startsWith('/') ? uri : `/${uri}`;
+        }
         let domain = file.file_domain || env.FILE_BASE_URL || '';
         if (!domain || domain.includes('${')) domain = '';
         domain = domain.replace(/\/+$/, '');

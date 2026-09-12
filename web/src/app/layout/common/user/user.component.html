@@ -1,6 +1,6 @@
 <button class="mt-1 cursor-pointer" mat-icon-button [matMenuTriggerFor]="userMenu" [matMenuTriggerRestoreFocus]="false">
     <span class="relative border min-w-10 max-w-10 min-h-10 max-h-10 flex items-center justify-center rounded-full">
-        <img class="border border-blue-500 min-w-10 max-w-10 min-h-10 max-h-10 object-cover rounded-full" [src]="src" alt="User Avatar">
+        <img class="border border-blue-500 min-w-10 max-w-10 min-h-10 max-h-10 object-cover rounded-full" [src]="src" (error)="onImgError($event)" alt="User Avatar">
     </span>
 </button>
 

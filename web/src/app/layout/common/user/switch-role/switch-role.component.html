@@ -66,6 +66,7 @@
                             <ng-container *ngIf="item.logo; else roleIcon">
                                 <img
                                     [src]="item.logo"
+                                    (error)="onLogoError($event)"
                                     alt="logo"
                                     class="h-10 w-10 rounded-full object-contain bg-white border border-slate-200 dark:border-slate-600"
                                 />
@@ -77,6 +78,7 @@
                                     <img
                                         *ngIf="item.badgeImage; else badgeIconTpl"
                                         [src]="item.badgeImage"
+                                        (error)="onAvatarError($event)"
                                         alt="avatar"
                                         class="h-full w-full object-cover"
                                     />

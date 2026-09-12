@@ -514,7 +514,10 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
         if (!file) return null;
         const uri = file.uri ?? file.url;
         if (!uri) return null;
-        if (/^https?:\/\//i.test(uri)) return uri;
+        if (/^(https?:|data:)/i.test(uri)) return uri;
+        if (/^(\/)?(images|assets|icons|fonts)\//i.test(uri)) {
+            return uri.startsWith('/') ? uri : `/${uri}`;
+        }
         let domain = file.file_domain || this._fileBaseUrl || '';
         if (!domain || domain.includes('${')) domain = '';
         domain = domain.replace(/\/+$/, '');
@@ -715,22 +718,47 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
         image.src = avatarUrl;
     }
 
+    onAvatarError(event: Event): void {
+        const target = event.target as HTMLImageElement;
+        if (target && !target.src.endsWith(ProfileViewComponent.DEFAULT_AVATAR)) {
+            target.src = ProfileViewComponent.DEFAULT_AVATAR;
+        }
+    }
+
+    onCoverError(event: Event): void {
+        const target = event.target as HTMLImageElement;
+        const fallback = '/images/placeholder/cover.jpg';
+        if (target && !target.src.endsWith(fallback)) {
+            target.src = fallback;
+        }
+    }
+
     getImageUrl(imageObj: any, type: 'avatar' | 'cover'): string {
         const image =
             typeof imageObj === 'string' ? imageObj : imageObj?.uri || null;
 
         if (!image) {
             return type === 'avatar'
-                ? '/images/placeholder/avatar.jpg'
-                : 'images/apps/phnom_penh.png';
+                ? ProfileViewComponent.DEFAULT_AVATAR
+                : '/images/placeholder/cover.jpg';
         }
 
-        if (image.startsWith('data:image/') || image.startsWith('http')) {
+        if (image.startsWith('data:image/')) {
             return image;
         }
 
-        const fileDomain = imageObj?.file_domain || this._fileBaseUrl || '';
-        return `${fileDomain}${image.startsWith('/') ? image : `/${image}`}`;
+        if (image.startsWith('/images/') || image.startsWith('images/') || image.startsWith('/assets/') || image.startsWith('assets/')) {
+            return image.startsWith('/') ? image : `/${image}`;
+        }
+
+        if (image.startsWith('http://') || image.startsWith('https://')) {
+            return image;
+        }
+
+        const rawDomain = imageObj?.file_domain || this._fileBaseUrl || '';
+        const fileDomain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
+        const cleanPath = image.replace(/^\/+/, '');
+        return fileDomain ? `${fileDomain}/${cleanPath}` : `/${cleanPath}`;
     }
 }
 
