@@ -1,207 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { UserPayload } from 'src/app/interface/jwt.interface';
-import { RealtimeGateway } from '../realtime/realtime.gateway';
-import {
-    MarkReadManyDto,
-    QueryChatNotificationDto,
-    QueryNotificationDto,
-    QueryTaskChatNotificationDto,
-    SaveFcmTokenDto,
-    UpdateNotificationSettingDto,
-} from './notification.dto';
+    import { Injectable } from '@nestjs/common';
+    import { UserPayload } from 'src/app/interface/jwt.interface';
+    import { RealtimeGateway } from '../realtime/realtime.gateway';
+    import {
+        MarkReadManyDto,
+        QueryChatNotificationDto,
+        QueryNotificationDto,
+        QueryTaskChatNotificationDto,
+        SaveFcmTokenDto,
+        UpdateNotificationSettingDto,
+    } from './notification.dto';
 
-export interface NotificationItem {
-    id: string;
-    type: string;
-    title: string;
-    title_kh: string;
-    title_en: string;
-    message: string;
-    message_kh: string;
-    message_en: string;
-    data?: any;
-    is_unread: boolean;
-    read_at: string | null;
-    created_at: string;
-    organization?: {
+    export interface NotificationItem {
         id: string;
-        name_en?: string;
-        name_kh?: string;
-        avatar?: { id?: number; uri?: string | null; file_domain?: string | null; url?: string | null } | null;
-    } | null;
-    project?: {
-        id: string;
-        name_en?: string;
-        name_kh?: string;
-        short_name_en?: string;
-        short_name_kh?: string;
-        avatar?: { id?: number; uri?: string | null; file_domain?: string | null; url?: string | null } | null;
-    } | null;
-    task?: {
-        id: number | string;
-        task_code?: string;
-        title?: string;
-        avatar?: { id?: number; uri?: string | null; file_domain?: string | null; url?: string | null } | null;
-    } | null;
-    last_message?: {
-        source: 'message' | 'activity';
-        id: string;
-        content: string;
-        field_name?: string | null;
-        sender_id: number;
-        chat_message_type_id: number | null;
+        type: string;
+        title: string;
+        title_kh: string;
+        title_en: string;
+        message: string;
+        message_kh: string;
+        message_en: string;
+        data?: any;
+        is_unread: boolean;
+        read_at: string | null;
         created_at: string;
-        sender?: { id: number; name_en?: string; name_kh?: string; avatar?: any } | null;
-    } | null;
-}
+        organization?: {
+            id: string;
+            name_en?: string;
+            name_kh?: string;
+            avatar?: { id?: number; uri?: string | null; file_domain?: string | null; url?: string | null } | null;
+        } | null;
+        project?: {
+            id: string;
+            name_en?: string;
+            name_kh?: string;
+            short_name_en?: string;
+            short_name_kh?: string;
+            avatar?: { id?: number; uri?: string | null; file_domain?: string | null; url?: string | null } | null;
+        } | null;
+        task?: {
+            id: number | string;
+            task_code?: string;
+            title?: string;
+            avatar?: { id?: number; uri?: string | null; file_domain?: string | null; url?: string | null } | null;
+        } | null;
+        last_message?: {
+            source: 'message' | 'activity';
+            id: string;
+            content: string;
+            field_name?: string | null;
+            sender_id: number;
+            chat_message_type_id: number | null;
+            created_at: string;
+            sender?: { id: number; name_en?: string; name_kh?: string; avatar?: any } | null;
+        } | null;
+    }
 
-@Injectable()
-export class NotificationService {
-    private notifications: NotificationItem[] = [
-        {
-            id: 'notif_1',
-            type: 'task_assigned',
-            title: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
-            title_kh: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង',
-            title_en: 'New Task Assigned',
-            message: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត បានចាត់តាំងភារកិច្ច "#WMS-0000: Org Admin | Structure | Department" ជូនអ្នក។',
-            message_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត បានចាត់តាំងភារកិច្ច "#WMS-0000: Org Admin | Structure | Department" ជូនអ្នក។',
-            message_en: 'You have been assigned to task #WMS-0000: Org Admin | Structure | Department',
-            is_unread: true,
-            read_at: null,
-            created_at: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-            organization: {
-                id: 'org_1',
-                name_en: 'Digitech Systems',
-                name_kh: 'ឌីជីថេក ស៊ីស្ទឹម',
-                avatar: { uri: 'images/logo/default_logo.png' },
-            },
-            project: {
-                id: 'wms-digitech',
-                name_en: 'WMS Digitech',
-                name_kh: 'WMS ឌីជីថេក',
-                short_name_en: 'WMS Digitech',
-                short_name_kh: 'WMS ឌីជីថេក',
-                avatar: { uri: 'images/logo/default_logo.png' },
-            },
-            task: {
-                id: 1,
-                task_code: '#WMS-0000',
-                title: 'ភារកិច្ចថ្មីត្រូវបានចាត់តាំង (#WMS-0000)',
-            },
-            last_message: {
-                source: 'activity',
-                id: 'msg_1',
-                content: 'បានចាត់តាំងភារកិច្ច "#WMS-0000: Org Admin | Structure" ជូនអ្នក',
-                sender_id: 1,
-                chat_message_type_id: 1,
-                created_at: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-                sender: { id: 1, name_en: 'PISETH PANHAVORN', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' },
-            },
-        },
-        {
-            id: 'notif_2',
-            type: 'error_alert',
-            title: 'បញ្ហាបច្ចេកទេសការងារ (Build Issue)',
-            title_kh: 'បញ្ហាបច្ចេកទេសការងារ',
-            title_en: 'Task Build Issue',
-            message: 'ការបញ្ជូនទិន្នន័យលើ pipeline BMS Digitech មានបញ្ហា សូមពិនិត្យ។',
-            message_kh: 'ការបញ្ជូនទិន្នន័យលើ pipeline BMS Digitech មានបញ្ហា សូមពិនិត្យ។',
-            message_en: 'A deployment issue was detected in BMS Digitech pipeline',
-            is_unread: true,
-            read_at: null,
-            created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-            organization: {
-                id: 'org_1',
-                name_en: 'Digitech Systems',
-                name_kh: 'ឌីជីថេក ស៊ីស្ទឹម',
-            },
-            project: {
-                id: 'bms-digitech',
-                name_en: 'BMS Digitech',
-                name_kh: 'BMS ឌីជីថេក',
-                short_name_en: 'BMS Digitech',
-                short_name_kh: 'BMS ឌីជីថេក',
-            },
-            task: {
-                id: 2,
-                task_code: '#BMS-0000',
-                title: 'បញ្ហាបច្ចេកទេសការងារ (#BMS-0000)',
-            },
-            last_message: {
-                source: 'message',
-                id: 'msg_2',
-                content: 'ការបញ្ជូនទិន្នន័យលើ pipeline BMS Digitech មានបញ្ហា សូមពិនិត្យ',
-                sender_id: 3,
-                chat_message_type_id: 1,
-                created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-                sender: { id: 3, name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ' },
-            },
-        },
-        {
-            id: 'notif_3',
-            type: 'account_update',
-            title: 'ការកែប្រែគណនី (Account Update)',
-            title_kh: 'ការកែប្រែគណនី',
-            title_en: 'Account Update',
-            message: 'ការកំណត់សិទ្ធិ និងព័ត៌មានគណនីរបស់អ្នកត្រូវបានធ្វើបច្ចុប្បន្នភាព។',
-            message_kh: 'ការកំណត់សិទ្ធិ និងព័ត៌មានគណនីរបស់អ្នកត្រូវបានធ្វើបច្ចុប្បន្នភាព។',
-            message_en: 'Account profile & permission settings have been updated.',
-            is_unread: false,
-            read_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            last_message: {
-                source: 'activity',
-                id: 'msg_3',
-                content: 'ព័ត៌មានគណនី និងសិទ្ធិត្រូវបានធ្វើបច្ចុប្បន្នភាព',
-                sender_id: 1,
-                chat_message_type_id: 1,
-                created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            },
-        },
-        {
-            id: 'notif_4',
-            type: 'feature_announcement',
-            title: 'ការប្រកាសមុខងារថ្មី (New Feature)',
-            title_kh: 'ការប្រកាសមុខងារថ្មី',
-            title_en: 'Feature Announcement',
-            message: 'មុខងារថ្មីត្រូវបានដាក់ឱ្យប្រើប្រាស់៖ Kanban Board & Real-time Notification។',
-            message_kh: 'មុខងារថ្មីត្រូវបានដាក់ឱ្យប្រើប្រាស់៖ Kanban Board & Real-time Notification។',
-            message_en: 'New feature released: Enhanced Kanban board & real-time notifications.',
-            is_unread: false,
-            read_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            last_message: {
-                source: 'activity',
-                id: 'msg_4',
-                content: 'មុខងារថ្មីត្រូវបានដាក់ឱ្យប្រើប្រាស់៖ Kanban Board & Real-time Notification',
-                sender_id: 1,
-                chat_message_type_id: 1,
-                created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            },
-        },
-        {
-            id: 'notif_5',
-            type: 'system_alert',
-            title: 'វត្តមានប្រចាំថ្ងៃ (Daily Attendance)',
-            title_kh: 'វត្តមានប្រចាំថ្ងៃ',
-            title_en: 'Daily Attendance',
-            message: 'អ្នកបានចុះវត្តមានចូលធ្វើការ (Check-In) ដោយជោគជ័យនៅម៉ោង 8:00 AM។',
-            message_kh: 'អ្នកបានចុះវត្តមានចូលធ្វើការ (Check-In) ដោយជោគជ័យនៅម៉ោង 8:00 AM។',
-            message_en: 'You successfully checked in today at 8:00 AM.',
-            is_unread: false,
-            read_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-            created_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-            last_message: {
-                source: 'activity',
-                id: 'msg_5',
-                content: 'បានចុះវត្តមានចូលធ្វើការ (Check-In) ដោយជោគជ័យនៅម៉ោង 8:00 AM',
-                sender_id: 1,
-                chat_message_type_id: 1,
-                created_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-            },
-        },
-    ];
+    @Injectable()
+    export class NotificationService {
+        private notifications: NotificationItem[] = [];
 
     private settingsMap = new Map<string, any>();
     private fcmTokens: Set<string> = new Set();
