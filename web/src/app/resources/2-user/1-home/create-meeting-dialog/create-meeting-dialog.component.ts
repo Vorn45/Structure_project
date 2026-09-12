@@ -43,7 +43,7 @@ export interface ScheduledMeeting {
         SideDialogCloseButtonComponent,
     ],
     template: `
-        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-hidden" style="font-family: 'Kantumruy Pro', sans-serif;">
+        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-visible" style="font-family: 'Kantumruy Pro', sans-serif;">
             
             <!-- ========================================================= -->
             <!-- 1. DIALOG HEADER (Exact Side Drawer Header Style)        -->

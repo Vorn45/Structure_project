@@ -22,7 +22,7 @@ import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-but
         SideDialogCloseButtonComponent,
     ],
     template: `
-        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-hidden" style="font-family: 'Kantumruy Pro', sans-serif;">
+        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-visible" style="font-family: 'Kantumruy Pro', sans-serif;">
             
             <!-- Header -->
             <div mat-dialog-title

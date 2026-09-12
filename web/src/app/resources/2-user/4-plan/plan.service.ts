@@ -169,6 +169,12 @@ export class UserPlanService {
         });
     }
 
+    updateAgileTask(projectId: string, taskId: string, task: any): Observable<{ status_code: number; data: any }> {
+        return this._http.patch<{ status_code: number; data: any }>(`${this.baseUrl}/${projectId}/agile-tasks/${taskId}`, task, {
+            withCredentials: true,
+        });
+    }
+
     deleteAgileTask(projectId: string, taskId: string): Observable<{ status_code: number; message: string }> {
         return this._http.delete<{ status_code: number; message: string }>(`${this.baseUrl}/${projectId}/agile-tasks/${taskId}`, {
             withCredentials: true,

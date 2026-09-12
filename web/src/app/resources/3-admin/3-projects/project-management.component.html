@@ -180,13 +180,32 @@
                                 </div>
                             </div>
 
-                            <!-- Right: Status Pill with Icon -->
-                            <span
-                                class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs shrink-0 font-kantumruy"
-                                [ngClass]="getStatusClass(plan.status)">
-                                <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
-                                <span>{{ getStatusLabel(plan.status) }}</span>
-                            </span>
+                            <!-- Right: Status Pill & 3-dot Menu -->
+                            <div class="flex items-center gap-1 shrink-0">
+                                <span
+                                    class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs font-kantumruy"
+                                    [ngClass]="getStatusClass(plan.status)">
+                                    <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
+                                    <span>{{ getStatusLabel(plan.status) }}</span>
+                                </span>
+                                <button *ngIf="isAdmin()" type="button"
+                                    (click)="$event.stopPropagation()"
+                                    [matMenuTriggerFor]="projectCardMenu"
+                                    class="w-7 h-7 -mr-1.5 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                    matTooltip="ជម្រើសបន្ថែម">
+                                    <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
+                                </button>
+                                <mat-menu #projectCardMenu="matMenu" class="!rounded-xl font-kantumruy">
+                                    <button mat-menu-item (click)="openEditDrawer(plan); $event.stopPropagation()" class="!text-[14px]">
+                                        <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-4.5 mr-2 text-blue-600"></mat-icon>
+                                        <span>កែប្រែគម្រោង</span>
+                                    </button>
+                                    <button mat-menu-item (click)="confirmDelete(plan, $event)" class="!text-[14px] !text-rose-600">
+                                        <mat-icon svgIcon="mdi:delete-outline" class="icon-size-4.5 mr-2 !text-rose-600"></mat-icon>
+                                        <span>លុបគម្រោង</span>
+                                    </button>
+                                </mat-menu>
+                            </div>
                         </div>
 
                         <!-- Description -->
@@ -288,9 +307,14 @@
 
                 <div class="flex items-center gap-2">
                     <button (click)="openEditDrawer(proj)"
-                        class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer">
-                        <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4"></mat-icon>
+                        class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs">
+                        <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
                         <span>កែប្រែគម្រោង</span>
+                    </button>
+                    <button *ngIf="isAdmin()" (click)="confirmDelete(proj, $event)"
+                        class="h-9 px-3.5 rounded-xl border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs">
+                        <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4 text-rose-600 dark:text-rose-400"></mat-icon>
+                        <span>លុបគម្រោង</span>
                     </button>
                 </div>
             </div>
@@ -1422,11 +1446,9 @@
     <!-- ========================================================================= -->
     @if (isDrawerOpen()) {
     <div (click)="closeDrawer()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-40 transition-opacity"></div>
-    <div class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800">
-        <button (click)="closeDrawer()"
-            class="-left-5 top-4 absolute z-50 w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 shadow-md cursor-pointer">
-            <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
-        </button>
+    <div class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy">
+        <!-- Standard Side Dialog Close Button -->
+        <shared-side-dialog-close-button [isReturn]="false" [closeOnClick]="false" (buttonClick)="closeDrawer()"></shared-side-dialog-close-button>
 
         <div class="min-h-14 max-h-14 h-14 border-b border-slate-200 px-6 flex items-center justify-between">
             <h2 class="text-[16px] font-medium text-slate-900 dark:text-white">{{ isEditing() ? 'កែប្រែព័ត៌មានគម្រោង' :

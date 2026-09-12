@@ -20,6 +20,8 @@ export interface CreateProjectDialogData {
     members?: { id: number | string; name: string; role: string; avatar?: string }[];
     existingProjects?: { code?: string; id?: string }[];
     onProjectCreated?: () => void;
+    project?: any;
+    isEditing?: boolean;
 }
 
 export interface ProjectStatusOption {
@@ -166,7 +168,7 @@ export interface ProjectAttachment {
             <div mat-dialog-title
                 class="w-full relative flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 px-4 font-kantumruy bg-white dark:bg-slate-900 shrink-0">
                 <span class="w-full text-center text-[18px] sm:text-[20px] font-semibold font-kantumruy text-slate-800 dark:text-slate-100">
-                    បង្កើតគម្រោងថ្មី
+                    {{ isEditing() ? 'កែប្រែគម្រោង' : 'បង្កើតគម្រោងថ្មី' }}
                 </span>
             </div>
 
@@ -724,6 +726,7 @@ export interface ProjectAttachment {
                 <!-- Actions: Create & Add Another + Create & Close -->
                 <div class="flex items-center gap-2">
                     <button
+                        *ngIf="!isEditing()"
                         type="button"
                         (click)="submitAndAddAnother()"
                         [disabled]="!projectName.trim() || isSubmitting()"
@@ -738,9 +741,9 @@ export interface ProjectAttachment {
                         [disabled]="!projectName.trim() || isSubmitting()"
                         class="h-10 px-5 rounded-xl font-medium font-kantumruy text-[14px] text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
                     >
-                        <mat-icon *ngIf="!isSubmitting()" svgIcon="mdi:plus" class="!w-4 !h-4 text-white shrink-0"></mat-icon>
+                        <mat-icon *ngIf="!isSubmitting()" [svgIcon]="isEditing() ? 'mdi:check' : 'mdi:plus'" class="!w-4 !h-4 text-white shrink-0"></mat-icon>
                         <mat-icon *ngIf="isSubmitting()" svgIcon="mdi:loading" class="!w-4 !h-4 text-white shrink-0 animate-spin"></mat-icon>
-                        <span>{{ isSubmitting() ? 'កំពុងបង្កើត...' : 'បង្កើតគម្រោង' }}</span>
+                        <span>{{ isSubmitting() ? (isEditing() ? 'កំពុងរក្សាទុក...' : 'កំពុងបង្កើត...') : (isEditing() ? 'រក្សាទុកការកែប្រែ' : 'បង្កើតគម្រោង') }}</span>
                     </button>
                 </div>
             </div>
@@ -766,6 +769,7 @@ export class CreateProjectDialogComponent implements OnInit {
     private dragCounter = 0;
 
     // State for continuous creation, notifications, and smooth closing
+    isEditing = signal<boolean>(false);
     isSubmitting = signal<boolean>(false);
     isClosing = signal<boolean>(false);
     successNotice = signal<string>('');
@@ -962,6 +966,30 @@ export class CreateProjectDialogComponent implements OnInit {
         }
 
         this.projectCode = this.generateNextCode();
+
+        if (this.data?.isEditing && this.data?.project) {
+            this.isEditing.set(true);
+            const p = this.data.project;
+            this.projectName = p.name || '';
+            this.projectCode = p.code || this.projectCode;
+            this.category = p.category || 'it';
+            this.budget = Number(p.budget_allocated || p.budget) || 5000;
+            this.description = p.description || '';
+            if (p.status) this.selectedStatus.set(p.status as any);
+            if (p.priority) this.priority.set(p.priority as any);
+            if (p.start_date) this.startDate = new Date(p.start_date);
+            if (p.end_date) this.endDate = new Date(p.end_date);
+            if (p.team_lead || p.lead) {
+                const lead = p.team_lead || p.lead;
+                this.leadName = lead.name || '';
+                this.leadRole = lead.role || '';
+                this.leadAvatar = lead.avatar || null;
+                this.leadId = lead.id || null;
+            }
+            if (p.members && p.members.length > 0) {
+                this.selectedMemberIds.set(p.members.map((m: any) => String(m.id)));
+            }
+        }
     }
 
     ngOnInit(): void {
@@ -1109,6 +1137,29 @@ export class CreateProjectDialogComponent implements OnInit {
 
         this.isSubmitting.set(true);
         const payload = this.buildPayload();
+
+        if (this.isEditing() && this.data?.project) {
+            this.isSubmitting.set(false);
+            this.performSmoothClose({
+                edited: true,
+                id: this.data.project.id,
+                project: payload,
+                name: name,
+                status: this.selectedStatus(),
+                priority: this.priority(),
+                category: this.category,
+                budget: Number(this.budget) || 5000,
+                budget_allocated: Number(this.budget) || 5000,
+                lead: payload.lead,
+                team_lead: payload.team_lead,
+                reporter: payload.reporter,
+                assignees: payload.assignees,
+                members: payload.members,
+                description: this.description.trim() || name,
+                attachments: this.attachedFiles(),
+            });
+            return;
+        }
 
         this._homeService.createProject(payload).subscribe({
             next: (res) => {

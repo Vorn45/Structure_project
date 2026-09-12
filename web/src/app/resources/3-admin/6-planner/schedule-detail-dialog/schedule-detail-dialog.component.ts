@@ -23,7 +23,7 @@ export interface ScheduleDetailDialogData {
         SideDialogCloseButtonComponent,
     ],
     template: `
-        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-hidden" style="font-family: 'Kantumruy Pro', sans-serif !important;">
+        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[16px] font-normal relative overflow-visible" style="font-family: 'Kantumruy Pro', sans-serif !important;">
             
             <!-- ========================================================= -->
             <!-- 1. DIALOG HEADER (Standard Side Drawer Header)            -->

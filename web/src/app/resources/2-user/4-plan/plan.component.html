@@ -219,13 +219,32 @@
                                 </div>
                             </div>
 
-                            <!-- Right: Status Pill with Icon -->
-                            <span
-                                class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs shrink-0 font-kantumruy"
-                                [ngClass]="getStatusClass(plan.status)">
-                                <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
-                                <span>{{ getStatusLabel(plan.status) }}</span>
-                            </span>
+                            <!-- Right: Status Pill & 3-dot Menu -->
+                            <div class="flex items-center gap-1 shrink-0">
+                                <span
+                                    class="inline-flex items-center gap-1 text-[11.5px] font-medium px-2.5 py-0.5 rounded-full border shadow-2xs font-kantumruy"
+                                    [ngClass]="getStatusClass(plan.status)">
+                                    <mat-icon [svgIcon]="getStatusIcon(plan.status)" class="icon-size-3.5"></mat-icon>
+                                    <span>{{ getStatusLabel(plan.status) }}</span>
+                                </span>
+                                <button *ngIf="canCreatePlan()" type="button"
+                                    (click)="$event.stopPropagation()"
+                                    [matMenuTriggerFor]="projectCardMenu"
+                                    class="w-7 h-7 -mr-1.5 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                    matTooltip="ជម្រើសបន្ថែម">
+                                    <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
+                                </button>
+                                <mat-menu #projectCardMenu="matMenu" class="!rounded-xl font-kantumruy">
+                                    <button mat-menu-item (click)="openEditProjectModal(plan, $event)" class="!text-[14px]">
+                                        <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-4.5 mr-2 text-blue-600"></mat-icon>
+                                        <span>កែប្រែគម្រោង</span>
+                                    </button>
+                                    <button mat-menu-item (click)="confirmDeletePlan(plan, $event)" class="!text-[14px] !text-rose-600">
+                                        <mat-icon svgIcon="mdi:delete-outline" class="icon-size-4.5 mr-2 !text-rose-600"></mat-icon>
+                                        <span>លុបគម្រោង</span>
+                                    </button>
+                                </mat-menu>
+                            </div>
                         </div>
 
                         <!-- Description -->
@@ -344,6 +363,20 @@
                             </span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Right: Edit & Delete Project Actions -->
+                <div *ngIf="canCreatePlan()" class="flex items-center gap-2">
+                    <button type="button" (click)="openEditProjectModal(proj, $event)"
+                        class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs">
+                        <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>កែប្រែគម្រោង</span>
+                    </button>
+                    <button type="button" (click)="confirmDeletePlan(proj, $event)"
+                        class="h-9 px-3.5 rounded-xl border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs">
+                        <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4 text-rose-600 dark:text-rose-400"></mat-icon>
+                        <span>លុបគម្រោង</span>
+                    </button>
                 </div>
             </div>
 
@@ -1238,12 +1271,18 @@
                                         <div
                                             class="w-[300px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] px-3.5 py-1 font-normal text-[14px] text-slate-900 dark:text-slate-100 truncate border-r border-white dark:border-slate-800 flex items-center justify-between group/row">
                                             <span class="truncate pr-2" [title]="task.name">{{ task.name }}</span>
-                                            <button type="button" (click)="deleteAgileTask(proj, task.id, $event)"
-                                                class="opacity-0 group-hover/row:opacity-100 text-slate-400 hover:text-red-600 transition-opacity p-0.5 rounded cursor-pointer shrink-0"
-                                                [matTooltip]="'លុបដំណាក់កាលនេះ'">
-                                                <mat-icon svgIcon="mdi:trash-can-outline"
-                                                    class="icon-size-3.5"></mat-icon>
-                                            </button>
+                                            <div *ngIf="canCreatePlan()" class="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity shrink-0">
+                                                <button type="button" (click)="openEditAgileTaskDialog(proj, task, $event)"
+                                                    class="text-slate-400 hover:text-blue-600 transition-colors p-0.5 rounded cursor-pointer"
+                                                    [matTooltip]="'កែប្រែដំណាក់កាលនេះ'">
+                                                    <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-3.5"></mat-icon>
+                                                </button>
+                                                <button type="button" (click)="deleteAgileTask(proj, task.id, $event)"
+                                                    class="text-slate-400 hover:text-red-600 transition-colors p-0.5 rounded cursor-pointer"
+                                                    [matTooltip]="'លុបដំណាក់កាលនេះ'">
+                                                    <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-3.5"></mat-icon>
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <div
@@ -2089,5 +2128,32 @@
         (closeModal)="closeFilePreview()"
         (downloadFile)="downloadTaskFile($event)">
     </task-file-preview-modal>
+
+    <!-- ========================================================================= -->
+    <!-- DELETE PLAN CONFIRMATION MODAL                                            -->
+    <!-- ========================================================================= -->
+    <div *ngIf="showDeletePlanModal()"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 font-kantumruy">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4 border border-rose-100 dark:border-rose-900/50">
+                <mat-icon svgIcon="mdi:alert-outline" class="icon-size-6"></mat-icon>
+            </div>
+            <h3 class="text-[17px] font-medium text-slate-900 dark:text-white">តើអ្នកពិតជាចង់លុបគម្រោងនេះមែនទេ?</h3>
+            <p class="text-[13.5px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                គម្រោង <span class="font-bold text-slate-800 dark:text-white font-mono">#{{ planToDelete()?.code }}</span> «<span class="font-bold text-slate-800 dark:text-white">{{ planToDelete()?.name }}</span>» រួមទាំងកិច្ចការ និងទិន្នន័យពាក់ព័ន្ធទាំងអស់នឹងត្រូវលុបចេញពីប្រព័ន្ធ។
+            </p>
+            <div class="mt-6 flex justify-end gap-2.5">
+                <button type="button" (click)="cancelDeletePlan()"
+                    class="h-9.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-[14px] font-medium cursor-pointer transition-colors">
+                    បោះបង់
+                </button>
+                <button type="button" (click)="deletePlan()" [disabled]="isDeletingPlan()"
+                    class="h-9.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs transition-all flex items-center gap-1.5 disabled:opacity-50">
+                    <mat-icon *ngIf="isDeletingPlan()" svgIcon="mdi:loading" class="icon-size-4 animate-spin"></mat-icon>
+                    <span>{{ isDeletingPlan() ? 'កំពុងលុប...' : 'លុបគម្រោង' }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
 </div>

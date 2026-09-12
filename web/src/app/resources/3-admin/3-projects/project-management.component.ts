@@ -21,6 +21,7 @@ import { CreatePhaseDialogComponent } from './dialogs/create-phase-dialog.compon
 import { CreateMemberDialogComponent } from './dialogs/create-member-dialog.component';
 import { CreateLinkDialogComponent } from './dialogs/create-link-dialog.component';
 import { AdminService, AdminProject, AdminUser } from '../admin.service';
+import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { TaskDrawerComponent } from 'app/resources/2-user/2-task/task-drawer/task-drawer.component';
 import { FilePreviewModalComponent } from 'app/resources/2-user/2-task/file-preview-modal/file-preview-modal.component';
 import {
@@ -328,6 +329,7 @@ export const DEFAULT_PROJECT_LINKS: TaskLink[] = [
         MatDialogModule,
         MatButtonModule,
         MatProgressSpinnerModule,
+        SideDialogCloseButtonComponent,
         TaskDrawerComponent,
         FilePreviewModalComponent,
     ],

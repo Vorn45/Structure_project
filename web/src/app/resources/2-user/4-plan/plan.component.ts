@@ -818,6 +818,187 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         });
     }
 
+    // Project Editing & Deletion
+    showDeletePlanModal = signal<boolean>(false);
+    planToDelete = signal<ProjectPlanItem | null>(null);
+    isDeletingPlan = signal<boolean>(false);
+
+    openEditProjectModal(plan: ProjectPlanItem, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        if (!this.canCreatePlan()) return;
+
+        const allMembersMap = new Map<string, any>();
+        for (const p of this.plans()) {
+            for (const m of p.members || []) {
+                if (m.name && !allMembersMap.has(m.name)) {
+                    allMembersMap.set(m.name, m);
+                }
+            }
+        }
+        const existingMembers = Array.from(allMembersMap.values());
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+            members: existingMembers.length ? existingMembers : undefined,
+            existingProjects: this.plans().map((p) => ({ id: p.id, code: p.code })),
+            project: plan,
+            isEditing: true,
+        });
+
+        const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result?.edited) {
+                const updatedPayload = result.project || {};
+                this._planService.updatePlan(plan.id, updatedPayload).subscribe({
+                    next: () => {
+                        this.loadPlans();
+                    },
+                    error: () => {
+                        const updated: ExtendedProjectItem = {
+                            ...(this.selectedProject()?.id === plan.id ? this.selectedProject()! : (plan as any)),
+                            name: updatedPayload.name || plan.name,
+                            description: updatedPayload.description ?? plan.description,
+                            status: updatedPayload.status || plan.status,
+                            priority: updatedPayload.priority || (plan as any).priority,
+                            budget_allocated: updatedPayload.budget_allocated || (plan as any).budget_allocated,
+                            members: updatedPayload.members || plan.members,
+                            team_lead: updatedPayload.team_lead || (plan as any).team_lead,
+                        };
+                        this.plans.update((list) => list.map((p) => (p.id === plan.id ? updated : p)));
+                        if (this.selectedProject()?.id === plan.id) {
+                            this.selectedProject.set(updated);
+                        }
+                    },
+                });
+            }
+        });
+    }
+
+    confirmDeletePlan(plan: ProjectPlanItem, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.planToDelete.set(plan);
+        this.showDeletePlanModal.set(true);
+    }
+
+    cancelDeletePlan(): void {
+        this.showDeletePlanModal.set(false);
+        this.planToDelete.set(null);
+    }
+
+    deletePlan(): void {
+        const target = this.planToDelete();
+        if (!target) return;
+
+        this.isDeletingPlan.set(true);
+        this._planService.deletePlan(target.id).subscribe({
+            next: () => {
+                this.isDeletingPlan.set(false);
+                this.showDeletePlanModal.set(false);
+                if (this.selectedProject()?.id === target.id) {
+                    this.clearSelectedProject();
+                }
+                this.plans.update((list) => list.filter((p) => p.id !== target.id));
+                this.planToDelete.set(null);
+                this.loadPlans();
+            },
+            error: (err) => {
+                console.error('Failed to delete project on backend', err);
+                this.isDeletingPlan.set(false);
+                this.showDeletePlanModal.set(false);
+                if (this.selectedProject()?.id === target.id) {
+                    this.clearSelectedProject();
+                }
+                this.plans.update((list) => list.filter((p) => p.id !== target.id));
+                this.planToDelete.set(null);
+            },
+        });
+    }
+
+    // Agile Plan Tasks CRUD
+    openAddPlanDialog(proj?: ProjectPlanItem): void {
+        const targetProject = proj || this.selectedProject();
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            currentWeek: this.currentWeek,
+            startWeek: this.startWeek,
+            totalWeeks: this.totalWeeks,
+            weeks: this.weeks,
+            projects: this.plans().map((p) => ({ id: p.id, code: p.code, name: p.name })),
+            selectedProjectId: targetProject?.id,
+            selectedProjectName: targetProject?.name,
+        });
+
+        const dialogRef = this._matDialog.open(AddPlanDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result?.task) {
+                const pId = result.projectId || targetProject?.id;
+                if (pId) {
+                    this._planService.createAgileTask(pId, result.task).subscribe({
+                        next: () => this.loadPlans(),
+                        error: () => {
+                            if (this.selectedProject()) {
+                                const updated = { ...this.selectedProject()! };
+                                updated.agileTasks = [...(updated.agileTasks || []), result.task];
+                                this.selectedProject.set(updated);
+                                this.saveProjectChanges(updated);
+                            }
+                        },
+                    });
+                }
+            }
+        });
+    }
+
+    openEditAgileTaskDialog(proj: ProjectPlanItem, task: AgilePlanTask, event?: Event): void {
+        if (event) event.stopPropagation();
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            currentWeek: this.currentWeek,
+            startWeek: this.startWeek,
+            totalWeeks: this.totalWeeks,
+            weeks: this.weeks,
+            projects: this.plans().map((p) => ({ id: p.id, code: p.code, name: p.name })),
+            selectedProjectId: proj?.id,
+            selectedProjectName: proj?.name,
+            task: task,
+            isEditing: true,
+        });
+
+        const dialogRef = this._matDialog.open(AddPlanDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result?.task) {
+                this._planService.updateAgileTask(proj.id, task.id, result.task).subscribe({
+                    next: () => this.loadPlans(),
+                    error: () => {
+                        const updated = { ...proj } as ExtendedProjectItem;
+                        updated.agileTasks = (updated.agileTasks || []).map((t) => (t.id === task.id ? result.task : t));
+                        this.selectedProject.set(updated);
+                        this.saveProjectChanges(updated);
+                    },
+                });
+            }
+        });
+    }
+
+    deleteAgileTask(proj: ProjectPlanItem, taskId: string, event?: Event): void {
+        if (event) event.stopPropagation();
+        this._planService.deleteAgileTask(proj.id, taskId).subscribe({
+            next: () => {
+                const updated = { ...proj } as ExtendedProjectItem;
+                updated.agileTasks = (updated.agileTasks || []).filter((t) => t.id !== taskId);
+                this.selectedProject.set(updated);
+                this.saveProjectChanges(updated);
+            },
+            error: () => {
+                const updated = { ...proj } as ExtendedProjectItem;
+                updated.agileTasks = (updated.agileTasks || []).filter((t) => t.id !== taskId);
+                this.selectedProject.set(updated);
+                this.saveProjectChanges(updated);
+            },
+        });
+    }
+
     openUserProfileDialog(user?: any): void {
         const currentUser = this._userService.getUser();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
@@ -1083,42 +1264,6 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                 return 'bg-[#581c87] hover:bg-[#4c1d95]';
         }
     }
-
-    openAddPlanDialog(proj: ExtendedProjectItem): void {
-        const dialogConfig = this._dialogConfigService.getDialogConfig({
-            currentWeek: this.currentWeek,
-            startWeek: this.startWeek,
-            totalWeeks: this.totalWeeks,
-            weeks: this.weeks,
-            projects: this.plans().map((p) => ({ id: p.id, code: p.code, name: p.name })),
-            selectedProjectId: proj.id,
-            selectedProjectName: proj.name,
-        });
-
-        const dialogRef = this._matDialog.open(AddPlanDialogComponent, dialogConfig);
-
-        dialogRef.afterClosed().subscribe((result?: any) => {
-            if (result) {
-                const newTask: AgilePlanTask = result.task || result;
-                const targetProj =
-                    (result.projectId && this.plans().find((p) => p.id === String(result.projectId))) || proj;
-                if (!targetProj.agileTasks) {
-                    targetProj.agileTasks = [...DEFAULT_AGILE_TASKS];
-                }
-                targetProj.agileTasks = [newTask, ...targetProj.agileTasks];
-                this.saveProjectChanges(targetProj);
-            }
-        });
-    }
-
-            deleteAgileTask(proj: ExtendedProjectItem, taskId: string, event: Event): void {
-                event.stopPropagation();
-                if (!proj.agileTasks) {
-                    proj.agileTasks = [...DEFAULT_AGILE_TASKS];
-                }
-                proj.agileTasks = proj.agileTasks.filter((t) => t.id !== taskId);
-                this.saveProjectChanges(proj);
-            }
 
             ngOnInit(): void {
                 this.loadPlans();
