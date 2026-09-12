@@ -196,11 +196,11 @@
                                     <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
                                 </button>
                                 <mat-menu #projectCardMenu="matMenu" class="!rounded-xl font-kantumruy">
-                                    <button mat-menu-item (click)="openEditDrawer(plan); $event.stopPropagation()" class="!text-[14px]">
+                                    <button mat-menu-item (click)="openEditDrawer(plan)" class="!text-[14px]">
                                         <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-4.5 mr-2 text-blue-600"></mat-icon>
                                         <span>កែប្រែគម្រោង</span>
                                     </button>
-                                    <button mat-menu-item (click)="confirmDelete(plan, $event)" class="!text-[14px] !text-rose-600">
+                                    <button mat-menu-item (click)="confirmDelete(plan)" class="!text-[14px] !text-rose-600">
                                         <mat-icon svgIcon="mdi:delete-outline" class="icon-size-4.5 mr-2 !text-rose-600"></mat-icon>
                                         <span>លុបគម្រោង</span>
                                     </button>

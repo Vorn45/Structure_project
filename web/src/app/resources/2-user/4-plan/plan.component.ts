@@ -824,9 +824,6 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     isDeletingPlan = signal<boolean>(false);
 
     openEditProjectModal(plan: ProjectPlanItem, event?: Event): void {
-        if (event) {
-            event.stopPropagation();
-        }
         if (!this.canCreatePlan()) return;
 
         const allMembersMap = new Map<string, any>();
@@ -876,9 +873,6 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     confirmDeletePlan(plan: ProjectPlanItem, event?: Event): void {
-        if (event) {
-            event.stopPropagation();
-        }
         this.planToDelete.set(plan);
         this.showDeletePlanModal.set(true);
     }

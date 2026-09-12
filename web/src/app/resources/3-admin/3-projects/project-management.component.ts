@@ -2326,7 +2326,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     confirmDelete(project: AdminProject, event?: Event): void {
-        if (event) event.stopPropagation();
         this.deleteTarget.set(project);
         this.showDeleteModal.set(true);
     }

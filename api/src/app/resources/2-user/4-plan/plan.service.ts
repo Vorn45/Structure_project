@@ -244,6 +244,15 @@ export class PlanService {
     async getPlans(user: UserPayload, query: QueryPlanDto) {
         await this.ensureLoaded();
         this.syncTaskCounts(this.projects);
+
+        // Sanitize any accidental duplicates: Project 4 is BMS Digitech
+        for (const p of this.projects) {
+            if ((p.id === '4' || p.description?.toLowerCase().includes('business management')) && p.name === 'WMS Digitech') {
+                p.name = 'BMS Digitech';
+                p.code = 'BMS-DIGI';
+            }
+        }
+
         let list = [...this.projects];
 
         if (query.search) {
@@ -351,7 +360,10 @@ export class PlanService {
 
         await this.ensureLoaded();
         const projName = dto.name;
-        const projCode = dto.code || `PMS-${Math.floor(100 + Math.random() * 900)}`;
+        let projCode = dto.code || `PMS-${Math.floor(100 + Math.random() * 900)}`;
+        if (this.projects.some((p) => p.code?.toUpperCase() === projCode.toUpperCase())) {
+            projCode = `${projCode}-${Math.floor(10 + Math.random() * 90)}`;
+        }
 
         const effectiveLead = dto.team_lead || dto.lead || (dto.members?.[0] ? {
             id: Number(dto.members[0].id) || 1,
