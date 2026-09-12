@@ -37,6 +37,8 @@ api/storage/
 storage/
 
 # Temp & Backups
+uploads/
+*/uploads/
 *.ps1
 *.sql
 *.dump

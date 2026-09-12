@@ -7,7 +7,8 @@
     import { LoggingInterceptor } from './app/common/interceptors/logging.interceptor';
     import { RefreshTokenCookieInterceptor } from './app/common/interceptors/refresh-token-cookie.interceptor';
     import { snakeCaseRequestAliasMiddleware } from './app/common/middlewares/snake-case-request-alias.middleware';
-    // import { join } from 'path';
+    import { join } from 'path';
+    import * as fs from 'fs';
 
     import session from 'express-session';
 
@@ -52,6 +53,15 @@
         app.useBodyParser('json', { limit: '1024mb' });
         app.useBodyParser('urlencoded', { limit: '1024mb', extended: true });
         app.useBodyParser('text', { limit: '1024mb' });
+
+        // Serve local uploads statically
+        const uploadsDir = join(process.cwd(), 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        app.useStaticAssets(uploadsDir, {
+            prefix: '/uploads/',
+        });
         app.use(snakeCaseRequestAliasMiddleware);
 
         app.setGlobalPrefix(appConfig.APP.GLOBAL_PREFIX);

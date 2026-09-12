@@ -1,7 +1,7 @@
 // ===========================================================================>> Core Library
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as bcrypt from 'bcrypt';
@@ -13,6 +13,7 @@ import { Role } from 'src/app/model/user/role.entity';
 import { UserRole } from 'src/app/model/user/user_role.entity';
 import { AuthProvider } from 'src/app/enum/pms.enum';
 import { PlanService } from '../../2-user/4-plan/plan.service';
+import { FileService } from 'src/app/shared/file/file.service';
 import { CreateAdminUserDto, QueryAdminUserDto, UpdateAdminUserDto } from './user.dto';
 
 export interface AdminUserItem {
@@ -186,6 +187,8 @@ export class AdminUserService {
         @InjectRepository(UserRole)
         private readonly _userRoleRepo: Repository<UserRole>,
         private readonly _planService: PlanService,
+        private readonly _fileService: FileService,
+        private readonly _dataSource: DataSource,
     ) {
         this.loadFromDisk();
     }
@@ -324,6 +327,18 @@ export class AdminUserService {
 
                     const projectsCount = assignedProjects.length > 0 ? assignedProjects.length : (meta.projects_count ?? 1);
 
+                    let userAvatarUrl: string | null = meta.avatar || null;
+                    if (u.avatar_file?.uri) {
+                        if (/^https?:\/\//i.test(u.avatar_file.uri)) {
+                            userAvatarUrl = u.avatar_file.uri;
+                        } else {
+                            const domain = (u.avatar_file.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
+                            userAvatarUrl = `${domain}/${u.avatar_file.uri.replace(/^\/+/, '')}`;
+                        }
+                    } else if (u.telegram_photo_url) {
+                        userAvatarUrl = u.telegram_photo_url;
+                    }
+
                     return {
                         id: u.id,
                         name_kh: u.name_kh || u.name_en || 'បុគ្គលិក',
@@ -333,7 +348,7 @@ export class AdminUserService {
                         role: detectedRole,
                         department: meta.department || 'ព័ត៌មានវិទ្យា (IT)',
                         position: meta.position || 'Software Engineer',
-                        avatar: u.avatar_file?.uri || u.telegram_photo_url || meta.avatar || null,
+                        avatar: userAvatarUrl,
                         is_active: u.is_active !== undefined ? u.is_active : 1,
                         projects_count: projectsCount,
                         created_at: u.created_at ? u.created_at.toISOString() : new Date().toISOString(),
@@ -404,6 +419,28 @@ export class AdminUserService {
             const cleanPhone = dto.phone?.trim() || '012 000 000';
             const cleanEmail = (dto.email?.trim() || `${dto.name_en.toLowerCase().replace(/\s+/g, '.')}@wfm.kh`).toLowerCase();
 
+            let storedAvatarId: number | undefined;
+            let avatarDisplayUrl: string | null = dto.avatar || null;
+
+            if (dto.avatar && dto.avatar.startsWith('data:image/')) {
+                try {
+                    const uploaded = await this._fileService.uploadBase64Image('user', dto.avatar);
+                    const savedFile = await this._dataSource.transaction(async (manager) => {
+                        return await this._fileService.storeFile(manager, uploaded, {
+                            ref_table: 'users',
+                            fallback_title: `${dto.name_en || 'user'}-avatar`,
+                        });
+                    });
+                    if (savedFile) {
+                        storedAvatarId = savedFile.id;
+                        const domain = (savedFile.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
+                        avatarDisplayUrl = `${domain}/${savedFile.uri.replace(/^\/+/, '')}`;
+                    }
+                } catch (e) {
+                    console.warn('[AdminUserService] Failed to process avatar base64 on create:', e);
+                }
+            }
+
             const newUser = this._userRepo.create({
                 name_kh: dto.name_kh.trim(),
                 name_en: dto.name_en.trim(),
@@ -415,6 +452,7 @@ export class AdminUserService {
                 password: passwordHash,
                 is_active: dto.is_active !== undefined ? dto.is_active : 1,
                 auth_provider: AuthProvider.LOCAL,
+                avatar_id: storedAvatarId,
             });
 
             const savedUser = await this._userRepo.save(newUser);
@@ -468,7 +506,7 @@ export class AdminUserService {
                 role: dto.role || 'Member',
                 department: dto.department || 'ព័ត៌មានវិទ្យា (IT)',
                 position: dto.position || 'Software Engineer',
-                avatar: dto.avatar || null,
+                avatar: avatarDisplayUrl || dto.avatar || null,
                 is_active: savedUser.is_active,
                 projects_count: 0,
                 created_at: savedUser.created_at ? savedUser.created_at.toISOString() : new Date().toISOString(),
@@ -553,6 +591,28 @@ export class AdminUserService {
                         const salt = await bcrypt.genSalt(10);
                         dbUser.password = await bcrypt.hash(dto.password.trim(), salt);
                         dbUser.password_changed_at = new Date();
+                    }
+
+                    if (dto.avatar && dto.avatar.startsWith('data:image/')) {
+                        try {
+                            const uploaded = await this._fileService.uploadBase64Image('user', dto.avatar);
+                            const savedFile = await this._dataSource.transaction(async (manager) => {
+                                return await this._fileService.storeFile(manager, uploaded, {
+                                    ref_table: 'users',
+                                    ref_id: String(dbUser.id),
+                                    fallback_title: `${dbUser.name_en || 'user'}-avatar`,
+                                });
+                            });
+                            if (savedFile) {
+                                dbUser.avatar_id = savedFile.id;
+                                const domain = (savedFile.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
+                                dto.avatar = `${domain}/${savedFile.uri.replace(/^\/+/, '')}`;
+                            }
+                        } catch (e) {
+                            console.warn('[AdminUserService] Failed to process avatar base64 on update:', e);
+                        }
+                    } else if (dto.avatar === '') {
+                        dbUser.avatar_id = undefined;
                     }
 
                     await this._userRepo.save(dbUser);
@@ -717,5 +777,56 @@ export class AdminUserService {
             status_code: 200,
             message: 'User deleted successfully',
         };
+    }
+
+    async uploadAvatar(user: UserPayload, id: number, file: any) {
+        if (!file?.buffer?.length) {
+            throw new BadRequestException('Avatar file is required');
+        }
+
+        const dbUser = await this._userRepo.findOne({ where: { id: Number(id) } });
+        if (!dbUser) {
+            throw new NotFoundException('User not found');
+        }
+
+        const uploaded = await this._fileService.uploadMultipartFile('user', file, undefined, 'image');
+        const savedFile = await this._dataSource.transaction(async (manager) => {
+            return await this._fileService.storeFile(manager, uploaded, {
+                ref_table: 'users',
+                ref_id: String(id),
+                fallback_title: `${dbUser.name_en || 'user'}-avatar`,
+            });
+        });
+
+        if (savedFile) {
+            dbUser.avatar_id = savedFile.id;
+            await this._userRepo.save(dbUser);
+
+            const domain = (savedFile.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
+            const avatarUrl = `${domain}/${savedFile.uri.replace(/^\/+/, '')}`;
+
+            // Update local metadata & cache
+            this.userMeta[String(id)] = {
+                ...this.getUserMeta(id),
+                avatar: avatarUrl,
+            };
+            const localIdx = this.localUsers.findIndex((u) => u.id === Number(id));
+            if (localIdx > -1) {
+                this.localUsers[localIdx].avatar = avatarUrl;
+            }
+            this.saveToDisk();
+
+            return {
+                status_code: 200,
+                message: 'Avatar uploaded successfully',
+                data: {
+                    id: dbUser.id,
+                    avatar: avatarUrl,
+                    avatar_id: savedFile.id,
+                },
+            };
+        }
+
+        throw new BadRequestException('Failed to upload avatar');
     }
 }

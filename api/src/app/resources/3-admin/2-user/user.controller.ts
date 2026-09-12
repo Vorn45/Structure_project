@@ -1,10 +1,12 @@
 // ===========================================================================>> Core Library
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import express from 'express';
 
 // ===========================================================================>> Custom Library
 import { AdminUserService } from './user.service';
 import { CreateAdminUserDto, QueryAdminUserDto, UpdateAdminUserDto } from './user.dto';
+import { IMAGE_UPLOAD_OPTIONS } from 'src/app/shared/file/file-upload.util';
 
 @Controller('users')
 export class AdminUserController {
@@ -18,6 +20,16 @@ export class AdminUserController {
     @Post('')
     async createUser(@Body() dto: CreateAdminUserDto, @Res({ passthrough: true }) res: express.Response) {
         return this._service.createUser(res.locals.user, dto);
+    }
+
+    @Post(':id/avatar')
+    @UseInterceptors(FileInterceptor('avatar', IMAGE_UPLOAD_OPTIONS))
+    async uploadAvatar(
+        @Param('id') id: string,
+        @UploadedFile() file: any,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return this._service.uploadAvatar(res.locals.user, parseInt(id, 10), file);
     }
 
     @Patch(':id')

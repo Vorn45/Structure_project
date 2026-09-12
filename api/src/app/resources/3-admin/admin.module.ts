@@ -24,6 +24,7 @@ import { AdminUserService } from './2-user/user.service';
 import { AdminProjectService } from './3-project/project.service';
 import { AdminAttendanceService } from './4-attendance/attendance.service';
 import { AdminSettingService } from './5-setting/setting.service';
+import { FileService } from 'src/app/shared/file/file.service';
 
 @Module({
     imports: [
@@ -46,6 +47,7 @@ import { AdminSettingService } from './5-setting/setting.service';
         AdminProjectService,
         AdminAttendanceService,
         AdminSettingService,
+        FileService,
     ],
     exports: [
         DashboardService,

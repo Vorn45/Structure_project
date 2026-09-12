@@ -5,6 +5,8 @@ import { firstValueFrom }                                                       
 
 // ===========================================================================>> Third Party Library
 import { EntityManager } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 // > Local
@@ -69,6 +71,40 @@ export class FileService {
         request: (headers: Record<string, string>) => Promise<T>,
     ): Promise<T> {
         return await request(this.getAuthHeaders());
+    }
+
+    public isLocalStorage(): boolean {
+        const storageType = process.env.FILE_STORAGE?.trim()?.toLowerCase();
+        if (storageType === 'local') return true;
+        return !process.env.FILE_PASSWORD || !this.getFileApiBaseUrl();
+    }
+
+    private async saveLocalFile(
+        folder: string,
+        filename: string,
+        buffer: Buffer,
+        mimetype?: string,
+    ): Promise<UploadedFilePayload> {
+        const safeFolder = (folder || 'general').replace(/[^a-zA-Z0-9_-]/g, '');
+        const uploadsBase = path.join(process.cwd(), 'uploads', safeFolder);
+        if (!fs.existsSync(uploadsBase)) {
+            fs.mkdirSync(uploadsBase, { recursive: true });
+        }
+
+        const ext = path.extname(filename) || (mimetype ? `.${mimetype.split('/')[1]}` : '.png');
+        const base = path.basename(filename, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const uniqueFilename = `${base}-${Date.now()}-${Math.floor(Math.random() * 1000)}${ext}`;
+        const filePath = path.join(uploadsBase, uniqueFilename);
+
+        await fs.promises.writeFile(filePath, buffer);
+
+        const uri = `uploads/${safeFolder}/${uniqueFilename}`;
+        return {
+            name: uniqueFilename,
+            uri,
+            mimetype: mimetype || 'image/png',
+            size: buffer.length,
+        };
     }
 
     private normalizeFileUri(uri?: string | null): string | null {
@@ -313,6 +349,20 @@ export class FileService {
         folder = '',
         base64 = '',
     ): Promise<UploadedFilePayload> {
+        // Validate before sending the request.
+        const parsed = this.parseBase64Image(base64);
+        await assertUploadSafe(parsed.buffer, `upload.${parsed.extension}`, 'image');
+
+        if (this.isLocalStorage()) {
+            const filename = `image-${Date.now()}-${Math.floor(Math.random() * 1000)}.${parsed.extension}`;
+            return await this.saveLocalFile(
+                folder || 'user',
+                filename,
+                parsed.buffer,
+                parsed.mimetype,
+            );
+        }
+
         const fileBaseUrl = this.getFileApiBaseUrl();
 
         if (!fileBaseUrl || !process.env.FILE_PASSWORD) {
@@ -320,10 +370,6 @@ export class FileService {
                 'File service is not configured',
             );
         }
-
-        // Validate before sending the request.
-        const parsed = this.parseBase64Image(base64);
-        await assertUploadSafe(parsed.buffer, `upload.${parsed.extension}`, 'image');
 
         try {
             const key = this.getFileKey();
@@ -389,6 +435,15 @@ export class FileService {
             file.originalname = fixMultipartFilename(file.originalname);
 
         await assertUploadSafe(file.buffer, file.originalname || 'upload', kind);
+
+        if (this.isLocalStorage()) {
+            return await this.saveLocalFile(
+                folder || 'user',
+                file.originalname || `upload-${Date.now()}`,
+                file.buffer,
+                file.mimetype,
+            );
+        }
 
         const fileBaseUrl = this.getFileApiBaseUrl();
 
@@ -480,6 +535,10 @@ export class FileService {
         const title = file.name ?? options?.fallback_title ?? 'uploaded-file';
         const mimetype = file.mimetype ?? options?.fallback_mimetype ?? null;
         const extension = this.extensionOf(title, file.uri, mimetype);
+        const isLocal = file.uri.startsWith('uploads/') || this.isLocalStorage();
+        const fileDomain = isLocal
+            ? (process.env.APP_BASE_URL?.trim() || 'http://localhost:3000')
+            : (appConfig.FILE.BASE_URL || (process.env.APP_BASE_URL?.trim() || 'http://localhost:3000'));
 
         return await manager.getRepository(File).save(
             manager.getRepository(File).create({
@@ -491,7 +550,7 @@ export class FileService {
                 ref_id: options?.ref_id ?? null,
                 folder_id: options?.folder_id ?? null,
                 uri: this.normalizeFileUri(file.uri),
-                file_domain: appConfig.FILE.BASE_URL,
+                file_domain: fileDomain,
                 created_by: options?.created_by ?? null,
                 updated_by: options?.updated_by ?? null,
             }),
