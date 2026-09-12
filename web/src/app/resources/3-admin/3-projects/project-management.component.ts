@@ -1376,6 +1376,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     // Phase management
     openCreatePhaseModal(): void {
+        if (!this.isAdmin()) return;
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
@@ -1401,6 +1402,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     deletePhase(phaseId: string, event: Event): void {
         event.stopPropagation();
+        if (!this.isAdmin()) return;
         this.phases.update((list) => list.filter((p) => p.id !== phaseId));
     }
 
@@ -1538,6 +1540,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     // Member management
     openCreateMemberModal(): void {
+        if (!this.isAdmin()) return;
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
@@ -1561,6 +1564,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     deleteMember(memberId: number, event: Event): void {
         event.stopPropagation();
+        if (!this.isAdmin()) return;
         this.teamMembers.update((list) => list.filter((m) => m.id !== memberId));
     }
 

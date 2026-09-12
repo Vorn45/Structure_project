@@ -526,6 +526,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     private _resizeListener?: () => void;
 
     loading = signal<boolean>(false);
+    currentUser = signal<any>(null);
     isTasksLoading = signal<boolean>(false);
     plans = signal<ExtendedProjectItem[]>(DEFAULT_INVITED_PROJECTS);
     searchQuery = signal<string>('');
@@ -616,7 +617,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     canCreatePlan(): boolean {
-        const u: any = this._userService.getUser();
+        const u: any = this.currentUser() || this._userService.getUser();
         if (!u) return false;
 
         const preferredRoleId = readPreferredRoleId();
@@ -665,6 +666,10 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             nameKh === 'រដ្ឋបាល';
 
         return isAdminSlug || isAdminName;
+    }
+
+    canManageMembers(): boolean {
+        return this.canCreatePlan();
     }
 
     openCreateProjectModal(): void {
@@ -1260,6 +1265,13 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
             ngOnInit(): void {
+                this.currentUser.set(this._userService.getUser());
+                this._userService.user$
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((u) => {
+                        this.currentUser.set(u);
+                    });
+
                 this.loadPlans();
 
                 // Replaces the old manual refresh button: project progress is derived
@@ -2067,6 +2079,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     openCreatePhaseModal(): void {
+        if (!this.canManageMembers()) return;
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
@@ -2094,6 +2107,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     deletePhase(phaseId: string, event: Event): void {
         event.stopPropagation();
+        if (!this.canManageMembers()) return;
         const proj = this.selectedProject();
         if (!proj || !proj.phases) return;
         proj.phases = proj.phases.filter((p) => p.id !== phaseId);
@@ -2114,6 +2128,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     deleteMeeting(meetingId: string, event: Event): void {
         event.stopPropagation();
+        if (!this.canManageMembers()) return;
         const proj = this.selectedProject();
         if (!proj || !proj.meetings) return;
         proj.meetings = proj.meetings.filter((m) => m.id !== meetingId);
@@ -2121,6 +2136,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     openCreateMemberModal(): void {
+        if (!this.canManageMembers()) return;
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
@@ -2146,6 +2162,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     deleteMember(memberId: number, event: Event): void {
         event.stopPropagation();
+        if (!this.canManageMembers()) return;
         const proj = this.selectedProject();
         if (!proj || !proj.members) return;
         proj.members = proj.members.filter((m) => m.id !== memberId);

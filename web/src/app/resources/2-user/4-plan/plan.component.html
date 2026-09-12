@@ -1206,7 +1206,7 @@
                                         នាក់)</span>
                                 </div>
 
-                                <button type="button" (click)="openAddPlanDialog(proj)"
+                                <button *ngIf="canCreatePlan()" type="button" (click)="openAddPlanDialog(proj)"
                                     class="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#1c2b6b] hover:bg-[#152254] text-white font-medium text-[13.5px] shadow-2xs transition-all cursor-pointer">
                                     <mat-icon svgIcon="mdi:plus" class="icon-size-4 text-white"></mat-icon>
                                     <span>បន្ថែមផែនការ</span>
@@ -1342,7 +1342,7 @@
                                 <h3 class="text-lg font-medium text-slate-900 dark:text-white">ដំណាក់កាលគម្រោង (Project Phases)</h3>
                                 <p class="text-[13px] text-slate-400">គ្រប់គ្រងដំណាក់កាល និងវដ្តអភិវឌ្ឍន៍របស់គម្រោង</p>
                             </div>
-                            <button type="button" (click)="openCreatePhaseModal()"
+                            <button *ngIf="canManageMembers()" type="button" (click)="openCreatePhaseModal()"
                                 class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto">
                                 <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
                                 <span>បង្កើតដំណាក់កាល</span>
@@ -1378,7 +1378,7 @@
                                     </span>
 
                                     <!-- Delete Button -->
-                                    <button type="button" (click)="deletePhase(ph.id, $event)"
+                                    <button *ngIf="canManageMembers()" type="button" (click)="deletePhase(ph.id, $event)"
                                         class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                                         [matTooltip]="'លុបដំណាក់កាលនេះ'">
                                         <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
@@ -1397,7 +1397,7 @@
                                 <h3 class="text-lg font-medium text-slate-900 dark:text-white">សមាជិកក្រុមការងារ ({{ proj.members.length }} នាក់)</h3>
                                 <p class="text-[14px] text-slate-400">បញ្ជីសមាជិកដែលចូលរួមក្នុងការអភិវឌ្ឍគម្រោងនេះ</p>
                             </div>
-                            <button type="button" (click)="openCreateMemberModal()"
+                            <button *ngIf="canManageMembers()" type="button" (click)="openCreateMemberModal()"
                                 class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto">
                                 <mat-icon svgIcon="mdi:account-plus-outline" class="icon-size-4.5 text-white"></mat-icon>
                                 <span>បន្ថែមសមាជិក</span>
@@ -1417,7 +1417,7 @@
                                         <p *ngIf="m.email" class="text-[13px] text-slate-400 dark:text-slate-500 truncate">{{ m.email }}</p>
                                     </div>
                                 </div>
-                                <button type="button" (click)="deleteMember(m.id, $event)"
+                                <button *ngIf="canManageMembers()" type="button" (click)="deleteMember(m.id, $event)"
                                     class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
                                     [matTooltip]="'ដកសមាជិកនេះ'">
                                     <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
@@ -1469,7 +1469,7 @@
                                         </a>
 
                                         <!-- Delete Button -->
-                                        <button type="button" (click)="deleteMeeting(m.id, $event)"
+                                        <button *ngIf="canManageMembers()" type="button" (click)="deleteMeeting(m.id, $event)"
                                             class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                                             [matTooltip]="'លុបកិច្ចប្រជុំនេះ'">
                                             <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
