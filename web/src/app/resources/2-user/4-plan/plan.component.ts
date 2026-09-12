@@ -2729,7 +2729,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                             { value: completedCount, name: 'បានបញ្ចប់', itemStyle: { color: '#10b981' } },
                             { value: inProgressCount, name: 'កំពុងធ្វើ', itemStyle: { color: '#3b82f6' } },
                             { value: reviewCount, name: 'រង់ចាំពិនិត្យ', itemStyle: { color: '#f59e0b' } },
-                            { value: newCount, name: 'ថ្មី (To-Do)', itemStyle: { color: '#8b5cf6' } },
+                            { value: newCount, name: 'ថ្មី', itemStyle: { color: '#8b5cf6' } },
                         ],
                     },
                 ],

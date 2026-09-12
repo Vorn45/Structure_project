@@ -455,31 +455,31 @@
                         <mat-menu #listStatusMenu="matMenu" class="min-w-[170px]">
                             <button mat-menu-item (click)="updateTaskStatus(task, 'new')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>ថ្មី (New)</span>
+                                <span>ថ្មី</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(task, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>បញ្ជាក់ (Confirmed)</span>
+                                <span>បញ្ជាក់</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(task, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>មិនបញ្ជាក់ (Unconfirmed)</span>
+                                <span>មិនបញ្ជាក់</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>កំពុងធ្វើ (In Progress)</span>
+                                <span>កំពុងធ្វើ</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(task, 'in_review')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>ស្នើពិនិត្យ (In Review)</span>
+                                <span>ស្នើពិនិត្យ</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(task, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>បើកឡើងវិញ (Reopened)</span>
+                                <span>បើកឡើងវិញ</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(task, 'done')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>បញ្ចប់ (Done)</span>
+                                <span>បញ្ចប់</span>
                             </button>
                         </mat-menu>
 
@@ -755,24 +755,40 @@
                                         class="!w-6 !h-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                                         <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
                                     </button>
-                                    <mat-menu #cardActionsMenu="matMenu">
-                                        <button mat-menu-item (click)="updateTaskStatus(task, 'new')"
-                                            class="!text-[15px]">ថ្មី</button>
-                                        <button mat-menu-item (click)="updateTaskStatus(task, 'confirmed')"
-                                            class="!text-[15px]">បញ្ជាក់</button>
-                                        <button mat-menu-item (click)="updateTaskStatus(task, 'unconfirmed')"
-                                            class="!text-[15px]">មិនបញ្ជាក់</button>
-                                        <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')"
-                                            class="!text-[15px]">កំពុងធ្វើ</button>
-                                        <button mat-menu-item (click)="updateTaskStatus(task, 'in_review')"
-                                            class="!text-[15px]">ស្នើពិនិត្យ</button>
-                                        <button mat-menu-item (click)="updateTaskStatus(task, 'reopened')"
-                                            class="!text-[15px]">បើកឡើងវិញ</button>
-                                        <button mat-menu-item (click)="updateTaskStatus(task, 'done')"
-                                            class="!text-[15px]">បញ្ចប់</button>
-                                        <mat-divider></mat-divider>
-                                        <button mat-menu-item (click)="confirmDelete(task)"
-                                            class="text-rose-600 !text-[15px]">លុបការងារ</button>
+                                    <mat-menu #cardActionsMenu="matMenu" class="min-w-[170px] font-kantumruy">
+                                         <button mat-menu-item (click)="updateTaskStatus(task, 'new')" class="!text-[14px] flex items-center gap-2.5">
+                                             <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>ថ្មី</span>
+                                         </button>
+                                         <button mat-menu-item (click)="updateTaskStatus(task, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                             <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>បញ្ជាក់</span>
+                                         </button>
+                                         <button mat-menu-item (click)="updateTaskStatus(task, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                             <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>មិនបញ្ជាក់</span>
+                                         </button>
+                                         <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
+                                             <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>កំពុងធ្វើ</span>
+                                         </button>
+                                         <button mat-menu-item (click)="updateTaskStatus(task, 'in_review')" class="!text-[14px] flex items-center gap-2.5">
+                                             <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>ស្នើពិនិត្យ</span>
+                                         </button>
+                                         <button mat-menu-item (click)="updateTaskStatus(task, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
+                                             <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>បើកឡើងវិញ</span>
+                                         </button>
+                                         <button mat-menu-item (click)="updateTaskStatus(task, 'done')" class="!text-[14px] flex items-center gap-2.5">
+                                             <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>បញ្ចប់</span>
+                                         </button>
+                                         <mat-divider></mat-divider>
+                                         <button mat-menu-item (click)="confirmDelete(task)" class="!text-[14px] flex items-center gap-2.5 text-rose-600">
+                                             <mat-icon svgIcon="mdi:trash-can-outline" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                                             <span>លុបការងារ</span>
+                                         </button>
                                     </mat-menu>
                                 </div>
                             </div>

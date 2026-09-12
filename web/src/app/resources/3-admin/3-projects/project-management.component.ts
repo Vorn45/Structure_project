@@ -669,7 +669,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         return [
             {
                 id: 'new',
-                title: 'ថ្មី (To-Do)',
+                title: 'ថ្មី',
                 count: tasks.filter((t) => t.status === 'new' || t.status === 'unconfirmed').length,
                 badgeClass: 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/50',
                 dotClass: 'bg-sky-500',
@@ -677,7 +677,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             },
             {
                 id: 'in_progress',
-                title: 'កំពុងធ្វើ (In Progress)',
+                title: 'កំពុងធ្វើ',
                 count: tasks.filter((t) => t.status === 'in_progress' || t.status === 'reopened').length,
                 badgeClass: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/50',
                 dotClass: 'bg-amber-500',
@@ -685,7 +685,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             },
             {
                 id: 'review',
-                title: 'ស្នើសុំពិនិត្យ (Review)',
+                title: 'ស្នើសុំពិនិត្យ',
                 count: tasks.filter((t) => t.status === 'review' || t.status === 'confirmed').length,
                 badgeClass: 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/50',
                 dotClass: 'bg-purple-500',
@@ -693,7 +693,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             },
             {
                 id: 'done',
-                title: 'បញ្ចប់ (Done)',
+                title: 'បញ្ចប់',
                 count: tasks.filter((t) => t.status === 'done' || t.status === 'completed').length,
                 badgeClass: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50',
                 dotClass: 'bg-emerald-500',
@@ -714,13 +714,13 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             unconfirmed: tasks.filter((t) => t.status === 'unconfirmed').length,
         };
         return [
-            { key: 'done', name: 'បញ្ចប់ (Done)', count: counts.done || 2, color: '#10b981' },
-            { key: 'review', name: 'ស្នើសុំពិនិត្យ (Review)', count: counts.review || 1, color: '#0284c7' },
-            { key: 'in_progress', name: 'កំពុងធ្វើ (In Progress)', count: counts.in_progress || 1, color: '#f59e0b' },
-            { key: 'confirmed', name: 'បញ្ជាក់ (Confirmed)', count: counts.confirmed || 1, color: '#8b5cf6' },
-            { key: 'reopened', name: 'បើកឡើងវិញ (Reopened)', count: counts.reopened || 1, color: '#f43f5e' },
-            { key: 'new', name: 'ថ្មី (New)', count: counts.new || 1, color: '#64748b' },
-            { key: 'unconfirmed', name: 'មិនបញ្ជាក់ (Unconfirmed)', count: counts.unconfirmed || 1, color: '#94a3b8' },
+            { key: 'done', name: 'បញ្ចប់', count: counts.done || 2, color: '#10b981' },
+            { key: 'review', name: 'ស្នើសុំពិនិត្យ', count: counts.review || 1, color: '#0284c7' },
+            { key: 'in_progress', name: 'កំពុងធ្វើ', count: counts.in_progress || 1, color: '#f59e0b' },
+            { key: 'confirmed', name: 'បញ្ជាក់', count: counts.confirmed || 1, color: '#8b5cf6' },
+            { key: 'reopened', name: 'បើកឡើងវិញ', count: counts.reopened || 1, color: '#f43f5e' },
+            { key: 'new', name: 'ថ្មី', count: counts.new || 1, color: '#64748b' },
+            { key: 'unconfirmed', name: 'មិនបញ្ជាក់', count: counts.unconfirmed || 1, color: '#94a3b8' },
         ];
     });
 

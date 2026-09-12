@@ -1,32 +1,32 @@
 
 @if (closeOnClick) {
-    <!-- mobile return/back (screens < sm: 640px) -->
+    <!-- mobile return/back -->
     <button
         [mat-dialog-close]="dialogCloseValue"
         [matTooltip]="(isReturn ? mobileTooltip : tooltip) | transloco"
-        class="side-dialog-close-button--mobile sm:hidden"
+        class="absolute left-2 top-2 md:hidden z-10"
         mat-icon-button
         type="button"
     >
         <mat-icon [svgIcon]="isReturn ? mobileIcon : icon"></mat-icon>
     </button>
 
-    <!-- desktop/tablet protruding close button tab (sm: 640px and up) -->
+    <!-- desktop close -->
     <button
         [mat-dialog-close]="dialogCloseValue"
         [matTooltip]="tooltip | transloco"
         matTooltipClass="side-dialog-close-button-tooltip"
         mat-icon-button
         type="button"
-        class="side-dialog-close-button group hidden sm:inline-flex"
+        class="side-dialog-close-button group hidden md:inline-flex"
     >
         <mat-icon [svgIcon]="icon"></mat-icon>
     </button>
 } @else {
-    <!-- mobile custom back action (screens < sm: 640px) -->
+    <!-- mobile custom back action -->
     <button
         [matTooltip]="(isReturn ? mobileTooltip : tooltip) | transloco"
-        class="side-dialog-close-button--mobile sm:hidden"
+        class="absolute left-2 top-2 md:hidden z-10"
         mat-icon-button
         type="button"
         (click)="buttonClick.emit()"
@@ -34,13 +34,13 @@
         <mat-icon [svgIcon]="isReturn ? mobileIcon : icon"></mat-icon>
     </button>
 
-    <!-- desktop/tablet protruding close button tab (sm: 640px and up) -->
+    <!-- desktop custom back action -->
     <button
         [matTooltip]="tooltip | transloco"
         matTooltipClass="side-dialog-close-button-tooltip"
         mat-icon-button
         type="button"
-        class="side-dialog-close-button group hidden sm:inline-flex"
+        class="side-dialog-close-button group hidden md:inline-flex"
         (click)="buttonClick.emit()"
     >
         <mat-icon [svgIcon]="icon"></mat-icon>

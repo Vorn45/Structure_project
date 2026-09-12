@@ -682,31 +682,31 @@
                                     <mat-menu #listRowStatusMenu="matMenu" class="min-w-[170px] font-kantumruy">
                                         <button mat-menu-item (click)="updateTaskStatus(task, 'new')" class="!text-[14px] flex items-center gap-2.5">
                                             <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
-                                            <span>ថ្មី (New)</span>
+                                            <span>ថ្មី</span>
                                         </button>
                                         <button mat-menu-item (click)="updateTaskStatus(task, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
                                             <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
-                                            <span>បញ្ជាក់ (Confirmed)</span>
+                                            <span>បញ្ជាក់</span>
                                         </button>
                                         <button mat-menu-item (click)="updateTaskStatus(task, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
                                             <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
-                                            <span>មិនបញ្ជាក់ (Unconfirmed)</span>
+                                            <span>មិនបញ្ជាក់</span>
                                         </button>
                                         <button mat-menu-item (click)="updateTaskStatus(task, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
                                             <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
-                                            <span>កំពុងធ្វើ (In Progress)</span>
+                                            <span>កំពុងធ្វើ</span>
                                         </button>
                                         <button mat-menu-item (click)="updateTaskStatus(task, 'review')" class="!text-[14px] flex items-center gap-2.5">
                                             <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
-                                            <span>ស្នើពិនិត្យ (In Review)</span>
+                                            <span>ស្នើពិនិត្យ</span>
                                         </button>
                                         <button mat-menu-item (click)="updateTaskStatus(task, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
                                             <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
-                                            <span>បើកឡើងវិញ (Reopened)</span>
+                                            <span>បើកឡើងវិញ</span>
                                         </button>
                                         <button mat-menu-item (click)="updateTaskStatus(task, 'done')" class="!text-[14px] flex items-center gap-2.5">
                                             <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
-                                            <span>បញ្ចប់ (Done)</span>
+                                            <span>បញ្ចប់</span>
                                         </button>
                                     </mat-menu>
 
@@ -971,7 +971,7 @@
                                         <p class="text-[16px] font-medium text-amber-900 dark:text-amber-200 mt-0.5">{{ getTaskCountByStatus('review') }}</p>
                                     </div>
                                     <div class="p-2.5 rounded-lg bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/40 text-center">
-                                        <span class="text-[12px] text-purple-800 dark:text-purple-300 font-medium block truncate">ថ្មី (To-Do)</span>
+                                        <span class="text-[12px] text-purple-800 dark:text-purple-300 font-medium block truncate">ថ្មី</span>
                                         <p class="text-[16px] font-medium text-purple-900 dark:text-purple-200 mt-0.5">{{ getTaskCountByStatus('new') }}</p>
                                     </div>
                                 </div>
@@ -1661,31 +1661,31 @@
                         <mat-menu #modalStatusMenu="matMenu" class="min-w-[170px] font-kantumruy">
                             <button mat-menu-item (click)="updateTaskStatus(currentTask, 'new')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>ថ្មី (New)</span>
+                                <span>ថ្មី</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(currentTask, 'confirmed')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>បញ្ជាក់ (Confirmed)</span>
+                                <span>បញ្ជាក់</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(currentTask, 'unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>មិនបញ្ជាក់ (Unconfirmed)</span>
+                                <span>មិនបញ្ជាក់</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(currentTask, 'in_progress')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>កំពុងធ្វើ (In Progress)</span>
+                                <span>កំពុងធ្វើ</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(currentTask, 'review')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>ស្នើពិនិត្យ (In Review)</span>
+                                <span>ស្នើពិនិត្យ</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(currentTask, 'reopened')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>បើកឡើងវិញ (Reopened)</span>
+                                <span>បើកឡើងវិញ</span>
                             </button>
                             <button mat-menu-item (click)="updateTaskStatus(currentTask, 'done')" class="!text-[14px] flex items-center gap-2.5">
                                 <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
-                                <span>បញ្ចប់ (Done)</span>
+                                <span>បញ្ចប់</span>
                             </button>
                         </mat-menu>
 

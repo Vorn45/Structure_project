@@ -113,7 +113,7 @@
                         </button>
                         <button mat-menu-item (click)="selectedStatus.set('active')" class="!text-[13.5px]">
                             <div class="flex items-center justify-between w-full">
-                                <span>សកម្ម (Active)</span>
+                                <span>សកម្ម</span>
                                 @if (selectedStatus() === 'active') {
                                     <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
                                 }
@@ -121,7 +121,7 @@
                         </button>
                         <button mat-menu-item (click)="selectedStatus.set('inactive')" class="!text-[13.5px]">
                             <div class="flex items-center justify-between w-full">
-                                <span>ផ្អាក (Suspended)</span>
+                                <span>ផ្អាក</span>
                                 @if (selectedStatus() === 'inactive') {
                                     <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
                                 }
@@ -150,7 +150,7 @@
                                 }
                             </div>
                         </button>
-                        @for (d of departments; track d) {
+                        @for (d of departmentList; track d) {
                             <button mat-menu-item (click)="selectedDepartment.set(d)" class="!text-[13.5px]">
                                 <div class="flex items-center justify-between w-full">
                                     <span>{{ d }}</span>
@@ -186,7 +186,7 @@
                         @for (r of roleList; track r.key) {
                             <button mat-menu-item (click)="selectedRole.set(r.key)" class="!text-[13.5px]">
                                 <div class="flex items-center justify-between w-full">
-                                    <span>{{ r.label }} ({{ r.key }})</span>
+                                    <span>{{ r.label }}</span>
                                     @if (selectedRole() === r.key) {
                                         <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
                                     }
@@ -298,7 +298,7 @@
                                             ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 cursor-pointer'
                                             : 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800 cursor-pointer'">
                                         <span class="w-1.5 h-1.5 rounded-full" [class]="user.is_active === 1 ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                                        {{ user.is_active === 1 ? 'សកម្ម (Active)' : 'ផ្អាក (Suspended)' }}
+                                        {{ user.is_active === 1 ? 'សកម្ម' : 'ផ្អាក' }}
                                     </button>
                                 </td>
 
@@ -312,7 +312,7 @@
                                             matTooltip="សកម្មភាព">
                                             <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4.5"></mat-icon>
                                         </button>
-                                        <mat-menu #rowActionMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                                        <mat-menu #rowActionMenu="matMenu" yPosition="below" xPosition="before" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
                                             <button mat-menu-item (click)="openEditDrawer(user)" class="!text-[13.5px]">
                                                 <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4 text-slate-500 mr-2"></mat-icon>
                                                 <span>កែសម្រួល</span>
@@ -342,11 +342,11 @@
 
     <!-- Create / Edit User Side Drawer -->
     @if (isDrawerOpen()) {
-        <!-- Backdrop: No blur, subtle clear dismiss overlay so the page behind stays sharp and visible -->
-        <div (click)="closeDrawer()" class="fixed inset-0 bg-slate-900/15 dark:bg-black/30 z-40 transition-opacity"></div>
+        <!-- Backdrop: Subtle clear dismiss overlay -->
+        <div (click)="closeDrawer()" class="fixed inset-0 bg-slate-900/30 dark:bg-black/50 z-50 transition-opacity"></div>
 
         <!-- Drawer Content: Exactly 600px width matching standard side dialog, overflow-visible for the X button tab -->
-        <div class="relative fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[600px] max-w-[600px] bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy"
+        <div class="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[600px] max-w-[600px] bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy"
             style="font-family: 'Kantumruy Pro', sans-serif !important;">
             <!-- Standard Side Dialog Close Button (X sticking out on left, matching Profile Dialog) -->
             <shared-side-dialog-close-button
@@ -409,7 +409,7 @@
                         <!-- Name EN -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ឈ្មោះជាអក្សរឡាតាំង (English Name) <span class="text-rose-500">*</span>
+                                ឈ្មោះជាអក្សរឡាតាំង <span class="text-rose-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -421,21 +421,21 @@
                         <!-- Gender -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ភេទ (Gender)
+                                ភេទ
                             </label>
                             <select
                                 formControlName="gender"
                                 class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
-                                <option value="male">ប្រុស (Male)</option>
-                                <option value="female">ស្រី (Female)</option>
-                                <option value="other">ផ្សេងៗ (Other)</option>
+                                <option value="male">ប្រុស</option>
+                                <option value="female">ស្រី</option>
+                                <option value="other">ផ្សេងៗ</option>
                             </select>
                         </div>
 
                         <!-- Date of Birth -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ថ្ងៃខែឆ្នាំកំណើត (Date of Birth)
+                                ថ្ងៃខែឆ្នាំកំណើត
                             </label>
                             <input
                                 type="date"
@@ -510,7 +510,7 @@
                         <!-- Telegram Username -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                តេឡេក្រាម (Telegram)
+                                តេឡេក្រាម
                             </label>
                             <div class="relative">
                                 <input
@@ -525,7 +525,7 @@
                         <!-- Current Address -->
                         <div class="sm:col-span-2">
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                អាសយដ្ឋានបច្ចុប្បន្ន (Address)
+                                អាសយដ្ឋានបច្ចុប្បន្ន
                             </label>
                             <input
                                 type="text"
@@ -552,8 +552,8 @@
                             <select
                                 formControlName="role"
                                 class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
-                                @for (r of roles; track r) {
-                                    <option [value]="r">{{ getRoleKhmer(r) }} ({{ r }})</option>
+                                @for (r of roleList; track r.key) {
+                                    <option [value]="r.key">{{ r.label }}</option>
                                 }
                             </select>
                         </div>
@@ -566,7 +566,7 @@
                             <select
                                 formControlName="department"
                                 class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
-                                @for (d of departments; track d) {
+                                @for (d of departmentList; track d) {
                                     <option [value]="d">{{ d }}</option>
                                 }
                             </select>
@@ -575,7 +575,7 @@
                         <!-- Position -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                មុខតំណែង (Position) <span class="text-rose-500">*</span>
+                                មុខតំណែង <span class="text-rose-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -598,13 +598,13 @@
                         <!-- Account Status -->
                         <div class="sm:col-span-2">
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ស្ថានភាពគណនី (Status)
+                                ស្ថានភាពគណនី
                             </label>
                             <select
                                 formControlName="is_active"
                                 class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
-                                <option [value]="1">សកម្ម (Active) - អាចចូលប្រើប្រព័ន្ធបានធម្មតា</option>
-                                <option [value]="0">ផ្អាកដំណើរការ (Suspended) - មិនអាចចូលប្រើប្រព័ន្ធបានទេ</option>
+                                <option [value]="1">សកម្ម - អាចចូលប្រើប្រព័ន្ធបានធម្មតា</option>
+                                <option [value]="0">ផ្អាកដំណើរការ - មិនអាចចូលប្រើប្រព័ន្ធបានទេ</option>
                             </select>
                         </div>
                     </div>

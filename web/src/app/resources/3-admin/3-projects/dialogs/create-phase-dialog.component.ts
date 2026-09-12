@@ -96,16 +96,16 @@ export interface CreatePhaseDialogData {
 
                             <div>
                                 <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
-                                    ស្ថានភាព (Status)
+                                    ស្ថានភាព
                                 </label>
                                 <select
                                     [ngModel]="phaseStatus()"
                                     (ngModelChange)="phaseStatus.set($event)"
                                     class="w-full px-4 py-3 text-[16px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 >
-                                    <option value="planned">⚪ គ្រោងទុក (Planned)</option>
-                                    <option value="in_progress">🔵 កំពុងដំណើរការ (In Progress)</option>
-                                    <option value="completed">🟢 បានបញ្ចប់ (Completed)</option>
+                                    <option value="planned">⚪ គ្រោងទុក</option>
+                                    <option value="in_progress">🔵 កំពុងដំណើរការ</option>
+                                    <option value="completed">🟢 បានបញ្ចប់</option>
                                 </select>
                             </div>
                         </div>

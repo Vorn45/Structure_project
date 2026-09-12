@@ -1082,54 +1082,6 @@ button.side-dialog-close-button {
     }
 }
 
-/* Mobile Side Dialog Close Button (inside header for viewport < 640px) */
-.side-dialog-close-button--mobile.mat-mdc-icon-button,
-button.side-dialog-close-button--mobile {
-    position: absolute !important;
-    left: 0.75rem !important;
-    top: 0.625rem !important;
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-    min-width: 2.25rem !important;
-    min-height: 2.25rem !important;
-    border-radius: 9999px !important;
-    background-color: #f1f5f9 !important;
-    color: #475569 !important;
-    z-index: 60 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    padding: 0 !important;
-
-    .mat-icon {
-        width: 1.25rem !important;
-        height: 1.25rem !important;
-        font-size: 1.25rem !important;
-        color: #475569 !important;
-        margin: 0 !important;
-    }
-
-    &:hover {
-        background-color: #e2e8f0 !important;
-        color: #0f172a !important;
-    }
-}
-
-.dark .side-dialog-close-button--mobile.mat-mdc-icon-button,
-.dark button.side-dialog-close-button--mobile {
-    background-color: #1e293b !important;
-    color: #cbd5e1 !important;
-
-    .mat-icon {
-        color: #cbd5e1 !important;
-    }
-
-    &:hover {
-        background-color: #334155 !important;
-        color: #ffffff !important;
-    }
-}
 
 
 

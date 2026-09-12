@@ -155,31 +155,53 @@ export interface TeamMember {
                         </div>
                     </div>
 
-                    <!-- 3. Work Status Selection (Clean Minimal Dots) -->
+                    <!-- 3. Work Status Selection -->
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 text-[13.5px]">
-                                ស្ថានភាពការងារ <span class="text-rose-500">*</span>
-                            </label>
-                            <span class="text-[12px] text-slate-400">ជ្រើសរើស ១</span>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-kantumruy">
+                        <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1.5 text-[13.5px]">
+                            ស្ថានភាពការងារ <span class="text-rose-500">*</span>
+                        </label>
+                        <div>
                             <button
-                                *ngFor="let s of statusList"
                                 type="button"
-                                (click)="selectedStatus.set(s.id)"
-                                class="px-3 py-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer select-none font-kantumruy text-[13px]"
-                                [ngClass]="selectedStatus() === s.id
-                                    ? s.activeBorder + ' ' + s.activeBg + ' ring-1 ' + s.activeBorder
-                                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'"
+                                [matMenuTriggerFor]="createTaskStatusMenu"
+                                class="inline-flex items-center gap-2 px-3.5 py-2 text-[14px] font-medium font-kantumruy rounded-xl border select-none transition-all shadow-2xs cursor-pointer"
+                                [ngClass]="getStatusClass(selectedStatus())"
                             >
-                                <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="s.dotColor || 'bg-slate-400'"></span>
-                                <span class="truncate"
-                                    [ngClass]="selectedStatus() === s.id ? s.activeColor + ' font-medium' : 'font-normal'">
-                                    {{ s.label }}
-                                </span>
+                                <mat-icon [svgIcon]="getStatusIcon(selectedStatus())" class="icon-size-4 !w-4.5 !h-4.5"></mat-icon>
+                                <span>{{ getStatusLabel(selectedStatus()) }}</span>
+                                <mat-icon svgIcon="mdi:chevron-down" class="!w-4 !h-4 opacity-70 ml-1"></mat-icon>
                             </button>
+
+                            <mat-menu #createTaskStatusMenu="matMenu" panelClass="task-dropdown-menu" class="min-w-[170px] font-kantumruy">
+                                <button mat-menu-item (click)="selectedStatus.set('new')" class="!text-[14px] flex items-center gap-2.5">
+                                    <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                                    <span>ថ្មី</span>
+                                </button>
+                                <button mat-menu-item (click)="selectedStatus.set('confirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                    <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
+                                    <span>បញ្ជាក់</span>
+                                </button>
+                                <button mat-menu-item (click)="selectedStatus.set('unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
+                                    <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
+                                    <span>មិនបញ្ជាក់</span>
+                                </button>
+                                <button mat-menu-item (click)="selectedStatus.set('in_progress')" class="!text-[14px] flex items-center gap-2.5">
+                                    <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                                    <span>កំពុងធ្វើ</span>
+                                </button>
+                                <button mat-menu-item (click)="selectedStatus.set('in_review')" class="!text-[14px] flex items-center gap-2.5">
+                                    <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
+                                    <span>ស្នើពិនិត្យ</span>
+                                </button>
+                                <button mat-menu-item (click)="selectedStatus.set('reopened')" class="!text-[14px] flex items-center gap-2.5">
+                                    <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                                    <span>បើកឡើងវិញ</span>
+                                </button>
+                                <button mat-menu-item (click)="selectedStatus.set('done')" class="!text-[14px] flex items-center gap-2.5">
+                                    <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
+                                    <span>បញ្ចប់</span>
+                                </button>
+                            </mat-menu>
                         </div>
                     </div>
 
@@ -832,6 +854,85 @@ export class CreateTaskDialogComponent implements OnInit {
         },
     ];
     selectedStatus = signal<string>('new');
+
+    getStatusLabel(status: string): string {
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'pending':
+                return 'ថ្មី';
+            case 'confirmed':
+                return 'បញ្ជាក់';
+            case 'unconfirmed':
+            case 'todo':
+                return 'មិនបញ្ជាក់';
+            case 'in_progress':
+                return 'កំពុងធ្វើ';
+            case 'in_review':
+            case 'review':
+            case 'under_review':
+                return 'ស្នើពិនិត្យ';
+            case 'reopened':
+                return 'បើកឡើងវិញ';
+            case 'done':
+            case 'completed':
+                return 'បញ្ចប់';
+            default:
+                return status || 'មិនបញ្ជាក់';
+        }
+    }
+
+    getStatusIcon(status: string): string {
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'pending':
+                return 'mdi:clipboard-text-outline';
+            case 'confirmed':
+                return 'mdi:clipboard-check-outline';
+            case 'unconfirmed':
+            case 'todo':
+                return 'mdi:clipboard-minus-outline';
+            case 'in_progress':
+                return 'mdi:progress-clock';
+            case 'in_review':
+            case 'review':
+            case 'under_review':
+                return 'mdi:magnify';
+            case 'reopened':
+                return 'mdi:restore';
+            case 'done':
+            case 'completed':
+                return 'mdi:check-circle';
+            default:
+                return 'mdi:clipboard-outline';
+        }
+    }
+
+    getStatusClass(status: string): string {
+        switch (status?.toLowerCase()) {
+            case 'new':
+            case 'pending':
+                return 'bg-blue-50/90 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200/80 dark:border-blue-800/40';
+            case 'confirmed':
+                return 'bg-indigo-50/90 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/40';
+            case 'unconfirmed':
+            case 'todo':
+                return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+            case 'in_progress':
+                return 'bg-amber-50/90 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200/80 dark:border-amber-800/40';
+            case 'in_review':
+            case 'review':
+            case 'under_review':
+                return 'bg-sky-50/90 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border-sky-200/80 dark:border-sky-800/40';
+            case 'reopened':
+                return 'bg-rose-50/90 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200/80 dark:border-rose-800/40';
+            case 'done':
+            case 'completed':
+                return 'bg-emerald-50/90 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/40';
+            default:
+                return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+        }
+    }
+
     taskTypesList = TASK_TYPES_LIST;
     selectedTaskType: string = 'feature';
 

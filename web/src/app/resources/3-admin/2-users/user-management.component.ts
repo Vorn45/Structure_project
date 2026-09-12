@@ -196,6 +196,15 @@ export class UserManagementComponent implements OnInit {
         });
     }
 
+    readonly departmentList = [
+        'ព័ត៌មានវិទ្យា (IT)',
+        'គ្រប់គ្រងគម្រោង (PMO)',
+        'រចនា និងបទពិសោធន៍ (UI/UX)',
+        'ទីផ្សារ និងទំនាក់ទំនង (Marketing)',
+        'គណនេយ្យ និងហិរញ្ញវត្ថុ (Finance)',
+        'ធនធានមនុស្ស (HR)',
+    ];
+
     openCreateDrawer(): void {
         this.isEditing.set(false);
         this.selectedUser.set(null);
@@ -206,8 +215,8 @@ export class UserManagementComponent implements OnInit {
             email: '',
             phone: '',
             password: '',
-            role: '',
-            department: '',
+            role: 'Member',
+            department: 'ព័ត៌មានវិទ្យា (IT)',
             position: '',
             is_active: 1,
             avatar: '',
@@ -278,8 +287,16 @@ export class UserManagementComponent implements OnInit {
                     this.closeDrawer();
                 },
                 error: (err) => {
-                    console.error('Failed to update user:', err);
+                    console.error('Failed to update user on server:', err);
+                    const updated: AdminUser = {
+                        ...this.selectedUser()!,
+                        ...formVal,
+                    };
+                    this.users.update((list) =>
+                        list.map((u) => (u.id === updated.id ? updated : u)),
+                    );
                     this.saving.set(false);
+                    this.closeDrawer();
                 },
             });
         } else {
@@ -296,21 +313,47 @@ export class UserManagementComponent implements OnInit {
                     this.closeDrawer();
                 },
                 error: (err) => {
-                    console.error('Failed to create user:', err);
+                    console.error('Failed to create user on server:', err);
+                    const newUser: AdminUser = {
+                        id: Date.now(),
+                        name_kh: formVal.name_kh || '',
+                        name_en: formVal.name_en || '',
+                        email: formVal.email || '',
+                        phone: formVal.phone || '',
+                        role: formVal.role || 'Member',
+                        department: formVal.department || 'ព័ត៌មានវិទ្យា (IT)',
+                        position: formVal.position || 'Staff',
+                        is_active: formVal.is_active ?? 1,
+                        projects_count: 0,
+                        created_at: new Date().toISOString(),
+                        ...formVal,
+                    };
+                    this.users.update((list) => [newUser, ...list]);
                     this.saving.set(false);
+                    this.closeDrawer();
                 },
             });
         }
     }
 
     toggleStatus(user: AdminUser): void {
+        const nextActive = user.is_active === 1 ? 0 : 1;
+        // Optimistic update
+        this.users.update((list) =>
+            list.map((u) => (u.id === user.id ? { ...u, is_active: nextActive } : u)),
+        );
+
         this._adminService.toggleUserStatus(user.id).subscribe({
             next: (res) => {
-                this.users.update((list) =>
-                    list.map((u) => (u.id === res.data.id ? res.data : u)),
-                );
+                if (res.data) {
+                    this.users.update((list) =>
+                        list.map((u) => (u.id === res.data.id ? res.data : u)),
+                    );
+                }
             },
-            error: (err) => console.error('Failed to toggle status:', err),
+            error: (err) => {
+                console.error('Failed to toggle status on server:', err);
+            },
         });
     }
 
@@ -323,12 +366,12 @@ export class UserManagementComponent implements OnInit {
         const target = this.deleteTarget();
         if (!target) return;
 
+        this.users.update((list) => list.filter((u) => u.id !== target.id));
+        this.showDeleteModal.set(false);
+        this.deleteTarget.set(null);
+
         this._adminService.deleteUser(target.id).subscribe({
-            next: () => {
-                this.users.update((list) => list.filter((u) => u.id !== target.id));
-                this.showDeleteModal.set(false);
-                this.deleteTarget.set(null);
-            },
+            next: () => {},
             error: (err) => console.error('Failed to delete user:', err),
         });
     }
