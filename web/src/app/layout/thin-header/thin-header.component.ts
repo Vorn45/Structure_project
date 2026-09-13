@@ -28,6 +28,7 @@ import {
 }                                                     from 'helper/components/navigation';
 import { HelperMediaWatcherService }                  from 'helper/services/media-watcher';
 import { Subject, takeUntil }                         from 'rxjs';
+import { SchemeComponent }                            from 'app/layout/common/scheme/scheme.component';
 import { NotificationsComponent }                     from '../common/notifications/component';
 
 @Component({
@@ -39,6 +40,7 @@ import { NotificationsComponent }                     from '../common/notificati
         CommonModule,
         HelperLoadingBarComponent,
         HelperNavigationComponent,
+        SchemeComponent,
         NotificationsComponent,
         UserComponent,
         MatIconModule,

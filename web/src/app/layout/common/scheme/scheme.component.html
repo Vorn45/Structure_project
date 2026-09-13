@@ -20,11 +20,11 @@
         }
     </div>
 } @else {
-    <button *ngIf="!isDark" mat-icon-button (click)="setScheme('dark')">
+    <button *ngIf="!isDark" mat-icon-button (click)="setScheme('dark')" [matTooltip]="'ប្តូរទៅងងឹត (Dark mode)'" class="text-slate-600 dark:text-slate-300">
         <mat-icon [svgIcon]="'heroicons_solid:moon'"></mat-icon>
     </button>
 
-    <button *ngIf="isDark" mat-icon-button (click)="setScheme('light')">
+    <button *ngIf="isDark" mat-icon-button (click)="setScheme('light')" [matTooltip]="'ប្តូរទៅភ្លឺ (Light mode)'" class="text-amber-400">
         <mat-icon [svgIcon]="'heroicons_solid:sun'"></mat-icon>
     </button>
 }

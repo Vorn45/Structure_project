@@ -31,6 +31,19 @@
         </div>
     </button>
 
+    <!-- 4. ស្បែកប្រព័ន្ធ (Theme / Dark Mode) -->
+    <button mat-menu-item (click)="toggleScheme()" class="!h-10 !rounded-md text-slate-600 dark:text-slate-300">
+        <div class="flex items-center justify-between w-full text-[14.5px] font-normal">
+            <div class="flex items-center gap-3">
+                <mat-icon [svgIcon]="isDark ? 'heroicons_outline:moon' : 'heroicons_outline:sun'" class="icon-size-5" [ngClass]="isDark ? 'text-indigo-400' : 'text-amber-500'"></mat-icon>
+                <span>{{ isDark ? 'ទម្រង់ងងឹត (Dark)' : 'ទម្រង់ភ្លឺ (Light)' }}</span>
+            </div>
+            <span class="text-[11px] px-1.5 py-0.5 rounded font-medium" [ngClass]="isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-100 text-slate-500'">
+                {{ isDark ? 'ON' : 'OFF' }}
+            </span>
+        </div>
+    </button>
+
     <mat-divider class="!my-1 border-slate-100 dark:border-slate-800"></mat-divider>
 
     <!-- 4. ចាកចេញ (Sign Out) -->

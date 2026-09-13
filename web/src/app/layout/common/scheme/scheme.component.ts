@@ -23,8 +23,8 @@ export class SchemeComponent implements OnInit, OnDestroy {
      */
     @Input() variant: 'icon' | 'segmented' = 'icon';
 
-    isDark: boolean = localStorage.getItem('scheme') === 'dark';
-    scheme: Scheme = 'light';
+    isDark: boolean = localStorage.getItem('scheme') ? localStorage.getItem('scheme') === 'dark' : true;
+    scheme: Scheme = (localStorage.getItem('scheme') as Scheme) || 'dark';
 
     readonly options: { value: Scheme; icon: string; label_en: string; label_km: string }[] = [
         { value: 'light', icon: 'heroicons_solid:sun',              label_en: 'Light',  label_km: 'ភ្លឺ' },

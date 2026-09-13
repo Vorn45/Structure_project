@@ -36,7 +36,20 @@
     <!-- Telegram Mini App SDK. Populates window.Telegram.WebApp when the page is
          opened inside a Telegram client; inert in a normal browser. Must be
          loaded from telegram.org — it cannot be bundled. -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Immediate theme initializer before render -->
+    <script>
+        (function () {
+            try {
+                var s = localStorage.getItem('scheme') || 'dark';
+                if (s === 'auto') {
+                    s = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                if (s === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>

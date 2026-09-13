@@ -137,7 +137,7 @@ export const appConfig: ApplicationConfig = {
                 layout: (localStorage.getItem('layout') as string) || 'compact',
                 scheme: localStorage.getItem('scheme')
                     ? (localStorage.getItem('scheme') as Scheme)
-                    : 'light',
+                    : 'dark',
                 screens: {
                     sm: '600px',
                     md: '960px',

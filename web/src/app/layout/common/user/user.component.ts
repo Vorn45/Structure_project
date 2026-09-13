@@ -18,6 +18,7 @@ import { DialogConfigService }                                          from 'ap
 import { SwitchRoleComponent }                                          from './switch-role/switch-role.component';
 import { QRDialogComponent }                                            from 'app/shared/qr/component';
 import { HelperConfirmationService }                                    from 'helper/services/confirmation';
+import { HelperConfigService, Scheme }                                  from 'helper/services/config';
 
 @Component({
     selector: 'user',
@@ -59,6 +60,7 @@ export class UserComponent implements OnInit, OnDestroy {
     public user               : User  = {} as User;
     public src                : string = '/images/placeholder/avatar.jpg';
     public FILE_URL           = env.FILE_BASE_URL;
+    public isDark             : boolean = localStorage.getItem('scheme') ? localStorage.getItem('scheme') === 'dark' : true;
     private _unsubscribeAll   : Subject<any> = new Subject<any>();
 
     constructor(
@@ -69,9 +71,17 @@ export class UserComponent implements OnInit, OnDestroy {
         private _matDialog                : MatDialog,
         private _dialogConfigService      : DialogConfigService,
         private _confirmationService      : HelperConfirmationService,
+        private _helperConfigService      : HelperConfigService,
     ) { }
 
     ngOnInit(): void {
+        this._helperConfigService.config$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((config) => {
+                this.isDark = config.scheme === 'dark';
+                this._changeDetectorRef.markForCheck();
+            });
+
         // Subscribe to user changes
         this._userService.user$.pipe(takeUntil(this._unsubscribeAll)).subscribe((user: User) => {
             const base = user ?? {} as User;
@@ -136,6 +146,12 @@ export class UserComponent implements OnInit, OnDestroy {
             enterAnimationDuration: '0s',
             data: { with_token: true },
         });
+    }
+
+    toggleScheme(): void {
+        const nextScheme: Scheme = this.isDark ? 'light' : 'dark';
+        localStorage.setItem('scheme', nextScheme);
+        this._helperConfigService.config = { scheme: nextScheme };
     }
 
     signOut(): void {

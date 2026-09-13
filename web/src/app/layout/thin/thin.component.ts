@@ -22,6 +22,8 @@ import { HelperMediaWatcherService } from 'helper/services/media-watcher';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationsComponent } from '../common/notifications/component';
 
+import { SchemeComponent }             from 'app/layout/common/scheme/scheme.component';
+
 @Component({
     selector: 'thin-layout',
     templateUrl: './thin.component.html',
@@ -30,6 +32,7 @@ import { NotificationsComponent } from '../common/notifications/component';
     imports: [
         HelperLoadingBarComponent,
         HelperNavigationComponent,
+        SchemeComponent,
         NotificationsComponent,
         UserComponent,
         MatIconModule,

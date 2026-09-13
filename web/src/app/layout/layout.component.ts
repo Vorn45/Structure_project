@@ -78,6 +78,17 @@ export class LayoutComponent implements OnInit, OnDestroy {
                 this._updateFontSize();
             });
 
+        this._helperMediaWatcherService.onMediaQueryChange$([
+            '(prefers-color-scheme: dark)',
+            '(prefers-color-scheme: light)',
+        ])
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(() => {
+                if (this.config.scheme === 'auto') {
+                    this._updateScheme();
+                }
+            });
+
         this._helperMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(({ matchingAliases }) => {
@@ -146,7 +157,17 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
     private _updateScheme(): void {
         this._document.body.classList.remove('light', 'dark');
-        this._document.body.classList.add(this.config.scheme);
+        this._document.documentElement.classList.remove('light', 'dark');
+
+        let scheme = this.config.scheme;
+        if (scheme === 'auto') {
+            const win = this._document?.defaultView || window;
+            const isDark = win?.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false;
+            scheme = isDark ? 'dark' : 'light';
+        }
+
+        this._document.body.classList.add(scheme);
+        this._document.documentElement.classList.add(scheme);
     }
 
     private _updateTheme(): void {
