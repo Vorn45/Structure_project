@@ -7,23 +7,29 @@ FROM node:20-alpine AS builder
 
 WORKDIR /usr/app
 
+# Force development mode during build stage so devDependencies are always installed
+ENV NODE_ENV=development
+
 # Configure npm network resilience against ECONNRESET and dropouts
 RUN npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 20000 && \
     npm config set fetch-retry-maxtimeout 120000 && \
     npm config set fetch-timeout 300000
 
+# Install Angular CLI globally so 'ng' binary is always available in PATH
+RUN npm install -g @angular/cli@18.2.14
+
 # Copy package and lock files to leverage Docker layer caching
 COPY package*.json ./
 
-# Install dependencies using pinned lockfile (with fallback)
-RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+# Install dependencies including dev tools needed for compilation
+RUN npm ci --legacy-peer-deps --include=dev || npm install --legacy-peer-deps --include=dev
 
 # Copy source code
 COPY . .
 
 # Build production Angular bundle
-RUN npm run build --prod
+RUN npm run build
 
 # 2. Production Runtime Stage (Nginx)
 FROM nginx:1.27-alpine
