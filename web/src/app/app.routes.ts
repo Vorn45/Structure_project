@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LocalPasscodeGuard } from 'app/core/local-passcode/local-passcode.guard';
-import { LayoutComponent } from 'app/layout/layout.component';
+import { LayoutComponent } from 'app/layout/component';
 import { initialDataResolver } from './app.resolver';
 import { ActivatedRouteSnapshot, CanActivate, Route, Router, UrlTree } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
@@ -55,7 +55,7 @@ export const appRoutes: Route[] = [
                 path: 'member',
                 loadComponent: () =>
                     import(
-                        'app/resources/3-public/member-verify/member-verify.component'
+                        'app/resources/3-public/member-verify/component'
                     ).then((m) => m.MemberVerifyComponent),
             },
         ],
@@ -74,7 +74,7 @@ export const appRoutes: Route[] = [
                 path: 'scan',
                 loadComponent: () =>
                     import(
-                        'app/resources/2-user/1-home/attendance-dialog/mobile-attendance-scan.component'
+                        'app/resources/2-user/1-home/attendance-dialog/mobile-attendance-scan/component'
                     ).then((m) => m.MobileAttendanceScanComponent),
             },
         ],

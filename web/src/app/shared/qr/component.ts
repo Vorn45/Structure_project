@@ -9,7 +9,7 @@ import { Router }                                                             fr
 import { TranslocoModule }                                                    from '@ngneat/transloco';
 import { AuthService }                                                        from 'app/core/auth/auth.service';
 import { UserService }                                                        from 'app/core/user/user.service';
-import { SkeletonQrCodeComponent }                                            from 'app/shared/skeleton/auth/qr_code/skeleton.component';
+import { SkeletonQrCodeComponent }                                            from 'app/shared/skeleton/auth/qr_code/component';
 import { env }                                                                from 'envs/env';
 import { SnackbarService }                                                    from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants                                                        from 'helper/shared/constants';

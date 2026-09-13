@@ -18,7 +18,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import * as echarts from 'echarts';
-import { SelectProjectPlanDialogComponent } from '../3-activity/select-project-plan-dialog.component';
+import { SelectProjectPlanDialogComponent } from '../3-activity/select-project-plan-dialog/component';
 
 export interface ReportProjectItem {
     id: string;

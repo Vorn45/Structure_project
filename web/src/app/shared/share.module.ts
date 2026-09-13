@@ -29,7 +29,7 @@ import { KhmerDatePipe } from 'helper/pipes/khmer-date.pipe';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatInputModule } from '@angular/material/input';
-import { NoDataComponent } from 'app/shared/no-data/no_data.compoent';
+import { NoDataComponent } from 'app/shared/no-data/component';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 
 import { trigger, transition, style, animate, animateChild, query, stagger } from '@angular/animations';

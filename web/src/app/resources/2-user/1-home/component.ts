@@ -13,7 +13,7 @@ import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
 import QRCode from 'qrcode';
 import { DigitalCardDialogComponent } from './digital-card-dialog/component';
-import { AttendanceDialogComponent } from './attendance-dialog/attendance-dialog.component';
+import { AttendanceDialogComponent } from './attendance-dialog/component';
 import { PayrollDialogComponent } from './payroll-dialog/component';
 import { CreateProjectDialogComponent } from './create-project-dialog/component';
 import { ActiveProjectsDialogComponent } from './active-projects-dialog/component';

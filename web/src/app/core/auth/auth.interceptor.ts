@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/auth.service';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
-import { HttpErrorDialogComponent } from 'app/shared/error/http-error-dialog.component';
+import { HttpErrorDialogComponent } from 'app/shared/error/http-error-dialog/component';
 import { Observable, catchError, switchMap, throwError } from 'rxjs';
 import { env } from 'envs/env';
 

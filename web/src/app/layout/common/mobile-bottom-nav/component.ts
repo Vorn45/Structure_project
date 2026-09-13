@@ -21,7 +21,7 @@ import {
 }                                                     from 'helper/components/navigation';
 import { HelperConfig, HelperConfigService }         from 'helper/services/config';
 import { Subject, filter, takeUntil }                from 'rxjs';
-import { MobileBottomNavSheetComponent }             from 'app/layout/common/mobile-bottom-nav/sheet.component';
+import { MobileBottomNavSheetComponent }             from 'app/layout/common/mobile-bottom-nav/sheet/component';
 
 const MOBILE_TAB_LIMIT = 5;
 /** Matches the 48px (3rem) / 60px (3.75rem) heights used for no-label / label states. */

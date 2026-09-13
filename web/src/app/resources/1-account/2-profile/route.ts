@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { ProfileDashboardComponent } from './dashboard/dashboard.component';
+import { ProfileDashboardComponent } from './dashboard/component';
 import { ProfileViewComponent } from './view/component';
 
 export default [

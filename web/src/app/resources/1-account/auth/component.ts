@@ -3,7 +3,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
-import { AboutDialogComponent } from './about-dialog/about.component';
+import { AboutDialogComponent } from './about-dialog/component';
 import { TranslocoModule } from '@ngneat/transloco';
 import { env } from 'envs/env';
 

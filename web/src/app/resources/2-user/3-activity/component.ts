@@ -12,9 +12,9 @@ import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { UserPlanService } from '../4-plan/plan.service';
 import { ActivityItem, UserActivityService } from './activity.service';
-import { AddPlanDialogComponent } from './add-plan-dialog.component';
-import { CreateProjectDialogComponent } from './create-project-dialog.component';
-import { ProjectPlanOption, SelectProjectPlanDialogComponent } from './select-project-plan-dialog.component';
+import { AddPlanDialogComponent } from './add-plan-dialog/component';
+import { CreateProjectDialogComponent } from './create-project-dialog/component';
+import { ProjectPlanOption, SelectProjectPlanDialogComponent } from './select-project-plan-dialog/component';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;

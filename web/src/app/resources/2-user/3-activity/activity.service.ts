@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { env } from 'envs/env';
 import { Observable } from 'rxjs';
 import { AgilePlanTask } from './component';
-import { ProjectPlanOption } from './select-project-plan-dialog.component';
+import { ProjectPlanOption } from './select-project-plan-dialog/component';
 
 export interface ActivityItem {
     id: number;

@@ -3,11 +3,11 @@ import { Routes }                   from '@angular/router';
 
 // ================================================================================>> Custom Library
 // Component
-import { AuthSignInComponent }      from './sign-in/sign-in.component';
+import { AuthSignInComponent }      from './sign-in/component';
 import { OverviewLoginComponent }   from './overviewlogin/component';
 import { AuthLayoutComponent }      from './component';
-import { AuthOTPComponent }         from './otp';
-import { AuthOTPForResetPasswordComponent } from './rest-password-otp/index';
+import { AuthOTPComponent }         from './otp/component';
+import { AuthOTPForResetPasswordComponent } from './rest-password-otp/component';
 
 export default [
     { path: '', pathMatch: 'full', redirectTo: 'overview' },
@@ -25,11 +25,11 @@ export default [
             },
             {
                 path: 'forgot-password',
-                loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+                loadComponent: () => import('./reset-password/component').then(m => m.ResetPasswordComponent)
             },
             {
                 path: 'reset-password',
-                loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+                loadComponent: () => import('./reset-password/component').then(m => m.ResetPasswordComponent)
             },
             {
                 path: 'otp',
@@ -37,7 +37,7 @@ export default [
             },
             {
                 path: 'qr-login',
-                loadComponent: () => import('./qr-scan-confirm/qr-scan-confirm.component').then(m => m.QrScanConfirmComponent)
+                loadComponent: () => import('./qr-scan-confirm/component').then(m => m.QrScanConfirmComponent)
             }
         ]
     }

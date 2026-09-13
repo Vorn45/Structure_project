@@ -13,7 +13,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { UserService } from 'app/core/user/user.service';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
-import { CreateTaskDialogComponent } from '../../3-admin/3-projects/dialogs/create-task-dialog.component';
+import { CreateTaskDialogComponent } from '../../3-admin/3-projects/dialogs/create-task-dialog/component';
 import { TaskDrawerComponent } from './task-drawer/component';
 import { FilePreviewModalComponent } from './file-preview-modal/component';
 import {

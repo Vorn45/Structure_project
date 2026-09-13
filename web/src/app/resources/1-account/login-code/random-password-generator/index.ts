@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslocoModule } from '@ngneat/transloco';
 import { RouterModule } from '@angular/router';
-import { LanguagesComponent } from 'app/layout/common/languages/languages.component';
+import { LanguagesComponent } from 'app/layout/common/languages/component';
 
 @Component({
     selector: 'random-password-generator',
