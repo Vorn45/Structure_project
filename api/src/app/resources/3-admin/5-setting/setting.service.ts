@@ -21,6 +21,7 @@ export class AdminSettingService {
             { id: 'dept-4', name_kh: 'ហេដ្ឋារចនាសម្ព័ន្ធ និងសន្តិសុខ (DevOps)', name_en: 'Infrastructure & Security', head: 'រ័ត្ន វិចិត្រ', member_count: 4 },
         ],
         work_categories: ['អភិវឌ្ឍន៍បច្ចេកវិទ្យា', 'ហេដ្ឋារចនាសម្ព័ន្ធ Cloud', 'សន្តិសុខព័ត៌មាន', 'រចនាផលិតផល', 'ការងាររដ្ឋបាល'],
+        logo: null as string | null,
     };
 
     private readonly storeFilePath = path.join(process.cwd(), 'storage', 'admin_settings_store.json');
@@ -66,6 +67,7 @@ export class AdminSettingService {
             organization_name_en: dto.organization_name_en ?? this.settings.organization_name_en,
             departments: dto.departments ?? this.settings.departments,
             work_categories: dto.work_categories ?? this.settings.work_categories,
+            logo: dto.logo !== undefined ? dto.logo : this.settings.logo,
         };
 
         this.saveToDisk();

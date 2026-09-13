@@ -20,4 +20,8 @@ export class UpdateSettingsDto {
 
     @IsOptional()
     work_categories?: string[];
+
+    @IsOptional()
+    @IsString()
+    logo?: string;
 }

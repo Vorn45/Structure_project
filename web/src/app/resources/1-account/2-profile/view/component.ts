@@ -102,6 +102,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
     public user: any = {};
     public current_lang: string = '';
     public isAvatarUpdating = false;
+    public isCoverUpdating = false;
     public fileInput: any;
     public isLoadingRoles: boolean = true;
     public activeTab: 'my-work' | 'unit-work' = 'my-work';
@@ -603,40 +604,114 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
         });
     }
 
-    openCroppedDialog(_event: Event, _aspect: number = 1 / 1, _type?: 'avatar' | 'cover', _onClose?: () => void): void { }
+    openCroppedDialog(event?: Event, _aspect: number = 1 / 1, type?: 'avatar' | 'cover', _onClose?: () => void): void {
+        if (event) {
+            const input = event.target as HTMLInputElement;
+            const file = input?.files?.[0];
+            if (file) {
+                if (type === 'cover') {
+                    this.uploadCoverDialog(file);
+                } else {
+                    this.uploadProfileDialog(file);
+                }
+                return;
+            }
+        }
+        if (type === 'cover') {
+            this.uploadCoverDialog();
+        } else {
+            this.uploadProfileDialog();
+        }
+    }
 
-    uploadProfileDialog(): void {
+    uploadCoverDialog(fileFromInput?: File): void {
+        const handleFile = (file: File) => {
+            this.isCoverUpdating = true;
+            this._service.updateBackground(file).subscribe({
+                next: (res: any) => {
+                    this.storeUpdatedTokens(res);
+                    const patch = {
+                        ...(res?.data || {}),
+                        cover: res?.data?.background || res?.data?.cover,
+                        background: res?.data?.background,
+                    };
+                    const updatedUser = this.mergeUser(this.user, patch);
+                    this.user = updatedUser;
+                    this._userService.user = updatedUser;
+                    this.isCoverUpdating = false;
+                    this._snackbar.openSnackBar(
+                        this._translocoService.translate('upload_success'),
+                        GlobalConstants.success,
+                    );
+                },
+                error: () => {
+                    this.isCoverUpdating = false;
+                    this._snackbar.openSnackBar(
+                        this._translocoService.translate('update_error'),
+                        GlobalConstants.error,
+                    );
+                },
+            });
+        };
+
+        if (fileFromInput) {
+            handleFile(fileFromInput);
+            return;
+        }
+
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
         input.onchange = (e: any) => {
             const file = e.target.files?.[0];
             if (file) {
-                this.isAvatarUpdating = true;
-                this._service.updateAvatar(file).subscribe({
-                    next: (res: any) => {
-                        this.storeUpdatedTokens(res);
-                        const patch = {
-                            ...(res?.data || {}),
-                            avatar: res?.data?.avatar,
-                        };
-                        const updatedUser = this.mergeUser(this.user, patch);
-                        this.user = updatedUser;
-                        this._userService.user = updatedUser;
-                        this.isAvatarUpdating = false;
-                        this._snackbar.openSnackBar(
-                            this._translocoService.translate('upload_success'),
-                            GlobalConstants.success,
-                        );
-                    },
-                    error: () => {
-                        this.isAvatarUpdating = false;
-                        this._snackbar.openSnackBar(
-                            this._translocoService.translate('update_error'),
-                            GlobalConstants.error,
-                        );
-                    },
-                });
+                handleFile(file);
+            }
+        };
+        input.click();
+    }
+
+    uploadProfileDialog(fileFromInput?: File): void {
+        const handleFile = (file: File) => {
+            this.isAvatarUpdating = true;
+            this._service.updateAvatar(file).subscribe({
+                next: (res: any) => {
+                    this.storeUpdatedTokens(res);
+                    const patch = {
+                        ...(res?.data || {}),
+                        avatar: res?.data?.avatar,
+                    };
+                    const updatedUser = this.mergeUser(this.user, patch);
+                    this.user = updatedUser;
+                    this._userService.user = updatedUser;
+                    this.isAvatarUpdating = false;
+                    this._snackbar.openSnackBar(
+                        this._translocoService.translate('upload_success'),
+                        GlobalConstants.success,
+                    );
+                },
+                error: () => {
+                    this.isAvatarUpdating = false;
+                    this._snackbar.openSnackBar(
+                        this._translocoService.translate('update_error'),
+                        GlobalConstants.error,
+                    );
+                },
+            });
+        };
+
+        if (fileFromInput) {
+            handleFile(fileFromInput);
+            return;
+        }
+
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e: any) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                handleFile(file);
             }
         };
         input.click();

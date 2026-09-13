@@ -218,6 +218,7 @@ export interface AdminSettingsData {
         member_count: number;
     }>;
     work_categories: string[];
+    logo?: string | null;
 }
 
 @Injectable({

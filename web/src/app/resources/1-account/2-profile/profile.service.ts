@@ -44,7 +44,14 @@ export class ProfileService {
         return this.http.put<{data: any}>(`${this.baseUrl}/account/profile`, formData);
     }
 
-    updateCover (body: {cover: string}): Observable<any> {
+    updateBackground(background: File): Observable<{data: any}> {
+        const formData = new FormData();
+        formData.append('background', background, background.name);
+
+        return this.http.put<{data: any}>(`${this.baseUrl}/account/profile`, formData);
+    }
+
+    updateCover(body: {cover: string}): Observable<any> {
         return this.http.put<any>(`${this.baseUrl}/account/profile/update-cover`, body, this.httpOptions);
     }
 

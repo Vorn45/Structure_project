@@ -734,6 +734,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             start_date: [new Date().toISOString().slice(0, 10)],
             end_date: [new Date(Date.now() + 86400000 * 45).toISOString().slice(0, 10)],
             budget: [5000],
+            logo: [''],
+            image: [''],
         });
 
         this.budgetForm = this._fb.group({
@@ -2208,6 +2210,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             start_date: new Date().toISOString().slice(0, 10),
             end_date: new Date(Date.now() + 86400000 * 45).toISOString().slice(0, 10),
             budget: 5000,
+            logo: '',
+            image: '',
         });
         this.isDrawerOpen.set(true);
     }
@@ -2223,8 +2227,32 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             start_date: project.start_date ? project.start_date.slice(0, 10) : '',
             end_date: project.end_date ? project.end_date.slice(0, 10) : '',
             budget: project.budget || 0,
+            logo: project.logo || project.image || '',
+            image: project.image || project.logo || '',
         });
         this.isDrawerOpen.set(true);
+    }
+
+    onLogoSelected(event: Event): void {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                this.projectForm.patchValue({
+                    logo: result,
+                    image: result,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    removeLogo(): void {
+        this.projectForm.patchValue({
+            logo: '',
+            image: '',
+        });
     }
 
     closeDrawer(): void {

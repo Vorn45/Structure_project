@@ -52,6 +52,41 @@
                     </h2>
 
                     <form [formGroup]="settingsForm" class="space-y-4">
+                        <!-- Organization Logo Upload Section -->
+                        <div class="flex items-center gap-4 pb-2">
+                            <div class="flex flex-col items-center justify-center shrink-0">
+                                <div
+                                    class="relative w-20 h-20 rounded-2xl overflow-visible border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 bg-slate-50 dark:bg-slate-900 transition-colors group"
+                                    (click)="orgLogoInput.click()"
+                                    [matTooltip]="'ជ្រើសរើសរូបសញ្ញាអង្គភាព (Logo)'">
+                                    @if (orgLogo()) {
+                                        <img
+                                            class="w-full h-full object-contain p-1.5 rounded-2xl shadow-xs"
+                                            [src]="orgLogo()!"
+                                            alt="Organization Logo">
+                                    } @else {
+                                        <div class="flex flex-col items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors">
+                                            <mat-icon svgIcon="mdi:office-building" class="icon-size-8"></mat-icon>
+                                        </div>
+                                    }
+
+                                    <div class="absolute -bottom-1 -right-1 flex items-center justify-center border rounded-full border-blue-500 p-1 bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-blue-400">
+                                        <mat-icon class="icon-size-4 text-blue-600 dark:text-blue-400" svgIcon="mdi:camera"></mat-icon>
+                                    </div>
+                                </div>
+                                <input #orgLogoInput type="file" accept="image/*" (change)="onLogoSelected($event)" class="hidden" />
+                                @if (orgLogo()) {
+                                    <button type="button" (click)="removeLogo()" class="mt-1 text-[12px] font-medium text-rose-500 hover:underline cursor-pointer">
+                                        លុបរូបភាព
+                                    </button>
+                                }
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <span class="block text-[14px] font-medium text-slate-900 dark:text-white">រូបសញ្ញាផ្លូវការរបស់អង្គភាព (Organization Logo)</span>
+                                <span class="block text-[12.5px] text-slate-500 dark:text-slate-400 mt-0.5">រូបភាពនេះនឹងបង្ហាញនៅលើ Header របារម៉ឺនុយ និងរបាយការណ៍ផ្លូវការនានា</span>
+                            </div>
+                        </div>
+
                         <!-- KH Name -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">

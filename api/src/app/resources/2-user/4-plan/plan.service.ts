@@ -487,6 +487,8 @@ export class PlanService {
             agileTasks: dto.agileTasks?.length ? dto.agileTasks : [],
             attachments: dto.attachments || [],
             attachments_count: dto.attachments?.length || 0,
+            logo: dto.logo || dto.image || null,
+            image: dto.image || dto.logo || null,
         };
 
         this.projects.unshift(newPlan);
@@ -523,6 +525,8 @@ export class PlanService {
             phases: dto.phases ?? (current as any).phases,
             meetings: dto.meetings ?? (current as any).meetings,
             agileTasks: dto.agileTasks ?? (current as any).agileTasks,
+            logo: dto.logo !== undefined ? dto.logo : current.logo,
+            image: dto.image !== undefined ? dto.image : current.image,
         };
 
         this.projects[index] = updated;

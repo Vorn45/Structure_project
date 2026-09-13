@@ -31,6 +31,7 @@ export class AdminSettingsComponent implements OnInit {
     private readonly _fb = inject(FormBuilder);
 
     settings = signal<AdminSettingsData | null>(null);
+    orgLogo = signal<string | null>(null);
     loading = signal<boolean>(true);
     saving = signal<boolean>(false);
     saveSuccess = signal<boolean>(false);
@@ -68,6 +69,7 @@ export class AdminSettingsComponent implements OnInit {
             next: (res) => {
                 if (res.data) {
                     this.settings.set(res.data);
+                    this.orgLogo.set(res.data.logo || null);
                     this.settingsForm.patchValue({
                         organization_name_kh: res.data.organization_name_kh,
                         organization_name_en: res.data.organization_name_en,
@@ -79,6 +81,21 @@ export class AdminSettingsComponent implements OnInit {
             },
             error: () => this.loading.set(false),
         });
+    }
+
+    onLogoSelected(event: Event): void {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.orgLogo.set(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    removeLogo(): void {
+        this.orgLogo.set(null);
     }
 
     addCategory(): void {
@@ -138,6 +155,7 @@ export class AdminSettingsComponent implements OnInit {
             organization_name_en: formVal.organization_name_en,
             departments: this.settings()!.departments,
             work_categories: this.settings()!.work_categories,
+            logo: this.orgLogo(),
         };
 
         this._adminService.updateSettings(payload).subscribe({

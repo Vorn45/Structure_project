@@ -191,19 +191,49 @@ export interface ProjectAttachment {
                 
                 <div class="p-5 space-y-5 font-kantumruy">
                     
-                    <!-- 1. Project Name Input -->
-                    <div>
-                        <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[15px]">
-                            ឈ្មោះគម្រោង <span class="text-rose-500">*</span>
-                        </label>
-                        <input
-                            #projectNameInput
-                            type="text"
-                            [(ngModel)]="projectName"
-                            (keyup.enter)="submitAndClose()"
-                            placeholder="ឧ. អភិវឌ្ឍន៍ប្រព័ន្ធគ្រប់គ្រងវត្តមាន WMS ដំណាក់កាលទី ២..."
-                            class="w-full px-3.5 py-2.5 text-[15px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                        />
+                    <!-- 1. Project Logo & Name Row -->
+                    <div class="flex items-center gap-4">
+                        <div class="flex flex-col items-center justify-center shrink-0">
+                            <div
+                                class="relative w-16 h-16 rounded-2xl overflow-visible border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 bg-slate-50 dark:bg-slate-800/60 transition-colors group"
+                                (click)="projectLogoInput.click()"
+                                [matTooltip]="'ជ្រើសរើសរូបសញ្ញាគម្រោង'">
+                                <img
+                                    *ngIf="projectLogo()"
+                                    class="w-full h-full object-cover rounded-2xl shadow-xs"
+                                    [src]="projectLogo()!"
+                                    alt="Project Logo" />
+                                <mat-icon
+                                    *ngIf="!projectLogo()"
+                                    svgIcon="default-project"
+                                    class="icon-size-7 text-slate-400 group-hover:text-blue-500 transition-colors"></mat-icon>
+                                <div class="absolute -bottom-1 -right-1 flex items-center justify-center border rounded-full border-blue-500 p-0.5 bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-blue-400">
+                                    <mat-icon class="!w-3.5 !h-3.5 text-blue-600 dark:text-blue-400" svgIcon="mdi:camera"></mat-icon>
+                                </div>
+                            </div>
+                            <input #projectLogoInput type="file" accept="image/*" (change)="onProjectLogoSelected($event)" class="hidden" />
+                            <button
+                                *ngIf="projectLogo()"
+                                type="button"
+                                (click)="removeProjectLogo()"
+                                class="mt-1 text-[11px] font-medium text-rose-500 hover:underline cursor-pointer">
+                                លុប
+                            </button>
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[15px]">
+                                ឈ្មោះគម្រោង <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                #projectNameInput
+                                type="text"
+                                [(ngModel)]="projectName"
+                                (keyup.enter)="submitAndClose()"
+                                placeholder="ឧ. អភិវឌ្ឍន៍ប្រព័ន្ធគ្រប់គ្រងវត្តមាន WMS ដំណាក់កាលទី ២..."
+                                class="w-full px-3.5 py-2.5 text-[15px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            />
+                        </div>
                     </div>
 
                     <!-- 2. Project Code & Category Row -->
@@ -762,6 +792,7 @@ export class CreateProjectDialogComponent implements OnInit {
     endDate: Date | string | null = new Date(Date.now() + 86400000 * 60);
     priority = signal<'low' | 'medium' | 'high'>('medium');
     description: string = '';
+    projectLogo = signal<string | null>(null);
 
     // File attachments
     attachedFiles = signal<ProjectAttachment[]>([]);
@@ -989,6 +1020,9 @@ export class CreateProjectDialogComponent implements OnInit {
             if (p.members && p.members.length > 0) {
                 this.selectedMemberIds.set(p.members.map((m: any) => String(m.id)));
             }
+            if (p.logo || p.image) {
+                this.projectLogo.set(p.logo || p.image);
+            }
         }
     }
 
@@ -1065,7 +1099,24 @@ export class CreateProjectDialogComponent implements OnInit {
             assignees: membersPayload,
             attachments: this.attachedFiles(),
             attachments_count: this.attachedFiles().length,
+            logo: this.projectLogo() || null,
+            image: this.projectLogo() || null,
         };
+    }
+
+    onProjectLogoSelected(event: Event): void {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.projectLogo.set(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    removeProjectLogo(): void {
+        this.projectLogo.set(null);
     }
 
     private performSmoothClose(result: any = null): void {
@@ -1110,6 +1161,7 @@ export class CreateProjectDialogComponent implements OnInit {
                 this.projectName = '';
                 this.description = '';
                 this.attachedFiles.set([]);
+                this.projectLogo.set(null);
                 setTimeout(() => {
                     this.projectNameInput?.nativeElement?.focus();
                 }, 100);
@@ -1124,6 +1176,7 @@ export class CreateProjectDialogComponent implements OnInit {
                 this.projectName = '';
                 this.description = '';
                 this.attachedFiles.set([]);
+                this.projectLogo.set(null);
                 setTimeout(() => {
                     this.projectNameInput?.nativeElement?.focus();
                 }, 100);
@@ -1157,6 +1210,8 @@ export class CreateProjectDialogComponent implements OnInit {
                 members: payload.members,
                 description: this.description.trim() || name,
                 attachments: this.attachedFiles(),
+                logo: this.projectLogo() || null,
+                image: this.projectLogo() || null,
             });
             return;
         }
