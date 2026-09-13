@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { env } from 'envs/env';
 import { Observable } from 'rxjs';
-import { AgilePlanTask } from './activity.component';
+import { AgilePlanTask } from './component';
 import { ProjectPlanOption } from './select-project-plan-dialog.component';
 
 export interface ActivityItem {

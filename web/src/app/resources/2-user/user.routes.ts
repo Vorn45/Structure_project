@@ -9,31 +9,31 @@ export default [
     {
         path: 'home',
         loadComponent: () =>
-            import('./1-home/home.component').then((m) => m.UserHomeComponent),
+            import('./1-home/component').then((m) => m.UserHomeComponent),
     },
     {
         path: 'tasks',
         loadComponent: () =>
-            import('./2-task/task.component').then((m) => m.UserTaskComponent),
+            import('./2-task/component').then((m) => m.UserTaskComponent),
     },
     {
         path: 'planner',
         loadComponent: () =>
-            import('../3-admin/6-planner/planner.component').then((m) => m.PlannerComponent),
+            import('../3-admin/6-planner/component').then((m) => m.PlannerComponent),
     },
     {
         path: 'activity',
         loadComponent: () =>
-            import('./3-activity/activity.component').then((m) => m.UserActivityComponent),
+            import('./3-activity/component').then((m) => m.UserActivityComponent),
     },
     {
         path: 'projects',
         loadComponent: () =>
-            import('./4-plan/plan.component').then((m) => m.UserPlanComponent),
+            import('./4-plan/component').then((m) => m.UserPlanComponent),
     },
     {
         path: 'report',
         loadComponent: () =>
-            import('./5-report/report.component').then((m) => m.UserReportComponent),
+            import('./5-report/component').then((m) => m.UserReportComponent),
     },
 ] as Routes;

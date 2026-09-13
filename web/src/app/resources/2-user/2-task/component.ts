@@ -14,8 +14,8 @@ import { UserService } from 'app/core/user/user.service';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { CreateTaskDialogComponent } from '../../3-admin/3-projects/dialogs/create-task-dialog.component';
-import { TaskDrawerComponent } from './task-drawer/task-drawer.component';
-import { FilePreviewModalComponent } from './file-preview-modal/file-preview-modal.component';
+import { TaskDrawerComponent } from './task-drawer/component';
+import { FilePreviewModalComponent } from './file-preview-modal/component';
 import {
     TASK_TYPES_LIST,
     TaskAttachment,
@@ -53,7 +53,8 @@ export interface ProjectFilterOption {
         TaskDrawerComponent,
         FilePreviewModalComponent,
     ],
-    templateUrl: './task.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [
         `
             :host {

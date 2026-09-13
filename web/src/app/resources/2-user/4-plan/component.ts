@@ -13,8 +13,8 @@ import { Router } from '@angular/router';
 import * as echarts from 'echarts';
 import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
-import { CreateProjectDialogComponent } from '../1-home/create-project-dialog/create-project-dialog.component';
-import { CreateMeetingDialogComponent } from '../1-home/create-meeting-dialog/create-meeting-dialog.component';
+import { CreateProjectDialogComponent } from '../1-home/create-project-dialog/component';
+import { CreateMeetingDialogComponent } from '../1-home/create-meeting-dialog/component';
 import { AddPlanDialogComponent } from '../3-activity/add-plan-dialog.component';
 import { CreateTaskDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-task-dialog.component';
 import { CreatePhaseDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-phase-dialog.component';
@@ -22,8 +22,8 @@ import { CreateMemberDialogComponent } from 'app/resources/3-admin/3-projects/di
 import { CreateLinkDialogComponent } from 'app/resources/3-admin/3-projects/dialogs/create-link-dialog.component';
 import { ProjectPlanItem, UserPlanService } from './plan.service';
 import { TaskItem, UserTaskService } from '../2-task/task.service';
-import { TaskDrawerComponent } from '../2-task/task-drawer/task-drawer.component';
-import { FilePreviewModalComponent } from '../2-task/file-preview-modal/file-preview-modal.component';
+import { TaskDrawerComponent } from '../2-task/task-drawer/component';
+import { FilePreviewModalComponent } from '../2-task/file-preview-modal/component';
 import {
     TaskItem as DrawerTaskItem,
     TaskMember as DrawerTaskMember,
@@ -517,7 +517,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         TaskDrawerComponent,
         FilePreviewModalComponent,
     ],
-    templateUrl: './plan.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
 })
 export class UserPlanComponent implements OnInit, OnDestroy {
     @ViewChild('taskDistributionChartRef') taskDistributionChartRef?: ElementRef<HTMLDivElement>;

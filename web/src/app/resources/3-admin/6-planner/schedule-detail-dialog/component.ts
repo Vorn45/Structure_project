@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
-import { PlannerScheduleEvent } from '../planner.component';
+import { PlannerScheduleEvent } from '../component';
 
 export interface ScheduleDetailDialogData {
     schedule: PlannerScheduleEvent;

@@ -38,7 +38,8 @@ import {
         { provide: DateAdapter, useClass: KhmerDateAdapter },
         { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
     ],
-    templateUrl: './task-drawer.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [
         `
             ::ng-deep .task-dropdown-menu.mat-mdc-menu-panel {

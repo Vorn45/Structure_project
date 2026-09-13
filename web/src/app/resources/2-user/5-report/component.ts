@@ -55,7 +55,8 @@ export interface PeriodMetrics {
         MatMenuModule,
         MatDialogModule,
     ],
-    templateUrl: './report.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
 })
 export class UserReportComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('speedGaugeChart') speedGaugeRef!: ElementRef<HTMLDivElement>;

@@ -10,7 +10,8 @@ import { TaskAttachment, TaskItem } from '../models/task.types';
     selector: 'task-file-preview-modal',
     standalone: true,
     imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule],
-    templateUrl: './file-preview-modal.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
 })
 export class FilePreviewModalComponent {
     previewFile = input<TaskAttachment | null>(null);

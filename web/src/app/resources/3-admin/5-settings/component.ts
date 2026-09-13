@@ -17,7 +17,8 @@ import { AdminService, AdminSettingsData } from '../admin.service';
         MatButtonModule,
         MatTooltipModule,
     ],
-    templateUrl: './admin-settings.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [`
         :host {
             display: block;

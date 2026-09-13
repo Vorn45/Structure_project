@@ -21,7 +21,8 @@ import { AdminService, AdminUser } from '../admin.service';
         MatMenuModule,
         SideDialogCloseButtonComponent,
     ],
-    templateUrl: './user-management.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [`
         :host {
             display: block;

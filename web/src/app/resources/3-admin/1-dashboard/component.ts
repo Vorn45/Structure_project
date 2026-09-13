@@ -75,7 +75,8 @@ const EMPTY_STATS: AdminStats = {
         MatIconModule,
         MatTooltipModule,
     ],
-    templateUrl: './admin-dashboard.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [`
         app-admin-dashboard,
         .admin-dashboard-root,

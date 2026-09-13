@@ -6,8 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
-import { CreateScheduleDialogComponent } from './create-schedule-dialog/create-schedule-dialog.component';
-import { ScheduleDetailDialogComponent } from './schedule-detail-dialog/schedule-detail-dialog.component';
+import { CreateScheduleDialogComponent } from './create-schedule-dialog/component';
+import { ScheduleDetailDialogComponent } from './schedule-detail-dialog/component';
 import { PlannerService, BackendPlannerSchedule } from './planner.service';
 
 export interface PlannerScheduleEvent {
@@ -52,7 +52,8 @@ export interface DayColumn {
         MatTooltipModule,
         MatDialogModule,
     ],
-    templateUrl: './planner.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [`
         :host {
             font-family: 'Kantumruy Pro', sans-serif !important;

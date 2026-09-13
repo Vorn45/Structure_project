@@ -13,8 +13,8 @@ import * as echarts from 'echarts';
 import { UserService } from 'app/core/user/user.service';
 import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
-import { CreateProjectDialogComponent } from 'app/resources/2-user/1-home/create-project-dialog/create-project-dialog.component';
-import { CreateMeetingDialogComponent } from 'app/resources/2-user/1-home/create-meeting-dialog/create-meeting-dialog.component';
+import { CreateProjectDialogComponent } from 'app/resources/2-user/1-home/create-project-dialog/component';
+import { CreateMeetingDialogComponent } from 'app/resources/2-user/1-home/create-meeting-dialog/component';
 import { AddPlanDialogComponent } from 'app/resources/2-user/3-activity/add-plan-dialog.component';
 import { CreateTaskDialogComponent } from './dialogs/create-task-dialog.component';
 import { CreatePhaseDialogComponent } from './dialogs/create-phase-dialog.component';
@@ -22,8 +22,8 @@ import { CreateMemberDialogComponent } from './dialogs/create-member-dialog.comp
 import { CreateLinkDialogComponent } from './dialogs/create-link-dialog.component';
 import { AdminService, AdminProject, AdminUser } from '../admin.service';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
-import { TaskDrawerComponent } from 'app/resources/2-user/2-task/task-drawer/task-drawer.component';
-import { FilePreviewModalComponent } from 'app/resources/2-user/2-task/file-preview-modal/file-preview-modal.component';
+import { TaskDrawerComponent } from 'app/resources/2-user/2-task/task-drawer/component';
+import { FilePreviewModalComponent } from 'app/resources/2-user/2-task/file-preview-modal/component';
 import {
     TaskItem,
     TaskMember,
@@ -333,7 +333,8 @@ export const DEFAULT_PROJECT_LINKS: TaskLink[] = [
         TaskDrawerComponent,
         FilePreviewModalComponent,
     ],
-    templateUrl: './project-management.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [`
         :host {
             display: block;

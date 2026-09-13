@@ -12,18 +12,18 @@ import { Router, RouterModule } from '@angular/router';
 import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
 import QRCode from 'qrcode';
-import { DigitalCardDialogComponent } from './digital-card-dialog/digital-card-dialog.component';
+import { DigitalCardDialogComponent } from './digital-card-dialog/component';
 import { AttendanceDialogComponent } from './attendance-dialog/attendance-dialog.component';
-import { PayrollDialogComponent } from './payroll-dialog/payroll-dialog.component';
-import { CreateProjectDialogComponent } from './create-project-dialog/create-project-dialog.component';
-import { ActiveProjectsDialogComponent } from './active-projects-dialog/active-projects-dialog.component';
-import { CreateMeetingDialogComponent } from './create-meeting-dialog/create-meeting-dialog.component';
-import { HelpSupportDialogComponent } from './help-support-dialog/help-support-dialog.component';
+import { PayrollDialogComponent } from './payroll-dialog/component';
+import { CreateProjectDialogComponent } from './create-project-dialog/component';
+import { ActiveProjectsDialogComponent } from './active-projects-dialog/component';
+import { CreateMeetingDialogComponent } from './create-meeting-dialog/component';
+import { HelpSupportDialogComponent } from './help-support-dialog/component';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
 import { HomeOverviewData, UserHomeService } from './home.service';
-import { TaskDrawerComponent } from '../2-task/task-drawer/task-drawer.component';
-import { FilePreviewModalComponent } from '../2-task/file-preview-modal/file-preview-modal.component';
+import { TaskDrawerComponent } from '../2-task/task-drawer/component';
+import { FilePreviewModalComponent } from '../2-task/file-preview-modal/component';
 import {
     TaskItem,
     TaskMember,
@@ -52,7 +52,8 @@ import { UserTaskService } from '../2-task/task.service';
         TaskDrawerComponent,
         FilePreviewModalComponent,
     ],
-    templateUrl: './home.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
 })
 export class UserHomeComponent implements OnInit, OnDestroy {
     loading = signal<boolean>(true);

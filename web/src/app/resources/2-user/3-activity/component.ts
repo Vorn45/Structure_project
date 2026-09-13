@@ -82,7 +82,8 @@ const EGOV_TASKS: AgilePlanTask[] = [
         MatProgressSpinnerModule,
         MatDialogModule,
     ],
-    templateUrl: './activity.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
 })
 export class UserActivityComponent implements OnInit {
     // Agile Project Management Plan State

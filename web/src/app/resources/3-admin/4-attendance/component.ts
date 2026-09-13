@@ -16,7 +16,8 @@ import { AdminService, AdminAttendanceData, AdminLeaveRequest } from '../admin.s
         MatButtonModule,
         MatTooltipModule,
     ],
-    templateUrl: './attendance-leave.component.html',
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
     styles: [`
         :host {
             display: block;
