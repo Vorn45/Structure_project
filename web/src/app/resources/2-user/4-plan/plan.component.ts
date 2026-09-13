@@ -2141,17 +2141,20 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             projectName: proj?.name,
+            existingMemberIds: proj?.members?.map((m: any) => m.id) || [],
+            existingMemberNames: proj?.members?.map((m: any) => m.name) || [],
         });
         const dialogRef = this._matDialog.open(CreateMemberDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.name && proj) {
                 if (!proj.members) proj.members = [];
                 const newM: TaskMember = {
-                    id: Date.now(),
+                    id: result.id || Date.now(),
                     name: result.name,
                     role: result.role || 'Developer',
                     email: result.email || undefined,
-                    initial: result.name.charAt(0).toUpperCase(),
+                    avatar: result.avatar || undefined,
+                    initial: result.initial || result.name.charAt(0).toUpperCase(),
                     bgClass: 'bg-indigo-600',
                 };
                 proj.members.push(newM);

@@ -1545,16 +1545,20 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             projectName: proj?.name,
+            users: this.users(),
+            existingMemberIds: this.teamMembers().map((m) => m.id),
+            existingMemberNames: this.teamMembers().map((m) => m.name),
         });
         const dialogRef = this._matDialog.open(CreateMemberDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.name) {
                 const newM: TaskMember = {
-                    id: Date.now(),
+                    id: result.id || Date.now(),
                     name: result.name,
                     role: result.role || 'Developer',
                     email: result.email || undefined,
-                    initial: result.name.charAt(0).toUpperCase(),
+                    avatar: result.avatar || undefined,
+                    initial: result.initial || result.name.charAt(0).toUpperCase(),
                     bgClass: 'bg-indigo-600 text-white',
                 };
                 this.teamMembers.update((list) => [...list, newM]);
