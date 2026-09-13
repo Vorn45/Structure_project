@@ -10,20 +10,20 @@ WORKDIR /usr/app
 # Force development mode during build stage so devDependencies are always installed
 ENV NODE_ENV=development
 
+# Ensure local node_modules/.bin is always on PATH
+ENV PATH="/usr/app/node_modules/.bin:${PATH}"
+
 # Configure npm network resilience against ECONNRESET and dropouts
 RUN npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 20000 && \
     npm config set fetch-retry-maxtimeout 120000 && \
     npm config set fetch-timeout 300000
 
-# Install Angular CLI globally so 'ng' binary is always available in PATH
-RUN npm install -g @angular/cli@18.2.14
-
 # Copy package and lock files to leverage Docker layer caching
 COPY package*.json ./
 
 # Install dependencies including dev tools needed for compilation
-RUN npm ci --legacy-peer-deps --include=dev || npm install --legacy-peer-deps --include=dev
+RUN npm install --legacy-peer-deps --include=dev
 
 # Copy source code
 COPY . .
