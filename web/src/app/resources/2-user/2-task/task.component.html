@@ -406,13 +406,13 @@
 
                     <!-- Right Meta: Date (No BG), Comments/Attachments, Assignee Avatar, Status Badge, Relative Time & Three-dots Menu -->
                     <div class="flex items-center gap-3 self-end md:self-center shrink-0">
-                        <!-- Date to do (Fixed width for straight vertical column alignment) -->
-                        <div class="hidden md:flex items-center gap-1.5 text-[13px] font-kantumruy font-normal w-28 shrink-0"
+                        <!-- Date to do (Fixed width & whitespace-nowrap for straight vertical column alignment and single-line guarantee) -->
+                        <div class="hidden md:flex items-center gap-1.5 text-[13px] font-kantumruy font-normal w-32 shrink-0 whitespace-nowrap"
                             [ngClass]="getDaysRemainingInfo(task.due_date).isOverdue 
                                 ? 'text-rose-600 dark:text-rose-400' 
                                 : 'text-slate-500 dark:text-slate-400'">
                             <mat-icon svgIcon="mdi:calendar-clock-outline" class="icon-size-4 opacity-80 shrink-0"></mat-icon>
-                            <span>{{ getTaskDateToDo(task.due_date, task.created_at) }}</span>
+                            <span class="whitespace-nowrap">{{ getTaskDateToDo(task.due_date, task.created_at) }}</span>
                         </div>
 
                         <!-- Comments & Attachments (Fixed width) -->
