@@ -562,29 +562,15 @@
             [class.md:flex]="true">
 
             <!-- Right Pane Header -->
-            <div class="h-14 px-5 border-b border-slate-200/90 dark:border-slate-800/60 bg-white dark:bg-[#090f1e] flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <button (click)="mobileTab.set('details')" class="md:hidden text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
-                        <mat-icon svgIcon="mdi:arrow-left" class="!w-5 !h-5"></mat-icon>
-                    </button>
+            <div class="relative h-14 px-5 border-b border-slate-200/90 dark:border-slate-800/60 bg-white dark:bg-[#090f1e] flex items-center justify-center shrink-0">
+                <button (click)="mobileTab.set('details')" class="md:hidden absolute left-4 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                    <mat-icon svgIcon="mdi:arrow-left" class="!w-5 !h-5"></mat-icon>
+                </button>
 
-                    <!-- 'ជជែក' (Chat) Header Title -->
-                    <h3 class="text-[15px] font-semibold text-slate-700 dark:text-slate-200 font-kantumruy">
-                        ជជែក
-                    </h3>
-                </div>
-
-                <!-- Task Status Badge in Chat Conversation Header -->
-                <div>
-                    <button [matMenuTriggerFor]="detailsStatusMenu"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[13px] font-medium border select-none transition-all shadow-2xs cursor-pointer"
-                        [ngClass]="getStatusPillClass(task()?.status)"
-                        [matTooltip]="'ផ្លាស់ប្តូរស្ថានភាពការងារ'">
-                        <mat-icon [svgIcon]="getStatusIcon(task()?.status)" class="icon-size-3.5"></mat-icon>
-                        <span>{{ getStatusLabel(task()?.status) }}</span>
-                        <mat-icon svgIcon="mdi:chevron-down" class="!w-3 !h-3 opacity-70 ml-0.5"></mat-icon>
-                    </button>
-                </div>
+                <!-- 'ជជែក' (Chat) Header Title -->
+                <h3 class="text-[15px] font-semibold text-slate-700 dark:text-slate-200 font-kantumruy text-center">
+                    ជជែក
+                </h3>
             </div>
 
             <!-- Chat Messages Timeline (Dedicated Scroll Area) -->
