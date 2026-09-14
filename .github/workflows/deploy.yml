@@ -245,18 +245,13 @@ jobs:
             -f docker-compose.yml \
             up -d --no-build --remove-orphans "${services[@]}"
 
-          # Force Nginx reload/restart so changes in nginx/conf.d take effect immediately
-          echo "Reloading Nginx load_balancer configuration..."
+          # Force Nginx restart so changes in nginx/conf.d take effect immediately
+          echo "Restarting Nginx load_balancer..."
           docker compose \
             --project-name "$COMPOSE_PROJECT_NAME" \
             --env-file "$RUNNER_TEMP/wms-production.env" \
             -f docker-compose.yml \
-            exec -T load_balancer nginx -s reload || \
-          docker compose \
-            --project-name "$COMPOSE_PROJECT_NAME" \
-            --env-file "$RUNNER_TEMP/wms-production.env" \
-            -f docker-compose.yml \
-            restart load_balancer
+            restart load_balancer || true
 
       - name: Show deployed container status
         shell: bash
