@@ -1197,6 +1197,28 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         return resolveFileUrl(user?.avatar) || '/images/placeholder/avatar.jpg';
     }
 
+    getProjectLogo(plan: any): string {
+        if (!plan) return '/images/logo/logo.png';
+        if (plan._logoFailed) return '/images/logo/logo.png';
+        const raw = plan.logo || plan.image;
+        if (raw && typeof raw === 'string' && !raw.includes('placeholder')) {
+            const resolved = resolveFileUrl(raw);
+            if (resolved && !resolved.includes('placeholder')) {
+                return resolved;
+            }
+        }
+        return '/images/logo/logo.png';
+    }
+
+    onProjectLogoError(event: Event, plan: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target && !target.src.includes('/images/logo/logo.png')) {
+            target.src = '/images/logo/logo.png';
+        } else {
+            if (plan) plan._logoFailed = true;
+        }
+    }
+
     getAssigneeAvatar(member: any): string | null {
         if (!member || member._avatarFailed) return null;
         const cur = this._userService.getUser();

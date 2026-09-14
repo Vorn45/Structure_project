@@ -348,6 +348,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         status: 'active',
         priority: 'high',
         category: 'Development',
+        logo: '/images/logo/logo.png',
+        image: '/images/logo/logo.png',
         budget_allocated: 65000,
         budget_spent: 28000,
         total_tasks: 0,
@@ -429,6 +431,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         status: 'active',
         priority: 'urgent',
         category: 'Workforce',
+        logo: '/images/logo/logo.png',
+        image: '/images/logo/logo.png',
         budget_allocated: 80000,
         budget_spent: 56000,
         total_tasks: 0,
@@ -555,6 +559,28 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     getCurrentUserAvatar(): string {
         const u = this._userService.getUser();
         return resolveFileUrl(u?.avatar) || '/images/placeholder/avatar.jpg';
+    }
+
+    getProjectLogo(plan: any): string {
+        if (!plan) return '/images/logo/logo.png';
+        if (plan._logoFailed) return '/images/logo/logo.png';
+        const raw = plan.logo || plan.image;
+        if (raw && typeof raw === 'string' && !raw.includes('placeholder')) {
+            const resolved = resolveFileUrl(raw);
+            if (resolved && !resolved.includes('placeholder')) {
+                return resolved;
+            }
+        }
+        return '/images/logo/logo.png';
+    }
+
+    onProjectLogoError(event: Event, plan: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target && !target.src.includes('/images/logo/logo.png')) {
+            target.src = '/images/logo/logo.png';
+        } else {
+            if (plan) plan._logoFailed = true;
+        }
     }
 
     getAssigneeAvatar(member: any): string | null {
@@ -852,6 +878,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         end_date: created.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
                         team_lead: created.team_lead || { id: Number(leadObj.id) || 1, name: leadObj.name, role: leadObj.role || 'Leader' },
                         members: projMembers.length ? projMembers : (created.members || []),
+                        logo: created.logo || result.logo || created.image || result.image || '/images/logo/logo.png',
+                        image: created.image || result.image || created.logo || result.logo || '/images/logo/logo.png',
                         tasks: created.tasks?.length ? created.tasks : starterTasks,
                         phases: created.phases?.length ? created.phases : starterPhases,
                         meetings: created.meetings?.length ? created.meetings : starterMeetings,
@@ -910,6 +938,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                             budget_allocated: updatedPayload.budget_allocated || (plan as any).budget_allocated,
                             members: updatedPayload.members || plan.members,
                             team_lead: updatedPayload.team_lead || (plan as any).team_lead,
+                            logo: updatedPayload.logo !== undefined ? updatedPayload.logo : ((plan as any).logo || '/images/logo/logo.png'),
+                            image: updatedPayload.image !== undefined ? updatedPayload.image : ((plan as any).image || '/images/logo/logo.png'),
                         };
                         this.plans.update((list) => list.map((p) => (p.id === plan.id ? updated : p)));
                         if (this.selectedProject()?.id === plan.id) {
@@ -1418,17 +1448,17 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                     code: ap.code,
                                     name: ap.name,
                                     logo:
-                                        (ap as any).logo ||
-                                        (ap as any).image ||
-                                        (existing as any)?.logo ||
-                                        (existing as any)?.image ||
-                                        null,
+                                        resolveFileUrl((ap as any).logo) ||
+                                        resolveFileUrl((ap as any).image) ||
+                                        resolveFileUrl((existing as any)?.logo) ||
+                                        resolveFileUrl((existing as any)?.image) ||
+                                        '/images/logo/logo.png',
                                     image:
-                                        (ap as any).image ||
-                                        (ap as any).logo ||
-                                        (existing as any)?.image ||
-                                        (existing as any)?.logo ||
-                                        null,
+                                        resolveFileUrl((ap as any).image) ||
+                                        resolveFileUrl((ap as any).logo) ||
+                                        resolveFileUrl((existing as any)?.image) ||
+                                        resolveFileUrl((existing as any)?.logo) ||
+                                        '/images/logo/logo.png',
                                     description: ap.description || existing?.description || '',
                                     status: (ap.status as any) || existing?.status || 'active',
                                     priority: (ap as any).priority || existing?.priority || 'high',

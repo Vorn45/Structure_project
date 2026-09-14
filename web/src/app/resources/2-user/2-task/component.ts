@@ -35,8 +35,10 @@ export interface ProjectFilterOption {
     code?: string;
     name: string;
     logo?: string;
+    image?: string;
     icon?: string;
     bgClass?: string;
+    _logoFailed?: boolean;
 }
 
 @Component({
@@ -314,13 +316,17 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             id: 'bms-digitech',
             name: 'BMS Digitech',
             code: 'BMS',
-            bgClass: 'bg-sky-600 text-white',
+            logo: '/images/logo/logo.png',
+            image: '/images/logo/logo.png',
+            bgClass: 'bg-white text-white',
         },
         {
             id: 'wms-digitech',
             name: 'WMS Digitech',
             code: 'WMS',
-            bgClass: 'bg-emerald-700 text-white',
+            logo: '/images/logo/logo.png',
+            image: '/images/logo/logo.png',
+            bgClass: 'bg-white text-white',
         },
     ]);
 
@@ -342,8 +348,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                         id: String(p.id),
                         code: p.code || p.name?.slice(0, 3)?.toUpperCase() || 'PRJ',
                         name: p.name,
-                        logo: p.logo || p.image || null,
-                        image: p.image || p.logo || null,
+                        logo: resolveFileUrl(p.logo || p.image) || '/images/logo/logo.png',
+                        image: resolveFileUrl(p.image || p.logo) || '/images/logo/logo.png',
                         bgClass: p.bgClass || bgColors[idx % bgColors.length],
                     }));
                     this.projects.set(mapped);
@@ -388,6 +394,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     id: t.project_id || id,
                     name: name,
                     code: code,
+                    logo: '/images/logo/logo.png',
+                    image: '/images/logo/logo.png',
                     bgClass: bgColors[pMap.size % bgColors.length],
                 };
                 pMap.set(id.toLowerCase(), option);
@@ -847,6 +855,28 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     getSelectedProjectLabel(): string {
         const p = this.projects().find((item) => item.id === this.selectedProjectId());
         return p ? p.name : 'គម្រោងទាំងអស់';
+    }
+
+    getProjectLogo(p: any): string {
+        if (!p) return '/images/logo/logo.png';
+        if (p._logoFailed) return '/images/logo/logo.png';
+        const raw = p.logo || p.image;
+        if (raw && typeof raw === 'string' && !raw.includes('placeholder')) {
+            const resolved = resolveFileUrl(raw);
+            if (resolved && !resolved.includes('placeholder')) {
+                return resolved;
+            }
+        }
+        return '/images/logo/logo.png';
+    }
+
+    onProjectLogoError(event: Event, p: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target && !target.src.includes('/images/logo/logo.png')) {
+            target.src = '/images/logo/logo.png';
+        } else {
+            if (p) p._logoFailed = true;
+        }
     }
 
     setMemberFilter(memberId: number | 'all'): void {

@@ -58,12 +58,10 @@
                         <button type="button"
                             (click)="toggleProjectFilter(p.id)"
                             [matTooltip]="p.name"
-                            class="relative inline-flex w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] items-center justify-center rounded-full ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105 shrink-0"
-                            [ngClass]="[p.bgClass || 'bg-slate-600 text-white', selectedProjectId() === p.id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10']">
-                            <!-- Image if defined -->
-                            <img *ngIf="p.image || p.logo" [src]="p.image || p.logo" [alt]="p.name" class="w-full h-full object-cover" />
-                            <!-- Default icon if no image -->
-                            <mat-icon *ngIf="!p.image && !p.logo" svgIcon="default-project" class="!w-4 !h-4 text-white"></mat-icon>
+                            class="relative inline-flex w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] items-center justify-center rounded-full ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105 shrink-0 bg-white dark:bg-slate-800 p-0.5"
+                            [ngClass]="[selectedProjectId() === p.id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10']">
+                            <!-- Project Logo -->
+                            <img [src]="getProjectLogo(p)" (error)="onProjectLogoError($event, p)" [alt]="p.name" class="w-full h-full object-contain rounded-full" />
                         </button>
                     </ng-container>
 
@@ -82,9 +80,8 @@
                 <mat-menu #projectMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
                     <!-- List other projects beyond the first 4 -->
                     <button *ngFor="let p of projects().slice(4)" mat-menu-item (click)="setProjectFilter(p.id)" class="!text-[14px]">
-                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] mr-2 shrink-0 overflow-hidden" [ngClass]="p.bgClass || 'bg-blue-600 text-white'">
-                            <img *ngIf="p.image || p.logo" [src]="p.image || p.logo" [alt]="p.name" class="w-full h-full object-cover" />
-                            <mat-icon *ngIf="!p.image && !p.logo" svgIcon="default-project" class="!w-3.5 !h-3.5 text-white"></mat-icon>
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] mr-2 shrink-0 overflow-hidden bg-white dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700">
+                            <img [src]="getProjectLogo(p)" (error)="onProjectLogoError($event, p)" [alt]="p.name" class="w-full h-full object-contain rounded-full" />
                         </div>
                         <span class="truncate max-w-[220px]" [class.font-bold]="selectedProjectId() === p.id" [class.text-blue-600]="selectedProjectId() === p.id">
                             {{ p.name }}

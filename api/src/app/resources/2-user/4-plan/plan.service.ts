@@ -50,6 +50,8 @@ const PROJECTS: ProjectPlanItem[] = [
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
         total_tasks: 5,
         completed_tasks: 1,
+        logo: '/images/logo/logo.png',
+        image: '/images/logo/logo.png',
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
@@ -68,6 +70,8 @@ const PROJECTS: ProjectPlanItem[] = [
         end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
         total_tasks: 4,
         completed_tasks: 0,
+        logo: '/images/logo/logo.png',
+        image: '/images/logo/logo.png',
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
@@ -156,6 +160,10 @@ export class PlanService {
                         if (!proj.members) proj.members = [];
                         if (!proj.members.some((m: any) => m.phone === '011242425' || m.name?.toLowerCase().includes('sovannara'))) {
                             proj.members.push({ id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null });
+                        }
+                        if (!proj.logo && !proj.image) {
+                            proj.logo = '/images/logo/logo.png';
+                            proj.image = '/images/logo/logo.png';
                         }
                     }
                 }
@@ -252,6 +260,10 @@ export class PlanService {
                 p.name = 'BMS Digitech';
                 p.code = 'BMS-DIGI';
             }
+            if (!p.logo && !p.image) {
+                p.logo = '/images/logo/logo.png';
+                p.image = '/images/logo/logo.png';
+            }
         }
 
         let list = [...this.projects];
@@ -291,6 +303,10 @@ export class PlanService {
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
+        }
+        if (!plan.logo && !plan.image) {
+            plan.logo = '/images/logo/logo.png';
+            plan.image = '/images/logo/logo.png';
         }
         this.syncTaskCounts([plan]);
 
