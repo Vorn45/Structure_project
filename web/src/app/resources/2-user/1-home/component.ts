@@ -312,8 +312,18 @@ export class UserHomeComponent implements OnInit, OnDestroy {
             next: (res) => {
                 if (res?.data) {
                     this.overview.set(res.data);
-                    if (!this.currentUser() && res.data.user) {
-                        this.currentUser.set(res.data.user as any);
+                    if (res.data.user) {
+                        const currentUser = (this.currentUser() || {}) as any;
+                        const overviewUser = res.data.user as any;
+                        const mergedUser = {
+                            ...currentUser,
+                            ...overviewUser,
+                            avatar: overviewUser.avatar || currentUser.avatar,
+                            cover: overviewUser.cover || overviewUser.background || currentUser.cover || currentUser.background,
+                            background: overviewUser.background || overviewUser.cover || currentUser.background || currentUser.cover,
+                        };
+                        this.currentUser.set(mergedUser as any);
+                        this._userService.user = mergedUser as any;
                     }
                     this.generateMemberQrCode();
                 }
@@ -327,31 +337,43 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     }
 
     getAvatarUrl(): string {
-        const user: any = this.currentUser() || this.overview()?.user;
-        const avatar = user?.avatar;
+        const u = this.currentUser() as any;
+        const ov = this.overview()?.user as any;
+        const avatar =
+            ov?.avatar ||
+            u?.avatar ||
+            ov?.avatar_file ||
+            u?.avatar_file;
         const resolved = resolveFileUrl(avatar);
         if (resolved) return resolved;
-        if (typeof avatar === 'string' && avatar.startsWith('http')) {
+        if (typeof avatar === 'string' && (avatar.startsWith('http') || avatar.startsWith('data:') || avatar.startsWith('blob:'))) {
             return avatar;
         }
         return '/images/placeholder/avatar.jpg';
     }
 
     getCoverUrl(): string {
-        const user: any = this.currentUser() || this.overview()?.user;
-        const cover = user?.cover || user?.background_file;
+        const u = this.currentUser() as any;
+        const ov = this.overview()?.user as any;
+        const cover =
+            ov?.cover ||
+            ov?.background ||
+            ov?.background_file ||
+            u?.cover ||
+            u?.background ||
+            u?.background_file;
         const resolved = resolveFileUrl(cover);
         if (resolved) return resolved;
-        if (typeof cover === 'string' && cover.startsWith('http')) {
+        if (typeof cover === 'string' && (cover.startsWith('http') || cover.startsWith('data:') || cover.startsWith('blob:'))) {
             return cover;
         }
         return '/images/placeholder/cover.jpg';
     }
 
     getLogoUrl(): string {
-        const user: any = this.currentUser() || this.overview()?.user;
+        const user = (this.currentUser() || this.overview()?.user) as any;
         const role = user?.roles?.find((r: any) => r.is_default) || user?.roles?.[0];
-        const logo = role?.organization?.logo;
+        const logo = role?.organization?.logo || role?.organization?.logo_file;
         const resolved = resolveFileUrl(logo);
         if (resolved) return resolved;
         return 'images/logo/default_logo.png';
