@@ -41,7 +41,7 @@ services:
     networks:
       - app_network
     volumes:
-      - ./uploads:/usr/src/app/uploads
+      - uploads_data:/usr/src/app/uploads
     expose:
       - "3000"
     healthcheck:
@@ -74,3 +74,7 @@ services:
 networks:
   app_network:
     driver: bridge
+
+volumes:
+  uploads_data:
+    name: digitechkh-wms_uploads_data

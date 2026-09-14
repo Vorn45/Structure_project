@@ -62,10 +62,36 @@ jobs:
             ${{ contains(github.event.head_commit.message, 'Merge') && '🔀' || '🚀' }} <b>${{ github.actor }}</b> ${{ contains(github.event.head_commit.message, 'Merge') && 'merged into' || 'pushed to' }} <code>${{ github.ref_name }}</code> in <a href="${{ github.server_url }}/${{ github.repository }}">${{ github.event.repository.name }}</a>
             📦 Commit: <a href="${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}">${{ github.sha }}</a>
 
+      - name: Fix runner workspace permissions and migrate legacy uploads
+        continue-on-error: true
+        shell: bash
+        run: |
+          WS="${{ github.workspace }}"
+          [ -z "$WS" ] && WS="$PWD"
+          echo "Checking workspace permissions at: $WS"
+
+          # 1. Migrate legacy host uploads into the dedicated Docker named volume if it exists
+          if [ -d "$WS/uploads" ]; then
+            echo "Migrating $WS/uploads into digitechkh-wms_uploads_data volume..."
+            docker volume create digitechkh-wms_uploads_data 2>/dev/null || true
+            docker run --rm -v "$WS/uploads":/src -v digitechkh-wms_uploads_data:/dst alpine sh -c "cp -rn /src/* /dst/ 2>/dev/null || true" 2>/dev/null || true
+            echo "Purging legacy host uploads directory using Docker (root)..."
+            docker run --rm -v "$WS":/ws alpine rm -rf /ws/uploads 2>/dev/null || true
+          fi
+
+          # 2. Direct cleanups fallback
+          sudo rm -rf "$WS/uploads" 2>/dev/null || true
+          rm -rf "$WS/uploads" 2>/dev/null || true
+
+          # 3. Ensure runner user owns all workspace files to prevent git checkout EACCES errors
+          docker run --rm -v "$WS":/ws alpine chown -R $(id -u):$(id -g) /ws 2>/dev/null || true
+          sudo chown -R $(id -u):$(id -g) "$WS" 2>/dev/null || true
+
       - name: Checkout main commit
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          clean: false
 
       - name: Select containers to rebuild
         id: changes
