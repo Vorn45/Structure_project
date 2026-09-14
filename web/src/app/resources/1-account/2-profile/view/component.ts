@@ -576,6 +576,8 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
             if (result) {
                 const oldAvatar = this.user?.avatar;
                 this.user = this.mergeUser(this.user, result);
+                this._userService.user = this.user;
+                this._changeDetectorRef.markForCheck();
 
                 const avatarUrl = this.getImageUrl(this.user?.avatar, 'avatar');
                 const avatarChanged = !!result.avatar && this.user.avatar !== oldAvatar;
@@ -642,6 +644,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                     cover: previewUrl,
                     background: previewUrl,
                 };
+                this._userService.user = this.user;
                 this._changeDetectorRef.markForCheck();
             } catch {}
 
@@ -700,6 +703,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                     ...this.user,
                     avatar: previewUrl,
                 };
+                this._userService.user = this.user;
                 this._changeDetectorRef.markForCheck();
             } catch {}
 

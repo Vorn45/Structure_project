@@ -63,6 +63,8 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     activeFilter = signal<string>('all');
     cardSide = signal<'front' | 'back'>('front');
     qrCodeDataUrl = signal<string>('');
+    avatarVersion = signal<number>(Date.now());
+    coverVersion = signal<number>(Date.now());
 
     // Unified Task Drawer State (matching /member/tasks Image 1)
     selectedTaskDrawerItem = signal<TaskItem | null>(null);
@@ -276,9 +278,24 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         if (initialUser) {
             this.currentUser.set(initialUser);
         }
-        this._userService.user$.subscribe((u) => {
+        this._userService.user$.pipe(takeUntil(this._unsubscribeAll)).subscribe((u) => {
             if (u) {
                 this.currentUser.set(u);
+                this.avatarVersion.set(Date.now());
+                this.coverVersion.set(Date.now());
+                this.overview.update((prev) => {
+                    if (!prev) return prev;
+                    const prevUser = (prev.user || {}) as any;
+                    return {
+                        ...prev,
+                        user: {
+                            ...prevUser,
+                            ...u,
+                            avatar: u.avatar ?? prevUser.avatar,
+                            cover: (u as any).cover ?? (u as any).background ?? prevUser.cover ?? prevUser.background,
+                        } as any,
+                    };
+                });
                 this.generateMemberQrCode();
             }
         });
@@ -318,9 +335,9 @@ export class UserHomeComponent implements OnInit, OnDestroy {
                         const mergedUser = {
                             ...currentUser,
                             ...overviewUser,
-                            avatar: overviewUser.avatar || currentUser.avatar,
-                            cover: overviewUser.cover || overviewUser.background || currentUser.cover || currentUser.background,
-                            background: overviewUser.background || overviewUser.cover || currentUser.background || currentUser.cover,
+                            avatar: currentUser.avatar || overviewUser.avatar,
+                            cover: currentUser.cover || currentUser.background || overviewUser.cover || overviewUser.background,
+                            background: currentUser.background || currentUser.cover || overviewUser.background || overviewUser.cover,
                         };
                         this.currentUser.set(mergedUser as any);
                         this._userService.user = mergedUser as any;
@@ -340,12 +357,18 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         const u = this.currentUser() as any;
         const ov = this.overview()?.user as any;
         const avatar =
-            ov?.avatar ||
             u?.avatar ||
-            ov?.avatar_file ||
-            u?.avatar_file;
+            ov?.avatar ||
+            u?.avatar_file ||
+            ov?.avatar_file;
         const resolved = resolveFileUrl(avatar);
-        if (resolved) return resolved;
+        if (resolved) {
+            if (resolved.startsWith('blob:') || resolved.startsWith('data:')) {
+                return resolved;
+            }
+            const sep = resolved.includes('?') ? '&' : '?';
+            return `${resolved}${sep}t=${this.avatarVersion()}`;
+        }
         if (typeof avatar === 'string' && (avatar.startsWith('http') || avatar.startsWith('data:') || avatar.startsWith('blob:'))) {
             return avatar;
         }
@@ -356,14 +379,20 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         const u = this.currentUser() as any;
         const ov = this.overview()?.user as any;
         const cover =
-            ov?.cover ||
-            ov?.background ||
-            ov?.background_file ||
             u?.cover ||
             u?.background ||
-            u?.background_file;
+            u?.background_file ||
+            ov?.cover ||
+            ov?.background ||
+            ov?.background_file;
         const resolved = resolveFileUrl(cover);
-        if (resolved) return resolved;
+        if (resolved) {
+            if (resolved.startsWith('blob:') || resolved.startsWith('data:')) {
+                return resolved;
+            }
+            const sep = resolved.includes('?') ? '&' : '?';
+            return `${resolved}${sep}t=${this.coverVersion()}`;
+        }
         if (typeof cover === 'string' && (cover.startsWith('http') || cover.startsWith('data:') || cover.startsWith('blob:'))) {
             return cover;
         }

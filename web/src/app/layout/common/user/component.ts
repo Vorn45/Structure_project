@@ -117,7 +117,12 @@ export class UserComponent implements OnInit, OnDestroy {
         });
         const dialogRef = this._matDialog.open(ProfileViewComponent, dialogConfig);
 
-        dialogRef.afterClosed().subscribe(result => {
+        dialogRef.afterClosed().subscribe(() => {
+            const u = this._userService.getUser();
+            if (u) {
+                this._userService.user = u;
+            }
+            this._changeDetectorRef.markForCheck();
         });
     }
 
