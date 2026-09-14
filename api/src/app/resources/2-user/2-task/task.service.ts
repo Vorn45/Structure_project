@@ -863,7 +863,10 @@ export class TaskService {
             for (const u of users) {
                 let avatarUrl: string | null = null;
                 if (u.avatar_file?.uri) {
-                    const domain = (u.avatar_file.file_domain || '').replace(/\/+$/, '');
+                    let domain = (u.avatar_file.file_domain || '').replace(/\/+$/, '');
+                    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(domain.trim())) {
+                        domain = '';
+                    }
                     const uri = u.avatar_file.uri.replace(/^\/+/, '');
                     avatarUrl = domain ? `${domain}/${uri}` : `/${uri}`;
                 } else if (u.telegram_photo_url) {
@@ -924,7 +927,8 @@ export class TaskService {
             }
         }
         if (m.avatar && typeof m.avatar === 'string' && !m.avatar.includes('placeholder')) {
-            return m.avatar;
+            const cleaned = m.avatar.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i, '/');
+            return cleaned.startsWith('/') || cleaned.startsWith('http') ? cleaned : `/${cleaned}`;
         }
         return null;
     }

@@ -1196,6 +1196,54 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         return resolveFileUrl(user?.avatar) || '/images/placeholder/avatar.jpg';
     }
 
+    getAssigneeAvatar(member: any): string | null {
+        if (!member || member._avatarFailed) return null;
+        const cur = this._userService.getUser();
+        const curNameEn = (cur?.en_name || cur?.name || '').toLowerCase().trim();
+        const curNameKh = (cur?.kh_name || '').toLowerCase().trim();
+        const curEmail = (cur?.email || '').toLowerCase().trim();
+        const targetName = (member.name || '').toLowerCase().trim();
+        const targetEmail = (member.email || '').toLowerCase().trim();
+
+        const isCurrentUser = Boolean(
+            (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
+            (curEmail && targetEmail && curEmail === targetEmail) ||
+            (targetName && (
+                (curNameKh && (targetName === curNameKh || targetName.includes(curNameKh) || curNameKh.includes(targetName))) ||
+                (curNameEn && (targetName === curNameEn || targetName.includes(curNameEn) || curNameEn.includes(targetName)))
+            ))
+        );
+
+        if (isCurrentUser && cur?.avatar) {
+            const curAvatar = resolveFileUrl(cur.avatar);
+            if (curAvatar && !curAvatar.includes('placeholder')) {
+                return curAvatar;
+            }
+        }
+
+        if (member.avatar) {
+            const resolved = resolveFileUrl(member.avatar);
+            if (resolved && !resolved.includes('placeholder')) {
+                return resolved;
+            }
+        }
+        return null;
+    }
+
+    getReporterAvatar(reporter: any): string | null {
+        return this.getAssigneeAvatar(reporter);
+    }
+
+    onMemberAvatarError(event: Event, member?: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target) {
+            target.style.display = 'none';
+        }
+        if (member) {
+            member._avatarFailed = true;
+        }
+    }
+
     loadTaskChat(task: AdminTaskItem): void {
         if (!this._taskChatMap.has(task.id)) {
             const initialChats: TaskChatMessageItem[] = [

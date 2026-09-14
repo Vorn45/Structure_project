@@ -531,6 +531,10 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         return null;
     }
 
+    getReporterAvatar(reporter: TaskMember | { name?: string; avatar?: any; id?: any; email?: string } | null | undefined): string | null {
+        return this.getAssigneeAvatar(reporter);
+    }
+
     onAvatarError(event: Event, member?: any): void {
         const target = event.target as HTMLImageElement;
         if (target) {

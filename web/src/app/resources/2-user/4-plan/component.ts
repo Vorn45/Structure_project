@@ -35,6 +35,7 @@ import {
 } from '../2-task/models/task.types';
 import { ProfileViewComponent } from 'app/resources/1-account/2-profile/view/component';
 import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
+import { resolveFileUrl } from 'helper/shared/file-url';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;
@@ -553,13 +554,55 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     getCurrentUserAvatar(): string {
         const u = this._userService.getUser();
-        if (u?.avatar && typeof u.avatar === 'object' && (u.avatar as any).uri) {
-            const domain = (u.avatar as any).file_domain || '';
-            const uri = (u.avatar as any).uri || '';
-            return domain ? `${domain}/${uri}` : uri;
+        return resolveFileUrl(u?.avatar) || '/images/placeholder/avatar.jpg';
+    }
+
+    getAssigneeAvatar(member: any): string | null {
+        if (!member || member._avatarFailed) return null;
+        const cur = this.currentUser() || this._userService.getUser();
+        const curNameEn = (cur?.en_name || cur?.name || '').toLowerCase().trim();
+        const curNameKh = (cur?.kh_name || '').toLowerCase().trim();
+        const curEmail = (cur?.email || '').toLowerCase().trim();
+        const targetName = (member.name || '').toLowerCase().trim();
+        const targetEmail = (member.email || '').toLowerCase().trim();
+
+        const isCurrentUser = Boolean(
+            (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
+            (curEmail && targetEmail && curEmail === targetEmail) ||
+            (targetName && (
+                (curNameKh && (targetName === curNameKh || targetName.includes(curNameKh) || curNameKh.includes(targetName))) ||
+                (curNameEn && (targetName === curNameEn || targetName.includes(curNameEn) || curNameEn.includes(targetName)))
+            ))
+        );
+
+        if (isCurrentUser && cur?.avatar) {
+            const curAvatar = resolveFileUrl(cur.avatar);
+            if (curAvatar && !curAvatar.includes('placeholder')) {
+                return curAvatar;
+            }
         }
-        if (typeof u?.avatar === 'string' && u.avatar) return u.avatar;
-        return '/images/placeholder/avatar.jpg';
+
+        if (member.avatar) {
+            const resolved = resolveFileUrl(member.avatar);
+            if (resolved && !resolved.includes('placeholder')) {
+                return resolved;
+            }
+        }
+        return null;
+    }
+
+    getReporterAvatar(reporter: any): string | null {
+        return this.getAssigneeAvatar(reporter);
+    }
+
+    onMemberAvatarError(event: Event, member?: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target) {
+            target.style.display = 'none';
+        }
+        if (member) {
+            member._avatarFailed = true;
+        }
     }
 
     teamMembersForDrawer = computed<DrawerTaskMember[]>(() => {

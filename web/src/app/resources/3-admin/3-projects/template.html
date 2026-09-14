@@ -758,8 +758,8 @@
                                     <div class="relative shrink-0 cursor-pointer"
                                         [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
                                         <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-emerald-500 dark:ring-emerald-400 bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
-                                            <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover block" />
-                                            <span *ngIf="!task.reporter?.avatar">{{ task.reporter?.initial || task.reporter?.name?.charAt(0) || 'P' }}</span>
+                                            <img *ngIf="getReporterAvatar(task.reporter)" [src]="getReporterAvatar(task.reporter)" [alt]="task.reporter.name" (error)="onMemberAvatarError($event, task.reporter)" class="w-full h-full object-cover block" />
+                                            <span *ngIf="!getReporterAvatar(task.reporter)">{{ task.reporter?.initial || task.reporter?.name?.charAt(0) || 'P' }}</span>
                                         </div>
                                         <span class="absolute -bottom-1 -right-1 bg-emerald-700 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
                                     </div>
@@ -794,8 +794,8 @@
                                         <div class="relative shrink-0 cursor-pointer"
                                             [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក (Assignee): ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
                                             <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
-                                                <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
-                                                <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.initial || task.assignee?.name?.charAt(0) || 'U' }}</span>
+                                                <img *ngIf="getAssigneeAvatar(task.assignee)" [src]="getAssigneeAvatar(task.assignee)" [alt]="task.assignee.name" (error)="onMemberAvatarError($event, task.assignee)" class="w-full h-full object-cover block" />
+                                                <span *ngIf="!getAssigneeAvatar(task.assignee)">{{ task.assignee?.initial || task.assignee?.name?.charAt(0) || 'U' }}</span>
                                             </div>
                                             <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 flex items-center justify-center text-[10px] bg-slate-50 dark:bg-slate-800">
                                                 <mat-icon svgIcon="mdi:account-outline" class="icon-size-3.5"></mat-icon>
