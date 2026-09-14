@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, Inject, OnInit, OnDestroy, Optional } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit, OnDestroy, Optional } from '@angular/core';
 import {
     MAT_DIALOG_DATA,
     MatDialog,
@@ -180,6 +180,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
         private _snackbar: SnackbarService,
         private _router: Router,
         private _confirmationService: HelperConfirmationService,
+        private _changeDetectorRef: ChangeDetectorRef,
         @Optional() private _dialogRef?: MatDialogRef<ProfileViewComponent>,
     ) {
         if (this.dialog_data?.data) {
@@ -197,6 +198,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                 ...(!base?.email && storedEmail ? { email: storedEmail } : {}),
                 ...(!base?.phone && storedPhone ? { phone: storedPhone } : {}),
             };
+            this._changeDetectorRef.markForCheck();
         });
     }
 
@@ -207,6 +209,22 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
             if (!this.user.email && storedEmail) this.user.email = storedEmail;
             if (!this.user.phone && storedPhone) this.user.phone = storedPhone;
         }
+        this._service.getProfileInfo().pipe(takeUntil(this._unsubscribeAll)).subscribe({
+            next: (res: any) => {
+                if (res?.data) {
+                    const patch = {
+                        ...res.data,
+                        avatar: res.data.avatar,
+                        cover: res.data.background || res.data.cover,
+                        background: res.data.background,
+                    };
+                    this.user = this.mergeUser(this.user, patch);
+                    this._userService.user = this.user;
+                    this._changeDetectorRef.markForCheck();
+                }
+            },
+            error: () => {},
+        });
         this._loadRoles();
     }
 
@@ -624,6 +642,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                     cover: previewUrl,
                     background: previewUrl,
                 };
+                this._changeDetectorRef.markForCheck();
             } catch {}
 
             this._service.updateBackground(file).subscribe({
@@ -638,6 +657,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                     this.user = updatedUser;
                     this._userService.user = updatedUser;
                     this.isCoverUpdating = false;
+                    this._changeDetectorRef.markForCheck();
                     this._snackbar.openSnackBar(
                         this._translocoService.translate('upload_success'),
                         GlobalConstants.success,
@@ -645,6 +665,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                 },
                 error: () => {
                     this.isCoverUpdating = false;
+                    this._changeDetectorRef.markForCheck();
                     this._snackbar.openSnackBar(
                         this._translocoService.translate('update_error'),
                         GlobalConstants.error,
@@ -679,6 +700,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                     ...this.user,
                     avatar: previewUrl,
                 };
+                this._changeDetectorRef.markForCheck();
             } catch {}
 
             this._service.updateAvatar(file).subscribe({
@@ -692,6 +714,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                     this.user = updatedUser;
                     this._userService.user = updatedUser;
                     this.isAvatarUpdating = false;
+                    this._changeDetectorRef.markForCheck();
                     this._snackbar.openSnackBar(
                         this._translocoService.translate('upload_success'),
                         GlobalConstants.success,
@@ -699,6 +722,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
                 },
                 error: () => {
                     this.isAvatarUpdating = false;
+                    this._changeDetectorRef.markForCheck();
                     this._snackbar.openSnackBar(
                         this._translocoService.translate('update_error'),
                         GlobalConstants.error,

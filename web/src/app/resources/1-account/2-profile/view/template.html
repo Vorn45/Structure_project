@@ -45,13 +45,14 @@
 
                 <!-- Upload Icon Overlay -->
                 <div *ngIf="!isAvatarUpdating"
-                    class="absolute inset-0 rounded-full flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                    (click)="uploadProfileDialog()">
+                    class="absolute inset-0 rounded-full flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                     <mat-icon class="!w-7 !h-7 text-white" svgIcon="mdi:upload"></mat-icon>
                 </div>
+                <input *ngIf="!isAvatarUpdating" type="file" accept="image/*" (change)="openCroppedDialog($event, 1/1, 'avatar')"
+                    class="absolute inset-0 opacity-0 cursor-pointer rounded-full z-20" />
                 <!-- Verification Badge -->
                 <div *ngIf="!isAvatarUpdating"
-                    class="absolute -bottom-0.5 -right-0.5 size-7 bg-amber-500 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">
+                    class="absolute -bottom-0.5 -right-0.5 size-7 bg-amber-500 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 z-30">
                     <mat-icon svgIcon="mdi:shield-check" class="text-white !w-4 !h-4"></mat-icon>
                 </div>
             </div>

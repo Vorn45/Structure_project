@@ -27,6 +27,10 @@ export class ProfileService {
 
     constructor(private http: HttpClient) { }
 
+    getProfileInfo(): Observable<any> {
+        return this.http.get<any>(`${this.baseUrl}/account/profile`);
+    }
+
     profile(body: ProfileUpdate): Observable<any> {
         return this.http.put<any>(`${this.baseUrl}/account/profile`, body, this.httpOptions);
     }
