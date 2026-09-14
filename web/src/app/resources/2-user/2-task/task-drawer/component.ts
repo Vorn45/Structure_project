@@ -435,6 +435,31 @@ export class TaskDrawerComponent implements OnDestroy {
         return (this.messages() || []).some((m) => !m.is_system);
     }
 
+    shouldShowMessageStatus(index: number): boolean {
+        const msgs = this.messages() || [];
+        const msg = msgs[index];
+        if (!msg || !msg.is_self) return false;
+
+        // Show if it's the last message overall
+        if (index === msgs.length - 1) return true;
+
+        // Find the next self message
+        for (let i = index + 1; i < msgs.length; i++) {
+            const nextMsg = msgs[i];
+            if (nextMsg.is_self) {
+                const currentSeen = msg.seen_by?.length || 0;
+                const nextSeen = nextMsg.seen_by?.length || 0;
+                
+                // If this message has more viewers than the next one, show it.
+                if (currentSeen > nextSeen) {
+                    return true;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
     isMemberAssigned(task: TaskItem | null | undefined, member: TaskMember): boolean {
         const assignees = this.getTaskAssignees(task);
         return assignees.some(
