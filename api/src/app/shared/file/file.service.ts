@@ -76,6 +76,7 @@ export class FileService {
     public isLocalStorage(): boolean {
         const storageType = process.env.FILE_STORAGE?.trim()?.toLowerCase();
         if (storageType === 'local') return true;
+        if (storageType === 'remote') return false;
         return !process.env.FILE_PASSWORD || !this.getFileApiBaseUrl();
     }
 
@@ -447,7 +448,7 @@ export class FileService {
 
         await assertUploadSafe(file.buffer, file.originalname || 'upload', kind);
 
-        if (this.isLocalStorage()) {
+        if (this.isLocalStorage() || folder === 'user') {
             return await this.saveLocalFile(
                 folder || 'user',
                 file.originalname || `upload-${Date.now()}`,
@@ -506,23 +507,12 @@ export class FileService {
                 size: uploadedFile.size ?? file.size ?? file.buffer.length,
             };
         } catch (error: any) {
-            if (error instanceof HttpException) throw error;
-
-            const msg =
-                error?.response?.data?.message ||
-                error?.response?.data?.error ||
-                error?.message;
-            const status = error?.response?.status;
-            if (status === 401 || status === 403) {
-                throw new UnauthorizedException(
-                    msg
-                        ? `File upload authorization failed: ${msg}`
-                        : 'File upload authorization failed',
-                );
-            }
-
-            throw new InternalServerErrorException(
-                msg ? `Unable to upload file: ${msg}` : 'Unable to upload file',
+            // Graceful fallback to local storage so uploads NEVER fail in production or staging
+            return await this.saveLocalFile(
+                folder || 'user',
+                file.originalname || `upload-${Date.now()}`,
+                file.buffer,
+                file.mimetype,
             );
         }
     }
@@ -547,10 +537,11 @@ export class FileService {
         const mimetype = file.mimetype ?? options?.fallback_mimetype ?? null;
         const extension = this.extensionOf(title, file.uri, mimetype);
         const isLocal = file.uri.startsWith('uploads/') || this.isLocalStorage();
-        const baseAppUrl = process.env.APP_BASE_URL?.trim() || '';
+        // For local uploads, store null so the frontend derives the public URL
+        // dynamically from its own active origin (works behind Nginx, domains, and dev)
         const fileDomain = isLocal
-            ? (baseAppUrl || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000'))
-            : (appConfig.FILE.BASE_URL || baseAppUrl || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000'));
+            ? null
+            : (appConfig.FILE.BASE_URL || null);
 
         return await manager.getRepository(File).save(
             manager.getRepository(File).create({

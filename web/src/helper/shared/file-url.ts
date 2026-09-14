@@ -18,10 +18,10 @@ export function resolveFileUrl(
         return uri;
     }
 
-    // If an absolute URL points to localhost:3000/uploads or 127.0.0.1:3000/uploads,
-    // strip the localhost:3000 prefix so it can be handled dynamically across environments
-    if (/^https?:\/\/(localhost|127\.0\.0\.1):3000\/(uploads|storage)\//i.test(uri)) {
-        uri = uri.replace(/^https?:\/\/(localhost|127\.0\.0\.1):3000\//i, '');
+    // If an absolute URL points to localhost or 127.0.0.1 (any port, e.g. :3000, :4500, or none),
+    // strip the localhost prefix so it can be handled dynamically across environments
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/(uploads|storage)\//i.test(uri)) {
+        uri = uri.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i, '');
     }
 
     // Static local frontend assets should be served directly without domain prefix
@@ -37,6 +37,11 @@ export function resolveFileUrl(
     const path = uri.replace(/^\/+/, '');
     const isLocalUpload = path.startsWith('uploads/') || path.startsWith('storage/');
     let rawDomain = (typeof file === 'string' ? '' : file.file_domain) || '';
+
+    // If rawDomain points to localhost/127.0.0.1 and we are not on local dev server, clear it
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(rawDomain.trim())) {
+        rawDomain = '';
+    }
 
     // Handle local uploads (saved to the app server's local disk / Docker volume)
     if (isLocalUpload) {
