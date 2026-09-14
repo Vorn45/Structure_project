@@ -34,6 +34,7 @@ import {
     TaskType,
 } from 'app/resources/2-user/2-task/models/task.types';
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
+import { resolveFileUrl } from 'helper/shared/file-url';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;
@@ -1192,10 +1193,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     getCurrentUserAvatar(): string {
         const user = this._userService.getUser();
-        if (user?.avatar?.uri && user?.avatar?.file_domain) {
-            return user.avatar.file_domain.replace(/\/+$/, '') + '/' + user.avatar.uri.replace(/^\/+/, '');
-        }
-        return '/images/placeholder/avatar.jpg';
+        return resolveFileUrl(user?.avatar) || '/images/placeholder/avatar.jpg';
     }
 
     loadTaskChat(task: AdminTaskItem): void {

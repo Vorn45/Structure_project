@@ -27,6 +27,7 @@ import {
     TaskTypeOption,
 } from './models/task.types';
 import { UserTaskService } from './task.service';
+import { resolveFileUrl } from 'helper/shared/file-url';
 
 export interface ProjectFilterOption {
     id: string;
@@ -457,10 +458,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
     getAvatarUrl(): string {
         const user = this._userService.getUser();
-        if (user?.avatar?.uri && user?.avatar?.file_domain) {
-            return user.avatar.file_domain.replace(/\/+$/, '') + '/' + user.avatar.uri.replace(/^\/+/, '');
-        }
-        return '/images/placeholder/avatar.jpg';
+        return resolveFileUrl(user?.avatar) || '/images/placeholder/avatar.jpg';
     }
 
     getCurrentActorName(): string {

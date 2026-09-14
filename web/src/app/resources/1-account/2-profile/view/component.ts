@@ -28,6 +28,7 @@ import { ChangePasswordProfileComponent } from '../dialog/change-password/compon
 import { UserService } from 'app/core/user/user.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { resolveFileUrl } from 'helper/shared/file-url';
 
 import { ResponseLogin } from 'app/core/auth/auth.types';
 import { toRoleArray, readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
@@ -512,18 +513,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
     }
 
     private _fileUrl(file: any): string | null {
-        if (!file) return null;
-        const uri = file.uri ?? file.url;
-        if (!uri) return null;
-        if (/^(https?:|data:)/i.test(uri)) return uri;
-        if (/^(\/)?(images|assets|icons|fonts)\//i.test(uri)) {
-            return uri.startsWith('/') ? uri : `/${uri}`;
-        }
-        let domain = file.file_domain || this._fileBaseUrl || '';
-        if (!domain || domain.includes('${')) domain = '';
-        domain = domain.replace(/\/+$/, '');
-        const path = String(uri).replace(/^\/+/, '');
-        return domain ? `${domain}/${path}` : `/${path}`;
+        return resolveFileUrl(file);
     }
 
     // Profile Settings & Actions
@@ -627,6 +617,15 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
     uploadCoverDialog(fileFromInput?: File): void {
         const handleFile = (file: File) => {
             this.isCoverUpdating = true;
+            try {
+                const previewUrl = URL.createObjectURL(file);
+                this.user = {
+                    ...this.user,
+                    cover: previewUrl,
+                    background: previewUrl,
+                };
+            } catch {}
+
             this._service.updateBackground(file).subscribe({
                 next: (res: any) => {
                     this.storeUpdatedTokens(res);
@@ -674,6 +673,14 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
     uploadProfileDialog(fileFromInput?: File): void {
         const handleFile = (file: File) => {
             this.isAvatarUpdating = true;
+            try {
+                const previewUrl = URL.createObjectURL(file);
+                this.user = {
+                    ...this.user,
+                    avatar: previewUrl,
+                };
+            } catch {}
+
             this._service.updateAvatar(file).subscribe({
                 next: (res: any) => {
                     this.storeUpdatedTokens(res);
@@ -809,31 +816,22 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
     }
 
     getImageUrl(imageObj: any, type: 'avatar' | 'cover'): string {
-        const image =
-            typeof imageObj === 'string' ? imageObj : imageObj?.uri || null;
-
-        if (!image) {
+        if (!imageObj) {
             return type === 'avatar'
                 ? ProfileViewComponent.DEFAULT_AVATAR
                 : '/images/placeholder/cover.jpg';
         }
 
-        if (image.startsWith('data:image/')) {
-            return image;
+        if (typeof imageObj === 'string' && (imageObj.startsWith('data:image/') || imageObj.startsWith('blob:'))) {
+            return imageObj;
         }
 
-        if (image.startsWith('/images/') || image.startsWith('images/') || image.startsWith('/assets/') || image.startsWith('assets/')) {
-            return image.startsWith('/') ? image : `/${image}`;
-        }
+        const resolved = resolveFileUrl(imageObj);
+        if (resolved) return resolved;
 
-        if (image.startsWith('http://') || image.startsWith('https://')) {
-            return image;
-        }
-
-        const rawDomain = imageObj?.file_domain || this._fileBaseUrl || '';
-        const fileDomain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
-        const cleanPath = image.replace(/^\/+/, '');
-        return fileDomain ? `${fileDomain}/${cleanPath}` : `/${cleanPath}`;
+        return type === 'avatar'
+            ? ProfileViewComponent.DEFAULT_AVATAR
+            : '/images/placeholder/cover.jpg';
     }
 }
 

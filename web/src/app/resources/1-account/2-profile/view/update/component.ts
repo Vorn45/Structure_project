@@ -22,6 +22,7 @@ import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
 import { HelperConfirmationService } from 'helper/services/confirmation/confirmation.service';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants from 'helper/shared/constants';
+import { resolveFileUrl } from 'helper/shared/file-url';
 import { ProfileService } from '../../profile.service';
 
 @Component({
@@ -344,21 +345,10 @@ export class UpdateProfileDialogComponent implements OnInit {
             return '/images/placeholder/avatar.jpg';
         }
 
-        if (avatar.startsWith('data:image/')) {
+        if (avatar.startsWith('data:image/') || avatar.startsWith('blob:')) {
             return avatar;
         }
 
-        if (avatar.startsWith('/images/') || avatar.startsWith('images/') || avatar.startsWith('/assets/') || avatar.startsWith('assets/')) {
-            return avatar.startsWith('/') ? avatar : `/${avatar}`;
-        }
-
-        if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
-            return avatar;
-        }
-
-        const rawDomain = user?.avatar?.file_domain || this._fileBaseUrl || '';
-        const fileDomain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
-        const cleanPath = avatar.replace(/^\/+/, '');
-        return fileDomain ? `${fileDomain}/${cleanPath}` : `/${cleanPath}`;
+        return resolveFileUrl(user?.avatar || avatar) || '/images/placeholder/avatar.jpg';
     }
 }
