@@ -246,6 +246,7 @@ export class PlanService {
         this.syncTaskCounts(this.projects);
 
         // Sanitize any accidental duplicates: Project 4 is BMS Digitech
+        this.projects = this.projects.filter((p) => !(p.code && /^BMS-DIGI-\d+$/i.test(p.code)));
         for (const p of this.projects) {
             if ((p.id === '4' || p.description?.toLowerCase().includes('business management')) && p.name === 'WMS Digitech') {
                 p.name = 'BMS Digitech';
