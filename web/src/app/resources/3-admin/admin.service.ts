@@ -122,6 +122,7 @@ export interface AdminUser {
     join_date?: string | null;
     note?: string | null;
     password?: string;
+    _avatarFailed?: boolean;
 }
 
 export interface AdminProject {

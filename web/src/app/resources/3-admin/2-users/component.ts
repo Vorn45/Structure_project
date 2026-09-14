@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { UserService } from 'app/core/user/user.service';
+import { resolveFileUrl } from 'helper/shared/file-url';
 import { AdminService, AdminUser } from '../admin.service';
 
 @Component({
@@ -38,8 +40,10 @@ import { AdminService, AdminUser } from '../admin.service';
 })
 export class UserManagementComponent implements OnInit {
     private readonly _adminService = inject(AdminService);
+    private readonly _userService = inject(UserService, { optional: true });
     private readonly _fb = inject(FormBuilder);
 
+    currentUser = signal<any>(null);
     users = signal<AdminUser[]>([]);
     loading = signal<boolean>(true);
     searchQuery = signal<string>('');
@@ -177,7 +181,75 @@ export class UserManagementComponent implements OnInit {
         this.userForm.patchValue({ avatar: '' });
     }
 
+    getUserAvatar(user: AdminUser | null | undefined): string | null {
+        if (!user || (user as any)._avatarFailed) {
+            return null;
+        }
+
+        // 1. Direct user avatar if present and not a placeholder
+        if (user.avatar) {
+            if (typeof user.avatar === 'string' && (user.avatar.includes('placeholder') || !user.avatar.trim())) {
+                // Skip placeholder
+            } else {
+                const resolved = resolveFileUrl(user.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
+        // 2. Fallback: match currently logged in user if this row is the current user
+        const cur = this.currentUser();
+        if (cur) {
+            const curEmail = (cur.email || '').toLowerCase().trim();
+            const userEmail = (user.email || '').toLowerCase().trim();
+            const curPhone = (cur.phone || '').replace(/\D/g, '');
+            const userPhone = (user.phone || '').replace(/\D/g, '');
+            const isMatch = Boolean(
+                (cur.id && user.id && Number(cur.id) === Number(user.id)) ||
+                (curEmail && userEmail && curEmail === userEmail) ||
+                (curPhone && userPhone && curPhone === userPhone)
+            );
+            if (isMatch && cur.avatar) {
+                const curAvatar = resolveFileUrl(cur.avatar);
+                if (curAvatar && !curAvatar.includes('placeholder')) {
+                    return curAvatar;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    onAvatarError(event: Event, user: AdminUser): void {
+        const target = event.target as HTMLImageElement;
+        if (target) {
+            target.style.display = 'none';
+        }
+        if (user) {
+            (user as any)._avatarFailed = true;
+            this.users.update((list) => [...list]);
+        }
+    }
+
+    getDrawerAvatarUrl(): string {
+        const val = this.userForm.get('avatar')?.value;
+        if (!val) return '/images/placeholder/avatar.jpg';
+        return resolveFileUrl(val) || '/images/placeholder/avatar.jpg';
+    }
+
+    onDrawerAvatarError(event: Event): void {
+        const target = event.target as HTMLImageElement;
+        if (target && !target.src.includes('placeholder')) {
+            target.src = '/images/placeholder/avatar.jpg';
+        }
+    }
+
     ngOnInit(): void {
+        this.currentUser.set(this._userService?.getUser() || null);
+        this._userService?.user$?.subscribe((u) => {
+            if (u) this.currentUser.set(u);
+        });
         this.loadUsers();
     }
 
