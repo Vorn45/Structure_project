@@ -348,8 +348,6 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         status: 'active',
         priority: 'high',
         category: 'Development',
-        logo: '/images/logo/logo.png',
-        image: '/images/logo/logo.png',
         budget_allocated: 65000,
         budget_spent: 28000,
         total_tasks: 0,
@@ -431,8 +429,6 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         status: 'active',
         priority: 'urgent',
         category: 'Workforce',
-        logo: '/images/logo/logo.png',
-        image: '/images/logo/logo.png',
         budget_allocated: 80000,
         budget_spent: 56000,
         total_tasks: 0,
@@ -1452,13 +1448,13 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                         resolveFileUrl((ap as any).image) ||
                                         resolveFileUrl((existing as any)?.logo) ||
                                         resolveFileUrl((existing as any)?.image) ||
-                                        '/images/logo/logo.png',
+                                        null,
                                     image:
                                         resolveFileUrl((ap as any).image) ||
                                         resolveFileUrl((ap as any).logo) ||
                                         resolveFileUrl((existing as any)?.image) ||
                                         resolveFileUrl((existing as any)?.logo) ||
-                                        '/images/logo/logo.png',
+                                        null,
                                     description: ap.description || existing?.description || '',
                                     status: (ap.status as any) || existing?.status || 'active',
                                     priority: (ap as any).priority || existing?.priority || 'high',
