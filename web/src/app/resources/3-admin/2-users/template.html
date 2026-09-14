@@ -240,13 +240,15 @@
                                 <!-- Name & Avatar -->
                                 <td class="py-3 px-4">
                                     <div class="flex items-center gap-3">
-                                        @if (user.avatar) {
-                                            <img [src]="user.avatar" [alt]="user.name_kh" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0" />
-                                        } @else {
-                                            <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-[13px] border border-blue-200 dark:border-blue-800 shrink-0">
-                                                {{ user.name_kh.slice(0, 1) }}
-                                            </div>
-                                        }
+                                        <div class="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center overflow-hidden">
+                                            @if (getUserAvatar(user); as avatarUrl) {
+                                                <img [src]="avatarUrl" [alt]="user.name_kh || user.name_en" (error)="onAvatarError($event, user)" class="w-full h-full rounded-full object-cover border border-slate-200 dark:border-slate-700 block" />
+                                            } @else {
+                                                <div class="w-full h-full rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-[13px] border border-blue-200 dark:border-blue-800">
+                                                    {{ user.name_kh ? user.name_kh.slice(0, 1) : (user.name_en ? user.name_en.slice(0, 1) : 'U') }}
+                                                </div>
+                                            }
+                                        </div>
                                         <div>
                                             <div class="font-medium text-slate-900 dark:text-white">{{ user.name_kh }}</div>
                                             <div class="text-[12px] text-slate-400">{{ user.name_en }}</div>
@@ -371,7 +373,8 @@
                         (click)="avatarFileInput.click()">
                         <img
                             class="w-full h-full object-cover rounded-full bg-slate-100 dark:bg-white/10 transition duration-300"
-                            [src]="userForm.get('avatar')?.value || '/images/placeholder/avatar.jpg'"
+                            [src]="getDrawerAvatarUrl()"
+                            (error)="onDrawerAvatarError($event)"
                             alt="User Avatar">
 
                         <div class="absolute bottom-1 right-1 flex items-center justify-center border rounded-full border-primary p-1 bg-slate-100 dark:bg-slate-800 shadow-sm">

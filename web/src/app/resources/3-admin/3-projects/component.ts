@@ -539,6 +539,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     // Drawer & Modal States
     isDrawerOpen = signal<boolean>(false);
     isEditing = signal<boolean>(false);
+    editingProject = signal<AdminProject | null>(null);
     projectForm: FormGroup;
     saving = signal<boolean>(false);
 
@@ -2248,6 +2249,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     openCreateDrawer(): void {
         this.isEditing.set(false);
+        this.editingProject.set(null);
         this.projectForm.reset({
             name: '',
             code: `WFM-${Math.floor(100 + Math.random() * 900)}`,
@@ -2265,6 +2267,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     openEditDrawer(project: AdminProject): void {
         this.isEditing.set(true);
+        this.editingProject.set(project);
         this.projectForm.patchValue({
             name: project.name,
             code: project.code,
@@ -2304,6 +2307,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     closeDrawer(): void {
         this.isDrawerOpen.set(false);
+        this.isEditing.set(false);
+        this.editingProject.set(null);
     }
 
     submitProjectForm(): void {
@@ -2314,15 +2319,17 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
         this.saving.set(true);
         const formVal = this.projectForm.value;
+        const targetProject = this.editingProject() || this.selectedProject();
 
-        if (this.isEditing() && this.selectedProject()) {
-            this._adminService.updateProject(this.selectedProject()!.id, formVal).subscribe({
+        if (this.isEditing() && targetProject) {
+            this._adminService.updateProject(targetProject.id, formVal).subscribe({
                 next: (res) => {
+                    const updated = res.data;
                     this.projects.update((list) =>
-                        list.map((p) => (p.id === res.data.id ? res.data : p)),
+                        list.map((p) => (p.id === updated.id || String(p.id) === String(targetProject.id) ? { ...p, ...updated } : p)),
                     );
-                    if (this.selectedProject()?.id === res.data.id) {
-                        this.selectedProject.set(res.data);
+                    if (this.selectedProject()?.id === targetProject.id || String(this.selectedProject()?.id) === String(targetProject.id)) {
+                        this.selectedProject.set({ ...this.selectedProject()!, ...updated });
                     }
                     this.saving.set(false);
                     this.closeDrawer();

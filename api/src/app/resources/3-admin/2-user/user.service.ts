@@ -229,6 +229,39 @@ export class AdminUserService {
         }
     }
 
+    private sanitizeAvatarUrl(url?: string | null): string | null {
+        if (!url) return null;
+        const trimmed = url.trim();
+        if (!trimmed) return null;
+        if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/(uploads|storage)\//i.test(trimmed)) {
+            const stripped = trimmed.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i, '');
+            return `/${stripped.replace(/^\/+/, '')}`;
+        }
+        return trimmed;
+    }
+
+    private formatAvatarUrl(file?: { uri?: string | null; file_domain?: string | null } | null): string | null {
+        if (!file || !file.uri) return null;
+        const rawUri = file.uri.trim();
+        if (!rawUri) return null;
+
+        if (/^https?:\/\//i.test(rawUri)) {
+            if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/(uploads|storage)\//i.test(rawUri)) {
+                const stripped = rawUri.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i, '');
+                return `/${stripped.replace(/^\/+/, '')}`;
+            }
+            return rawUri;
+        }
+
+        let domain = (file.file_domain || '').trim().replace(/\/+$/, '');
+        if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(domain)) {
+            domain = '';
+        }
+
+        const uri = rawUri.replace(/^\/+/, '');
+        return domain ? `${domain}/${uri}` : `/${uri}`;
+    }
+
     private getUserMeta(id: number, email?: string, phone?: string) {
         const key = String(id);
         const normPhone = (phone || '').replace(/\D/g, '');
@@ -327,14 +360,9 @@ export class AdminUserService {
 
                     const projectsCount = assignedProjects.length > 0 ? assignedProjects.length : (meta.projects_count ?? 1);
 
-                    let userAvatarUrl: string | null = meta.avatar || null;
+                    let userAvatarUrl: string | null = meta.avatar ? this.sanitizeAvatarUrl(meta.avatar) : null;
                     if (u.avatar_file?.uri) {
-                        if (/^https?:\/\//i.test(u.avatar_file.uri)) {
-                            userAvatarUrl = u.avatar_file.uri;
-                        } else {
-                            const domain = (u.avatar_file.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
-                            userAvatarUrl = `${domain}/${u.avatar_file.uri.replace(/^\/+/, '')}`;
-                        }
+                        userAvatarUrl = this.formatAvatarUrl(u.avatar_file);
                     } else if (u.telegram_photo_url) {
                         userAvatarUrl = u.telegram_photo_url;
                     }
@@ -367,7 +395,10 @@ export class AdminUserService {
 
         // Fallback to local store if DB returns empty
         if (list.length === 0) {
-            list = [...this.localUsers];
+            list = [...this.localUsers].map((u) => ({
+                ...u,
+                avatar: this.sanitizeAvatarUrl(u.avatar),
+            }));
         }
 
         // Apply filters
@@ -433,8 +464,7 @@ export class AdminUserService {
                     });
                     if (savedFile) {
                         storedAvatarId = savedFile.id;
-                        const domain = (savedFile.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
-                        avatarDisplayUrl = `${domain}/${savedFile.uri.replace(/^\/+/, '')}`;
+                        avatarDisplayUrl = this.formatAvatarUrl(savedFile);
                     }
                 } catch (e) {
                     console.warn('[AdminUserService] Failed to process avatar base64 on create:', e);
@@ -605,14 +635,14 @@ export class AdminUserService {
                             });
                             if (savedFile) {
                                 dbUser.avatar_id = savedFile.id;
-                                const domain = (savedFile.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
-                                dto.avatar = `${domain}/${savedFile.uri.replace(/^\/+/, '')}`;
+                                dto.avatar = this.formatAvatarUrl(savedFile) || undefined;
                             }
                         } catch (e) {
                             console.warn('[AdminUserService] Failed to process avatar base64 on update:', e);
                         }
                     } else if (dto.avatar === '') {
-                        dbUser.avatar_id = undefined;
+                        dbUser.avatar_id = null as any;
+                        dbUser.avatar_file = null as any;
                     }
 
                     await this._userRepo.save(dbUser);
@@ -802,8 +832,7 @@ export class AdminUserService {
             dbUser.avatar_id = savedFile.id;
             await this._userRepo.save(dbUser);
 
-            const domain = (savedFile.file_domain || 'http://localhost:3000').replace(/\/+$/, '');
-            const avatarUrl = `${domain}/${savedFile.uri.replace(/^\/+/, '')}`;
+            const avatarUrl = this.formatAvatarUrl(savedFile) || `/${savedFile.uri.replace(/^\/+/, '')}`;
 
             // Update local metadata & cache
             this.userMeta[String(id)] = {
