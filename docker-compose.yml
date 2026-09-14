@@ -40,6 +40,8 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - app_network
+    volumes:
+      - ./uploads:/usr/src/app/uploads
     expose:
       - "3000"
     healthcheck:

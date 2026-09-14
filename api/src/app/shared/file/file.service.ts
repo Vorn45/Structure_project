@@ -547,9 +547,10 @@ export class FileService {
         const mimetype = file.mimetype ?? options?.fallback_mimetype ?? null;
         const extension = this.extensionOf(title, file.uri, mimetype);
         const isLocal = file.uri.startsWith('uploads/') || this.isLocalStorage();
+        const baseAppUrl = process.env.APP_BASE_URL?.trim() || '';
         const fileDomain = isLocal
-            ? (process.env.APP_BASE_URL?.trim() || 'http://localhost:3000')
-            : (appConfig.FILE.BASE_URL || (process.env.APP_BASE_URL?.trim() || 'http://localhost:3000'));
+            ? (baseAppUrl || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000'))
+            : (appConfig.FILE.BASE_URL || baseAppUrl || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000'));
 
         return await manager.getRepository(File).save(
             manager.getRepository(File).create({

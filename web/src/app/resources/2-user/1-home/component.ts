@@ -20,6 +20,7 @@ import { ActiveProjectsDialogComponent } from './active-projects-dialog/componen
 import { CreateMeetingDialogComponent } from './create-meeting-dialog/component';
 import { HelpSupportDialogComponent } from './help-support-dialog/component';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
+import { resolveFileUrl } from 'helper/shared/file-url';
 import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
 import { HomeOverviewData, UserHomeService } from './home.service';
 import { TaskDrawerComponent } from '../2-task/task-drawer/component';
@@ -328,9 +329,8 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     getAvatarUrl(): string {
         const user: any = this.currentUser() || this.overview()?.user;
         const avatar = user?.avatar;
-        if (avatar?.uri && avatar?.file_domain) {
-            return `${avatar.file_domain.replace(/\/+$/, '')}/${avatar.uri.replace(/^\/+/, '')}`;
-        }
+        const resolved = resolveFileUrl(avatar);
+        if (resolved) return resolved;
         if (typeof avatar === 'string' && avatar.startsWith('http')) {
             return avatar;
         }
@@ -340,9 +340,8 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     getCoverUrl(): string {
         const user: any = this.currentUser() || this.overview()?.user;
         const cover = user?.cover || user?.background_file;
-        if (cover?.uri && cover?.file_domain) {
-            return `${cover.file_domain.replace(/\/+$/, '')}/${cover.uri.replace(/^\/+/, '')}`;
-        }
+        const resolved = resolveFileUrl(cover);
+        if (resolved) return resolved;
         if (typeof cover === 'string' && cover.startsWith('http')) {
             return cover;
         }
@@ -353,10 +352,23 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         const user: any = this.currentUser() || this.overview()?.user;
         const role = user?.roles?.find((r: any) => r.is_default) || user?.roles?.[0];
         const logo = role?.organization?.logo;
-        if (logo?.uri && logo?.file_domain) {
-            return `${logo.file_domain.replace(/\/+$/, '')}/${logo.uri.replace(/^\/+/, '')}`;
-        }
+        const resolved = resolveFileUrl(logo);
+        if (resolved) return resolved;
         return 'images/logo/default_logo.png';
+    }
+
+    onAvatarError(event: Event): void {
+        const img = event.target as HTMLImageElement;
+        if (img && !img.src.includes('/images/placeholder/avatar.jpg')) {
+            img.src = '/images/placeholder/avatar.jpg';
+        }
+    }
+
+    onCoverError(event: Event): void {
+        const img = event.target as HTMLImageElement;
+        if (img && !img.src.includes('/images/placeholder/cover.jpg')) {
+            img.src = '/images/placeholder/cover.jpg';
+        }
     }
 
     setFilter(filter: string): void {

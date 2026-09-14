@@ -12,7 +12,7 @@
             class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm bg-white dark:bg-slate-800">
             <!-- Landscape Cover Photo -->
             <div class="relative w-full h-48 sm:h-60 md:h-72 overflow-hidden bg-slate-900">
-                <img [src]="getCoverUrl()" alt="Profile Cover" class="w-full h-full object-cover" />
+                <img [src]="getCoverUrl()" (error)="onCoverError($event)" alt="Profile Cover" class="w-full h-full object-cover" />
             </div>
 
             <!-- Dedicated White Background Card with Generous Padding -->
@@ -24,7 +24,7 @@
                         <div class="relative -mt-16 sm:-mt-20 shrink-0 z-20">
                             <div
                                 class="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-white dark:border-slate-800 bg-white dark:bg-slate-700 shadow-xl overflow-hidden flex items-center justify-center">
-                                <img [src]="getAvatarUrl()" alt="Avatar" class="w-full h-full object-cover" />
+                                <img [src]="getAvatarUrl()" (error)="onAvatarError($event)" alt="Avatar" class="w-full h-full object-cover" />
                             </div>
                             <!-- Orange/Amber Verified Badge -->
                             <div class="absolute bottom-1 right-1 w-7 h-7 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-md border-2 border-white dark:border-slate-800 cursor-pointer"

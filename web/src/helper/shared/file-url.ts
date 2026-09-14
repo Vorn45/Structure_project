@@ -18,9 +18,34 @@ export function resolveFileUrl(file: { uri?: string; url?: string; file_domain?:
         return uri.startsWith('/') ? uri : `/${uri}`;
     }
 
-    const rawDomain = (typeof file === 'string' ? '' : file.file_domain) || env.FILE_BASE_URL || '';
-    const domain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
     const path = uri.replace(/^\/+/, '');
+    const isLocalUpload = path.startsWith('uploads/') || path.startsWith('storage/');
+    let rawDomain = (typeof file === 'string' ? '' : file.file_domain) || '';
 
+    // Handle local uploads (saved to the app server's local disk)
+    if (isLocalUpload) {
+        if (typeof window !== 'undefined') {
+            const isDevServer =
+                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+                window.location.port === '4200';
+
+            // If accessed via server URL, domain, or Nginx gateway (not Angular dev server :4200),
+            // use relative path so it routes through the gateway / current origin and avoids Mixed Content
+            if (!isDevServer || !rawDomain) {
+                if (rawDomain.includes('localhost:3000') || rawDomain.includes('127.0.0.1:3000') || !rawDomain) {
+                    return `/${path}`;
+                }
+            }
+        }
+        if (!rawDomain) {
+            return `http://localhost:3000/${path}`;
+        }
+    }
+
+    if (!rawDomain) {
+        rawDomain = env.FILE_BASE_URL || '';
+    }
+
+    const domain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
     return domain ? `${domain}/${path}` : `/${path}`;
 }
