@@ -519,11 +519,23 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
         if (/^(\/)?(images|assets|icons|fonts)\//i.test(uri)) {
             return uri.startsWith('/') ? uri : `/${uri}`;
         }
-        let domain = file.file_domain || this._fileBaseUrl || '';
-        if (!domain || domain.includes('${')) domain = '';
-        domain = domain.replace(/\/+$/, '');
+        const domain = file.file_domain?.trim() || '';
+        // Local uploads: use API origin so it works in dev (port 3000) and production (nginx)
+        if (/^(\/)?uploads\//i.test(uri) && !domain) {
+            try {
+                const apiOrigin = new URL(env.API_BASE_URL).origin;
+                return `${apiOrigin}/${String(uri).replace(/^\/+/, '')}`;
+            } catch {
+                return uri.startsWith('/') ? uri : `/${uri}`;
+            }
+        }
+        const rawDomain = domain || this._fileBaseUrl || '';
+        if (!rawDomain || rawDomain.includes('${')) {
+            return uri.startsWith('/') ? uri : `/${uri}`;
+        }
+        const cleanDomain = rawDomain.replace(/\/+$/, '');
         const path = String(uri).replace(/^\/+/, '');
-        return domain ? `${domain}/${path}` : `/${path}`;
+        return `${cleanDomain}/${path}`;
     }
 
     // Profile Settings & Actions
@@ -830,10 +842,21 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
             return image;
         }
 
-        const rawDomain = imageObj?.file_domain || this._fileBaseUrl || '';
+        const domain = (typeof imageObj !== 'string' ? imageObj?.file_domain?.trim() : '') || '';
+
+        // Local uploads: use API origin so it works in dev (port 3000) and production (nginx)
+        if (/^(\/)?uploads\//i.test(image) && !domain) {
+            try {
+                const apiOrigin = new URL(env.API_BASE_URL).origin;
+                return `${apiOrigin}/${image.replace(/^\/+/, '')}`;
+            } catch {
+                return image.startsWith('/') ? image : `/${image}`;
+            }
+        }
+
+        const rawDomain = domain || this._fileBaseUrl || '';
         const fileDomain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
         const cleanPath = image.replace(/^\/+/, '');
         return fileDomain ? `${fileDomain}/${cleanPath}` : `/${cleanPath}`;
     }
 }
-

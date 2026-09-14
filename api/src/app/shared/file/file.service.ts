@@ -547,9 +547,12 @@ export class FileService {
         const mimetype = file.mimetype ?? options?.fallback_mimetype ?? null;
         const extension = this.extensionOf(title, file.uri, mimetype);
         const isLocal = file.uri.startsWith('uploads/') || this.isLocalStorage();
+        // For local uploads, store null so the frontend derives the correct
+        // public URL from its own API_BASE_URL origin (works behind nginx and
+        // in direct-localhost dev without hard-coding the internal port).
         const fileDomain = isLocal
-            ? (process.env.APP_BASE_URL?.trim() || 'http://localhost:3000')
-            : (appConfig.FILE.BASE_URL || (process.env.APP_BASE_URL?.trim() || 'http://localhost:3000'));
+            ? null
+            : (appConfig.FILE.BASE_URL || null);
 
         return await manager.getRepository(File).save(
             manager.getRepository(File).create({

@@ -356,7 +356,19 @@ export class UpdateProfileDialogComponent implements OnInit {
             return avatar;
         }
 
-        const rawDomain = user?.avatar?.file_domain || this._fileBaseUrl || '';
+        const domain = (typeof user?.avatar !== 'string' ? user?.avatar?.file_domain?.trim() : '') || '';
+
+        // Local uploads: use API origin so it works in dev (port 3000) and production (nginx)
+        if (/^(\/)?uploads\//i.test(avatar) && !domain) {
+            try {
+                const apiOrigin = new URL(env.API_BASE_URL).origin;
+                return `${apiOrigin}/${avatar.replace(/^\/+/, '')}`;
+            } catch {
+                return avatar.startsWith('/') ? avatar : `/${avatar}`;
+            }
+        }
+
+        const rawDomain = domain || this._fileBaseUrl || '';
         const fileDomain = rawDomain.includes('${') ? '' : rawDomain.replace(/\/+$/, '');
         const cleanPath = avatar.replace(/^\/+/, '');
         return fileDomain ? `${fileDomain}/${cleanPath}` : `/${cleanPath}`;
