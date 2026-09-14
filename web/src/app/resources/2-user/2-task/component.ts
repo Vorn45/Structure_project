@@ -834,9 +834,9 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     isOtherProjectSelected(): boolean {
         const id = this.selectedProjectId();
         if (id === 'all') return false;
-        if (this.projects().length <= 3) return false;
-        const top3Ids = this.projects().slice(0, 3).map((p) => p.id);
-        return !top3Ids.includes(id);
+        if (this.projects().length <= 4) return false;
+        const top4Ids = this.projects().slice(0, 4).map((p) => p.id);
+        return !top4Ids.includes(id);
     }
 
     getSelectedOtherProjectName(): string {
