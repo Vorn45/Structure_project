@@ -115,12 +115,20 @@ export class HomeService {
         // Dynamic recent tasks
         const recent_tasks = allTasks.slice(0, 5).map((t) => ({
             id: t.id,
+            code: t.code,
             title: t.title,
             status: t.status,
             priority: t.priority,
             due_date: t.due_date || new Date().toISOString(),
             progress: t.progress,
+            project_id: t.project_id,
             project_name: t.project_name,
+            reporter: t.reporter,
+            assignee: t.assignee,
+            assignees: t.assignees,
+            comments_count: t.comments_count,
+            attachments_count: t.attachments_count,
+            created_at: t.created_at,
         }));
 
         // Dynamic active projects

@@ -645,17 +645,34 @@ export class TaskService {
                 relations: ['user_roles', 'user_roles.role', 'avatar_file'],
                 order: { id: 'ASC' },
             });
-            // Filter strictly to the 4 active team members
-            dbUsers = dbUsers.filter((u) => u.phone && allowedPhones.includes(u.phone));
-            // Deduplicate by phone
-            const seen = new Set<string>();
+            const normalizePhone = (p?: string) => (p || '').replace(/\D/g, '').slice(-8);
+            const targetPhoneSuffixes = allowedPhones.map((p) => p.slice(-8));
+
+            // Filter strictly to active team members, guaranteeing current logged-in user is included
+            dbUsers = dbUsers.filter((u) => {
+                if (user?.id && u.id === user.id) return true;
+                const p = normalizePhone(u.phone);
+                if (p && targetPhoneSuffixes.includes(p)) return true;
+                const name = `${u.name_en || ''} ${u.name_kh || ''}`.toLowerCase();
+                return (
+                    name.includes('piseth') || name.includes('panhavorn') || name.includes('ពិសិដ្ឋ') ||
+                    name.includes('brusmuny') || name.includes('ប្រុសមុន្នី') ||
+                    name.includes('winner') || name.includes('វីនណឺរ') ||
+                    name.includes('sovannara') || name.includes('សុវណ្ណារ៉ា')
+                );
+            });
+
+            // Deduplicate by ID and phone suffix
+            const seenIds = new Set<number>();
+            const seenPhones = new Set<string>();
             const unique: User[] = [];
             for (const u of dbUsers) {
-                const p = u.phone?.trim() || '';
-                if (p && !seen.has(p)) {
-                    seen.add(p);
-                    unique.push(u);
-                }
+                if (seenIds.has(u.id)) continue;
+                const p = normalizePhone(u.phone);
+                if (p && seenPhones.has(p)) continue;
+                seenIds.add(u.id);
+                if (p) seenPhones.add(p);
+                unique.push(u);
             }
             dbUsers = unique;
         } catch (e) {
@@ -671,10 +688,10 @@ export class TaskService {
         ];
 
         const defaultFallbacks = [
-            { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', phone: '010843612' },
-            { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', phone: '087280875' },
-            { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', phone: '067776682' },
-            { id: 67, name: 'Phuong Sovannara', name_en: 'Phuong Sovannara', name_kh: 'ភួង សុវណ្ណារ៉ា', role: 'Developer', email: 'phuongsovannara@gmail.com', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-amber-600', phone: '011242425' },
+            { id: 64, name: 'Piseth Panhavorn', name_en: 'Piseth Panhavorn', name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Administrator', email: 'pisethpanhavorn544@gmail.com', avatar: null, colorClass: 'bg-indigo-600', phone: '010843612' },
+            { id: 65, name: 'Pum Brusmuny', name_en: 'PUM BRUSMUNY', name_kh: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead', email: 'pumprusmuny@example.com', avatar: null, colorClass: 'bg-blue-600', phone: '087280875' },
+            { id: 66, name: 'Tha Winner', name_en: 'THA WINNER', name_kh: 'ថា វីនណឺរ', role: 'Backend Lead', email: 'thawinner@example.com', avatar: null, colorClass: 'bg-emerald-600', phone: '067776682' },
+            { id: 67, name: 'Phuong Sovannara', name_en: 'Phuong Sovannara', name_kh: 'ភួង សុវណ្ណារ៉ា', role: 'Developer', email: 'phuongsovannara@gmail.com', avatar: null, colorClass: 'bg-amber-600', phone: '011242425' },
         ];
 
         let mapped = dbUsers.map((u, idx) => {
@@ -684,7 +701,7 @@ export class TaskService {
                 u.user_roles?.[0]?.role?.slug ||
                 'សមាជិក (Member)';
 
-            let avatarUrl: string | null = '/images/placeholder/avatar.jpg';
+            let avatarUrl: string | null = null;
             if (u.avatar_file?.uri) {
                 const domain = (u.avatar_file.file_domain || '').replace(/\/+$/, '');
                 const uri = u.avatar_file.uri.replace(/^\/+/, '');
@@ -708,11 +725,11 @@ export class TaskService {
             };
         });
 
-        // Ensure all 3 members (Piseth, Pum, Winner) are guaranteed to be in the returned list
+        // Ensure key team members exist in the returned list
         for (const def of defaultFallbacks) {
             const exists = mapped.some(
                 (m) =>
-                    (m.phone && def.phone && m.phone === def.phone) ||
+                    (m.phone && def.phone && m.phone.replace(/\D/g, '').slice(-8) === def.phone.replace(/\D/g, '').slice(-8)) ||
                     m.id === def.id ||
                     (m.name && def.name && m.name.toLowerCase().includes(def.name.toLowerCase().split(' ')[0]))
             );
@@ -836,6 +853,109 @@ export class TaskService {
         return this.isTaskBelongToUser(task, user);
     }
 
+    /** Load database user avatars map for high-performance task avatar enrichment */
+    private async getAvatarMap(): Promise<Map<string, string>> {
+        const avatarMap = new Map<string, string>();
+        try {
+            const users = await this._userRepo.find({
+                relations: ['avatar_file'],
+            });
+            for (const u of users) {
+                let avatarUrl: string | null = null;
+                if (u.avatar_file?.uri) {
+                    const domain = (u.avatar_file.file_domain || '').replace(/\/+$/, '');
+                    const uri = u.avatar_file.uri.replace(/^\/+/, '');
+                    avatarUrl = domain ? `${domain}/${uri}` : `/${uri}`;
+                } else if (u.telegram_photo_url) {
+                    avatarUrl = u.telegram_photo_url;
+                }
+                if (avatarUrl) {
+                    if (u.id) avatarMap.set(`id:${u.id}`, avatarUrl);
+                    if (u.phone) {
+                        const cleanPhone = u.phone.replace(/\D/g, '');
+                        avatarMap.set(`phone:${cleanPhone}`, avatarUrl);
+                        if (cleanPhone.length >= 8) avatarMap.set(`phone:${cleanPhone.slice(-8)}`, avatarUrl);
+                    }
+                    if (u.email) avatarMap.set(`email:${u.email.toLowerCase().trim()}`, avatarUrl);
+                    if (u.name_en) avatarMap.set(`name:${u.name_en.toLowerCase().trim()}`, avatarUrl);
+                    if (u.name_kh) avatarMap.set(`name:${u.name_kh.toLowerCase().trim()}`, avatarUrl);
+                    const parts = `${u.name_en || ''} ${u.name_kh || ''}`.toLowerCase().split(/\s+/).filter(Boolean);
+                    for (const part of parts) {
+                        if (part.length >= 3 && !avatarMap.has(`part:${part}`)) {
+                            avatarMap.set(`part:${part}`, avatarUrl);
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load user avatars:', e);
+        }
+        return avatarMap;
+    }
+
+    private resolveMemberAvatar(m: any, avatarMap: Map<string, string>): string | null {
+        if (!m) return null;
+        if (m.id && avatarMap.has(`id:${m.id}`)) {
+            return avatarMap.get(`id:${m.id}`)!;
+        }
+        if (m.email && avatarMap.has(`email:${m.email.toLowerCase().trim()}`)) {
+            return avatarMap.get(`email:${m.email.toLowerCase().trim()}`)!;
+        }
+        if (m.phone) {
+            const p = String(m.phone).replace(/\D/g, '');
+            if (avatarMap.has(`phone:${p}`)) return avatarMap.get(`phone:${p}`)!;
+            if (p.length >= 8 && avatarMap.has(`phone:${p.slice(-8)}`)) return avatarMap.get(`phone:${p.slice(-8)}`)!;
+        }
+        const nameKey = (m.name || '').toLowerCase().trim();
+        if (nameKey) {
+            if (avatarMap.has(`name:${nameKey}`)) return avatarMap.get(`name:${nameKey}`)!;
+            for (const [k, v] of avatarMap.entries()) {
+                if (k.startsWith('name:')) {
+                    const candidate = k.replace('name:', '');
+                    if (candidate && (candidate === nameKey || candidate.includes(nameKey) || nameKey.includes(candidate))) {
+                        return v;
+                    }
+                } else if (k.startsWith('part:')) {
+                    const candidate = k.replace('part:', '');
+                    if (nameKey.includes(candidate)) {
+                        return v;
+                    }
+                }
+            }
+        }
+        if (m.avatar && typeof m.avatar === 'string' && !m.avatar.includes('placeholder')) {
+            return m.avatar;
+        }
+        return null;
+    }
+
+    private async enrichTasksWithAvatars(tasks: TaskItem[], currentUser?: UserPayload): Promise<TaskItem[]> {
+        if (!tasks || tasks.length === 0) return tasks;
+        const avatarMap = await this.getAvatarMap();
+        return tasks.map((t) => {
+            const copy = { ...t };
+            if (copy.assignee) {
+                const av = this.resolveMemberAvatar(copy.assignee, avatarMap);
+                if (av) {
+                    copy.assignee = { ...copy.assignee, avatar: av };
+                }
+            }
+            if (Array.isArray(copy.assignees)) {
+                copy.assignees = copy.assignees.map((a) => {
+                    const av = this.resolveMemberAvatar(a, avatarMap);
+                    return av ? { ...a, avatar: av } : a;
+                });
+            }
+            if (copy.reporter) {
+                const av = this.resolveMemberAvatar(copy.reporter, avatarMap);
+                if (av) {
+                    copy.reporter = { ...copy.reporter, avatar: av };
+                }
+            }
+            return copy;
+        });
+    }
+
     async getTasks(user: UserPayload, query: QueryTasksDto) {
         await this.ensureStoreLoaded();
         const validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
@@ -856,12 +976,13 @@ export class TaskService {
         const limit = query.limit ? parseInt(query.limit, 10) : 100;
         const offset = query.offset ? parseInt(query.offset, 10) : 0;
         const paginated = list.slice(offset, offset + limit);
+        const enrichedResults = await this.enrichTasksWithAvatars(paginated, user);
 
         return {
             status_code: 200,
             message: 'Tasks retrieved successfully',
             data: {
-                results: paginated,
+                results: enrichedResults,
                 total: list.length,
                 limit,
                 offset,
@@ -877,10 +998,12 @@ export class TaskService {
             throw new NotFoundException(`Task #${id} not found`);
         }
 
+        const [enrichedTask] = await this.enrichTasksWithAvatars([task], user);
+
         return {
             status_code: 200,
             message: 'Task retrieved successfully',
-            data: task,
+            data: enrichedTask || task,
         };
     }
 
@@ -1070,10 +1193,12 @@ export class TaskService {
             this._realtimeGateway.emitTaskUpdated({ task_id: newTask.id, project_id: newTask.project_id });
         }
 
+        const [enrichedTask] = await this.enrichTasksWithAvatars([newTask], user);
+
         return {
             status_code: 201,
             message: 'Task created successfully',
-            data: newTask,
+            data: enrichedTask || newTask,
         };
     }
 
@@ -1515,10 +1640,12 @@ export class TaskService {
             this._realtimeGateway.emitTaskUpdated({ task_id: updated.id, status_id: updated.status as any, project_id: updated.project_id });
         }
 
+        const [enrichedUpdated] = await this.enrichTasksWithAvatars([updated], user);
+
         return {
             status_code: 200,
             message: 'Task updated successfully',
-            data: updated,
+            data: enrichedUpdated || updated,
         };
     }
 
@@ -1551,13 +1678,16 @@ export class TaskService {
 
         const comments = this.ensureTaskComments(taskId);
 
+        const avatarMap = await this.getAvatarMap();
+
         // Record current viewer into seen_by for comments sent by others
         if (user && user.id) {
             const viewerName = (user.name_kh || user.name_en || '').trim() || 'User';
+            const userAvatar = this.resolveMemberAvatar({ id: user.id, email: user.email, name: viewerName }, avatarMap) || (user.avatar as any)?.uri || null;
             const currentViewer = {
                 id: user.id,
                 name: viewerName,
-                avatar: (user.avatar as any)?.uri || null,
+                avatar: userAvatar,
                 seen_at: new Date().toISOString(),
             };
             let changed = false;
@@ -1600,10 +1730,19 @@ export class TaskService {
                         (userEmail && senderName === userEmail) ||
                         (user?.id && c.sender_id === user.id)
                     );
+                    let senderAvatar = c.sender_avatar;
+                    if (!senderAvatar || senderAvatar.includes('placeholder')) {
+                        senderAvatar = this.resolveMemberAvatar({ id: c.sender_id, name: c.sender_name }, avatarMap) || senderAvatar || null;
+                    }
+                    const seenByList = (Array.isArray(c.seen_by) ? c.seen_by : []).map((s: any) => {
+                        const sAv = this.resolveMemberAvatar(s, avatarMap);
+                        return sAv ? { ...s, avatar: sAv } : s;
+                    });
                     return {
                         ...c,
+                        sender_avatar: senderAvatar,
                         is_self: isSelf,
-                        seen_by: Array.isArray(c.seen_by) ? c.seen_by : [],
+                        seen_by: seenByList,
                     };
                 }),
             },
@@ -1617,12 +1756,15 @@ export class TaskService {
             throw new NotFoundException(`Task #${taskId} not found`);
         }
 
+        const avatarMap = await this.getAvatarMap();
+        const userAvatar = this.resolveMemberAvatar({ id: user.id, email: user.email, name: user.name_kh || user.name_en }, avatarMap) || (user.avatar as any)?.uri || null;
+
         const comments = this.ensureTaskComments(taskId);
         const newComment = {
             id: Date.now(),
             sender_id: user.id,
             sender_name: user.name_kh || user.name_en || 'អ្នកប្រើប្រាស់ (User)',
-            sender_avatar: (user.avatar as any)?.uri || '/images/placeholder/avatar.jpg',
+            sender_avatar: userAvatar,
             text: (text || '').trim(),
             time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
             is_self: true,

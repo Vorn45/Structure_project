@@ -415,6 +415,79 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         }
     }
 
+    getAssigneeAvatar(member: any): string | null {
+        if (!member) return null;
+        if (member._avatarFailed) return null;
+
+        const cur = (this.currentUser() || this.overview()?.user) as any;
+        const curNameEn = (cur?.en_name || cur?.name_en || cur?.name || '').toLowerCase().trim();
+        const curNameKh = (cur?.kh_name || cur?.name_kh || '').toLowerCase().trim();
+        const curEmail = (cur?.email || '').toLowerCase().trim();
+        const targetName = (member.name || '').toLowerCase().trim();
+        const targetEmail = (member.email || '').toLowerCase().trim();
+
+        const isCurrentUser = Boolean(
+            (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
+            (curEmail && targetEmail && curEmail === targetEmail) ||
+            (targetName && (
+                (curNameKh && (targetName === curNameKh || targetName.includes(curNameKh) || curNameKh.includes(targetName))) ||
+                (curNameEn && (targetName === curNameEn || targetName.includes(curNameEn) || curNameEn.includes(targetName)))
+            ))
+        );
+
+        if (isCurrentUser) {
+            const curAv = this.getAvatarUrl();
+            if (curAv && !curAv.includes('placeholder')) {
+                return curAv;
+            }
+        }
+
+        if (member.avatar) {
+            if (typeof member.avatar === 'string' && member.avatar.includes('placeholder')) {
+                // Ignore placeholder
+            } else {
+                const resolved = resolveFileUrl(member.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
+        const team = this.teamMembers();
+        if (team && team.length > 0) {
+            const found = team.find((m) =>
+                (member.id && Number(m.id) === Number(member.id)) ||
+                (targetName && m.name && (
+                    m.name.toLowerCase().trim() === targetName ||
+                    m.name.toLowerCase().includes(targetName) ||
+                    targetName.includes(m.name.toLowerCase().trim())
+                ))
+            );
+            if (found?.avatar) {
+                const resolved = resolveFileUrl(found.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    getReporterAvatar(reporter: any): string | null {
+        return this.getAssigneeAvatar(reporter);
+    }
+
+    onMemberAvatarError(event: Event, member?: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target) {
+            target.style.display = 'none';
+        }
+        if (member) {
+            member._avatarFailed = true;
+        }
+    }
+
     onCoverError(event: Event): void {
         const img = event.target as HTMLImageElement;
         if (img && !img.src.includes('/images/placeholder/cover.jpg')) {

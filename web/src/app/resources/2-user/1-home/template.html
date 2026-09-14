@@ -664,8 +664,8 @@
                             <div class="relative shrink-0 cursor-pointer ml-1"
                                 [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
                                 <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
-                                    <img *ngIf="task.reporter?.avatar" [src]="task.reporter.avatar" [alt]="task.reporter.name" class="w-full h-full object-cover block" />
-                                    <mat-icon *ngIf="!task.reporter?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
+                                    <img *ngIf="getReporterAvatar(task.reporter)" [src]="getReporterAvatar(task.reporter)" [alt]="task.reporter?.name" (error)="onMemberAvatarError($event, task.reporter)" class="w-full h-full object-cover block" />
+                                    <mat-icon *ngIf="!getReporterAvatar(task.reporter)" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
                                 </div>
                                 <span class="absolute -bottom-1 -right-1 bg-emerald-600 text-white text-[7.5px] font-extrabold px-1 rounded-full border border-white dark:border-slate-800 leading-tight">R</span>
                             </div>
@@ -697,8 +697,8 @@
                                 <div class="relative shrink-0 cursor-pointer"
                                     [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក: ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
                                     <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
-                                        <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
-                                        <mat-icon *ngIf="!task.assignee?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
+                                        <img *ngIf="getAssigneeAvatar(task.assignee)" [src]="getAssigneeAvatar(task.assignee)" [alt]="task.assignee.name" (error)="onMemberAvatarError($event, task.assignee)" class="w-full h-full object-cover block" />
+                                        <mat-icon *ngIf="!getAssigneeAvatar(task.assignee)" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
                                     </div>
                                     <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
                                         <mat-icon svgIcon="mdi:account-outline" class="!w-3.5 !h-3.5"></mat-icon>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, ElementRef, HostListener, input, OnDestroy, output, signal, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, inject, input, OnDestroy, output, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, MAT_NATIVE_DATE_FORMATS } from '@angular/material/core';
 import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { UserService } from 'app/core/user/user.service';
+import { resolveFileUrl } from 'helper/shared/file-url';
 import {
     TASK_TYPES_LIST,
     TaskAttachment,
@@ -157,6 +159,8 @@ export class TaskDrawerComponent implements OnDestroy {
     previewImage = output<string>();
     downloadFile = output<TaskAttachment>();
     deleteTask = output<TaskItem>();
+
+    private readonly _userService = inject(UserService);
 
     taskTypes = TASK_TYPES_LIST;
 
@@ -473,20 +477,97 @@ export class TaskDrawerComponent implements OnDestroy {
         return name.slice(0, 2).toUpperCase();
     }
 
-    getViewerAvatar(viewer: { avatar?: string | null; name?: string; id?: number }): string {
-        if (viewer?.avatar && viewer.avatar.trim()) {
-            return viewer.avatar;
-        }
-        if (viewer?.name || viewer?.id) {
-            const member = (this.teamMembers() || []).find(
-                (m) => (viewer.id && Number(m.id) === Number(viewer.id)) ||
-                       (viewer.name && m.name && m.name.toLowerCase().trim() === viewer.name.toLowerCase().trim())
-            );
-            if (member?.avatar && member.avatar.trim()) {
-                return member.avatar;
+    getAssigneeAvatar(member: TaskMember | { name?: string; avatar?: any; id?: any; email?: string } | null | undefined): string | null {
+        if (!member) return null;
+        if ((member as any)._avatarFailed) return null;
+
+        // 1. Check if member is current logged-in user
+        const cur = this._userService.getUser();
+        const curNameEn = (cur?.en_name || cur?.name || '').toLowerCase().trim();
+        const curNameKh = (cur?.kh_name || '').toLowerCase().trim();
+        const curEmail = (cur?.email || '').toLowerCase().trim();
+        const targetName = (member.name || '').toLowerCase().trim();
+        const targetEmail = (member.email || '').toLowerCase().trim();
+
+        const isCurrentUser = Boolean(
+            (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
+            (curEmail && targetEmail && curEmail === targetEmail) ||
+            (targetName && (
+                (curNameKh && (targetName === curNameKh || targetName.includes(curNameKh) || curNameKh.includes(targetName))) ||
+                (curNameEn && (targetName === curNameEn || targetName.includes(curNameEn) || curNameEn.includes(targetName)))
+            ))
+        );
+
+        if (isCurrentUser && cur?.avatar) {
+            const curAvatar = resolveFileUrl(cur.avatar);
+            if (curAvatar && !curAvatar.includes('placeholder')) {
+                return curAvatar;
             }
         }
-        return '/images/placeholder/avatar.jpg';
+
+        // 2. If member has an avatar that is not a placeholder
+        if (member.avatar) {
+            if (typeof member.avatar === 'string' && member.avatar.includes('placeholder')) {
+                // Ignore placeholder
+            } else {
+                const resolved = resolveFileUrl(member.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
+        // 3. Fallback: match from teamMembers()
+        const team = this.teamMembers();
+        if (team && team.length > 0) {
+            const found = team.find((m) =>
+                (member.id && Number(m.id) === Number(member.id)) ||
+                (targetName && m.name && (
+                    m.name.toLowerCase().trim() === targetName ||
+                    m.name.toLowerCase().includes(targetName) ||
+                    targetName.includes(m.name.toLowerCase().trim())
+                ))
+            );
+            if (found?.avatar) {
+                const resolved = resolveFileUrl(found.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    getSenderAvatar(msg: TaskChatMessage): string | null {
+        if (!msg) return null;
+        if (msg.is_self) {
+            const cur = this._userService.getUser();
+            if (cur?.avatar) {
+                const url = resolveFileUrl(cur.avatar);
+                if (url && !url.includes('placeholder')) return url;
+            }
+        }
+        return this.getAssigneeAvatar({
+            id: msg.sender_id,
+            name: msg.sender_name,
+            avatar: msg.sender_avatar,
+        });
+    }
+
+    getViewerAvatar(viewer: { avatar?: string | null; name?: string; id?: number }): string {
+        const av = this.getAssigneeAvatar(viewer);
+        return av || '/images/placeholder/avatar.jpg';
+    }
+
+    onAvatarError(event: Event, member?: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target) {
+            target.style.display = 'none';
+        }
+        if (member) {
+            member._avatarFailed = true;
+        }
     }
 
     getSeenTooltip(seenBy?: Array<{ name?: string }>): string {

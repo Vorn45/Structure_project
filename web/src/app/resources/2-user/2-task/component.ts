@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from 'app/core/user/user.service';
+import { User } from 'app/core/user/user.types';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { CreateTaskDialogComponent } from '../../3-admin/3-projects/dialogs/create-task-dialog/component';
@@ -456,14 +457,88 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         private readonly _taskSocket: TaskSocketService,
     ) {}
 
+    currentUser = signal<User | null>(null);
+
     getAvatarUrl(): string {
-        const user = this._userService.getUser();
+        const user = this.currentUser() || this._userService.getUser();
         return resolveFileUrl(user?.avatar) || '/images/placeholder/avatar.jpg';
     }
 
     getCurrentActorName(): string {
-        const user = this._userService.getUser();
+        const user = this.currentUser() || this._userService.getUser();
         return (user?.kh_name || user?.name || user?.en_name || '').trim();
+    }
+
+    getAssigneeAvatar(member: TaskMember | { name?: string; avatar?: any; id?: any; email?: string } | null | undefined): string | null {
+        if (!member) return null;
+        if ((member as any)._avatarFailed) return null;
+
+        // 1. Check if member is current logged-in user (reactive to newly uploaded avatar)
+        const cur = this.currentUser() || this._userService.getUser();
+        const curNameEn = (cur?.en_name || cur?.name || '').toLowerCase().trim();
+        const curNameKh = (cur?.kh_name || '').toLowerCase().trim();
+        const curEmail = (cur?.email || '').toLowerCase().trim();
+        const targetName = (member.name || '').toLowerCase().trim();
+        const targetEmail = (member.email || '').toLowerCase().trim();
+
+        const isCurrentUser = Boolean(
+            (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
+            (curEmail && targetEmail && curEmail === targetEmail) ||
+            (targetName && (
+                (curNameKh && (targetName === curNameKh || targetName.includes(curNameKh) || curNameKh.includes(targetName))) ||
+                (curNameEn && (targetName === curNameEn || targetName.includes(curNameEn) || curNameEn.includes(targetName)))
+            ))
+        );
+
+        if (isCurrentUser && cur?.avatar) {
+            const curAvatar = resolveFileUrl(cur.avatar);
+            if (curAvatar && !curAvatar.includes('placeholder')) {
+                return curAvatar;
+            }
+        }
+
+        // 2. If member object already has an avatar that is not a placeholder
+        if (member.avatar) {
+            if (typeof member.avatar === 'string' && member.avatar.includes('placeholder')) {
+                // Ignore placeholder
+            } else {
+                const resolved = resolveFileUrl(member.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
+        // 3. Fallback: match from teamMembers()
+        const team = this.teamMembers();
+        if (team && team.length > 0) {
+            const found = team.find((m) =>
+                (member.id && Number(m.id) === Number(member.id)) ||
+                (targetName && m.name && (
+                    m.name.toLowerCase().trim() === targetName ||
+                    m.name.toLowerCase().includes(targetName) ||
+                    targetName.includes(m.name.toLowerCase().trim())
+                ))
+            );
+            if (found?.avatar) {
+                const resolved = resolveFileUrl(found.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    onAvatarError(event: Event, member?: any): void {
+        const target = event.target as HTMLImageElement;
+        if (target) {
+            target.style.display = 'none';
+        }
+        if (member) {
+            member._avatarFailed = true;
+        }
     }
 
     loadTeamMembers(): void {
@@ -478,6 +553,11 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.currentUser.set(this._userService.getUser());
+        this._userService.user$.pipe(takeUntil(this._unsubscribeAll)).subscribe((u) => {
+            this.currentUser.set(u);
+        });
+
         this.loadTeamMembers();
         this.loadProjects();
 

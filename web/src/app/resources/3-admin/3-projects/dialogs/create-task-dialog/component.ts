@@ -14,6 +14,7 @@ import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-but
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { TASK_TYPES_LIST, TaskAttachment, TaskTypeOption } from 'app/resources/2-user/2-task/models/task.types';
 import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
+import { resolveFileUrl } from 'helper/shared/file-url';
 
 export interface CreateTaskDialogData {
     projectCode?: string;
@@ -341,8 +342,8 @@ export interface TeamMember {
                                 <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                                     <!-- Avatar or Default Icon User -->
                                     <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
-                                        <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
-                                        <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                                        <img *ngIf="getMemberAvatar(m)" [src]="getMemberAvatar(m)" class="w-full h-full object-cover" />
+                                        <mat-icon *ngIf="!getMemberAvatar(m)" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                     </div>
                                     <div class="min-w-0 text-left flex-1">
                                         <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">
@@ -377,8 +378,8 @@ export interface TeamMember {
                                     <div class="flex items-center gap-2.5 min-w-0">
                                         <!-- Avatar or Default Icon User -->
                                         <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
-                                            <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
-                                            <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                                            <img *ngIf="getMemberAvatar(m)" [src]="getMemberAvatar(m)" class="w-full h-full object-cover" />
+                                            <mat-icon *ngIf="!getMemberAvatar(m)" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
                                         </div>
                                         <div class="min-w-0 text-left">
                                             <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">{{ m.name }}</p>
@@ -982,6 +983,23 @@ export class CreateTaskDialogComponent implements OnInit {
 
     get selectedAssignees(): TeamMember[] {
         return this.teamMembers.filter((m) => this.selectedAssigneeIds().includes(String(m.id)));
+    }
+
+    getMemberAvatar(m: TeamMember): string | null {
+        if (!m) return null;
+        if (m.avatar) {
+            const resolved = resolveFileUrl(m.avatar);
+            if (resolved && !resolved.includes('placeholder')) return resolved;
+        }
+        if (this.data?.user) {
+            const u = this.data.user;
+            const uName = (u.en_name || u.name || u.kh_name || '').toLowerCase().trim();
+            if (uName && m.name && (m.name.toLowerCase().trim() === uName || String(u.id) === String(m.id))) {
+                const resolved = resolveFileUrl(u.avatar);
+                if (resolved && !resolved.includes('placeholder')) return resolved;
+            }
+        }
+        return null;
     }
 
     isAssigneeSelected(id: string | number): boolean {

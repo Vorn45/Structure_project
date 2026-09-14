@@ -434,8 +434,8 @@
                             <div class="relative shrink-0 cursor-pointer"
                                 [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក: ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
                                 <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
-                                    <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
-                                    <mat-icon *ngIf="!task.assignee?.avatar" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
+                                    <img *ngIf="getAssigneeAvatar(task.assignee)" [src]="getAssigneeAvatar(task.assignee)" [alt]="task.assignee.name" (error)="onAvatarError($event, task.assignee)" class="w-full h-full object-cover block" />
+                                    <mat-icon *ngIf="!getAssigneeAvatar(task.assignee)" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>
                                 </div>
                                 <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400">
                                     <mat-icon svgIcon="mdi:account-outline" class="!w-3.5 !h-3.5"></mat-icon>
@@ -623,8 +623,8 @@
                                             <div *ngFor="let m of getTaskAssignees(task).slice(0, 2)"
                                                 class="w-6 h-6 min-w-[24px] min-h-[24px] rounded-full ring-2 ring-white dark:ring-slate-800 overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center shadow-2xs cursor-pointer"
                                                 [matTooltip]="'អ្នកទទួលបន្ទុក: ' + m.name">
-                                                <img *ngIf="m.avatar" [src]="m.avatar" [alt]="m.name" class="w-full h-full object-cover block" />
-                                                <span *ngIf="!m.avatar" class="text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                                <img *ngIf="getAssigneeAvatar(m)" [src]="getAssigneeAvatar(m)" [alt]="m.name" (error)="onAvatarError($event, m)" class="w-full h-full object-cover block" />
+                                                <span *ngIf="!getAssigneeAvatar(m)" class="text-[10px] font-bold text-slate-600 dark:text-slate-300">
                                                     {{ m.name ? m.name.charAt(0).toUpperCase() : 'U' }}
                                                 </span>
                                             </div>
