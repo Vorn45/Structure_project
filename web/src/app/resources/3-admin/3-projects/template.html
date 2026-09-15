@@ -154,8 +154,8 @@
                             <!-- Left: Icon & Names -->
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <!-- Project Logo -->
-                                <div class="w-11 h-11 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shrink-0 shadow-2xs bg-white dark:bg-slate-800">
-                                    <img [src]="getProjectLogo(plan)" (error)="onProjectLogoError($event, plan)" class="w-full h-full object-cover" [alt]="plan.name" />
+                                <div class="w-11 h-11 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shrink-0 shadow-2xs bg-white dark:bg-slate-800 flex items-center justify-center p-1.5">
+                                    <img [src]="getProjectLogo(plan)" (error)="onProjectLogoError($event, plan)" class="w-full h-full object-contain rounded-xl" [alt]="plan.name" />
                                 </div>
 
                                 <!-- Title & Code -->
@@ -238,10 +238,11 @@
                             <div *ngIf="plan.members && plan.members.length > 0; else noMembers"
                                 class="flex -space-x-1.5 overflow-hidden items-center">
                                 <div *ngFor="let m of plan.members.slice(0, 4); let idx = index"
-                                    class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
+                                    class="relative inline-flex items-center justify-center w-6 h-6 rounded-full overflow-hidden text-white text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
                                     [ngClass]="idx % 4 === 0 ? 'bg-blue-600' : (idx % 4 === 1 ? 'bg-indigo-600' : (idx % 4 === 2 ? 'bg-purple-600' : 'bg-emerald-600'))"
                                     [matTooltip]="m.name + (m.role ? ' (' + m.role + ')' : '')">
-                                    {{ m.name.charAt(0) }}
+                                    <img *ngIf="getAssigneeAvatar(m)" [src]="getAssigneeAvatar(m)" [alt]="m.name" (error)="onMemberAvatarError($event, m)" class="w-full h-full object-cover block" />
+                                    <span *ngIf="!getAssigneeAvatar(m)">{{ m.name ? m.name.charAt(0).toUpperCase() : 'M' }}</span>
                                 </div>
                                 <div *ngIf="plan.members.length > 4"
                                     class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 text-[10px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs"
@@ -292,8 +293,8 @@
                         <mat-icon svgIcon="mdi:arrow-left" class="icon-size-5"></mat-icon>
                     </button>
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 shadow-2xs bg-white dark:bg-slate-800">
-                            <img [src]="getProjectLogo(proj)" (error)="onProjectLogoError($event, proj)" class="w-full h-full object-cover" [alt]="proj.name" />
+                        <div class="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 shadow-2xs bg-white dark:bg-slate-800 flex items-center justify-center p-1">
+                            <img [src]="getProjectLogo(proj)" (error)="onProjectLogoError($event, proj)" class="w-full h-full object-contain rounded-md" [alt]="proj.name" />
                         </div>
                         <div class="flex items-center gap-2">
                             <h2 class="text-[17px] font-medium text-slate-800 dark:text-white truncate">
@@ -977,8 +978,8 @@
                                             <div *ngIf="task.assignee?.name" class="w-5 h-5 min-w-[20px] min-h-[20px] max-w-[20px] max-h-[20px] rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-2xs overflow-hidden"
                                                 [ngClass]="task.assignee?.bgClass || 'bg-blue-600 text-white'"
                                                 [matTooltip]="task.assignee?.name || ''">
-                                                <img *ngIf="task.assignee?.avatar" [src]="task.assignee.avatar" [alt]="task.assignee.name" class="w-full h-full object-cover block" />
-                                                <span *ngIf="!task.assignee?.avatar">{{ task.assignee?.initial || task.assignee?.name?.charAt(0) }}</span>
+                                                <img *ngIf="getAssigneeAvatar(task.assignee)" [src]="getAssigneeAvatar(task.assignee)" [alt]="task.assignee.name" (error)="onMemberAvatarError($event, task.assignee)" class="w-full h-full object-cover block" />
+                                                <span *ngIf="!getAssigneeAvatar(task.assignee)">{{ task.assignee?.initial || task.assignee?.name?.charAt(0) }}</span>
                                             </div>
                                             <div *ngIf="!task.assignee?.name" class="w-5 h-5 min-w-[20px] min-h-[20px] max-w-[20px] max-h-[20px] rounded-full flex items-center justify-center text-[9px] font-bold text-slate-400 border border-dashed border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800"
                                                 matTooltip="មិនទាន់កំណត់">

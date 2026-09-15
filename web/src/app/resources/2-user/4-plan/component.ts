@@ -533,6 +533,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     plans = signal<ExtendedProjectItem[]>(DEFAULT_INVITED_PROJECTS);
     searchQuery = signal<string>('');
     statusFilter = signal<string>('all');
+    teamMembers = signal<any[]>([]);
 
     // Currently selected project
     selectedProject = signal<ExtendedProjectItem | null>(null);
@@ -610,6 +611,26 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                 return resolved;
             }
         }
+
+        const team = this.teamMembers();
+        if (team && team.length > 0) {
+            const found = team.find((m: any) =>
+                (member.id && Number(m.id) === Number(member.id)) ||
+                (targetEmail && m.email && m.email.toLowerCase().trim() === targetEmail) ||
+                (targetName && m.name && (
+                    m.name.toLowerCase().trim() === targetName ||
+                    m.name.toLowerCase().includes(targetName) ||
+                    targetName.includes(m.name.toLowerCase().trim())
+                ))
+            );
+            if (found?.avatar) {
+                const resolved = resolveFileUrl(found.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
         return null;
     }
 
@@ -1334,6 +1355,17 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         }
     }
 
+    loadTeamMembers(): void {
+        this._taskService.getMembers().subscribe({
+            next: (res) => {
+                if (res?.data && res.data.length > 0) {
+                    this.teamMembers.set(res.data);
+                }
+            },
+            error: (err) => console.error('Failed to load team members from DB', err),
+        });
+    }
+
             ngOnInit(): void {
                 this.currentUser.set(this._userService.getUser());
                 this._userService.user$
@@ -1342,6 +1374,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         this.currentUser.set(u);
                     });
 
+                this.loadTeamMembers();
                 this.loadPlans();
 
                 // Replaces the old manual refresh button: project progress is derived

@@ -1250,6 +1250,26 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 return resolved;
             }
         }
+
+        const usersList = this.users();
+        if (usersList && usersList.length > 0) {
+            const found = usersList.find((u: any) =>
+                (member.id && Number(u.id) === Number(member.id)) ||
+                (targetEmail && u.email && u.email.toLowerCase().trim() === targetEmail) ||
+                (targetName && (
+                    (u.en_name && u.en_name.toLowerCase().trim() === targetName) ||
+                    (u.kh_name && u.kh_name.toLowerCase().trim() === targetName) ||
+                    (u.name && u.name.toLowerCase().trim() === targetName)
+                ))
+            );
+            if (found?.avatar) {
+                const resolved = resolveFileUrl(found.avatar);
+                if (resolved && !resolved.includes('placeholder')) {
+                    return resolved;
+                }
+            }
+        }
+
         return null;
     }
 
