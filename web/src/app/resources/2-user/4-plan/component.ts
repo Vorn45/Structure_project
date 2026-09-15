@@ -339,11 +339,17 @@ export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [
     },
 ];
 
+export const BMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="bmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230284c7"/><stop offset="100%" stop-color="%230369a1"/></linearGradient><linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%2338bdf8"/><stop offset="100%" stop-color="%23bae6fd"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="%231e293b" stroke-width="2"/><g transform="translate(18, 18)"><circle cx="42" cy="42" r="38" fill="url(%23bmsGrad)" opacity="0.25"/><path d="M 12 60 L 72 60" stroke="%2394a3b8" stroke-width="3" stroke-linecap="round"/><rect x="20" y="38" width="8" height="22" rx="3" fill="url(%23barGrad)"/><rect x="34" y="24" width="8" height="36" rx="3" fill="%23ffffff"/><rect x="48" y="32" width="8" height="28" rx="3" fill="url(%23barGrad)"/><rect x="62" y="16" width="8" height="44" rx="3" fill="%2338bdf8"/><path d="M 18 42 L 32 30 L 48 36 L 66 14" fill="none" stroke="%2338bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="66" cy="14" r="4.5" fill="%23ffffff" stroke="%230284c7" stroke-width="2"/><circle cx="32" cy="30" r="3" fill="%23ffffff"/><circle cx="48" cy="36" r="3" fill="%23ffffff"/></g></svg>';
+
+export const WMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="wmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23ea580c"/><stop offset="100%" stop-color="%23c2410c"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="%231e293b" stroke-width="2"/><g transform="translate(60, 60)"><circle cx="0" cy="0" r="38" fill="url(%23wmsGrad)" opacity="0.2"/><path d="M 0 -36 L 31 -18 L 31 18 L 0 36 L -31 18 L -31 -18 Z" fill="none" stroke="%23f97316" stroke-width="4.5" stroke-linejoin="round"/><path d="M 0 -32 L 27 -16 L 0 0 L -27 -16 Z" fill="%23fb923c"/><path d="M -27 -14 L 0 2 L 0 32 L -27 16 Z" fill="%230284c7"/><path d="M 0 2 L 27 -14 L 27 16 L 0 32 Z" fill="%23ea580c"/><path d="M 0 0 L 0 32 M 0 0 L -27 -16 M 0 0 L 27 -16" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/></g></svg>';
+
 const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
     {
         id: '4',
         code: 'BMS-DIGI',
         name: 'BMS Digitech',
+        logo: BMS_PROJECT_LOGO,
+        image: BMS_PROJECT_LOGO,
         description: 'Business Management System - Digitech Project Management, Sales & Invoicing Workflow.',
         status: 'active',
         priority: 'high',
@@ -425,6 +431,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         id: '5',
         code: 'WMS-DIGI',
         name: 'WMS Digitech',
+        logo: WMS_PROJECT_LOGO,
+        image: WMS_PROJECT_LOGO,
         description: 'Workforce & Attendance Management System - Digitech Real-time QR & Payroll.',
         status: 'active',
         priority: 'urgent',
@@ -559,24 +567,38 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     getProjectLogo(plan: any): string {
-        if (!plan) return '/images/logo/logo.png';
-        if (plan._logoFailed) return '/images/logo/logo.png';
+        if (!plan) return BMS_PROJECT_LOGO;
+        const code = (plan.code || '').toUpperCase();
+        const name = (plan.name || '').toUpperCase();
+        if (plan._logoFailed) {
+            if (code.includes('WMS') || name.includes('WMS')) return WMS_PROJECT_LOGO;
+            return BMS_PROJECT_LOGO;
+        }
         const raw = plan.logo || plan.image;
-        if (raw && typeof raw === 'string' && !raw.includes('placeholder')) {
+        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png')) {
             const resolved = resolveFileUrl(raw);
-            if (resolved && !resolved.includes('placeholder')) {
+            if (resolved && !resolved.includes('placeholder') && !resolved.includes('/images/logo/logo.png')) {
                 return resolved;
             }
+        }
+        if (code.includes('WMS') || name.includes('WMS')) {
+            return WMS_PROJECT_LOGO;
+        }
+        if (code.includes('BMS') || name.includes('BMS')) {
+            return BMS_PROJECT_LOGO;
         }
         return '/images/logo/logo.png';
     }
 
     onProjectLogoError(event: Event, plan: any): void {
         const target = event.target as HTMLImageElement;
-        if (target && !target.src.includes('/images/logo/logo.png')) {
-            target.src = '/images/logo/logo.png';
-        } else {
-            if (plan) plan._logoFailed = true;
+        const code = (plan?.code || '').toUpperCase();
+        const name = (plan?.name || '').toUpperCase();
+        const fallback = (code.includes('WMS') || name.includes('WMS')) ? WMS_PROJECT_LOGO : BMS_PROJECT_LOGO;
+        if (target && target.src !== fallback) {
+            target.src = fallback;
+        } else if (plan) {
+            plan._logoFailed = true;
         }
     }
 
@@ -600,14 +622,14 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
         if (isCurrentUser && cur?.avatar) {
             const curAvatar = resolveFileUrl(cur.avatar);
-            if (curAvatar && !curAvatar.includes('placeholder')) {
+            if (curAvatar && !curAvatar.includes('placeholder/avatar.jpg') && !curAvatar.includes('placeholder/image.jpg')) {
                 return curAvatar;
             }
         }
 
         if (member.avatar) {
             const resolved = resolveFileUrl(member.avatar);
-            if (resolved && !resolved.includes('placeholder')) {
+            if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
                 return resolved;
             }
         }
@@ -625,10 +647,24 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             );
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
-                if (resolved && !resolved.includes('placeholder')) {
+                if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
                     return resolved;
                 }
             }
+        }
+
+        // Dedicated member profile photo resolution
+        if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី') || targetName.includes('pum')) {
+            return '/uploads/user/Screenshot_2026-07-22_115449-1789358446601-91.png';
+        }
+        if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
+            return '/images/placeholder/panha-portrait.jpg';
+        }
+        if (targetName.includes('winner') || targetName.includes('វីនណឺរ')) {
+            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
+        }
+        if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
+            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
         }
 
         return null;
@@ -1394,16 +1430,29 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                     plansRes: this._planService.getPlans({
                         search: this.searchQuery() || undefined,
                         status: this.statusFilter() !== 'all' ? this.statusFilter() : undefined,
-                    }),
+                    }).pipe(catchError(() => of(null))),
                     tasksRes: this._taskService.getTasks().pipe(catchError(() => of(null))),
+                    projectsRes: this._taskService.getProjects().pipe(catchError(() => of(null))),
                 }).subscribe({
-                    next: ({ plansRes, tasksRes }) => {
+                    next: ({ plansRes, tasksRes, projectsRes }) => {
                         const allTasks: TaskItem[] = tasksRes?.data?.results || [];
+                        const taskProjects: any[] = projectsRes?.data || [];
+
                         if (plansRes?.data?.results?.length) {
                             const items: ExtendedProjectItem[] = plansRes.data.results.map((ap) => {
                                 const existing = DEFAULT_INVITED_PROJECTS.find(
                                     (p) => p.id === String(ap.id) || p.code === ap.code || p.name === ap.name
                                 );
+                                const matchingTaskProj = taskProjects.find(
+                                    (tp) => tp.id === String(ap.id) || tp.code === ap.code || tp.name === ap.name
+                                );
+                                const codeUp = (ap.code || '').toUpperCase();
+                                const nameUp = (ap.name || '').toUpperCase();
+                                const fallbackDefaultLogo = (codeUp.includes('WMS') || nameUp.includes('WMS'))
+                                    ? WMS_PROJECT_LOGO
+                                    : (codeUp.includes('BMS') || nameUp.includes('BMS'))
+                                    ? BMS_PROJECT_LOGO
+                                    : '/images/logo/logo.png';
 
                                 const pid = String(ap.id || '').toLowerCase();
                                 const pcode = (ap.code || '').toLowerCase().replace('#', '');
@@ -1479,15 +1528,19 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                     logo:
                                         resolveFileUrl((ap as any).logo) ||
                                         resolveFileUrl((ap as any).image) ||
+                                        resolveFileUrl(matchingTaskProj?.logo) ||
+                                        resolveFileUrl(matchingTaskProj?.image) ||
                                         resolveFileUrl((existing as any)?.logo) ||
                                         resolveFileUrl((existing as any)?.image) ||
-                                        null,
+                                        fallbackDefaultLogo,
                                     image:
                                         resolveFileUrl((ap as any).image) ||
                                         resolveFileUrl((ap as any).logo) ||
+                                        resolveFileUrl(matchingTaskProj?.image) ||
+                                        resolveFileUrl(matchingTaskProj?.logo) ||
                                         resolveFileUrl((existing as any)?.image) ||
                                         resolveFileUrl((existing as any)?.logo) ||
-                                        null,
+                                        fallbackDefaultLogo,
                                     description: ap.description || existing?.description || '',
                                     status: (ap.status as any) || existing?.status || 'active',
                                     priority: (ap as any).priority || existing?.priority || 'high',
@@ -1528,7 +1581,40 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                 }
                             }
                         } else {
-                            this.plans.set(DEFAULT_INVITED_PROJECTS);
+                            const fallbackItems = DEFAULT_INVITED_PROJECTS.map((p) => {
+                                const pid = p.id.toLowerCase();
+                                const pcode = p.code.toLowerCase().replace('#', '');
+                                const pname = p.name.toLowerCase();
+                                const pPrefix = pcode.split('-')[0];
+
+                                const projectTasks = allTasks.filter((t) => {
+                                    const tPid = (t.project_id || '').toLowerCase();
+                                    const tPname = (t.project_name || '').toLowerCase();
+                                    const tCode = (t.code || '').toLowerCase().replace('#', '');
+
+                                    return (
+                                        (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
+                                        (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
+                                        (pPrefix && (tCode.startsWith(pPrefix + '-') || tPid.startsWith(pPrefix))) ||
+                                        (pname && (tPname.includes(pname) || pname.includes(tPname)))
+                                    );
+                                });
+
+                                const total = projectTasks.length;
+                                const completed = projectTasks.filter((t) =>
+                                    ['done', 'completed'].includes((t.status || '').toLowerCase())
+                                ).length;
+                                const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                                return {
+                                    ...p,
+                                    total_tasks: total > 0 ? total : p.total_tasks,
+                                    completed_tasks: total > 0 ? completed : p.completed_tasks,
+                                    progress: total > 0 ? progress : p.progress,
+                                    tasks: projectTasks.length > 0 ? projectTasks.map((t) => this.mapTaskToIndividualTaskItem(t)) : p.tasks,
+                                };
+                            });
+                            this.plans.set(fallbackItems);
                         }
                         this.loading.set(false);
                     },

@@ -29,6 +29,7 @@ import {
 } from './models/task.types';
 import { UserTaskService } from './task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
+import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO } from 'app/resources/2-user/4-plan/component';
 
 export interface ProjectFilterOption {
     id: string;
@@ -500,18 +501,18 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
         if (isCurrentUser && cur?.avatar) {
             const curAvatar = resolveFileUrl(cur.avatar);
-            if (curAvatar && !curAvatar.includes('placeholder')) {
+            if (curAvatar && !curAvatar.includes('placeholder/avatar.jpg') && !curAvatar.includes('placeholder/image.jpg')) {
                 return curAvatar;
             }
         }
 
         // 2. If member object already has an avatar that is not a placeholder
         if (member.avatar) {
-            if (typeof member.avatar === 'string' && member.avatar.includes('placeholder')) {
+            if (typeof member.avatar === 'string' && (member.avatar.includes('placeholder/avatar.jpg') || member.avatar.includes('placeholder/image.jpg'))) {
                 // Ignore placeholder
             } else {
                 const resolved = resolveFileUrl(member.avatar);
-                if (resolved && !resolved.includes('placeholder')) {
+                if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
                     return resolved;
                 }
             }
@@ -530,10 +531,24 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             );
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
-                if (resolved && !resolved.includes('placeholder')) {
+                if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
                     return resolved;
                 }
             }
+        }
+
+        // 4. Dedicated member profile photo resolution
+        if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី') || targetName.includes('pum')) {
+            return '/uploads/user/Screenshot_2026-07-22_115449-1789358446601-91.png';
+        }
+        if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
+            return '/images/placeholder/panha-portrait.jpg';
+        }
+        if (targetName.includes('winner') || targetName.includes('វីនណឺរ')) {
+            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
+        }
+        if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
+            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
         }
 
         return null;
@@ -858,24 +873,38 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     getProjectLogo(p: any): string {
-        if (!p) return '/images/logo/logo.png';
-        if (p._logoFailed) return '/images/logo/logo.png';
+        if (!p) return BMS_PROJECT_LOGO;
+        const code = (p.code || p.id || '').toUpperCase();
+        const name = (p.name || '').toUpperCase();
+        if (p._logoFailed) {
+            if (code.includes('WMS') || name.includes('WMS')) return WMS_PROJECT_LOGO;
+            return BMS_PROJECT_LOGO;
+        }
         const raw = p.logo || p.image;
-        if (raw && typeof raw === 'string' && !raw.includes('placeholder')) {
+        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png')) {
             const resolved = resolveFileUrl(raw);
-            if (resolved && !resolved.includes('placeholder')) {
+            if (resolved && !resolved.includes('placeholder') && !resolved.includes('/images/logo/logo.png')) {
                 return resolved;
             }
+        }
+        if (code.includes('WMS') || name.includes('WMS')) {
+            return WMS_PROJECT_LOGO;
+        }
+        if (code.includes('BMS') || name.includes('BMS')) {
+            return BMS_PROJECT_LOGO;
         }
         return '/images/logo/logo.png';
     }
 
     onProjectLogoError(event: Event, p: any): void {
         const target = event.target as HTMLImageElement;
-        if (target && !target.src.includes('/images/logo/logo.png')) {
-            target.src = '/images/logo/logo.png';
-        } else {
-            if (p) p._logoFailed = true;
+        const code = (p?.code || p?.id || '').toUpperCase();
+        const name = (p?.name || '').toUpperCase();
+        const fallback = (code.includes('WMS') || name.includes('WMS')) ? WMS_PROJECT_LOGO : BMS_PROJECT_LOGO;
+        if (target && target.src !== fallback) {
+            target.src = fallback;
+        } else if (p) {
+            p._logoFailed = true;
         }
     }
 

@@ -38,6 +38,10 @@ export interface ProjectPlanItem {
     agileTasks?: any[];
 }
 
+export const BMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="bmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230284c7"/><stop offset="100%" stop-color="%230369a1"/></linearGradient><linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%2338bdf8"/><stop offset="100%" stop-color="%23bae6fd"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="%231e293b" stroke-width="2"/><g transform="translate(18, 18)"><circle cx="42" cy="42" r="38" fill="url(%23bmsGrad)" opacity="0.25"/><path d="M 12 60 L 72 60" stroke="%2394a3b8" stroke-width="3" stroke-linecap="round"/><rect x="20" y="38" width="8" height="22" rx="3" fill="url(%23barGrad)"/><rect x="34" y="24" width="8" height="36" rx="3" fill="%23ffffff"/><rect x="48" y="32" width="8" height="28" rx="3" fill="url(%23barGrad)"/><rect x="62" y="16" width="8" height="44" rx="3" fill="%2338bdf8"/><path d="M 18 42 L 32 30 L 48 36 L 66 14" fill="none" stroke="%2338bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="66" cy="14" r="4.5" fill="%23ffffff" stroke="%230284c7" stroke-width="2"/><circle cx="32" cy="30" r="3" fill="%23ffffff"/><circle cx="48" cy="36" r="3" fill="%23ffffff"/></g></svg>';
+
+export const WMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="wmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23ea580c"/><stop offset="100%" stop-color="%23c2410c"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="%231e293b" stroke-width="2"/><g transform="translate(60, 60)"><circle cx="0" cy="0" r="38" fill="url(%23wmsGrad)" opacity="0.2"/><path d="M 0 -36 L 31 -18 L 31 18 L 0 36 L -31 18 L -31 -18 Z" fill="none" stroke="%23f97316" stroke-width="4.5" stroke-linejoin="round"/><path d="M 0 -32 L 27 -16 L 0 0 L -27 -16 Z" fill="%23fb923c"/><path d="M -27 -14 L 0 2 L 0 32 L -27 16 Z" fill="%230284c7"/><path d="M 0 2 L 27 -14 L 27 16 L 0 32 Z" fill="%23ea580c"/><path d="M 0 0 L 0 32 M 0 0 L -27 -16 M 0 0 L 27 -16" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/></g></svg>';
+
 const PROJECTS: ProjectPlanItem[] = [
     {
         id: '4',
@@ -50,6 +54,8 @@ const PROJECTS: ProjectPlanItem[] = [
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
         total_tasks: 5,
         completed_tasks: 1,
+        logo: BMS_PROJECT_LOGO,
+        image: BMS_PROJECT_LOGO,
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
@@ -68,6 +74,8 @@ const PROJECTS: ProjectPlanItem[] = [
         end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
         total_tasks: 4,
         completed_tasks: 0,
+        logo: WMS_PROJECT_LOGO,
+        image: WMS_PROJECT_LOGO,
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: null },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
@@ -251,6 +259,14 @@ export class PlanService {
             if ((p.id === '4' || p.description?.toLowerCase().includes('business management')) && p.name === 'WMS Digitech') {
                 p.name = 'BMS Digitech';
                 p.code = 'BMS-DIGI';
+            }
+            if ((p.code === 'BMS-DIGI' || p.name?.includes('BMS')) && (!p.logo || p.logo.includes('placeholder') || p.logo === '/images/logo/logo.png')) {
+                p.logo = BMS_PROJECT_LOGO;
+                p.image = BMS_PROJECT_LOGO;
+            }
+            if ((p.code === 'WMS-DIGI' || p.name?.includes('WMS')) && (!p.logo || p.logo.includes('placeholder') || p.logo === '/images/logo/logo.png')) {
+                p.logo = WMS_PROJECT_LOGO;
+                p.image = WMS_PROJECT_LOGO;
             }
         }
 
