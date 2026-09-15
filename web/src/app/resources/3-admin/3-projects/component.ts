@@ -1202,24 +1202,31 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         if (!plan) return BMS_PROJECT_LOGO;
         const code = (plan.code || '').toUpperCase();
         const name = (plan.name || '').toUpperCase();
-        if (plan._logoFailed) {
-            if (code.includes('WMS') || name.includes('WMS')) return WMS_PROJECT_LOGO;
+        const id = String(plan.id || '').toLowerCase();
+
+        // 1. Signature project overrides (BMS & WMS)
+        if (code.includes('BMS') || name.includes('BMS') || id.includes('bms')) {
+            const raw = plan.logo || plan.image;
+            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
+                return resolveFileUrl(raw) || BMS_PROJECT_LOGO;
+            }
             return BMS_PROJECT_LOGO;
         }
-        const raw = plan.logo || plan.image;
-        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png')) {
-            const resolved = resolveFileUrl(raw);
-            if (resolved && !resolved.includes('placeholder') && !resolved.includes('/images/logo/logo.png')) {
-                return resolved;
+
+        if (code.includes('WMS') || name.includes('WMS') || id.includes('wms')) {
+            const raw = plan.logo || plan.image;
+            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
+                return resolveFileUrl(raw) || WMS_PROJECT_LOGO;
             }
-        }
-        if (code.includes('WMS') || name.includes('WMS')) {
             return WMS_PROJECT_LOGO;
         }
-        if (code.includes('BMS') || name.includes('BMS')) {
-            return BMS_PROJECT_LOGO;
+
+        const raw = plan.logo || plan.image;
+        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png') && !raw.includes('/images/logo/wfm_logo.png')) {
+            const resolved = resolveFileUrl(raw);
+            if (resolved) return resolved;
         }
-        return '/images/logo/logo.png';
+        return BMS_PROJECT_LOGO;
     }
 
     onProjectLogoError(event: Event, plan: any): void {
@@ -1242,6 +1249,20 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const curEmail = (cur?.email || '').toLowerCase().trim();
         const targetName = (member.name || '').toLowerCase().trim();
         const targetEmail = (member.email || '').toLowerCase().trim();
+
+        // 1. Dedicated member profile photo resolution (highest priority for rock-solid loading)
+        if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី') || targetName.includes('pum')) {
+            return '/images/placeholder/brusmuny-portrait.png';
+        }
+        if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
+            return '/images/placeholder/panha-portrait.jpg';
+        }
+        if (targetName.includes('winner') || targetName.includes('វីនណឺរ')) {
+            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
+        }
+        if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
+            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
+        }
 
         const isCurrentUser = Boolean(
             (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
@@ -1283,20 +1304,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     return resolved;
                 }
             }
-        }
-
-        // Dedicated member profile photo resolution
-        if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី') || targetName.includes('pum')) {
-            return '/uploads/user/Screenshot_2026-07-22_115449-1789358446601-91.png';
-        }
-        if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
-            return '/images/placeholder/panha-portrait.jpg';
-        }
-        if (targetName.includes('winner') || targetName.includes('វីនណឺរ')) {
-            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
-        }
-        if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
-            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
         }
 
         return null;

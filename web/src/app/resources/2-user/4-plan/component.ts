@@ -339,9 +339,9 @@ export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [
     },
 ];
 
-export const BMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="bmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230284c7"/><stop offset="100%" stop-color="%230369a1"/></linearGradient><linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%2338bdf8"/><stop offset="100%" stop-color="%23bae6fd"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="%231e293b" stroke-width="2"/><g transform="translate(18, 18)"><circle cx="42" cy="42" r="38" fill="url(%23bmsGrad)" opacity="0.25"/><path d="M 12 60 L 72 60" stroke="%2394a3b8" stroke-width="3" stroke-linecap="round"/><rect x="20" y="38" width="8" height="22" rx="3" fill="url(%23barGrad)"/><rect x="34" y="24" width="8" height="36" rx="3" fill="%23ffffff"/><rect x="48" y="32" width="8" height="28" rx="3" fill="url(%23barGrad)"/><rect x="62" y="16" width="8" height="44" rx="3" fill="%2338bdf8"/><path d="M 18 42 L 32 30 L 48 36 L 66 14" fill="none" stroke="%2338bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="66" cy="14" r="4.5" fill="%23ffffff" stroke="%230284c7" stroke-width="2"/><circle cx="32" cy="30" r="3" fill="%23ffffff"/><circle cx="48" cy="36" r="3" fill="%23ffffff"/></g></svg>';
+export const BMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="bmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230284c7"/><stop offset="100%" stop-color="%230369a1"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><circle cx="60" cy="60" r="34" fill="url(%23bmsGrad)"/><line x1="39" y1="76" x2="81" y2="76" stroke="%2393c5fd" stroke-width="2.5" stroke-linecap="round"/><rect x="42" y="62" width="7" height="14" rx="2" fill="%23bae6fd"/><rect x="52" y="51" width="7" height="25" rx="2" fill="%23ffffff"/><rect x="62" y="57" width="7" height="19" rx="2" fill="%23bae6fd"/><rect x="72" y="44" width="7" height="32" rx="2" fill="%2338bdf8"/><path d="M 41 65 L 53 49 L 64 55 L 78 39" fill="none" stroke="%2338bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="78" cy="39" r="4" fill="%23ffffff" stroke="%230284c7" stroke-width="2"/><circle cx="53" cy="49" r="2.5" fill="%23ffffff"/><circle cx="64" cy="55" r="2.5" fill="%23ffffff"/></svg>';
 
-export const WMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="wmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23ea580c"/><stop offset="100%" stop-color="%23c2410c"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="4" y="4" width="112" height="112" rx="24" fill="none" stroke="%231e293b" stroke-width="2"/><g transform="translate(60, 60)"><circle cx="0" cy="0" r="38" fill="url(%23wmsGrad)" opacity="0.2"/><path d="M 0 -36 L 31 -18 L 31 18 L 0 36 L -31 18 L -31 -18 Z" fill="none" stroke="%23f97316" stroke-width="4.5" stroke-linejoin="round"/><path d="M 0 -32 L 27 -16 L 0 0 L -27 -16 Z" fill="%23fb923c"/><path d="M -27 -14 L 0 2 L 0 32 L -27 16 Z" fill="%230284c7"/><path d="M 0 2 L 27 -14 L 27 16 L 0 32 Z" fill="%23ea580c"/><path d="M 0 0 L 0 32 M 0 0 L -27 -16 M 0 0 L 27 -16" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/></g></svg>';
+export const WMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><g transform="translate(60, 60)"><path d="M 0 -25 L 23 -12 L 0 1 L -23 -12 Z" fill="%23fb923c" stroke="%23ea580c" stroke-width="1.5" stroke-linejoin="round"/><path d="M -23 -12 L 0 1 L 0 26 L -23 13 Z" fill="%230284c7" stroke="%230369a1" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 23 -12 L 23 13 L 0 26 Z" fill="%23ea580c" stroke="%23c2410c" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 0 26 M 0 1 L -23 -12 M 0 1 L 23 -12" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M -11.5 -5.5 L 0 -12 L 11.5 -5.5 L 0 1 Z" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/><path d="M -11.5 7 L -11.5 -5.5 M 11.5 7 L 11.5 -5.5" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/></g></svg>';
 
 const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
     {
@@ -361,10 +361,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         progress: 0,
         start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
-        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer' },
+        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', avatar: '/images/placeholder/panha-portrait.jpg' },
         members: [
-            { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
-            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com' },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/panha-portrait.jpg' },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/brusmuny-portrait.png' },
             { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
             { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-purple-600', email: 'phuongsovannara@gmail.com' },
         ],
@@ -444,10 +444,10 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         progress: 0,
         start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
-        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager' },
+        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', avatar: '/images/placeholder/panha-portrait.jpg' },
         members: [
-            { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
-            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com' },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/panha-portrait.jpg' },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/brusmuny-portrait.png' },
             { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
             { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-rose-600', email: 'phuongsovannara@gmail.com' },
         ],
@@ -570,24 +570,31 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         if (!plan) return BMS_PROJECT_LOGO;
         const code = (plan.code || '').toUpperCase();
         const name = (plan.name || '').toUpperCase();
-        if (plan._logoFailed) {
-            if (code.includes('WMS') || name.includes('WMS')) return WMS_PROJECT_LOGO;
+        const id = String(plan.id || '').toLowerCase();
+
+        // 1. Signature project overrides (BMS & WMS)
+        if (code.includes('BMS') || name.includes('BMS') || id.includes('bms')) {
+            const raw = plan.logo || plan.image;
+            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
+                return resolveFileUrl(raw) || BMS_PROJECT_LOGO;
+            }
             return BMS_PROJECT_LOGO;
         }
-        const raw = plan.logo || plan.image;
-        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png')) {
-            const resolved = resolveFileUrl(raw);
-            if (resolved && !resolved.includes('placeholder') && !resolved.includes('/images/logo/logo.png')) {
-                return resolved;
+
+        if (code.includes('WMS') || name.includes('WMS') || id.includes('wms')) {
+            const raw = plan.logo || plan.image;
+            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
+                return resolveFileUrl(raw) || WMS_PROJECT_LOGO;
             }
-        }
-        if (code.includes('WMS') || name.includes('WMS')) {
             return WMS_PROJECT_LOGO;
         }
-        if (code.includes('BMS') || name.includes('BMS')) {
-            return BMS_PROJECT_LOGO;
+
+        const raw = plan.logo || plan.image;
+        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png') && !raw.includes('/images/logo/wfm_logo.png')) {
+            const resolved = resolveFileUrl(raw);
+            if (resolved) return resolved;
         }
-        return '/images/logo/logo.png';
+        return BMS_PROJECT_LOGO;
     }
 
     onProjectLogoError(event: Event, plan: any): void {
@@ -610,6 +617,20 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         const curEmail = (cur?.email || '').toLowerCase().trim();
         const targetName = (member.name || '').toLowerCase().trim();
         const targetEmail = (member.email || '').toLowerCase().trim();
+
+        // 1. Dedicated member profile photo resolution (highest priority for rock-solid loading)
+        if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី') || targetName.includes('pum')) {
+            return '/images/placeholder/brusmuny-portrait.png';
+        }
+        if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
+            return '/images/placeholder/panha-portrait.jpg';
+        }
+        if (targetName.includes('winner') || targetName.includes('វីនណឺរ')) {
+            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
+        }
+        if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
+            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
+        }
 
         const isCurrentUser = Boolean(
             (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
@@ -651,20 +672,6 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                     return resolved;
                 }
             }
-        }
-
-        // Dedicated member profile photo resolution
-        if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី') || targetName.includes('pum')) {
-            return '/uploads/user/Screenshot_2026-07-22_115449-1789358446601-91.png';
-        }
-        if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
-            return '/images/placeholder/panha-portrait.jpg';
-        }
-        if (targetName.includes('winner') || targetName.includes('វីនណឺរ')) {
-            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
-        }
-        if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
-            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
         }
 
         return null;
