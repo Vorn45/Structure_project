@@ -24,6 +24,9 @@ export interface ProjectPlanItem {
     completed_tasks: number;
     logo?: string | null;
     image?: string | null;
+    lead?: { id?: number; name?: string; role?: string; avatar?: string | null };
+    team_lead?: { id?: number; name?: string; role?: string; avatar?: string | null };
+    reporter?: string | { id?: number; name?: string; role?: string; avatar?: string | null };
     members: Array<{
         id: number;
         name: string;
@@ -282,6 +285,11 @@ export class PlanService {
 
         let list = [...this.projects];
 
+        // Role-based scoping: Non-admin members only see projects they are assigned to
+        if (!this.isAdmin(user)) {
+            list = list.filter((p) => this.isUserProjectMember(user, p));
+        }
+
         if (query.search) {
             const s = query.search.toLowerCase();
             list = list.filter(
@@ -318,6 +326,9 @@ export class PlanService {
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
+        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលគម្រោងនេះទេ (You do not have permission to view this project).');
+        }
         this.syncTaskCounts([plan]);
 
         return {
@@ -333,6 +344,9 @@ export class PlanService {
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
+        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលសមាជិកនៃគម្រោងនេះទេ (You do not have permission to view members of this project).');
+        }
 
         return {
             status_code: 200,
@@ -345,7 +359,8 @@ export class PlanService {
         };
     }
 
-    assertAdminOrSuperAdmin(user: UserPayload, actionDesc: string = 'កែប្រែ ឬគ្រប់គ្រងគម្រោង'): void {
+    public isAdmin(user?: UserPayload): boolean {
+        if (!user) return false;
         const roles = Array.isArray(user?.roles) ? user.roles : [];
         const activeRole: any =
             roles.find((r: any) => r.is_default) ??
@@ -362,7 +377,7 @@ export class PlanService {
             slug === 'member' ||
             nameKh === 'អ្នកប្រើប្រាស់';
 
-        const isAdmin =
+        return (
             !isUserRole &&
             (
                 slug.includes('admin') ||
@@ -375,9 +390,48 @@ export class PlanService {
                 user?.is_active === RoleEnum.ORG_ADMIN ||
                 user?.is_active === RoleEnum.ORG_OWNER ||
                 user?.is_active === RoleEnum.SUPER_ADMIN
-            );
+            )
+        );
+    }
 
-        if (!isAdmin) {
+    public isUserProjectMember(user: UserPayload, project: ProjectPlanItem): boolean {
+        if (!user) return false;
+        if (this.isAdmin(user)) return true;
+
+        const uId = user.id ? String(user.id) : '';
+        const uEmail = (user.email || '').toLowerCase().trim();
+        const uPhone = (user.phone || '').replace(/\D/g, '');
+        const uNameEn = (user.name_en || '').toLowerCase().trim();
+        const uNameKh = (user.name_kh || '').trim();
+
+        // Check if user is the project lead or reporter
+        const leadId = project.lead?.id || (project as any).team_lead?.id;
+        if (leadId && String(leadId) === uId) return true;
+        const leadName = (project.lead?.name || (project as any).team_lead?.name || '').toLowerCase().trim();
+        if (leadName && (leadName === uNameEn || (uNameKh && leadName === uNameKh.toLowerCase()))) return true;
+
+        const reporter = (project as any).reporter;
+        if (reporter && typeof reporter === 'string') {
+            const rLow = reporter.toLowerCase().trim();
+            if (rLow === uNameEn || (uNameKh && reporter.trim() === uNameKh)) return true;
+        }
+
+        // Check project members list
+        const members = Array.isArray(project.members) ? project.members : [];
+        return members.some((m: any) => {
+            if (m.id && String(m.id) === uId) return true;
+            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
+            if (m.name) {
+                const mName = m.name.toLowerCase().trim();
+                if (mName === uNameEn || (uNameKh && m.name.trim() === uNameKh)) return true;
+            }
+            return false;
+        });
+    }
+
+    assertAdminOrSuperAdmin(user: UserPayload, actionDesc: string = 'កែប្រែ ឬគ្រប់គ្រងគម្រោង'): void {
+        if (!this.isAdmin(user)) {
             throw new ForbiddenException(`មានតែ Administrator ឬ Super Administrator ប៉ុណ្ណោះដែលអាច${actionDesc}បាន (Only Admin or Super Admin can perform this action).`);
         }
     }
@@ -590,6 +644,9 @@ export class PlanService {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលកិច្ចការនៃគម្រោងនេះទេ (You do not have permission to view tasks in this project).');
+        }
         this.syncTaskCounts([plan]);
         return {
             status_code: 200,
@@ -601,6 +658,9 @@ export class PlanService {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិបង្កើតកិច្ចការក្នុងគម្រោងនេះទេ (You do not have permission to create tasks in this project).');
+        }
         if (!plan.tasks) plan.tasks = [];
 
         const newTask = {
@@ -756,6 +816,16 @@ export class PlanService {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+
+        if (!this.isAdmin(user)) {
+            const uId = user.id ? String(user.id) : '';
+            const leadId = plan.lead?.id || (plan as any).team_lead?.id;
+            const isLead = leadId && String(leadId) === uId;
+            if (!isLead) {
+                throw new ForbiddenException('មានតែ Administrator ឬ ប្រធានគម្រោងប៉ុណ្ណោះដែលអាចបន្ថែមសមាជិកបាន (Only Admin or Project Lead can add members).');
+            }
+        }
+
         if (!plan.members) plan.members = [];
 
         const newMember = {
@@ -780,6 +850,16 @@ export class PlanService {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+
+        if (!this.isAdmin(user)) {
+            const uId = user.id ? String(user.id) : '';
+            const leadId = plan.lead?.id || (plan as any).team_lead?.id;
+            const isLead = leadId && String(leadId) === uId;
+            if (!isLead) {
+                throw new ForbiddenException('មានតែ Administrator ឬ ប្រធានគម្រោងប៉ុណ្ណោះដែលអាចលុបសមាជិកបាន (Only Admin or Project Lead can remove members).');
+            }
+        }
+
         if (!plan.members) return { status_code: 200, message: 'Deleted' };
 
         plan.members = plan.members.filter((m: any) => m.id !== memberId && m.id !== Number(memberId));
@@ -795,6 +875,9 @@ export class PlanService {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលផែនការនៃគម្រោងនេះទេ (You do not have permission to view agile plans in this project).');
+        }
         return {
             status_code: 200,
             data: plan.agileTasks || [],

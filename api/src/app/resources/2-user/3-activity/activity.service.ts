@@ -276,78 +276,175 @@ export class ActivityService {
         }
     }
 
-        private ensureUserData(userId: string | number) {
-            const uId = String(userId || '1');
-            let needsSave = false;
+    private isAdmin(user?: UserPayload): boolean {
+        if (!user) return false;
+        const roles = Array.isArray(user?.roles) ? user.roles : [];
+        const activeRole: any =
+            roles.find((r: any) => r.is_default) ??
+            roles.find((r: any) => Number(r.id) === Number(user?.is_active)) ??
+            roles[0];
 
-            if (!this.userProjectsMap[uId] || !Array.isArray(this.userProjectsMap[uId]) || this.userProjectsMap[uId].length === 0) {
-                this.userProjectsMap[uId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
-                needsSave = true;
+        const slug = (activeRole?.slug || '').toLowerCase().trim();
+        const nameEn = (activeRole?.name_en || '').toLowerCase().trim();
+        const nameKh = (activeRole?.name_kh || '').trim();
+
+        const isUserRole =
+            slug === 'user' ||
+            slug === 'personal_workspace' ||
+            slug === 'member' ||
+            nameKh === 'អ្នកប្រើប្រាស់';
+
+        return (
+            !isUserRole &&
+            (
+                slug.includes('admin') ||
+                slug.includes('owner') ||
+                slug.includes('super') ||
+                nameEn.includes('admin') ||
+                nameEn.includes('owner') ||
+                nameKh === 'អភិបាលប្រព័ន្ធ' ||
+                nameKh === 'រដ្ឋបាល' ||
+                user?.is_active === 4 ||
+                user?.is_active === 2 ||
+                user?.is_active === 3
+            )
+        );
+    }
+
+    private getUserAssignedProjects(user?: UserPayload): RoadmapProject[] {
+        if (!user) return [];
+        try {
+            const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
+            if (fs.existsSync(planStorePath)) {
+                const raw = fs.readFileSync(planStorePath, 'utf8');
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.plans)) {
+                    const uId = String(user.id || '');
+                    const uEmail = (user.email || '').toLowerCase().trim();
+                    const uPhone = (user.phone || '').replace(/\D/g, '');
+                    const uNameEn = (user.name_en || '').toLowerCase().trim();
+                    const uNameKh = (user.name_kh || '').trim();
+
+                    const assigned = parsed.plans.filter((p: any) => {
+                        const leadId = p.lead?.id || p.team_lead?.id;
+                        if (leadId && String(leadId) === uId) return true;
+                        const leadName = (p.lead?.name || p.team_lead?.name || '').toLowerCase().trim();
+                        if (leadName && (leadName === uNameEn || (uNameKh && leadName === uNameKh.toLowerCase()))) return true;
+
+                        const members = Array.isArray(p.members) ? p.members : [];
+                        return members.some((m: any) => {
+                            if (m.id && String(m.id) === uId) return true;
+                            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+                            if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
+                            if (m.name) {
+                                const mName = m.name.toLowerCase().trim();
+                                if (mName === uNameEn || (uNameKh && m.name.trim() === uNameKh)) return true;
+                            }
+                            return false;
+                        });
+                    });
+
+                    return assigned.map((p: any) => ({
+                        id: String(p.id || p.code),
+                        code: p.code || 'PROJ',
+                        name: p.name,
+                        description: p.description || '',
+                        tasksCount: p.total_tasks || 0,
+                    }));
+                }
             }
-            if (!this.userTasksMap[uId] || Object.keys(this.userTasksMap[uId]).length === 0) {
+        } catch (e) {
+            console.warn('Failed to load user assigned projects for activity roadmap:', e);
+        }
+        return [];
+    }
+
+    private ensureUserData(userId: string | number, user?: UserPayload) {
+        const uId = String(userId || '1');
+        let needsSave = false;
+        const isUserAdmin = user ? this.isAdmin(user) : (uId === '1');
+
+        if (!this.userProjectsMap[uId] || !Array.isArray(this.userProjectsMap[uId]) || (isUserAdmin && this.userProjectsMap[uId].length === 0)) {
+            if (isUserAdmin) {
+                this.userProjectsMap[uId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
+            } else {
+                this.userProjectsMap[uId] = this.getUserAssignedProjects(user);
+            }
+            needsSave = true;
+        }
+        if (!this.userTasksMap[uId] || Object.keys(this.userTasksMap[uId]).length === 0) {
+            if (isUserAdmin) {
                 this.userTasksMap[uId] = {
                     '1': JSON.parse(JSON.stringify(DEFAULT_PMS_TASKS)),
                     '2': JSON.parse(JSON.stringify(DEFAULT_WMS_TASKS)),
                     '3': JSON.parse(JSON.stringify(DEFAULT_EGOV_TASKS)),
                 };
-                needsSave = true;
+            } else {
+                this.userTasksMap[uId] = {};
             }
-            if (!this.userActivitiesMap[uId] || !Array.isArray(this.userActivitiesMap[uId]) || this.userActivitiesMap[uId].length === 0) {
+            needsSave = true;
+        }
+        if (!this.userActivitiesMap[uId] || !Array.isArray(this.userActivitiesMap[uId]) || (isUserAdmin && this.userActivitiesMap[uId].length === 0)) {
+            if (isUserAdmin) {
                 this.userActivitiesMap[uId] = JSON.parse(JSON.stringify(ACTIVITIES));
-                needsSave = true;
+            } else {
+                this.userActivitiesMap[uId] = [];
             }
-            if (!this.userSelectedProjectMap[uId]) {
-                this.userSelectedProjectMap[uId] = '1';
-                needsSave = true;
-            }
-
-            if (needsSave) {
-                this.saveStore().catch(() => {});
-            }
+            needsSave = true;
+        }
+        if (!this.userSelectedProjectMap[uId]) {
+            const firstProj = this.userProjectsMap[uId]?.[0]?.id;
+            this.userSelectedProjectMap[uId] = firstProj ? String(firstProj) : (isUserAdmin ? '1' : '');
+            needsSave = true;
         }
 
-        async getActivities(user: UserPayload, query: QueryActivityDto) {
-            await this.ensureLoaded();
-            const uId = String(user?.id || 1);
-            this.ensureUserData(uId);
+        if (needsSave) {
+            this.saveStore().catch(() => {});
+        }
+    }
 
-            let list = [...(this.userActivitiesMap[uId] || [])];
+    async getActivities(user: UserPayload, query: QueryActivityDto) {
+        await this.ensureLoaded();
+        const uId = String(user?.id || 1);
+        this.ensureUserData(uId, user);
 
-            if (query.type && query.type !== 'all') {
-                list = list.filter((a) => a.type === query.type);
-            }
+        let list = [...(this.userActivitiesMap[uId] || [])];
 
-            const limit = query.limit ? parseInt(query.limit, 10) : 20;
-            const offset = query.offset ? parseInt(query.offset, 10) : 0;
-            const paginated = list.slice(offset, offset + limit);
-
-            return {
-                status_code: 200,
-                message: 'Activities retrieved successfully',
-                data: {
-                    results: paginated,
-                    total: list.length,
-                    limit,
-                    offset,
-                },
-            };
+        if (query.type && query.type !== 'all') {
+            list = list.filter((a) => a.type === query.type);
         }
 
-        async createActivity(user: UserPayload, dto: CreateActivityDto) {
-            await this.ensureLoaded();
-            const uId = String(user?.id || 1);
-            this.ensureUserData(uId);
+        const limit = query.limit ? parseInt(query.limit, 10) : 20;
+        const offset = query.offset ? parseInt(query.offset, 10) : 0;
+        const paginated = list.slice(offset, offset + limit);
 
-            const item: ActivityItem = {
-                id: Date.now(),
-                action: dto.action,
-                title: dto.title,
-                description: dto.description || '',
-                type: dto.type || 'task',
-                icon: dto.icon || 'mdi:check-circle',
-                actor: {
-                    id: Number(uId),
-                    name: user?.name_en || user?.name_kh || 'Current User',
+        return {
+            status_code: 200,
+            message: 'Activities retrieved successfully',
+            data: {
+                results: paginated,
+                total: list.length,
+                limit,
+                offset,
+            },
+        };
+    }
+
+    async createActivity(user: UserPayload, dto: CreateActivityDto) {
+        await this.ensureLoaded();
+        const uId = String(user?.id || 1);
+        this.ensureUserData(uId, user);
+
+        const item: ActivityItem = {
+            id: Date.now(),
+            action: dto.action,
+            title: dto.title,
+            description: dto.description || '',
+            type: dto.type || 'task',
+            icon: dto.icon || 'mdi:check-circle',
+            actor: {
+                id: Number(uId),
+                name: user?.name_en || user?.name_kh || 'Current User',
                 avatar: null,
             },
             created_at: new Date().toISOString(),
@@ -369,15 +466,15 @@ export class ActivityService {
     async getRoadmapData(user: UserPayload) {
         await this.ensureLoaded();
         const uId = String(user?.id || 1);
-        this.ensureUserData(uId);
+        this.ensureUserData(uId, user);
 
         return {
             status_code: 200,
             message: 'Roadmap data retrieved successfully',
             data: {
-                projects: this.userProjectsMap[uId],
-                tasksMap: this.userTasksMap[uId],
-                selectedProjectId: this.userSelectedProjectMap[uId] || '1',
+                projects: this.userProjectsMap[uId] || [],
+                tasksMap: this.userTasksMap[uId] || {},
+                selectedProjectId: this.userSelectedProjectMap[uId] || '',
             },
         };
     }
@@ -385,7 +482,7 @@ export class ActivityService {
     async selectRoadmapProject(user: UserPayload, dto: SelectRoadmapProjectDto) {
         await this.ensureLoaded();
         const uId = String(user?.id || 1);
-        this.ensureUserData(uId);
+        this.ensureUserData(uId, user);
 
         const targetId = String(dto.project_id || dto.projectId || '1');
         this.userSelectedProjectMap[uId] = targetId;
@@ -403,7 +500,7 @@ export class ActivityService {
     async createRoadmapProject(user: UserPayload, dto: CreateRoadmapProjectDto) {
         await this.ensureLoaded();
         const uId = String(user?.id || 1);
-        this.ensureUserData(uId);
+        this.ensureUserData(uId, user);
 
         const newProject: RoadmapProject = {
             id: dto.id || `proj-${Date.now()}`,
@@ -447,7 +544,7 @@ export class ActivityService {
     async createRoadmapTask(user: UserPayload, dto: CreateRoadmapTaskDto) {
         await this.ensureLoaded();
         const uId = String(user?.id || 1);
-        this.ensureUserData(uId);
+        this.ensureUserData(uId, user);
 
         const projectId = String(dto.project_id || dto.projectId || '1');
         const rawSegments = Array.isArray(dto.segments) ? dto.segments : [];
@@ -500,7 +597,7 @@ export class ActivityService {
     async deleteRoadmapTask(user: UserPayload, taskId: string, projectId: string) {
         await this.ensureLoaded();
         const uId = String(user?.id || 1);
-        this.ensureUserData(uId);
+        this.ensureUserData(uId, user);
 
         const pId = String(projectId);
         if (this.userTasksMap[uId] && this.userTasksMap[uId][pId]) {

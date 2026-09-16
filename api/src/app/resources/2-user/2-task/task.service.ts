@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
@@ -553,6 +553,101 @@ export class TaskService {
         return this.tasks;
     }
 
+    private isAdmin(user?: UserPayload): boolean {
+        if (!user) return false;
+        const roles = Array.isArray(user?.roles) ? user.roles : [];
+        const activeRole: any =
+            roles.find((r: any) => r.is_default) ??
+            roles.find((r: any) => Number(r.id) === Number(user?.is_active)) ??
+            roles[0];
+
+        const slug = (activeRole?.slug || '').toLowerCase().trim();
+        const nameEn = (activeRole?.name_en || '').toLowerCase().trim();
+        const nameKh = (activeRole?.name_kh || '').trim();
+
+        const isUserRole =
+            slug === 'user' ||
+            slug === 'personal_workspace' ||
+            slug === 'member' ||
+            nameKh === 'អ្នកប្រើប្រាស់';
+
+        return (
+            !isUserRole &&
+            (
+                slug.includes('admin') ||
+                slug.includes('owner') ||
+                slug.includes('super') ||
+                nameEn.includes('admin') ||
+                nameEn.includes('owner') ||
+                nameKh === 'អភិបាលប្រព័ន្ធ' ||
+                nameKh === 'រដ្ឋបាល' ||
+                user?.is_active === 4 ||
+                user?.is_active === 2 ||
+                user?.is_active === 3
+            )
+        );
+    }
+
+    private isUserPlanMember(user: UserPayload, plan: any): boolean {
+        if (!user) return false;
+        if (this.isAdmin(user)) return true;
+
+        const uId = user.id ? String(user.id) : '';
+        const uEmail = (user.email || '').toLowerCase().trim();
+        const uPhone = (user.phone || '').replace(/\D/g, '');
+        const uNameEn = (user.name_en || '').toLowerCase().trim();
+        const uNameKh = (user.name_kh || '').trim();
+
+        const leadId = plan.lead?.id || plan.team_lead?.id;
+        if (leadId && String(leadId) === uId) return true;
+        const leadName = (plan.lead?.name || plan.team_lead?.name || '').toLowerCase().trim();
+        if (leadName && (leadName === uNameEn || (uNameKh && leadName === uNameKh.toLowerCase()))) return true;
+
+        const reporter = plan.reporter;
+        if (reporter && typeof reporter === 'string') {
+            const rLow = reporter.toLowerCase().trim();
+            if (rLow === uNameEn || (uNameKh && reporter.trim() === uNameKh)) return true;
+        }
+
+        const members = Array.isArray(plan.members) ? plan.members : [];
+        return members.some((m: any) => {
+            if (m.id && String(m.id) === uId) return true;
+            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
+            if (m.name) {
+                const mName = m.name.toLowerCase().trim();
+                if (mName === uNameEn || (uNameKh && m.name.trim() === uNameKh)) return true;
+            }
+            return false;
+        });
+    }
+
+    private isUserTaskAssigneeOrReporter(user: UserPayload, t: TaskItem): boolean {
+        if (!user) return false;
+        const uId = user.id ? String(user.id) : '';
+        const uEmail = (user.email || '').toLowerCase().trim();
+        const uNameEn = (user.name_en || '').toLowerCase().trim();
+        const uNameKh = (user.name_kh || '').trim();
+
+        if (t.reporter && (String(t.reporter.id) === uId || (t.reporter.name && (t.reporter.name.toLowerCase().trim() === uNameEn || (uNameKh && t.reporter.name.trim() === uNameKh))))) {
+            return true;
+        }
+
+        if (t.assignee && (String(t.assignee.id) === uId || (uEmail && t.assignee.email && t.assignee.email.toLowerCase().trim() === uEmail) || (t.assignee.name && (t.assignee.name.toLowerCase().trim() === uNameEn || (uNameKh && t.assignee.name.trim() === uNameKh))))) {
+            return true;
+        }
+
+        if (Array.isArray(t.assignees)) {
+            return t.assignees.some((a) => (
+                String(a.id) === uId ||
+                (uEmail && a.email && a.email.toLowerCase().trim() === uEmail) ||
+                (a.name && (a.name.toLowerCase().trim() === uNameEn || (uNameKh && a.name.trim() === uNameKh)))
+            ));
+        }
+
+        return false;
+    }
+
     async getProjects(user?: UserPayload) {
         let planProjects: any[] = [];
         try {
@@ -568,10 +663,32 @@ export class TaskService {
             console.warn('Failed to read plans_data_store.json for task projects:', e);
         }
 
+        const isUserAdmin = !user || this.isAdmin(user);
+
+        // Filter projects from plans_data_store.json if not admin
+        if (!isUserAdmin && user) {
+            planProjects = planProjects.filter((p) => this.isUserPlanMember(user, p));
+        }
+
+        const allowedPlanKeys = new Set(planProjects.map((p) => (p.id || '').toLowerCase()));
+        planProjects.forEach((p) => {
+            if (p.name) allowedPlanKeys.add(p.name.toLowerCase());
+            if (p.code) allowedPlanKeys.add(p.code.toLowerCase());
+        });
+
         // Collect distinct projects from current tasks
         const taskProjectMap = new Map<string, { id: string; name: string; code?: string }>();
         for (const t of this.tasks) {
             if (t.project_id || t.project_name) {
+                if (!isUserAdmin && user) {
+                    const isTaskAssigned = this.isUserTaskAssigneeOrReporter(user, t);
+                    const pidKey = (t.project_id || '').toLowerCase();
+                    const pnameKey = (t.project_name || '').toLowerCase();
+                    const isAllowedPlan = allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
+                    if (!isTaskAssigned && !isAllowedPlan) {
+                        continue;
+                    }
+                }
                 const key = (t.project_id || t.project_name).toLowerCase();
                 if (!taskProjectMap.has(key)) {
                     taskProjectMap.set(key, {
@@ -623,7 +740,8 @@ export class TaskService {
             }
         }
 
-        if (results.length === 0) {
+        // Only fallback to sample projects if admin
+        if (results.length === 0 && isUserAdmin) {
             results.push(
                 { id: 'bms-digitech', name: 'BMS Digitech', code: 'BMS' },
                 { id: 'wms-digitech', name: 'WMS Digitech', code: 'WMS' },
@@ -962,7 +1080,37 @@ export class TaskService {
 
     async getTasks(user: UserPayload, query: QueryTasksDto) {
         await this.ensureStoreLoaded();
-        const validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
+        let validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
+
+        // For non-admin users, restrict tasks to those belonging to their assigned projects or tasks assigned to them
+        if (user && !this.isAdmin(user)) {
+            let accessiblePlans: any[] = [];
+            try {
+                const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
+                if (fs.existsSync(planStorePath)) {
+                    const raw = fs.readFileSync(planStorePath, 'utf8');
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.plans)) {
+                        accessiblePlans = parsed.plans.filter((p: any) => this.isUserPlanMember(user, p));
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to read plans for task filtering:', e);
+            }
+
+            const allowedPlanKeys = new Set(accessiblePlans.map((p) => (p.id || '').toLowerCase()));
+            accessiblePlans.forEach((p) => {
+                if (p.name) allowedPlanKeys.add(p.name.toLowerCase());
+                if (p.code) allowedPlanKeys.add(p.code.toLowerCase());
+            });
+
+            validTasks = validTasks.filter((t) => {
+                if (this.isUserTaskAssigneeOrReporter(user, t)) return true;
+                const pidKey = (t.project_id || '').toLowerCase();
+                const pnameKey = (t.project_name || '').toLowerCase();
+                return allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
+            });
+        }
 
         // Every active filter EXCEPT status. Each status chip shows how many tasks
         // would match if that chip were picked, so the counted scope must not be
@@ -1000,6 +1148,37 @@ export class TaskService {
         const task = this.tasks.find((t) => t.id === id);
         if (!task) {
             throw new NotFoundException(`Task #${id} not found`);
+        }
+
+        if (user && !this.isAdmin(user)) {
+            let isAllowed = this.isUserTaskAssigneeOrReporter(user, task);
+            if (!isAllowed) {
+                try {
+                    const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
+                    if (fs.existsSync(planStorePath)) {
+                        const raw = fs.readFileSync(planStorePath, 'utf8');
+                        const parsed = JSON.parse(raw);
+                        if (parsed && Array.isArray(parsed.plans)) {
+                            const pidKey = (task.project_id || '').toLowerCase();
+                            const pnameKey = (task.project_name || '').toLowerCase();
+                            const matchedPlan = parsed.plans.find(
+                                (p: any) =>
+                                    (p.id && p.id.toLowerCase() === pidKey) ||
+                                    (p.name && p.name.toLowerCase() === pnameKey) ||
+                                    (p.code && p.code.toLowerCase() === pidKey)
+                            );
+                            if (matchedPlan && this.isUserPlanMember(user, matchedPlan)) {
+                                isAllowed = true;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to verify task project permissions:', e);
+                }
+            }
+            if (!isAllowed) {
+                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលភារកិច្ចនេះទេ (You do not have permission to view this task).');
+            }
         }
 
         const [enrichedTask] = await this.enrichTasksWithAvatars([task], user);

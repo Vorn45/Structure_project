@@ -366,28 +366,30 @@
 
             <!-- Drawer Form Body -->
             <form [formGroup]="userForm" (ngSubmit)="submitUserForm()" class="flex-1 overflow-y-auto p-6 space-y-6">
-                <!-- Centered Circular Avatar with Camera Badge -->
-                <div class="flex flex-col items-center justify-center pb-2">
-                    <div
-                        class="relative w-[120px] h-[120px] rounded-full overflow-visible border border-gray-300 dark:border-white/10 flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
-                        (click)="avatarFileInput.click()">
-                        <img
-                            class="w-full h-full object-cover rounded-full bg-slate-100 dark:bg-white/10 transition duration-300"
-                            [src]="getDrawerAvatarUrl()"
-                            (error)="onDrawerAvatarError($event)"
-                            alt="User Avatar">
+                <!-- Centered Circular Avatar with Camera Badge (Only shown when editing an existing user) -->
+                @if (isEditing()) {
+                    <div class="flex flex-col items-center justify-center pb-2">
+                        <div
+                            class="relative w-[120px] h-[120px] rounded-full overflow-visible border border-gray-300 dark:border-white/10 flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                            (click)="avatarFileInput.click()">
+                            <img
+                                class="w-full h-full object-cover rounded-full bg-slate-100 dark:bg-white/10 transition duration-300"
+                                [src]="getDrawerAvatarUrl()"
+                                (error)="onDrawerAvatarError($event)"
+                                alt="User Avatar">
 
-                        <div class="absolute bottom-1 right-1 flex items-center justify-center border rounded-full border-primary p-1 bg-slate-100 dark:bg-slate-800 shadow-sm">
-                            <mat-icon class="icon-size-5 text-primary" svgIcon="mdi:camera"></mat-icon>
+                            <div class="absolute bottom-1 right-1 flex items-center justify-center border rounded-full border-primary p-1 bg-slate-100 dark:bg-slate-800 shadow-sm">
+                                <mat-icon class="icon-size-5 text-primary" svgIcon="mdi:camera"></mat-icon>
+                            </div>
                         </div>
+                        <input #avatarFileInput id="avatarFileInput" type="file" accept="image/*" (change)="onAvatarSelected($event)" class="hidden" />
+                        @if (userForm.get('avatar')?.value) {
+                            <button type="button" (click)="removeAvatar()" class="mt-2 text-[12px] font-medium text-rose-500 hover:underline cursor-pointer">
+                                លុបរូបថត
+                            </button>
+                        }
                     </div>
-                    <input #avatarFileInput id="avatarFileInput" type="file" accept="image/*" (change)="onAvatarSelected($event)" class="hidden" />
-                    @if (userForm.get('avatar')?.value) {
-                        <button type="button" (click)="removeAvatar()" class="mt-2 text-[12px] font-medium text-rose-500 hover:underline cursor-pointer">
-                            លុបរូបថត
-                        </button>
-                    }
-                </div>
+                }
 
                 <!-- Section 1: ព័ត៌មានផ្ទាល់ខ្លួន (Personal Information) -->
                 <div>
