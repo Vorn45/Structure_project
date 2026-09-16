@@ -212,12 +212,40 @@ jobs:
             exit 0
           fi
 
+          # 1. Pre-pull base images with retry to ensure local cache & avoid concurrent Docker Hub timeouts
+          echo "Pre-pulling base images with retry..."
+          for img in "node:20-alpine" "nginx:1.27-alpine"; do
+            for attempt in 1 2 3; do
+              echo "Pulling $img (attempt $attempt)..."
+              if docker pull "$img"; then
+                break
+              fi
+              echo "Pulling $img failed, retrying in 5s..."
+              sleep 5
+            done
+          done
+
+          # 2. Build selected containers with retry
           echo "Building services: ${services[*]}"
-          docker compose \
-            --project-name "$COMPOSE_PROJECT_NAME" \
-            --env-file "$RUNNER_TEMP/wms-production.env" \
-            -f docker-compose.yml \
-            build "${services[@]}"
+          build_success=false
+          for attempt in 1 2 3; do
+            echo "Executing docker compose build (attempt $attempt of 3)..."
+            if docker compose \
+              --project-name "$COMPOSE_PROJECT_NAME" \
+              --env-file "$RUNNER_TEMP/wms-production.env" \
+              -f docker-compose.yml \
+              build "${services[@]}"; then
+              build_success=true
+              break
+            fi
+            echo "Build attempt $attempt failed, retrying in 10s..."
+            sleep 10
+          done
+
+          if [ "$build_success" != "true" ]; then
+            echo "::error::docker compose build failed after 3 attempts."
+            exit 1
+          fi
 
       - name: Restart selected containers
         shell: bash
