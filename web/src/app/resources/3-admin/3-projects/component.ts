@@ -36,6 +36,7 @@ import {
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
 import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO } from 'app/resources/2-user/4-plan/component';
+import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;
@@ -353,6 +354,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     private readonly _userService = inject(UserService);
     private readonly _userTaskService = inject(UserTaskService);
     private readonly _route = inject(ActivatedRoute);
+    private readonly _snackbarService = inject(SnackbarService);
 
     projects = signal<AdminProject[]>([]);
     users = signal<AdminUser[]>([]);
@@ -1670,6 +1672,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     openCreateMemberModal(): void {
         if (!this.isAdmin()) return;
         const proj = this.selectedProject();
+        if (!proj) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             projectName: proj?.name,
@@ -1681,23 +1684,63 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.name) {
                 const newM: TaskMember = {
-                    id: result.id || Date.now(),
+                    id: Number(result.id || result.user_id) || Date.now(),
                     name: result.name,
                     role: result.role || 'Developer',
                     email: result.email || undefined,
                     avatar: result.avatar || undefined,
                     initial: result.initial || result.name.charAt(0).toUpperCase(),
                     bgClass: 'bg-indigo-600 text-white',
+                    phone: result.phone || undefined,
+                    user_id: result.user_id || result.id,
                 };
-                this.teamMembers.update((list) => [...list, newM]);
+                const updatedList = [...this.teamMembers(), newM];
+                this.teamMembers.set(updatedList);
+                this.persistProjectMembers(proj.id, updatedList, 'add');
             }
         });
     }
 
-    deleteMember(memberId: number, event: Event): void {
+    deleteMember(memberId: number | string, event: Event): void {
         event.stopPropagation();
         if (!this.isAdmin()) return;
-        this.teamMembers.update((list) => list.filter((m) => m.id !== memberId));
+        const proj = this.selectedProject();
+        if (!proj) return;
+        const updatedList = this.teamMembers().filter((m) => String(m.id) !== String(memberId));
+        this.teamMembers.set(updatedList);
+        this.persistProjectMembers(proj.id, updatedList, 'delete');
+    }
+
+    private persistProjectMembers(projectId: string | number, members: TaskMember[], action: 'add' | 'delete' = 'add'): void {
+        const payloadMembers = members.map((m) => ({
+            id: Number(m.id) || m.id,
+            user_id: Number((m as any).user_id || m.id) || undefined,
+            name: m.name,
+            role: m.role || 'សមាជិក',
+            email: m.email || null,
+            phone: (m as any).phone || null,
+            avatar: m.avatar || null,
+        }));
+
+        this._adminService.updateProject(String(projectId), { members: payloadMembers as any }).subscribe({
+            next: (res) => {
+                if (res.data) {
+                    this.selectedProject.set(res.data);
+                    this.projects.update((list) =>
+                        list.map((p) => (p.id === res.data.id || p.code === res.data.code ? { ...p, members: res.data.members } : p))
+                    );
+                    this._snackbarService.success(
+                        action === 'add'
+                            ? 'បានបន្ថែមសមាជិកទៅក្នុងគម្រោងដោយជោគជ័យ'
+                            : 'បានដកសមាជិកចេញពីគម្រោងដោយជោគជ័យ'
+                    );
+                }
+            },
+            error: (err) => {
+                console.error('Failed to update project members:', err);
+                this._snackbarService.error('មានបញ្ហាក្នុងការរក្សាទុកសមាជិកគម្រោង');
+            },
+        });
     }
 
     // Link management
@@ -2168,6 +2211,16 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             next: (res) => {
                 if (res.data && res.data.results) {
                     this.projects.set(res.data.results);
+                    const curr = this.selectedProject();
+                    if (curr) {
+                        const updatedSelected = res.data.results.find((p: any) => p.id === curr.id || p.code === curr.code);
+                        if (updatedSelected) {
+                            this.selectedProject.set(updatedSelected);
+                            if (updatedSelected.members && Array.isArray(updatedSelected.members) && updatedSelected.members.length > 0) {
+                                this.teamMembers.set(updatedSelected.members.map((m: any) => this.mapProjectMemberToTaskMember(m)));
+                            }
+                        }
+                    }
                 }
                 this.loading.set(false);
             },
@@ -2181,6 +2234,10 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             next: (res) => {
                 if (res.data && res.data.results) {
                     this.users.set(res.data.results);
+                    const curr = this.selectedProject();
+                    if (curr && curr.members && Array.isArray(curr.members) && curr.members.length > 0) {
+                        this.teamMembers.set(curr.members.map((m: any) => this.mapProjectMemberToTaskMember(m)));
+                    }
                 }
             },
         });
@@ -2272,12 +2329,67 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         };
     }
 
+    private mapProjectMemberToTaskMember(m: any): TaskMember {
+        const uId = String(m.id || m.user_id || '');
+        const uPhone = (m.phone || '').replace(/\D/g, '');
+        const uEmail = (m.email || '').toLowerCase().trim();
+        const mName = (m.name || '').toLowerCase().trim();
+
+        // Match against system users list if available
+        const matchedUser = this.users().find((u) => {
+            if (uId && String(u.id) === uId) return true;
+            if (uPhone && (u.phone || '').replace(/\D/g, '') === uPhone) return true;
+            if (uEmail && (u.email || '').toLowerCase().trim() === uEmail) return true;
+            if (mName && (u.name_en?.toLowerCase().trim() === mName || u.name_kh?.trim() === m.name?.trim())) return true;
+            return false;
+        });
+
+        const name = matchedUser ? (matchedUser.name_kh || matchedUser.name_en) : (m.name || 'សមាជិក');
+        const role = m.role || (matchedUser ? (matchedUser.position || matchedUser.role) : 'សមាជិក');
+        const email = m.email || matchedUser?.email || undefined;
+        const phone = m.phone || matchedUser?.phone || undefined;
+        const avatar = m.avatar || matchedUser?.avatar || undefined;
+        const initial = m.initial || (name ? name.trim().charAt(0).toUpperCase() : 'M');
+
+        return {
+            id: Number(matchedUser?.id || m.id) || Date.now(),
+            user_id: Number(matchedUser?.id || m.user_id || m.id) || undefined,
+            name,
+            role,
+            avatar,
+            email,
+            phone,
+            initial,
+            bgClass: 'bg-blue-600 text-white',
+        };
+    }
+
     selectProject(project: AdminProject): void {
         this.selectedProject.set(project);
         this.projectNavTab.set('tasks');
         this.taskSearchQuery.set('');
         this.subtaskFilter.set('all');
         this.isTasksLoading.set(true);
+
+        if (project.members && Array.isArray(project.members) && project.members.length > 0) {
+            this.teamMembers.set(project.members.map((m: any) => this.mapProjectMemberToTaskMember(m)));
+        } else if (project.code === 'WMS-DIGI' || project.name?.includes('WMS')) {
+            this.teamMembers.set([...DEFAULT_PROJECT_TEAM_MEMBERS]);
+        } else {
+            this.teamMembers.set([]);
+        }
+
+        if (project.phases && Array.isArray(project.phases) && project.phases.length > 0) {
+            this.phases.set(project.phases);
+        } else {
+            this.phases.set(DEFAULT_PROJECT_PHASES);
+        }
+
+        if (project.meetings && Array.isArray(project.meetings) && project.meetings.length > 0) {
+            this.meetings.set(project.meetings);
+        } else {
+            this.meetings.set(DEFAULT_PROJECT_MEETINGS);
+        }
 
         this._userTaskService
             .getTasks()

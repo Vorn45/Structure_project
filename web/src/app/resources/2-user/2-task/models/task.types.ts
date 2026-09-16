@@ -54,6 +54,8 @@ export interface TaskMember {
     initial?: string;
     bgClass?: string;
     online?: boolean;
+    phone?: string | null;
+    user_id?: number | string | null;
 }
 
 export interface TaskItem {

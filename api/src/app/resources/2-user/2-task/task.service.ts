@@ -612,6 +612,7 @@ export class TaskService {
         const members = Array.isArray(plan.members) ? plan.members : [];
         return members.some((m: any) => {
             if (m.id && String(m.id) === uId) return true;
+            if (m.user_id && String(m.user_id) === uId) return true;
             if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
             if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
             if (m.name) {

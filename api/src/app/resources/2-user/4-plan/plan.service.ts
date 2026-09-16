@@ -111,6 +111,12 @@ export class PlanService {
                     this.projects = data.plans.filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id));
                     if (this.projects.length === 0) {
                         this.projects = [...PROJECTS];
+                    } else {
+                        for (const defP of PROJECTS) {
+                            if (!this.projects.some((p: any) => p.code === defP.code || p.id === defP.id)) {
+                                this.projects.push(defP);
+                            }
+                        }
                     }
                 }
             }
@@ -163,6 +169,11 @@ export class PlanService {
                 if (this.projects.length === 0) {
                     this.projects = [...PROJECTS];
                 } else {
+                    for (const defP of PROJECTS) {
+                        if (!this.projects.some((p: any) => p.code === defP.code || p.id === defP.id)) {
+                            this.projects.push(defP);
+                        }
+                    }
                     for (const proj of this.projects) {
                         if (!proj.members) proj.members = [];
                         if (!proj.members.some((m: any) => m.phone === '011242425' || m.name?.toLowerCase().includes('sovannara'))) {
@@ -420,6 +431,7 @@ export class PlanService {
         const members = Array.isArray(project.members) ? project.members : [];
         return members.some((m: any) => {
             if (m.id && String(m.id) === uId) return true;
+            if (m.user_id && String(m.user_id) === uId) return true;
             if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
             if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
             if (m.name) {
@@ -585,7 +597,12 @@ export class PlanService {
     async updatePlan(user: UserPayload, id: string, dto: any) {
         this.assertAdminOrSuperAdmin(user, 'កែប្រែព័ត៌មានគម្រោង');
         await this.ensureLoaded();
-        const index = this.projects.findIndex((p) => p.id === id || p.code === id);
+        const normId = String(id || '').toLowerCase().replace(/^#/, '').trim();
+        const index = this.projects.findIndex(
+            (p) =>
+                String(p.id || '').toLowerCase() === normId ||
+                String(p.code || '').toLowerCase().replace(/^#/, '') === normId
+        );
         if (index === -1) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }

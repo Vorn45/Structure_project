@@ -390,7 +390,15 @@ export class CreateMemberDialogComponent implements OnInit {
     submit(): void {
         const name = this.memberName().trim();
         if (!name) return;
-        const staff = this.selectedStaff();
+        let staff = this.selectedStaff();
+        if (!staff && this.data.users && this.data.users.length > 0) {
+            staff = this.data.users.find(
+                (u) =>
+                    (this.memberEmail() && u.email?.toLowerCase().trim() === this.memberEmail().toLowerCase().trim()) ||
+                    u.name_kh?.trim() === name ||
+                    (u.name_en && u.name_en.toLowerCase().trim() === name.toLowerCase())
+            ) || null;
+        }
         this._dialogRef.close({
             id: staff?.id || Date.now(),
             name,
@@ -400,6 +408,7 @@ export class CreateMemberDialogComponent implements OnInit {
             initial: this.getInitial(staff, name),
             department: staff?.department,
             user_id: staff?.id,
+            phone: staff?.phone || undefined,
         });
     }
 

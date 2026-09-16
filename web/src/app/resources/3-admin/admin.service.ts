@@ -143,10 +143,12 @@ export interface AdminProject {
     image?: string | null;
     members: Array<{
         id: number;
+        user_id?: number | string | null;
         name: string;
         role: string;
         avatar?: string | null;
-        email?: string;
+        email?: string | null;
+        phone?: string | null;
     }>;
     tasks?: any[];
     phases?: any[];
