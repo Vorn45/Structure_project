@@ -2,8 +2,12 @@
 # Multi-stage Dockerfile for Angular Frontend
 # ===================================================
 
+# High-availability mirrors (AWS ECR Public) immune to Docker Hub rate limits and timeouts
+ARG NODE_IMAGE=public.ecr.aws/docker/library/node:20-alpine
+ARG NGINX_IMAGE=public.ecr.aws/docker/library/nginx:1.27-alpine
+
 # 1. Build Stage
-FROM node:20-alpine AS builder
+FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /usr/app
 
@@ -32,7 +36,7 @@ COPY . .
 RUN npm run build
 
 # 2. Production Runtime Stage (Nginx)
-FROM nginx:1.27-alpine
+FROM ${NGINX_IMAGE}
 
 COPY default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /usr/app/dist /usr/share/nginx/html

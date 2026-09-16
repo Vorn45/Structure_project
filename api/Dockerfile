@@ -2,8 +2,11 @@
 # Multi-stage Dockerfile for NestJS API
 # ===================================================
 
+# High-availability mirror (AWS ECR Public) immune to Docker Hub rate limits and timeouts
+ARG NODE_IMAGE=public.ecr.aws/docker/library/node:20-alpine
+
 # 1. Build Stage
-FROM node:20-alpine AS builder
+FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /usr/src/app
 
@@ -25,7 +28,7 @@ RUN npm run build
 RUN npm prune --production
 
 # 2. Production Stage
-FROM node:20-alpine AS runner
+FROM ${NODE_IMAGE} AS runner
 
 WORKDIR /usr/src/app
 

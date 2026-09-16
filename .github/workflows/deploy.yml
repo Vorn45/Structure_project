@@ -212,9 +212,9 @@ jobs:
             exit 0
           fi
 
-          # 1. Pre-pull base images with retry to ensure local cache & avoid concurrent Docker Hub timeouts
+          # 1. Pre-pull base images with retry to ensure local cache & avoid concurrent timeouts
           echo "Pre-pulling base images with retry..."
-          for img in "node:20-alpine" "nginx:1.27-alpine"; do
+          for img in "public.ecr.aws/docker/library/node:20-alpine" "public.ecr.aws/docker/library/nginx:1.27-alpine"; do
             for attempt in 1 2 3; do
               echo "Pulling $img (attempt $attempt)..."
               if docker pull "$img"; then

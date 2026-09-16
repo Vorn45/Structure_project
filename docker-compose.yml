@@ -4,7 +4,7 @@ services:
   # ===================================================
   load_balancer:
     container_name: digitechkh-wms-load_balancer
-    image: nginx:1.27-alpine
+    image: public.ecr.aws/docker/library/nginx:1.27-alpine
     restart: unless-stopped
     ports:
       - "${PORT_HTTP:-4500}:80"
