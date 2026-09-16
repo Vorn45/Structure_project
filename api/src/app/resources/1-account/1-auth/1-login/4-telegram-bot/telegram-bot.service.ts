@@ -845,7 +845,17 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
                 }
             } catch (error: any) {
                 if (!axios.isCancel(error)) {
-                    await new Promise((resolve) => setTimeout(resolve, 3000));
+                    const status = error?.response?.status;
+                    const desc = error?.response?.data?.description || error?.message || error;
+                    if (status === 409) {
+                        this._logger.warn(
+                            `Telegram polling conflict (409): Another instance is running getUpdates with this bot token. Please ensure only one server instance is running. Retrying in 5s...`,
+                        );
+                        await new Promise((resolve) => setTimeout(resolve, 5000));
+                    } else {
+                        this._logger.warn(`Telegram polling warning (${status || 'network'}): ${desc}`);
+                        await new Promise((resolve) => setTimeout(resolve, 1500));
+                    }
                 }
             }
         }

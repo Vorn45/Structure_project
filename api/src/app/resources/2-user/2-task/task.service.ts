@@ -1314,24 +1314,33 @@ export class TaskService {
                 .andWhere('user.is_active = 1')
                 .getMany();
 
-            const chatIdsToSend = new Set<string>(['8836877586', '853828296', '1174417436']);
+            const chatIdsToSend = new Set<string>();
+
+            // Primary admin ID
+            chatIdsToSend.add('8836877586');
+
             if (process.env.TELEGRAM_CHAT_MAIN_ID) {
                 chatIdsToSend.add(String(process.env.TELEGRAM_CHAT_MAIN_ID));
             }
             if (process.env.TELEGRAM_CHAT_ID) {
                 chatIdsToSend.add(String(process.env.TELEGRAM_CHAT_ID));
             }
-            if (appConfig.ORGANIZATION_LOG.TELEGRAM_CHAT_ID) {
+            if (appConfig.ORGANIZATION_LOG?.TELEGRAM_CHAT_ID) {
                 chatIdsToSend.add(String(appConfig.ORGANIZATION_LOG.TELEGRAM_CHAT_ID));
             }
+
+            const targetSet = targetUserIds && targetUserIds.length > 0
+                ? new Set(targetUserIds.map((id) => Number(id)))
+                : null;
+
             for (const u of linkedUsers) {
-                if (u.telegram_id) {
+                if (u.telegram_id && (!targetSet || targetSet.has(u.id))) {
                     chatIdsToSend.add(String(u.telegram_id));
                 }
             }
 
-            for (const chatId of chatIdsToSend) {
-                if (!chatId) continue;
+            const sendPromises = Array.from(chatIdsToSend).map(async (chatId) => {
+                if (!chatId) return;
 
                 let messageThreadId: number | undefined = undefined;
                 try {
@@ -1356,19 +1365,24 @@ export class TaskService {
                     payload.message_thread_id = messageThreadId;
                 }
 
-                axios
-                    .post(`https://api.telegram.org/bot${botToken}/sendMessage`, payload, { timeout: 15000 })
-                    .catch((err) => {
-                        if (messageThreadId) {
-                            delete payload.message_thread_id;
-                            axios
-                                .post(`https://api.telegram.org/bot${botToken}/sendMessage`, payload, { timeout: 15000 })
-                                .catch((e) => console.warn('[Telegram Notification Direct Fallback] Error:', e?.message || e));
-                        } else {
-                            console.warn(`[Telegram Notification] Failed to send to ${chatId}:`, err?.message || err);
+                try {
+                    await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, payload, { timeout: 8000 });
+                } catch (err: any) {
+                    const desc = err?.response?.data?.description || err?.message || '';
+                    if (messageThreadId && desc.toLowerCase().includes('thread')) {
+                        delete payload.message_thread_id;
+                        try {
+                            await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, payload, { timeout: 8000 });
+                        } catch (e: any) {
+                            console.warn(`[Telegram Notification] Fallback failed for ${chatId}:`, e?.response?.data?.description || e?.message || e);
                         }
-                    });
-            }
+                    } else {
+                        console.warn(`[Telegram Notification] Failed to send to ${chatId}:`, desc);
+                    }
+                }
+            });
+
+            await Promise.allSettled(sendPromises);
         } catch (err: any) {
             console.warn('[Telegram Notification] Error querying linked users:', err?.message || err);
         }
