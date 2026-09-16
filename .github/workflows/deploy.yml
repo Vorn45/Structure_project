@@ -36,9 +36,7 @@ concurrency:
 jobs:
   deploy-production:
     name: Rebuild changed containers on NAS
-    runs-on:
-      - self-hosted
-      - nas-wms
+    runs-on: self-hosted
     environment: production_ENV
     timeout-minutes: 30
 

@@ -42,12 +42,12 @@ Synology NAS Docker Engine (DSM 7.3)
 
 | Purpose / គោលបំណង | Digitech WMS Value / តម្លៃ WMS | Coexistence with OSSP / ភាពដាច់ដោយឡែកពី OSSP |
 |---|---|---|
-| **GitHub Repository** | `https://github.com/BrusmunyPum/digitech-wms` | Dedicated repo |
+| **GitHub Repository** | `https://github.com/BrusmunyPum/digitechkh-wms` | Dedicated repo |
 | **Development Branch** | `dev` | Normal development |
 | **Production Branch** | `main` | Production release |
 | **Runner Host Directory** | `/volume1/docker/digitechkh/wms-runner` | Distinct from `/volume1/docker/actions-runner` |
 | **Runner Container Name** | `wms-github-runner` | Distinct from `ossp-github-runner` |
-| **Runner Labels** | `self-hosted`, `nas-wms` | Avoids job collision with `nas` |
+| **Runner Labels** | `self-hosted` | Dedicated repository runner |
 | **Compose Project Name** | `digitechkh-wms` | Isolated network & volumes |
 | **Database Volume** | `digitechkh-wms_postgres_data` | Strictly preserved |
 | **Redis Volume** | `digitechkh-wms_redis_data` | Strictly preserved |
@@ -124,7 +124,7 @@ RUN apt-get update \
 ENV RUNNER_ALLOW_RUNASROOT=1
 WORKDIR /volume1/docker/digitechkh/wms-runner
 ENTRYPOINT ["/bin/bash", "-lc"]
-CMD ["if [ ! -f .runner ]; then ./config.sh --unattended --url \"$RUNNER_URL\" --token \"$RUNNER_TOKEN\" --name \"wms-synology-nas\" --labels \"nas-wms\" --work \"_work\" --replace; fi; exec ./run.sh"]
+CMD ["if [ ! -f .runner ]; then ./config.sh --unattended --url \"$RUNNER_URL\" --token \"$RUNNER_TOKEN\" --name \"ubuntu-wms-runner\" --labels \"self-hosted,nas-wms\" --work \"_work\" --replace; fi; exec ./run.sh"]
 EOF
 ```
 
@@ -133,7 +133,7 @@ EOF
 ### Step 4: Register the Runner with GitHub / ចុះឈ្មោះ Runner ទៅ GitHub
 
 1. In your browser, open GitHub:  
-   👉 `https://github.com/BrusmunyPum/digitech-wms/settings/actions/runners/new`
+   👉 `https://github.com/BrusmunyPum/digitechkh-wms/settings/actions/runners/new`
 2. Look at the token in the command provided by GitHub (e.g. `AQ...`).
 3. On your Synology NAS terminal, safely store the token in memory (it won't show on screen):
 
@@ -148,7 +148,7 @@ read -s RUNNER_TOKEN
 sudo docker run -d \
   --name wms-github-runner \
   --restart unless-stopped \
-  -e RUNNER_URL="https://github.com/BrusmunyPum/digitech-wms" \
+  -e RUNNER_URL="https://github.com/BrusmunyPum/digitechkh-wms" \
   -e RUNNER_TOKEN="$RUNNER_TOKEN" \
   -v /volume1/docker/digitechkh/wms-runner:/volume1/docker/digitechkh/wms-runner \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -183,7 +183,7 @@ sudo docker rm -f wms-github-runner
 sudo docker run -d \
   --name wms-github-runner \
   --restart unless-stopped \
-  -e RUNNER_URL="https://github.com/BrusmunyPum/digitech-wms" \
+  -e RUNNER_URL="https://github.com/BrusmunyPum/digitechkh-wms" \
   -e DOCKER_API_VERSION="1.43" \
   -v /volume1/docker/digitechkh/wms-runner:/volume1/docker/digitechkh/wms-runner \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -202,7 +202,7 @@ sudo docker exec wms-github-runner docker compose version
 ### Step 6: Configure GitHub Secrets / កំណត់ GitHub Secrets
 
 1. Open your repository on GitHub:  
-   👉 `https://github.com/BrusmunyPum/digitech-wms/settings/environments`
+   👉 `https://github.com/BrusmunyPum/digitechkh-wms/settings/environments`
 2. Open the **`production_ENV`** environment.
 3. Under **Environment secrets**, click **Add secret**:
    - **Name**: `PRODUCTION_ENV_FILE`
@@ -230,7 +230,7 @@ sudo docker exec wms-github-runner docker compose version
 ### Persistent Volume Safety:
 The workflow executes:
 ```bash
-docker volume inspect "digitech-wms_postgres_data"
+docker volume inspect "digitechkh-wms_postgres_data"
 ```
 If the volume is missing, the workflow halts immediately **before** any build or restart. It **never** prunes volumes or removes database data.
 
@@ -246,14 +246,14 @@ sudo docker logs --tail 50 wms-github-runner
 
 ### Check Project Containers
 ```bash
-sudo docker ps --filter label=com.docker.compose.project=digitech-wms --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+sudo docker ps --filter label=com.docker.compose.project=digitechkh-wms --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
 ### View Live Logs
 ```bash
-sudo docker logs -f digitech-wms-api-1
-sudo docker logs -f digitech-wms-web-1
-sudo docker logs -f digitech-wms-load_balancer-1
+sudo docker logs -f digitechkh-wms-api-1
+sudo docker logs -f digitechkh-wms-web-1
+sudo docker logs -f digitechkh-wms-load_balancer-1
 ```
 
 ### Manual Trigger
@@ -271,6 +271,6 @@ You can trigger a rebuild manually at any time without a Git commit:
 | `runner stays Offline` | Runner container stopped or no internet | Check `sudo docker ps -a` and `sudo docker logs wms-github-runner`. |
 | `client version 1.52 is too new` | Docker API mismatch with DSM | Add `-e DOCKER_API_VERSION="1.43"` to runner container. |
 | `A session for this runner already exists` | Previous container was restarted quickly | Wait 2–3 minutes; GitHub will automatically clear the dead session. |
-| `PRODUCTION_ENV_FILE is missing` | Secret not set under `production` | Add secret in GitHub Repo &rarr; Settings &rarr; Environments &rarr; `production`. |
-| `Volume inspect failed` | Compose project name mismatch | Verify `COMPOSE_PROJECT_NAME=digitech-wms` matches `sudo docker volume ls`. |
-| `Job queued waiting for runner` | Runner labels don't match | Ensure runner has labels `self-hosted` and `nas-wms`. |
+| `PRODUCTION_ENV_FILE is missing` | Secret not set under `production_ENV` | Add secret in GitHub Repo &rarr; Settings &rarr; Environments &rarr; `production_ENV`. |
+| `Volume inspect failed` | Compose project name mismatch | Verify `COMPOSE_PROJECT_NAME=digitechkh-wms` matches `sudo docker volume ls`. |
+| `Job queued waiting for runner` | Runner offline or labels mismatch | Ensure runner has status `Idle` in GitHub Settings &rarr; Actions &rarr; Runners. |
