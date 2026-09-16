@@ -303,30 +303,30 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
-            <div *ngIf="!loading() && filteredPlans().length === 0"
-                class="flex flex-col items-center justify-center py-20 px-4 text-center font-kantumruy">
-                <div
-                    class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-500 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50 shadow-xs">
-                    <mat-icon svgIcon="default-project" class="icon-size-8"></mat-icon>
+                <!-- Empty State -->
+                <div *ngIf="!loading() && filteredPlans().length === 0"
+                    class="flex flex-col items-center justify-center py-20 px-4 text-center font-kantumruy">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-500 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50 shadow-xs">
+                        <mat-icon svgIcon="default-project" class="icon-size-8"></mat-icon>
+                    </div>
+                    <h4 class="text-[16px] font-semibold text-slate-800 dark:text-white mb-1">
+                        មិនទាន់មានគម្រោងត្រូវបានអនុញ្ញាតទេ
+                    </h4>
+                    <p class="text-[13px] text-slate-500 dark:text-slate-400 max-w-sm">
+                        គណនីរបស់អ្នកមិនទាន់ត្រូវបានចាត់តាំងឱ្យចូលរួមគម្រោងណាមួយនៅឡើយទេ។ សូមរង់ចាំ Admin ឬ Project Manager បន្ថែមអ្នកចូលក្នុងគម្រោង។
+                    </p>
                 </div>
-                <h4 class="text-[16px] font-semibold text-slate-800 dark:text-white mb-1">
-                    រកមិនឃើញគម្រោងទេ
-                </h4>
-                <p class="text-[13px] text-slate-500 dark:text-slate-400 max-w-sm">
-                    មិនមានគម្រោងដែលត្រូវគ្នានឹងការស្វែងរក ឬការច្រោះទិន្នន័យរបស់អ្នកឡើយ។
-                </p>
             </div>
-        </div>
 
-        <!-- ========================================================================= -->
-        <!-- SCENARIO B: PROJECT WORKSPACE (CLEAN & STANDARDIZED SAAS WORKSPACE)        -->
-        <!-- ========================================================================= -->
-        <div *ngIf="selectedProject() as proj" class="flex flex-col flex-1 h-full min-h-[calc(100vh-2rem)]">
+            <!-- ========================================================================= -->
+            <!-- SCENARIO B: PROJECT WORKSPACE (CLEAN & STANDARDIZED SAAS WORKSPACE)        -->
+            <!-- ========================================================================= -->
+            <div *ngIf="selectedProject() as proj" class="flex flex-col flex-1 h-full min-h-[calc(100vh-2rem)]">
 
-            <!-- 1. Top Bar Header -->
-            <div
-                class="h-14 px-6 sm:px-8 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0">
+                <!-- 1. Top Bar Header -->
+                <div
+                    class="h-14 px-6 sm:px-8 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800 shrink-0">
                 <!-- Left: Back Button & Project Title -->
                 <div class="flex items-center gap-3">
                     <button type="button" (click)="clearSelectedProject()"

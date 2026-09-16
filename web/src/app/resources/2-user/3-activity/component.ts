@@ -90,17 +90,11 @@ export class UserActivityComponent implements OnInit {
     loading = signal<boolean>(false);
 
     // Current Project selection
-    projectOptions = signal<ProjectPlanOption[]>([
-        { id: '4', code: 'BMS-DIGI', name: 'BMS Digitech', description: 'Business Management System - Digitech Project Management & Workflow.', tasksCount: 6 },
-        { id: '5', code: 'WMS-DIGI', name: 'WMS Digitech', description: 'Workforce & Attendance Management System - Digitech Real-time QR & Payroll.', tasksCount: 6 },
-    ]);
-    currentProject = signal<ProjectPlanOption>(this.projectOptions()[0]);
+    projectOptions = signal<ProjectPlanOption[]>([]);
+    currentProject = signal<ProjectPlanOption | null>(null);
 
     // Tasks mapped by Project ID
-    projectTasksMap = signal<{ [projectId: string]: AgilePlanTask[] }>({
-        '4': WMS_TASKS,
-        '5': EGOV_TASKS,
-    });
+    projectTasksMap = signal<{ [projectId: string]: AgilePlanTask[] }>({});
 
     // Dynamic current tasks based on active project
     currentTasks = computed(() => {
@@ -154,17 +148,19 @@ export class UserActivityComponent implements OnInit {
         private readonly _userService: UserService,
     ) {}
 
-    private readonly BACKUP_KEY = 'wfm_agile_roadmap_backup_v2';
-
     ngOnInit(): void {
         this.loadFromLocalBackup();
         this.loadRoadmapFromApi();
-        this.loadActivities();
+    }
+
+    private getBackupKey(): string {
+        const u = this._userService.getUser();
+        return `wfm_agile_roadmap_backup_${u?.id || 'guest'}`;
     }
 
     private loadFromLocalBackup(): void {
         try {
-            const raw = localStorage.getItem(this.BACKUP_KEY);
+            const raw = localStorage.getItem(this.getBackupKey());
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed.projects) && parsed.projects.length > 0) {
@@ -187,9 +183,9 @@ export class UserActivityComponent implements OnInit {
             const data = {
                 projects: this.projectOptions(),
                 tasksMap: this.projectTasksMap(),
-                selectedProjectId: cur ? String(cur.id) : '1',
+                selectedProjectId: cur ? String(cur.id) : null,
             };
-            localStorage.setItem(this.BACKUP_KEY, JSON.stringify(data));
+            localStorage.setItem(this.getBackupKey(), JSON.stringify(data));
         } catch {}
     }
 
@@ -220,34 +216,20 @@ export class UserActivityComponent implements OnInit {
                         }
                     }
 
-                    // Preserve any local projects that may not yet be in remote API response
-                    const currentLocalProjects = this.projectOptions();
-                    const mergedProjects: ProjectPlanOption[] = [...currentLocalProjects];
-                    if (Array.isArray(rawProjects)) {
-                        for (const rp of rawProjects) {
-                            const pId = String(rp.id);
-                            const existingIdx = mergedProjects.findIndex((p) => String(p.id) === pId);
-                            const item: ProjectPlanOption = {
-                                id: pId,
-                                code: rp.code,
-                                name: rp.name,
-                                description: rp.description,
-                                tasksCount: rp.tasksCount !== undefined ? rp.tasksCount : (rp.tasks_count !== undefined ? rp.tasks_count : (normalizedMap[pId]?.length || 0)),
-                            };
-                            if (existingIdx >= 0) {
-                                mergedProjects[existingIdx] = item;
-                            } else {
-                                mergedProjects.push(item);
-                            }
-                        }
-                    }
-
-                    if (mergedProjects.length > 0) {
-                        this.projectOptions.set(mergedProjects);
-                        const match = rawSelectedId ? mergedProjects.find((p) => String(p.id) === String(rawSelectedId)) : null;
-                        if (match) {
-                            this.currentProject.set(match);
-                        }
+                    if (Array.isArray(rawProjects) && rawProjects.length > 0) {
+                        const mapped: ProjectPlanOption[] = rawProjects.map((rp: any) => ({
+                            id: String(rp.id),
+                            code: rp.code,
+                            name: rp.name,
+                            description: rp.description,
+                            tasksCount: rp.tasksCount !== undefined ? rp.tasksCount : (rp.tasks_count !== undefined ? rp.tasks_count : (normalizedMap[String(rp.id)]?.length || 0)),
+                        }));
+                        this.projectOptions.set(mapped);
+                        const match = rawSelectedId ? mapped.find((p) => String(p.id) === String(rawSelectedId)) : null;
+                        this.currentProject.set(match || mapped[0]);
+                    } else {
+                        this.projectOptions.set([]);
+                        this.currentProject.set(null);
                     }
 
                     // Merge tasksMap
@@ -409,6 +391,9 @@ export class UserActivityComponent implements OnInit {
     }
 
     openAddPlanDialog(): void {
+        if (this.projectOptions().length === 0) {
+            return;
+        }
         const currentP = this.currentProject() || this.projectOptions()[0];
         const currentPId = currentP?.id ? String(currentP.id) : '1';
         const dialogConfig = this._dialogConfigService.getDialogConfig({

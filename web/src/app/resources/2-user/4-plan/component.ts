@@ -538,7 +538,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     loading = signal<boolean>(false);
     currentUser = signal<any>(null);
     isTasksLoading = signal<boolean>(false);
-    plans = signal<ExtendedProjectItem[]>(DEFAULT_INVITED_PROJECTS);
+    plans = signal<ExtendedProjectItem[]>([]);
     searchQuery = signal<string>('');
     statusFilter = signal<string>('all');
     teamMembers = signal<any[]>([]);
@@ -1585,48 +1585,19 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                 );
                                 if (matchingSel) {
                                     this.selectedProject.set(matchingSel);
+                                } else {
+                                    this.selectedProject.set(null);
                                 }
                             }
                         } else {
-                            const fallbackItems = DEFAULT_INVITED_PROJECTS.map((p) => {
-                                const pid = p.id.toLowerCase();
-                                const pcode = p.code.toLowerCase().replace('#', '');
-                                const pname = p.name.toLowerCase();
-                                const pPrefix = pcode.split('-')[0];
-
-                                const projectTasks = allTasks.filter((t) => {
-                                    const tPid = (t.project_id || '').toLowerCase();
-                                    const tPname = (t.project_name || '').toLowerCase();
-                                    const tCode = (t.code || '').toLowerCase().replace('#', '');
-
-                                    return (
-                                        (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
-                                        (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
-                                        (pPrefix && (tCode.startsWith(pPrefix + '-') || tPid.startsWith(pPrefix))) ||
-                                        (pname && (tPname.includes(pname) || pname.includes(tPname)))
-                                    );
-                                });
-
-                                const total = projectTasks.length;
-                                const completed = projectTasks.filter((t) =>
-                                    ['done', 'completed'].includes((t.status || '').toLowerCase())
-                                ).length;
-                                const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-                                return {
-                                    ...p,
-                                    total_tasks: total > 0 ? total : p.total_tasks,
-                                    completed_tasks: total > 0 ? completed : p.completed_tasks,
-                                    progress: total > 0 ? progress : p.progress,
-                                    tasks: projectTasks.length > 0 ? projectTasks.map((t) => this.mapTaskToIndividualTaskItem(t)) : p.tasks,
-                                };
-                            });
-                            this.plans.set(fallbackItems);
+                            this.plans.set([]);
+                            this.selectedProject.set(null);
                         }
                         this.loading.set(false);
                     },
                     error: () => {
-                        this.plans.set(DEFAULT_INVITED_PROJECTS);
+                        this.plans.set([]);
+                        this.selectedProject.set(null);
                         this.loading.set(false);
                     },
                 });

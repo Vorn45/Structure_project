@@ -312,24 +312,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     ];
 
     // Available Projects list (Loaded dynamically from database / tasks; default icon used when no image)
-    projects = signal<ProjectFilterOption[]>([
-        {
-            id: 'bms-digitech',
-            name: 'BMS Digitech',
-            code: 'BMS',
-            logo: BMS_PROJECT_LOGO,
-            image: BMS_PROJECT_LOGO,
-            bgClass: 'bg-white text-white',
-        },
-        {
-            id: 'wms-digitech',
-            name: 'WMS Digitech',
-            code: 'WMS',
-            logo: WMS_PROJECT_LOGO,
-            image: WMS_PROJECT_LOGO,
-            bgClass: 'bg-white text-white',
-        },
-    ]);
+    projects = signal<ProjectFilterOption[]>([]);
 
     loadProjects(): void {
         this._taskService.getProjects().subscribe({
@@ -355,11 +338,11 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     }));
                     this.projects.set(mapped);
                 } else {
-                    this.deriveProjectsFromTasks();
+                    this.projects.set([]);
                 }
             },
             error: () => {
-                this.deriveProjectsFromTasks();
+                this.projects.set([]);
             },
         });
     }
@@ -1469,6 +1452,9 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     openCreateModal(defaultStatus?: string): void {
+        if (this.projects().length === 0) {
+            return;
+        }
         const currentProj = this.projects().find((p) => p.id === this.selectedProjectId() && p.id !== 'all');
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),

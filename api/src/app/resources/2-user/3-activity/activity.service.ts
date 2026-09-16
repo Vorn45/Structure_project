@@ -290,24 +290,32 @@ export class ActivityService {
 
         const isUserRole =
             slug === 'user' ||
-            slug === 'personal_workspace' ||
+            slug === 'org_user' ||
             slug === 'member' ||
-            nameKh === 'អ្នកប្រើប្រាស់';
+            slug === 'personal_workspace' ||
+            slug === 'employee' ||
+            slug === 'staff' ||
+            nameEn === 'user' ||
+            nameEn === 'member' ||
+            nameKh === 'អ្នកប្រើប្រាស់' ||
+            nameKh === 'សមាជិក';
+
+        if (isUserRole) {
+            return false;
+        }
 
         return (
-            !isUserRole &&
-            (
-                slug.includes('admin') ||
-                slug.includes('owner') ||
-                slug.includes('super') ||
-                nameEn.includes('admin') ||
-                nameEn.includes('owner') ||
-                nameKh === 'អភិបាលប្រព័ន្ធ' ||
-                nameKh === 'រដ្ឋបាល' ||
-                user?.is_active === 4 ||
-                user?.is_active === 2 ||
-                user?.is_active === 3
-            )
+            slug === 'superadmin' ||
+            slug === 'super_admin' ||
+            slug === 'org_admin' ||
+            slug === 'admin' ||
+            slug === 'org_owner' ||
+            nameEn === 'superadmin' ||
+            nameEn === 'super admin' ||
+            nameEn === 'org admin' ||
+            nameEn === 'admin' ||
+            nameKh === 'អភិបាលប្រព័ន្ធ' ||
+            nameKh === 'រដ្ឋបាល'
         );
     }
 
@@ -363,16 +371,20 @@ export class ActivityService {
     private ensureUserData(userId: string | number, user?: UserPayload) {
         const uId = String(userId || '1');
         let needsSave = false;
-        const isUserAdmin = user ? this.isAdmin(user) : (uId === '1');
+        const isUserAdmin = user ? this.isAdmin(user) : false;
 
-        if (!this.userProjectsMap[uId] || !Array.isArray(this.userProjectsMap[uId]) || (isUserAdmin && this.userProjectsMap[uId].length === 0)) {
-            if (isUserAdmin) {
+        if (isUserAdmin) {
+            if (!this.userProjectsMap[uId] || !Array.isArray(this.userProjectsMap[uId]) || this.userProjectsMap[uId].length === 0) {
                 this.userProjectsMap[uId] = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
-            } else {
-                this.userProjectsMap[uId] = this.getUserAssignedProjects(user);
+                needsSave = true;
             }
+        } else {
+            // For regular members, always sync with latest assigned projects
+            const assigned = this.getUserAssignedProjects(user);
+            this.userProjectsMap[uId] = assigned;
             needsSave = true;
         }
+
         if (!this.userTasksMap[uId] || Object.keys(this.userTasksMap[uId]).length === 0) {
             if (isUserAdmin) {
                 this.userTasksMap[uId] = {
@@ -393,10 +405,21 @@ export class ActivityService {
             }
             needsSave = true;
         }
-        if (!this.userSelectedProjectMap[uId]) {
-            const firstProj = this.userProjectsMap[uId]?.[0]?.id;
-            this.userSelectedProjectMap[uId] = firstProj ? String(firstProj) : (isUserAdmin ? '1' : '');
-            needsSave = true;
+
+        if (isUserAdmin) {
+            if (!this.userSelectedProjectMap[uId]) {
+                const firstProj = this.userProjectsMap[uId]?.[0]?.id;
+                this.userSelectedProjectMap[uId] = firstProj ? String(firstProj) : '1';
+                needsSave = true;
+            }
+        } else {
+            const currentSelected = this.userSelectedProjectMap[uId];
+            const hasMatch = this.userProjectsMap[uId]?.some((p) => String(p.id) === String(currentSelected));
+            if (!hasMatch) {
+                const firstProj = this.userProjectsMap[uId]?.[0]?.id;
+                this.userSelectedProjectMap[uId] = firstProj ? String(firstProj) : '';
+                needsSave = true;
+            }
         }
 
         if (needsSave) {

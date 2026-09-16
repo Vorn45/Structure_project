@@ -174,12 +174,6 @@ export class PlanService {
                             this.projects.push(defP);
                         }
                     }
-                    for (const proj of this.projects) {
-                        if (!proj.members) proj.members = [];
-                        if (!proj.members.some((m: any) => m.phone === '011242425' || m.name?.toLowerCase().includes('sovannara'))) {
-                            proj.members.push({ id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null });
-                        }
-                    }
                 }
                 await this.saveStore();
             } else {
@@ -384,24 +378,32 @@ export class PlanService {
 
         const isUserRole =
             slug === 'user' ||
-            slug === 'personal_workspace' ||
+            slug === 'org_user' ||
             slug === 'member' ||
-            nameKh === 'អ្នកប្រើប្រាស់';
+            slug === 'personal_workspace' ||
+            slug === 'employee' ||
+            slug === 'staff' ||
+            nameEn === 'user' ||
+            nameEn === 'member' ||
+            nameKh === 'អ្នកប្រើប្រាស់' ||
+            nameKh === 'សមាជិក';
+
+        if (isUserRole) {
+            return false;
+        }
 
         return (
-            !isUserRole &&
-            (
-                slug.includes('admin') ||
-                slug.includes('owner') ||
-                slug.includes('super') ||
-                nameEn.includes('admin') ||
-                nameEn.includes('owner') ||
-                nameKh === 'អភិបាលប្រព័ន្ធ' ||
-                nameKh === 'រដ្ឋបាល' ||
-                user?.is_active === RoleEnum.ORG_ADMIN ||
-                user?.is_active === RoleEnum.ORG_OWNER ||
-                user?.is_active === RoleEnum.SUPER_ADMIN
-            )
+            slug === 'superadmin' ||
+            slug === 'super_admin' ||
+            slug === 'org_admin' ||
+            slug === 'admin' ||
+            slug === 'org_owner' ||
+            nameEn === 'superadmin' ||
+            nameEn === 'super admin' ||
+            nameEn === 'org admin' ||
+            nameEn === 'admin' ||
+            nameKh === 'អភិបាលប្រព័ន្ធ' ||
+            nameKh === 'រដ្ឋបាល'
         );
     }
 

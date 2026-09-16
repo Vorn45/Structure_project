@@ -117,6 +117,9 @@
 
                 <!-- Plus Add Task Button -->
                 <button (click)="openCreateModal()"
+                    [disabled]="projects().length === 0"
+                    [class.opacity-50]="projects().length === 0"
+                    [class.cursor-not-allowed]="projects().length === 0"
                     class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center shadow-2xs hover:shadow-xs transition-all"
                     [matTooltip]="'បង្កើតការងារថ្មី (Add Task)'">
                     <mat-icon svgIcon="mdi:plus" class="icon-size-5"></mat-icon>
@@ -309,8 +312,23 @@
             </div>
         </div>
 
+        <!-- Empty State When No Allowed Projects -->
+        <div *ngIf="!loading() && projects().length === 0"
+            class="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center font-kantumruy">
+            <div
+                class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-500 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50 shadow-xs">
+                <mat-icon svgIcon="mdi:shield-lock-outline" class="icon-size-8 text-blue-500"></mat-icon>
+            </div>
+            <h4 class="text-[16px] font-semibold text-slate-800 dark:text-white mb-1">
+                មិនទាន់មានគម្រោងត្រូវបានអនុញ្ញាតទេ
+            </h4>
+            <p class="text-[13px] text-slate-500 dark:text-slate-400 max-w-sm">
+                គណនីរបស់អ្នកមិនទាន់ត្រូវបានចាត់តាំងឱ្យចូលរួមគម្រោងណាមួយនៅឡើយទេ។ សូមរង់ចាំ Admin ឬ Project Manager បន្ថែមអ្នកចូលក្នុងគម្រោង។
+            </p>
+        </div>
+
         <!-- Empty State (Only for List/Grid views, Kanban shows its columns) -->
-        <div *ngIf="!loading() && tasks().length === 0 && viewMode() !== 'kanban'"
+        <div *ngIf="!loading() && projects().length > 0 && tasks().length === 0 && viewMode() !== 'kanban'"
             class="text-center py-20 bg-white dark:bg-slate-800/60 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-8">
             <div
                 class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center mx-auto mb-4 shadow-xs">
@@ -483,7 +501,7 @@
         <!-- ===================================================================== -->
         <!-- VIEW 2: KANBAN BOARD VIEW (7 Columns / Fields)                        -->
         <!-- ===================================================================== -->
-        <div #kanbanContainer *ngIf="!loading() && viewMode() === 'kanban'" cdkDropListGroup
+        <div #kanbanContainer *ngIf="!loading() && projects().length > 0 && viewMode() === 'kanban'" cdkDropListGroup
             (wheel)="onKanbanWheel($event, kanbanContainer)"
             class="kanban-scroll-container flex-1 min-h-0 flex gap-3 overflow-x-auto overflow-y-hidden pb-1 items-stretch w-full min-w-0 select-none font-kantumruy"
             [class.!overflow-x-hidden]="showChatRoom() || !!selectedTask()">

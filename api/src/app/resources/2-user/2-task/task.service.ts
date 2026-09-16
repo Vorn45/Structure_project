@@ -567,24 +567,32 @@ export class TaskService {
 
         const isUserRole =
             slug === 'user' ||
-            slug === 'personal_workspace' ||
+            slug === 'org_user' ||
             slug === 'member' ||
-            nameKh === 'អ្នកប្រើប្រាស់';
+            slug === 'personal_workspace' ||
+            slug === 'employee' ||
+            slug === 'staff' ||
+            nameEn === 'user' ||
+            nameEn === 'member' ||
+            nameKh === 'អ្នកប្រើប្រាស់' ||
+            nameKh === 'សមាជិក';
+
+        if (isUserRole) {
+            return false;
+        }
 
         return (
-            !isUserRole &&
-            (
-                slug.includes('admin') ||
-                slug.includes('owner') ||
-                slug.includes('super') ||
-                nameEn.includes('admin') ||
-                nameEn.includes('owner') ||
-                nameKh === 'អភិបាលប្រព័ន្ធ' ||
-                nameKh === 'រដ្ឋបាល' ||
-                user?.is_active === 4 ||
-                user?.is_active === 2 ||
-                user?.is_active === 3
-            )
+            slug === 'superadmin' ||
+            slug === 'super_admin' ||
+            slug === 'org_admin' ||
+            slug === 'admin' ||
+            slug === 'org_owner' ||
+            nameEn === 'superadmin' ||
+            nameEn === 'super admin' ||
+            nameEn === 'org admin' ||
+            nameEn === 'admin' ||
+            nameKh === 'អភិបាលប្រព័ន្ធ' ||
+            nameKh === 'រដ្ឋបាល'
         );
     }
 
@@ -664,7 +672,7 @@ export class TaskService {
             console.warn('Failed to read plans_data_store.json for task projects:', e);
         }
 
-        const isUserAdmin = !user || this.isAdmin(user);
+        const isUserAdmin = user ? this.isAdmin(user) : false;
 
         // Filter projects from plans_data_store.json if not admin
         if (!isUserAdmin && user) {

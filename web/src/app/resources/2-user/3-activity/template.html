@@ -27,11 +27,12 @@
             <!-- Center: Project Title (Centered, Clean font-medium without icon) -->
             <div class="flex-1 flex items-center justify-center px-4 min-w-0">
                 <button type="button" (click)="openSelectProjectPlanDialog()"
+                    [disabled]="projectOptions().length === 0"
                     class="text-center bg-transparent border-none p-0 cursor-pointer hover:text-blue-600 transition-colors max-w-full"
                     [matTooltip]="'ចុចដើម្បីជ្រើសរើស ឬ ប្ដូរផែនការគម្រោង'">
                     <span class="text-[17px] font-medium text-slate-800 dark:text-slate-100 truncate"
                         style="font-family: 'Kantumruy Pro', sans-serif;">
-                        {{ currentProject().name }}
+                        {{ currentProject()?.name || 'មិនទាន់មានគម្រោង' }}
                     </span>
                 </button>
             </div>
@@ -39,6 +40,9 @@
             <!-- Right: Add Plan Action Button & 3-Dot More Button -->
             <div class="flex items-center gap-2 shrink-0">
                 <button type="button" (click)="openAddPlanDialog()"
+                    [disabled]="projectOptions().length === 0"
+                    [class.opacity-50]="projectOptions().length === 0"
+                    [class.cursor-not-allowed]="projectOptions().length === 0"
                     class="flex items-center gap-1.5 h-10 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-normal text-[16px] transition-all cursor-pointer">
                     <mat-icon svgIcon="mdi:plus" class="icon-size-5 text-slate-600 dark:text-slate-300"></mat-icon>
                     <span>បន្ថែមផែនការ</span>
@@ -85,20 +89,35 @@
                 <mat-menu #existingPlanProjectsMenu="matMenu" class="!rounded-xl font-kantumruy !min-w-[320px]">
                     <button *ngFor="let p of projectOptions()" mat-menu-item (click)="currentProject.set(p)" class="!text-[15px] !h-11 !px-4">
                         <div class="flex items-center justify-between w-full gap-4">
-                            <span class="whitespace-nowrap" [ngClass]="currentProject().id === p.id ? 'font-medium text-indigo-600' : 'text-slate-700 dark:text-slate-200'">
+                            <span class="whitespace-nowrap" [ngClass]="currentProject()?.id === p.id ? 'font-medium text-indigo-600' : 'text-slate-700 dark:text-slate-200'">
                                 {{ p.name }}
                             </span>
-                            <mat-icon *ngIf="currentProject().id === p.id" svgIcon="mdi:check" class="icon-size-4.5 text-indigo-600 shrink-0"></mat-icon>
+                            <mat-icon *ngIf="currentProject()?.id === p.id" svgIcon="mdi:check" class="icon-size-4.5 text-indigo-600 shrink-0"></mat-icon>
                         </div>
                     </button>
                 </mat-menu>
             </div>
         </div>
 
+        <!-- Empty State When No Allowed Projects -->
+        <div *ngIf="projectOptions().length === 0"
+            class="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center font-kantumruy">
+            <div
+                class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-500 dark:text-blue-400 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-900/50 shadow-xs">
+                <mat-icon svgIcon="mdi:calendar-multiselect" class="icon-size-8 text-blue-500"></mat-icon>
+            </div>
+            <h4 class="text-[16px] font-semibold text-slate-800 dark:text-white mb-1">
+                មិនទាន់មានគម្រោងត្រូវបានអនុញ្ញាតទេ
+            </h4>
+            <p class="text-[13px] text-slate-500 dark:text-slate-400 max-w-sm">
+                គណនីរបស់អ្នកមិនទាន់ត្រូវបានចាត់តាំងឱ្យចូលរួមគម្រោងណាមួយនៅឡើយទេ។ សូមរង់ចាំ Admin ឬ Project Manager បន្ថែមអ្នកចូលក្នុងគម្រោង។
+            </p>
+        </div>
+
         <!-- ========================================================================= -->
         <!-- AGILE PROJECT MANAGEMENT PLAN GANTT TIMELINE (EXACT TEMPLATE)              -->
         <!-- ========================================================================= -->
-        <div class="flex-1 flex flex-col space-y-6">
+        <div *ngIf="projectOptions().length > 0" class="flex-1 flex flex-col space-y-6">
 
             <!-- Gantt Chart Container (Horizontal Scrollable) -->
             <div
