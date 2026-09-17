@@ -582,15 +582,8 @@ export class TaskService {
             return this._planService.isAdmin(user);
         }
         const phoneClean = (user.phone || '').replace(/\D/g, '');
-        const emailClean = (user.email || '').toLowerCase().trim();
-
-        // Only genuine system superadmins can bypass project-level scoping
-        return (
-            phoneClean === '010843612' ||
-            phoneClean === '087280875' ||
-            emailClean === 'pisethpanhavorn544@gmail.com' ||
-            emailClean === 'pumprusmuny@example.com'
-        );
+        const uId = Number(user.id || 0);
+        return phoneClean === '010843612' || phoneClean === '087280875' || uId === 5 || uId === 6;
     }
 
     private isUserPlanMember(user: UserPayload, plan: any): boolean {
@@ -600,38 +593,89 @@ export class TaskService {
         }
         if (this.isAdmin(user)) return true;
 
-        const uId = user.id ? String(user.id) : '';
+        const uId = Number(user.id || 0);
         const uEmail = (user.email || '').toLowerCase().trim();
         const uPhone = (user.phone || '').replace(/\D/g, '');
 
-        const leadId = plan.lead?.id || plan.team_lead?.id;
-        if (leadId && String(leadId) === uId && Number(leadId) > 1000) return true;
-        const leadPhone = (plan.lead?.phone || plan.team_lead?.phone || '').replace(/\D/g, '');
-        if (leadPhone && uPhone && leadPhone === uPhone) return true;
-        const leadEmail = (plan.lead?.email || plan.team_lead?.email || '').toLowerCase().trim();
-        if (leadEmail && uEmail && leadEmail === uEmail) return true;
+        const lead = plan.lead || plan.team_lead;
+        if (lead) {
+            const leadId = Number(lead.id || lead.user_id || 0);
+            if (leadId && uId && leadId === uId) return true;
+            const leadPhone = String(lead.phone || '').replace(/\D/g, '');
+            if (leadPhone && uPhone && (leadPhone === uPhone || leadPhone.slice(-8) === uPhone.slice(-8))) return true;
+            const leadEmail = String(lead.email || '').toLowerCase().trim();
+            if (leadEmail && uEmail && leadEmail === uEmail) {
+                if (leadEmail === 'pisethpanhavorn544@gmail.com') {
+                    if (uPhone === '010843612' || uId === 5) return true;
+                } else if (leadEmail === 'pumprusmuny@example.com') {
+                    if (uPhone === '087280875' || uId === 6) return true;
+                } else {
+                    return true;
+                }
+            }
+        }
 
         const members = Array.isArray(plan.members) ? plan.members : [];
         return members.some((m: any) => {
-            if (m.user_id && String(m.user_id) === uId) return true;
-            if (m.id && String(m.id) === uId && Number(m.id) > 1000) return true;
-            if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
-            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            if (!m) return false;
+            const mId = Number(m.user_id || m.id || 0);
+            if (mId && uId && mId === uId && mId !== 101 && mId !== 102 && mId !== 103 && mId !== 104) return true;
+
+            if (m.phone && uPhone) {
+                const cleanMPhone = String(m.phone).replace(/\D/g, '');
+                if (cleanMPhone === uPhone || (cleanMPhone.length >= 8 && cleanMPhone.slice(-8) === uPhone.slice(-8))) {
+                    return true;
+                }
+            }
+
+            if (m.id === 101) return uPhone === '010843612' || uId === 5;
+            if (m.id === 102) return uPhone === '087280875' || uId === 6;
+            if (m.id === 103) return uPhone === '078776682' || uPhone === '067776682' || uId === 7 || uId === 8;
+            if (m.id === 104) return uPhone === '011242425' || uId === 9;
+
+            if (m.email && uEmail && String(m.email).toLowerCase().trim() === uEmail) {
+                if (uEmail === 'pisethpanhavorn544@gmail.com') return uPhone === '010843612' || uId === 5;
+                if (uEmail === 'pumprusmuny@example.com') return uPhone === '087280875' || uId === 6;
+                return true;
+            }
             return false;
         });
     }
 
     private isUserTaskAssigneeOrReporter(user: UserPayload, t: TaskItem): boolean {
         if (!user) return false;
-        const uId = user.id ? String(user.id) : '';
+        const uId = Number(user.id || 0);
         const uEmail = (user.email || '').toLowerCase().trim();
         const uPhone = (user.phone || '').replace(/\D/g, '');
 
+        if ((t as any).assignee_id && uId && Number((t as any).assignee_id) === uId) return true;
+        if ((t as any).reporter_id && uId && Number((t as any).reporter_id) === uId) return true;
+
         const matchUser = (target?: { id?: number; name?: string; email?: string; phone?: string } | null): boolean => {
             if (!target) return false;
-            if (uEmail && target.email && target.email.toLowerCase().trim() === uEmail) return true;
-            if (uPhone && target.phone && target.phone.replace(/\D/g, '') === uPhone) return true;
-            if (target.id && Number(target.id) > 1000 && String(target.id) === uId) return true;
+            const targetId = Number(target.id || 0);
+
+            if (targetId && uId && targetId === uId) {
+                return true;
+            }
+
+            if (target.phone && uPhone) {
+                const tPhone = String(target.phone).replace(/\D/g, '');
+                if (tPhone === uPhone || (tPhone.length >= 8 && tPhone.slice(-8) === uPhone.slice(-8))) {
+                    return true;
+                }
+            }
+
+            if (target.email && uEmail && String(target.email).toLowerCase().trim() === uEmail) {
+                if (uEmail === 'pisethpanhavorn544@gmail.com') {
+                    return uPhone === '010843612' || uId === 5;
+                }
+                if (uEmail === 'pumprusmuny@example.com') {
+                    return uPhone === '087280875' || uId === 6;
+                }
+                return true;
+            }
+
             return false;
         };
 

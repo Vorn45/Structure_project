@@ -371,40 +371,122 @@ export class PlanService {
     public isAdmin(user?: UserPayload): boolean {
         if (!user) return false;
         const phoneClean = (user.phone || '').replace(/\D/g, '');
-        const emailClean = (user.email || '').toLowerCase().trim();
+        const uId = Number(user.id || 0);
 
-        // Only genuine system superadmins can bypass project-level scoping
-        return (
-            phoneClean === '010843612' ||
-            phoneClean === '087280875' ||
-            emailClean === 'pisethpanhavorn544@gmail.com' ||
-            emailClean === 'pumprusmuny@example.com'
-        );
+        // 1. Root founders / system superadmins by verified phone or DB ID
+        if (phoneClean === '010843612' || phoneClean === '087280875') return true;
+        if (uId === 5 || uId === 6) return true;
+
+        // 2. Check roles array
+        const roles = Array.isArray(user.roles) ? user.roles : [];
+        const isSuperOrAdmin = roles.some((r: any) => {
+            const slug = (r?.slug || '').toLowerCase().trim();
+            const nameEn = (r?.name_en || '').toLowerCase().trim();
+            const nameKh = (r?.name_kh || '').trim();
+            return (
+                slug === 'superadmin' ||
+                slug === 'super_admin' ||
+                slug === 'org_admin' ||
+                slug === 'admin' ||
+                slug === 'org_owner' ||
+                nameEn === 'superadmin' ||
+                nameEn === 'super administrator' ||
+                nameEn === 'org admin' ||
+                nameEn === 'administrator' ||
+                nameKh === 'អភិបាលប្រព័ន្ធ' ||
+                nameKh === 'រដ្ឋបាល'
+            );
+        });
+
+        // Ordinary user/member/staff cannot be admin unless they have explicit admin role
+        const activeRole: any =
+            roles.find((r: any) => r.is_default) ??
+            roles.find((r: any) => Number(r.id) === Number(user.is_active)) ??
+            roles[0];
+        const activeSlug = (activeRole?.slug || '').toLowerCase().trim();
+        const isUserRole =
+            activeSlug === 'user' ||
+            activeSlug === 'org_user' ||
+            activeSlug === 'member' ||
+            activeSlug === 'personal_workspace' ||
+            activeSlug === 'employee' ||
+            activeSlug === 'staff';
+
+        if (isUserRole && !isSuperOrAdmin) {
+            return false;
+        }
+
+        return isSuperOrAdmin;
     }
 
     public isUserProjectMember(user: UserPayload, project: ProjectPlanItem): boolean {
         if (!user) return false;
         if (this.isAdmin(user)) return true;
 
-        const uId = user.id ? String(user.id) : '';
+        const uId = Number(user.id || 0);
         const uEmail = (user.email || '').toLowerCase().trim();
         const uPhone = (user.phone || '').replace(/\D/g, '');
 
         // 1. Check if user is the project lead by verified user_id, phone, or email
-        const leadId = project.lead?.id || (project as any).team_lead?.id;
-        if (leadId && String(leadId) === uId && Number(leadId) > 1000) return true;
-        const leadPhone = ((project.lead as any)?.phone || (project as any).team_lead?.phone || '').replace(/\D/g, '');
-        if (leadPhone && uPhone && leadPhone === uPhone) return true;
-        const leadEmail = ((project.lead as any)?.email || (project as any).team_lead?.email || '').toLowerCase().trim();
-        if (leadEmail && uEmail && leadEmail === uEmail) return true;
+        const lead = project.lead || (project as any).team_lead;
+        if (lead) {
+            const leadId = Number(lead.id || lead.user_id || 0);
+            if (leadId && uId && leadId === uId) return true;
+            const leadPhone = String(lead.phone || '').replace(/\D/g, '');
+            if (leadPhone && uPhone && (leadPhone === uPhone || leadPhone.slice(-8) === uPhone.slice(-8))) return true;
+            const leadEmail = String(lead.email || '').toLowerCase().trim();
+            if (leadEmail && uEmail && leadEmail === uEmail) {
+                if (leadEmail === 'pisethpanhavorn544@gmail.com') {
+                    if (uPhone === '010843612' || uId === 5) return true;
+                } else if (leadEmail === 'pumprusmuny@example.com') {
+                    if (uPhone === '087280875' || uId === 6) return true;
+                } else {
+                    return true;
+                }
+            }
+        }
 
         // 2. Check project members list
         const members = Array.isArray(project.members) ? project.members : [];
         return members.some((m: any) => {
-            if (m.user_id && String(m.user_id) === uId) return true;
-            if (m.id && String(m.id) === uId && Number(m.id) > 1000) return true;
-            if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
-            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            if (!m) return false;
+            // Match by numeric user ID (excluding mock seed IDs 101-104)
+            const mId = Number(m.user_id || m.id || 0);
+            if (mId && uId && mId === uId && mId !== 101 && mId !== 102 && mId !== 103 && mId !== 104) return true;
+
+            // Match by phone number (unique per person)
+            if (m.phone && uPhone) {
+                const cleanMPhone = String(m.phone).replace(/\D/g, '');
+                if (cleanMPhone === uPhone || (cleanMPhone.length >= 8 && cleanMPhone.slice(-8) === uPhone.slice(-8))) {
+                    return true;
+                }
+            }
+
+            // For mock seed members (IDs 101, 102, 103, 104):
+            if (m.id === 101) {
+                return uPhone === '010843612' || uId === 5;
+            }
+            if (m.id === 102) {
+                return uPhone === '087280875' || uId === 6;
+            }
+            if (m.id === 103) {
+                return uPhone === '078776682' || uPhone === '067776682' || uId === 7 || uId === 8;
+            }
+            if (m.id === 104) {
+                return uPhone === '011242425' || uId === 9;
+            }
+
+            // Match by email ONLY if not the admin's shared/reused email
+            if (m.email && uEmail && String(m.email).toLowerCase().trim() === uEmail) {
+                if (uEmail === 'pisethpanhavorn544@gmail.com') {
+                    return uPhone === '010843612' || uId === 5;
+                }
+                if (uEmail === 'pumprusmuny@example.com') {
+                    return uPhone === '087280875' || uId === 6;
+                }
+                return true;
+            }
+
             return false;
         });
     }
@@ -813,10 +895,12 @@ export class PlanService {
         if (!plan.members) plan.members = [];
 
         const newMember = {
-            id: Date.now(),
+            id: dto.id || dto.user_id || Date.now(),
+            user_id: dto.user_id || dto.id,
             name: dto.name,
             role: dto.role || 'Developer',
             email: dto.email,
+            phone: dto.phone,
             avatar: dto.avatar || null,
         };
 

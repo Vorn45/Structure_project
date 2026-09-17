@@ -275,22 +275,14 @@ export class PlannerService {
     async getSchedules(user: UserPayload, query: QueryPlannerDto) {
         const allSchedules = await this._readSchedules();
         const userRoles = Array.isArray(user?.roles) ? user.roles : [];
-        const roleName = (userRoles[0]?.name_en) || (user as any)?.role || '';
-        const isAdmin = !user ||
-            user?.id === 1 ||
-            roleName.toLowerCase().includes('admin') ||
-            roleName.toLowerCase().includes('manager') ||
-            userRoles.some((r: any) => {
-                const en = (r.name_en || '').toLowerCase();
-                const kh = (r.name_kh || '').toLowerCase();
-                const slug = (r.slug || '').toLowerCase();
-                return en.includes('admin') || en.includes('manager') || en.includes('lead') ||
-                       kh.includes('អភិបាល') || kh.includes('គ្រប់គ្រង') ||
-                       slug.includes('admin');
-            }) ||
-            (query as any)?.scope === 'all' ||
-            (query as any)?.all === 'true' ||
-            (query as any)?.admin === 'true';
+        const phoneClean = (user?.phone || '').replace(/\D/g, '');
+        const isRootAdmin = phoneClean === '010843612' || phoneClean === '087280875' || user?.id === 5 || user?.id === 6;
+        const hasAdminRole = userRoles.some((r: any) => {
+            const slug = (r.slug || '').toLowerCase();
+            const en = (r.name_en || '').toLowerCase();
+            return slug.includes('admin') || slug.includes('owner') || en.includes('admin');
+        });
+        const isAdmin = Boolean(user && (isRootAdmin || hasAdminRole));
 
         const currentUserId = user?.id;
         const nameKh = user?.name_kh?.trim()?.toLowerCase() || '';
@@ -333,7 +325,7 @@ export class PlannerService {
         // - Admin sees ALL Work, Personal & Break plans across the entire organization.
         // - Regular Users see Work plans where they are explicitly assigned/selected or creator, plus own personal/breaks.
         let visibleSchedules = allSchedules.filter((sch) => {
-            if (isAdmin || (query as any)?.admin === 'true' || (query as any)?.scope === 'all' || (query as any)?.all === 'true') {
+            if (isAdmin) {
                 return true;
             }
 

@@ -290,6 +290,12 @@ export class CreateProjectMeetingDto {
 }
 
 export class CreateProjectMemberDto {
+    @IsOptional()
+    id?: number;
+
+    @IsOptional()
+    user_id?: number;
+
     @IsNotEmpty()
     @IsString()
     name: string;
@@ -301,4 +307,12 @@ export class CreateProjectMemberDto {
     @IsOptional()
     @IsString()
     email?: string;
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsOptional()
+    @IsString()
+    avatar?: string | null;
 }
