@@ -63,7 +63,7 @@ export class HomeService {
         const allProjects = this.planService.getRawProjects();
         const isAdmin = this.planService.isAdmin(user);
 
-        // Role-based scoping: Non-admin members only see projects and tasks they are assigned to
+        // Role-based scoping: Non-admin members only see projects they belong to, and tasks where they are reporter or assignee
         let accessibleProjects = allProjects;
         let accessibleTasks = allTasks;
 
@@ -73,19 +73,7 @@ export class HomeService {
                 accessibleTasks = [];
             } else {
                 accessibleProjects = allProjects.filter((p) => this.planService.isUserProjectMember(user, p));
-                const allowedProjectKeys = new Set<string>();
-                accessibleProjects.forEach((p) => {
-                    if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
-                    if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
-                    if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
-                });
-
-                accessibleTasks = allTasks.filter((t) => {
-                    if (this.taskService.belongsToUser(t, user)) return true;
-                    const pidKey = (t.project_id || '').toLowerCase();
-                    const pnameKey = (t.project_name || '').toLowerCase();
-                    return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
-                });
+                accessibleTasks = allTasks.filter((t) => this.taskService.belongsToUser(t, user));
             }
         }
 
@@ -265,20 +253,7 @@ export class HomeService {
             if (!user) {
                 accessibleTasks = [];
             } else {
-                const accessibleProjects = this.planService.getRawProjects().filter((p) => this.planService.isUserProjectMember(user, p));
-                const allowedProjectKeys = new Set<string>();
-                accessibleProjects.forEach((p) => {
-                    if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
-                    if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
-                    if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
-                });
-
-                accessibleTasks = allTasks.filter((t) => {
-                    if (this.taskService.belongsToUser(t, user)) return true;
-                    const pidKey = (t.project_id || '').toLowerCase();
-                    const pnameKey = (t.project_name || '').toLowerCase();
-                    return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
-                });
+                accessibleTasks = allTasks.filter((t) => this.taskService.belongsToUser(t, user));
             }
         }
 

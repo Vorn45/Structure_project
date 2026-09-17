@@ -650,10 +650,11 @@ export class TaskService {
 
         if ((t as any).assignee_id && uId && Number((t as any).assignee_id) === uId) return true;
         if ((t as any).reporter_id && uId && Number((t as any).reporter_id) === uId) return true;
+        if (Array.isArray((t as any).assignee_ids) && uId && (t as any).assignee_ids.some((id: any) => Number(id) === uId)) return true;
 
-        const matchUser = (target?: { id?: number; name?: string; email?: string; phone?: string } | null): boolean => {
+        const matchUser = (target?: { id?: number; user_id?: number; name?: string; email?: string; phone?: string } | null): boolean => {
             if (!target) return false;
-            const targetId = Number(target.id || 0);
+            const targetId = Number(target.id || (target as any).user_id || 0);
 
             if (targetId && uId && targetId === uId) {
                 return true;
@@ -713,10 +714,7 @@ export class TaskService {
                 if (!isUserAdmin) {
                     if (!user) continue;
                     const isTaskAssigned = this.isUserTaskAssigneeOrReporter(user, t);
-                    const pidKey = (t.project_id || '').toLowerCase();
-                    const pnameKey = (t.project_name || '').toLowerCase();
-                    const isAllowedPlan = allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
-                    if (!isTaskAssigned && !isAllowedPlan) {
+                    if (!isTaskAssigned) {
                         continue;
                     }
                 }
@@ -1084,25 +1082,12 @@ export class TaskService {
         await this.ensureStoreLoaded();
         let validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
 
-        // For non-admin users, restrict tasks to those belonging to their assigned projects or tasks assigned to them
+        // For non-admin users, task feature strictly shows only tasks where own account is reporter or assignee
         if (!this.isAdmin(user)) {
             if (!user) {
                 validTasks = [];
             } else {
-                const accessiblePlans = this.getPlanProjects().filter((p: any) => this.isUserPlanMember(user, p));
-
-                const allowedPlanKeys = new Set(accessiblePlans.map((p) => (p.id || '').toLowerCase()));
-                accessiblePlans.forEach((p) => {
-                    if (p.name) allowedPlanKeys.add(p.name.toLowerCase());
-                    if (p.code) allowedPlanKeys.add(p.code.toLowerCase());
-                });
-
-                validTasks = validTasks.filter((t) => {
-                    if (this.isUserTaskAssigneeOrReporter(user, t)) return true;
-                    const pidKey = (t.project_id || '').toLowerCase();
-                    const pnameKey = (t.project_name || '').toLowerCase();
-                    return allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
-                });
+                validTasks = validTasks.filter((t) => this.isUserTaskAssigneeOrReporter(user, t));
             }
         }
 
@@ -1145,25 +1130,7 @@ export class TaskService {
         }
 
         if (!this.isAdmin(user)) {
-            if (!user) {
-                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលភារកិច្ចនេះទេ (You do not have permission to view this task).');
-            }
-            let isAllowed = this.isUserTaskAssigneeOrReporter(user, task);
-            if (!isAllowed) {
-                const accessiblePlans = this.getPlanProjects().filter((p: any) => this.isUserPlanMember(user, p));
-                const pidKey = (task.project_id || '').toLowerCase();
-                const pnameKey = (task.project_name || '').toLowerCase();
-                const matchedPlan = accessiblePlans.find(
-                    (p: any) =>
-                        (p.id && p.id.toLowerCase() === pidKey) ||
-                        (p.name && p.name.toLowerCase() === pnameKey) ||
-                        (p.code && p.code.toLowerCase() === pidKey)
-                );
-                if (matchedPlan) {
-                    isAllowed = true;
-                }
-            }
-            if (!isAllowed) {
+            if (!user || !this.isUserTaskAssigneeOrReporter(user, task)) {
                 throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលភារកិច្ចនេះទេ (You do not have permission to view this task).');
             }
         }
@@ -1562,6 +1529,11 @@ export class TaskService {
         }
 
         const current = this.tasks[index];
+        if (!this.isAdmin(user)) {
+            if (!user || !this.isUserTaskAssigneeOrReporter(user, current)) {
+                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិកែប្រែភារកិច្ចនេះទេ (You do not have permission to update this task).');
+            }
+        }
         const updated: TaskItem = {
             ...current,
             title: dto.title ?? current.title,
@@ -1840,6 +1812,13 @@ export class TaskService {
             throw new NotFoundException(`Task #${id} not found`);
         }
 
+        const taskToDelete = this.tasks[index];
+        if (!this.isAdmin(user)) {
+            if (!user || !this.isUserTaskAssigneeOrReporter(user, taskToDelete)) {
+                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិលុបភារកិច្ចនេះទេ (You do not have permission to delete this task).');
+            }
+        }
+
         this.tasks.splice(index, 1);
         this.taskComments.delete(id);
         this.saveStore();
@@ -1858,6 +1837,12 @@ export class TaskService {
         const task = this.tasks.find((t) => t.id === taskId);
         if (!task) {
             throw new NotFoundException(`Task #${taskId} not found`);
+        }
+
+        if (!this.isAdmin(user)) {
+            if (!user || !this.isUserTaskAssigneeOrReporter(user, task)) {
+                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលការសន្ទនានេះទេ (You do not have permission to view task comments).');
+            }
         }
 
         const comments = this.ensureTaskComments(taskId);
@@ -1938,6 +1923,12 @@ export class TaskService {
         const task = this.tasks.find((t) => t.id === taskId);
         if (!task) {
             throw new NotFoundException(`Task #${taskId} not found`);
+        }
+
+        if (!this.isAdmin(user)) {
+            if (!user || !this.isUserTaskAssigneeOrReporter(user, task)) {
+                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលរួមក្នុងការសន្ទនានេះទេ (You do not have permission to comment on this task).');
+            }
         }
 
         const avatarMap = await this.getAvatarMap();
