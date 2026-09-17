@@ -177,12 +177,17 @@ export class AcceptInviteComponent implements OnInit {
                 }
 
                 // Redirect user based on assigned role
-                const role = (this.invitation()?.role || '').toLowerCase();
                 setTimeout(() => {
-                    if (role.includes('admin') || role.includes('super')) {
-                        this._router.navigateByUrl('/admin/dashboard');
+                    const redirectUrl = this._authService.getRedirectUrl();
+                    if (redirectUrl && redirectUrl !== '/auth/sign-in') {
+                        this._router.navigateByUrl(redirectUrl);
                     } else {
-                        this._router.navigateByUrl('/user/home');
+                        const role = (this.invitation()?.role || '').toLowerCase();
+                        if (role.includes('admin') || role.includes('super')) {
+                            this._router.navigateByUrl('/admin/dashboard');
+                        } else {
+                            this._router.navigateByUrl('/member/home');
+                        }
                     }
                 }, 1200);
             },

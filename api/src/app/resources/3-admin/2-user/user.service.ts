@@ -320,6 +320,8 @@ export class AdminUserService implements OnModuleInit {
         const normEmail = (email || '').toLowerCase().trim();
 
         if (this.userMeta[key]) return this.userMeta[key];
+        this.loadFromDisk();
+        if (this.userMeta[key]) return this.userMeta[key];
         if (normPhone && this.userMeta[normPhone]) return this.userMeta[normPhone];
         if (normEmail && normEmail !== 'pisethpanhavorn544@gmail.com' && normEmail !== 'pumprusmuny@example.com' && this.userMeta[normEmail]) return this.userMeta[normEmail];
 
@@ -365,7 +367,7 @@ export class AdminUserService implements OnModuleInit {
             role: 'Member',
             department: 'ព័ត៌មានវិទ្យា (IT)',
             position: 'Software Engineer',
-            projects_count: 1,
+            projects_count: 0,
         };
     }
 
@@ -414,7 +416,7 @@ export class AdminUserService implements OnModuleInit {
                         });
                     });
 
-                    const projectsCount = assignedProjects.length > 0 ? assignedProjects.length : (meta.projects_count ?? 1);
+                    const projectsCount = assignedProjects.length > 0 ? assignedProjects.length : (meta.projects_count ?? 0);
 
                     let userAvatarUrl: string | null = null;
                     if (u.avatar_file?.uri) {
@@ -792,7 +794,7 @@ export class AdminUserService implements OnModuleInit {
                     position: dto.position || existingMeta.position || 'Software Engineer',
                     avatar: dto.avatar || null,
                     is_active: dto.is_active ?? 1,
-                    projects_count: existingMeta.projects_count ?? 1,
+                    projects_count: existingMeta.projects_count ?? 0,
                     created_at: new Date().toISOString(),
                     telegram_username: dto.telegram_username || existingMeta.telegram_username || null,
                     gender: dto.gender || existingMeta.gender || 'male',
@@ -1422,7 +1424,7 @@ export class AdminUserService implements OnModuleInit {
             role: invData.role || 'Member',
             department: invData.department || 'ព័ត៌មានវិទ្យា (IT)',
             position: invData.position || 'Staff Member',
-            projects_count: 1,
+            projects_count: 0,
         };
         this.saveToDisk();
 

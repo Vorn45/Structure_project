@@ -67,7 +67,12 @@ export interface ActiveProjectItem {
                                 វឌ្ឍនភាព និង ស្ថានភាពគម្រោងកំពុងដំណើរការ
                             </h3>
                             <p class="text-[14px] text-teal-200/90 mt-1.5 leading-normal">
-                                សរុប ៤ គម្រោងសកម្ម • ២ គម្រោងដំណើរការល្អ • ១ គម្រោងជិតដល់ថ្ងៃកំណត់
+                                <ng-container *ngIf="projects.length > 0">
+                                    សរុប {{ projects.length }} គម្រោងសកម្ម
+                                </ng-container>
+                                <ng-container *ngIf="projects.length === 0">
+                                    មិនទាន់មានគម្រោងសកម្មនៅឡើយទេ
+                                </ng-container>
                             </p>
                         </div>
                     </div>
@@ -87,6 +92,12 @@ export interface ActiveProjectItem {
 
                     <!-- Project List Cards -->
                     <div class="space-y-3.5 font-kantumruy">
+                        <div *ngIf="filteredProjects.length === 0" class="py-12 text-center text-slate-400">
+                            <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-10 mx-auto mb-2 text-slate-300 dark:text-slate-600"></mat-icon>
+                            <div class="text-[14px]">មិនទាន់មានគម្រោងសកម្មត្រូវបានចាត់តាំងនៅឡើយទេ</div>
+                            <div class="text-[12px] text-slate-400 mt-1">សូមរង់ចាំ Admin ឬ Project Manager ចាត់តាំងគម្រោងជូនអ្នក</div>
+                        </div>
+
                         <div *ngFor="let p of filteredProjects"
                             class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 hover:border-teal-400 transition-all space-y-3 font-kantumruy shadow-2xs">
                             
@@ -149,41 +160,7 @@ export interface ActiveProjectItem {
 export class ActiveProjectsDialogComponent implements OnInit {
     searchQuery: string = '';
 
-    projects: ActiveProjectItem[] = [
-        {
-            id: '1',
-            title: 'ប្រព័ន្ធគ្រប់គ្រងវត្តមានស្វ័យប្រវត្ត WMS',
-            code: 'PRJ-2026-01',
-            progress: 85,
-            tasksCount: 24,
-            completedTasks: 20,
-            status: 'on_track',
-            dueDate: '១៥ កញ្ញា ២០២៦',
-            members: [{ name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }, { name: 'ពុំ ប្រុសមុន្នី' }],
-        },
-        {
-            id: '2',
-            title: 'ការធ្វើបច្ចុប្បន្នភាពម៉ាស៊ីនមេ និងសុវត្ថិភាពទិន្នន័យ',
-            code: 'PRJ-2026-02',
-            progress: 60,
-            tasksCount: 15,
-            completedTasks: 9,
-            status: 'in_progress',
-            dueDate: '៣០ កញ្ញា ២០២៦',
-            members: [{ name: 'កែវ សុវណ្ណ' }],
-        },
-        {
-            id: '3',
-            title: 'រៀបចំប្រព័ន្ធ QR Code ស្កេនវត្តមានចល័ត',
-            code: 'PRJ-2026-03',
-            progress: 40,
-            tasksCount: 18,
-            completedTasks: 7,
-            status: 'in_progress',
-            dueDate: '១០ តុលា ២០២៦',
-            members: [{ name: 'រ័ត្ន វិចិត្រ' }],
-        },
-    ];
+    projects: ActiveProjectItem[] = [];
 
     constructor(
         public dialogRef: MatDialogRef<ActiveProjectsDialogComponent>,
@@ -195,8 +172,9 @@ export class ActiveProjectsDialogComponent implements OnInit {
     ngOnInit(): void {
         this._homeService.getActiveProjects().subscribe({
             next: (res) => {
-                if (res?.data?.results) {
-                    this.projects = res.data.results.map((p: any) => ({
+                const results = res?.data?.results || (Array.isArray(res?.data) ? res.data : []);
+                if (results) {
+                    this.projects = results.map((p: any) => ({
                         id: p.id,
                         title: p.name,
                         code: p.code,
@@ -205,11 +183,14 @@ export class ActiveProjectsDialogComponent implements OnInit {
                         completedTasks: p.completed_tasks,
                         status: p.status === 'active' ? 'in_progress' : 'on_track',
                         dueDate: p.end_date ? new Intl.DateTimeFormat('km-KH', { dateStyle: 'medium' }).format(new Date(p.end_date)) : 'មិនកំណត់',
-                        members: p.members || [{ name: 'PISETH PANHAVORN' }],
+                        members: p.members || [],
                     }));
                 }
             },
-            error: (err) => console.error('Failed to load active projects', err),
+            error: (err) => {
+                console.error('Failed to load active projects', err);
+                this.projects = [];
+            },
         });
     }
 
@@ -223,6 +204,6 @@ export class ActiveProjectsDialogComponent implements OnInit {
 
     goToAllProjects(): void {
         this.dialogRef.close();
-        this._router.navigate(['/projects']);
+        this._router.navigate(['/member/projects']);
     }
 }

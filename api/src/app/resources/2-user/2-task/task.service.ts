@@ -688,6 +688,42 @@ export class TaskService {
         return false;
     }
 
+    public getUserAccessiblePlanKeys(user: UserPayload): Set<string> {
+        const allowed = new Set<string>();
+        if (!user) return allowed;
+        const userPlans = this.getPlanProjects().filter((p) => this.isUserPlanMember(user, p));
+        for (const p of userPlans) {
+            if (p.id) allowed.add(String(p.id).toLowerCase());
+            if (p.code) allowed.add(String(p.code).toLowerCase().replace('#', ''));
+            if (p.name) allowed.add(String(p.name).toLowerCase());
+        }
+        return allowed;
+    }
+
+    public isTaskInAccessiblePlans(t: TaskItem, allowedKeys: Set<string>): boolean {
+        if (!allowedKeys || allowedKeys.size === 0) return false;
+        const tPid = (t.project_id || '').toLowerCase();
+        const tPname = (t.project_name || '').toLowerCase();
+        const tCode = (t.code || '').toLowerCase().replace('#', '');
+        const tCodePrefix = tCode.split('-')[0];
+
+        for (const key of allowedKeys) {
+            if (tPid && (tPid === key || tPid.includes(key) || key.includes(tPid))) return true;
+            if (tPname && (tPname === key || tPname.includes(key) || key.includes(tPname))) return true;
+            if (tCode && (tCode === key || tCode.includes(key) || key.includes(tCode))) return true;
+            if (tCodePrefix && tCodePrefix === key) return true;
+        }
+        return false;
+    }
+
+    public canUserAccessTask(user: UserPayload, task: TaskItem): boolean {
+        if (!user) return false;
+        if (this.isAdmin(user)) return true;
+        if (this.isUserTaskAssigneeOrReporter(user, task)) return true;
+        const allowedPlanKeys = this.getUserAccessiblePlanKeys(user);
+        return this.isTaskInAccessiblePlans(task, allowedPlanKeys);
+    }
+
     async getProjects(user?: UserPayload) {
         let planProjects = this.getPlanProjects();
         const isUserAdmin = user ? this.isAdmin(user) : false;
@@ -1085,15 +1121,33 @@ export class TaskService {
 
         // For non-admin users:
         // If viewing tasks within a specific project or requesting project scope (scope: 'all' | 'project'),
-        // show all tasks in that project/scope.
-        // Otherwise, on the main Task feature (/member/tasks), strictly show only tasks where own account is reporter or assignee.
+        // only show tasks from projects the user belongs to, or tasks explicitly assigned to them.
+        // On the main Task feature (/member/tasks), strictly show only tasks where own account is reporter or assignee.
         if (!this.isAdmin(user)) {
             if (!user) {
                 validTasks = [];
-            } else if (query.scope === 'all' || query.scope === 'project' || (query.project_id && query.project_id !== 'all')) {
-                // Project-level or global tasks scope
             } else {
-                validTasks = validTasks.filter((t) => this.isUserTaskAssigneeOrReporter(user, t));
+                const allowedPlanKeys = this.getUserAccessiblePlanKeys(user);
+
+                if (query.scope === 'all' || query.scope === 'project') {
+                    validTasks = validTasks.filter(
+                        (t) => this.isTaskInAccessiblePlans(t, allowedPlanKeys) || this.isUserTaskAssigneeOrReporter(user, t),
+                    );
+                } else if (query.project_id && query.project_id !== 'all') {
+                    const targetProjectId = query.project_id.toLowerCase();
+                    const isMemberOfThisProject = Array.from(allowedPlanKeys).some(
+                        (k) => k === targetProjectId || k.includes(targetProjectId) || targetProjectId.includes(k),
+                    );
+                    if (isMemberOfThisProject) {
+                        validTasks = validTasks.filter((t) => this.matchesProject(t, query.project_id));
+                    } else {
+                        validTasks = validTasks.filter(
+                            (t) => this.matchesProject(t, query.project_id) && this.isUserTaskAssigneeOrReporter(user, t),
+                        );
+                    }
+                } else {
+                    validTasks = validTasks.filter((t) => this.isUserTaskAssigneeOrReporter(user, t));
+                }
             }
         }
 
@@ -1135,7 +1189,7 @@ export class TaskService {
             throw new NotFoundException(`Task #${id} not found`);
         }
 
-        if (!user) {
+        if (!user || !this.canUserAccessTask(user, task)) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលភារកិច្ចនេះទេ (You do not have permission to view this task).');
         }
 
@@ -1150,6 +1204,19 @@ export class TaskService {
 
     async createTask(user: UserPayload, dto: CreateTaskDto) {
         await this.ensureStoreLoaded();
+        if (!user) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិបង្កើតភារកិច្ចទេ (You do not have permission to create tasks).');
+        }
+        if (!this.isAdmin(user)) {
+            const allowedPlanKeys = this.getUserAccessiblePlanKeys(user);
+            const targetProjectId = (dto.project_id || '').toLowerCase();
+            const isMember = Array.from(allowedPlanKeys).some(
+                (k) => k === targetProjectId || k.includes(targetProjectId) || targetProjectId.includes(k),
+            );
+            if (!isMember) {
+                throw new ForbiddenException('អ្នកអាចបង្កើតភារកិច្ចបានតែក្នុងគម្រោងដែលអ្នកជាសមាជិកប៉ុណ្ណោះ (You can only create tasks in projects you are a member of).');
+            }
+        }
         const prefix = (dto.project_id === 'wms-digitech' || (dto.code && dto.code.toUpperCase().includes('WMS'))) ? 'WMS' : 'BMS';
         let formattedCode = '';
         if (dto.code && dto.code.trim()) {
@@ -1533,7 +1600,7 @@ export class TaskService {
         }
 
         const current = this.tasks[index];
-        if (!user) {
+        if (!user || !this.canUserAccessTask(user, current)) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិកែប្រែភារកិច្ចនេះទេ (You do not have permission to update this task).');
         }
         const updated: TaskItem = {
@@ -1841,7 +1908,7 @@ export class TaskService {
             throw new NotFoundException(`Task #${taskId} not found`);
         }
 
-        if (!user) {
+        if (!user || !this.canUserAccessTask(user, task)) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលការសន្ទនានេះទេ (You do not have permission to view task comments).');
         }
 
@@ -1925,7 +1992,7 @@ export class TaskService {
             throw new NotFoundException(`Task #${taskId} not found`);
         }
 
-        if (!user) {
+        if (!user || !this.canUserAccessTask(user, task)) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលរួមក្នុងការសន្ទនានេះទេ (You do not have permission to comment on this task).');
         }
 

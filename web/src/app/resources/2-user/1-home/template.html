@@ -618,10 +618,11 @@
                     </button>
                 </div>
 
-                <div *ngIf="getFilteredTasks().length === 0" class="text-center py-12 text-slate-400">
+                <div *ngIf="getFilteredTasks().length === 0" class="text-center py-12 text-slate-400 font-kantumruy">
                     <mat-icon svgIcon="mdi:clipboard-text-outline"
-                        class="icon-size-12 mx-auto mb-2 text-slate-300"></mat-icon>
-                    <p class="text-[16px] font-normal">មិនមានការងារក្នុងផ្នែកនេះទេ</p>
+                        class="icon-size-12 mx-auto mb-2 text-slate-300 dark:text-slate-600"></mat-icon>
+                    <p class="text-[16px] font-normal text-slate-600 dark:text-slate-300">មិនទាន់មានការងារត្រូវបានចាត់តាំងនៅឡើយទេ</p>
+                    <p class="text-[13px] text-slate-400 dark:text-slate-500 mt-1">សូមរង់ចាំអ្នកគ្រប់គ្រង ឬប្រធានក្រុមចាត់តាំងការងារជូនអ្នក</p>
                 </div>
 
                 <div class="space-y-2">

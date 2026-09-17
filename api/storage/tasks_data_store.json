@@ -311,6 +311,14 @@
         "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Org Admin | Structure | Department\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
+        "seen_by": [
+          {
+            "id": 64,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null,
+            "seen_at": "2026-09-13T03:21:27.850Z"
+          }
+        ],
         "sender_id": 999,
         "created_at": "2026-09-04T08:12:50.923Z",
         "sender_name": "ឡេង សុខឆាយ",
@@ -390,19 +398,40 @@
       },
       {
         "id": 2,
-        "text": "សួស្តី @បញ្ញា វិរៈទិត្យា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"My Work | Profile | Missing Cover\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
+        "text": "សួស្តី @ពិសិដ្ឋ បញ្ញាវ័ន្ត! ខ្ញុំបានចាត់តាំងភារកិច្ច \"My Work | Profile | Missing Cover\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
-        "sender_id": 999,
+        "seen_by": [
+          {
+            "id": 1,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null
+          },
+          {
+            "id": 64,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null,
+            "seen_at": "2026-09-13T01:33:07.418Z"
+          }
+        ],
+        "sender_id": 1,
         "created_at": "2026-09-04T08:12:54.657Z",
-        "sender_name": "ចេង ច័ន្ទបញ្ញា",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
+        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+        "sender_avatar": null
       },
       {
         "id": 1788522180662,
         "text": "hii",
         "time": "06:43 PM",
         "is_self": true,
+        "seen_by": [
+          {
+            "id": 64,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null,
+            "seen_at": "2026-09-13T01:33:07.418Z"
+          }
+        ],
         "is_system": false,
         "sender_id": 2,
         "created_at": "2026-09-04T11:43:00.662Z",
@@ -415,6 +444,14 @@
         "text": "បានផ្ញើឯកសារ បញ្ជីវត្តមាននិស្សិតកម្មសិក្សាក្រុមទី3.pdf",
         "time": "06:43 PM",
         "is_self": true,
+        "seen_by": [
+          {
+            "id": 64,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null,
+            "seen_at": "2026-09-13T01:33:07.418Z"
+          }
+        ],
         "is_system": false,
         "sender_id": 2,
         "created_at": "2026-09-04T11:43:41.294Z",
@@ -436,6 +473,14 @@
         "text": "",
         "time": "06:46 PM",
         "is_self": true,
+        "seen_by": [
+          {
+            "id": 64,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null,
+            "seen_at": "2026-09-13T01:33:07.418Z"
+          }
+        ],
         "is_system": false,
         "sender_id": 2,
         "created_at": "2026-09-04T11:46:56.517Z",
@@ -457,6 +502,14 @@
         "text": "បានផ្ញើឯកសារ",
         "time": "06:50 PM",
         "is_self": true,
+        "seen_by": [
+          {
+            "id": 64,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null,
+            "seen_at": "2026-09-13T01:33:07.418Z"
+          }
+        ],
         "is_system": false,
         "sender_id": 2,
         "created_at": "2026-09-04T11:50:53.619Z",
@@ -710,6 +763,19 @@
         "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Profile | Switch Org | Exit Org\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
         "time": "8:45 AM",
         "is_self": false,
+        "seen_by": [
+          {
+            "id": 2,
+            "name": "ពុំ ប្រុសមុន្នី",
+            "avatar": null
+          },
+          {
+            "id": 64,
+            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
+            "avatar": null,
+            "seen_at": "2026-09-13T01:33:23.959Z"
+          }
+        ],
         "sender_id": 1,
         "created_at": "2026-09-04T08:12:48.356Z",
         "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
@@ -740,5 +806,5 @@
       }
     ]
   },
-  "updated_at": "2026-09-11T04:41:19.523Z"
+  "updated_at": "2026-09-17T13:21:53.796Z"
 }

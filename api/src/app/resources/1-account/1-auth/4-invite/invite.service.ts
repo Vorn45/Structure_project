@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import * as path from 'path';
 import type { Request } from 'express';
 
 import { User } from 'src/app/model/user/users.entity';
@@ -102,20 +104,33 @@ export class InviteService {
 
         const savedUser = await this.userRepo.save(newUser);
 
-        // Assign role
+        // Assign role matching logic identical to AdminUserService.createUser
         const availableRoles = await this.roleRepo.find();
         let matchedRole: Role | undefined;
+
         if (invData.role) {
             const targetSlug = invData.role.toLowerCase().replace(/[\s_-]+/g, '');
             matchedRole = availableRoles.find(
                 (r) =>
                     r.slug === targetSlug ||
                     r.slug.replace(/[\s_-]+/g, '') === targetSlug ||
-                    r.name_en?.toLowerCase().replace(/[\s_-]+/g, '') === targetSlug,
+                    r.name_en?.toLowerCase() === invData.role!.toLowerCase() ||
+                    r.name_kh === invData.role,
             );
+
+            if (!matchedRole) {
+                if (targetSlug.includes('superadmin') || targetSlug.includes('super')) {
+                    matchedRole = availableRoles.find((r) => r.slug === 'superadmin');
+                } else if (targetSlug.includes('admin') || targetSlug === 'administrator') {
+                    matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'admin' || r.slug === 'superadmin');
+                } else {
+                    matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles.find((r) => r.slug === 'org_user');
+                }
+            }
         }
+
         if (!matchedRole) {
-            matchedRole = availableRoles.find((r) => r.slug === 'user' || r.slug === 'member') || availableRoles[0];
+            matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles.find((r) => r.slug !== 'superadmin');
         }
 
         if (matchedRole) {
@@ -125,6 +140,32 @@ export class InviteService {
                 is_default: true,
             });
             await this.userRoleRepo.save(userRole);
+        }
+
+        // Store metadata in admin_users_meta.json with projects_count: 0 (same as admin create)
+        try {
+            const metaFilePath = path.join(process.cwd(), 'storage', 'admin_users_meta.json');
+            let metaObj: Record<string, any> = {};
+            if (fs.existsSync(metaFilePath)) {
+                try {
+                    metaObj = JSON.parse(fs.readFileSync(metaFilePath, 'utf8'));
+                } catch {}
+            }
+            const genderStr = gender === 'female' || gender === 'ស្រី' || gender === '2' ? 'female' : 'male';
+            metaObj[String(savedUser.id)] = {
+                role: invData.role || 'Member',
+                department: invData.department || 'ព័ត៌មានវិទ្យា (IT)',
+                position: invData.position || 'Software Engineer',
+                gender: genderStr,
+                phone: savedUser.phone || '',
+                email: savedUser.email || '',
+                projects_count: 0,
+            };
+            const dir = path.dirname(metaFilePath);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(metaFilePath, JSON.stringify(metaObj, null, 2), 'utf8');
+        } catch (e) {
+            console.warn('[InviteService] Failed to save admin user meta to disk:', e);
         }
 
         // Mark invitation accepted
@@ -149,12 +190,6 @@ export class InviteService {
             message: 'គណនីរបស់អ្នកត្រូវបានបង្កើតដោយជោគជ័យ (Account created successfully)',
             data: {
                 ...session,
-                user: {
-                    id: savedUser.id,
-                    email: savedUser.email,
-                    name_kh: savedUser.name_kh,
-                    name_en: savedUser.name_en,
-                },
             },
         };
     }
