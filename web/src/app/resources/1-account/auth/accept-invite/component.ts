@@ -1,6 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import {
+    AbstractControl,
+    FormBuilder,
+    FormGroup,
+    FormsModule,
+    ReactiveFormsModule,
+    ValidationErrors,
+    Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,6 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from 'app/core/auth/auth.service';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { AdminService } from 'app/resources/3-admin/admin.service';
+import { LanguagesComponent } from 'app/layout/common/languages/component';
 
 export function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password')?.value;
@@ -29,6 +38,7 @@ export function passwordsMatchValidator(control: AbstractControl): ValidationErr
         MatButtonModule,
         MatIconModule,
         MatProgressSpinnerModule,
+        LanguagesComponent,
     ],
     templateUrl: './template.html',
     styleUrl: './style.scss',
@@ -49,6 +59,12 @@ export class AcceptInviteComponent implements OnInit {
     showPassword = signal<boolean>(false);
     showConfirmPassword = signal<boolean>(false);
 
+    // Stepper: 'info' -> 'password' -> 'success'
+    currentStep = signal<'info' | 'password' | 'success'>('info');
+    gender = signal<'male' | 'female'>('male');
+
+    form!: FormGroup;
+
     togglePassword(): void {
         this.showPassword.update((v) => !v);
     }
@@ -57,7 +73,10 @@ export class AcceptInviteComponent implements OnInit {
         this.showConfirmPassword.update((v) => !v);
     }
 
-    form!: FormGroup;
+    setGender(val: 'male' | 'female'): void {
+        this.gender.set(val);
+        this.form.get('gender')?.setValue(val);
+    }
 
     ngOnInit(): void {
         this.form = this._fb.group(
@@ -65,6 +84,7 @@ export class AcceptInviteComponent implements OnInit {
                 email: [{ value: '', disabled: true }],
                 name_kh: ['', [Validators.required]],
                 name_en: ['', [Validators.required]],
+                gender: ['male', [Validators.required]],
                 phone: ['', [Validators.required]],
                 password: ['', [Validators.required, Validators.minLength(6)]],
                 confirm_password: ['', [Validators.required]],
@@ -94,6 +114,7 @@ export class AcceptInviteComponent implements OnInit {
                     email: res.data.email,
                     name_kh: res.data.name || '',
                     name_en: res.data.name || '',
+                    gender: 'male',
                 });
                 this.verifying.set(false);
             },
@@ -106,6 +127,26 @@ export class AcceptInviteComponent implements OnInit {
                 this.verifying.set(false);
             },
         });
+    }
+
+    nextToPassword(): void {
+        const nameKh = this.form.get('name_kh');
+        const nameEn = this.form.get('name_en');
+        const phone = this.form.get('phone');
+
+        nameKh?.markAsTouched();
+        nameEn?.markAsTouched();
+        phone?.markAsTouched();
+
+        if (nameKh?.invalid || nameEn?.invalid || phone?.invalid) {
+            return;
+        }
+
+        this.currentStep.set('password');
+    }
+
+    backToInfo(): void {
+        this.currentStep.set('info');
     }
 
     submit(): void {
@@ -122,11 +163,13 @@ export class AcceptInviteComponent implements OnInit {
             password: formVal.password.trim(),
             name_kh: formVal.name_kh.trim(),
             name_en: formVal.name_en.trim(),
+            gender: this.gender(),
             phone: formVal.phone.trim(),
         };
 
         this._adminService.acceptInvite(payload).subscribe({
             next: (res) => {
+                this.currentStep.set('success');
                 this._snackbar?.success('សូមស្វាគមន៍! ការបង្កើតគណនីបានជោគជ័យ');
 
                 if (res.data && res.data.token) {
@@ -141,7 +184,7 @@ export class AcceptInviteComponent implements OnInit {
                     } else {
                         this._router.navigateByUrl('/user/home');
                     }
-                }, 800);
+                }, 1200);
             },
             error: (err) => {
                 this.submitting.set(false);

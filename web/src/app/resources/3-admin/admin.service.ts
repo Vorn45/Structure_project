@@ -442,7 +442,7 @@ export class AdminService {
         });
     }
 
-    acceptInvite(payload: { token: string; password: string; name_kh?: string; name_en?: string; phone?: string }): Observable<any> {
+    acceptInvite(payload: { token: string; password: string; name_kh?: string; name_en?: string; phone?: string; gender?: string }): Observable<any> {
         return this._http.post<any>(`${env.API_BASE_URL}/auth/invite/accept`, payload);
     }
 }

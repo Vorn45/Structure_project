@@ -70,8 +70,8 @@ export class AppModule implements NestModule {
                 { path: 'v1/healthz', method: RequestMethod.ALL },
                 { path: 'v1/health', method: RequestMethod.ALL },
                 { path: `${version}/*path`, method: RequestMethod.ALL },
-                { path: 'auth/*path', method: RequestMethod.POST },
-                { path: 'account/auth/*path', method: RequestMethod.POST },
+                { path: 'auth/*path', method: RequestMethod.ALL },
+                { path: 'account/auth/*path', method: RequestMethod.ALL },
                 {
                     path: 'account/profile/qr-login/status',
                     method: RequestMethod.GET,

@@ -22,7 +22,7 @@ const IS_RETRY_AFTER_REFRESH = new HttpContextToken<boolean>(() => false);
 
 // Auth endpoints must never trigger a refresh attempt.
 const isAuthEndpoint = (url: string): boolean =>
-    ['/auth/login', '/auth/mini-app', '/auth/otp', '/auth/refresh', '/auth/resend-otp', '/verify-otp'].some(
+    ['/auth/login', '/auth/mini-app', '/auth/otp', '/auth/refresh', '/auth/resend-otp', '/verify-otp', '/auth/invite'].some(
         (path) => url.includes(path)
     );
 

@@ -60,12 +60,14 @@ export class InviteService {
                 department: invitation.department,
                 position: invitation.position,
                 expires_at: invitation.expires_at,
+                company_name: 'ក្រុមហ៊ុន ឌីជីថេក ខេអេច ឯ.ក',
+                company_name_en: 'Digitech KH Co., Ltd.',
             },
         };
     }
 
     async accept(dto: AcceptInviteDto, req: Request) {
-        const { token, password, name_kh, name_en, phone } = dto;
+        const { token, password, name_kh, name_en, phone, gender } = dto;
         const verification = await this.verify(token);
         const invData = verification.data;
 
@@ -85,6 +87,8 @@ export class InviteService {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
+        const sexId = gender === 'female' || gender === 'ស្រី' || gender === '2' ? 2 : 1;
+
         const newUser = this.userRepo.create({
             name_kh: name_kh?.trim() || invData.name || 'បុគ្គលិក',
             name_en: name_en?.trim() || invData.name || 'Staff Member',
@@ -93,6 +97,7 @@ export class InviteService {
             password: passwordHash,
             is_active: 1,
             auth_provider: AuthProvider.LOCAL,
+            sex_id: sexId,
         });
 
         const savedUser = await this.userRepo.save(newUser);

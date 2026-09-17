@@ -12,6 +12,10 @@ import { AuthOTPForResetPasswordComponent } from './rest-password-otp/component'
 export default [
     { path: '', pathMatch: 'full', redirectTo: 'overview' },
     {
+        path: 'accept-invite',
+        loadComponent: () => import('./accept-invite/component').then(m => m.AcceptInviteComponent)
+    },
+    {
         path: '',
         component: AuthLayoutComponent,
         children: [
@@ -39,10 +43,6 @@ export default [
                 path: 'qr-login',
                 loadComponent: () => import('./qr-scan-confirm/component').then(m => m.QrScanConfirmComponent)
             },
-            {
-                path: 'accept-invite',
-                loadComponent: () => import('./accept-invite/component').then(m => m.AcceptInviteComponent)
-            }
         ]
     }
 ] as Routes;

@@ -206,4 +206,8 @@ export class AcceptInviteDto {
     @IsOptional()
     @IsString()
     phone?: string;
+
+    @IsOptional()
+    @IsString()
+    gender?: string;
 }
