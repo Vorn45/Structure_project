@@ -88,8 +88,20 @@ export class UserComponent implements OnInit, OnDestroy {
             const avatarUri = typeof avatar === 'string' ? avatar : avatar?.uri;
             const avatarDomain = (typeof avatar !== 'string' ? avatar?.file_domain : null) ?? '';
 
-            if (!avatarUri) {
-                this.src = '/images/placeholder/avatar.jpg';
+            if (!avatarUri || avatarUri.includes('placeholder/avatar.jpg')) {
+                const userPhone = (this.user?.phone || '').replace(/\D/g, '');
+                const uId = this.user?.id ? Number(this.user.id) : null;
+                if (userPhone === '010843612' || uId === 5) {
+                    this.src = '/images/placeholder/panha-portrait.jpg';
+                } else if (userPhone === '087280875' || uId === 6) {
+                    this.src = '/images/placeholder/brusmuny-portrait.png';
+                } else if (userPhone === '067776682' || userPhone === '078776682' || uId === 7 || uId === 8) {
+                    this.src = '/images/placeholder/winner-portrait.jpg';
+                } else if (userPhone === '011242425' || uId === 9) {
+                    this.src = '/images/placeholder/sovannara-portrait.png';
+                } else {
+                    this.src = '/images/placeholder/avatar.jpg';
+                }
             } else if (avatarUri.startsWith('data:image/')) {
                 this.src = avatarUri;
             } else {

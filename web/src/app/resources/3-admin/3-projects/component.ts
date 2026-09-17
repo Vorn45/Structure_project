@@ -1258,10 +1258,10 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             return '/images/placeholder/panha-portrait.jpg';
         }
         if (targetPhone === '067776682' || targetPhone === '078776682' || member.id === 7 || member.id === 8 || member.id === 103) {
-            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
+            return '/images/placeholder/winner-portrait.jpg';
         }
         if (targetPhone === '011242425' || member.id === 9 || member.id === 104) {
-            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
+            return '/images/placeholder/sovannara-portrait.png';
         }
 
         const curId = cur?.id ? Number(cur.id) : null;

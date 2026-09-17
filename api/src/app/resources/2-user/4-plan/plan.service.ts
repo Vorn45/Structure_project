@@ -62,8 +62,8 @@ const PROJECTS: ProjectPlanItem[] = [
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: '/images/placeholder/panha-portrait.jpg' },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: '/images/placeholder/brusmuny-portrait.png' },
-            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: '/images/placeholder/winner-portrait.jpg' },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: '/images/placeholder/sovannara-portrait.png' },
         ],
     },
     {
@@ -82,8 +82,8 @@ const PROJECTS: ProjectPlanItem[] = [
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: '/images/placeholder/panha-portrait.jpg' },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: '/images/placeholder/brusmuny-portrait.png' },
-            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: '/images/placeholder/winner-portrait.jpg' },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: '/images/placeholder/sovannara-portrait.png' },
         ],
     },
 ];
@@ -283,6 +283,10 @@ export class PlanService {
                         m.avatar = '/images/placeholder/brusmuny-portrait.png';
                     } else if (mPhone === '010843612' || m.id === 101 || m.id === 5) {
                         m.avatar = '/images/placeholder/panha-portrait.jpg';
+                    } else if (mPhone === '067776682' || mPhone === '078776682' || m.id === 103 || m.id === 7 || m.id === 8) {
+                        m.avatar = '/images/placeholder/winner-portrait.jpg';
+                    } else if (mPhone === '011242425' || m.id === 104 || m.id === 9) {
+                        m.avatar = '/images/placeholder/sovannara-portrait.png';
                     }
                 }
             }

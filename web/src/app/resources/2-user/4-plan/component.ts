@@ -365,8 +365,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/panha-portrait.jpg' },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/brusmuny-portrait.png' },
-            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-purple-600', email: 'phuongsovannara@gmail.com' },
+            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com', avatar: '/images/placeholder/winner-portrait.jpg' },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-purple-600', email: 'phuongsovannara@gmail.com', avatar: '/images/placeholder/sovannara-portrait.png' },
         ],
         tasks: [],
         phases: [
@@ -448,8 +448,8 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         members: [
             { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/panha-portrait.jpg' },
             { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/brusmuny-portrait.png' },
-            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com' },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-rose-600', email: 'phuongsovannara@gmail.com' },
+            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com', avatar: '/images/placeholder/winner-portrait.jpg' },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-rose-600', email: 'phuongsovannara@gmail.com', avatar: '/images/placeholder/sovannara-portrait.png' },
         ],
         tasks: [],
         phases: [
@@ -624,10 +624,10 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             return '/images/placeholder/panha-portrait.jpg';
         }
         if (targetPhone === '067776682' || targetPhone === '078776682' || member.id === 7 || member.id === 8 || member.id === 103) {
-            return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
+            return '/images/placeholder/winner-portrait.jpg';
         }
         if (targetPhone === '011242425' || member.id === 9 || member.id === 104) {
-            return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
+            return '/images/placeholder/sovannara-portrait.png';
         }
 
         const curId = cur?.id ? Number(cur.id) : null;

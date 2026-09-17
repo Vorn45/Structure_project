@@ -194,21 +194,36 @@ export class UserManagementComponent implements OnInit {
             return null;
         }
 
-        // 1. Direct user avatar if present and not empty
-        if (user.avatar && typeof user.avatar === 'string' && user.avatar.trim()) {
+        const userPhone = (user.phone || '').replace(/\D/g, '');
+
+        // 1. Dedicated seed profile photo resolution (strictly aligned with Project & Tasks)
+        if (userPhone === '087280875' || user.id === 6 || user.id === 102) {
+            return '/images/placeholder/brusmuny-portrait.png';
+        }
+        if (userPhone === '010843612' || user.id === 5 || user.id === 101) {
+            return '/images/placeholder/panha-portrait.jpg';
+        }
+        if (userPhone === '067776682' || userPhone === '078776682' || user.id === 7 || user.id === 8 || user.id === 103) {
+            return '/images/placeholder/winner-portrait.jpg';
+        }
+        if (userPhone === '011242425' || user.id === 9 || user.id === 104) {
+            return '/images/placeholder/sovannara-portrait.png';
+        }
+
+        // 2. Direct user avatar if present and not empty
+        if (user.avatar && typeof user.avatar === 'string' && user.avatar.trim() && !user.avatar.includes('placeholder/avatar.jpg')) {
             const resolved = resolveFileUrl(user.avatar);
             if (resolved) {
                 return resolved;
             }
         }
 
-        // 2. Fallback: match currently logged in user if this row is strictly the current user
+        // 3. Fallback: match currently logged in user if this row is strictly the current user
         const cur = this.currentUser();
         if (cur && cur.avatar) {
             const curId = cur.id ? Number(cur.id) : null;
             const userId = user.id ? Number(user.id) : null;
             const curPhone = (cur.phone || '').replace(/\D/g, '');
-            const userPhone = (user.phone || '').replace(/\D/g, '');
             const isMatch = Boolean(
                 (curId && userId && curId === userId) ||
                 (!curId && !userId && curPhone && userPhone && curPhone === userPhone)
@@ -221,7 +236,7 @@ export class UserManagementComponent implements OnInit {
             }
         }
 
-        // 3. Fallback to placeholder avatar
+        // 4. Fallback to placeholder avatar
         return '/images/placeholder/avatar.jpg';
     }
 

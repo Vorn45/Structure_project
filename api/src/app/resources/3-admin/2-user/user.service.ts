@@ -47,7 +47,7 @@ const DEFAULT_USERS: AdminUserItem[] = [
         role: 'Super Admin',
         department: 'ព័ត៌មានវិទ្យា (IT)',
         position: 'Super Admin Architect',
-        avatar: null,
+        avatar: '/images/placeholder/panha-portrait.jpg',
         is_active: 1,
         projects_count: 2,
         created_at: '2026-01-10T08:00:00.000Z',
@@ -67,7 +67,7 @@ const DEFAULT_USERS: AdminUserItem[] = [
         role: 'Super Admin',
         department: 'គ្រប់គ្រងគម្រោង (PMO)',
         position: 'Project Director & Lead',
-        avatar: null,
+        avatar: '/images/placeholder/brusmuny-portrait.png',
         is_active: 1,
         projects_count: 2,
         created_at: '2026-01-15T08:00:00.000Z',
@@ -87,7 +87,7 @@ const DEFAULT_USERS: AdminUserItem[] = [
         role: 'Team Lead',
         department: 'ព័ត៌មានវិទ្យា (IT)',
         position: 'Senior Frontend Architect',
-        avatar: null,
+        avatar: '/images/placeholder/winner-portrait.jpg',
         is_active: 1,
         projects_count: 2,
         created_at: '2026-02-01T08:00:00.000Z',
@@ -107,7 +107,7 @@ const DEFAULT_USERS: AdminUserItem[] = [
         role: 'Member',
         department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)',
         position: 'Cloud & Security Specialist',
-        avatar: null,
+        avatar: '/images/placeholder/sovannara-portrait.png',
         is_active: 1,
         projects_count: 1,
         created_at: '2026-02-15T08:00:00.000Z',
@@ -322,6 +322,7 @@ export class AdminUserService implements OnModuleInit {
                 department: 'ព័ត៌មានវិទ្យា (IT)',
                 position: 'Super Admin Architect',
                 projects_count: 2,
+                avatar: '/images/placeholder/panha-portrait.jpg',
             };
         }
         if (normPhone === '087280875' || id === 6) {
@@ -330,6 +331,7 @@ export class AdminUserService implements OnModuleInit {
                 department: 'គ្រប់គ្រងគម្រោង (PMO)',
                 position: 'Project Director & Lead',
                 projects_count: 2,
+                avatar: '/images/placeholder/brusmuny-portrait.png',
             };
         }
         if (normPhone === '067776682' || normPhone === '078776682' || id === 7 || id === 8) {
@@ -338,6 +340,7 @@ export class AdminUserService implements OnModuleInit {
                 department: 'ព័ត៌មានវិទ្យា (IT)',
                 position: 'Senior Frontend Architect',
                 projects_count: 2,
+                avatar: '/images/placeholder/winner-portrait.jpg',
             };
         }
         if (normPhone === '011242425' || id === 9) {
@@ -346,6 +349,7 @@ export class AdminUserService implements OnModuleInit {
                 department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)',
                 position: 'Cloud & Security Specialist',
                 projects_count: 1,
+                avatar: '/images/placeholder/sovannara-portrait.png',
             };
         }
 
