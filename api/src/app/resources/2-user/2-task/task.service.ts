@@ -692,8 +692,12 @@ export class TaskService {
         let planProjects = this.getPlanProjects();
         const isUserAdmin = user ? this.isAdmin(user) : false;
 
-        if (!user) {
-            planProjects = [];
+        if (!isUserAdmin) {
+            if (!user) {
+                planProjects = [];
+            } else {
+                planProjects = planProjects.filter((p) => this.isUserPlanMember(user, p));
+            }
         }
 
         const allowedPlanKeys = new Set(planProjects.map((p) => (p.id || '').toLowerCase()));
@@ -706,6 +710,15 @@ export class TaskService {
         const taskProjectMap = new Map<string, { id: string; name: string; code?: string }>();
         for (const t of this.tasks) {
             if (t.project_id || t.project_name) {
+                if (!isUserAdmin) {
+                    if (!user) continue;
+                    const pidKey = (t.project_id || '').toLowerCase();
+                    const pnameKey = (t.project_name || '').toLowerCase();
+                    const isAllowedPlan = allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
+                    if (!isAllowedPlan) {
+                        continue;
+                    }
+                }
                 const key = (t.project_id || t.project_name).toLowerCase();
                 if (!taskProjectMap.has(key)) {
                     taskProjectMap.set(key, {

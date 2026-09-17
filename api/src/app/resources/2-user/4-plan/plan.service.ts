@@ -290,8 +290,13 @@ export class PlanService {
 
         let list = [...this.projects];
 
-        if (!user) {
-            list = [];
+        // Role-based scoping: Non-admin members ONLY see projects they are assigned to
+        if (!this.isAdmin(user)) {
+            if (!user) {
+                list = [];
+            } else {
+                list = list.filter((p) => this.isUserProjectMember(user, p));
+            }
         }
 
         if (this.isFilterActive(query.search)) {
@@ -326,11 +331,19 @@ export class PlanService {
 
     async getPlanById(user: UserPayload, id: string) {
         await this.ensureLoaded();
-        const plan = this.projects.find((p) => p.id === id || p.code === id);
+        const normId = String(id || '').toLowerCase().replace(/^#/, '').trim();
+        const plan = this.projects.find(
+            (p) =>
+                String(p.id || '').toLowerCase() === normId ||
+                String(p.code || '').toLowerCase().replace(/^#/, '') === normId ||
+                String(p.name || '').toLowerCase() === normId ||
+                (normId.includes('wms') && (p.name.toLowerCase().includes('wms') || (p.code && p.code.toLowerCase().includes('wms')))) ||
+                (normId.includes('bms') && (p.name.toLowerCase().includes('bms') || (p.code && p.code.toLowerCase().includes('bms'))))
+        );
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
-        if (!user) {
+        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលគម្រោងនេះទេ (You do not have permission to view this project).');
         }
         this.syncTaskCounts([plan]);
@@ -709,9 +722,17 @@ export class PlanService {
     // =========================================================================
     async getTasks(user: UserPayload, id: string) {
         await this.ensureLoaded();
-        const plan = this.projects.find((p) => p.id === id || p.code === id);
+        const normId = String(id || '').toLowerCase().replace(/^#/, '').trim();
+        const plan = this.projects.find(
+            (p) =>
+                String(p.id || '').toLowerCase() === normId ||
+                String(p.code || '').toLowerCase().replace(/^#/, '') === normId ||
+                String(p.name || '').toLowerCase() === normId ||
+                (normId.includes('wms') && (p.name.toLowerCase().includes('wms') || (p.code && p.code.toLowerCase().includes('wms')))) ||
+                (normId.includes('bms') && (p.name.toLowerCase().includes('bms') || (p.code && p.code.toLowerCase().includes('bms'))))
+        );
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
-        if (!user) {
+        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលកិច្ចការនៃគម្រោងនេះទេ (You do not have permission to view tasks in this project).');
         }
         this.syncTaskCounts([plan]);
