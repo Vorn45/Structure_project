@@ -117,6 +117,8 @@ export class SesService {
                 throw new Error(`SES SMTP failed: ${response.trim()}`);
         };
 
+        const ehloDomain = 'wms.digitechkh.site';
+
         if (isImplicitTls) {
             await new Promise<void>((resolve, reject) => {
                 (socket as tls.TLSSocket).once('secureConnect', resolve);
@@ -124,7 +126,7 @@ export class SesService {
             });
             attachReader();
             await read(); // 220 banner
-            await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
+            await send(`EHLO ${ehloDomain}`, [250]);
         } else {
             await new Promise<void>((resolve, reject) => {
                 socket.once('connect', resolve);
@@ -133,7 +135,7 @@ export class SesService {
             attachReader();
 
             await read();
-            await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
+            await send(`EHLO ${ehloDomain}`, [250]);
             await send('STARTTLS', [220]);
 
             if (onData) socket.off('data', onData);
@@ -145,7 +147,7 @@ export class SesService {
             });
             attachReader();
 
-            await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
+            await send(`EHLO ${ehloDomain}`, [250]);
         }
 
         await send('AUTH LOGIN', [334]);
