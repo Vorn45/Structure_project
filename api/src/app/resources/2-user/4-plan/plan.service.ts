@@ -299,8 +299,8 @@ export class PlanService {
             }
         }
 
-        if (query.search) {
-            const s = query.search.toLowerCase();
+        if (this.isFilterActive(query.search)) {
+            const s = query.search.toLowerCase().trim();
             list = list.filter(
                 (p) =>
                     p.name.toLowerCase().includes(s) ||
@@ -309,7 +309,7 @@ export class PlanService {
             );
         }
 
-        if (query.status && query.status !== 'all') {
+        if (this.isFilterActive(query.status)) {
             list = list.filter((p) => p.status === query.status);
         }
 
@@ -366,6 +366,12 @@ export class PlanService {
                 members: plan.members || [],
             },
         };
+    }
+
+    private isFilterActive(value?: string): boolean {
+        return Boolean(
+            value && value !== 'all' && value !== 'undefined' && value !== 'null' && value.trim(),
+        );
     }
 
     public isAdmin(user?: UserPayload): boolean {

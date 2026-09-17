@@ -251,8 +251,13 @@ export class UserActivityComponent implements OnInit {
     loadProjectsFromApi(): void {
         this._planService.getPlans().subscribe({
             next: (res) => {
-                if (res?.data?.results?.length) {
-                    const apiProjects: ProjectPlanOption[] = res.data.results.map((p) => ({
+                const rawList: any[] = Array.isArray(res?.data)
+                    ? res.data
+                    : Array.isArray((res?.data as any)?.results)
+                    ? (res?.data as any).results
+                    : [];
+                if (rawList.length) {
+                    const apiProjects: ProjectPlanOption[] = rawList.map((p) => ({
                         id: String(p.id),
                         code: p.code,
                         name: p.name,

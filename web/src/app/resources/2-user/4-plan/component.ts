@@ -1445,8 +1445,14 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         const allTasks: TaskItem[] = tasksRes?.data?.results || [];
                         const taskProjects: any[] = projectsRes?.data || [];
 
-                        if (plansRes?.data?.results?.length) {
-                            const items: ExtendedProjectItem[] = plansRes.data.results.map((ap) => {
+                        const rawPlans: any[] = Array.isArray(plansRes?.data)
+                            ? plansRes.data
+                            : Array.isArray((plansRes?.data as any)?.results)
+                            ? (plansRes?.data as any).results
+                            : [];
+
+                        if (rawPlans.length > 0) {
+                            const items: ExtendedProjectItem[] = rawPlans.map((ap) => {
                                 const existing = DEFAULT_INVITED_PROJECTS.find(
                                     (p) => p.id === String(ap.id) || p.code === ap.code || p.name === ap.name
                                 );

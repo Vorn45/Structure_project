@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { env } from 'envs/env';
 import { Observable } from 'rxjs';
@@ -37,9 +37,9 @@ export interface PlanListResponse {
     data: {
         results: ProjectPlanItem[];
         total: number;
-        limit: number;
-        offset: number;
-    };
+        limit?: number;
+        offset?: number;
+    } | ProjectPlanItem[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,8 +52,16 @@ export class UserPlanService {
     // 1. MAIN PLAN CRUD
     // =========================================================================
     getPlans(params?: { search?: string; status?: string }): Observable<PlanListResponse> {
+        let httpParams = new HttpParams();
+        if (params) {
+            for (const [key, val] of Object.entries(params)) {
+                if (val !== undefined && val !== null && val !== 'undefined' && val !== 'null' && val !== 'all' && String(val).trim()) {
+                    httpParams = httpParams.set(key, String(val).trim());
+                }
+            }
+        }
         return this._http.get<PlanListResponse>(this.baseUrl, {
-            params: params as Record<string, string>,
+            params: httpParams,
             withCredentials: true,
         });
     }
