@@ -781,7 +781,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     this.tasks.set(finalTasks as any);
                     this.computeCounts(finalTasks, res.data.counts);
                     this.loading.set(false);
-                    if (this.projects().length <= 2) {
+                    if (finalTasks.length > 0 && this.projects().length <= 2) {
                         this.deriveProjectsFromTasks();
                     }
 

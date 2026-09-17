@@ -61,35 +61,57 @@ export class HomeService {
 
         const allTasks = this.taskService.getRawTasks();
         const allProjects = this.planService.getRawProjects();
+        const isAdmin = this.planService.isAdmin(user);
+
+        // Role-based scoping: Non-admin members only see projects and tasks they are assigned to
+        let accessibleProjects = allProjects;
+        let accessibleTasks = allTasks;
+
+        if (!isAdmin) {
+            accessibleProjects = allProjects.filter((p) => this.planService.isUserProjectMember(user, p));
+            const allowedProjectKeys = new Set<string>();
+            accessibleProjects.forEach((p) => {
+                if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
+                if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
+                if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
+            });
+
+            accessibleTasks = allTasks.filter((t) => {
+                if (this.taskService.belongsToUser(t, user)) return true;
+                const pidKey = (t.project_id || '').toLowerCase();
+                const pnameKey = (t.project_name || '').toLowerCase();
+                return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
+            });
+        }
 
         // "ការងារខ្ញុំ" on the home page means this user's tasks across every project.
         // Counted with the task service's own helper so the home pills and the work
         // page's status chips (member = me, project = all) always agree.
         const my_task_counts = this.taskService.countByStatus(
-            allTasks.filter((t) => this.taskService.belongsToUser(t, user)),
+            accessibleTasks.filter((t) => this.taskService.belongsToUser(t, user)),
         );
 
-        // Dynamically compute real-time task metrics
-        const total_tasks = allTasks.length;
-        const pending_tasks = allTasks.filter(
+        // Dynamically compute real-time task metrics based on accessible tasks
+        const total_tasks = accessibleTasks.length;
+        const pending_tasks = accessibleTasks.filter(
             (t) =>
                 t.status === TaskStatusEnum.TODO ||
                 t.status === TaskStatusEnum.NEW,
         ).length;
-        const in_progress_tasks = allTasks.filter(
+        const in_progress_tasks = accessibleTasks.filter(
             (t) =>
                 t.status === TaskStatusEnum.IN_PROGRESS ||
                 t.status === TaskStatusEnum.REOPENED ||
                 t.status === TaskStatusEnum.IN_REVIEW,
         ).length;
-        const completed_tasks = allTasks.filter(
+        const completed_tasks = accessibleTasks.filter(
             (t) =>
                 t.status === TaskStatusEnum.DONE ||
                 t.status === TaskStatusEnum.CONFIRMED,
         ).length;
 
         const now = new Date();
-        const overdue_tasks = allTasks.filter(
+        const overdue_tasks = accessibleTasks.filter(
             (t) =>
                 t.due_date &&
                 new Date(t.due_date) < now &&
@@ -97,23 +119,23 @@ export class HomeService {
                 t.status !== TaskStatusEnum.CONFIRMED,
         ).length;
 
-        const high_priority = allTasks.filter(
+        const high_priority = accessibleTasks.filter(
             (t) =>
                 t.priority === TaskPriorityEnum.HIGH ||
                 t.priority === TaskPriorityEnum.URGENT,
         ).length;
-        const medium_priority = allTasks.filter(
+        const medium_priority = accessibleTasks.filter(
             (t) => t.priority === TaskPriorityEnum.MEDIUM,
         ).length;
-        const low_priority = allTasks.filter(
+        const low_priority = accessibleTasks.filter(
             (t) => t.priority === TaskPriorityEnum.LOW,
         ).length;
 
         const completion_rate =
             total_tasks > 0 ? Math.round((completed_tasks / total_tasks) * 100) : 0;
 
-        // Dynamic recent tasks
-        const recent_tasks = allTasks.slice(0, 5).map((t) => ({
+        // Dynamic recent tasks strictly within user's accessible scope
+        const recent_tasks = accessibleTasks.slice(0, 5).map((t) => ({
             id: t.id,
             code: t.code,
             title: t.title,
@@ -131,11 +153,11 @@ export class HomeService {
             created_at: t.created_at,
         }));
 
-        // Dynamic active projects
-        const active_projects = allProjects
+        // Dynamic active projects strictly within user's accessible scope
+        const active_projects = accessibleProjects
             .filter((p) => p.status === 'active')
             .map((p) => {
-                const projectTasks = allTasks.filter((t) => t.project_id === p.id);
+                const projectTasks = accessibleTasks.filter((t) => t.project_id === p.id);
                 const pTotal = projectTasks.length || p.total_tasks;
                 const pCompleted =
                     projectTasks.filter(
@@ -231,21 +253,40 @@ export class HomeService {
 
     async getStats(user: UserPayload) {
         const allTasks = this.taskService.getRawTasks();
+        const isAdmin = this.planService.isAdmin(user);
 
-        const todo = allTasks.filter(
+        let accessibleTasks = allTasks;
+        if (!isAdmin) {
+            const accessibleProjects = this.planService.getRawProjects().filter((p) => this.planService.isUserProjectMember(user, p));
+            const allowedProjectKeys = new Set<string>();
+            accessibleProjects.forEach((p) => {
+                if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
+                if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
+                if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
+            });
+
+            accessibleTasks = allTasks.filter((t) => {
+                if (this.taskService.belongsToUser(t, user)) return true;
+                const pidKey = (t.project_id || '').toLowerCase();
+                const pnameKey = (t.project_name || '').toLowerCase();
+                return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
+            });
+        }
+
+        const todo = accessibleTasks.filter(
             (t) =>
                 t.status === TaskStatusEnum.TODO ||
                 t.status === TaskStatusEnum.NEW,
         ).length;
-        const in_progress = allTasks.filter(
+        const in_progress = accessibleTasks.filter(
             (t) =>
                 t.status === TaskStatusEnum.IN_PROGRESS ||
                 t.status === TaskStatusEnum.REOPENED,
         ).length;
-        const review = allTasks.filter(
+        const review = accessibleTasks.filter(
             (t) => t.status === TaskStatusEnum.IN_REVIEW,
         ).length;
-        const done = allTasks.filter(
+        const done = accessibleTasks.filter(
             (t) =>
                 t.status === TaskStatusEnum.DONE ||
                 t.status === TaskStatusEnum.CONFIRMED,
@@ -262,7 +303,7 @@ export class HomeService {
         };
 
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        allTasks.forEach((t) => {
+        accessibleTasks.forEach((t) => {
             if (t.created_at) {
                 const day = dayNames[new Date(t.created_at).getDay()];
                 if (dayMap[day]) dayMap[day].created += 1;

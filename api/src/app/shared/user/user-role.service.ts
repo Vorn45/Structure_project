@@ -82,7 +82,7 @@ export class UserRoleService {
         const roles = await this.getRoles(userId);
         if (roles.length) return roles;
 
-        let role = await this.roleRepo.findOne({ where: { slug: 'superadmin' } });
+        let role = await this.roleRepo.findOne({ where: { slug: 'user' } });
         if (!role) {
             const defaultRoles = [
                 {
@@ -123,12 +123,12 @@ export class UserRoleService {
                 }
             }
             role = await this.roleRepo.findOne({
-                where: { slug: 'superadmin' },
+                where: { slug: 'user' },
             });
         }
 
         const fallbackRole =
-            role || (await this.roleRepo.findOne({ where: { slug: 'user' } }));
+            role || (await this.roleRepo.findOne({ where: { slug: 'user' } })) || (await this.roleRepo.findOne({ where: { slug: 'org_user' } }));
         if (!fallbackRole) return roles;
 
         const existing = await this.userRoleRepo.findOne({

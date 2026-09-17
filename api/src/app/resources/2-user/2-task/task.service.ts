@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, forwardRef, Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
@@ -13,6 +13,7 @@ import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { NotificationService, NotificationItem } from 'src/app/shared/notification/notification.service';
 import { RealtimeGateway } from 'src/app/shared/realtime/realtime.gateway';
+import { PlanService } from '../4-plan/plan.service';
 import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateTaskDto } from './task.dto';
 
 // In-memory / mock store to serve user task operations
@@ -272,9 +273,31 @@ export class TaskService {
         private readonly _threadRepo: Repository<TelegramThread>,
         private readonly _notificationService?: NotificationService,
         private readonly _realtimeGateway?: RealtimeGateway,
+        @Optional()
+        @Inject(forwardRef(() => PlanService))
+        private readonly _planService?: PlanService,
     ) {
         this.loadFromDisk();
         this.initDbStore();
+    }
+
+    private getPlanProjects(): any[] {
+        if (this._planService) {
+            return this._planService.getRawProjects();
+        }
+        try {
+            const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
+            if (fs.existsSync(planStorePath)) {
+                const raw = fs.readFileSync(planStorePath, 'utf8');
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.plans)) {
+                    return parsed.plans;
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to read plans_data_store.json for task projects:', e);
+        }
+        return [];
     }
 
     private async ensureTableExists(): Promise<void> {
@@ -555,6 +578,9 @@ export class TaskService {
 
     private isAdmin(user?: UserPayload): boolean {
         if (!user) return false;
+        if (this._planService) {
+            return this._planService.isAdmin(user);
+        }
         const roles = Array.isArray(user?.roles) ? user.roles : [];
         const activeRole: any =
             roles.find((r: any) => r.is_default) ??
@@ -598,6 +624,9 @@ export class TaskService {
 
     private isUserPlanMember(user: UserPayload, plan: any): boolean {
         if (!user) return false;
+        if (this._planService) {
+            return this._planService.isUserProjectMember(user, plan);
+        }
         if (this.isAdmin(user)) return true;
 
         const uId = user.id ? String(user.id) : '';
@@ -619,8 +648,8 @@ export class TaskService {
 
         const members = Array.isArray(plan.members) ? plan.members : [];
         return members.some((m: any) => {
-            if (m.id && String(m.id) === uId) return true;
             if (m.user_id && String(m.user_id) === uId) return true;
+            if (m.id && String(m.id) === uId && !['UI/UX Designer', 'Frontend Dev'].includes(m.name)) return true;
             if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
             if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
             if (m.name) {
@@ -658,20 +687,7 @@ export class TaskService {
     }
 
     async getProjects(user?: UserPayload) {
-        let planProjects: any[] = [];
-        try {
-            const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
-            if (fs.existsSync(planStorePath)) {
-                const raw = fs.readFileSync(planStorePath, 'utf8');
-                const parsed = JSON.parse(raw);
-                if (parsed && Array.isArray(parsed.plans)) {
-                    planProjects = parsed.plans;
-                }
-            }
-        } catch (e) {
-            console.warn('Failed to read plans_data_store.json for task projects:', e);
-        }
-
+        let planProjects = this.getPlanProjects();
         const isUserAdmin = user ? this.isAdmin(user) : false;
 
         // Filter projects from plans_data_store.json if not admin
@@ -1093,19 +1109,7 @@ export class TaskService {
 
         // For non-admin users, restrict tasks to those belonging to their assigned projects or tasks assigned to them
         if (user && !this.isAdmin(user)) {
-            let accessiblePlans: any[] = [];
-            try {
-                const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
-                if (fs.existsSync(planStorePath)) {
-                    const raw = fs.readFileSync(planStorePath, 'utf8');
-                    const parsed = JSON.parse(raw);
-                    if (parsed && Array.isArray(parsed.plans)) {
-                        accessiblePlans = parsed.plans.filter((p: any) => this.isUserPlanMember(user, p));
-                    }
-                }
-            } catch (e) {
-                console.warn('Failed to read plans for task filtering:', e);
-            }
+            const accessiblePlans = this.getPlanProjects().filter((p: any) => this.isUserPlanMember(user, p));
 
             const allowedPlanKeys = new Set(accessiblePlans.map((p) => (p.id || '').toLowerCase()));
             accessiblePlans.forEach((p) => {
@@ -1162,27 +1166,17 @@ export class TaskService {
         if (user && !this.isAdmin(user)) {
             let isAllowed = this.isUserTaskAssigneeOrReporter(user, task);
             if (!isAllowed) {
-                try {
-                    const planStorePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
-                    if (fs.existsSync(planStorePath)) {
-                        const raw = fs.readFileSync(planStorePath, 'utf8');
-                        const parsed = JSON.parse(raw);
-                        if (parsed && Array.isArray(parsed.plans)) {
-                            const pidKey = (task.project_id || '').toLowerCase();
-                            const pnameKey = (task.project_name || '').toLowerCase();
-                            const matchedPlan = parsed.plans.find(
-                                (p: any) =>
-                                    (p.id && p.id.toLowerCase() === pidKey) ||
-                                    (p.name && p.name.toLowerCase() === pnameKey) ||
-                                    (p.code && p.code.toLowerCase() === pidKey)
-                            );
-                            if (matchedPlan && this.isUserPlanMember(user, matchedPlan)) {
-                                isAllowed = true;
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.warn('Failed to verify task project permissions:', e);
+                const accessiblePlans = this.getPlanProjects().filter((p: any) => this.isUserPlanMember(user, p));
+                const pidKey = (task.project_id || '').toLowerCase();
+                const pnameKey = (task.project_name || '').toLowerCase();
+                const matchedPlan = accessiblePlans.find(
+                    (p: any) =>
+                        (p.id && p.id.toLowerCase() === pidKey) ||
+                        (p.name && p.name.toLowerCase() === pnameKey) ||
+                        (p.code && p.code.toLowerCase() === pidKey)
+                );
+                if (matchedPlan) {
+                    isAllowed = true;
                 }
             }
             if (!isAllowed) {

@@ -505,16 +505,16 @@ export class AdminUserService {
                 if (!matchedRole) {
                     if (targetSlug.includes('superadmin') || targetSlug.includes('super')) {
                         matchedRole = availableRoles.find((r) => r.slug === 'superadmin');
-                    } else if (targetSlug.includes('admin')) {
-                        matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'superadmin');
-                    } else if (targetSlug.includes('manager') || targetSlug.includes('lead')) {
-                        matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'user');
+                    } else if (targetSlug.includes('admin') || targetSlug === 'administrator') {
+                        matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'admin' || r.slug === 'superadmin');
+                    } else {
+                        matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles.find((r) => r.slug === 'org_user');
                     }
                 }
             }
 
             if (!matchedRole) {
-                matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles[0];
+                matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles.find((r) => r.slug !== 'superadmin');
             }
 
             if (matchedRole) {
@@ -661,15 +661,15 @@ export class AdminUserService {
                         if (!matchedRole) {
                             if (targetSlug.includes('superadmin') || targetSlug.includes('super')) {
                                 matchedRole = availableRoles.find((r) => r.slug === 'superadmin');
-                            } else if (targetSlug.includes('admin')) {
-                                matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'superadmin');
-                            } else if (targetSlug.includes('manager') || targetSlug.includes('lead')) {
-                                matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'user');
+                            } else if (targetSlug.includes('admin') || targetSlug === 'administrator') {
+                                matchedRole = availableRoles.find((r) => r.slug === 'org_admin' || r.slug === 'admin' || r.slug === 'superadmin');
+                            } else {
+                                matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles.find((r) => r.slug === 'org_user');
                             }
                         }
 
                         if (!matchedRole) {
-                            matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles[0];
+                            matchedRole = availableRoles.find((r) => r.slug === 'user') || availableRoles.find((r) => r.slug !== 'superadmin');
                         }
 
                         if (matchedRole) {
