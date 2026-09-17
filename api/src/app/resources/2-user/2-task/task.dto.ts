@@ -70,6 +70,10 @@ export class CreateTaskDto {
     project_id?: string;
 
     @IsOptional()
+    @IsString()
+    project_name?: string;
+
+    @IsOptional()
     @IsEnum(TaskPriorityEnum)
     priority?: TaskPriorityEnum;
 

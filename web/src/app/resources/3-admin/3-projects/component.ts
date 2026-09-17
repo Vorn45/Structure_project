@@ -35,7 +35,7 @@ import {
 } from 'app/resources/2-user/2-task/models/task.types';
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
-import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO } from 'app/resources/2-user/4-plan/component';
+import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO, DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 
 export interface AgilePlanSegment {
@@ -1201,7 +1201,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     getProjectLogo(plan: any): string {
-        if (!plan) return BMS_PROJECT_LOGO;
+        if (!plan) return DEFAULT_PROJECT_LOGO;
         const code = (plan.code || '').toUpperCase();
         const name = (plan.name || '').toUpperCase();
         const id = String(plan.id || '').toLowerCase();
@@ -1228,14 +1228,12 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             const resolved = resolveFileUrl(raw);
             if (resolved) return resolved;
         }
-        return BMS_PROJECT_LOGO;
+        return getProjectFallbackLogo(plan.code, plan.name);
     }
 
     onProjectLogoError(event: Event, plan: any): void {
         const target = event.target as HTMLImageElement;
-        const code = (plan?.code || '').toUpperCase();
-        const name = (plan?.name || '').toUpperCase();
-        const fallback = (code.includes('WMS') || name.includes('WMS')) ? WMS_PROJECT_LOGO : BMS_PROJECT_LOGO;
+        const fallback = getProjectFallbackLogo(plan?.code, plan?.name);
         if (target && target.src !== fallback) {
             target.src = fallback;
         } else if (plan) {
@@ -1758,68 +1756,29 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
+            projectId: proj?.id,
             projectCode: proj?.code,
             projectName: proj?.name,
+            projects: this.projects().map((p) => ({
+                id: String(p.id),
+                name: p.name,
+                code: p.code,
+                logo: p.logo || p.image,
+            })),
             members: this.teamMembers(),
             existingTasks: this.tasks(),
+            onTaskCreated: () => {
+                if (proj) {
+                    this.selectProject(proj);
+                }
+            },
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.title) {
-                const codeFormatted = result.code ? (result.code.startsWith('#') ? result.code : `#${result.code}`) : `#${proj?.code || 'BMS'}-${String(this.tasks().length).padStart(4, '0')}`;
-                
-                const selectedMembers: TaskMember[] = result.assignees && result.assignees.length > 0
-                    ? result.assignees.map((a: any, idx: number) => ({
-                        id: Number(a.id) || idx + 1,
-                        name: a.name,
-                        role: a.role || 'Member',
-                        initial: (a.name || 'M').charAt(0).toUpperCase(),
-                        bgClass: 'bg-indigo-600 text-white',
-                        avatar: a.avatar || null,
-                    }))
-                    : (result.assignee?.name ? [{
-                        id: Number(result.assignee.id) || 1,
-                        name: result.assignee.name,
-                        role: result.assignee.role || 'Member',
-                        initial: (result.assignee.name || 'M').charAt(0).toUpperCase(),
-                        bgClass: 'bg-indigo-600 text-white',
-                        avatar: result.assignee.avatar || null,
-                    }] : []);
-
-                const primaryAssignee: TaskMember | null = selectedMembers.length > 0 ? selectedMembers[0] : null;
-
-                const reporterName = typeof result.reporter === 'string'
-                    ? result.reporter
-                    : (result.reporter?.name || result.reporterName || '');
-
-                const newTask: AdminTaskItem = {
-                    id: `tsk-${Date.now()}`,
-                    code: codeFormatted,
-                    title: result.title,
-                    description: result.description || result.title,
-                    status: result.status || 'new',
-                    priority: result.priority || 'medium',
-                    due_date: result.due_date || '15/09/2026',
-                    time_ago: 'ទើបបង្កើត',
-                    comments_count: 0,
-                    attachments_count: result.attachments_count || (result.attachments?.length || 0),
-                    progress: 0,
-                    reporter: reporterName ? {
-                        id: 1,
-                        name: reporterName,
-                        role: result.reporter?.role || 'Super Admin',
-                        initial: reporterName.charAt(0).toUpperCase(),
-                        bgClass: 'bg-blue-600 text-white',
-                    } : null,
-                    assignee: primaryAssignee,
-                    subtasks: [
-                        { id: `st-${Date.now()}`, title: 'រៀបចំលក្ខខណ្ឌតម្រូវការដំបូង', completed: false },
-                    ],
-                    members: selectedMembers,
-                    links: [],
-                    documents: [],
-                };
-                this.tasks.update((list) => [newTask, ...list]);
+                if (proj) {
+                    this.selectProject(proj);
+                }
             }
         });
     }

@@ -17,8 +17,10 @@ import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
 import { resolveFileUrl } from 'helper/shared/file-url';
 
 export interface CreateTaskDialogData {
+    projectId?: string;
     projectCode?: string;
     projectName?: string;
+    projects?: Array<{ id: string; name: string; code?: string; logo?: string; image?: string }>;
     user?: any;
     members?: { id: number | string; name: string; role: string; avatar?: string }[];
     existingTasks?: { code?: string; project_id?: string }[];
@@ -123,7 +125,7 @@ export interface TeamMember {
                                 <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400 shrink-0 ml-1.5"></mat-icon>
                             </button>
 
-                            <mat-menu #projectMenu="matMenu" class="custom-saas-menu !rounded-2xl !p-1.5 shadow-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <mat-menu #projectMenu="matMenu" class="custom-saas-menu !rounded-2xl !p-1.5 shadow-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 max-h-72 overflow-y-auto">
                                 <button
                                     mat-menu-item
                                     *ngFor="let p of projectList"
@@ -328,15 +330,34 @@ export interface TeamMember {
                     </div>
 
                     <!-- Multi-Select Menu for Assignee -->
-                    <mat-menu #assigneeMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
+                    <!-- Multi-Select Menu for Assignee -->
+                    <mat-menu #assigneeMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[300px] !p-1.5">
                         <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
                             <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសអ្នកទទួលខុសត្រូវ</span>
                             <span *ngIf="selectedAssignees.length > 0" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
                                 {{ selectedAssignees.length }} នាក់
                             </span>
                         </div>
-                        <div (click)="$event.stopPropagation()" class="max-h-60 overflow-y-auto space-y-0.5">
-                            <div *ngFor="let m of teamMembers"
+
+                        <!-- Live Search Input for Assignee -->
+                        <div (click)="$event.stopPropagation()" class="px-2 pb-1.5 pt-0.5 border-b border-slate-100 dark:border-slate-800/60 mb-1">
+                            <div class="relative flex items-center">
+                                <mat-icon svgIcon="mdi:magnify" class="!w-4 !h-4 text-slate-400 absolute left-2 pointer-events-none"></mat-icon>
+                                <input
+                                    type="text"
+                                    [(ngModel)]="assigneeSearch"
+                                    (click)="$event.stopPropagation()"
+                                    placeholder="ស្វែងរកតាមឈ្មោះ ឬតួនាទី..."
+                                    class="w-full pl-7 pr-6 py-1.5 text-[12px] font-kantumruy rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                                />
+                                <button *ngIf="assigneeSearch" (click)="assigneeSearch = ''; $event.stopPropagation()" class="absolute right-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
+                                    <mat-icon svgIcon="mdi:close-circle" class="!w-3.5 !h-3.5"></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div (click)="$event.stopPropagation()" class="max-h-80 overflow-y-auto space-y-0.5">
+                            <div *ngFor="let m of filteredAssigneeMembers"
                                 (click)="toggleAssignee(m.id)"
                                 class="flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors font-kantumruy select-none my-0.5">
                                 <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
@@ -357,22 +378,40 @@ export interface TeamMember {
                                 <mat-icon *ngIf="isAssigneeSelected(m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 text-blue-500 shrink-0 ml-auto"></mat-icon>
                             </div>
 
-                            <div *ngIf="teamMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
+                            <div *ngIf="filteredAssigneeMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
                                 រកមិនឃើញសមាជិកទេ
                             </div>
                         </div>
                     </mat-menu>
 
                     <!-- Menu for Reporter -->
-                    <mat-menu #reporterMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
+                    <mat-menu #reporterMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[300px] !p-1.5">
                         <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
                             <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសអ្នករាយការណ៍</span>
                             <span *ngIf="reporterName" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
                                 បានជ្រើសរើស
                             </span>
                         </div>
-                        <div class="max-h-60 overflow-y-auto space-y-0.5">
-                            <button *ngFor="let m of teamMembers" mat-menu-item (click)="selectReporter(m)"
+
+                        <!-- Live Search Input for Reporter -->
+                        <div (click)="$event.stopPropagation()" class="px-2 pb-1.5 pt-0.5 border-b border-slate-100 dark:border-slate-800/60 mb-1">
+                            <div class="relative flex items-center">
+                                <mat-icon svgIcon="mdi:magnify" class="!w-4 !h-4 text-slate-400 absolute left-2 pointer-events-none"></mat-icon>
+                                <input
+                                    type="text"
+                                    [(ngModel)]="reporterSearch"
+                                    (click)="$event.stopPropagation()"
+                                    placeholder="ស្វែងរកតាមឈ្មោះ ឬតួនាទី..."
+                                    class="w-full pl-7 pr-6 py-1.5 text-[12px] font-kantumruy rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                                />
+                                <button *ngIf="reporterSearch" (click)="reporterSearch = ''; $event.stopPropagation()" class="absolute right-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
+                                    <mat-icon svgIcon="mdi:close-circle" class="!w-3.5 !h-3.5"></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="max-h-80 overflow-y-auto space-y-0.5">
+                            <button *ngFor="let m of filteredReporterMembers" mat-menu-item (click)="selectReporter(m)"
                                 class="!text-[13px] !rounded-xl !h-auto !py-1.5 my-0.5">
                                 <div class="flex items-center justify-between w-full">
                                     <div class="flex items-center gap-2.5 min-w-0">
@@ -390,7 +429,7 @@ export interface TeamMember {
                                 </div>
                             </button>
 
-                            <div *ngIf="teamMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
+                            <div *ngIf="filteredReporterMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
                                 រកមិនឃើញសមាជិកទេ
                             </div>
                         </div>
@@ -783,7 +822,7 @@ export class CreateTaskDialogComponent implements OnInit {
     isDraggingOver = signal<boolean>(false);
     private dragCounter = 0;
 
-    projectList = [
+    projectList: Array<{ id: string; name: string; code: string }> = [
         { id: 'bms-digitech', name: 'BMS Digitech', code: 'BMS' },
         { id: 'wms-digitech', name: 'WMS Digitech', code: 'WMS' },
     ];
@@ -980,6 +1019,28 @@ export class CreateTaskDialogComponent implements OnInit {
         { id: '4', name: 'ភឿង សុវណ្ណារ៉ា', role: 'Developer' },
     ];
     selectedAssigneeIds = signal<string[]>([]);
+    assigneeSearch: string = '';
+    reporterSearch: string = '';
+
+    get filteredAssigneeMembers(): TeamMember[] {
+        const q = this.assigneeSearch.trim().toLowerCase();
+        if (!q) return this.teamMembers;
+        return this.teamMembers.filter(
+            (m) =>
+                (m.name && m.name.toLowerCase().includes(q)) ||
+                (m.role && m.role.toLowerCase().includes(q))
+        );
+    }
+
+    get filteredReporterMembers(): TeamMember[] {
+        const q = this.reporterSearch.trim().toLowerCase();
+        if (!q) return this.teamMembers;
+        return this.teamMembers.filter(
+            (m) =>
+                (m.name && m.name.toLowerCase().includes(q)) ||
+                (m.role && m.role.toLowerCase().includes(q))
+        );
+    }
 
     get selectedAssignees(): TeamMember[] {
         return this.teamMembers.filter((m) => this.selectedAssigneeIds().includes(String(m.id)));
@@ -1036,18 +1097,22 @@ export class CreateTaskDialogComponent implements OnInit {
 
     generateNextCode(projId: string): string {
         const found = this.projectList.find((p) => p.id === projId);
-        const prefix = found ? found.code : (projId.toUpperCase().includes('WMS') ? 'WMS' : 'BMS');
+        let prefix = found?.code || this.data?.projectCode;
+        if (!prefix) {
+            prefix = projId.toUpperCase().includes('WMS') ? 'WMS' : (projId.toUpperCase().includes('BMS') ? 'BMS' : 'PRJ');
+        }
+        prefix = prefix.replace(/^#/, '');
 
         const projectTasks = (this.data?.existingTasks || []).filter(
-            (t) => (t.project_id === projId || t.code?.toUpperCase().includes(prefix))
+            (t) => (t.project_id === projId || (t.code && t.code.toUpperCase().includes(prefix.toUpperCase())))
         );
 
         let maxNum = -1;
         for (const t of projectTasks) {
             if (t.code) {
-                const match = t.code.match(/\d+/);
+                const match = t.code.match(/(\d+)(?!.*\d)/);
                 if (match) {
-                    const val = parseInt(match[0], 10);
+                    const val = parseInt(match[1], 10);
                     if (!isNaN(val) && val > maxNum) {
                         maxNum = val;
                     }
@@ -1055,24 +1120,67 @@ export class CreateTaskDialogComponent implements OnInit {
             }
         }
 
-        const nextNum = maxNum >= 0 ? maxNum + 1 : 0;
+        const nextNum = maxNum >= 0 ? maxNum + 1 : 1;
         return `${prefix}-${String(nextNum).padStart(4, '0')}`;
     }
 
     incrementTaskCode(): void {
-        const match = this.taskCode.match(/^([A-Za-z]+)-(\d+)$/);
-        if (match) {
-            const prefix = match[1];
-            const num = parseInt(match[2], 10) + 1;
-            this.taskCode = `${prefix}-${String(num).padStart(4, '0')}`;
-        } else {
-            this.taskCode = this.generateNextCode(this.selectedProjectId);
+        const lastDash = this.taskCode.lastIndexOf('-');
+        if (lastDash !== -1) {
+            const prefix = this.taskCode.substring(0, lastDash);
+            const numPart = this.taskCode.substring(lastDash + 1);
+            const num = parseInt(numPart, 10);
+            if (!isNaN(num)) {
+                this.taskCode = `${prefix}-${String(num + 1).padStart(numPart.length || 4, '0')}`;
+                return;
+            }
         }
+        this.taskCode = this.generateNextCode(this.selectedProjectId);
     }
 
     onProjectSelected(projId: string): void {
         this.selectedProjectId = projId;
         this.taskCode = this.generateNextCode(projId);
+    }
+
+    private mergeMembers(newMembers: TeamMember[]): void {
+        const current = [...this.teamMembers];
+        const normalize = (s?: string) => (s || '').toLowerCase().replace(/[\s\-_]/g, '');
+
+        for (const nm of newMembers) {
+            const nmNorm = normalize(nm.name);
+            const exists = current.some((cm) => {
+                if (String(cm.id) === String(nm.id)) return true;
+                const cmNorm = normalize(cm.name);
+                if (cmNorm && nmNorm && (cmNorm === nmNorm || cmNorm.includes(nmNorm) || nmNorm.includes(cmNorm))) return true;
+                return false;
+            });
+
+            if (!exists) {
+                current.push(nm);
+            }
+        }
+
+        this.teamMembers = current;
+    }
+
+    loadAllMembers(): void {
+        this._userTaskService.getMembers().subscribe({
+            next: (res) => {
+                if (res?.data && res.data.length > 0) {
+                    const fetched: TeamMember[] = res.data.map((u: any) => ({
+                        id: String(u.id),
+                        name: u.name_kh || u.name_en || u.name,
+                        role: u.role || 'សមាជិក (Member)',
+                        avatar: u.avatar || undefined,
+                    }));
+                    this.mergeMembers(fetched);
+                }
+            },
+            error: (err) => {
+                console.warn('Could not load full team members list:', err);
+            },
+        });
     }
 
     constructor(
@@ -1092,12 +1200,32 @@ export class CreateTaskDialogComponent implements OnInit {
             }
         });
 
-        if (this.data?.projectCode) {
+        // Initialize projects list if provided in dialog data
+        if (this.data?.projects && this.data.projects.length > 0) {
+            this.projectList = this.data.projects.map((p) => ({
+                id: String(p.id),
+                name: p.name,
+                code: (p.code || p.id).replace(/^#/, ''),
+            }));
+        }
+
+        // Auto-select and guarantee active project
+        const targetId = this.data?.projectId || this.data?.projectCode;
+        const targetCode = (this.data?.projectCode || this.data?.projectId || '').replace(/^#/, '');
+        const targetName = this.data?.projectName || targetCode || 'Project';
+
+        if (targetId || targetCode) {
             const found = this.projectList.find(
-                (p) => p.code.toLowerCase() === this.data.projectCode?.toLowerCase() || p.id.toLowerCase() === this.data.projectCode?.toLowerCase()
+                (p) =>
+                    (targetId && (p.id.toLowerCase() === String(targetId).toLowerCase() || p.code.toLowerCase() === String(targetId).toLowerCase())) ||
+                    (targetCode && p.code.toLowerCase() === targetCode.toLowerCase())
             );
             if (found) {
                 this.selectedProjectId = found.id;
+            } else if (targetId) {
+                const newProj = { id: String(targetId), name: targetName, code: targetCode || 'PRJ' };
+                this.projectList.unshift(newProj);
+                this.selectedProjectId = String(targetId);
             }
         }
         if (this.data?.members && this.data.members.length > 0) {
@@ -1110,12 +1238,28 @@ export class CreateTaskDialogComponent implements OnInit {
         }
         if (this.data?.user) {
             const u = this.data.user;
-            const uName = u.en_name || u.name || u.kh_name || '';
-            if (uName && !this.teamMembers.some((m) => m.name.toLowerCase() === uName.toLowerCase())) {
+            const uName = (u.en_name || u.name || u.kh_name || '').trim();
+            const uKh = (u.kh_name || '').trim();
+            const uEn = (u.en_name || '').trim();
+            const normalize = (s?: string) => (s || '').toLowerCase().replace(/[\s\-_]/g, '');
+            const uNorm = normalize(uName);
+            const uKhNorm = normalize(uKh);
+            const uEnNorm = normalize(uEn);
+
+            const isExisting = this.teamMembers.some((m) => {
+                if (String(m.id) === String(u.id)) return true;
+                const mNorm = normalize(m.name);
+                if (uNorm && (mNorm === uNorm || mNorm.includes(uNorm) || uNorm.includes(mNorm))) return true;
+                if (uKhNorm && (mNorm === uKhNorm || mNorm.includes(uKhNorm) || uKhNorm.includes(mNorm))) return true;
+                if (uEnNorm && (mNorm === uEnNorm || mNorm.includes(uEnNorm) || uEnNorm.includes(mNorm))) return true;
+                return false;
+            });
+
+            if (!isExisting && (uKh || uEn || uName)) {
                 this.teamMembers.unshift({
                     id: String(u.id || 'me'),
-                    name: uName,
-                    role: u.roles?.[0]?.name_en || u.roles?.[0]?.name_kh || 'User',
+                    name: uKh || uEn || uName,
+                    role: u.roles?.[0]?.name_kh || u.roles?.[0]?.name_en || 'User',
                     avatar: u.avatar?.uri || null,
                 });
             }
@@ -1124,7 +1268,42 @@ export class CreateTaskDialogComponent implements OnInit {
         // Note: reporter and assignees deliberately start empty (no defaults) per user requirement
     }
 
-    ngOnInit(): void { }
+    loadProjects(): void {
+        this._userTaskService.getProjects().subscribe({
+            next: (res) => {
+                if (res?.data && res.data.length > 0) {
+                    const currentList = [...this.projectList];
+                    for (const p of res.data) {
+                        const pid = String(p.id || p.code);
+                        const pcode = (p.code || pid).replace(/^#/, '');
+                        const pname = p.name || pcode;
+                        const exists = currentList.some((item) => item.id.toLowerCase() === pid.toLowerCase() || item.code.toLowerCase() === pcode.toLowerCase());
+                        if (!exists) {
+                            currentList.push({ id: pid, name: pname, code: pcode });
+                        }
+                    }
+                    this.projectList = currentList;
+                    const found = this.projectList.find((p) => p.id === this.selectedProjectId);
+                    if (!found && this.data?.projectName) {
+                        const cur = this.projectList.find(
+                            (p) => p.name.toLowerCase() === this.data?.projectName?.toLowerCase() || p.code.toLowerCase() === this.data?.projectCode?.toLowerCase()
+                        );
+                        if (cur) {
+                            this.selectedProjectId = cur.id;
+                        }
+                    }
+                }
+            },
+            error: (err) => {
+                console.warn('Could not fetch project list dynamically:', err);
+            },
+        });
+    }
+
+    ngOnInit(): void {
+        this.loadProjects();
+        this.loadAllMembers();
+    }
 
     private buildPayload(): any {
         const title = this.taskTitle.trim();
@@ -1163,7 +1342,7 @@ export class CreateTaskDialogComponent implements OnInit {
             assignees: this.selectedAssignees,
             assigneeNames: this.selectedAssignees.map((m) => m.name).join(', '),
             project_id: this.selectedProjectId,
-            project_name: selectedProj?.name || 'BMS Digitech',
+            project_name: selectedProj?.name || this.data?.projectName || 'Project',
             description: this.description.trim() || title,
             attachments: this.attachedFiles(),
             attachments_count: this.attachedFiles().length,

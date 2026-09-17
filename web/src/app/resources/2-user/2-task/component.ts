@@ -29,7 +29,7 @@ import {
 } from './models/task.types';
 import { UserTaskService } from './task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
-import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO } from 'app/resources/2-user/4-plan/component';
+import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO, DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 
 export interface ProjectFilterOption {
     id: string;
@@ -836,7 +836,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     getProjectLogo(p: any): string {
-        if (!p) return BMS_PROJECT_LOGO;
+        if (!p) return DEFAULT_PROJECT_LOGO;
         const code = (p.code || p.id || '').toUpperCase();
         const name = (p.name || '').toUpperCase();
         const id = String(p.id || '').toLowerCase();
@@ -863,14 +863,12 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             const resolved = resolveFileUrl(raw);
             if (resolved) return resolved;
         }
-        return BMS_PROJECT_LOGO;
+        return getProjectFallbackLogo(p.code || p.id, p.name);
     }
 
     onProjectLogoError(event: Event, p: any): void {
         const target = event.target as HTMLImageElement;
-        const code = (p?.code || p?.id || '').toUpperCase();
-        const name = (p?.name || '').toUpperCase();
-        const fallback = (code.includes('WMS') || name.includes('WMS')) ? WMS_PROJECT_LOGO : BMS_PROJECT_LOGO;
+        const fallback = getProjectFallbackLogo(p?.code || p?.id, p?.name);
         if (target && target.src !== fallback) {
             target.src = fallback;
         } else if (p) {
@@ -1438,8 +1436,15 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         const currentProj = this.projects().find((p) => p.id === this.selectedProjectId() && p.id !== 'all');
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
-            projectCode: currentProj?.id || 'BMS',
+            projectId: currentProj?.id,
+            projectCode: currentProj?.code || currentProj?.id || 'BMS',
             projectName: currentProj?.name || 'BMS Digitech',
+            projects: this.projects().filter((p) => p.id !== 'all').map((p) => ({
+                id: String(p.id),
+                name: p.name,
+                code: p.code || p.id,
+                logo: p.logo || p.image,
+            })),
             members: this.teamMembers(),
             existingTasks: this.tasks(),
             onTaskCreated: () => this.loadTasks(),

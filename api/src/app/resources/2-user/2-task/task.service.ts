@@ -722,41 +722,41 @@ export class TaskService {
         if (this.isUserTaskAssigneeOrReporter(user, task)) return true;
         const allowedPlanKeys = this.getUserAccessiblePlanKeys(user);
         return this.isTaskInAccessiblePlans(task, allowedPlanKeys);
-    }
-
-    async getProjects(user?: UserPayload) {
-        let planProjects = this.getPlanProjects();
-        const isUserAdmin = user ? this.isAdmin(user) : false;
-
-        if (!isUserAdmin) {
-            if (!user) {
-                planProjects = [];
-            } else {
-                planProjects = planProjects.filter((p) => this.isUserPlanMember(user, p));
-            }
         }
 
-        const allowedPlanKeys = new Set(planProjects.map((p) => (p.id || '').toLowerCase()));
-        planProjects.forEach((p) => {
-            if (p.name) allowedPlanKeys.add(p.name.toLowerCase());
-            if (p.code) allowedPlanKeys.add(p.code.toLowerCase());
-        });
+        async getProjects(user?: UserPayload) {
+            let planProjects = this.getPlanProjects();
+            const isUserAdmin = user ? this.isAdmin(user) : false;
 
-        // Collect distinct projects from current tasks
-        const taskProjectMap = new Map<string, { id: string; name: string; code?: string }>();
-        for (const t of this.tasks) {
-            if (t.project_id || t.project_name) {
-                if (!isUserAdmin) {
-                    if (!user) continue;
-                    const pidKey = (t.project_id || '').toLowerCase();
-                    const pnameKey = (t.project_name || '').toLowerCase();
-                    const isAllowedPlan = allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
-                    if (!isAllowedPlan) {
-                        continue;
-                    }
+            if (!isUserAdmin) {
+                if (!user) {
+                    planProjects = [];
+                } else {
+                    planProjects = planProjects.filter((p) => this.isUserPlanMember(user, p));
                 }
-                const key = (t.project_id || t.project_name).toLowerCase();
-                if (!taskProjectMap.has(key)) {
+            }
+
+            const allowedPlanKeys = new Set(planProjects.map((p) => (p.id || '').toLowerCase()));
+            planProjects.forEach((p) => {
+                if (p.name) allowedPlanKeys.add(p.name.toLowerCase());
+                if (p.code) allowedPlanKeys.add(p.code.toLowerCase());
+            });
+
+            // Collect distinct projects from current tasks
+            const taskProjectMap = new Map<string, { id: string; name: string; code?: string }>();
+            for (const t of this.tasks) {
+                if (t.project_id || t.project_name) {
+                    if (!isUserAdmin) {
+                        if (!user) continue;
+                        const pidKey = (t.project_id || '').toLowerCase();
+                        const pnameKey = (t.project_name || '').toLowerCase();
+                        const isAllowedPlan = allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
+                        if (!isAllowedPlan) {
+                            continue;
+                        }
+                    }
+                    const key = (t.project_id || t.project_name).toLowerCase();
+                    if (!taskProjectMap.has(key)) {
                     taskProjectMap.set(key, {
                         id: t.project_id || key,
                         name: t.project_name || t.project_id || 'Project',
@@ -823,30 +823,21 @@ export class TaskService {
 
     async getMembers(user: UserPayload) {
         let dbUsers: User[] = [];
-        const allowedPhones = ['010843612', '087280875', '067776682', '011242425'];
         try {
             dbUsers = await this._userRepo.find({
                 relations: ['user_roles', 'user_roles.role', 'avatar_file'],
                 order: { id: 'ASC' },
             });
-            const normalizePhone = (p?: string) => (p || '').replace(/\D/g, '').slice(-8);
-            const targetPhoneSuffixes = allowedPhones.map((p) => p.slice(-8));
 
-            // Filter strictly to active team members, guaranteeing current logged-in user is included
+            // Keep all active users (exclude only soft-deleted or inactive if specified)
             dbUsers = dbUsers.filter((u) => {
-                if (user?.id && u.id === user.id) return true;
-                const p = normalizePhone(u.phone);
-                if (p && targetPhoneSuffixes.includes(p)) return true;
-                const name = `${u.name_en || ''} ${u.name_kh || ''}`.toLowerCase();
-                return (
-                    name.includes('piseth') || name.includes('panhavorn') || name.includes('ពិសិដ្ឋ') ||
-                    name.includes('brusmuny') || name.includes('ប្រុសមុន្នី') ||
-                    name.includes('winner') || name.includes('វីនណឺរ') ||
-                    name.includes('sovannara') || name.includes('សុវណ្ណារ៉ា')
-                );
+                if ((u as any).deleted_at) return false;
+                if ((u as any).is_active === 0) return false;
+                return true;
             });
 
             // Deduplicate by ID and phone suffix
+            const normalizePhone = (p?: string) => (p || '').replace(/\D/g, '').slice(-8);
             const seenIds = new Set<number>();
             const seenPhones = new Set<string>();
             const unique: User[] = [];
@@ -869,6 +860,8 @@ export class TaskService {
             'bg-emerald-600',
             'bg-amber-600',
             'bg-purple-600',
+            'bg-teal-600',
+            'bg-rose-600',
         ];
 
         const defaultFallbacks = [
@@ -894,7 +887,7 @@ export class TaskService {
                 avatarUrl = u.telegram_photo_url;
             }
 
-            const displayName = u.name_en || u.name_kh || `User #${u.id}`;
+            const displayName = u.name_kh || u.name_en || `User #${u.id}`;
 
             return {
                 id: u.id,
@@ -909,13 +902,50 @@ export class TaskService {
             };
         });
 
-        // Ensure key team members exist in the returned list
+        // Also check if admin store has additional team members
+        try {
+            const storePath = path.join(process.cwd(), 'storage', 'admin_users_store.json');
+            if (fs.existsSync(storePath)) {
+                const raw = fs.readFileSync(storePath, 'utf8');
+                const storeUsers = JSON.parse(raw);
+                if (Array.isArray(storeUsers)) {
+                    for (const su of storeUsers) {
+                        const suPhone = (su.phone || '').replace(/\D/g, '').slice(-8);
+                        const exists = mapped.some(
+                            (m) =>
+                                (suPhone && m.phone && m.phone.replace(/\D/g, '').slice(-8) === suPhone) ||
+                                (su.email && m.email && m.email.toLowerCase() === su.email.toLowerCase()) ||
+                                (su.name_kh && m.name_kh && m.name_kh.trim() === su.name_kh.trim()) ||
+                                (su.name_en && m.name_en && m.name_en.toLowerCase().trim() === su.name_en.toLowerCase().trim())
+                        );
+                        if (!exists) {
+                            mapped.push({
+                                id: su.id || (1000 + mapped.length),
+                                name: su.name_kh || su.name_en || `Staff #${su.id}`,
+                                name_kh: su.name_kh,
+                                name_en: su.name_en,
+                                email: su.email || '',
+                                phone: su.phone || '',
+                                role: su.position || su.role || 'សមាជិក (Member)',
+                                avatar: su.avatar || null,
+                                colorClass: colors[mapped.length % colors.length],
+                            });
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Error loading admin_users_store for members:', err);
+        }
+
+        // Ensure default fallbacks are present if list is small or missing key team leads
         for (const def of defaultFallbacks) {
             const exists = mapped.some(
                 (m) =>
                     (m.phone && def.phone && m.phone.replace(/\D/g, '').slice(-8) === def.phone.replace(/\D/g, '').slice(-8)) ||
-                    m.id === def.id ||
-                    (m.name && def.name && m.name.toLowerCase().includes(def.name.toLowerCase().split(' ')[0]))
+                    (m.email && def.email && m.email.toLowerCase() === def.email.toLowerCase()) ||
+                    (m.name_kh && def.name_kh && m.name_kh.trim() === def.name_kh.trim()) ||
+                    (m.name_en && def.name_en && m.name_en.toLowerCase().trim() === def.name_en.toLowerCase().trim())
             );
             if (!exists) {
                 mapped.push(def);
@@ -1217,25 +1247,41 @@ export class TaskService {
                 throw new ForbiddenException('អ្នកអាចបង្កើតភារកិច្ចបានតែក្នុងគម្រោងដែលអ្នកជាសមាជិកប៉ុណ្ណោះ (You can only create tasks in projects you are a member of).');
             }
         }
-        const prefix = (dto.project_id === 'wms-digitech' || (dto.code && dto.code.toUpperCase().includes('WMS'))) ? 'WMS' : 'BMS';
+        let prefix = 'PRJ';
         let formattedCode = '';
         if (dto.code && dto.code.trim()) {
+            const clean = dto.code.replace(/^#/, '').trim();
+            const parts = clean.split('-');
+            if (parts.length > 0 && parts[0]) {
+                prefix = parts[0].toUpperCase();
+            }
             formattedCode = dto.code.trim().startsWith('#') ? dto.code.trim() : `#${dto.code.trim()}`;
         } else {
+            const targetPid = dto.project_id || '';
+            const foundPlan = this.getPlanProjects().find(
+                (p) => String(p.id).toLowerCase() === targetPid.toLowerCase() || String(p.code || '').toLowerCase() === targetPid.toLowerCase()
+            );
+            if (foundPlan?.code) {
+                prefix = foundPlan.code.replace(/^#/, '').toUpperCase();
+            } else if (targetPid.toUpperCase().includes('WMS')) {
+                prefix = 'WMS';
+            } else if (targetPid.toUpperCase().includes('BMS')) {
+                prefix = 'BMS';
+            }
             const projectTasks = this.tasks.filter((t) => t.project_id === dto.project_id || t.code?.toUpperCase().includes(prefix));
             let maxNum = -1;
             for (const t of projectTasks) {
                 if (t.code) {
-                    const match = t.code.match(/\d+/);
+                    const match = t.code.match(/(\d+)(?!.*\d)/);
                     if (match) {
-                        const val = parseInt(match[0], 10);
+                        const val = parseInt(match[1], 10);
                         if (!isNaN(val) && val > maxNum) {
                             maxNum = val;
                         }
                     }
                 }
             }
-            const nextSeq = maxNum >= 0 ? maxNum + 1 : 0;
+            const nextSeq = maxNum >= 0 ? maxNum + 1 : 1;
             formattedCode = `#${prefix}-${String(nextSeq).padStart(4, '0')}`;
         }
 
@@ -1302,6 +1348,12 @@ export class TaskService {
 
         const initialAttachments = (dto.attachments && Array.isArray(dto.attachments)) ? dto.attachments : [];
 
+        const targetPid = dto.project_id || (prefix === 'WMS' ? 'wms-digitech' : (prefix === 'BMS' ? 'bms-digitech' : prefix.toLowerCase()));
+        const foundPlan = this.getPlanProjects().find(
+            (p) => String(p.id).toLowerCase() === targetPid.toLowerCase() || String(p.code || '').toLowerCase() === targetPid.toLowerCase()
+        );
+        const resolvedProjectName = dto.project_name || foundPlan?.name || (prefix === 'WMS' ? 'WMS Digitech' : (prefix === 'BMS' ? 'BMS Digitech' : (foundPlan?.code || prefix)));
+
         const newTask: TaskItem = {
             id: Date.now(),
             code: formattedCode,
@@ -1315,8 +1367,8 @@ export class TaskService {
             comments_count: 0,
             attachments_count: initialAttachments.length,
             due_date: dto.due_date || null,
-            project_id: dto.project_id || (prefix === 'WMS' ? 'wms-digitech' : 'bms-digitech'),
-            project_name: prefix === 'BMS' ? 'BMS Digitech' : 'WMS Digitech',
+            project_id: targetPid,
+            project_name: resolvedProjectName,
             reporter: taskReporter,
             assignee: primaryAssignee,
             assignees: assigneesList,

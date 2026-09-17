@@ -343,6 +343,24 @@ export const BMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.
 
 export const WMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><g transform="translate(60, 60)"><path d="M 0 -25 L 23 -12 L 0 1 L -23 -12 Z" fill="%23fb923c" stroke="%23ea580c" stroke-width="1.5" stroke-linejoin="round"/><path d="M -23 -12 L 0 1 L 0 26 L -23 13 Z" fill="%230284c7" stroke="%230369a1" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 23 -12 L 23 13 L 0 26 Z" fill="%23ea580c" stroke="%23c2410c" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 0 26 M 0 1 L -23 -12 M 0 1 L 23 -12" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M -11.5 -5.5 L 0 -12 L 11.5 -5.5 L 0 1 Z" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/><path d="M -11.5 7 L -11.5 -5.5 M 11.5 7 L 11.5 -5.5" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/></g></svg>';
 
+export const DEFAULT_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="defGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%231e293b"/><stop offset="100%" stop-color="%230f172a"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%23334155" stroke-width="2"/><circle cx="60" cy="60" r="38" fill="url(%23defGrad)" stroke="%23475569" stroke-width="1.5"/><g transform="translate(36, 36) scale(3)"><path fill="%2394a3b8" d="M4 1a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V4a3 3 0 0 0-3-3zM2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2zm0 1h12v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></g></svg>';
+
+export function getProjectFallbackLogo(code?: string, name?: string): string {
+    const cleanCode = (code || '').replace(/^#/, '').trim().toUpperCase();
+    const cleanName = (name || '').trim().toUpperCase();
+    if (cleanCode.includes('BMS') || cleanName.includes('BMS')) return BMS_PROJECT_LOGO;
+    if (cleanCode.includes('WMS') || cleanName.includes('WMS')) return WMS_PROJECT_LOGO;
+
+    // Use clean project code prefix (e.g. PRJ, PMS, HR, ACC) or project initials
+    const rawPrefix = cleanCode ? cleanCode.split(/[-_]/)[0] : (cleanName ? cleanName.slice(0, 3) : '');
+    const initials = rawPrefix.slice(0, 4);
+
+    if (initials && initials.length >= 2 && !/^\d+$/.test(initials)) {
+        return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%231e293b"/><stop offset="100%" stop-color="%230f172a"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%23334155" stroke-width="2"/><circle cx="60" cy="60" r="38" fill="url(%23pGrad)" stroke="%233b82f6" stroke-width="1.5"/><text x="60" y="${initials.length > 3 ? '66' : '68'}" text-anchor="middle" fill="%2360a5fa" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="${initials.length > 3 ? 20 : 23}" letter-spacing="1">${initials}</text></svg>`;
+    }
+    return DEFAULT_PROJECT_LOGO;
+}
+
 const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
     {
         id: '4',
@@ -567,7 +585,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     getProjectLogo(plan: any): string {
-        if (!plan) return BMS_PROJECT_LOGO;
+        if (!plan) return DEFAULT_PROJECT_LOGO;
         const code = (plan.code || '').toUpperCase();
         const name = (plan.name || '').toUpperCase();
         const id = String(plan.id || '').toLowerCase();
@@ -594,14 +612,12 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             const resolved = resolveFileUrl(raw);
             if (resolved) return resolved;
         }
-        return BMS_PROJECT_LOGO;
+        return getProjectFallbackLogo(plan.code, plan.name);
     }
 
     onProjectLogoError(event: Event, plan: any): void {
         const target = event.target as HTMLImageElement;
-        const code = (plan?.code || '').toUpperCase();
-        const name = (plan?.name || '').toUpperCase();
-        const fallback = (code.includes('WMS') || name.includes('WMS')) ? WMS_PROJECT_LOGO : BMS_PROJECT_LOGO;
+        const fallback = getProjectFallbackLogo(plan?.code, plan?.name);
         if (target && target.src !== fallback) {
             target.src = fallback;
         } else if (plan) {
@@ -1442,11 +1458,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                 );
                                 const codeUp = (ap.code || '').toUpperCase();
                                 const nameUp = (ap.name || '').toUpperCase();
-                                const fallbackDefaultLogo = (codeUp.includes('WMS') || nameUp.includes('WMS'))
-                                    ? WMS_PROJECT_LOGO
-                                    : (codeUp.includes('BMS') || nameUp.includes('BMS'))
-                                    ? BMS_PROJECT_LOGO
-                                    : '/images/logo/logo.png';
+                                const fallbackDefaultLogo = getProjectFallbackLogo(ap.code, ap.name);
 
                                 const pid = String(ap.id || '').toLowerCase();
                                 const pcode = (ap.code || '').toLowerCase().replace('#', '');
@@ -2348,10 +2360,22 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
+            projectId: proj?.id,
             projectCode: proj?.code,
             projectName: proj?.name,
+            projects: this.plans().map((p) => ({
+                id: String(p.id),
+                name: p.name,
+                code: p.code,
+                logo: p.logo || p.image,
+            })),
             members: proj?.members || [],
             existingTasks: proj?.tasks || [],
+            onTaskCreated: () => {
+                if (proj) {
+                    this.selectProject(proj);
+                }
+            },
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
