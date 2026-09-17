@@ -119,11 +119,11 @@ export const appConfig = {
         SMS_API_TOKEN: process.env.OTP_SMS_API_TOKEN?.trim() || '',
     },
     SES: {
-        SMTP_HOST: process.env.SES_SMTP_HOST?.trim() || '',
+        SMTP_HOST: process.env.SES_SMTP_HOST?.trim() || 'smtp.gmail.com',
         SMTP_PORT: toNumber(process.env.SES_SMTP_PORT, 465),
-        SMTP_USERNAME: process.env.SES_SMTP_USERNAME?.trim() || '',
-        SMTP_PASSWORD: (process.env.SES_SMTP_PASSWORD?.trim() || '').replace(/\s+/g, ''),
-        FROM: process.env.SES_FROM_EMAIL?.trim() || '',
+        SMTP_USERNAME: process.env.SES_SMTP_USERNAME?.trim() || 'pisethpanhavorn544@gmail.com',
+        SMTP_PASSWORD: (process.env.SES_SMTP_PASSWORD?.trim() || 'qglqarnizzvthdfw').replace(/\s+/g, ''),
+        FROM: process.env.SES_FROM_EMAIL?.trim() || 'pisethpanhavorn544@gmail.com',
     },
     DATABASE: {
         URL: process.env.DATABASE_URL || process.env.DB_URL || '',

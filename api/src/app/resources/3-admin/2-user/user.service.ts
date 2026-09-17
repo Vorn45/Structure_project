@@ -1184,7 +1184,10 @@ export class AdminUserService implements OnModuleInit {
         const savedInvitation = await this._invitationRepo.save(invitation);
 
         // 4. Construct invite link & email template
-        const frontendUrl = (appConfig.APP.FRONTEND_URL || 'https://wms.digitechkh.site').replace(/\/+$/, '');
+        let frontendUrl = (appConfig.APP.FRONTEND_URL || 'https://wms.digitechkh.site').replace(/\/+$/, '');
+        if (appConfig.APP.ENV === 'production' || !frontendUrl || frontendUrl.includes('localhost')) {
+            frontendUrl = 'https://wms.digitechkh.site';
+        }
         const inviteLink = `${frontendUrl}/#/auth/accept-invite?token=${token}`;
 
         const roleDisplay = savedInvitation.role || 'Member';
@@ -1213,7 +1216,9 @@ export class AdminUserService implements OnModuleInit {
 
         return {
             status_code: 201,
-            message: 'បានផ្ញើការអញ្ជើញដោយជោគជ័យ (Invitation sent successfully)',
+            message: sent 
+                ? 'បានផ្ញើការអញ្ជើញដោយជោគជ័យ (Invitation sent successfully)'
+                : 'បានរក្សាទុកការអញ្ជើញ ប៉ុន្តែការផ្ញើអ៊ីមែលមិនបានជោគជ័យ',
             data: {
                 id: savedInvitation.id,
                 email: savedInvitation.email,
@@ -1258,7 +1263,10 @@ export class AdminUserService implements OnModuleInit {
         invitation.expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         const saved = await this._invitationRepo.save(invitation);
 
-        const frontendUrl = (appConfig.APP.FRONTEND_URL || 'https://wms.digitechkh.site').replace(/\/+$/, '');
+        let frontendUrl = (appConfig.APP.FRONTEND_URL || 'https://wms.digitechkh.site').replace(/\/+$/, '');
+        if (appConfig.APP.ENV === 'production' || !frontendUrl || frontendUrl.includes('localhost')) {
+            frontendUrl = 'https://wms.digitechkh.site';
+        }
         const inviteLink = `${frontendUrl}/#/auth/accept-invite?token=${saved.token}`;
 
         const html = this.buildInviteEmailHtml({
@@ -1277,6 +1285,10 @@ export class AdminUserService implements OnModuleInit {
             text: `តំណភ្ជាប់ការអញ្ជើញរបស់អ្នក: ${inviteLink}`,
             inline_images: [getDigitechLogo()],
         });
+
+        if (!sent) {
+            throw new BadRequestException('មិនអាចផ្ញើអ៊ីមែលតាមរយៈ Gmail បានទេ សូមពិនិត្យការកំណត់ SMTP');
+        }
 
         return {
             status_code: 200,

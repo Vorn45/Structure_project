@@ -2,6 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as net                 from 'net';
 import * as tls                from 'tls';
+import * as crypto             from 'crypto';
 
 // ===========================================================================>> Custom Library
 // > Local
@@ -173,10 +174,18 @@ export class SesService {
             '--alt-boundary--',
         ];
 
+        const messageId = `<${Date.now()}.${crypto.randomBytes(8).toString('hex')}@digitechkh.site>`;
+        const date = new Date().toUTCString();
+        const encodedSubject = `=?UTF-8?B?${Buffer.from(payload.subject, 'utf8').toString('base64')}?=`;
+        const fromName = 'WMS Digitech';
+        const encodedFrom = `=?UTF-8?B?${Buffer.from(fromName, 'utf8').toString('base64')}?= <${from}>`;
+
         const headers = [
-            `From: ${from}`,
-            `To: ${payload.to}`,
-            `Subject: ${payload.subject}`,
+            `From: ${encodedFrom}`,
+            `To: <${payload.to}>`,
+            `Subject: ${encodedSubject}`,
+            `Date: ${date}`,
+            `Message-ID: ${messageId}`,
             'MIME-Version: 1.0',
         ];
 
