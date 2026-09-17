@@ -361,12 +361,12 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         progress: 0,
         start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
-        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', avatar: '/images/placeholder/panha-portrait.jpg' },
+        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', avatar: null },
         members: [
-            { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/panha-portrait.jpg' },
-            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/brusmuny-portrait.png' },
-            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com', avatar: '/images/placeholder/winner-portrait.jpg' },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-purple-600', email: 'phuongsovannara@gmail.com', avatar: '/images/placeholder/sovannara-portrait.png' },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: null },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com', avatar: null },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-purple-600', email: 'phuongsovannara@gmail.com', avatar: null },
         ],
         tasks: [],
         phases: [
@@ -444,12 +444,12 @@ const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
         progress: 0,
         start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
         end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
-        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', avatar: '/images/placeholder/panha-portrait.jpg' },
+        team_lead: { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', avatar: null },
         members: [
-            { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: '/images/placeholder/panha-portrait.jpg' },
-            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: '/images/placeholder/brusmuny-portrait.png' },
-            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com', avatar: '/images/placeholder/winner-portrait.jpg' },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-rose-600', email: 'phuongsovannara@gmail.com', avatar: '/images/placeholder/sovannara-portrait.png' },
+            { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', initial: 'P', bgClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com', avatar: null },
+            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', initial: 'P', bgClass: 'bg-emerald-600', email: 'pumprusmuny@example.com', avatar: null },
+            { id: 103, name: 'THA WINNER', role: 'Developer', initial: 'T', bgClass: 'bg-amber-600', email: 'thawinner@example.com', avatar: null },
+            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', initial: 'P', bgClass: 'bg-rose-600', email: 'phuongsovannara@gmail.com', avatar: null },
         ],
         tasks: [],
         phases: [
@@ -616,19 +616,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         const targetEmail = (member.email || '').toLowerCase().trim();
         const targetPhone = ((member.phone || '') as string).replace(/\D/g, '');
 
-        // 1. Dedicated member profile photo resolution (strictly for genuine seed accounts)
-        if (targetPhone === '087280875' || member.id === 6 || member.id === 102) {
-            return '/images/placeholder/brusmuny-portrait.png';
-        }
-        if (targetPhone === '010843612' || member.id === 5 || member.id === 101) {
-            return '/images/placeholder/panha-portrait.jpg';
-        }
-        if (targetPhone === '067776682' || targetPhone === '078776682' || member.id === 7 || member.id === 8 || member.id === 103) {
-            return '/images/placeholder/winner-portrait.jpg';
-        }
-        if (targetPhone === '011242425' || member.id === 9 || member.id === 104) {
-            return '/images/placeholder/sovannara-portrait.png';
-        }
+
 
         const curId = cur?.id ? Number(cur.id) : null;
         const memberId = member?.id ? Number(member.id) : null;
@@ -639,14 +627,14 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
         if (isCurrentUser && cur?.avatar) {
             const curAvatar = resolveFileUrl(cur.avatar);
-            if (curAvatar && !curAvatar.includes('placeholder/avatar.jpg') && !curAvatar.includes('placeholder/image.jpg')) {
+            if (curAvatar && !curAvatar.includes('placeholder') && !curAvatar.includes('portrait')) {
                 return curAvatar;
             }
         }
 
         if (member.avatar) {
             const resolved = resolveFileUrl(member.avatar);
-            if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
+            if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                 return resolved;
             }
         }
@@ -661,7 +649,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             });
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
-                if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
+                if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                     return resolved;
                 }
             }

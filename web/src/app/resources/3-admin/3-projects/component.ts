@@ -1250,19 +1250,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const targetEmail = (member.email || '').toLowerCase().trim();
         const targetPhone = ((member.phone || '') as string).replace(/\D/g, '');
 
-        // 1. Dedicated member profile photo resolution (strictly for genuine seed accounts)
-        if (targetPhone === '087280875' || member.id === 6 || member.id === 102) {
-            return '/images/placeholder/brusmuny-portrait.png';
-        }
-        if (targetPhone === '010843612' || member.id === 5 || member.id === 101) {
-            return '/images/placeholder/panha-portrait.jpg';
-        }
-        if (targetPhone === '067776682' || targetPhone === '078776682' || member.id === 7 || member.id === 8 || member.id === 103) {
-            return '/images/placeholder/winner-portrait.jpg';
-        }
-        if (targetPhone === '011242425' || member.id === 9 || member.id === 104) {
-            return '/images/placeholder/sovannara-portrait.png';
-        }
+
 
         const curId = cur?.id ? Number(cur.id) : null;
         const memberId = member?.id ? Number(member.id) : null;
@@ -1273,14 +1261,14 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
         if (isCurrentUser && cur?.avatar) {
             const curAvatar = resolveFileUrl(cur.avatar);
-            if (curAvatar && !curAvatar.includes('placeholder/avatar.jpg') && !curAvatar.includes('placeholder/image.jpg')) {
+            if (curAvatar && !curAvatar.includes('placeholder') && !curAvatar.includes('portrait')) {
                 return curAvatar;
             }
         }
 
         if (member.avatar) {
             const resolved = resolveFileUrl(member.avatar);
-            if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
+            if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                 return resolved;
             }
         }
@@ -1295,7 +1283,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             });
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
-                if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
+                if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                     return resolved;
                 }
             }

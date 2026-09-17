@@ -84,7 +84,7 @@ export interface VerifiedMemberData {
                 <!-- 4. CENTER PORTRAIT PHOTO -->
                 <div class="flex justify-center mb-6 px-6">
                     <div class="w-38 h-48 rounded-lg overflow-hidden border-2 border-slate-200 shadow-md bg-slate-50 relative p-1">
-                        <img [src]="member()?.avatar_url || '/images/placeholder/panha-portrait.jpg'" 
+                        <img [src]="member()?.avatar_url || '/images/placeholder/avatar.jpg'" 
                             alt="Member Portrait Photo" 
                             class="w-full h-full object-cover rounded-md"
                             (error)="onAvatarError($event)" />
@@ -246,7 +246,7 @@ export class MemberVerifyComponent implements OnInit {
                 role_title: 'សមាជិកប្រព័ន្ធ (Core Member)',
                 status: 'សុពលភាពសកម្ម (Active Verified)',
                 valid_until: '៣១ ធ្នូ ២០២៧',
-                avatar_url: '/images/placeholder/panha-portrait.jpg',
+                avatar_url: '/images/placeholder/avatar.jpg',
             });
         });
     }

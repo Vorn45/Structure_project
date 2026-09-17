@@ -194,49 +194,34 @@ export class UserManagementComponent implements OnInit {
             return null;
         }
 
-        const userPhone = (user.phone || '').replace(/\D/g, '');
-
-        // 1. Dedicated seed profile photo resolution (strictly aligned with Project & Tasks)
-        if (userPhone === '087280875' || user.id === 6 || user.id === 102) {
-            return '/images/placeholder/brusmuny-portrait.png';
-        }
-        if (userPhone === '010843612' || user.id === 5 || user.id === 101) {
-            return '/images/placeholder/panha-portrait.jpg';
-        }
-        if (userPhone === '067776682' || userPhone === '078776682' || user.id === 7 || user.id === 8 || user.id === 103) {
-            return '/images/placeholder/winner-portrait.jpg';
-        }
-        if (userPhone === '011242425' || user.id === 9 || user.id === 104) {
-            return '/images/placeholder/sovannara-portrait.png';
-        }
-
-        // 2. Direct user avatar if present and not empty
-        if (user.avatar && typeof user.avatar === 'string' && user.avatar.trim() && !user.avatar.includes('placeholder/avatar.jpg')) {
+        // 1. Direct user uploaded avatar
+        if (user.avatar && typeof user.avatar === 'string' && user.avatar.trim() && !user.avatar.includes('placeholder') && !user.avatar.includes('portrait')) {
             const resolved = resolveFileUrl(user.avatar);
-            if (resolved) {
+            if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                 return resolved;
             }
         }
 
-        // 3. Fallback: match currently logged in user if this row is strictly the current user
+        // 2. Fallback: match currently logged in user if this row is strictly the current user with genuine uploaded avatar
         const cur = this.currentUser();
         if (cur && cur.avatar) {
             const curId = cur.id ? Number(cur.id) : null;
             const userId = user.id ? Number(user.id) : null;
             const curPhone = (cur.phone || '').replace(/\D/g, '');
+            const userPhone = (user.phone || '').replace(/\D/g, '');
             const isMatch = Boolean(
                 (curId && userId && curId === userId) ||
                 (!curId && !userId && curPhone && userPhone && curPhone === userPhone)
             );
             if (isMatch) {
                 const curAvatar = resolveFileUrl(cur.avatar);
-                if (curAvatar) {
+                if (curAvatar && !curAvatar.includes('placeholder') && !curAvatar.includes('portrait')) {
                     return curAvatar;
                 }
             }
         }
 
-        // 4. Fallback to placeholder avatar
+        // 3. If account has not yet uploaded profile, use default placeholder avatar
         return '/images/placeholder/avatar.jpg';
     }
 

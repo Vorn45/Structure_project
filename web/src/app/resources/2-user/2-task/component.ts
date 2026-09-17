@@ -480,18 +480,18 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
         if (isCurrentUser && cur?.avatar) {
             const curAvatar = resolveFileUrl(cur.avatar);
-            if (curAvatar && !curAvatar.includes('placeholder/avatar.jpg') && !curAvatar.includes('placeholder/image.jpg')) {
+            if (curAvatar && !curAvatar.includes('placeholder') && !curAvatar.includes('portrait')) {
                 return curAvatar;
             }
         }
 
         // 2. If member object already has an avatar that is not a placeholder
         if (member.avatar) {
-            if (typeof member.avatar === 'string' && (member.avatar.includes('placeholder/avatar.jpg') || member.avatar.includes('placeholder/image.jpg'))) {
-                // Ignore placeholder
+            if (typeof member.avatar === 'string' && (member.avatar.includes('placeholder') || member.avatar.includes('portrait'))) {
+                // Ignore placeholder/portrait
             } else {
                 const resolved = resolveFileUrl(member.avatar);
-                if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
+                if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                     return resolved;
                 }
             }
@@ -508,24 +508,10 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             });
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
-                if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
+                if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                     return resolved;
                 }
             }
-        }
-
-        // 4. Dedicated member profile photo resolution (strictly for genuine seed accounts)
-        if (targetPhone === '087280875' || member.id === 6 || member.id === 102) {
-            return '/images/placeholder/brusmuny-portrait.png';
-        }
-        if (targetPhone === '010843612' || member.id === 5 || member.id === 101) {
-            return '/images/placeholder/panha-portrait.jpg';
-        }
-        if (targetPhone === '067776682' || targetPhone === '078776682' || member.id === 7 || member.id === 8 || member.id === 103) {
-            return '/images/placeholder/winner-portrait.jpg';
-        }
-        if (targetPhone === '011242425' || member.id === 9 || member.id === 104) {
-            return '/images/placeholder/sovannara-portrait.png';
         }
 
         return null;
