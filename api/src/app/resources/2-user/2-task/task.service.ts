@@ -636,24 +636,36 @@ export class TaskService {
         const uNameKh = (user.name_kh || '').trim();
 
         const leadId = plan.lead?.id || plan.team_lead?.id;
-        if (leadId && String(leadId) === uId) return true;
-        const leadName = (plan.lead?.name || plan.team_lead?.name || '').toLowerCase().trim();
-        if (leadName && (leadName === uNameEn || (uNameKh && leadName === uNameKh.toLowerCase()))) return true;
-
-        const reporter = plan.reporter;
-        if (reporter && typeof reporter === 'string') {
-            const rLow = reporter.toLowerCase().trim();
-            if (rLow === uNameEn || (uNameKh && reporter.trim() === uNameKh)) return true;
-        }
+        if (leadId && String(leadId) === uId && Number(leadId) > 1000) return true;
+        const leadPhone = (plan.lead?.phone || plan.team_lead?.phone || '').replace(/\D/g, '');
+        if (leadPhone && uPhone && leadPhone === uPhone) return true;
+        const leadEmail = (plan.lead?.email || plan.team_lead?.email || '').toLowerCase().trim();
+        if (leadEmail && uEmail && leadEmail === uEmail) return true;
 
         const members = Array.isArray(plan.members) ? plan.members : [];
         return members.some((m: any) => {
             if (m.user_id && String(m.user_id) === uId) return true;
-            if (m.id && String(m.id) === uId && !['UI/UX Designer', 'Frontend Dev'].includes(m.name)) return true;
-            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            if (m.id && String(m.id) === uId && Number(m.id) > 1000) return true;
             if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
+            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            const mPhone = (m.phone || '').replace(/\D/g, '');
+            const mEmail = (m.email || '').toLowerCase().trim();
+            if (mPhone && uPhone && mPhone !== uPhone) return false;
+            if (mEmail && uEmail && mEmail !== uEmail) return false;
             if (m.name) {
                 const mName = m.name.toLowerCase().trim();
+                if (mName.includes('piseth') || mName.includes('panhavorn') || mName.includes('ពិសិដ្ឋ') || mName.includes('បញ្ញាវ័ន្ត')) {
+                    return uPhone === '010843612' || uEmail === 'pisethpanhavorn544@gmail.com';
+                }
+                if (mName.includes('brusmuny') || mName.includes('ប្រុសមុន្នី')) {
+                    return uPhone === '087280875' || uEmail === 'pumprusmuny@example.com';
+                }
+                if (mName.includes('winner') || mName.includes('វីនណឺ')) {
+                    return uPhone === '067776682' || uEmail === 'thawinner@example.com';
+                }
+                if (mName.includes('sovannara') || mName.includes('សុវណ្ណារ៉ា')) {
+                    return uPhone === '011242425' || uEmail === 'phuongsovannara@gmail.com';
+                }
                 if (mName === uNameEn || (uNameKh && m.name.trim() === uNameKh)) return true;
             }
             return false;
@@ -664,25 +676,38 @@ export class TaskService {
         if (!user) return false;
         const uId = user.id ? String(user.id) : '';
         const uEmail = (user.email || '').toLowerCase().trim();
+        const uPhone = (user.phone || '').replace(/\D/g, '');
         const uNameEn = (user.name_en || '').toLowerCase().trim();
         const uNameKh = (user.name_kh || '').trim();
 
-        if (t.reporter && (String(t.reporter.id) === uId || (t.reporter.name && (t.reporter.name.toLowerCase().trim() === uNameEn || (uNameKh && t.reporter.name.trim() === uNameKh))))) {
-            return true;
-        }
+        const matchUser = (target?: { id?: number; name?: string; email?: string; phone?: string } | null): boolean => {
+            if (!target) return false;
+            if (uEmail && target.email && target.email.toLowerCase().trim() === uEmail) return true;
+            if (uPhone && target.phone && target.phone.replace(/\D/g, '') === uPhone) return true;
+            if (target.id && Number(target.id) > 1000 && String(target.id) === uId) return true;
+            if (target.name && !target.phone && !target.email) {
+                const targetName = target.name.toLowerCase().trim();
+                if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
+                    return uPhone === '010843612' || uEmail === 'pisethpanhavorn544@gmail.com';
+                }
+                if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី')) {
+                    return uPhone === '087280875' || uEmail === 'pumprusmuny@example.com';
+                }
+                if (targetName.includes('winner') || targetName.includes('វីនណឺ')) {
+                    return uPhone === '067776682' || uEmail === 'thawinner@example.com';
+                }
+                if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
+                    return uPhone === '011242425' || uEmail === 'phuongsovannara@gmail.com';
+                }
+            }
+            return false;
+        };
 
-        if (t.assignee && (String(t.assignee.id) === uId || (uEmail && t.assignee.email && t.assignee.email.toLowerCase().trim() === uEmail) || (t.assignee.name && (t.assignee.name.toLowerCase().trim() === uNameEn || (uNameKh && t.assignee.name.trim() === uNameKh))))) {
-            return true;
-        }
-
+        if (matchUser(t.reporter)) return true;
+        if (matchUser(t.assignee)) return true;
         if (Array.isArray(t.assignees)) {
-            return t.assignees.some((a) => (
-                String(a.id) === uId ||
-                (uEmail && a.email && a.email.toLowerCase().trim() === uEmail) ||
-                (a.name && (a.name.toLowerCase().trim() === uNameEn || (uNameKh && a.name.trim() === uNameKh)))
-            ));
+            return t.assignees.some((a) => matchUser(a));
         }
-
         return false;
     }
 

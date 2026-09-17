@@ -1,5 +1,5 @@
 // ===========================================================================>> Core Library
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import * as fs from 'fs';
@@ -161,7 +161,7 @@ const DEFAULT_USERS: AdminUserItem[] = [
 ];
 
 @Injectable()
-export class AdminUserService {
+export class AdminUserService implements OnModuleInit {
     private localUsers: AdminUserItem[] = [...DEFAULT_USERS];
     private userMeta: Record<string, {
         department?: string;
@@ -191,6 +191,52 @@ export class AdminUserService {
         private readonly _dataSource: DataSource,
     ) {
         this.loadFromDisk();
+    }
+
+    async onModuleInit(): Promise<void> {
+        try {
+            await this.autoHealUserRoles();
+        } catch (e: any) {
+            console.warn('[AdminUserService] autoHealUserRoles warning:', e?.message || e);
+        }
+    }
+
+    private async autoHealUserRoles(): Promise<void> {
+        const userRole = await this._roleRepo.findOne({ where: { slug: 'user' } });
+        if (!userRole) return;
+
+        const users = await this._userRepo.find({
+            relations: ['user_roles', 'user_roles.role'],
+        });
+
+        const superadminPhones = ['010843612', '087280875'];
+        const superadminEmails = ['pisethpanhavorn544@gmail.com', 'pumprusmuny@example.com'];
+
+        for (const u of users) {
+            const phoneClean = (u.phone || '').replace(/\D/g, '');
+            const emailClean = (u.email || '').toLowerCase().trim();
+
+            const isGenuineSuperadmin =
+                superadminPhones.includes(phoneClean) || superadminEmails.includes(emailClean);
+
+            if (!isGenuineSuperadmin) {
+                const meta = this.getUserMeta(u.id, u.email, u.phone);
+                const roleName = (meta?.role || '').toLowerCase();
+                const isExplicitAdmin = roleName.includes('super admin') || roleName.includes('superadmin');
+
+                // If not genuine superadmin and not explicitly set as Super Admin in meta,
+                // ensure they don't hold role_id: 1 (superadmin)
+                if (!isExplicitAdmin) {
+                    for (const ur of u.user_roles || []) {
+                        if (ur.role?.slug === 'superadmin' || ur.role?.slug === 'org_admin') {
+                            ur.role_id = userRole.id;
+                            await this._userRoleRepo.save(ur);
+                            console.log(`[AdminUserService] Auto-healed role for user #${u.id} (${u.name_en || u.name_kh}) to user role.`);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private loadFromDisk(): void {

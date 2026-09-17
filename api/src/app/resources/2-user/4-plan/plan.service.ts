@@ -417,27 +417,45 @@ export class PlanService {
         const uNameEn = (user.name_en || '').toLowerCase().trim();
         const uNameKh = (user.name_kh || '').trim();
 
-        // Check if user is the project lead or reporter
+        // 1. Check if user is the project lead or reporter by verified user_id, phone, or email
         const leadId = project.lead?.id || (project as any).team_lead?.id;
-        if (leadId && String(leadId) === uId) return true;
-        const leadName = (project.lead?.name || (project as any).team_lead?.name || '').toLowerCase().trim();
-        if (leadName && (leadName === uNameEn || (uNameKh && leadName === uNameKh.toLowerCase()))) return true;
+        if (leadId && String(leadId) === uId && Number(leadId) > 1000) return true;
+        const leadPhone = (project.lead as any)?.phone || (project as any).team_lead?.phone;
+        if (leadPhone && uPhone && leadPhone.replace(/\D/g, '') === uPhone) return true;
+        const leadEmail = ((project.lead as any)?.email || (project as any).team_lead?.email || '').toLowerCase().trim();
+        if (leadEmail && uEmail && leadEmail === uEmail) return true;
 
-        const reporter = (project as any).reporter;
-        if (reporter && typeof reporter === 'string') {
-            const rLow = reporter.toLowerCase().trim();
-            if (rLow === uNameEn || (uNameKh && reporter.trim() === uNameKh)) return true;
-        }
-
-        // Check project members list
+        // 2. Check project members list
         const members = Array.isArray(project.members) ? project.members : [];
         return members.some((m: any) => {
+            // Explicit DB user link
             if (m.user_id && String(m.user_id) === uId) return true;
-            if (m.id && String(m.id) === uId && !['UI/UX Designer', 'Frontend Dev'].includes(m.name)) return true;
-            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            // Real database user ID (excluding mock IDs 1..106)
+            if (m.id && String(m.id) === uId && Number(m.id) > 1000) return true;
+            // Phone match (primary verified identifier)
             if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
+            // Email match (primary verified identifier)
+            if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
+            // Name match: ONLY if neither side has a conflicting phone/email
+            const mPhone = (m.phone || '').replace(/\D/g, '');
+            const mEmail = (m.email || '').toLowerCase().trim();
+            if (mPhone && uPhone && mPhone !== uPhone) return false;
+            if (mEmail && uEmail && mEmail !== uEmail) return false;
             if (m.name) {
                 const mName = m.name.toLowerCase().trim();
+                // Special check for mock seed admins: must match their true phone/email
+                if (mName.includes('piseth') || mName.includes('panhavorn') || mName.includes('ពិសិដ្ឋ') || mName.includes('បញ្ញាវ័ន្ត')) {
+                    return uPhone === '010843612' || uEmail === 'pisethpanhavorn544@gmail.com';
+                }
+                if (mName.includes('brusmuny') || mName.includes('ប្រុសមុន្នី')) {
+                    return uPhone === '087280875' || uEmail === 'pumprusmuny@example.com';
+                }
+                if (mName.includes('winner') || mName.includes('វីនណឺ')) {
+                    return uPhone === '067776682' || uEmail === 'thawinner@example.com';
+                }
+                if (mName.includes('sovannara') || mName.includes('សុវណ្ណារ៉ា')) {
+                    return uPhone === '011242425' || uEmail === 'phuongsovannara@gmail.com';
+                }
                 if (mName === uNameEn || (uNameKh && m.name.trim() === uNameKh)) return true;
             }
             return false;
