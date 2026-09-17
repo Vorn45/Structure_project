@@ -1,0 +1,202 @@
+<div class="w-full flex flex-col justify-center font-kantumruy" style="font-family: 'Kantumruy Pro', sans-serif !important;">
+
+    <!-- 1. LOADING / VERIFYING STATE -->
+    @if (verifying()) {
+        <div class="flex flex-col items-center justify-center py-12 text-center space-y-4">
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900 shadow-sm animate-pulse">
+                <mat-progress-spinner [diameter]="36" [mode]="'indeterminate'"></mat-progress-spinner>
+            </div>
+            <div>
+                <h3 class="text-[17px] font-semibold text-slate-800 dark:text-white">កំពុងផ្ទៀងផ្ទាត់ការអញ្ជើញ...</h3>
+                <p class="text-[13px] text-slate-500 dark:text-slate-400 mt-1">សូមរង់ចាំមួយភ្លែត ប្រព័ន្ធកំពុងពិនិត្យសុពលភាពតំណភ្ជាប់</p>
+            </div>
+        </div>
+    }
+
+    <!-- 2. VERIFICATION ERROR STATE -->
+    @else if (verifyError()) {
+        <div class="flex flex-col items-center justify-center py-8 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <div class="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-100 dark:border-rose-900 shadow-sm">
+                <mat-icon svgIcon="mdi:alert-circle-outline" class="icon-size-8"></mat-icon>
+            </div>
+            <div class="max-w-md">
+                <h3 class="text-[18px] font-semibold text-slate-900 dark:text-white">មិនអាចបន្តការអញ្ជើញបានទេ</h3>
+                <p class="text-[13.5px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                    {{ verifyError() }}
+                </p>
+            </div>
+            <div class="pt-2">
+                <a routerLink="/auth/sign-in"
+                   class="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium shadow-md transition-all cursor-pointer">
+                    <mat-icon svgIcon="mdi:arrow-left" class="icon-size-4.5"></mat-icon>
+                    <span>ត្រឡប់ទៅទំព័រចូល (Sign In)</span>
+                </a>
+            </div>
+        </div>
+    }
+
+    <!-- 3. INVITATION ACCEPT FORM -->
+    @else if (invitation()) {
+        <div class="w-full flex flex-col space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <!-- Top Welcome Header -->
+            <div class="text-center space-y-1.5">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900 shadow-2xs mb-1">
+                    <mat-icon svgIcon="mdi:handshake-outline" class="icon-size-7"></mat-icon>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">ទទួលយកការអញ្ជើញ</h2>
+                <p class="text-[13px] text-slate-500 dark:text-slate-400">
+                    សូមបំពេញព័ត៌មានផ្ទាល់ខ្លួន និងកំណត់ពាក្យសម្ងាត់ដើម្បីចាប់ផ្តើមប្រើប្រាស់
+                </p>
+            </div>
+
+            <!-- Invitation Context Card -->
+            <div class="p-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl space-y-2.5">
+                <div class="flex items-center justify-between text-[12.5px]">
+                    <span class="text-slate-500 dark:text-slate-400">អញ្ជើញទៅកាន់ Gmail:</span>
+                    <span class="font-medium text-slate-900 dark:text-white">{{ invitation()?.email }}</span>
+                </div>
+                <div class="flex items-center justify-between text-[12.5px]">
+                    <span class="text-slate-500 dark:text-slate-400">តួនាទីក្នុងប្រព័ន្ធ:</span>
+                    <span class="inline-flex items-center px-2 py-0.2 rounded-full text-[11px] font-semibold border"
+                          [ngClass]="getRoleBadgeClass(invitation()?.role)">
+                        {{ invitation()?.role }}
+                    </span>
+                </div>
+                @if (invitation()?.department) {
+                    <div class="flex items-center justify-between text-[12.5px]">
+                        <span class="text-slate-500 dark:text-slate-400">ការិយាល័យ/ផ្នែក:</span>
+                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ invitation()?.department }}</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Form -->
+            <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off" class="space-y-3.5">
+                <!-- Name Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Khmer Name -->
+                    <div>
+                        <label class="block text-[12.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ឈ្មោះជាភាសាខ្មែរ <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="name_kh"
+                            placeholder="ឧ. សុខ សំណាង"
+                            class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13.5px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                        @if (form.get('name_kh')?.touched && form.get('name_kh')?.hasError('required')) {
+                            <p class="text-[11.5px] text-rose-500 mt-1">សូមបញ្ចូលឈ្មោះជាភាសាខ្មែរ</p>
+                        }
+                    </div>
+
+                    <!-- English Name -->
+                    <div>
+                        <label class="block text-[12.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ឈ្មោះជាអក្សរឡាតាំង <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="name_en"
+                            placeholder="ឧ. Sok Samnang"
+                            class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13.5px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                        @if (form.get('name_en')?.touched && form.get('name_en')?.hasError('required')) {
+                            <p class="text-[11.5px] text-rose-500 mt-1">សូមបញ្ចូលឈ្មោះជាអក្សរឡាតាំង</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label class="block text-[12.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        លេខទូរស័ព្ទ <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <mat-icon svgIcon="mdi:phone-outline" class="absolute left-3 top-2.5 text-slate-400 icon-size-4 pointer-events-none"></mat-icon>
+                        <input
+                            type="tel"
+                            formControlName="phone"
+                            placeholder="ឧ. 012 345 678"
+                            class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13.5px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                    </div>
+                    @if (form.get('phone')?.touched && form.get('phone')?.hasError('required')) {
+                        <p class="text-[11.5px] text-rose-500 mt-1">សូមបញ្ចូលលេខទូរស័ព្ទ</p>
+                    }
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-[12.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        ពាក្យសម្ងាត់ <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <mat-icon svgIcon="mdi:lock-outline" class="absolute left-3 top-2.5 text-slate-400 icon-size-4 pointer-events-none"></mat-icon>
+                        <input
+                            [type]="showPassword() ? 'text' : 'password'"
+                            formControlName="password"
+                            placeholder="យ៉ាងតិច ៦ តួអក្សរ"
+                            class="w-full pl-9 pr-10 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13.5px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                        <button
+                            type="button"
+                            (click)="togglePassword()"
+                            class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                            <mat-icon [svgIcon]="showPassword() ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" class="icon-size-4.5"></mat-icon>
+                        </button>
+                    </div>
+                    @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+                        <p class="text-[11.5px] text-rose-500 mt-1">សូមកំណត់ពាក្យសម្ងាត់</p>
+                    }
+                    @if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
+                        <p class="text-[11.5px] text-rose-500 mt-1">ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ</p>
+                    }
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label class="block text-[12.5px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        បញ្ជាក់ពាក្យសម្ងាត់ <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <mat-icon svgIcon="mdi:lock-check-outline" class="absolute left-3 top-2.5 text-slate-400 icon-size-4 pointer-events-none"></mat-icon>
+                        <input
+                            [type]="showConfirmPassword() ? 'text' : 'password'"
+                            formControlName="confirm_password"
+                            placeholder="វាយពាក្យសម្ងាត់ម្តងទៀត"
+                            class="w-full pl-9 pr-10 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13.5px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                        <button
+                            type="button"
+                            (click)="toggleConfirmPassword()"
+                            class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                            <mat-icon [svgIcon]="showConfirmPassword() ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" class="icon-size-4.5"></mat-icon>
+                        </button>
+                    </div>
+                    @if (form.touched && form.hasError('passwordMismatch')) {
+                        <p class="text-[11.5px] text-rose-500 mt-1">ពាក្យសម្ងាត់ផ្ទៀងផ្ទាត់មិនដូចគ្នាឡើយ</p>
+                    }
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    [disabled]="submitting() || form.invalid"
+                    class="w-full h-11 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-medium shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-2">
+                    @if (submitting()) {
+                        <mat-progress-spinner [diameter]="22" [mode]="'indeterminate'"></mat-progress-spinner>
+                        <span>កំពុងដំណើរការបង្កើតគណនី...</span>
+                    } @else {
+                        <mat-icon svgIcon="mdi:check-circle-outline" class="icon-size-5"></mat-icon>
+                        <span>បង្កើតគណនី និងចាប់ផ្តើម</span>
+                    }
+                </button>
+            </form>
+
+            <!-- Bottom Link -->
+            <div class="text-center pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span class="text-[13px] text-slate-500 dark:text-slate-400">មានគណនីរួចហើយ?</span>
+                <a routerLink="/auth/sign-in" class="ml-1.5 text-[13px] font-medium text-blue-600 hover:underline cursor-pointer">
+                    ចូលប្រើប្រព័ន្ធ (Sign In)
+                </a>
+            </div>
+        </div>
+    }
+
+</div>

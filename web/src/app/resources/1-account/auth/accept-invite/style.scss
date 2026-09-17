@@ -1,0 +1,9 @@
+:host {
+    display: block;
+    width: 100%;
+    font-family: 'Kantumruy Pro', sans-serif !important;
+}
+
+:host *, :host ::ng-deep * {
+    font-family: 'Kantumruy Pro', sans-serif !important;
+}

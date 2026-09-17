@@ -149,3 +149,61 @@ export class UpdateAdminUserDto {
     @IsString()
     password?: string;
 }
+
+export class InviteUserDto {
+    @IsNotEmpty()
+    @IsString()
+    email: string;
+
+    @IsOptional()
+    @IsString()
+    name?: string;
+
+    @IsOptional()
+    @IsString()
+    role?: string;
+
+    @IsOptional()
+    @IsString()
+    department?: string;
+
+    @IsOptional()
+    @IsString()
+    position?: string;
+
+    @IsOptional()
+    @IsString()
+    note?: string;
+}
+
+export class QueryInvitationsDto {
+    @IsOptional()
+    @IsString()
+    status?: string;
+
+    @IsOptional()
+    @IsString()
+    search?: string;
+}
+
+export class AcceptInviteDto {
+    @IsNotEmpty()
+    @IsString()
+    token: string;
+
+    @IsNotEmpty()
+    @IsString()
+    password: string;
+
+    @IsOptional()
+    @IsString()
+    name_kh?: string;
+
+    @IsOptional()
+    @IsString()
+    name_en?: string;
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+}

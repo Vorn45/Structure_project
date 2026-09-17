@@ -42,6 +42,8 @@ uploads/
 *.ps1
 *.sql
 *.dump
+scratch*.js
+*/scratch*.js
 
 # AI Agents & IDE metadata
 .agents/

@@ -5,12 +5,32 @@ import express from 'express';
 
 // ===========================================================================>> Custom Library
 import { AdminUserService } from './user.service';
-import { CreateAdminUserDto, QueryAdminUserDto, UpdateAdminUserDto } from './user.dto';
+import { CreateAdminUserDto, InviteUserDto, QueryAdminUserDto, QueryInvitationsDto, UpdateAdminUserDto } from './user.dto';
 import { IMAGE_UPLOAD_OPTIONS } from 'src/app/shared/file/file-upload.util';
 
 @Controller('users')
 export class AdminUserController {
     constructor(private readonly _service: AdminUserService) {}
+
+    @Get('invitations')
+    async getInvitations(@Query() query: QueryInvitationsDto) {
+        return this._service.getInvitations(query);
+    }
+
+    @Post('invite')
+    async inviteUser(@Body() dto: InviteUserDto, @Res({ passthrough: true }) res: express.Response) {
+        return this._service.inviteUser(res.locals.user, dto);
+    }
+
+    @Post('invitations/:id/resend')
+    async resendInvitation(@Param('id') id: string, @Res({ passthrough: true }) res: express.Response) {
+        return this._service.resendInvitation(res.locals.user, id);
+    }
+
+    @Delete('invitations/:id')
+    async revokeInvitation(@Param('id') id: string, @Res({ passthrough: true }) res: express.Response) {
+        return this._service.revokeInvitation(res.locals.user, id);
+    }
 
     @Get('')
     async getUsers(@Query() query: QueryAdminUserDto, @Res({ passthrough: true }) res: express.Response) {

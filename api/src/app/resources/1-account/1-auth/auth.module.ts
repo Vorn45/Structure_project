@@ -11,6 +11,7 @@ import { PasskeyLoginModule }  from './1-login/6-passkey/passkey-login.module';
 import { SsoLoginModule }      from './1-login/7-sso/sso-login.module';
 import { ForgetPasswordModule } from './2-forgot-password/forget-password.module';
 import { SignUpModule }         from './3-signup/signup.module';
+import { InviteModule }         from './4-invite/invite.module';
 
 // ======================================= >> Code Starts Here << ========================== //
 @Module({
@@ -24,6 +25,7 @@ import { SignUpModule }         from './3-signup/signup.module';
         SsoLoginModule,
         ForgetPasswordModule,
         SignUpModule,
+        InviteModule,
     ],
 })
 export class AuthModule {}

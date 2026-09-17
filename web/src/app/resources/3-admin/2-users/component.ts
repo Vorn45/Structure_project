@@ -8,7 +8,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserService } from 'app/core/user/user.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
-import { AdminService, AdminUser } from '../admin.service';
+import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
+import { AdminService, AdminUser, AdminUserInvitation, InviteUserPayload } from '../admin.service';
 
 @Component({
     selector: 'app-user-management',
@@ -42,6 +43,10 @@ export class UserManagementComponent implements OnInit {
     private readonly _adminService = inject(AdminService);
     private readonly _userService = inject(UserService, { optional: true });
     private readonly _fb = inject(FormBuilder);
+    private readonly _snackbar = inject(SnackbarService, { optional: true });
+
+    // Active sub-view ('users' = Staff list, 'invitations' = Gmail invitations list)
+    activeView = signal<'users' | 'invitations'>('users');
 
     currentUser = signal<any>(null);
     users = signal<AdminUser[]>([]);
@@ -52,6 +57,44 @@ export class UserManagementComponent implements OnInit {
     selectedStatus = signal<string>('all');
     sortBy = signal<'name_asc' | 'name_desc' | 'default'>('default');
     isFilterOpen = signal<boolean>(false);
+
+    // Gmail Invitations state
+    invitations = signal<AdminUserInvitation[]>([]);
+    loadingInvitations = signal<boolean>(false);
+    isInviteModalOpen = signal<boolean>(false);
+    inviting = signal<boolean>(false);
+    inviteForm: FormGroup;
+    inviteSearchQuery = signal<string>('');
+    inviteStatusFilter = signal<string>('all');
+    resendingId = signal<string | null>(null);
+    revokingId = signal<string | null>(null);
+    copiedInviteId = signal<string | null>(null);
+
+    pendingInvitationsCount = computed(() =>
+        this.invitations().filter((i) => i.status === 'pending').length
+    );
+
+    filteredInvitations = computed(() => {
+        let list = this.invitations();
+        const search = this.inviteSearchQuery().toLowerCase().trim();
+        const status = this.inviteStatusFilter();
+
+        if (search) {
+            list = list.filter(
+                (i) =>
+                    i.email.toLowerCase().includes(search) ||
+                    (i.name && i.name.toLowerCase().includes(search)) ||
+                    (i.role && i.role.toLowerCase().includes(search)) ||
+                    (i.department && i.department.toLowerCase().includes(search)),
+            );
+        }
+
+        if (status !== 'all') {
+            list = list.filter((i) => i.status === status);
+        }
+
+        return list;
+    });
 
     toggleFilterBar(): void {
         this.isFilterOpen.update((v) => !v);
@@ -163,6 +206,15 @@ export class UserManagementComponent implements OnInit {
             join_date: [new Date().toISOString().split('T')[0]],
             note: [''],
         });
+
+        this.inviteForm = this._fb.group({
+            email: ['', [Validators.required, Validators.email]],
+            name: [''],
+            role: ['Member', [Validators.required]],
+            department: ['ព័ត៌មានវិទ្យា (IT)', [Validators.required]],
+            position: ['Staff', [Validators.required]],
+            note: [''],
+        });
     }
 
     hasCustomAvatar(): boolean {
@@ -259,6 +311,7 @@ export class UserManagementComponent implements OnInit {
             if (u) this.currentUser.set(u);
         });
         this.loadUsers();
+        this.loadInvitations();
     }
 
     loadUsers(): void {
@@ -501,6 +554,158 @@ export class UserManagementComponent implements OnInit {
                 return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800';
             default:
                 return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+        }
+    }
+
+    // ==========================================
+    // INVITATION ACTIONS & HELPERS
+    // ==========================================
+    setActiveView(view: 'users' | 'invitations'): void {
+        this.activeView.set(view);
+        if (view === 'invitations' && this.invitations().length === 0) {
+            this.loadInvitations();
+        }
+    }
+
+    openInviteModal(): void {
+        this.inviteForm.reset({
+            email: '',
+            name: '',
+            role: 'Member',
+            department: 'ព័ត៌មានវិទ្យា (IT)',
+            position: 'Staff',
+            note: '',
+        });
+        this.isInviteModalOpen.set(true);
+    }
+
+    closeInviteModal(): void {
+        this.isInviteModalOpen.set(false);
+    }
+
+    submitInvite(): void {
+        if (this.inviteForm.invalid) {
+            this.inviteForm.markAllAsTouched();
+            return;
+        }
+
+        this.inviting.set(true);
+        const formVal = this.inviteForm.value;
+        const payload: InviteUserPayload = {
+            email: (formVal.email || '').trim().toLowerCase(),
+            name: (formVal.name || '').trim() || undefined,
+            role: formVal.role || 'Member',
+            department: formVal.department || undefined,
+            position: (formVal.position || '').trim() || undefined,
+            note: (formVal.note || '').trim() || undefined,
+        };
+
+        this._adminService.inviteUser(payload).subscribe({
+            next: () => {
+                this.inviting.set(false);
+                this._snackbar?.success(`បានផ្ញើការអញ្ជើញទៅកាន់ ${payload.email} ដោយជោគជ័យ!`);
+                this.closeInviteModal();
+                this.loadInvitations();
+                this.activeView.set('invitations');
+            },
+            error: (err) => {
+                this.inviting.set(false);
+                const msg = err.error?.message || err.message || 'បរាជ័យក្នុងការផ្ញើការអញ្ជើញ';
+                this._snackbar?.error(msg);
+            },
+        });
+    }
+
+    loadInvitations(): void {
+        this.loadingInvitations.set(true);
+        this._adminService.getInvitations().subscribe({
+            next: (res) => {
+                if (res.data) {
+                    this.invitations.set(res.data);
+                }
+                this.loadingInvitations.set(false);
+            },
+            error: (err) => {
+                console.error('Failed to load invitations:', err);
+                this.loadingInvitations.set(false);
+            },
+        });
+    }
+
+    resendInvite(inv: AdminUserInvitation): void {
+        this.resendingId.set(inv.id);
+        this._adminService.resendInvitation(inv.id).subscribe({
+            next: () => {
+                this.resendingId.set(null);
+                this._snackbar?.success(`បានផ្ញើការអញ្ជើញសារជាថ្មីទៅកាន់ ${inv.email} ដោយជោគជ័យ!`);
+                this.loadInvitations();
+            },
+            error: (err) => {
+                this.resendingId.set(null);
+                const msg = err.error?.message || err.message || 'បរាជ័យក្នុងការផ្ញើឡើងវិញ';
+                this._snackbar?.error(msg);
+            },
+        });
+    }
+
+    revokeInvite(inv: AdminUserInvitation): void {
+        if (!confirm(`តើអ្នកពិតជាចង់លុបចោលការអញ្ជើញសម្រាប់ ${inv.email} មែនទេ?`)) {
+            return;
+        }
+
+        this.revokingId.set(inv.id);
+        this._adminService.revokeInvitation(inv.id).subscribe({
+            next: () => {
+                this.revokingId.set(null);
+                this._snackbar?.success('បានលុបចោលការអញ្ជើញដោយជោគជ័យ');
+                this.invitations.update((list) => list.filter((i) => i.id !== inv.id));
+            },
+            error: (err) => {
+                this.revokingId.set(null);
+                const msg = err.error?.message || err.message || 'បរាជ័យក្នុងការលុបចោលការអញ្ជើញ';
+                this._snackbar?.error(msg);
+            },
+        });
+    }
+
+    copyInviteLink(inv: AdminUserInvitation): void {
+        const link = inv.invite_link || `${window.location.origin}/auth/accept-invite?token=${inv.id}`;
+        navigator.clipboard.writeText(link).then(() => {
+            this.copiedInviteId.set(inv.id);
+            this._snackbar?.success('បានចម្លងតំណភ្ជាប់អញ្ជើញរួចរាល់!');
+            setTimeout(() => this.copiedInviteId.set(null), 3000);
+        }).catch(() => {
+            this._snackbar?.error('មិនអាចចម្លងតំណភ្ជាប់បានទេ');
+        });
+    }
+
+    getInvitationStatusBadgeClass(status: string): string {
+        switch (status) {
+            case 'accepted':
+                return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800';
+            case 'pending':
+                return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800';
+            case 'expired':
+                return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
+            case 'revoked':
+                return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800';
+            default:
+                return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
+        }
+    }
+
+    getInvitationStatusLabel(status: string): string {
+        switch (status) {
+            case 'accepted':
+                return 'បានទទួល (Accepted)';
+            case 'pending':
+                return 'រង់ចាំទទួល (Pending)';
+            case 'expired':
+                return 'ផុតកំណត់ (Expired)';
+            case 'revoked':
+                return 'បានលុបចោល (Revoked)';
+            default:
+                return status;
         }
     }
 }

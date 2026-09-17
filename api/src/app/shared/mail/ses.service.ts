@@ -59,7 +59,14 @@ export class SesService {
         const port = appConfig.SES.SMTP_PORT;
         const from = appConfig.SES.FROM;
 
-        let socket: net.Socket = net.connect(port, host);
+        const isImplicitTls = Number(port) === 465;
+        let socket: net.Socket;
+        if (isImplicitTls) {
+            socket = tls.connect({ host, port, servername: host });
+        } else {
+            socket = net.connect(port, host);
+        }
+
         let buffer = '';
         let onData: ((chunk: Buffer) => void) | null = null;
 
@@ -97,26 +104,37 @@ export class SesService {
                 throw new Error(`SES SMTP failed: ${response.trim()}`);
         };
 
-        await new Promise<void>((resolve, reject) => {
-            socket.once('connect', resolve);
-            socket.once('error', reject);
-        });
-        attachReader();
+        if (isImplicitTls) {
+            await new Promise<void>((resolve, reject) => {
+                (socket as tls.TLSSocket).once('secureConnect', resolve);
+                socket.once('error', reject);
+            });
+            attachReader();
+            await read(); // 220 banner
+            await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
+        } else {
+            await new Promise<void>((resolve, reject) => {
+                socket.once('connect', resolve);
+                socket.once('error', reject);
+            });
+            attachReader();
 
-        await read();
-        await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
-        await send('STARTTLS', [220]);
+            await read();
+            await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
+            await send('STARTTLS', [220]);
 
-        if (onData) socket.off('data', onData);
-        socket = tls.connect({ socket, servername: host });
-        buffer = '';
-        await new Promise<void>((resolve, reject) => {
-            (socket as tls.TLSSocket).once('secureConnect', resolve);
-            socket.once('error', reject);
-        });
-        attachReader();
+            if (onData) socket.off('data', onData);
+            socket = tls.connect({ socket, servername: host });
+            buffer = '';
+            await new Promise<void>((resolve, reject) => {
+                (socket as tls.TLSSocket).once('secureConnect', resolve);
+                socket.once('error', reject);
+            });
+            attachReader();
 
-        await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
+            await send(`EHLO ${appConfig.APP.SYSTEM_NAME}`, [250]);
+        }
+
         await send('AUTH LOGIN', [334]);
         await send(Buffer.from(appConfig.SES.SMTP_USERNAME).toString('base64'), [334]);
         await send(Buffer.from(appConfig.SES.SMTP_PASSWORD).toString('base64'), [235]);

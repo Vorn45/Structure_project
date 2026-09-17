@@ -122,7 +122,7 @@ export const appConfig = {
         SMTP_HOST: process.env.SES_SMTP_HOST?.trim() || '',
         SMTP_PORT: toNumber(process.env.SES_SMTP_PORT, 465),
         SMTP_USERNAME: process.env.SES_SMTP_USERNAME?.trim() || '',
-        SMTP_PASSWORD: process.env.SES_SMTP_PASSWORD?.trim() || '',
+        SMTP_PASSWORD: (process.env.SES_SMTP_PASSWORD?.trim() || '').replace(/\s+/g, ''),
         FROM: process.env.SES_FROM_EMAIL?.trim() || '',
     },
     DATABASE: {

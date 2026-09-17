@@ -38,6 +38,10 @@ export default [
             {
                 path: 'qr-login',
                 loadComponent: () => import('./qr-scan-confirm/component').then(m => m.QrScanConfirmComponent)
+            },
+            {
+                path: 'accept-invite',
+                loadComponent: () => import('./accept-invite/component').then(m => m.AcceptInviteComponent)
             }
         ]
     }

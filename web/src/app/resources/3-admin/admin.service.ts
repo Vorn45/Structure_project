@@ -224,6 +224,28 @@ export interface AdminSettingsData {
     logo?: string | null;
 }
 
+export interface AdminUserInvitation {
+    id: string;
+    email: string;
+    name?: string | null;
+    role: string;
+    department?: string | null;
+    position?: string | null;
+    status: 'pending' | 'accepted' | 'expired' | 'revoked';
+    expires_at: string;
+    created_at: string;
+    invite_link?: string;
+}
+
+export interface InviteUserPayload {
+    email: string;
+    name?: string;
+    role?: string;
+    department?: string;
+    position?: string;
+    note?: string;
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -392,5 +414,35 @@ export class AdminService {
 
     updateSettings(payload: Partial<AdminSettingsData>): Observable<{ status_code: number; data: AdminSettingsData }> {
         return this._http.patch<{ status_code: number; data: AdminSettingsData }>(`${this._baseUrl}/settings`, payload);
+    }
+
+    // 6. Invitations
+    getInvitations(status?: string): Observable<{ status_code: number; data: AdminUserInvitation[] }> {
+        let params = new HttpParams();
+        if (status) params = params.set('status', status);
+        return this._http.get<{ status_code: number; data: AdminUserInvitation[] }>(`${this._baseUrl}/users/invitations`, { params });
+    }
+
+    inviteUser(payload: InviteUserPayload): Observable<{ status_code: number; message: string; data: AdminUserInvitation }> {
+        return this._http.post<{ status_code: number; message: string; data: AdminUserInvitation }>(`${this._baseUrl}/users/invite`, payload);
+    }
+
+    resendInvitation(id: string): Observable<{ status_code: number; message: string; data: AdminUserInvitation }> {
+        return this._http.post<{ status_code: number; message: string; data: AdminUserInvitation }>(`${this._baseUrl}/users/invitations/${id}/resend`, {});
+    }
+
+    revokeInvitation(id: string): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/users/invitations/${id}`);
+    }
+
+    // Auth Invite (public verification and acceptance)
+    verifyInviteToken(token: string): Observable<{ status_code: number; data: any }> {
+        return this._http.get<{ status_code: number; data: any }>(`${env.API_BASE_URL}/auth/invite/verify`, {
+            params: new HttpParams().set('token', token),
+        });
+    }
+
+    acceptInvite(payload: { token: string; password: string; name_kh?: string; name_en?: string; phone?: string }): Observable<any> {
+        return this._http.post<any>(`${env.API_BASE_URL}/auth/invite/accept`, payload);
     }
 }

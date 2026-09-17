@@ -7,45 +7,96 @@
 
         <!-- Top Header Row -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
-            <!-- Left: Title & Count -->
-            <div class="flex items-center gap-3 shrink-0">
-                <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-5 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+            <!-- Left: Sub-tabs (Staff vs Gmail Invitations) -->
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="inline-flex items-center bg-slate-100/90 dark:bg-slate-900/90 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                    <button
+                        type="button"
+                        (click)="setActiveView('users')"
+                        [class.bg-white]="activeView() === 'users'"
+                        [class.dark:bg-slate-800]="activeView() === 'users'"
+                        [class.shadow-2xs]="activeView() === 'users'"
+                        [class.text-blue-600]="activeView() === 'users'"
+                        [class.dark:text-blue-400]="activeView() === 'users'"
+                        [class.font-medium]="activeView() === 'users'"
+                        class="px-3 py-1.5 rounded-lg text-[13.5px] text-slate-600 dark:text-slate-300 transition-all flex items-center gap-1.5 cursor-pointer">
+                        <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-4"></mat-icon>
+                        <span>បញ្ជីបុគ្គលិក</span>
+                        <span class="inline-flex items-center justify-center px-2 py-0.2 rounded-full text-[11px] font-bold"
+                            [ngClass]="activeView() === 'users' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'">
+                            {{ filteredUsers().length }}
+                        </span>
+                    </button>
 
-                <span class="text-[17px] font-medium text-slate-800 dark:text-white">បុគ្គលិក</span>
-
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                    {{ filteredUsers().length }}
-                </span>
+                    <button
+                        type="button"
+                        (click)="setActiveView('invitations')"
+                        [class.bg-white]="activeView() === 'invitations'"
+                        [class.dark:bg-slate-800]="activeView() === 'invitations'"
+                        [class.shadow-2xs]="activeView() === 'invitations'"
+                        [class.text-blue-600]="activeView() === 'invitations'"
+                        [class.dark:text-blue-400]="activeView() === 'invitations'"
+                        [class.font-medium]="activeView() === 'invitations'"
+                        class="px-3 py-1.5 rounded-lg text-[13.5px] text-slate-600 dark:text-slate-300 transition-all flex items-center gap-1.5 cursor-pointer">
+                        <mat-icon svgIcon="mdi:email-fast-outline" class="icon-size-4"></mat-icon>
+                        <span>ការអញ្ជើញតាម Gmail</span>
+                        @if (pendingInvitationsCount() > 0) {
+                            <span class="inline-flex items-center justify-center px-2 py-0.2 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                                {{ pendingInvitationsCount() }}
+                            </span>
+                        }
+                    </button>
+                </div>
             </div>
 
             <!-- Center: Search bar with clickable tune-variant icon on right -->
             <div class="flex-1 flex items-center justify-center max-w-sm sm:max-w-md mx-auto w-full">
                 <div class="relative w-full flex items-center">
                     <mat-icon svgIcon="mdi:magnify" class="absolute left-3 text-slate-400 icon-size-4.5 pointer-events-none"></mat-icon>
-                    <input
-                        type="text"
-                        [ngModel]="searchQuery()"
-                        (ngModelChange)="searchQuery.set($event)"
-                        placeholder="ឈ្មោះ:..."
-                        class="w-full pl-9 pr-9 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" />
+                    @if (activeView() === 'users') {
+                        <input
+                            type="text"
+                            [ngModel]="searchQuery()"
+                            (ngModelChange)="searchQuery.set($event)"
+                            placeholder="ឈ្មោះ:..."
+                            class="w-full pl-9 pr-9 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" />
 
-                    <!-- Filter Toggle Button inside search input -->
-                    <button
-                        type="button"
-                        (click)="toggleFilterBar()"
-                        class="absolute right-1.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
-                        [ngClass]="(isFilterOpen() || hasActiveFilters()) ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-2xs' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'"
-                        [matTooltip]="isFilterOpen() ? 'លាក់តម្រង (Hide Filters)' : 'បង្ហាញតម្រង (Show Filters)'">
-                        <mat-icon svgIcon="mdi:tune-variant" class="icon-size-4"></mat-icon>
-                        @if (hasActiveFilters()) {
-                            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 border border-white dark:border-slate-800"></span>
-                        }
-                    </button>
+                        <!-- Filter Toggle Button inside search input -->
+                        <button
+                            type="button"
+                            (click)="toggleFilterBar()"
+                            class="absolute right-1.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                            [ngClass]="(isFilterOpen() || hasActiveFilters()) ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-2xs' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'"
+                            [matTooltip]="isFilterOpen() ? 'លាក់តម្រង (Hide Filters)' : 'បង្ហាញតម្រង (Show Filters)'">
+                            <mat-icon svgIcon="mdi:tune-variant" class="icon-size-4"></mat-icon>
+                            @if (hasActiveFilters()) {
+                                <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 border border-white dark:border-slate-800"></span>
+                            }
+                        </button>
+                    } @else {
+                        <input
+                            type="text"
+                            [ngModel]="inviteSearchQuery()"
+                            (ngModelChange)="inviteSearchQuery.set($event)"
+                            placeholder="ស្វែងរកអ៊ីមែល Gmail, ឈ្មោះ, តួនាទី..."
+                            class="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" />
+                    }
                 </div>
             </div>
 
             <!-- Header Actions -->
             <div class="flex items-center gap-2 shrink-0">
+                <!-- Invite Staff via Gmail Button -->
+                <button
+                    type="button"
+                    (click)="openInviteModal()"
+                    class="h-9 px-3.5 rounded-xl border border-blue-500/30 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-[13.5px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                    matTooltip="ផ្ញើការអញ្ជើញតាម Gmail ទៅកាន់បុគ្គលិកថ្មី">
+                    <mat-icon svgIcon="mdi:email-plus-outline" class="icon-size-4"></mat-icon>
+                    <span>អញ្ជើញបុគ្គលិក</span>
+                </button>
+
+                <!-- Create Staff Direct Button -->
                 <button
                     type="button"
                     (click)="openCreateDrawer()"
@@ -56,289 +107,459 @@
             </div>
         </div>
 
-        <!-- Filter Controls Row (Shown directly under header when clicking filter icon) -->
-        @if (isFilterOpen()) {
-            <div class="flex items-center justify-between gap-2 overflow-x-auto pb-3 pt-1 border-b border-slate-100 dark:border-slate-700/60 [scrollbar-width:none] animate-in fade-in slide-in-from-top-1 duration-150">
-                <div class="flex items-center gap-2">
-                    <!-- 1. Sort Button -->
-                    <button
-                        type="button"
-                        [matMenuTriggerFor]="sortMenu"
-                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
-                        [class.!border-blue-500]="sortBy() !== 'default'"
-                        [class.!text-blue-600]="sortBy() !== 'default'"
-                        matTooltip="តម្រៀប (Sort)">
-                        <mat-icon svgIcon="mdi:swap-vertical" class="icon-size-4.5"></mat-icon>
-                    </button>
-                    <mat-menu #sortMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                        <button mat-menu-item (click)="setSort('default')" class="!text-[14px]">
-                            <span>លំនាំដើម (Default)</span>
-                        </button>
-                        <button mat-menu-item (click)="setSort('name_asc')" class="!text-[14px]">
-                            <span>ឈ្មោះ (ក - អ)</span>
-                        </button>
-                        <button mat-menu-item (click)="setSort('name_desc')" class="!text-[14px]">
-                            <span>ឈ្មោះ (អ - ក)</span>
-                        </button>
-                    </mat-menu>
-
-                    <!-- 2. Layout Button -->
-                    <button
-                        type="button"
-                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
-                        matTooltip="ប្លង់បង្ហាញ (Layout)">
-                        <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5"></mat-icon>
-                    </button>
-
-                    <!-- 3. Status Filter Dropdown -->
-                    <button
-                        type="button"
-                        [matMenuTriggerFor]="statusMenu"
-                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
-                        [class.!border-blue-500]="selectedStatus() !== 'all'"
-                        [class.!text-blue-600]="selectedStatus() !== 'all'">
-                        <mat-icon svgIcon="mdi:account-clock-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
-                            [class.!text-blue-600]="selectedStatus() !== 'all'"></mat-icon>
-                        <span>{{ selectedStatus() === 'all' ? 'អនុញ្ញាត' : (selectedStatus() === 'active' ? 'សកម្ម' : 'ផ្អាក') }}</span>
-                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
-                    </button>
-                    <mat-menu #statusMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                        <button mat-menu-item (click)="selectedStatus.set('all')" class="!text-[13.5px]">
-                            <div class="flex items-center justify-between w-full">
-                                <span>ស្ថានភាពទាំងអស់</span>
-                                @if (selectedStatus() === 'all') {
-                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
-                                }
-                            </div>
-                        </button>
-                        <button mat-menu-item (click)="selectedStatus.set('active')" class="!text-[13.5px]">
-                            <div class="flex items-center justify-between w-full">
-                                <span>សកម្ម</span>
-                                @if (selectedStatus() === 'active') {
-                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
-                                }
-                            </div>
-                        </button>
-                        <button mat-menu-item (click)="selectedStatus.set('inactive')" class="!text-[13.5px]">
-                            <div class="flex items-center justify-between w-full">
-                                <span>ផ្អាក</span>
-                                @if (selectedStatus() === 'inactive') {
-                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
-                                }
-                            </div>
-                        </button>
-                    </mat-menu>
-
-                    <!-- 4. Department / Office Filter Dropdown -->
-                    <button
-                        type="button"
-                        [matMenuTriggerFor]="deptMenu"
-                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
-                        [class.!border-blue-500]="selectedDepartment() !== 'all'"
-                        [class.!text-blue-600]="selectedDepartment() !== 'all'">
-                        <mat-icon svgIcon="mdi:domain" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
-                            [class.!text-blue-600]="selectedDepartment() !== 'all'"></mat-icon>
-                        <span>{{ selectedDepartment() === 'all' ? 'ការិយាល័យ-ផ្នែក' : selectedDepartment() }}</span>
-                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
-                    </button>
-                    <mat-menu #deptMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                        <button mat-menu-item (click)="selectedDepartment.set('all')" class="!text-[13.5px]">
-                            <div class="flex items-center justify-between w-full">
-                                <span>ការិយាល័យ-ផ្នែកទាំងអស់</span>
-                                @if (selectedDepartment() === 'all') {
-                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
-                                }
-                            </div>
-                        </button>
-                        @for (d of departmentList; track d) {
-                            <button mat-menu-item (click)="selectedDepartment.set(d)" class="!text-[13.5px]">
-                                <div class="flex items-center justify-between w-full">
-                                    <span>{{ d }}</span>
-                                    @if (selectedDepartment() === d) {
-                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
-                                    }
-                                </div>
-                            </button>
-                        }
-                    </mat-menu>
-
-                    <!-- 5. Role / Position Filter Dropdown -->
-                    <button
-                        type="button"
-                        [matMenuTriggerFor]="roleMenu"
-                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
-                        [class.!border-blue-500]="selectedRole() !== 'all'"
-                        [class.!text-blue-600]="selectedRole() !== 'all'">
-                        <mat-icon svgIcon="mdi:account-star-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
-                            [class.!text-blue-600]="selectedRole() !== 'all'"></mat-icon>
-                        <span>{{ selectedRole() === 'all' ? 'មុខតំណែង' : getRoleKhmer(selectedRole()) }}</span>
-                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
-                    </button>
-                    <mat-menu #roleMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                        <button mat-menu-item (click)="selectedRole.set('all')" class="!text-[13.5px]">
-                            <div class="flex items-center justify-between w-full">
-                                <span>មុខតំណែងទាំងអស់</span>
-                                @if (selectedRole() === 'all') {
-                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
-                                }
-                            </div>
-                        </button>
-                        @for (r of roleList; track r.key) {
-                            <button mat-menu-item (click)="selectedRole.set(r.key)" class="!text-[13.5px]">
-                                <div class="flex items-center justify-between w-full">
-                                    <span>{{ r.label }}</span>
-                                    @if (selectedRole() === r.key) {
-                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
-                                    }
-                                </div>
-                            </button>
-                        }
-                    </mat-menu>
-                </div>
-
-                <!-- Right: Reset button & Archive button -->
-                <div class="flex items-center gap-2 shrink-0">
-                    @if (hasActiveFilters()) {
+        @if (activeView() === 'users') {
+            <!-- Filter Controls Row (Shown directly under header when clicking filter icon) -->
+            @if (isFilterOpen()) {
+                <div class="flex items-center justify-between gap-2 overflow-x-auto pb-3 pt-1 border-b border-slate-100 dark:border-slate-700/60 [scrollbar-width:none] animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div class="flex items-center gap-2">
+                        <!-- 1. Sort Button -->
                         <button
                             type="button"
-                            (click)="resetFilters()"
-                            class="h-9 px-2.5 rounded-xl border border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-[12.5px] font-medium flex items-center gap-1 hover:bg-red-100 transition-all cursor-pointer"
-                            matTooltip="សម្អាតតម្រងទាំងអស់">
-                            <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
-                            <span>សម្អាត</span>
+                            [matMenuTriggerFor]="sortMenu"
+                            class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                            [class.!border-blue-500]="sortBy() !== 'default'"
+                            [class.!text-blue-600]="sortBy() !== 'default'"
+                            matTooltip="តម្រៀប (Sort)">
+                            <mat-icon svgIcon="mdi:swap-vertical" class="icon-size-4.5"></mat-icon>
                         </button>
-                    }
+                        <mat-menu #sortMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                            <button mat-menu-item (click)="setSort('default')" class="!text-[14px]">
+                                <span>លំនាំដើម (Default)</span>
+                            </button>
+                            <button mat-menu-item (click)="setSort('name_asc')" class="!text-[14px]">
+                                <span>ឈ្មោះ (ក - អ)</span>
+                            </button>
+                            <button mat-menu-item (click)="setSort('name_desc')" class="!text-[14px]">
+                                <span>ឈ្មោះ (អ - ក)</span>
+                            </button>
+                        </mat-menu>
+
+                        <!-- 2. Layout Button -->
+                        <button
+                            type="button"
+                            class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                            matTooltip="ប្លង់បង្ហាញ (Layout)">
+                            <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5"></mat-icon>
+                        </button>
+
+                        <!-- 3. Status Filter Dropdown -->
+                        <button
+                            type="button"
+                            [matMenuTriggerFor]="statusMenu"
+                            class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                            [class.!border-blue-500]="selectedStatus() !== 'all'"
+                            [class.!text-blue-600]="selectedStatus() !== 'all'">
+                            <mat-icon svgIcon="mdi:account-clock-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                                [class.!text-blue-600]="selectedStatus() !== 'all'"></mat-icon>
+                            <span>{{ selectedStatus() === 'all' ? 'ស្ថានភាព' : (selectedStatus() === 'active' ? 'សកម្ម' : 'ផ្អាក') }}</span>
+                            <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                        </button>
+                        <mat-menu #statusMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                            <button mat-menu-item (click)="selectedStatus.set('all')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>ស្ថានភាពទាំងអស់</span>
+                                    @if (selectedStatus() === 'all') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="selectedStatus.set('active')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span>សកម្ម (Active)</span>
+                                    </div>
+                                    @if (selectedStatus() === 'active') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="selectedStatus.set('inactive')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                        <span>ផ្អាក (Inactive)</span>
+                                    </div>
+                                    @if (selectedStatus() === 'inactive') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                        </mat-menu>
+
+                        <!-- 4. Department Filter Dropdown -->
+                        <button
+                            type="button"
+                            [matMenuTriggerFor]="deptMenu"
+                            class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                            [class.!border-blue-500]="selectedDepartment() !== 'all'"
+                            [class.!text-blue-600]="selectedDepartment() !== 'all'">
+                            <mat-icon svgIcon="mdi:domain" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                                [class.!text-blue-600]="selectedDepartment() !== 'all'"></mat-icon>
+                            <span>{{ selectedDepartment() === 'all' ? 'ការិយាល័យ-ផ្នែក' : selectedDepartment() }}</span>
+                            <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                        </button>
+                        <mat-menu #deptMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                            <button mat-menu-item (click)="selectedDepartment.set('all')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>ការិយាល័យ-ផ្នែកទាំងអស់</span>
+                                    @if (selectedDepartment() === 'all') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            @for (d of departmentList; track d) {
+                                <button mat-menu-item (click)="selectedDepartment.set(d)" class="!text-[13.5px]">
+                                    <div class="flex items-center justify-between w-full">
+                                        <span>{{ d }}</span>
+                                        @if (selectedDepartment() === d) {
+                                            <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                        }
+                                    </div>
+                                </button>
+                            }
+                        </mat-menu>
+
+                        <!-- 5. Role / Position Filter Dropdown -->
+                        <button
+                            type="button"
+                            [matMenuTriggerFor]="roleMenu"
+                            class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                            [class.!border-blue-500]="selectedRole() !== 'all'"
+                            [class.!text-blue-600]="selectedRole() !== 'all'">
+                            <mat-icon svgIcon="mdi:account-star-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                                [class.!text-blue-600]="selectedRole() !== 'all'"></mat-icon>
+                            <span>{{ selectedRole() === 'all' ? 'មុខតំណែង' : getRoleKhmer(selectedRole()) }}</span>
+                            <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                        </button>
+                        <mat-menu #roleMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                            <button mat-menu-item (click)="selectedRole.set('all')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>មុខតំណែងទាំងអស់</span>
+                                    @if (selectedRole() === 'all') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            @for (r of roleList; track r.key) {
+                                <button mat-menu-item (click)="selectedRole.set(r.key)" class="!text-[13.5px]">
+                                    <div class="flex items-center justify-between w-full">
+                                        <span>{{ r.label }}</span>
+                                        @if (selectedRole() === r.key) {
+                                            <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                        }
+                                    </div>
+                                </button>
+                            }
+                        </mat-menu>
+                    </div>
+
+                    <!-- Right: Reset button & Archive button -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        @if (hasActiveFilters()) {
+                            <button
+                                type="button"
+                                (click)="resetFilters()"
+                                class="h-9 px-2.5 rounded-xl border border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-[12.5px] font-medium flex items-center gap-1 hover:bg-red-100 transition-all cursor-pointer"
+                                matTooltip="សម្អាតតម្រងទាំងអស់">
+                                <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
+                                <span>សម្អាត</span>
+                            </button>
+                        }
+                        <button
+                            type="button"
+                            class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                            matTooltip="ប័ណ្ណសារ (Archive)">
+                            <mat-icon svgIcon="mdi:archive-outline" class="icon-size-4.5"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <!-- Users Table -->
+            <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-[13px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-700/80">
+                                <th class="py-3 px-4">បុគ្គលិក / ឈ្មោះ</th>
+                                <th class="py-3 px-4">ព័ត៌មានទំនាក់ទំនង</th>
+                                <th class="py-3 px-4">តួនាទី</th>
+                                <th class="py-3 px-4">នាយកដ្ឋាន & តំណែង</th>
+                                <th class="py-3 px-4">គម្រោង</th>
+                                <th class="py-3 px-4">ស្ថានភាព</th>
+                                <th class="py-3 px-4 text-right">សកម្មភាព</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
+                            @for (user of filteredUsers(); track user.id) {
+                                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
+                                    <!-- Name & Avatar -->
+                                    <td class="py-3 px-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center overflow-hidden">
+                                                @if (getUserAvatar(user); as avatarUrl) {
+                                                    <img [src]="avatarUrl" [alt]="user.name_kh || user.name_en" (error)="onAvatarError($event, user)" class="w-full h-full rounded-full object-cover border border-slate-200 dark:border-slate-700 block" />
+                                                } @else {
+                                                    <div class="w-full h-full rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-[13px] border border-blue-200 dark:border-blue-800">
+                                                        {{ user.name_kh ? user.name_kh.slice(0, 1) : (user.name_en ? user.name_en.slice(0, 1) : 'U') }}
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                    <span>{{ user.name_kh }}</span>
+                                                    @if (user.id === currentUser()?.id) {
+                                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">អ្នក</span>
+                                                    }
+                                                </div>
+                                                <div class="text-[12px] text-slate-400">{{ user.name_en }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Contact Info -->
+                                    <td class="py-3 px-4">
+                                        <div class="text-slate-800 dark:text-slate-200">{{ user.email }}</div>
+                                        <div class="text-[12px] text-slate-400">{{ user.phone }}</div>
+                                    </td>
+
+                                    <!-- Role -->
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium border"
+                                            [ngClass]="getRoleBadgeClass(user.role)">
+                                            {{ getRoleKhmer(user.role) }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Department & Position -->
+                                    <td class="py-3 px-4">
+                                        <div class="text-slate-800 dark:text-slate-200">{{ user.department }}</div>
+                                        <div class="text-[12px] text-slate-400">{{ user.position }}</div>
+                                    </td>
+
+                                    <!-- Projects -->
+                                    <td class="py-3 px-4">
+                                        <span class="inline-flex items-center gap-1 text-[13px] text-slate-600 dark:text-slate-300">
+                                            <mat-icon svgIcon="mdi:briefcase-outline" class="icon-size-4 text-slate-400"></mat-icon>
+                                            <span>{{ user.projects_count || 0 }}</span>
+                                        </span>
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td class="py-3 px-4">
+                                        <button
+                                            type="button"
+                                            (click)="toggleStatus(user)"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium transition-colors cursor-pointer"
+                                            [ngClass]="user.is_active === 1 ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'">
+                                            <span class="w-1.5 h-1.5 rounded-full"
+                                                [ngClass]="user.is_active === 1 ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                                            <span>{{ user.is_active === 1 ? 'សកម្ម' : 'ផ្អាក' }}</span>
+                                        </button>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="py-3 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <button
+                                                type="button"
+                                                (click)="openEditDrawer(user)"
+                                                class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+                                                matTooltip="កែប្រែព័ត៌មាន">
+                                                <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4"></mat-icon>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                (click)="confirmDelete(user)"
+                                                class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400 transition-all cursor-pointer"
+                                                matTooltip="លុបគណនី">
+                                                <mat-icon svgIcon="mdi:delete-outline" class="icon-size-4"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr>
+                                    <td colspan="7" class="py-12 text-center text-slate-400">
+                                        <mat-icon svgIcon="mdi:account-off-outline" class="icon-size-8 text-slate-300 dark:text-slate-600"></mat-icon>
+                                        <div class="mt-2 text-[14px]">មិនមានទិន្នន័យបុគ្គលិកត្រូវនឹងការស្វែងរកឡើយ</div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        } @else {
+            <!-- Gmail Invitations View -->
+            <div class="flex flex-col space-y-4">
+                <!-- Status Filter Chips -->
+                <div class="flex items-center gap-1.5 flex-wrap pb-2">
                     <button
                         type="button"
-                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
-                        matTooltip="ប័ណ្ណសារ (Archive)">
-                        <mat-icon svgIcon="mdi:archive-outline" class="icon-size-4.5"></mat-icon>
+                        (click)="inviteStatusFilter.set('all')"
+                        [ngClass]="inviteStatusFilter() === 'all' ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
+                        class="px-3 py-1 rounded-lg text-[13px] border font-medium transition-colors cursor-pointer">
+                        ទាំងអស់ ({{ invitations().length }})
                     </button>
+                    <button
+                        type="button"
+                        (click)="inviteStatusFilter.set('pending')"
+                        [ngClass]="inviteStatusFilter() === 'pending' ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
+                        class="px-3 py-1 rounded-lg text-[13px] border font-medium transition-colors cursor-pointer">
+                        កំពុងរង់ចាំ ({{ pendingInvitationsCount() }})
+                    </button>
+                    <button
+                        type="button"
+                        (click)="inviteStatusFilter.set('accepted')"
+                        [ngClass]="inviteStatusFilter() === 'accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
+                        class="px-3 py-1 rounded-lg text-[13px] border font-medium transition-colors cursor-pointer">
+                        បានទទួល
+                    </button>
+                    <button
+                        type="button"
+                        (click)="inviteStatusFilter.set('expired')"
+                        [ngClass]="inviteStatusFilter() === 'expired' ? 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-300' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
+                        class="px-3 py-1 rounded-lg text-[13px] border font-medium transition-colors cursor-pointer">
+                        ផុតកំណត់
+                    </button>
+                </div>
+
+                <!-- Invitations Table -->
+                <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[13px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-700/80">
+                                    <th class="py-3 px-4">អាសយដ្ឋាន Gmail / ឈ្មោះ</th>
+                                    <th class="py-3 px-4">តួនាទី</th>
+                                    <th class="py-3 px-4">នាយកដ្ឋាន & តំណែង</th>
+                                    <th class="py-3 px-4">ស្ថានភាព</th>
+                                    <th class="py-3 px-4">កាលបរិច្ឆេទផ្ញើ</th>
+                                    <th class="py-3 px-4">សុពលភាព</th>
+                                    <th class="py-3 px-4 text-right">សកម្មភាព</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
+                                @for (inv of filteredInvitations(); track inv.id) {
+                                    <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
+                                        <!-- Email & Name -->
+                                        <td class="py-3 px-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center border border-red-200 dark:border-red-900 shrink-0">
+                                                    <mat-icon svgIcon="mdi:gmail" class="icon-size-4.5"></mat-icon>
+                                                </div>
+                                                <div>
+                                                    <div class="font-medium text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                        <span>{{ inv.email }}</span>
+                                                    </div>
+                                                    <div class="text-[12px] text-slate-400">
+                                                        {{ inv.name || 'មិនបានបញ្ជាក់ឈ្មោះ' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Role -->
+                                        <td class="py-3 px-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium border"
+                                                [ngClass]="getRoleBadgeClass(inv.role)">
+                                                {{ getRoleKhmer(inv.role) }}
+                                            </span>
+                                        </td>
+
+                                        <!-- Department & Position -->
+                                        <td class="py-3 px-4">
+                                            <div class="text-slate-800 dark:text-slate-200">{{ inv.department || 'ព័ត៌មានវិទ្យា (IT)' }}</div>
+                                            <div class="text-[12px] text-slate-400">{{ inv.position || 'Staff' }}</div>
+                                        </td>
+
+                                        <!-- Status Badge -->
+                                        <td class="py-3 px-4">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium border"
+                                                [ngClass]="getInvitationStatusBadgeClass(inv.status)">
+                                                {{ getInvitationStatusLabel(inv.status) }}
+                                            </span>
+                                        </td>
+
+                                        <!-- Created At -->
+                                        <td class="py-3 px-4 text-slate-600 dark:text-slate-400 text-[13px]">
+                                            {{ inv.created_at | date:'dd/MM/yyyy HH:mm' }}
+                                        </td>
+
+                                        <!-- Expires At -->
+                                        <td class="py-3 px-4 text-[13px]">
+                                            <span [ngClass]="inv.status === 'expired' ? 'text-rose-500 font-medium' : 'text-slate-600 dark:text-slate-400'">
+                                                {{ inv.expires_at | date:'dd/MM/yyyy' }}
+                                            </span>
+                                        </td>
+
+                                        <!-- Actions -->
+                                        <td class="py-3 px-4 text-right">
+                                            <div class="flex items-center justify-end gap-1">
+                                                <!-- Copy Invite Link -->
+                                                <button
+                                                    type="button"
+                                                    (click)="copyInviteLink(inv)"
+                                                    class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+                                                    [matTooltip]="copiedInviteId() === inv.id ? 'បានចម្លង!' : 'ចម្លងតំណភ្ជាប់ (Copy Link)'">
+                                                    @if (copiedInviteId() === inv.id) {
+                                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-emerald-600"></mat-icon>
+                                                    } @else {
+                                                        <mat-icon svgIcon="mdi:link-variant" class="icon-size-4"></mat-icon>
+                                                    }
+                                                </button>
+
+                                                <!-- Resend (if pending or expired) -->
+                                                @if (inv.status === 'pending' || inv.status === 'expired') {
+                                                    <button
+                                                        type="button"
+                                                        (click)="resendInvite(inv)"
+                                                        [disabled]="resendingId() === inv.id"
+                                                        class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400 transition-all cursor-pointer"
+                                                        matTooltip="ផ្ញើអ៊ីមែលម្តងទៀត (Resend Email)">
+                                                        <mat-icon svgIcon="mdi:send-outline" class="icon-size-4" [class.animate-spin]="resendingId() === inv.id"></mat-icon>
+                                                    </button>
+                                                }
+
+                                                <!-- Revoke (if pending) -->
+                                                @if (inv.status === 'pending') {
+                                                    <button
+                                                        type="button"
+                                                        (click)="revokeInvite(inv)"
+                                                        [disabled]="revokingId() === inv.id"
+                                                        class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400 transition-all cursor-pointer"
+                                                        matTooltip="លុបចោលការអញ្ជើញ (Revoke)">
+                                                        <mat-icon svgIcon="mdi:close" class="icon-size-4"></mat-icon>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="7" class="py-12 text-center text-slate-400">
+                                            <mat-icon svgIcon="mdi:email-outline" class="icon-size-8 text-slate-300 dark:text-slate-600"></mat-icon>
+                                            <div class="mt-2 text-[14px]">មិនទាន់មានការអញ្ជើញណាមួយឡើយ</div>
+                                            <div class="mt-3">
+                                                <button
+                                                    type="button"
+                                                    (click)="openInviteModal()"
+                                                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-medium shadow-2xs transition-all cursor-pointer">
+                                                    <mat-icon svgIcon="mdi:email-plus-outline" class="icon-size-4"></mat-icon>
+                                                    <span>អញ្ជើញបុគ្គលិកដំបូង</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         }
-
-        <!-- Users Table -->
-        <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="text-[13px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-700/80">
-                            <th class="py-3 px-4">បុគ្គលិក / ឈ្មោះ</th>
-                            <th class="py-3 px-4">ព័ត៌មានទំនាក់ទំនង</th>
-                            <th class="py-3 px-4">តួនាទី</th>
-                            <th class="py-3 px-4">នាយកដ្ឋាន & តំណែង</th>
-                            <th class="py-3 px-4">គម្រោង</th>
-                            <th class="py-3 px-4">ស្ថានភាព</th>
-                            <th class="py-3 px-4 text-right">សកម្មភាព</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
-                        @for (user of filteredUsers(); track user.id) {
-                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
-                                <!-- Name & Avatar -->
-                                <!-- Name & Avatar -->
-                                <td class="py-3 px-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center overflow-hidden">
-                                            @if (getUserAvatar(user); as avatarUrl) {
-                                                <img [src]="avatarUrl" [alt]="user.name_kh || user.name_en" (error)="onAvatarError($event, user)" class="w-full h-full rounded-full object-cover border border-slate-200 dark:border-slate-700 block" />
-                                            } @else {
-                                                <div class="w-full h-full rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-[13px] border border-blue-200 dark:border-blue-800">
-                                                    {{ user.name_kh ? user.name_kh.slice(0, 1) : (user.name_en ? user.name_en.slice(0, 1) : 'U') }}
-                                                </div>
-                                            }
-                                        </div>
-                                        <div>
-                                            <div class="font-medium text-slate-900 dark:text-white">{{ user.name_kh }}</div>
-                                            <div class="text-[12px] text-slate-400">{{ user.name_en }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <!-- Contact -->
-                                <td class="py-3 px-4 text-[13px]">
-                                    <div class="text-slate-800 dark:text-slate-200 font-medium">{{ user.email }}</div>
-                                    <div class="flex items-center gap-2 mt-0.5">
-                                        <span class="text-slate-400 font-mono">{{ user.phone }}</span>
-                                        @if (user.telegram_username) {
-                                            <span class="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-mono bg-sky-50 dark:bg-sky-950/40 px-1.5 py-0.5 rounded border border-sky-200/60 dark:border-sky-800/60">
-                                                <mat-icon svgIcon="mdi:telegram" class="icon-size-3"></mat-icon>
-                                                {{ user.telegram_username.startsWith('@') ? user.telegram_username : '@' + user.telegram_username }}
-                                            </span>
-                                        }
-                                    </div>
-                                </td>
-
-                                <!-- Role Badge (in Khmer) -->
-                                <td class="py-3 px-4">
-                                    <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium border ' + getRoleBadgeClass(user.role)">
-                                        {{ getRoleKhmer(user.role) }}
-                                    </span>
-                                </td>
-
-                                <!-- Department & Position -->
-                                <td class="py-3 px-4 text-[13px]">
-                                    <div class="font-medium text-slate-800 dark:text-slate-200">{{ user.department }}</div>
-                                    <div class="text-slate-400 mt-0.5">{{ user.position }}</div>
-                                </td>
-
-                                <!-- Projects Count -->
-                                <td class="py-3 px-4 text-[13px] font-medium text-slate-700 dark:text-slate-300">
-                                    <span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-mono text-[12px]">
-                                        {{ user.projects_count }} គម្រោង
-                                    </span>
-                                </td>
-
-                                <!-- Status Toggle -->
-                                <td class="py-3 px-4">
-                                    <button
-                                        type="button"
-                                        (click)="toggleStatus(user)"
-                                        matTooltip="ចុចដើម្បីប្ដូរស្ថានភាព"
-                                        [class]="user.is_active === 1
-                                            ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 cursor-pointer'
-                                            : 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800 cursor-pointer'">
-                                        <span class="w-1.5 h-1.5 rounded-full" [class]="user.is_active === 1 ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                                        {{ user.is_active === 1 ? 'សកម្ម' : 'ផ្អាក' }}
-                                    </button>
-                                </td>
-
-                                <!-- Actions: 3-dot Menu -->
-                                <td class="py-3 px-4 text-right">
-                                    <div class="flex items-center justify-end">
-                                        <button
-                                            type="button"
-                                            [matMenuTriggerFor]="rowActionMenu"
-                                            class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-all cursor-pointer"
-                                            matTooltip="សកម្មភាព">
-                                            <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4.5"></mat-icon>
-                                        </button>
-                                        <mat-menu #rowActionMenu="matMenu" yPosition="below" xPosition="before" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-                                            <button mat-menu-item (click)="openEditDrawer(user)" class="!text-[13.5px]">
-                                                <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4 text-slate-500 mr-2"></mat-icon>
-                                                <span>កែសម្រួល</span>
-                                            </button>
-                                            <button mat-menu-item (click)="confirmDelete(user)" class="!text-[13.5px] !text-rose-600">
-                                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4 text-rose-600 mr-2"></mat-icon>
-                                                <span>លុបគណនី</span>
-                                            </button>
-                                        </mat-menu>
-                                    </div>
-                                </td>
-                            </tr>
-                        } @empty {
-                            <tr>
-                                <td colspan="7" class="py-12 text-center text-slate-400">
-                                    <mat-icon svgIcon="mdi:account-off-outline" class="icon-size-8 text-slate-300 dark:text-slate-600"></mat-icon>
-                                    <div class="mt-2 text-[14px]">មិនមានទិន្នន័យបុគ្គលិកត្រូវនឹងការស្វែងរកឡើយ</div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
     </div>
 
@@ -671,6 +892,186 @@
                         លុបគណនី
                     </button>
                 </div>
+            </div>
+        </div>
+    }
+
+    <!-- ========================================================================= -->
+    <!-- INVITE STAFF VIA GMAIL SIDE DRAWER (MATCHING CREATE USER DRAWER)          -->
+    <!-- ========================================================================= -->
+    @if (isInviteModalOpen()) {
+        <!-- Backdrop: Subtle clear dismiss overlay -->
+        <div (click)="closeInviteModal()" class="fixed inset-0 bg-slate-900/30 dark:bg-black/50 z-50 transition-opacity"></div>
+
+        <!-- Drawer Content: Exactly 600px width matching standard side dialog, overflow-visible for the X button tab -->
+        <div class="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[600px] max-w-[600px] bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy"
+            style="font-family: 'Kantumruy Pro', sans-serif !important;">
+            <!-- Standard Side Dialog Close Button (X sticking out on left, matching Profile & Create User Dialogs) -->
+            <shared-side-dialog-close-button
+                [isReturn]="false"
+                [closeOnClick]="false"
+                (buttonClick)="closeInviteModal()">
+            </shared-side-dialog-close-button>
+
+            <!-- 56px Header: Matching Profile Dialog header style with centered title -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 bg-white dark:bg-slate-900 relative px-4 shrink-0 font-kantumruy">
+                <span class="w-full text-center text-xl sm:text-2xl font-medium text-slate-600 dark:text-slate-300">
+                    អញ្ជើញបុគ្គលិកតាម Gmail
+                </span>
+            </div>
+
+            <!-- Drawer Form Body -->
+            <form [formGroup]="inviteForm" (ngSubmit)="submitInvite()" autocomplete="off" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Top Centered Icon with Gmail badge matching Create User Avatar Circle -->
+                <div class="flex flex-col items-center justify-center pb-1">
+                    <div class="relative w-[100px] h-[100px] rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm">
+                        <mat-icon svgIcon="mdi:email-fast-outline" class="icon-size-12"></mat-icon>
+                        <div class="absolute bottom-0 right-0 flex items-center justify-center border rounded-full border-red-300 dark:border-red-800 p-1.5 bg-red-50 dark:bg-red-950 shadow-sm text-red-600 dark:text-red-400">
+                            <mat-icon svgIcon="mdi:gmail" class="icon-size-4.5"></mat-icon>
+                        </div>
+                    </div>
+                    <p class="mt-2.5 text-[13px] text-slate-500 dark:text-slate-400 text-center max-w-sm">
+                        ផ្ញើតំណភ្ជាប់អញ្ជើញដោយស្វ័យប្រវត្តិតាមរយៈ Gmail ជាមួយនឹងសុពលភាព ៧ ថ្ងៃ
+                    </p>
+                </div>
+
+                <!-- Info Alert Banner -->
+                <div class="p-3.5 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 rounded-xl flex items-start gap-3 text-[13px] text-blue-900 dark:text-blue-200">
+                    <mat-icon svgIcon="mdi:information-outline" class="icon-size-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5"></mat-icon>
+                    <div class="leading-relaxed">
+                        ប្រព័ន្ធនឹងផ្ញើអ៊ីមែលអញ្ជើញទៅកាន់ Gmail ជាមួយនឹងតំណភ្ជាប់សុវត្ថិភាព។ បុគ្គលិកគ្រាន់តែចុចលើតំណភ្ជាប់នោះ ដើម្បីទទួលយក និងកំណត់ពាក្យសម្ងាត់ផ្ទាល់ខ្លួនបានភ្លាមៗ។
+                    </div>
+                </div>
+
+                <!-- Section 1: ព័ត៌មានអញ្ជើញ & អ៊ីមែល (Email & Basic Info) -->
+                <div>
+                    <div class="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-[13px] font-semibold text-slate-900 dark:text-white">
+                        <mat-icon svgIcon="mdi:email-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>ព័ត៌មានទំនាក់ទំនង Gmail</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Gmail Address (Required) -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                អាសយដ្ឋាន Gmail <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <mat-icon svgIcon="mdi:gmail" class="absolute left-3.5 top-2.5 text-red-500 icon-size-4.5 pointer-events-none"></mat-icon>
+                                <input
+                                    type="email"
+                                    formControlName="email"
+                                    placeholder="ឧ. somnang.staff@gmail.com"
+                                    class="w-full pl-10 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                            </div>
+                            @if (inviteForm.get('email')?.touched && inviteForm.get('email')?.hasError('required')) {
+                                <p class="text-[12px] text-rose-500 mt-1">សូមបញ្ចូលអាសយដ្ឋាន Gmail</p>
+                            }
+                            @if (inviteForm.get('email')?.touched && inviteForm.get('email')?.hasError('email')) {
+                                <p class="text-[12px] text-rose-500 mt-1">ទម្រង់អ៊ីមែលមិនត្រឹមត្រូវ</p>
+                            }
+                        </div>
+
+                        <!-- Staff Name (Optional) -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ឈ្មោះបុគ្គលិក (ជាជម្រើស)
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="name"
+                                placeholder="ឧ. សុខ សំណាង / Sok Samnang"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: តួនាទី & នាយកដ្ឋាន (Role, Department & Position) -->
+                <div>
+                    <div class="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-[13px] font-semibold text-slate-900 dark:text-white">
+                        <mat-icon svgIcon="mdi:badge-account-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>ការងារ និងតួនាទីក្នុងប្រព័ន្ធ</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Role -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                តួនាទី <span class="text-rose-500">*</span>
+                            </label>
+                            <select
+                                formControlName="role"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                                @for (r of roleList; track r.key) {
+                                    <option [value]="r.key">{{ r.label }} ({{ r.key }})</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Department -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ការិយាល័យ-ផ្នែក <span class="text-rose-500">*</span>
+                            </label>
+                            <select
+                                formControlName="department"
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none">
+                                @for (d of departmentList; track d) {
+                                    <option [value]="d">{{ d }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Position (Full width) -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                មុខតំណែង <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                formControlName="position"
+                                placeholder="ឧ. Software Engineer, UI/UX Designer..."
+                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: កំណត់សម្គាល់បន្ថែម (Note / Remarks) -->
+                <div>
+                    <div class="flex items-center gap-2 pb-2 mb-3 border-b border-slate-100 dark:border-slate-800 text-[13px] font-semibold text-slate-900 dark:text-white">
+                        <mat-icon svgIcon="mdi:text-box-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>កំណត់សម្គាល់បន្ថែម</span>
+                    </div>
+
+                    <textarea
+                        formControlName="note"
+                        rows="3"
+                        placeholder="កំណត់សម្គាល់បន្ថែមអំពីបុគ្គលិក គម្រោង ឬការទទួលខុសត្រូវ..."
+                        class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none resize-none transition-all"></textarea>
+                </div>
+            </form>
+
+            <!-- Footer matching Create User Drawer -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2 bg-slate-50/50 dark:bg-slate-900/50">
+                <button
+                    (click)="closeInviteModal()"
+                    type="button"
+                    class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-[14px] font-medium cursor-pointer transition-colors">
+                    បោះបង់
+                </button>
+                <button
+                    (click)="submitInvite()"
+                    type="button"
+                    [disabled]="inviting() || inviteForm.invalid"
+                    class="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                    @if (inviting()) {
+                        <mat-icon svgIcon="mdi:loading" class="icon-size-4 animate-spin"></mat-icon>
+                        <span>កំពុងផ្ញើ...</span>
+                    } @else {
+                        <mat-icon svgIcon="mdi:send-outline" class="icon-size-4 text-white"></mat-icon>
+                        <span>ផ្ញើការអញ្ជើញ</span>
+                    }
+                </button>
             </div>
         </div>
     }

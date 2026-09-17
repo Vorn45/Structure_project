@@ -9,6 +9,8 @@ import { User } from 'src/app/model/user/users.entity';
 import { Role } from 'src/app/model/user/role.entity';
 import { UserRole } from 'src/app/model/user/user_role.entity';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
+import { UserInvitation } from 'src/app/model/user/user-invitation.entity';
+import { MailModule } from 'src/app/shared/mail/mail.module';
 import { UserModule } from '../2-user/user.module';
 
 // Controllers
@@ -31,7 +33,8 @@ import { FileService } from 'src/app/shared/file/file.service';
         HttpModule,
         CommonModule,
         UserModule,
-        TypeOrmModule.forFeature([User, Role, UserRole, PlanStore]),
+        MailModule,
+        TypeOrmModule.forFeature([User, Role, UserRole, PlanStore, UserInvitation]),
     ],
     controllers: [
         DashboardController,
