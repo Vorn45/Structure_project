@@ -692,13 +692,8 @@ export class TaskService {
         let planProjects = this.getPlanProjects();
         const isUserAdmin = user ? this.isAdmin(user) : false;
 
-        // Filter projects from plans_data_store.json if not admin
-        if (!isUserAdmin) {
-            if (!user) {
-                planProjects = [];
-            } else {
-                planProjects = planProjects.filter((p) => this.isUserPlanMember(user, p));
-            }
+        if (!user) {
+            planProjects = [];
         }
 
         const allowedPlanKeys = new Set(planProjects.map((p) => (p.id || '').toLowerCase()));
@@ -711,13 +706,6 @@ export class TaskService {
         const taskProjectMap = new Map<string, { id: string; name: string; code?: string }>();
         for (const t of this.tasks) {
             if (t.project_id || t.project_name) {
-                if (!isUserAdmin) {
-                    if (!user) continue;
-                    const isTaskAssigned = this.isUserTaskAssigneeOrReporter(user, t);
-                    if (!isTaskAssigned) {
-                        continue;
-                    }
-                }
                 const key = (t.project_id || t.project_name).toLowerCase();
                 if (!taskProjectMap.has(key)) {
                     taskProjectMap.set(key, {
@@ -1082,10 +1070,15 @@ export class TaskService {
         await this.ensureStoreLoaded();
         let validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
 
-        // For non-admin users, task feature strictly shows only tasks where own account is reporter or assignee
+        // For non-admin users:
+        // If viewing tasks within a specific project or requesting project scope (scope: 'all' | 'project'),
+        // show all tasks in that project/scope.
+        // Otherwise, on the main Task feature (/member/tasks), strictly show only tasks where own account is reporter or assignee.
         if (!this.isAdmin(user)) {
             if (!user) {
                 validTasks = [];
+            } else if (query.scope === 'all' || query.scope === 'project' || (query.project_id && query.project_id !== 'all')) {
+                // Project-level or global tasks scope
             } else {
                 validTasks = validTasks.filter((t) => this.isUserTaskAssigneeOrReporter(user, t));
             }
@@ -1129,10 +1122,8 @@ export class TaskService {
             throw new NotFoundException(`Task #${id} not found`);
         }
 
-        if (!this.isAdmin(user)) {
-            if (!user || !this.isUserTaskAssigneeOrReporter(user, task)) {
-                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលភារកិច្ចនេះទេ (You do not have permission to view this task).');
-            }
+        if (!user) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលភារកិច្ចនេះទេ (You do not have permission to view this task).');
         }
 
         const [enrichedTask] = await this.enrichTasksWithAvatars([task], user);
@@ -1529,10 +1520,8 @@ export class TaskService {
         }
 
         const current = this.tasks[index];
-        if (!this.isAdmin(user)) {
-            if (!user || !this.isUserTaskAssigneeOrReporter(user, current)) {
-                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិកែប្រែភារកិច្ចនេះទេ (You do not have permission to update this task).');
-            }
+        if (!user) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិកែប្រែភារកិច្ចនេះទេ (You do not have permission to update this task).');
         }
         const updated: TaskItem = {
             ...current,
@@ -1839,10 +1828,8 @@ export class TaskService {
             throw new NotFoundException(`Task #${taskId} not found`);
         }
 
-        if (!this.isAdmin(user)) {
-            if (!user || !this.isUserTaskAssigneeOrReporter(user, task)) {
-                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលការសន្ទនានេះទេ (You do not have permission to view task comments).');
-            }
+        if (!user) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលការសន្ទនានេះទេ (You do not have permission to view task comments).');
         }
 
         const comments = this.ensureTaskComments(taskId);
@@ -1925,10 +1912,8 @@ export class TaskService {
             throw new NotFoundException(`Task #${taskId} not found`);
         }
 
-        if (!this.isAdmin(user)) {
-            if (!user || !this.isUserTaskAssigneeOrReporter(user, task)) {
-                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលរួមក្នុងការសន្ទនានេះទេ (You do not have permission to comment on this task).');
-            }
+        if (!user) {
+            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលរួមក្នុងការសន្ទនានេះទេ (You do not have permission to comment on this task).');
         }
 
         const avatarMap = await this.getAvatarMap();

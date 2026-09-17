@@ -42,6 +42,10 @@ export class QueryTasksDto {
 
     @IsOptional()
     @IsString()
+    scope?: string;
+
+    @IsOptional()
+    @IsString()
     limit?: string;
 
     @IsOptional()

@@ -290,13 +290,8 @@ export class PlanService {
 
         let list = [...this.projects];
 
-        // Role-based scoping: Non-admin members only see projects they are assigned to
-        if (!this.isAdmin(user)) {
-            if (!user) {
-                list = [];
-            } else {
-                list = list.filter((p) => this.isUserProjectMember(user, p));
-            }
+        if (!user) {
+            list = [];
         }
 
         if (this.isFilterActive(query.search)) {
@@ -335,7 +330,7 @@ export class PlanService {
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
-        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
+        if (!user) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលគម្រោងនេះទេ (You do not have permission to view this project).');
         }
         this.syncTaskCounts([plan]);
@@ -716,7 +711,7 @@ export class PlanService {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
         if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
-        if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
+        if (!user) {
             throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលកិច្ចការនៃគម្រោងនេះទេ (You do not have permission to view tasks in this project).');
         }
         this.syncTaskCounts([plan]);

@@ -1438,7 +1438,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         search: this.searchQuery() || undefined,
                         status: this.statusFilter() !== 'all' ? this.statusFilter() : undefined,
                     }).pipe(catchError(() => of(null))),
-                    tasksRes: this._taskService.getTasks().pipe(catchError(() => of(null))),
+                    tasksRes: this._taskService.getTasks({ scope: 'all' }).pipe(catchError(() => of(null))),
                     projectsRes: this._taskService.getProjects().pipe(catchError(() => of(null))),
                 }).subscribe({
                     next: ({ plansRes, tasksRes, projectsRes }) => {
@@ -1758,34 +1758,16 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         this.taskSearchQuery.set('');
         this.isTasksLoading.set(true);
 
-        this._taskService
-            .getTasks()
+        this._planService
+            .getTasks(latest.id)
             .pipe(
                 catchError(() => of(null)),
                 finalize(() => this.isTasksLoading.set(false))
             )
             .subscribe((res) => {
-                if (res?.data?.results?.length) {
-                    const allTasks: TaskItem[] = res.data.results;
-                    const pid = String(latest.id || '').toLowerCase();
-                    const pcode = (latest.code || '').toLowerCase().replace('#', '');
-                    const pname = (latest.name || '').toLowerCase();
-                    const pPrefix = pcode.split('-')[0];
-
-                    const projectTasks = allTasks.filter((t) => {
-                        const tPid = (t.project_id || '').toLowerCase();
-                        const tPname = (t.project_name || '').toLowerCase();
-                        const tCode = (t.code || '').toLowerCase().replace('#', '');
-
-                        return (
-                            (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
-                            (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
-                            (pPrefix && (tCode.startsWith(pPrefix + '-') || tPid.startsWith(pPrefix))) ||
-                            (pname && (tPname.includes(pname) || pname.includes(tPname)))
-                        );
-                    });
-
-                    const mapped = projectTasks.map((t) => this.mapTaskToIndividualTaskItem(t));
+                const tasksList = res?.data;
+                if (Array.isArray(tasksList) && tasksList.length > 0) {
+                    const mapped = tasksList.map((t) => this.mapTaskToIndividualTaskItem(t));
                     const current = this.selectedProject();
                     if (current && (current.id === latest.id || current.code === latest.code)) {
                         const updatedProject: ExtendedProjectItem = {
@@ -1806,18 +1788,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                             list.map((p) => (p.id === updatedProject.id ? updatedProject : p))
                         );
                     }
-                } else {
-                    const current = this.selectedProject();
-                    if (current && (current.id === latest.id || current.code === latest.code)) {
-                        const updatedProject: ExtendedProjectItem = {
-                            ...current,
-                            tasks: [],
-                            total_tasks: 0,
-                            completed_tasks: 0,
-                            progress: 0,
-                        };
-                        this.selectedProject.set(updatedProject);
-                    }
+                } else if (latest.tasks && latest.tasks.length > 0) {
+                    this.selectedProject.set(latest);
                 }
             });
     }

@@ -72,7 +72,7 @@ export class HomeService {
                 accessibleProjects = [];
                 accessibleTasks = [];
             } else {
-                accessibleProjects = allProjects.filter((p) => this.planService.isUserProjectMember(user, p));
+                accessibleProjects = allProjects;
                 accessibleTasks = allTasks.filter((t) => this.taskService.belongsToUser(t, user));
             }
         }

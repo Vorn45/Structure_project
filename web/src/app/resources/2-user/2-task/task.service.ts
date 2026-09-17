@@ -107,7 +107,7 @@ export class UserTaskService {
         });
     }
 
-    getTasks(params?: { search?: string; status?: string; priority?: string; project_id?: string; member_id?: string }): Observable<TaskListResponse> {
+    getTasks(params?: { search?: string; status?: string; priority?: string; project_id?: string; member_id?: string; scope?: string }): Observable<TaskListResponse> {
         let httpParams = new HttpParams();
         if (params?.search && params.search.trim()) {
             httpParams = httpParams.set('search', params.search.trim());
@@ -123,6 +123,9 @@ export class UserTaskService {
         }
         if (params?.member_id && params.member_id !== 'all') {
             httpParams = httpParams.set('member_id', params.member_id);
+        }
+        if (params?.scope) {
+            httpParams = httpParams.set('scope', params.scope);
         }
 
         return this._http.get<TaskListResponse>(this.baseUrl, {
