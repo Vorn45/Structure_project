@@ -165,6 +165,13 @@ export class UserManagementComponent implements OnInit {
         });
     }
 
+    hasCustomAvatar(): boolean {
+        const val = this.userForm.get('avatar')?.value;
+        if (!val || typeof val !== 'string') return false;
+        const trimmed = val.trim();
+        return trimmed.length > 0 && !trimmed.includes('placeholder/avatar.jpg');
+    }
+
     onAvatarSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (input.files && input.files[0]) {
@@ -172,6 +179,7 @@ export class UserManagementComponent implements OnInit {
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.userForm.patchValue({ avatar: e.target?.result as string });
+                input.value = '';
             };
             reader.readAsDataURL(file);
         }
@@ -186,15 +194,11 @@ export class UserManagementComponent implements OnInit {
             return null;
         }
 
-        // 1. Direct user avatar if present and not a placeholder
-        if (user.avatar) {
-            if (typeof user.avatar === 'string' && (user.avatar.includes('placeholder') || !user.avatar.trim())) {
-                // Skip placeholder
-            } else {
-                const resolved = resolveFileUrl(user.avatar);
-                if (resolved && !resolved.includes('placeholder')) {
-                    return resolved;
-                }
+        // 1. Direct user avatar if present and not empty
+        if (user.avatar && typeof user.avatar === 'string' && user.avatar.trim()) {
+            const resolved = resolveFileUrl(user.avatar);
+            if (resolved) {
+                return resolved;
             }
         }
 
@@ -212,17 +216,22 @@ export class UserManagementComponent implements OnInit {
             );
             if (isMatch && cur.avatar) {
                 const curAvatar = resolveFileUrl(cur.avatar);
-                if (curAvatar && !curAvatar.includes('placeholder')) {
+                if (curAvatar) {
                     return curAvatar;
                 }
             }
         }
 
-        return null;
+        // 3. Fallback to placeholder avatar
+        return '/images/placeholder/avatar.jpg';
     }
 
     onAvatarError(event: Event, user: AdminUser): void {
         const target = event.target as HTMLImageElement;
+        if (target && !target.src.includes('placeholder')) {
+            target.src = '/images/placeholder/avatar.jpg';
+            return;
+        }
         if (target) {
             target.style.display = 'none';
         }
@@ -379,6 +388,10 @@ export class UserManagementComponent implements OnInit {
                 delete formVal.password;
             }
 
+            if (!formVal.avatar || !formVal.avatar.trim()) {
+                formVal.avatar = '/images/placeholder/avatar.jpg';
+            }
+
             this._adminService.createUser(formVal).subscribe({
                 next: (res) => {
                     this.users.update((list) => [res.data, ...list]);
@@ -398,6 +411,7 @@ export class UserManagementComponent implements OnInit {
                         position: formVal.position || 'Staff',
                         is_active: formVal.is_active ?? 1,
                         projects_count: 0,
+                        avatar: formVal.avatar || '/images/placeholder/avatar.jpg',
                         created_at: new Date().toISOString(),
                         ...formVal,
                     };

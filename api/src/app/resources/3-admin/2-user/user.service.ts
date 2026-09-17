@@ -441,6 +441,7 @@ export class AdminUserService {
     async createUser(user: UserPayload, dto: CreateAdminUserDto) {
         let createdId = Date.now();
         let createdItem: AdminUserItem | null = null;
+        let avatarDisplayUrl: string | null = dto.avatar?.trim() || '/images/placeholder/avatar.jpg';
 
         try {
             const salt = await bcrypt.genSalt(10);
@@ -451,7 +452,6 @@ export class AdminUserService {
             const cleanEmail = (dto.email?.trim() || `${dto.name_en.toLowerCase().replace(/\s+/g, '.')}@wfm.kh`).toLowerCase();
 
             let storedAvatarId: number | undefined;
-            let avatarDisplayUrl: string | null = dto.avatar || null;
 
             if (dto.avatar && dto.avatar.startsWith('data:image/')) {
                 try {
@@ -536,7 +536,7 @@ export class AdminUserService {
                 role: dto.role || 'Member',
                 department: dto.department || 'ព័ត៌មានវិទ្យា (IT)',
                 position: dto.position || 'Software Engineer',
-                avatar: avatarDisplayUrl || dto.avatar || null,
+                avatar: avatarDisplayUrl || dto.avatar || '/images/placeholder/avatar.jpg',
                 is_active: savedUser.is_active,
                 projects_count: 0,
                 created_at: savedUser.created_at ? savedUser.created_at.toISOString() : new Date().toISOString(),
@@ -561,7 +561,7 @@ export class AdminUserService {
                 role: dto.role || 'Member',
                 department: dto.department || 'ព័ត៌មានវិទ្យា (IT)',
                 position: dto.position || 'Software Engineer',
-                avatar: dto.avatar || null,
+                avatar: avatarDisplayUrl || dto.avatar || '/images/placeholder/avatar.jpg',
                 is_active: dto.is_active !== undefined ? dto.is_active : 1,
                 projects_count: 0,
                 created_at: new Date().toISOString(),
