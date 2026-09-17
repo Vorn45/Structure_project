@@ -581,44 +581,15 @@ export class TaskService {
         if (this._planService) {
             return this._planService.isAdmin(user);
         }
-        const roles = Array.isArray(user?.roles) ? user.roles : [];
-        const activeRole: any =
-            roles.find((r: any) => r.is_default) ??
-            roles.find((r: any) => Number(r.id) === Number(user?.is_active)) ??
-            roles[0];
+        const phoneClean = (user.phone || '').replace(/\D/g, '');
+        const emailClean = (user.email || '').toLowerCase().trim();
 
-        const slug = (activeRole?.slug || '').toLowerCase().trim();
-        const nameEn = (activeRole?.name_en || '').toLowerCase().trim();
-        const nameKh = (activeRole?.name_kh || '').trim();
-
-        const isUserRole =
-            slug === 'user' ||
-            slug === 'org_user' ||
-            slug === 'member' ||
-            slug === 'personal_workspace' ||
-            slug === 'employee' ||
-            slug === 'staff' ||
-            nameEn === 'user' ||
-            nameEn === 'member' ||
-            nameKh === 'អ្នកប្រើប្រាស់' ||
-            nameKh === 'សមាជិក';
-
-        if (isUserRole) {
-            return false;
-        }
-
+        // Only genuine system superadmins can bypass project-level scoping
         return (
-            slug === 'superadmin' ||
-            slug === 'super_admin' ||
-            slug === 'org_admin' ||
-            slug === 'admin' ||
-            slug === 'org_owner' ||
-            nameEn === 'superadmin' ||
-            nameEn === 'super admin' ||
-            nameEn === 'org admin' ||
-            nameEn === 'admin' ||
-            nameKh === 'អភិបាលប្រព័ន្ធ' ||
-            nameKh === 'រដ្ឋបាល'
+            phoneClean === '010843612' ||
+            phoneClean === '087280875' ||
+            emailClean === 'pisethpanhavorn544@gmail.com' ||
+            emailClean === 'pumprusmuny@example.com'
         );
     }
 
@@ -632,8 +603,6 @@ export class TaskService {
         const uId = user.id ? String(user.id) : '';
         const uEmail = (user.email || '').toLowerCase().trim();
         const uPhone = (user.phone || '').replace(/\D/g, '');
-        const uNameEn = (user.name_en || '').toLowerCase().trim();
-        const uNameKh = (user.name_kh || '').trim();
 
         const leadId = plan.lead?.id || plan.team_lead?.id;
         if (leadId && String(leadId) === uId && Number(leadId) > 1000) return true;
@@ -648,26 +617,6 @@ export class TaskService {
             if (m.id && String(m.id) === uId && Number(m.id) > 1000) return true;
             if (m.phone && uPhone && m.phone.replace(/\D/g, '') === uPhone) return true;
             if (m.email && uEmail && m.email.toLowerCase().trim() === uEmail) return true;
-            const mPhone = (m.phone || '').replace(/\D/g, '');
-            const mEmail = (m.email || '').toLowerCase().trim();
-            if (mPhone && uPhone && mPhone !== uPhone) return false;
-            if (mEmail && uEmail && mEmail !== uEmail) return false;
-            if (m.name) {
-                const mName = m.name.toLowerCase().trim();
-                if (mName.includes('piseth') || mName.includes('panhavorn') || mName.includes('ពិសិដ្ឋ') || mName.includes('បញ្ញាវ័ន្ត')) {
-                    return uPhone === '010843612' || uEmail === 'pisethpanhavorn544@gmail.com';
-                }
-                if (mName.includes('brusmuny') || mName.includes('ប្រុសមុន្នី')) {
-                    return uPhone === '087280875' || uEmail === 'pumprusmuny@example.com';
-                }
-                if (mName.includes('winner') || mName.includes('វីនណឺ')) {
-                    return uPhone === '067776682' || uEmail === 'thawinner@example.com';
-                }
-                if (mName.includes('sovannara') || mName.includes('សុវណ្ណារ៉ា')) {
-                    return uPhone === '011242425' || uEmail === 'phuongsovannara@gmail.com';
-                }
-                if (mName === uNameEn || (uNameKh && m.name.trim() === uNameKh)) return true;
-            }
             return false;
         });
     }
@@ -677,29 +626,12 @@ export class TaskService {
         const uId = user.id ? String(user.id) : '';
         const uEmail = (user.email || '').toLowerCase().trim();
         const uPhone = (user.phone || '').replace(/\D/g, '');
-        const uNameEn = (user.name_en || '').toLowerCase().trim();
-        const uNameKh = (user.name_kh || '').trim();
 
         const matchUser = (target?: { id?: number; name?: string; email?: string; phone?: string } | null): boolean => {
             if (!target) return false;
             if (uEmail && target.email && target.email.toLowerCase().trim() === uEmail) return true;
             if (uPhone && target.phone && target.phone.replace(/\D/g, '') === uPhone) return true;
             if (target.id && Number(target.id) > 1000 && String(target.id) === uId) return true;
-            if (target.name && !target.phone && !target.email) {
-                const targetName = target.name.toLowerCase().trim();
-                if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
-                    return uPhone === '010843612' || uEmail === 'pisethpanhavorn544@gmail.com';
-                }
-                if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី')) {
-                    return uPhone === '087280875' || uEmail === 'pumprusmuny@example.com';
-                }
-                if (targetName.includes('winner') || targetName.includes('វីនណឺ')) {
-                    return uPhone === '067776682' || uEmail === 'thawinner@example.com';
-                }
-                if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
-                    return uPhone === '011242425' || uEmail === 'phuongsovannara@gmail.com';
-                }
-            }
             return false;
         };
 
@@ -716,8 +648,12 @@ export class TaskService {
         const isUserAdmin = user ? this.isAdmin(user) : false;
 
         // Filter projects from plans_data_store.json if not admin
-        if (!isUserAdmin && user) {
-            planProjects = planProjects.filter((p) => this.isUserPlanMember(user, p));
+        if (!isUserAdmin) {
+            if (!user) {
+                planProjects = [];
+            } else {
+                planProjects = planProjects.filter((p) => this.isUserPlanMember(user, p));
+            }
         }
 
         const allowedPlanKeys = new Set(planProjects.map((p) => (p.id || '').toLowerCase()));
@@ -730,7 +666,8 @@ export class TaskService {
         const taskProjectMap = new Map<string, { id: string; name: string; code?: string }>();
         for (const t of this.tasks) {
             if (t.project_id || t.project_name) {
-                if (!isUserAdmin && user) {
+                if (!isUserAdmin) {
+                    if (!user) continue;
                     const isTaskAssigned = this.isUserTaskAssigneeOrReporter(user, t);
                     const pidKey = (t.project_id || '').toLowerCase();
                     const pnameKey = (t.project_name || '').toLowerCase();
@@ -917,39 +854,10 @@ export class TaskService {
      * Check whether a task belongs to the user:
      * Either the user is assigned to the task (primary assignee or in assignees list)
      * OR the user is the reporter of the task.
-     * Matches by Khmer/English name, email, or user ID so mock ID collisions do not cause cross-user leaks.
      */
     private isTaskBelongToUser(task: TaskItem, user?: UserPayload): boolean {
-        const userNameEn = (user?.name_en || '').toLowerCase().trim();
-        const userNameKh = (user?.name_kh || '').toLowerCase().trim();
-        const userEmail = (user?.email || '').toLowerCase().trim();
-
-        const matchUser = (target?: { name?: string; email?: string; id?: number } | null): boolean => {
-            if (!target) return false;
-            const targetName = target.name?.toLowerCase().trim();
-            if (targetName) {
-                if (userNameKh && (targetName === userNameKh || targetName.includes(userNameKh) || userNameKh.includes(targetName))) return true;
-                if (userNameEn && (targetName === userNameEn || targetName.includes(userNameEn) || userNameEn.includes(targetName))) return true;
-            }
-            if (userEmail && target.email && target.email.toLowerCase().trim() === userEmail) return true;
-            if (user?.id && target.id && target.id === user.id) return true;
-            return false;
-        };
-
-        // 1. Check if user is the Reporter
-        if (matchUser(task.reporter)) return true;
-
-        // 2. Check if user is the Primary Assignee
-        if (matchUser(task.assignee)) return true;
-
-        // 3. Check if user is in the Assignees list
-        if (task.assignees && Array.isArray(task.assignees)) {
-            for (const ass of task.assignees) {
-                if (matchUser(ass)) return true;
-            }
-        }
-
-        return false;
+        if (!user) return false;
+        return this.isUserTaskAssigneeOrReporter(user, task);
     }
 
     /** A query value only filters when it is set and is not one of the "no filter" sentinels the web sends. */
@@ -1133,21 +1041,25 @@ export class TaskService {
         let validTasks = this.tasks.filter((t) => !this.isPmsTask(t));
 
         // For non-admin users, restrict tasks to those belonging to their assigned projects or tasks assigned to them
-        if (user && !this.isAdmin(user)) {
-            const accessiblePlans = this.getPlanProjects().filter((p: any) => this.isUserPlanMember(user, p));
+        if (!this.isAdmin(user)) {
+            if (!user) {
+                validTasks = [];
+            } else {
+                const accessiblePlans = this.getPlanProjects().filter((p: any) => this.isUserPlanMember(user, p));
 
-            const allowedPlanKeys = new Set(accessiblePlans.map((p) => (p.id || '').toLowerCase()));
-            accessiblePlans.forEach((p) => {
-                if (p.name) allowedPlanKeys.add(p.name.toLowerCase());
-                if (p.code) allowedPlanKeys.add(p.code.toLowerCase());
-            });
+                const allowedPlanKeys = new Set(accessiblePlans.map((p) => (p.id || '').toLowerCase()));
+                accessiblePlans.forEach((p) => {
+                    if (p.name) allowedPlanKeys.add(p.name.toLowerCase());
+                    if (p.code) allowedPlanKeys.add(p.code.toLowerCase());
+                });
 
-            validTasks = validTasks.filter((t) => {
-                if (this.isUserTaskAssigneeOrReporter(user, t)) return true;
-                const pidKey = (t.project_id || '').toLowerCase();
-                const pnameKey = (t.project_name || '').toLowerCase();
-                return allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
-            });
+                validTasks = validTasks.filter((t) => {
+                    if (this.isUserTaskAssigneeOrReporter(user, t)) return true;
+                    const pidKey = (t.project_id || '').toLowerCase();
+                    const pnameKey = (t.project_name || '').toLowerCase();
+                    return allowedPlanKeys.has(pidKey) || allowedPlanKeys.has(pnameKey);
+                });
+            }
         }
 
         // Every active filter EXCEPT status. Each status chip shows how many tasks
@@ -1188,7 +1100,10 @@ export class TaskService {
             throw new NotFoundException(`Task #${id} not found`);
         }
 
-        if (user && !this.isAdmin(user)) {
+        if (!this.isAdmin(user)) {
+            if (!user) {
+                throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលភារកិច្ចនេះទេ (You do not have permission to view this task).');
+            }
             let isAllowed = this.isUserTaskAssigneeOrReporter(user, task);
             if (!isAllowed) {
                 const accessiblePlans = this.getPlanProjects().filter((p: any) => this.isUserPlanMember(user, p));

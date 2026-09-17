@@ -68,20 +68,25 @@ export class HomeService {
         let accessibleTasks = allTasks;
 
         if (!isAdmin) {
-            accessibleProjects = allProjects.filter((p) => this.planService.isUserProjectMember(user, p));
-            const allowedProjectKeys = new Set<string>();
-            accessibleProjects.forEach((p) => {
-                if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
-                if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
-                if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
-            });
+            if (!user) {
+                accessibleProjects = [];
+                accessibleTasks = [];
+            } else {
+                accessibleProjects = allProjects.filter((p) => this.planService.isUserProjectMember(user, p));
+                const allowedProjectKeys = new Set<string>();
+                accessibleProjects.forEach((p) => {
+                    if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
+                    if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
+                    if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
+                });
 
-            accessibleTasks = allTasks.filter((t) => {
-                if (this.taskService.belongsToUser(t, user)) return true;
-                const pidKey = (t.project_id || '').toLowerCase();
-                const pnameKey = (t.project_name || '').toLowerCase();
-                return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
-            });
+                accessibleTasks = allTasks.filter((t) => {
+                    if (this.taskService.belongsToUser(t, user)) return true;
+                    const pidKey = (t.project_id || '').toLowerCase();
+                    const pnameKey = (t.project_name || '').toLowerCase();
+                    return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
+                });
+            }
         }
 
         // "ការងារខ្ញុំ" on the home page means this user's tasks across every project.
@@ -257,20 +262,24 @@ export class HomeService {
 
         let accessibleTasks = allTasks;
         if (!isAdmin) {
-            const accessibleProjects = this.planService.getRawProjects().filter((p) => this.planService.isUserProjectMember(user, p));
-            const allowedProjectKeys = new Set<string>();
-            accessibleProjects.forEach((p) => {
-                if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
-                if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
-                if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
-            });
+            if (!user) {
+                accessibleTasks = [];
+            } else {
+                const accessibleProjects = this.planService.getRawProjects().filter((p) => this.planService.isUserProjectMember(user, p));
+                const allowedProjectKeys = new Set<string>();
+                accessibleProjects.forEach((p) => {
+                    if (p.id) allowedProjectKeys.add(String(p.id).toLowerCase());
+                    if (p.name) allowedProjectKeys.add(p.name.toLowerCase());
+                    if (p.code) allowedProjectKeys.add(p.code.toLowerCase());
+                });
 
-            accessibleTasks = allTasks.filter((t) => {
-                if (this.taskService.belongsToUser(t, user)) return true;
-                const pidKey = (t.project_id || '').toLowerCase();
-                const pnameKey = (t.project_name || '').toLowerCase();
-                return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
-            });
+                accessibleTasks = allTasks.filter((t) => {
+                    if (this.taskService.belongsToUser(t, user)) return true;
+                    const pidKey = (t.project_id || '').toLowerCase();
+                    const pnameKey = (t.project_name || '').toLowerCase();
+                    return allowedProjectKeys.has(pidKey) || allowedProjectKeys.has(pnameKey);
+                });
+            }
         }
 
         const todo = accessibleTasks.filter(
