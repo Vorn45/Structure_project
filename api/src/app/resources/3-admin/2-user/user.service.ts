@@ -210,14 +210,12 @@ export class AdminUserService implements OnModuleInit {
         });
 
         const superadminPhones = ['010843612', '087280875'];
-        const superadminEmails = ['pisethpanhavorn544@gmail.com', 'pumprusmuny@example.com'];
 
         for (const u of users) {
             const phoneClean = (u.phone || '').replace(/\D/g, '');
-            const emailClean = (u.email || '').toLowerCase().trim();
 
             const isGenuineSuperadmin =
-                superadminPhones.includes(phoneClean) || superadminEmails.includes(emailClean);
+                superadminPhones.includes(phoneClean) || u.id === 5 || u.id === 6;
 
             if (!isGenuineSuperadmin) {
                 const meta = this.getUserMeta(u.id, u.email, u.phone);
@@ -315,10 +313,10 @@ export class AdminUserService implements OnModuleInit {
 
         if (this.userMeta[key]) return this.userMeta[key];
         if (normPhone && this.userMeta[normPhone]) return this.userMeta[normPhone];
-        if (normEmail && this.userMeta[normEmail]) return this.userMeta[normEmail];
+        if (normEmail && normEmail !== 'pisethpanhavorn544@gmail.com' && normEmail !== 'pumprusmuny@example.com' && this.userMeta[normEmail]) return this.userMeta[normEmail];
 
-        // Sensible initial mappings for known seed accounts
-        if (normPhone === '010843612' || normEmail === 'pisethpanhavorn544@gmail.com') {
+        // Sensible initial mappings for known seed accounts (strictly by phone or ID)
+        if (normPhone === '010843612' || id === 5) {
             return {
                 role: 'Super Admin',
                 department: 'ព័ត៌មានវិទ្យា (IT)',
@@ -326,7 +324,7 @@ export class AdminUserService implements OnModuleInit {
                 projects_count: 2,
             };
         }
-        if (normPhone === '087280875' || normEmail === 'pumprusmuny@example.com') {
+        if (normPhone === '087280875' || id === 6) {
             return {
                 role: 'Super Admin',
                 department: 'គ្រប់គ្រងគម្រោង (PMO)',
@@ -334,7 +332,7 @@ export class AdminUserService implements OnModuleInit {
                 projects_count: 2,
             };
         }
-        if (normPhone === '067776682' || normEmail === 'thawinner@example.com') {
+        if (normPhone === '067776682' || normPhone === '078776682' || id === 7 || id === 8) {
             return {
                 role: 'Team Lead',
                 department: 'ព័ត៌មានវិទ្យា (IT)',
@@ -342,7 +340,7 @@ export class AdminUserService implements OnModuleInit {
                 projects_count: 2,
             };
         }
-        if (normPhone === '011242425' || normEmail === 'phuongsovannara@gmail.com') {
+        if (normPhone === '011242425' || id === 9) {
             return {
                 role: 'Member',
                 department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)',

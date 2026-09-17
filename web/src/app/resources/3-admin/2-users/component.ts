@@ -202,19 +202,18 @@ export class UserManagementComponent implements OnInit {
             }
         }
 
-        // 2. Fallback: match currently logged in user if this row is the current user
+        // 2. Fallback: match currently logged in user if this row is strictly the current user
         const cur = this.currentUser();
-        if (cur) {
-            const curEmail = (cur.email || '').toLowerCase().trim();
-            const userEmail = (user.email || '').toLowerCase().trim();
+        if (cur && cur.avatar) {
+            const curId = cur.id ? Number(cur.id) : null;
+            const userId = user.id ? Number(user.id) : null;
             const curPhone = (cur.phone || '').replace(/\D/g, '');
             const userPhone = (user.phone || '').replace(/\D/g, '');
             const isMatch = Boolean(
-                (cur.id && user.id && Number(cur.id) === Number(user.id)) ||
-                (curEmail && userEmail && curEmail === userEmail) ||
-                (curPhone && userPhone && curPhone === userPhone)
+                (curId && userId && curId === userId) ||
+                (!curId && !userId && curPhone && userPhone && curPhone === userPhone)
             );
-            if (isMatch && cur.avatar) {
+            if (isMatch) {
                 const curAvatar = resolveFileUrl(cur.avatar);
                 if (curAvatar) {
                     return curAvatar;

@@ -467,19 +467,15 @@ export class UserTaskComponent implements OnInit, OnDestroy {
 
         // 1. Check if member is current logged-in user (reactive to newly uploaded avatar)
         const cur = this.currentUser() || this._userService.getUser();
-        const curNameEn = (cur?.en_name || cur?.name || '').toLowerCase().trim();
-        const curNameKh = (cur?.kh_name || '').toLowerCase().trim();
-        const curEmail = (cur?.email || '').toLowerCase().trim();
-        const targetName = (member.name || '').toLowerCase().trim();
+        const curPhone = (cur?.phone || '').replace(/\D/g, '');
         const targetEmail = (member.email || '').toLowerCase().trim();
+        const targetPhone = (((member as any).phone || '') as string).replace(/\D/g, '');
 
+        const curId = cur?.id ? Number(cur.id) : null;
+        const memberId = member.id ? Number(member.id) : null;
         const isCurrentUser = Boolean(
-            (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
-            (curEmail && targetEmail && curEmail === targetEmail) ||
-            (targetName && (
-                (curNameKh && (targetName === curNameKh || targetName.includes(curNameKh) || curNameKh.includes(targetName))) ||
-                (curNameEn && (targetName === curNameEn || targetName.includes(curNameEn) || curNameEn.includes(targetName)))
-            ))
+            (curId && memberId && curId === memberId) ||
+            (!curId && !memberId && curPhone && targetPhone && curPhone === targetPhone)
         );
 
         if (isCurrentUser && cur?.avatar) {
@@ -504,14 +500,12 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         // 3. Fallback: match from teamMembers()
         const team = this.teamMembers();
         if (team && team.length > 0) {
-            const found = team.find((m) =>
-                (member.id && Number(m.id) === Number(member.id)) ||
-                (targetName && m.name && (
-                    m.name.toLowerCase().trim() === targetName ||
-                    m.name.toLowerCase().includes(targetName) ||
-                    targetName.includes(m.name.toLowerCase().trim())
-                ))
-            );
+            const found = team.find((m) => {
+                const mId = m.id ? Number(m.id) : null;
+                const mPhone = (((m as any).phone || '') as string).replace(/\D/g, '');
+                return (memberId && mId && memberId === mId) ||
+                       (targetPhone && mPhone && targetPhone === mPhone);
+            });
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
                 if (resolved && !resolved.includes('placeholder/avatar.jpg') && !resolved.includes('placeholder/image.jpg')) {
@@ -520,17 +514,17 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             }
         }
 
-        // 4. Dedicated member profile photo resolution
-        if (targetName.includes('brusmuny') || targetName.includes('ប្រុសមុន្នី') || targetName.includes('pum')) {
+        // 4. Dedicated member profile photo resolution (strictly for genuine seed accounts)
+        if (targetPhone === '087280875' || member.id === 6 || member.id === 102) {
             return '/images/placeholder/brusmuny-portrait.png';
         }
-        if (targetName.includes('piseth') || targetName.includes('panhavorn') || targetName.includes('ពិសិដ្ឋ') || targetName.includes('បញ្ញាវ័ន្ត')) {
+        if (targetPhone === '010843612' || member.id === 5 || member.id === 101) {
             return '/images/placeholder/panha-portrait.jpg';
         }
-        if (targetName.includes('winner') || targetName.includes('វីនណឺរ')) {
+        if (targetPhone === '067776682' || targetPhone === '078776682' || member.id === 7 || member.id === 8 || member.id === 103) {
             return '/uploads/user/photo_2025-08-07_12-48-51-1789361518944-536.jpg';
         }
-        if (targetName.includes('sovannara') || targetName.includes('សុវណ្ណារ៉ា')) {
+        if (targetPhone === '011242425' || member.id === 9 || member.id === 104) {
             return '/uploads/user/2025-10-31__3_-1789358043188-913.png';
         }
 

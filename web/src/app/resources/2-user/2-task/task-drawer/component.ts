@@ -508,19 +508,14 @@ export class TaskDrawerComponent implements OnDestroy {
 
         // 1. Check if member is current logged-in user
         const cur = this._userService.getUser();
-        const curNameEn = (cur?.en_name || cur?.name || '').toLowerCase().trim();
-        const curNameKh = (cur?.kh_name || '').toLowerCase().trim();
-        const curEmail = (cur?.email || '').toLowerCase().trim();
-        const targetName = (member.name || '').toLowerCase().trim();
-        const targetEmail = (member.email || '').toLowerCase().trim();
+        const curPhone = (cur?.phone || '').replace(/\D/g, '');
+        const targetPhone = (((member as any).phone || '') as string).replace(/\D/g, '');
 
+        const curId = cur?.id ? Number(cur.id) : null;
+        const memberId = member?.id ? Number(member.id) : null;
         const isCurrentUser = Boolean(
-            (cur?.id && member.id && Number(cur.id) === Number(member.id)) ||
-            (curEmail && targetEmail && curEmail === targetEmail) ||
-            (targetName && (
-                (curNameKh && (targetName === curNameKh || targetName.includes(curNameKh) || curNameKh.includes(targetName))) ||
-                (curNameEn && (targetName === curNameEn || targetName.includes(curNameEn) || curNameEn.includes(targetName)))
-            ))
+            (curId && memberId && curId === memberId) ||
+            (!curId && !memberId && curPhone && targetPhone && curPhone === targetPhone)
         );
 
         if (isCurrentUser && cur?.avatar) {
@@ -545,14 +540,12 @@ export class TaskDrawerComponent implements OnDestroy {
         // 3. Fallback: match from teamMembers()
         const team = this.teamMembers();
         if (team && team.length > 0) {
-            const found = team.find((m) =>
-                (member.id && Number(m.id) === Number(member.id)) ||
-                (targetName && m.name && (
-                    m.name.toLowerCase().trim() === targetName ||
-                    m.name.toLowerCase().includes(targetName) ||
-                    targetName.includes(m.name.toLowerCase().trim())
-                ))
-            );
+            const found = team.find((m) => {
+                const mId = m.id ? Number(m.id) : null;
+                const mPhone = (((m as any).phone || '') as string).replace(/\D/g, '');
+                return (memberId && mId && memberId === mId) ||
+                       (targetPhone && mPhone && targetPhone === mPhone);
+            });
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
                 if (resolved && !resolved.includes('placeholder')) {

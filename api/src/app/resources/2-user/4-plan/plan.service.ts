@@ -278,10 +278,10 @@ export class PlanService {
             }
             if (p.members && Array.isArray(p.members)) {
                 for (const m of p.members) {
-                    const mName = (m.name || '').toLowerCase();
-                    if (mName.includes('brusmuny') || mName.includes('pum')) {
+                    const mPhone = (m.phone || '').replace(/\D/g, '');
+                    if (mPhone === '087280875' || m.id === 102 || m.id === 6) {
                         m.avatar = '/images/placeholder/brusmuny-portrait.png';
-                    } else if (mName.includes('piseth') || mName.includes('panhavorn')) {
+                    } else if (mPhone === '010843612' || m.id === 101 || m.id === 5) {
                         m.avatar = '/images/placeholder/panha-portrait.jpg';
                     }
                 }
