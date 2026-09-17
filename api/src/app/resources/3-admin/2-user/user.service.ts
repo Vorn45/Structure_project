@@ -1206,7 +1206,7 @@ export class AdminUserService implements OnModuleInit {
         const text = `សួស្តី ${nameDisplay}, អ្នកត្រូវបានអញ្ជើញឱ្យចូលរួម WMS Digitech ក្នុងតួនាទី ${roleDisplay}។ សូមចុចតំណភ្ជាប់នេះដើម្បីទទួលយក: ${inviteLink}`;
 
         // Send via SMTP
-        const sent = await this._sesService.send({
+        const sendResult = await this._sesService.send({
             to: cleanEmail,
             subject,
             html,
@@ -1216,9 +1216,9 @@ export class AdminUserService implements OnModuleInit {
 
         return {
             status_code: 201,
-            message: sent 
+            message: sendResult.success 
                 ? 'បានផ្ញើការអញ្ជើញដោយជោគជ័យ (Invitation sent successfully)'
-                : 'បានរក្សាទុកការអញ្ជើញ ប៉ុន្តែការផ្ញើអ៊ីមែលមិនបានជោគជ័យ',
+                : `បានរក្សាទុកការអញ្ជើញ ប៉ុន្តែការផ្ញើអ៊ីមែលមិនបានជោគជ័យ: ${sendResult.error}`,
             data: {
                 id: savedInvitation.id,
                 email: savedInvitation.email,
@@ -1228,7 +1228,7 @@ export class AdminUserService implements OnModuleInit {
                 status: savedInvitation.status,
                 expires_at: savedInvitation.expires_at,
                 invite_link: inviteLink,
-                email_sent: sent,
+                email_sent: sendResult.success,
             },
         };
     }
@@ -1278,7 +1278,7 @@ export class AdminUserService implements OnModuleInit {
             inviterName: user?.name_kh || user?.name_en || 'អ្នកគ្រប់គ្រងប្រព័ន្ធ',
         });
 
-        const sent = await this._sesService.send({
+        const sendResult = await this._sesService.send({
             to: saved.email,
             subject: `WMS Digitech - ការអញ្ជើញចូលរួមប្រព័ន្ធ`,
             html,
@@ -1286,8 +1286,8 @@ export class AdminUserService implements OnModuleInit {
             inline_images: [getDigitechLogo()],
         });
 
-        if (!sent) {
-            throw new BadRequestException('មិនអាចផ្ញើអ៊ីមែលតាមរយៈ Gmail បានទេ សូមពិនិត្យការកំណត់ SMTP');
+        if (!sendResult.success) {
+            throw new BadRequestException(`មិនអាចផ្ញើអ៊ីមែលតាមរយៈ Gmail បានទេ (${sendResult.error})`);
         }
 
         return {
@@ -1296,7 +1296,7 @@ export class AdminUserService implements OnModuleInit {
             data: {
                 ...saved,
                 invite_link: inviteLink,
-                email_sent: sent,
+                email_sent: sendResult.success,
             },
         };
     }

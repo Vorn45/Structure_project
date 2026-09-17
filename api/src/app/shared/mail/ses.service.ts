@@ -25,6 +25,11 @@ export interface SesEmailPayload {
     inline_images?: SesInlineImage[];
 }
 
+export interface SesSendResult {
+    success: boolean;
+    error?: string;
+}
+
 @Injectable()
 export class SesService {
     private readonly _logger = new Logger(SesService.name);
@@ -34,19 +39,21 @@ export class SesService {
         return !!(SMTP_HOST && SMTP_USERNAME && SMTP_PASSWORD && FROM);
     }
 
-    async send(payload: SesEmailPayload): Promise<boolean> {
+    async send(payload: SesEmailPayload): Promise<SesSendResult> {
         if (!this.isConfigured()) {
-            this._logger.warn('AWS SES SMTP is not configured — email sending is disabled.');
-            return false;
+            const err = `AWS SES SMTP is not configured — host=${appConfig.SES.SMTP_HOST || 'none'}, user=${appConfig.SES.SMTP_USERNAME ? 'set' : 'none'}, from=${appConfig.SES.FROM || 'none'}`;
+            this._logger.warn(err);
+            return { success: false, error: err };
         }
 
         try {
             await this.sendSmtpMail(payload);
             this._logger.log(`SES email sent to ${payload.to}`);
-            return true;
-        } catch (error) {
-            this._logger.error(`SES send failed: ${String(error)}`);
-            return false;
+            return { success: true };
+        } catch (error: any) {
+            const errMsg = error?.message || String(error);
+            this._logger.error(`SES send failed: ${errMsg}`);
+            return { success: false, error: `${errMsg} (Host: ${appConfig.SES.SMTP_HOST}:${appConfig.SES.SMTP_PORT})` };
         }
     }
 
@@ -67,6 +74,11 @@ export class SesService {
         } else {
             socket = net.connect(port, host);
         }
+
+        socket.setTimeout(10000);
+        socket.once('timeout', () => {
+            socket.destroy(new Error(`SMTP connection timed out after 10s connecting to ${host}:${port}`));
+        });
 
         let buffer = '';
         let onData: ((chunk: Buffer) => void) | null = null;
