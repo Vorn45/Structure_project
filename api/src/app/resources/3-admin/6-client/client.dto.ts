@@ -12,6 +12,10 @@ export class QueryAdminClientDto {
     @IsOptional()
     @IsString()
     industry?: string;
+
+    @IsOptional()
+    @IsString()
+    sort?: string;
 }
 
 export class CreateAdminClientDto {

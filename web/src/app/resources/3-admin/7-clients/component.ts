@@ -57,9 +57,14 @@ export class ClientManagementComponent implements OnInit {
     clientForm: FormGroup;
     saving = signal<boolean>(false);
 
+    // Detail modal state
+    selectedDetailClient = signal<AdminClient | null>(null);
+    showDetailModal = signal<boolean>(false);
+
     // Delete confirmation
     deleteTarget = signal<AdminClient | null>(null);
     showDeleteModal = signal<boolean>(false);
+    deleting = signal<boolean>(false);
 
     readonly statusList = [
         { key: 'active', label: 'សកម្ម', color: 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' },
@@ -68,9 +73,22 @@ export class ClientManagementComponent implements OnInit {
         { key: 'inactive', label: 'អសកម្ម', color: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700' },
     ];
 
-    readonly industries = computed(() =>
-        ['all', ...new Set(this.clients().map((c) => c.industry).filter(Boolean))],
-    );
+    readonly presetIndustries: string[] = [
+        'ធនាគារ និងហិរញ្ញវត្ថុ (Banking & Finance)',
+        'ធនាគារឌីជីថល (Fintech & Digital Banking)',
+        'ពាណិជ្ជកម្ម និងអចលនទ្រព្យ (Retail & Real Estate)',
+        'សេវាសាធារណៈ និងថាមពល (Public Utilities)',
+        'ផលិតកម្ម និងចែកចាយ (F&B / Manufacturing)',
+        'ព័ត៌មានវិទ្យា និងទូរគមនាគមន៍ (IT & Telecom)',
+        'ដឹកជញ្ជូន និងឃ្លាំងស្តុក (Logistics & Supply Chain)',
+    ];
+
+    readonly industries = computed(() => {
+        const fromClients = this.clients()
+            .map((c) => c.industry)
+            .filter((ind): ind is string => !!ind);
+        return ['all', ...Array.from(new Set([...this.presetIndustries, ...fromClients]))];
+    });
 
     hasActiveFilters = computed(() => {
         return (
@@ -222,10 +240,37 @@ export class ClientManagementComponent implements OnInit {
         this.selectedClient.set(null);
     }
 
+    openDetailModal(client: AdminClient): void {
+        this.selectedDetailClient.set(client);
+        this.showDetailModal.set(true);
+    }
+
+    closeDetailModal(): void {
+        this.showDetailModal.set(false);
+        this.selectedDetailClient.set(null);
+    }
+
+    editFromDetail(): void {
+        const client = this.selectedDetailClient();
+        if (client) {
+            this.closeDetailModal();
+            this.openEditDrawer(client);
+        }
+    }
+
+    onLogoError(client: AdminClient): void {
+        client.logo = null;
+    }
+
     onLogoSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (input.files && input.files[0]) {
             const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                this._snackbar?.error('ទំហំរូបភាពមិនត្រូវលើសពី 5MB ឡើយ');
+                input.value = '';
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.clientForm.patchValue({ logo: e.target?.result as string });
@@ -241,13 +286,18 @@ export class ClientManagementComponent implements OnInit {
     submitClientForm(): void {
         if (this.clientForm.invalid) {
             this.clientForm.markAllAsTouched();
+            this._snackbar?.error('សូមបំពេញព័ត៌មានចាំបាច់ឱ្យបានត្រឹមត្រូវ');
             return;
         }
 
         this.saving.set(true);
         const formVal = { ...this.clientForm.value };
+        if (formVal.company_name) formVal.company_name = formVal.company_name.trim();
+        if (formVal.contact_person) formVal.contact_person = formVal.contact_person.trim();
         if (formVal.email) formVal.email = formVal.email.trim();
         if (formVal.phone) formVal.phone = formVal.phone.trim();
+        if (formVal.contact_phone) formVal.contact_phone = formVal.contact_phone.trim();
+        if (formVal.contact_email) formVal.contact_email = formVal.contact_email.trim();
         if (!formVal.name_kh) formVal.name_kh = formVal.company_name;
         if (!formVal.name_en) formVal.name_en = formVal.company_name;
 
@@ -319,18 +369,22 @@ export class ClientManagementComponent implements OnInit {
         const target = this.deleteTarget();
         if (!target) return;
 
+        this.deleting.set(true);
         const previousList = this.clients();
         this.clients.update((list) => list.filter((c) => c.id !== target.id));
         this.showDeleteModal.set(false);
-        this.deleteTarget.set(null);
 
         this._adminService.deleteClient(target.id).subscribe({
             next: () => {
+                this.deleting.set(false);
+                this.deleteTarget.set(null);
                 this._snackbar?.success('បានលុបព័ត៌មានអតិថិជនដោយជោគជ័យ');
             },
             error: (err) => {
                 console.error('Backend deleteClient error:', err);
+                this.deleting.set(false);
                 this.clients.set(previousList);
+                this.deleteTarget.set(null);
                 this._snackbar?.error(err?.error?.message || 'បរាជ័យក្នុងការលុបព័ត៌មានអតិថិជន');
             },
         });

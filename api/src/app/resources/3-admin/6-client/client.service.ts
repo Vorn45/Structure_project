@@ -14,7 +14,7 @@ export class AdminClientService implements OnModuleInit {
 
     async onModuleInit() {
         try {
-            const count = await this._clientRepo.count();
+            const count = await this._clientRepo.count({ withDeleted: true });
             if (count === 0) {
                 const defaults = [
                     {
@@ -128,7 +128,13 @@ export class AdminClientService implements OnModuleInit {
             });
         }
 
-        qb.orderBy('client.created_at', 'DESC');
+        if (query.sort === 'name_asc') {
+            qb.orderBy('client.company_name', 'ASC');
+        } else if (query.sort === 'name_desc') {
+            qb.orderBy('client.company_name', 'DESC');
+        } else {
+            qb.orderBy('client.created_at', 'DESC');
+        }
 
         const [results, total] = await qb.getManyAndCount();
 
@@ -154,8 +160,14 @@ export class AdminClientService implements OnModuleInit {
     }
 
     async createClient(user: UserPayload, dto: CreateAdminClientDto) {
+        const companyName = dto.company_name?.trim();
         const newClient = this._clientRepo.create({
             ...dto,
+            company_name: companyName,
+            name_kh: dto.name_kh?.trim() || companyName,
+            name_en: dto.name_en?.trim() || companyName,
+            email: dto.email?.trim() || undefined,
+            phone: dto.phone?.trim() || undefined,
             organization_id: user?.organization_id || undefined,
         });
         const saved = await this._clientRepo.save(newClient);
@@ -170,6 +182,10 @@ export class AdminClientService implements OnModuleInit {
     async updateClient(user: UserPayload, id: number, dto: UpdateAdminClientDto) {
         const client = await this._clientRepo.findOne({ where: { id } });
         if (!client) throw new NotFoundException(`Client with ID ${id} not found`);
+
+        if (dto.company_name) dto.company_name = dto.company_name.trim();
+        if (dto.email) dto.email = dto.email.trim();
+        if (dto.phone) dto.phone = dto.phone.trim();
 
         Object.assign(client, dto);
         const updated = await this._clientRepo.save(client);

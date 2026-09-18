@@ -2,8 +2,13 @@
     style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
 
     <!-- ===== FRAMED MAIN CONTAINER ===== -->
-    <div class="flex flex-col flex-1 min-w-0 space-y-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
+    <div class="flex flex-col flex-1 min-w-0 space-y-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6 relative overflow-hidden"
         style="min-height: calc(100vh - 2rem);">
+
+        <!-- Top Animated Loading Indicator Bar -->
+        @if (loading()) {
+            <div class="absolute top-0 left-0 right-0 h-0.5 bg-blue-600 animate-pulse z-10"></div>
+        }
 
         <!-- Top Header Row -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
@@ -44,6 +49,14 @@
 
             <!-- Header Actions -->
             <div class="flex items-center gap-2 shrink-0">
+                <button
+                    type="button"
+                    (click)="loadClients()"
+                    [disabled]="loading()"
+                    class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                    matTooltip="ផ្ទុកទិន្នន័យឡើងវិញ">
+                    <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5 text-slate-600 dark:text-slate-300" [class.animate-spin]="loading()"></mat-icon>
+                </button>
                 <button
                     type="button"
                     (click)="openCreateDrawer()"
@@ -168,17 +181,17 @@
                         @for (client of filteredClients(); track client.id) {
                             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-750 transition-colors">
                                 <!-- 1. Company Name & Logo -->
-                                <td class="py-3.5 px-4">
+                                <td class="py-3.5 px-4 cursor-pointer" (click)="openDetailModal(client)" matTooltip="ចុចដើម្បីមើលព័ត៌មានលម្អិត">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] shrink-0 rounded-xl overflow-hidden bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 flex items-center justify-center font-bold text-blue-600 dark:text-blue-400 text-[14px]">
                                             @if (client.logo) {
-                                                <img [src]="client.logo" [alt]="client.company_name" class="w-full h-full object-cover" />
+                                                <img [src]="client.logo" [alt]="client.company_name" (error)="onLogoError(client)" class="w-full h-full object-cover" />
                                             } @else {
                                                 <span>{{ getClientInitials(client) }}</span>
                                             }
                                         </div>
                                         <div class="flex flex-col min-w-0">
-                                            <span class="font-medium text-slate-900 dark:text-white truncate text-[14px]">
+                                            <span class="font-medium text-slate-900 dark:text-white truncate text-[14px] hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                                 {{ client.company_name }}
                                             </span>
                                             <span class="text-[12px] text-slate-400 truncate">
@@ -258,6 +271,10 @@
                                         <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4.5"></mat-icon>
                                     </button>
                                     <mat-menu #rowMenu="matMenu" yPosition="below" xPosition="before" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                                        <button mat-menu-item (click)="openDetailModal(client)" class="!text-[14px]">
+                                            <mat-icon svgIcon="mdi:eye-outline" class="icon-size-4 text-slate-600 dark:text-slate-300 mr-2"></mat-icon>
+                                            <span>មើលព័ត៌មានលម្អិត</span>
+                                        </button>
                                         <button mat-menu-item (click)="openEditDrawer(client)" class="!text-[14px]">
                                             <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4 text-blue-600 mr-2"></mat-icon>
                                             <span>កែប្រែព័ត៌មាន</span>
@@ -363,7 +380,11 @@
                             type="text"
                             formControlName="company_name"
                             placeholder="ឧ. Canadia Bank Plc., Chip Mong Group..."
+                            [class.!border-red-500]="clientForm.get('company_name')?.invalid && clientForm.get('company_name')?.touched"
                             class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        @if (clientForm.get('company_name')?.invalid && clientForm.get('company_name')?.touched) {
+                            <span class="text-[12px] text-red-500 mt-1 block">សូមបញ្ចូលឈ្មោះក្រុមហ៊ុន / ស្ថាប័ន</span>
+                        }
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -434,7 +455,11 @@
                             type="text"
                             formControlName="contact_person"
                             placeholder="ឧ. លោក ជា វណ្ណា (VP of Technology)"
+                            [class.!border-red-500]="clientForm.get('contact_person')?.invalid && clientForm.get('contact_person')?.touched"
                             class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100" />
+                        @if (clientForm.get('contact_person')?.invalid && clientForm.get('contact_person')?.touched) {
+                            <span class="text-[12px] text-red-500 mt-1 block">សូមបញ្ចូលឈ្មោះអ្នកទំនាក់ទំនង</span>
+                        }
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -562,7 +587,7 @@
                 <button
                     type="button"
                     (click)="submitClientForm()"
-                    [disabled]="saving() || clientForm.invalid"
+                    [disabled]="saving()"
                     class="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-2 shadow-sm transition-all cursor-pointer">
                     @if (saving()) {
                         <mat-icon svgIcon="mdi:loading" class="animate-spin icon-size-4"></mat-icon>
@@ -599,8 +624,154 @@
                     <button
                         type="button"
                         (click)="deleteClient()"
-                        class="h-9 px-5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[14px] font-medium transition-all shadow-2xs cursor-pointer">
-                        លុបអតិថិជន
+                        [disabled]="deleting()"
+                        class="h-9 px-5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-[14px] font-medium transition-all shadow-2xs cursor-pointer flex items-center gap-1.5">
+                        @if (deleting()) {
+                            <mat-icon svgIcon="mdi:loading" class="animate-spin icon-size-4"></mat-icon>
+                        }
+                        <span>លុបអតិថិជន</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ===== CLIENT DETAIL MODAL ===== -->
+    @if (showDetailModal() && selectedDetailClient(); as detail) {
+        <div class="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+            (click)="closeDetailModal()">
+            <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in zoom-in-95 duration-150"
+                (click)="$event.stopPropagation()">
+                
+                <!-- Modal Header with Logo and Banner -->
+                <div class="p-6 bg-slate-50/80 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700/60 flex items-start justify-between gap-4">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-14 h-14 min-w-[56px] min-h-[56px] rounded-2xl overflow-hidden bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 flex items-center justify-center font-bold text-blue-600 dark:text-blue-400 text-lg shadow-2xs">
+                            @if (detail.logo) {
+                                <img [src]="detail.logo" [alt]="detail.company_name" (error)="onLogoError(detail)" class="w-full h-full object-cover" />
+                            } @else {
+                                <span>{{ getClientInitials(detail) }}</span>
+                            }
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <h3 class="text-[17px] font-semibold text-slate-900 dark:text-white truncate">
+                                {{ detail.company_name }}
+                            </h3>
+                            @if (detail.name_kh || detail.name_en) {
+                                <span class="text-[13px] text-slate-500 dark:text-slate-400 truncate">
+                                    {{ detail.name_kh || detail.name_en }}
+                                </span>
+                            }
+                            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border"
+                                    [ngClass]="getIndustryBadgeClass(detail.industry)">
+                                    {{ detail.industry }}
+                                </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border"
+                                    [ngClass]="getStatusBadgeClass(detail.status)">
+                                    <span class="w-1.5 h-1.5 rounded-full mr-1"
+                                        [ngClass]="detail.status === 'active' ? 'bg-emerald-500' : detail.status === 'contracted' ? 'bg-blue-500' : detail.status === 'lead' ? 'bg-amber-500' : 'bg-slate-400'"></span>
+                                    {{ getStatusKhmer(detail.status) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        (click)="closeDetailModal()"
+                        class="w-8 h-8 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer shrink-0">
+                        <mat-icon svgIcon="mdi:close" class="icon-size-4.5"></mat-icon>
+                    </button>
+                </div>
+
+                <!-- Modal Body: Details Grid -->
+                <div class="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
+                    <!-- Primary Contact Card -->
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-750/50 border border-slate-100 dark:border-slate-700/60 space-y-2">
+                        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-400">
+                            <mat-icon svgIcon="mdi:account-tie-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                            <span>អ្នកទំនាក់ទំនងចម្បង</span>
+                        </div>
+                        <div class="text-[14px] font-medium text-slate-800 dark:text-slate-200">
+                            {{ detail.contact_person || 'មិនទាន់កំណត់' }}
+                        </div>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-slate-600 dark:text-slate-300">
+                            @if (detail.contact_phone || detail.phone) {
+                                <a [href]="'tel:' + (detail.contact_phone || detail.phone)" class="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline">
+                                    <mat-icon svgIcon="mdi:phone-outline" class="icon-size-3.5"></mat-icon>
+                                    <span>{{ detail.contact_phone || detail.phone }}</span>
+                                </a>
+                            }
+                            @if (detail.contact_email || detail.email) {
+                                <a [href]="'mailto:' + (detail.contact_email || detail.email)" class="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline">
+                                    <mat-icon svgIcon="mdi:email-outline" class="icon-size-3.5"></mat-icon>
+                                    <span>{{ detail.contact_email || detail.email }}</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Company Information -->
+                    <div class="space-y-2.5 text-[13px]">
+                        @if (detail.website) {
+                            <div class="flex items-start gap-2.5">
+                                <mat-icon svgIcon="mdi:web" class="icon-size-4 text-slate-400 shrink-0 mt-0.5"></mat-icon>
+                                <div class="flex-1">
+                                    <span class="text-slate-400 block text-xs">គេហទំព័រ</span>
+                                    <a [href]="detail.website" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
+                                        <span>{{ detail.website }}</span>
+                                        <mat-icon svgIcon="mdi:open-in-new" class="icon-size-3"></mat-icon>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+
+                        @if (detail.address) {
+                            <div class="flex items-start gap-2.5">
+                                <mat-icon svgIcon="mdi:map-marker-outline" class="icon-size-4 text-slate-400 shrink-0 mt-0.5"></mat-icon>
+                                <div class="flex-1">
+                                    <span class="text-slate-400 block text-xs">អាសយដ្ឋាន</span>
+                                    <span class="text-slate-700 dark:text-slate-300">{{ detail.address }}</span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="flex items-start gap-2.5">
+                            <mat-icon svgIcon="mdi:briefcase-outline" class="icon-size-4 text-slate-400 shrink-0 mt-0.5"></mat-icon>
+                            <div class="flex-1">
+                                <span class="text-slate-400 block text-xs">ចំនួនគម្រោងសកម្ម</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200">{{ detail.projects_count || 0 }} គម្រោង</span>
+                            </div>
+                        </div>
+
+                        @if (detail.note) {
+                            <div class="flex items-start gap-2.5 pt-1">
+                                <mat-icon svgIcon="mdi:text-box-outline" class="icon-size-4 text-slate-400 shrink-0 mt-0.5"></mat-icon>
+                                <div class="flex-1">
+                                    <span class="text-slate-400 block text-xs">កំណត់សម្គាល់បន្ថែម</span>
+                                    <p class="text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-750/30 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700/50 mt-1 leading-relaxed">
+                                        {{ detail.note }}
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Modal Footer Actions -->
+                <div class="p-4 bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-end gap-2.5">
+                    <button
+                        type="button"
+                        (click)="closeDetailModal()"
+                        class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750 text-[13px] font-medium transition-all cursor-pointer">
+                        បិទ
+                    </button>
+                    <button
+                        type="button"
+                        (click)="editFromDetail()"
+                        class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                        <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4"></mat-icon>
+                        <span>កែប្រែព័ត៌មាន</span>
                     </button>
                 </div>
             </div>
