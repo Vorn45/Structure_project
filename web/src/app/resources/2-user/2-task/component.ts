@@ -1803,6 +1803,14 @@ export class UserTaskComponent implements OnInit, OnDestroy {
         this.dialogMode.set('details');
         this.showChatRoom.set(true);
         this.loadTaskChat(task);
+        this._taskService.getTaskById(task.id).subscribe({
+            next: (res) => {
+                if (res?.data && String(this.selectedTask()?.id) === String(task.id)) {
+                    this.selectedTask.set(res.data);
+                }
+            },
+            error: () => {},
+        });
     }
 
     openTaskChat(task: TaskItem, event?: Event): void {
