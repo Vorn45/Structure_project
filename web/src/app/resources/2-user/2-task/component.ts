@@ -558,6 +558,93 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(() => this.loadTasks(true));
 
+        // Real-time task comments & chat updates
+        this._taskSocket
+            .taskCommentUpdates()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((evt) => {
+                const taskId = String(evt.task_id);
+                const currentSelected = this.selectedTask();
+
+                // 1. Live update comment & attachment counts in the main task list
+                this.tasks.update((items) =>
+                    items.map((t) => {
+                        if (String(t.id) === taskId) {
+                            return {
+                                ...t,
+                                comments_count: evt.comments_count ?? (t.comments_count || 0) + 1,
+                                attachments_count: evt.attachments_count ?? t.attachments_count,
+                            };
+                        }
+                        return t;
+                    })
+                );
+
+                // 2. If the chat drawer is currently open for this task, append comment
+                if (currentSelected && String(currentSelected.id) === taskId) {
+                    currentSelected.comments_count = evt.comments_count ?? (currentSelected.comments_count || 0) + 1;
+                    if (evt.attachments_count !== undefined) {
+                        currentSelected.attachments_count = evt.attachments_count;
+                    }
+
+                    const currentUser = this.currentUser() || this._userService.getUser();
+                    const isSelf = Boolean(currentUser?.id && evt.comment.sender_id === currentUser.id);
+
+                    const currentMsgs = this.chatMessages();
+                    const alreadyExists = currentMsgs.some((m) =>
+                        (m.id && evt.comment.id && m.id === evt.comment.id) ||
+                        (isSelf && m.text === evt.comment.text && Math.abs(new Date(m.created_at || 0).getTime() - new Date(evt.comment.created_at || 0).getTime()) < 4000)
+                    );
+
+                    if (!alreadyExists) {
+                        let displayTime = evt.comment.time;
+                        if (evt.comment.created_at) {
+                            const d = new Date(evt.comment.created_at);
+                            if (!isNaN(d.getTime())) {
+                                displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                        }
+
+                        const incomingMsg: TaskChatMessage = {
+                            ...evt.comment,
+                            is_self: isSelf,
+                            time: displayTime || 'ទើបតែផ្ញើ',
+                        };
+
+                        this.chatMessages.update((msgs) => [...msgs, incomingMsg]);
+                        const cached = this.taskChatHistoryMap.get(currentSelected.id) || [];
+                        this.taskChatHistoryMap.set(currentSelected.id, [...cached, incomingMsg]);
+                    }
+                }
+            });
+
+        // Real-time task comment seen status
+        this._taskSocket
+            .taskCommentSeenUpdates()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((evt) => {
+                const currentSelected = this.selectedTask();
+                if (currentSelected && String(currentSelected.id) === String(evt.task_id)) {
+                    this.chatMessages.update((msgs) =>
+                        msgs.map((m) => {
+                            if (!m.is_system && m.is_self) {
+                                const seen = m.seen_by ? [...m.seen_by] : [];
+                                if (!seen.some((s) => s.id === evt.viewer.id)) {
+                                    seen.push({
+                                        id: evt.viewer.id,
+                                        name: evt.viewer.name || 'Member',
+                                        avatar: evt.viewer.avatar,
+                                        seen_at: evt.viewer.seen_at,
+                                    });
+                                }
+                                return { ...m, seen_by: seen };
+                            }
+                            return m;
+                        })
+                    );
+                }
+            });
+
         this._route.queryParams.subscribe((params) => {
             if (params['status']) {
                 this.activeStatus.set(params['status']);
@@ -1023,6 +1110,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: `${actorPrefix}បានប្តូរស្ថានភាពពី "${this.getStatusLabel(oldStatus)}" ទៅជា "${this.getStatusLabel(targetStatus)}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
+                created_at: new Date().toISOString(),
             };
             this.appendChatMessage(task.id, systemMsg);
         }
@@ -1072,6 +1160,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: `${actorPrefix}បានប្តូរអាទិភាពពី "${this.getPriorityLabel(oldPriority)}" ទៅជា "${this.getPriorityLabel(targetPriority)}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
+                created_at: new Date().toISOString(),
             };
             this.appendChatMessage(task.id, systemMsg);
         }
@@ -1119,6 +1208,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: `${actorPrefix}បានប្តូរប្រភេទការងារពី "${oldLabel}" ទៅជា "${newLabel}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
+                created_at: new Date().toISOString(),
             };
             this.appendChatMessage(task.id, systemMsg);
         }
@@ -1155,6 +1245,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: newDateStr ? `${actorPrefix}បានកំណត់កាលបរិច្ឆេទត្រូវធ្វើថ្មី៖ ${formatted}` : `${actorPrefix}បានសម្អាតកាលបរិច្ឆេទកំណត់`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
+                created_at: new Date().toISOString(),
             };
             this.appendChatMessage(task.id, systemMsg);
         }
@@ -1193,6 +1284,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: `${actorPrefix}បានប្តូរចំណងជើងការងារទៅជា "${trimmed}"`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
+                created_at: new Date().toISOString(),
             };
             this.appendChatMessage(task.id, systemMsg);
         }
@@ -1232,6 +1324,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: `${actorPrefix}បានកែប្រែការពិពណ៌នាការងារ`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 is_system: true,
+                created_at: new Date().toISOString(),
             };
             this.appendChatMessage(task.id, systemMsg);
         }
@@ -1297,7 +1390,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             this.selectedTask.set({ ...updatedTask });
         }
 
-        const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         this.appendChatMessage(task.id, {
             id: Date.now(),
             sender_name: 'ប្រព័ន្ធ (System)',
@@ -1305,6 +1398,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             time: nowTime,
             is_self: false,
             is_system: true,
+            created_at: new Date().toISOString(),
         });
 
         this._taskService.updateTask(task.id, {
@@ -1345,7 +1439,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             this.selectedTask.set({ ...updatedTask });
         }
 
-        const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         this.appendChatMessage(task.id, {
             id: Date.now(),
             sender_name: 'ប្រព័ន្ធ (System)',
@@ -1353,6 +1447,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             time: nowTime,
             is_self: false,
             is_system: true,
+            created_at: new Date().toISOString(),
         });
 
         this._taskService.updateTask(task.id, {
@@ -1730,6 +1825,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     loadTaskChat(task: TaskItem): void {
+        this._taskSocket.joinTask(task.id);
         const reporterName = task.reporter?.name || 'អ្នកគ្រប់គ្រង';
         const reporterAvatar = task.reporter?.avatar || null;
         const reporterId = task.reporter?.id || 1;
@@ -1757,9 +1853,10 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 text: hasAssignee && assigneeName
                     ? `ភារកិច្ច ${task.code || ('#' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} និងចាត់តាំងទៅកាន់ ${assigneeName}`
                     : `ភារកិច្ច ${task.code || ('#' + task.id)} ត្រូវបានបង្កើតដោយ ${reporterName} (គ្មានអ្នកទទួលបន្ទុក)`,
-                time: '8:30 AM',
+                time: task.created_at ? new Date(task.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '8:30 AM',
                 is_self: false,
                 is_system: true,
+                created_at: task.created_at,
             },
         ];
 
@@ -1779,8 +1876,9 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                 sender_name: reporterName,
                 sender_avatar: reporterAvatar,
                 text: `សួស្តី @${assigneeName}! ខ្ញុំបានចាត់តាំងភារកិច្ច "${task.title}" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។`,
-                time: '8:45 AM',
+                time: task.created_at ? new Date(task.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '8:45 AM',
                 is_self: isReporterMe,
+                created_at: task.created_at,
                 seen_by: isReporterMe ? seenList : undefined,
             });
         }
@@ -1798,16 +1896,6 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             next: (res) => {
                 if (res?.data?.comments && res.data.comments.length > 0) {
                     const mapped = (res.data.comments as TaskChatMessage[]).map((c) => {
-                        if (c.is_system) {
-                            return { ...c, is_self: false, is_system: true };
-                        }
-                        const senderName = (c.sender_name || '').toLowerCase().trim();
-                        const isSelf = Boolean(
-                            (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName) || senderName.includes(currentUserName))) ||
-                            (currentUser?.id && c.sender_id === currentUser.id) ||
-                            c.is_self
-                        );
-
                         // Format time in user's local timezone if created_at exists
                         let displayTime = c.time;
                         if (c.created_at) {
@@ -1816,6 +1904,16 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                                 displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             }
                         }
+
+                        if (c.is_system) {
+                            return { ...c, time: displayTime, is_self: false, is_system: true };
+                        }
+                        const senderName = (c.sender_name || '').toLowerCase().trim();
+                        const isSelf = Boolean(
+                            (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName) || senderName.includes(currentUserName))) ||
+                            (currentUser?.id && c.sender_id === currentUser.id) ||
+                            c.is_self
+                        );
 
                         return { ...c, time: displayTime, is_self: isSelf, seen_by: c.seen_by || [] };
                     });
@@ -1829,6 +1927,10 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     closeTaskChat(): void {
+        const cur = this.selectedTask();
+        if (cur?.id) {
+            this._taskSocket.leaveTask(cur.id);
+        }
         this.showChatRoom.set(false);
         this.selectedTask.set(null);
         const q = this._route.snapshot.queryParams;

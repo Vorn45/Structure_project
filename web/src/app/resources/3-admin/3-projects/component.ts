@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, finalize, of, Subject, takeUntil } from 'rxjs';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -37,6 +37,7 @@ import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
 import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO, DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
+import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 
 export interface AgilePlanSegment {
     iteration: 1 | 2 | 3;
@@ -355,6 +356,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     private readonly _userTaskService = inject(UserTaskService);
     private readonly _route = inject(ActivatedRoute);
     private readonly _snackbarService = inject(SnackbarService);
+    private readonly _taskSocket = inject(TaskSocketService);
+    private readonly _destroy$ = new Subject<void>();
 
     projects = signal<AdminProject[]>([]);
     users = signal<AdminUser[]>([]);
@@ -752,6 +755,74 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     ngOnInit(): void {
         this.loadData();
+
+        // Real-time task comments & chat updates
+        this._taskSocket
+            .taskCommentUpdates()
+            .pipe(takeUntil(this._destroy$))
+            .subscribe((evt) => {
+                const taskIdStr = String(evt.task_id);
+                const currentModal = this.selectedTaskDrawerItem();
+
+                // 1. Live update task counters in the project task list
+                this.tasks.update((items) =>
+                    items.map((t) => {
+                        const tId = String(t.id).replace(/\D/g, '') || String(t.id);
+                        const cleanTarget = taskIdStr.replace(/\D/g, '') || taskIdStr;
+                        if (tId === cleanTarget || String(t.id) === taskIdStr) {
+                            return {
+                                ...t,
+                                comments_count: evt.comments_count ?? (t.comments_count || 0) + 1,
+                                attachments_count: evt.attachments_count ?? t.attachments_count,
+                            };
+                        }
+                        return t;
+                    })
+                );
+
+                // 2. If task details modal / drawer is currently open for this task
+                if (currentModal) {
+                    const modalIdClean = String(currentModal.id).replace(/\D/g, '') || String(currentModal.id);
+                    const incomingIdClean = taskIdStr.replace(/\D/g, '') || taskIdStr;
+
+                    if (modalIdClean === incomingIdClean || String(currentModal.id) === taskIdStr) {
+                        currentModal.comments_count = evt.comments_count ?? (currentModal.comments_count || 0) + 1;
+                        if (evt.attachments_count !== undefined) {
+                            currentModal.attachments_count = evt.attachments_count;
+                        }
+
+                        const currentUser = this._userService.getUser();
+                        const isSelf = Boolean(currentUser?.id && evt.comment.sender_id === currentUser.id);
+
+                        const currentMsgs = this.taskDrawerChatMessages();
+                        const alreadyExists = currentMsgs.some((m) =>
+                            (m.id && evt.comment.id && m.id === evt.comment.id) ||
+                            (isSelf && m.text === evt.comment.text && Math.abs(new Date(m.created_at || 0).getTime() - new Date(evt.comment.created_at || 0).getTime()) < 4000)
+                        );
+
+                        if (!alreadyExists) {
+                            let displayTime = evt.comment.time;
+                            if (evt.comment.created_at) {
+                                const d = new Date(evt.comment.created_at);
+                                if (!isNaN(d.getTime())) {
+                                    displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                }
+                            }
+
+                            const incomingMsg: TaskChatMessage = {
+                                ...evt.comment,
+                                is_self: isSelf,
+                                time: displayTime || 'ទើបតែផ្ញើ',
+                            };
+
+                            const updated = [...currentMsgs, incomingMsg];
+                            this.taskDrawerChatMessages.set(updated);
+                            this._drawerChatHistoryMap.set(currentModal.id, updated);
+                        }
+                    }
+                }
+            });
+
         this._route.queryParams.subscribe((params) => {
             const taskCode = (params['taskCode'] || params['task_code'] || '').trim().toLowerCase();
             const taskId = (params['taskId'] || params['task_id'] || '').trim();
@@ -777,6 +848,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     ngOnDestroy(): void {
+        this._destroy$.next();
+        this._destroy$.complete();
         this._resizeObserver?.disconnect();
         this.disposeCharts();
     }
@@ -833,6 +906,13 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     closeTaskDrawer(): void {
+        const cur = this.selectedTaskDrawerItem();
+        if (cur?.id) {
+            const numericId = parseInt(String(cur.id).replace(/\D/g, ''), 10);
+            if (!isNaN(numericId)) {
+                this._taskSocket.leaveTask(numericId);
+            }
+        }
         this.showTaskDrawer.set(false);
         this.selectedTaskDrawerItem.set(null);
         this.activeTaskModal.set(null);
@@ -913,6 +993,11 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     loadTaskDrawerChat(task: AdminTaskItem): void {
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._taskSocket.joinTask(numericId);
+        }
+
         const cached = this._drawerChatHistoryMap.get(task.id);
         if (cached && cached.length > 0) {
             this.taskDrawerChatMessages.set([...cached]);
@@ -960,7 +1045,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         this._drawerChatHistoryMap.set(task.id, initialMsgs);
 
         // Fetch live comments from backend if available
-        const numericId = parseInt(task.id.replace(/\D/g, ''), 10);
         if (!isNaN(numericId)) {
             this._userTaskService.getTaskComments(numericId).subscribe({
                 next: (res) => {
@@ -970,13 +1054,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                         const currentUserId = currentUser?.id;
 
                         const mapped = (res.data.comments as TaskChatMessage[]).map((c) => {
-                            if (c.is_system) return { ...c, is_self: false, is_system: true };
-                            const senderName = (c.sender_name || '').toLowerCase().trim();
-                            const isSelf = Boolean(
-                                (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName) || senderName.includes(currentUserName))) ||
-                                (currentUserId && c.sender_id === currentUserId) ||
-                                c.is_self
-                            );
                             let displayTime = c.time;
                             if (c.created_at) {
                                 const d = new Date(c.created_at);
@@ -984,6 +1061,13 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                                     displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 }
                             }
+                            if (c.is_system) return { ...c, time: displayTime, is_self: false, is_system: true };
+                            const senderName = (c.sender_name || '').toLowerCase().trim();
+                            const isSelf = Boolean(
+                                (currentUserName && (senderName === currentUserName || currentUserName.includes(senderName) || senderName.includes(currentUserName))) ||
+                                (currentUserId && c.sender_id === currentUserId) ||
+                                c.is_self
+                            );
                             return { ...c, time: displayTime, is_self: isSelf };
                         });
                         this.taskDrawerChatMessages.set(mapped);

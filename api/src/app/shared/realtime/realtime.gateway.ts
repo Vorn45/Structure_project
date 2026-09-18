@@ -85,6 +85,35 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         }
     }
 
+    @SubscribeMessage('task:join')
+    handleTaskJoin(@ConnectedSocket() client: Socket, @MessageBody() taskId: string | number) {
+        if (taskId) {
+            client.join(`task:${taskId}`);
+        }
+    }
+
+    @SubscribeMessage('task:leave')
+    handleTaskLeave(@ConnectedSocket() client: Socket, @MessageBody() taskId: string | number) {
+        if (taskId) {
+            client.leave(`task:${taskId}`);
+        }
+    }
+
+    @SubscribeMessage('task:typing')
+    handleTaskTyping(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() payload: { task_id: string | number; state: 'text' | 'file' | null; user_name?: string },
+    ) {
+        if (!payload?.task_id) return;
+        const userId = (client as any).userId;
+        client.to(`task:${payload.task_id}`).emit('task:typing', {
+            task_id: payload.task_id,
+            user_id: userId,
+            user_name: payload.user_name,
+            state: payload.state,
+        });
+    }
+
     emitToAll(event: string, payload: any) {
         if (this.server) {
             this.server.emit(event, payload);
@@ -117,5 +146,29 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     emitTaskUpdated(taskPayload: { task_id: string | number; status_id?: number | null; project_id?: string | number | null }) {
         if (!this.server) return;
         this.server.emit('task:updated', taskPayload);
+    }
+
+    emitTaskComment(payload: {
+        task_id: string | number;
+        project_id?: string | number | null;
+        comment: any;
+        comments_count?: number;
+        attachments_count?: number;
+    }) {
+        if (!this.server) return;
+        this.server.to(`task:${payload.task_id}`).emit('task:comment', payload);
+        if (payload.project_id) {
+            this.server.to(`project:${payload.project_id}`).emit('task:comment', payload);
+        }
+        this.server.emit('task:comment', payload);
+    }
+
+    emitTaskCommentSeen(payload: {
+        task_id: string | number;
+        viewer: { id: number; name?: string; avatar?: string | null; seen_at?: string };
+    }) {
+        if (!this.server) return;
+        this.server.to(`task:${payload.task_id}`).emit('task:comment:seen', payload);
+        this.server.emit('task:comment:seen', payload);
     }
 }

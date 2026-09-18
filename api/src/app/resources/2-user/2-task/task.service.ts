@@ -1387,7 +1387,7 @@ export class TaskService {
                 sender_name: taskReporter?.name || user?.name_kh || user?.name_en || 'អ្នកប្រើប្រាស់',
                 sender_avatar: taskReporter?.avatar || (user?.avatar as any)?.uri || '/images/placeholder/avatar.jpg',
                 text: 'បានភ្ជាប់ឯកសារពេលបង្កើតការងារថ្មី',
-                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Phnom_Penh', hour: '2-digit', minute: '2-digit' }),
                 is_self: true,
                 is_system: false,
                 attachments: initialAttachments,
@@ -1669,7 +1669,7 @@ export class TaskService {
 
         // Record action history in task comments
         const comments = this.ensureTaskComments(id);
-        const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const nowTime = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Phnom_Penh', hour: '2-digit', minute: '2-digit' });
         const updaterName = (user?.name_kh || user?.name_en || '').trim() || 'Piseth Panhavorn';
         const actorPrefix = updaterName ? `${updaterName} ` : '';
 
@@ -1993,6 +1993,12 @@ export class TaskService {
             if (changed) {
                 this.taskComments.set(taskId, comments);
                 this.saveStore();
+                if (this._realtimeGateway) {
+                    this._realtimeGateway.emitTaskCommentSeen({
+                        task_id: taskId,
+                        viewer: currentViewer,
+                    });
+                }
             }
         }
 
@@ -2008,8 +2014,19 @@ export class TaskService {
                 task_title: task.title,
                 task_status: task.status,
                 comments: comments.map((c) => {
+                    let formattedTime = c.time;
+                    if (c.created_at) {
+                        const d = new Date(c.created_at);
+                        if (!isNaN(d.getTime())) {
+                            formattedTime = d.toLocaleTimeString('en-US', {
+                                timeZone: 'Asia/Phnom_Penh',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            });
+                        }
+                    }
                     if (c.is_system || c.sender_id === 0) {
-                        return { ...c, is_self: false, is_system: true };
+                        return { ...c, time: formattedTime, is_self: false, is_system: true };
                     }
                     const senderName = (c.sender_name || '').toLowerCase().trim();
                     const isSelf = Boolean(
@@ -2028,6 +2045,7 @@ export class TaskService {
                     });
                     return {
                         ...c,
+                        time: formattedTime,
                         sender_avatar: senderAvatar,
                         is_self: isSelf,
                         seen_by: seenByList,
@@ -2058,7 +2076,7 @@ export class TaskService {
             sender_name: user.name_kh || user.name_en || 'អ្នកប្រើប្រាស់ (User)',
             sender_avatar: userAvatar,
             text: (text || '').trim(),
-            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            time: new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Phnom_Penh', hour: '2-digit', minute: '2-digit' }),
             is_self: true,
             is_system: false,
             attachments: attachments || undefined,
@@ -2141,6 +2159,17 @@ export class TaskService {
 
         if (this._realtimeGateway) {
             this._realtimeGateway.emitTaskUpdated({ task_id: task.id, project_id: task.project_id });
+            this._realtimeGateway.emitTaskComment({
+                task_id: task.id,
+                project_id: task.project_id,
+                comment: {
+                    ...newComment,
+                    sender_avatar: newComment.sender_avatar || userAvatar,
+                    is_self: false,
+                },
+                comments_count: task.comments_count,
+                attachments_count: task.attachments_count,
+            });
         }
 
         return {

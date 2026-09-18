@@ -1425,6 +1425,75 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                 )
                     .pipe(takeUntil(this._unsubscribeAll))
                     .subscribe(() => this.loadPlans());
+
+                // Real-time task comments & chat updates
+                this._taskSocket
+                    .taskCommentUpdates()
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((evt) => {
+                        const taskIdStr = String(evt.task_id);
+                        const currentDrawer = this.selectedTaskDrawerItem();
+
+                        // 1. Update task counter in selectedProject
+                        this.selectedProject.update((proj) => {
+                            if (!proj?.tasks) return proj;
+                            return {
+                                ...proj,
+                                tasks: proj.tasks.map((t) => {
+                                    const tId = String(t.id).replace(/\D/g, '') || String(t.id);
+                                    const cleanTarget = taskIdStr.replace(/\D/g, '') || taskIdStr;
+                                    if (tId === cleanTarget || String(t.id) === taskIdStr) {
+                                        return {
+                                            ...t,
+                                            comments_count: evt.comments_count ?? (t.comments_count || 0) + 1,
+                                            attachments_count: evt.attachments_count ?? t.attachments_count,
+                                        };
+                                    }
+                                    return t;
+                                }),
+                            };
+                        });
+
+                        // 2. If task drawer is currently open for this task, append comment
+                        if (currentDrawer) {
+                            const drawerIdClean = String(currentDrawer.id).replace(/\D/g, '') || String(currentDrawer.id);
+                            const incomingIdClean = taskIdStr.replace(/\D/g, '') || taskIdStr;
+
+                            if (drawerIdClean === incomingIdClean || String(currentDrawer.id) === taskIdStr) {
+                                currentDrawer.comments_count = evt.comments_count ?? (currentDrawer.comments_count || 0) + 1;
+                                if (evt.attachments_count !== undefined) {
+                                    currentDrawer.attachments_count = evt.attachments_count;
+                                }
+
+                                const currentUser = this._userService.getUser();
+                                const isSelf = Boolean(currentUser?.id && evt.comment.sender_id === currentUser.id);
+
+                                const currentMsgs = this.taskDrawerChatMessages();
+                                const alreadyExists = currentMsgs.some((m) =>
+                                    (m.id && evt.comment.id && m.id === evt.comment.id) ||
+                                    (isSelf && m.text === evt.comment.text && Math.abs(new Date(m.created_at || 0).getTime() - new Date(evt.comment.created_at || 0).getTime()) < 4000)
+                                );
+
+                                if (!alreadyExists) {
+                                    let displayTime = evt.comment.time;
+                                    if (evt.comment.created_at) {
+                                        const d = new Date(evt.comment.created_at);
+                                        if (!isNaN(d.getTime())) {
+                                            displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                        }
+                                    }
+
+                                    const incomingMsg: TaskChatMessage = {
+                                        ...evt.comment,
+                                        is_self: isSelf,
+                                        time: displayTime || 'ទើបតែផ្ញើ',
+                                    };
+
+                                    this.taskDrawerChatMessages.update((msgs) => [...msgs, incomingMsg]);
+                                }
+                            }
+                        }
+                    });
             }
 
             loadPlans(): void {
@@ -1842,6 +1911,11 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         this.taskDrawerDialogMode.set(mode);
         this.showTaskDrawer.set(true);
 
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        if (!isNaN(numericId)) {
+            this._taskSocket.joinTask(numericId);
+        }
+
         const msgs: TaskChatMessage[] = [
             {
                 id: 1,
@@ -1887,6 +1961,13 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     closeTaskDrawer(): void {
+        const cur = this.selectedTaskDrawerItem();
+        if (cur?.id) {
+            const numericId = parseInt(String(cur.id).replace(/\D/g, ''), 10);
+            if (!isNaN(numericId)) {
+                this._taskSocket.leaveTask(numericId);
+            }
+        }
         this.showTaskDrawer.set(false);
         this.selectedTaskDrawerItem.set(null);
     }

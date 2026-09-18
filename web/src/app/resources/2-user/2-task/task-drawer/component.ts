@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, ElementRef, HostListener, inject, input, OnDestroy, output, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -10,6 +11,7 @@ import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, MAT_NATIVE_DATE_FOR
 import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserService } from 'app/core/user/user.service';
+import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
 import {
     TASK_TYPES_LIST,
@@ -161,6 +163,7 @@ export class TaskDrawerComponent implements OnDestroy {
     deleteTask = output<TaskItem>();
 
     private readonly _userService = inject(UserService);
+    private readonly _taskSocket = inject(TaskSocketService);
 
     taskTypes = TASK_TYPES_LIST;
 
@@ -170,11 +173,17 @@ export class TaskDrawerComponent implements OnDestroy {
 
     @ViewChild('titleInputRef') titleInputRef?: ElementRef<HTMLTextAreaElement>;
     @ViewChild('descriptionInputRef') descriptionInputRef?: ElementRef<HTMLTextAreaElement>;
+    @ViewChild('chatScrollContainer') chatScrollContainer?: ElementRef<HTMLDivElement>;
 
     isEditingTitle = signal<boolean>(false);
     editingTitle = signal<string>('');
     isEditingDescription = signal<boolean>(false);
     editingDescription = signal<string>('');
+
+    typingUser = signal<{ user_name: string; state: string } | null>(null);
+    private _typingTimeout?: any;
+    private _sendTypingDebounce?: any;
+    private _typingSub?: Subscription;
 
     private _titleDebounceTimer?: any;
     private _descriptionDebounceTimer?: any;
@@ -232,11 +241,57 @@ export class TaskDrawerComponent implements OnDestroy {
                 this.isEditingDescription.set(false);
             }
         }, { allowSignalWrites: true });
+
+        // Auto-scroll chat to bottom when messages update
+        effect(() => {
+            const msgs = this.messages();
+            if (msgs && msgs.length > 0) {
+                setTimeout(() => this.scrollToBottom(true), 60);
+            }
+        });
+
+        // Listen for real-time typing indicators in the active task room
+        effect(() => {
+            const currentTask = this.task();
+            this._typingSub?.unsubscribe();
+            this.typingUser.set(null);
+            clearTimeout(this._typingTimeout);
+
+            if (currentTask && currentTask.id) {
+                const taskIdStr = String(currentTask.id);
+                const curUser = this._userService.getUser();
+                const curUserId = curUser?.id ? Number(curUser.id) : null;
+
+                this._typingSub = this._taskSocket.taskTypingUpdates().subscribe((evt) => {
+                    if (String(evt.task_id) === taskIdStr) {
+                        if (curUserId && evt.user_id && Number(evt.user_id) === curUserId) {
+                            return;
+                        }
+                        if (evt.state) {
+                            this.typingUser.set({
+                                user_name: evt.user_name || 'នរណាម្នាក់',
+                                state: evt.state,
+                            });
+                            clearTimeout(this._typingTimeout);
+                            this._typingTimeout = setTimeout(() => {
+                                this.typingUser.set(null);
+                            }, 3500);
+                        } else {
+                            this.typingUser.set(null);
+                            clearTimeout(this._typingTimeout);
+                        }
+                    }
+                });
+            }
+        });
     }
 
     ngOnDestroy(): void {
         clearTimeout(this._titleDebounceTimer);
         clearTimeout(this._descriptionDebounceTimer);
+        this._typingSub?.unsubscribe();
+        clearTimeout(this._typingTimeout);
+        clearTimeout(this._sendTypingDebounce);
     }
 
     startEditTitle(): void {
@@ -591,6 +646,17 @@ export class TaskDrawerComponent implements OnDestroy {
     getSeenTooltip(seenBy?: Array<{ name?: string }>): string {
         if (!seenBy || seenBy.length === 0) return '';
         return seenBy.map((v) => v.name || 'Member').join(', ');
+    }
+
+    formatMessageTime(msg: TaskChatMessage): string {
+        if (!msg) return '';
+        if (msg.created_at) {
+            const d = new Date(msg.created_at);
+            if (!isNaN(d.getTime())) {
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+        return msg.time || '';
     }
 
     formatDate(dateStr?: string | null): string {
@@ -1038,13 +1104,44 @@ export class TaskDrawerComponent implements OnDestroy {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
+    scrollToBottom(smooth = true): void {
+        if (this.chatScrollContainer?.nativeElement) {
+            const el = this.chatScrollContainer.nativeElement;
+            el.scrollTo({
+                top: el.scrollHeight,
+                behavior: smooth ? 'smooth' : 'auto',
+            });
+        }
+    }
+
+    onChatInput(): void {
+        const currentTask = this.task();
+        if (!currentTask?.id) return;
+        const curUser = this._userService.getUser();
+        const myName = (curUser?.kh_name || curUser?.name || curUser?.en_name || '').trim();
+
+        this._taskSocket.sendTaskTyping(currentTask.id, 'text', myName);
+
+        clearTimeout(this._sendTypingDebounce);
+        this._sendTypingDebounce = setTimeout(() => {
+            this._taskSocket.sendTaskTyping(currentTask.id, null, myName);
+        }, 2500);
+    }
+
     submitChatMessage(): void {
         const text = this.newChatMessage.trim();
         const attachments = this.pendingAttachments();
         if (!text && attachments.length === 0) return;
 
+        const currentTask = this.task();
+        if (currentTask?.id) {
+            clearTimeout(this._sendTypingDebounce);
+            this._taskSocket.sendTaskTyping(currentTask.id, null);
+        }
+
         this.sendMessage.emit({ text, attachments });
         this.newChatMessage = '';
         this.pendingAttachments.set([]);
+        setTimeout(() => this.scrollToBottom(true), 50);
     }
 }

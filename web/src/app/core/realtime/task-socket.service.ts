@@ -87,6 +87,26 @@ export interface NotificationNew {
     [key: string]: any;
 }
 
+export interface TaskCommentEvent {
+    task_id: string | number;
+    project_id?: string | number | null;
+    comment: any;
+    comments_count?: number;
+    attachments_count?: number;
+}
+
+export interface TaskCommentSeenEvent {
+    task_id: string | number;
+    viewer: { id: number; name?: string; avatar?: string | null; seen_at?: string };
+}
+
+export interface TaskTypingEvent {
+    task_id: string | number;
+    user_id?: number;
+    user_name?: string;
+    state: 'text' | 'file' | null;
+}
+
 /** An MCP agent just acted on a task — ephemeral, never persisted. Drives a
  *  "<bot> is working on this…" hint the same way ChatTyping drives a human one. */
 export interface AgentActivity {
@@ -105,6 +125,9 @@ export class TaskSocketService {
     private readonly _chatRead              = new Subject<ChatRead>();
     private readonly _chatDelivered         = new Subject<ChatDelivered>();
     private readonly _chatTyping            = new Subject<ChatTyping>();
+    private readonly _taskComments          = new Subject<TaskCommentEvent>();
+    private readonly _taskCommentSeen       = new Subject<TaskCommentSeenEvent>();
+    private readonly _taskTyping            = new Subject<TaskTypingEvent>();
     private readonly _agentActivity         = new Subject<AgentActivity>();
     private readonly _organizationMembers   = new Subject<OrganizationMembersChanged>();
     private readonly _organizationPresence  = new Subject<OrganizationMemberPresence>();
@@ -123,6 +146,7 @@ export class TaskSocketService {
     }
     private readonly _projectRooms = new Map<string, number>();
     private readonly _organizationRooms = new Map<string, number>();
+    private readonly _taskRooms = new Map<string, number>();
 
     private _connect(): Socket | null {
         if (this._socket?.connected) return this._socket;
@@ -140,6 +164,9 @@ export class TaskSocketService {
             timeout: 5000,
         });
         socket.on('task:updated', (payload: TaskUpdated) => this._tasks.next(payload));
+        socket.on('task:comment', (payload: TaskCommentEvent) => this._taskComments.next(payload));
+        socket.on('task:comment:seen', (payload: TaskCommentSeenEvent) => this._taskCommentSeen.next(payload));
+        socket.on('task:typing', (payload: TaskTypingEvent) => this._taskTyping.next(payload));
         socket.on('chat:unread', (payload: ChatUnread) => this._chatUnread.next(payload));
         socket.on('chat:read', (payload: ChatRead) => this._chatRead.next(payload));
         socket.on('chat:delivered', (payload: ChatDelivered) => this._chatDelivered.next(payload));
@@ -164,6 +191,7 @@ export class TaskSocketService {
             console.debug('[realtime] connected', socket.id);
             this._projectRooms.forEach((_count, id) => socket.emit('project:join', id));
             this._organizationRooms.forEach((_count, id) => socket.emit('organization:join', id));
+            this._taskRooms.forEach((_count, id) => socket.emit('task:join', id));
         });
         socket.on('connect_error', (err) => {
             console.warn('[realtime] connect_error', err?.message || err);
@@ -223,6 +251,53 @@ export class TaskSocketService {
         } else {
             this._organizationRooms.set(id, count - 1);
         }
+    }
+
+    /** Subscribe to a specific task's live comments, seen status, and typing indicators. */
+    joinTask(taskId: string | number): void {
+        const id = String(taskId);
+        if (!id) return;
+        const next = (this._taskRooms.get(id) ?? 0) + 1;
+        this._taskRooms.set(id, next);
+        const sock = this._connect();
+        if (next === 1 && sock) sock.emit('task:join', id);
+    }
+
+    leaveTask(taskId: string | number): void {
+        const id = String(taskId);
+        if (!id) return;
+        const count = this._taskRooms.get(id) ?? 0;
+        if (count <= 1) {
+            this._taskRooms.delete(id);
+            this._socket?.emit('task:leave', id);
+        } else {
+            this._taskRooms.set(id, count - 1);
+        }
+    }
+
+    /** Fires when a new comment is posted on any task the user is viewing or in their scope. */
+    taskCommentUpdates(): Observable<TaskCommentEvent> {
+        this._connect();
+        return this._taskComments.asObservable();
+    }
+
+    /** Fires when a comment in a task is seen by another user. */
+    taskCommentSeenUpdates(): Observable<TaskCommentSeenEvent> {
+        this._connect();
+        return this._taskCommentSeen.asObservable();
+    }
+
+    /** Fires when another member is typing in a task chat drawer. */
+    taskTypingUpdates(): Observable<TaskTypingEvent> {
+        this._connect();
+        return this._taskTyping.asObservable();
+    }
+
+    /** Broadcasts typing state for a task. */
+    sendTaskTyping(taskId: string | number, state: 'text' | 'file' | null, userName?: string): void {
+        const id = String(taskId);
+        if (!id) return;
+        this._connect()?.emit('task:typing', { task_id: id, state, user_name: userName });
     }
 
     /** Fires when an org's membership changes (member added/removed, role change). */

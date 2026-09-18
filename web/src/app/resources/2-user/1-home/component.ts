@@ -302,6 +302,68 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         this.generateMemberQrCode();
         this.loadOverview();
 
+        // Real-time task comments & chat updates
+        this._taskSocket
+            .taskCommentUpdates()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((evt) => {
+                const taskId = String(evt.task_id);
+                const currentDrawerTask = this.selectedTaskDrawerItem();
+
+                // 1. Live update comments count on recent_tasks in the overview
+                this.overview.update((prev) => {
+                    if (!prev?.recent_tasks) return prev;
+                    return {
+                        ...prev,
+                        recent_tasks: prev.recent_tasks.map((t) => {
+                            if (String(t.id) === taskId) {
+                                return {
+                                    ...t,
+                                    comments_count: evt.comments_count ?? ((t as any).comments_count || 0) + 1,
+                                    attachments_count: evt.attachments_count ?? (t as any).attachments_count,
+                                } as any;
+                            }
+                            return t;
+                        }),
+                    };
+                });
+
+                // 2. If drawer is open for this task, append comment
+                if (currentDrawerTask && String(currentDrawerTask.id) === taskId) {
+                    currentDrawerTask.comments_count = evt.comments_count ?? (currentDrawerTask.comments_count || 0) + 1;
+                    if (evt.attachments_count !== undefined) {
+                        currentDrawerTask.attachments_count = evt.attachments_count;
+                    }
+
+                    const currentUser = this.currentUser() || this._userService.getUser();
+                    const isSelf = Boolean(currentUser?.id && evt.comment.sender_id === currentUser.id);
+
+                    const currentMsgs = this.taskDrawerChatMessages();
+                    const alreadyExists = currentMsgs.some((m) =>
+                        (m.id && evt.comment.id && m.id === evt.comment.id) ||
+                        (isSelf && m.text === evt.comment.text && Math.abs(new Date(m.created_at || 0).getTime() - new Date(evt.comment.created_at || 0).getTime()) < 4000)
+                    );
+
+                    if (!alreadyExists) {
+                        let displayTime = evt.comment.time;
+                        if (evt.comment.created_at) {
+                            const d = new Date(evt.comment.created_at);
+                            if (!isNaN(d.getTime())) {
+                                displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                        }
+
+                        const incomingMsg: TaskChatMessage = {
+                            ...evt.comment,
+                            is_self: isSelf,
+                            time: displayTime || 'ទើបតែផ្ញើ',
+                        };
+
+                        this.taskDrawerChatMessages.update((msgs) => [...msgs, incomingMsg]);
+                    }
+                }
+            });
+
         this._taskService.getMembers().subscribe({
             next: (res) => {
                 if (res?.data) {
@@ -807,6 +869,7 @@ export class UserHomeComponent implements OnInit, OnDestroy {
         this.selectedTaskDrawerItem.set(drawerTask);
         this.taskDrawerDialogMode.set(mode);
         this.showTaskDrawer.set(true);
+        this._taskSocket.joinTask(task.id);
 
         this._taskService.getTaskComments(task.id).subscribe({
             next: (res) => {
@@ -841,6 +904,10 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     }
 
     closeTaskDrawer(): void {
+        const cur = this.selectedTaskDrawerItem();
+        if (cur?.id) {
+            this._taskSocket.leaveTask(cur.id);
+        }
         this.showTaskDrawer.set(false);
         this.selectedTaskDrawerItem.set(null);
     }
