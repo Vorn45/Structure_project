@@ -7,8 +7,18 @@ import * as path from 'path';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { PlannerStore } from 'src/app/model/user/planner-store.entity';
+import { User } from 'src/app/model/user/users.entity';
 
 import { CreateScheduleDto, QueryPlannerDto, UpdateScheduleDto } from './planner.dto';
+
+function getRelativeWeekDate(dayOffset: number): string {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day; // Monday of current week
+    const target = new Date(d);
+    target.setDate(d.getDate() + diff + dayOffset);
+    return target.toISOString().split('T')[0];
+}
 
 export interface PlannerScheduleItem {
     id: string;
@@ -50,6 +60,9 @@ const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
         id: 'sch_1',
         title: 'កែប្រែប្រព័ន្ធ Web & ពិនិត្យ UI',
         time: '09:00 ព្រឹក - 11:30 ព្រឹក',
+        date: getRelativeWeekDate(0),
+        start_date: getRelativeWeekDate(0),
+        end_date: getRelativeWeekDate(0),
         day_index: 0,
         start_day_index: 0,
         end_day_index: 0,
@@ -78,6 +91,9 @@ const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
         id: 'sch_2',
         title: 'ត្រួតពិនិត្យគម្រោង PMS & WMS',
         time: '01:30 រសៀល - 03:30 រសៀល',
+        date: getRelativeWeekDate(1),
+        start_date: getRelativeWeekDate(1),
+        end_date: getRelativeWeekDate(1),
         day_index: 1,
         start_day_index: 1,
         end_day_index: 1,
@@ -105,6 +121,9 @@ const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
         id: 'sch_3',
         title: 'ប្រជុំអនឡាញក្រុមការងារបច្ចេកវិទ្យា',
         time: '10:00 ព្រឹក - 11:30 ព្រឹក',
+        date: getRelativeWeekDate(2),
+        start_date: getRelativeWeekDate(2),
+        end_date: getRelativeWeekDate(2),
         day_index: 2,
         start_day_index: 2,
         end_day_index: 2,
@@ -131,6 +150,9 @@ const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
         id: 'sch_4',
         title: 'ពិភាក្សាស្ថាបត្យកម្មប្រព័ន្ធ & Database',
         time: '02:00 រសៀល - 04:30 រសៀល',
+        date: getRelativeWeekDate(3),
+        start_date: getRelativeWeekDate(3),
+        end_date: getRelativeWeekDate(3),
         day_index: 3,
         start_day_index: 3,
         end_day_index: 3,
@@ -156,6 +178,9 @@ const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
         id: 'sch_5',
         title: 'សម្រាកខ្លី និងជួបញ៉ាំកាហ្វេ',
         time: '03:30 រសៀល - 04:00 រសៀល',
+        date: getRelativeWeekDate(4),
+        start_date: getRelativeWeekDate(4),
+        end_date: getRelativeWeekDate(4),
         day_index: 4,
         start_day_index: 4,
         end_day_index: 4,
@@ -180,6 +205,9 @@ const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
         id: 'sch_6',
         title: 'រៀបចំផែនការ & សង្ខេបលទ្ធផលសប្តាហ៍',
         time: '09:30 ព្រឹក - 11:30 ព្រឹក',
+        date: getRelativeWeekDate(5),
+        start_date: getRelativeWeekDate(5),
+        end_date: getRelativeWeekDate(5),
         day_index: 5,
         start_day_index: 5,
         end_day_index: 5,
@@ -204,11 +232,13 @@ const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
 
 @Injectable()
 export class PlannerService {
-    private readonly _storageFile = path.resolve(process.cwd(), 'scratch_planner_store.json');
+    private readonly _storageFile = path.resolve(process.cwd(), 'storage', 'data', 'planner_schedules.json');
 
     constructor(
         @InjectRepository(PlannerStore)
         private readonly _storeRepo: Repository<PlannerStore>,
+        @InjectRepository(User)
+        private readonly _userRepo: Repository<User>,
     ) {}
 
     // =========================================================================
@@ -216,33 +246,40 @@ export class PlannerService {
     // =========================================================================
     private async _readSchedules(): Promise<PlannerScheduleItem[]> {
         let schedules: PlannerScheduleItem[] = [];
+        let hasStore = false;
+
         try {
             const dbStore = await this._storeRepo.findOne({
                 where: { key: 'default_planner_store' },
             });
-            if (dbStore && Array.isArray(dbStore.schedules) && dbStore.schedules.length > 0) {
+            if (dbStore && Array.isArray(dbStore.schedules)) {
                 schedules = dbStore.schedules;
+                hasStore = true;
             }
         } catch (e) {
-            // Fallback to local scratch file if table not yet migrated
+            // Fallback to disk storage
         }
 
-        if (schedules.length === 0 && fs.existsSync(this._storageFile)) {
+        if (!hasStore && fs.existsSync(this._storageFile)) {
             try {
                 const data = fs.readFileSync(this._storageFile, 'utf8');
                 schedules = JSON.parse(data);
+                hasStore = true;
             } catch (err) {}
         }
 
-        // Ensure default core schedules are always preserved alongside custom schedules
-        const existingIds = new Set(schedules.map((s) => s.id));
-        const missingDefaults = DEFAULT_SCHEDULES.filter((d) => !existingIds.has(d.id));
-        if (missingDefaults.length > 0) {
-            schedules = [...schedules, ...missingDefaults];
-            await this._writeSchedules(schedules);
+        // Backward compatibility fallback to scratch file if present
+        const legacyFile = path.resolve(process.cwd(), 'scratch_planner_store.json');
+        if (!hasStore && fs.existsSync(legacyFile)) {
+            try {
+                const data = fs.readFileSync(legacyFile, 'utf8');
+                schedules = JSON.parse(data);
+                hasStore = true;
+            } catch (err) {}
         }
 
-        if (schedules.length === 0) {
+        // Only initialize defaults on fresh first-ever run
+        if (!hasStore) {
             schedules = DEFAULT_SCHEDULES;
             await this._writeSchedules(schedules);
         }
@@ -267,6 +304,10 @@ export class PlannerService {
         } catch (e) {}
 
         try {
+            const dir = path.dirname(this._storageFile);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
             fs.writeFileSync(this._storageFile, JSON.stringify(schedules, null, 2), 'utf8');
         } catch (err) {}
     }
@@ -477,17 +518,36 @@ export class PlannerService {
         }
 
         const current = all[index];
+        const targetDate = (dto as any).date || (dto as any).start_date || current.date;
+        const startDate = (dto as any).start_date || targetDate || current.start_date;
+        const endDate = (dto as any).end_date || startDate || current.end_date;
+
+        const colorThemeMap: Record<string, string> = {
+            work: 'peach',
+            myself: 'lavender',
+            breaks: 'pink',
+        };
+
+        const targetCat = dto.category !== undefined ? dto.category : current.category;
+        const targetTheme = dto.color_theme || (dto.category ? colorThemeMap[dto.category] : current.color_theme);
+
         const updated: PlannerScheduleItem = {
             ...current,
             title: dto.title !== undefined ? dto.title.trim() : current.title,
-            category: dto.category !== undefined ? dto.category : current.category,
+            category: targetCat,
             type: dto.type !== undefined ? dto.type : current.type,
+            date: targetDate,
+            start_date: startDate,
+            end_date: endDate,
             day_index: dto.day_index !== undefined ? Number(dto.day_index) : current.day_index,
             start_day_index: dto.start_day_index !== undefined ? Number(dto.start_day_index) : current.start_day_index,
             end_day_index: dto.end_day_index !== undefined ? Number(dto.end_day_index) : current.end_day_index,
             start_time: dto.start_time !== undefined ? dto.start_time : current.start_time,
             end_time: dto.end_time !== undefined ? dto.end_time : current.end_time,
             time: dto.time !== undefined ? dto.time : current.time,
+            color_theme: targetTheme as any,
+            top_position: dto.top_position !== undefined ? dto.top_position : current.top_position,
+            height: dto.height !== undefined ? dto.height : current.height,
             note: dto.note !== undefined ? dto.note : current.note,
             plan_id: dto.plan_id !== undefined ? dto.plan_id : current.plan_id,
             plan_name: dto.plan_name !== undefined ? dto.plan_name : current.plan_name,
@@ -540,6 +600,43 @@ export class PlannerService {
     // 6. GET TEAM MEMBERS (FOR PLANNER MEMBER SELECTION)
     // =========================================================================
     async getTeamMembers(user: UserPayload) {
+        try {
+            const users = await this._userRepo.find({
+                select: ['id', 'name_kh', 'name_en', 'first_name', 'last_name', 'telegram_photo_url'],
+                order: { id: 'ASC' },
+                take: 100,
+            });
+            if (users && users.length > 0) {
+                const colors = [
+                    'bg-slate-700 text-white',
+                    'bg-teal-700 text-white',
+                    'bg-indigo-700 text-white',
+                    'bg-purple-700 text-white',
+                    'bg-emerald-700 text-white',
+                    'bg-amber-700 text-white',
+                ];
+                const mapped = users.map((u, i) => {
+                    const name = u.name_kh && u.name_en
+                        ? `${u.name_kh} (${u.name_en})`
+                        : (u.name_kh || u.name_en || (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : `បុគ្គលិក #${u.id}`));
+                    const initials = (u.name_en || u.name_kh || 'U').trim().slice(0, 2).toUpperCase();
+                    return {
+                        id: u.id,
+                        name,
+                        role: 'សមាជិកក្រុមការងារ',
+                        initials,
+                        avatar: u.telegram_photo_url || null,
+                        bg: colors[i % colors.length],
+                    };
+                });
+                return {
+                    status_code: 200,
+                    message: 'ទាញយកបញ្ជីសមាជិកបានជោគជ័យ',
+                    data: mapped,
+                };
+            }
+        } catch (err) {}
+
         const defaultMembers = [
             { id: 1, name: 'ចេង ច័ន្ទបញ្ញា (Panha)', role: 'Frontend Lead / Developer', initials: 'CP', bg: 'bg-slate-700 text-white', avatar: null },
             { id: 2, name: 'សុខ សុភា (Sopheak)', role: 'Lead Project Manager', initials: 'SP', bg: 'bg-teal-700 text-white', avatar: null },

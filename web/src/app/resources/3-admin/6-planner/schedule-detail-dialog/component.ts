@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -156,22 +156,35 @@ export interface ScheduleDetailDialogData {
             <!-- ========================================================= -->
             <div class="p-4 px-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 shrink-0 font-kantumruy">
                 
-                <!-- Delete Button -->
+                <!-- Delete Button with Safe Confirmation -->
                 <button
                     type="button"
                     (click)="deleteSchedule()"
-                    class="px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 transition-all flex items-center gap-1.5 cursor-pointer">
-                    <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5 text-rose-600 dark:text-rose-400"></mat-icon>
-                    <span>លុបកាលវិភាគ</span>
+                    [class]="confirmDelete()
+                        ? 'px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-white bg-rose-600 hover:bg-rose-700 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs'
+                        : 'px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 transition-all flex items-center gap-1.5 cursor-pointer'">
+                    <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
+                    <span>{{ confirmDelete() ? 'ចុចម្តងទៀតដើម្បីលុប' : 'លុបកាលវិភាគ' }}</span>
                 </button>
 
-                <!-- Close Button -->
-                <button
-                    type="button"
-                    (click)="close()"
-                    class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium shadow-xs transition-all cursor-pointer">
-                    យល់ព្រម / បិទ
-                </button>
+                <div class="flex items-center gap-2.5">
+                    <!-- Edit Button -->
+                    <button
+                        type="button"
+                        (click)="editSchedule()"
+                        class="px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 transition-all flex items-center gap-1.5 cursor-pointer">
+                        <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>កែប្រែ</span>
+                    </button>
+
+                    <!-- Close Button -->
+                    <button
+                        type="button"
+                        (click)="close()"
+                        class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium shadow-xs transition-all cursor-pointer">
+                        យល់ព្រម / បិទ
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -179,6 +192,7 @@ export interface ScheduleDetailDialogData {
 })
 export class ScheduleDetailDialogComponent {
     schedule: PlannerScheduleEvent;
+    confirmDelete = signal<boolean>(false);
 
     constructor(
         public dialogRef: MatDialogRef<ScheduleDetailDialogComponent>,
@@ -272,7 +286,15 @@ export class ScheduleDetailDialogComponent {
         this.dialogRef.close();
     }
 
+    editSchedule(): void {
+        this.dialogRef.close({ action: 'edit', schedule: this.schedule });
+    }
+
     deleteSchedule(): void {
+        if (!this.confirmDelete()) {
+            this.confirmDelete.set(true);
+            return;
+        }
         this.dialogRef.close({ action: 'delete', id: this.schedule.id });
     }
 }

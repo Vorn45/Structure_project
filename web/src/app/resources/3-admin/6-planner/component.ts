@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
+import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { CreateScheduleDialogComponent } from './create-schedule-dialog/component';
 import { ScheduleDetailDialogComponent } from './schedule-detail-dialog/component';
 import { PlannerService, BackendPlannerSchedule } from './planner.service';
@@ -94,6 +95,7 @@ export class PlannerComponent implements OnInit {
     private _matDialog = inject(MatDialog);
     private _dialogConfigService = inject(DialogConfigService);
     private _plannerService = inject(PlannerService);
+    private _snackbarService = inject(SnackbarService);
 
     isLoading = signal<boolean>(false);
 
@@ -534,9 +536,9 @@ export class PlannerComponent implements OnInit {
                         id: s.id,
                         title: s.title,
                         time: formatCleanTime(s.time),
-                        date: s.date || s.start_date || (s.created_at ? s.created_at.split('T')[0] : undefined),
-                        startDate: s.start_date || s.date || (s.created_at ? s.created_at.split('T')[0] : undefined),
-                        endDate: s.end_date || s.date || s.start_date || (s.created_at ? s.created_at.split('T')[0] : undefined),
+                        date: s.date || s.start_date,
+                        startDate: s.start_date || s.date,
+                        endDate: s.end_date || s.date || s.start_date,
                         dayIndex: Number(s.day_index !== undefined ? s.day_index : (s.start_day_index !== undefined ? s.start_day_index : 0)),
                         startDayIndex: s.start_day_index,
                         endDayIndex: s.end_day_index,
@@ -548,7 +550,9 @@ export class PlannerComponent implements OnInit {
                         type: s.type,
                         colorTheme: (s.color_theme as any) || 'peach',
                         members: (s.members || []).map((m) => ({
+                            id: m.id,
                             name: m.name,
+                            role: m.role || 'សមាជិក',
                             avatar: m.avatar || undefined,
                             initials: m.initials || m.name.slice(0, 2).toUpperCase(),
                             bg: m.bg || 'bg-blue-700 text-white',
@@ -695,45 +699,38 @@ export class PlannerComponent implements OnInit {
         const dialogRef = this._matDialog.open(CreateScheduleDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result: any) => {
             if (result) {
-                const tempId = 'sch_' + Date.now();
-                const calcTop = this.calculateTopPosition(result.time, result.start_time, result.category);
-                const calcHeight = this.calculateHeight(result.time, result.start_time, result.end_time, result.category);
-                const optimisticEv: PlannerScheduleEvent = {
-                    id: tempId,
-                    title: result.title,
-                    time: result.time,
-                    date: result.date || result.start_date,
-                    startDate: result.start_date || result.date,
-                    endDate: result.end_date || result.date || result.start_date,
-                    dayIndex: Number(result.day_index !== undefined ? result.day_index : 2),
-                    startDayIndex: result.start_day_index,
-                    endDayIndex: result.end_day_index,
-                    startTime: result.start_time,
-                    endTime: result.end_time,
-                    topPosition: calcTop,
-                    height: calcHeight,
-                    category: result.category,
-                    type: result.type,
-                    colorTheme: result.color_theme || 'peach',
-                    members: result.members || [],
-                    extraCount: Math.max(0, (result.members?.length || 0) - 2),
-                    note: result.note,
-                };
-
-                // Immediate UI update
-                this.events.update((list) => [optimisticEv, ...list]);
-
-                // Sync with backend API
+                this.isLoading.set(true);
                 this._plannerService.createSchedule(result).subscribe({
-                    next: (res) => {
-                        if (res?.data?.id) {
-                            this.events.update((list) =>
-                                list.map((item) => (item.id === tempId ? { ...item, id: res.data.id } : item))
-                            );
-                        }
+                    next: () => {
+                        this.loadSchedules();
+                        this._snackbarService.success('បានបង្កើតកាលវិភាគថ្មីដោយជោគជ័យ');
                     },
                     error: () => {
-                        // Keep optimistic event in UI
+                        this.isLoading.set(false);
+                        this._snackbarService.error('មិនអាចបង្កើតកាលវិភាគថ្មីបានទេ');
+                    },
+                });
+            }
+        });
+    }
+
+    openEditScheduleModal(schedule: PlannerScheduleEvent): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            schedule,
+            isEdit: true,
+        });
+        const dialogRef = this._matDialog.open(CreateScheduleDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result: any) => {
+            if (result && result.id) {
+                this.isLoading.set(true);
+                this._plannerService.updateSchedule(result.id, result).subscribe({
+                    next: () => {
+                        this.loadSchedules();
+                        this._snackbarService.success('បានកែប្រែកាលវិភាគដោយជោគជ័យ');
+                    },
+                    error: () => {
+                        this.isLoading.set(false);
+                        this._snackbarService.error('មិនអាចកែប្រែកាលវិភាគបានទេ');
                     },
                 });
             }
@@ -747,14 +744,19 @@ export class PlannerComponent implements OnInit {
         const dialogRef = this._matDialog.open(ScheduleDetailDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((res: any) => {
             if (res && res.action === 'delete' && res.id) {
+                this.isLoading.set(true);
                 this._plannerService.deleteSchedule(res.id).subscribe({
                     next: () => {
                         this.loadSchedules();
+                        this._snackbarService.success('បានលុបកាលវិភាគដោយជោគជ័យ');
                     },
                     error: () => {
-                        this.events.update((list) => list.filter((e) => e.id !== res.id));
+                        this.isLoading.set(false);
+                        this._snackbarService.error('មិនអាចលុបកាលវិភាគបានទេ');
                     },
                 });
+            } else if (res && res.action === 'edit' && res.schedule) {
+                this.openEditScheduleModal(res.schedule);
             }
         });
     }

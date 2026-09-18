@@ -29,6 +29,12 @@
             </button>
         </div>
 
+        @if (isLoading()) {
+            <div class="w-full h-0.5 bg-blue-100 dark:bg-blue-950 overflow-hidden rounded-full mb-3">
+                <div class="h-full bg-blue-600 animate-pulse w-full"></div>
+            </div>
+        }
+
         <!-- ===== MAIN CONTENT GRID (1/4 Left Sidebar, 3/4 Right Calendar) ===== -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
@@ -319,6 +325,16 @@
                             ខែ
                         </button>
                     </div>
+
+                    <!-- Refresh Button -->
+                    <button
+                        type="button"
+                        (click)="loadSchedules()"
+                        [disabled]="isLoading()"
+                        matTooltip="ផ្ទុកទិន្នន័យឡើងវិញ"
+                        class="w-9.5 h-9.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs disabled:opacity-50">
+                        <mat-icon svgIcon="mdi:refresh" [class.animate-spin]="isLoading()" class="icon-size-4.5"></mat-icon>
+                    </button>
 
                     <!-- Settings Gear -->
                     <button

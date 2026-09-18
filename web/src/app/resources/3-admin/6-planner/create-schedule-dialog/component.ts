@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { UserService } from 'app/core/user/user.service';
 import { AdminService } from '../../admin.service';
 
 export interface CreateScheduleDialogData {
@@ -18,6 +19,8 @@ export interface CreateScheduleDialogData {
     date?: string;
     startDate?: string;
     endDate?: string;
+    schedule?: any;
+    isEdit?: boolean;
 }
 
 export interface TeamMemberItem {
@@ -53,7 +56,7 @@ export interface TeamMemberItem {
             <div mat-dialog-title
                 class="w-full relative flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-white/10 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900 shrink-0">
                 <span class="w-full text-center text-xl sm:text-2xl font-medium font-kantumruy text-slate-800 dark:text-slate-200">
-                    បង្កើតកាលវិភាគថ្មី
+                    {{ isEdit() ? 'កែប្រែកាលវិភាគ' : 'បង្កើតកាលវិភាគថ្មី' }}
                 </span>
             </div>
 
@@ -376,7 +379,7 @@ export interface TeamMemberItem {
                     [disabled]="!title().trim()"
                     class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[15.5px] font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer">
                     <mat-icon svgIcon="mdi:check" class="icon-size-4.5 text-white"></mat-icon>
-                    <span>រក្សាទុក</span>
+                    <span>{{ isEdit() ? 'កែប្រែ' : 'រក្សាទុក' }}</span>
                 </button>
             </div>
 
@@ -384,6 +387,9 @@ export interface TeamMemberItem {
     `,
 })
 export class CreateScheduleDialogComponent implements OnInit {
+    isEdit = signal<boolean>(false);
+    scheduleId = signal<string | null>(null);
+
     title = signal<string>('');
     category = signal<'work' | 'myself' | 'breaks'>('work');
     activityTypeInput = signal<string>('កិច្ចប្រជុំទូទៅ');
@@ -411,6 +417,7 @@ export class CreateScheduleDialogComponent implements OnInit {
     ];
 
     private readonly _adminService = inject(AdminService, { optional: true });
+    private readonly _userService = inject(UserService, { optional: true });
 
     availableMembers = signal<TeamMemberItem[]>([]);
     selectedMemberIds = signal<Array<string | number>>([]);
@@ -455,14 +462,46 @@ export class CreateScheduleDialogComponent implements OnInit {
         }
 
         if (this.data) {
-            if (this.data.category) this.category.set(this.data.category);
-            if (this.data.time) this.startTimeRaw.set(this.parseTimeTo24h(this.data.time));
-            if (this.data.startDate) {
-                this.startDate.set(this.data.startDate);
-                this.endDate.set(this.data.endDate || this.data.startDate);
-            } else if (this.data.date) {
-                this.startDate.set(this.data.date);
-                this.endDate.set(this.data.date);
+            if (this.data.isEdit && this.data.schedule) {
+                const s = this.data.schedule;
+                this.isEdit.set(true);
+                this.scheduleId.set(s.id);
+                this.title.set(s.title || '');
+                if (s.category) this.setCategory(s.category);
+                if (s.type) this.activityTypeInput.set(s.type);
+                if (s.note) this.note.set(s.note);
+
+                const sDate = (s.startDate || s.date || '').split('T')[0];
+                const eDate = (s.endDate || sDate || '').split('T')[0];
+                if (sDate) {
+                    this.startDate.set(sDate);
+                    this.endDate.set(eDate || sDate);
+                }
+
+                if (s.startTime) {
+                    this.startTimeRaw.set(this.parseTimeTo24h(s.startTime));
+                } else if (s.time) {
+                    this.startTimeRaw.set(this.parseTimeTo24h(s.time.split('-')[0]));
+                }
+                if (s.endTime) {
+                    this.endTimeRaw.set(this.parseTimeTo24h(s.endTime));
+                } else if (s.time && s.time.includes('-')) {
+                    this.endTimeRaw.set(this.parseTimeTo24h(s.time.split('-')[1]));
+                }
+
+                if (Array.isArray(s.members) && s.members.length > 0) {
+                    this.selectedMemberIds.set(s.members.map((m: any) => m.id).filter(Boolean));
+                }
+            } else {
+                if (this.data.category) this.category.set(this.data.category);
+                if (this.data.time) this.startTimeRaw.set(this.parseTimeTo24h(this.data.time));
+                if (this.data.startDate) {
+                    this.startDate.set(this.data.startDate);
+                    this.endDate.set(this.data.endDate || this.data.startDate);
+                } else if (this.data.date) {
+                    this.startDate.set(this.data.date);
+                    this.endDate.set(this.data.date);
+                }
             }
         }
     }
@@ -652,10 +691,14 @@ export class CreateScheduleDialogComponent implements OnInit {
                 bg: m.bg,
             }));
 
+        const curUser = this._userService?.getUser();
+        const creatorName = curUser?.kh_name || curUser?.en_name || curUser?.name || (curUser as any)?.name_kh || (curUser as any)?.name_en || 'អ្នកគ្រប់គ្រង (Admin)';
+        const creatorInitials = (curUser?.en_name || curUser?.kh_name || curUser?.name || 'AD').trim().slice(0, 2).toUpperCase();
+
         const finalMembers = selectedMembers.length > 0
             ? selectedMembers
             : [
-                { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'អ្នករៀបចំ', initials: 'PP', bg: 'bg-emerald-700 text-white' },
+                { id: curUser?.id || 1, name: creatorName, role: 'អ្នករៀបចំ (Organizer)', initials: creatorInitials, bg: 'bg-blue-700 text-white' },
             ];
 
         const curCat = this.category();
@@ -684,6 +727,7 @@ export class CreateScheduleDialogComponent implements OnInit {
         const endIdx = dayOfWeekEnd === 0 ? 5 : Math.max(0, Math.min(5, dayOfWeekEnd - 1));
 
         const result = {
+            ...(this.isEdit() && this.scheduleId() ? { id: this.scheduleId(), isEdit: true } : {}),
             title: titleVal,
             time: displayTime || '09:00 ព្រឹក',
             date: startD,
@@ -699,7 +743,7 @@ export class CreateScheduleDialogComponent implements OnInit {
             color_theme: colorMap[curCat] || 'peach',
             members: finalMembers,
             note: this.note().trim(),
-            };
+        };
 
         this.dialogRef.close(result);
     }
