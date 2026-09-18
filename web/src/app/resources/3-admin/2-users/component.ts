@@ -601,9 +601,13 @@ export class UserManagementComponent implements OnInit {
         };
 
         this._adminService.inviteUser(payload).subscribe({
-            next: () => {
+            next: (res: any) => {
                 this.inviting.set(false);
-                this._snackbar?.success(`បានផ្ញើការអញ្ជើញទៅកាន់ ${payload.email} ដោយជោគជ័យ!`);
+                if (res?.data && res.data.email_sent === false) {
+                    this._snackbar?.warning(res.message || 'បានរក្សាទុកការអញ្ជើញ ប៉ុន្តែការផ្ញើអ៊ីមែលមិនបានជោគជ័យ។ សូមចម្លងតំណភ្ជាប់ផ្ញើដោយផ្ទាល់!');
+                } else {
+                    this._snackbar?.success(`បានផ្ញើការអញ្ជើញទៅកាន់ ${payload.email} ដោយជោគជ័យ!`);
+                }
                 this.closeInviteModal();
                 this.loadInvitations();
                 this.activeView.set('invitations');

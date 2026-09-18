@@ -122,9 +122,9 @@ export class OtpDeliveryService {
             inline_images,
         });
 
-        if (!sent)
+        if (!sent || !sent.success)
             throw new InternalServerErrorException(
-                'Failed to send OTP email',
+                `Failed to send OTP email: ${sent?.error || 'Unknown error'}`,
             );
     }
 }

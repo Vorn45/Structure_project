@@ -16,22 +16,13 @@ export function getDigitechLogo(): SesInlineImage {
     }
 
     const candidates = [
-        path.resolve(process.cwd(), '../web/public/images/logo/logo-mark-transparent.png'),
-        path.resolve(process.cwd(), 'web/public/images/logo/logo-mark-transparent.png'),
-        path.resolve(__dirname, '../../../../../../web/public/images/logo/logo-mark-transparent.png'),
-        path.resolve(__dirname, '../../../../../web/public/images/logo/logo-mark-transparent.png'),
-        path.resolve(__dirname, '../../../../web/public/images/logo/logo-mark-transparent.png'),
-        path.resolve(__dirname, '../../../web/public/images/logo/logo-mark-transparent.png'),
-        'd:/WFM/web/public/images/logo/logo-mark-transparent.png',
-        path.resolve(process.cwd(), '../web/public/images/logo/logo-mark.png'),
-        path.resolve(process.cwd(), 'web/public/images/logo/logo-mark.png'),
-        'd:/WFM/web/public/images/logo/logo-mark.png',
         path.resolve(__dirname, 'digitech_logo.png'),
         path.resolve(process.cwd(), 'src/app/shared/mail/templates/digitech_logo.png'),
         path.resolve(process.cwd(), 'api/src/app/shared/mail/templates/digitech_logo.png'),
-        path.resolve(__dirname, '../../../../../src/app/shared/mail/templates/digitech_logo.png'),
-        path.resolve(__dirname, '../../../../src/app/shared/mail/templates/digitech_logo.png'),
         'd:/WFM/api/src/app/shared/mail/templates/digitech_logo.png',
+        path.resolve(process.cwd(), '../web/public/images/logo/logo-mark-transparent.png'),
+        path.resolve(process.cwd(), 'web/public/images/logo/logo-mark-transparent.png'),
+        'd:/WFM/web/public/images/logo/logo-mark-transparent.png',
     ];
 
     for (const c of candidates) {
@@ -39,16 +30,6 @@ export function getDigitechLogo(): SesInlineImage {
             if (fs.existsSync(c)) {
                 const buf = fs.readFileSync(c);
                 if (buf && buf.length > 0) {
-                    try {
-                        const targetInDirname = path.resolve(__dirname, 'digitech_logo.png');
-                        fs.writeFileSync(targetInDirname, buf);
-                    } catch {}
-                    try {
-                        const targetInSrc = path.resolve(process.cwd(), 'src/app/shared/mail/templates/digitech_logo.png');
-                        if (c !== targetInSrc) {
-                            fs.writeFileSync(targetInSrc, buf);
-                        }
-                    } catch {}
                     cachedDigitechLogo = {
                         cid: 'digitech-logo',
                         filename: 'digitech-logo.png',
