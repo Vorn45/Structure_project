@@ -24,6 +24,7 @@ export interface CreateTaskDialogData {
     user?: any;
     members?: { id: number | string; name: string; role: string; avatar?: string }[];
     existingTasks?: { code?: string; project_id?: string }[];
+    defaultStatus?: string;
     onTaskCreated?: () => void;
 }
 
@@ -1257,6 +1258,9 @@ export class CreateTaskDialogComponent implements OnInit {
             }
         }
         this.taskCode = this.generateNextCode(this.selectedProjectId);
+        if (this.data?.defaultStatus) {
+            this.selectedStatus.set(this.data.defaultStatus);
+        }
         // Note: reporter and assignees deliberately start empty (no defaults) per user requirement
     }
 

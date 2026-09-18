@@ -1,0 +1,44 @@
+﻿/* CDK Drag & Drop Smooth Transitions & Styling */
+::ng-deep .cdk-drag-preview {
+    box-sizing: border-box !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.25), 0 10px 10px -5px rgba(15, 23, 42, 0.1) !important;
+    background-color: #ffffff !important;
+    border: 2px solid #3b82f6 !important;
+    opacity: 0.95 !important;
+    cursor: grabbing !important;
+    pointer-events: none !important;
+    z-index: 99999 !important;
+    font-family: 'Kantumruy Pro', sans-serif !important;
+}
+
+:host-context(.dark) ::ng-deep .cdk-drag-preview,
+::ng-deep html.dark .cdk-drag-preview,
+::ng-deep .dark .cdk-drag-preview {
+    background-color: #1e293b !important;
+    border-color: #3b82f6 !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+::ng-deep .cdk-drag-placeholder {
+    opacity: 0.35 !important;
+    border-radius: 0.875rem !important;
+    transition: transform 250ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+::ng-deep .cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+::ng-deep .cdk-drop-list-dragging .cdk-drag {
+    transition: transform 250ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.kanban-scroll-container {
+    scrollbar-width: thin;
+}
+
+.kanban-column-scroll {
+    scrollbar-width: thin;
+}

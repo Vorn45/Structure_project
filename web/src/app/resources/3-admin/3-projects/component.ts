@@ -3,6 +3,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, inj
 import { ActivatedRoute } from '@angular/router';
 import { catchError, finalize, of, Subject, takeUntil } from 'rxjs';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,6 +33,8 @@ import {
     TaskStatus,
     TaskPriority,
     TaskType,
+    TASK_TYPES_LIST,
+    TaskTypeOption,
 } from 'app/resources/2-user/2-task/models/task.types';
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
@@ -124,6 +127,7 @@ export interface AdminTaskItem {
     comments_count: number;
     attachments_count: number;
     assignee?: TaskMember | null;
+    assignees?: TaskMember[];
     reporter?: TaskMember | null;
     members?: TaskMember[];
     status: 'review' | 'done' | 'confirmed' | 'reopened' | 'new' | 'in_progress' | 'unconfirmed' | string;
@@ -132,6 +136,7 @@ export interface AdminTaskItem {
     subtasks?: ProjectSubtaskItem[];
     links?: TaskLink[];
     documents?: TaskDocument[];
+    task_type?: string;
 }
 
 export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [];
@@ -148,6 +153,7 @@ export const DEFAULT_PROJECT_LINKS: TaskLink[] = [];
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
+        DragDropModule,
         MatIconModule,
         MatTooltipModule,
         MatMenuModule,
@@ -193,6 +199,108 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     taskViewMode = signal<'list' | 'board'>('list');
     taskSearchQuery = signal<string>('');
     subtaskFilter = signal<string>('all');
+    taskStatusFilter = signal<string>('all');
+    taskTypes = TASK_TYPES_LIST;
+
+    taskCounts = signal<{
+        all: number;
+        new: number;
+        confirmed: number;
+        unconfirmed: number;
+        in_progress: number;
+        in_review: number;
+        reopened: number;
+        done: number;
+    }>({
+        all: 0,
+        new: 0,
+        confirmed: 0,
+        unconfirmed: 0,
+        in_progress: 0,
+        in_review: 0,
+        reopened: 0,
+        done: 0,
+    });
+
+    kanbanColumns = [
+        {
+            key: 'new',
+            label: 'ថ្មី',
+            icon: 'mdi:clipboard-text-outline',
+            textColor: 'text-blue-600 dark:text-blue-400',
+            dotColor: 'bg-blue-500',
+            colAccent: 'border-l-[3px] border-l-blue-500',
+            panelBg: 'bg-white dark:bg-slate-800/20',
+            panelBorder: 'border-slate-200/80 dark:border-slate-700/60',
+            badgeClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+        },
+        {
+            key: 'confirmed',
+            label: 'បញ្ជាក់',
+            icon: 'mdi:clipboard-check-outline',
+            textColor: 'text-indigo-600 dark:text-indigo-400',
+            dotColor: 'bg-indigo-500',
+            colAccent: 'border-l-[3px] border-l-indigo-500',
+            panelBg: 'bg-white dark:bg-slate-800/20',
+            panelBorder: 'border-slate-200/80 dark:border-slate-700/60',
+            badgeClass: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
+        },
+        {
+            key: 'unconfirmed',
+            label: 'មិនបញ្ជាក់',
+            icon: 'mdi:clipboard-minus-outline',
+            textColor: 'text-slate-500 dark:text-slate-400',
+            dotColor: 'bg-slate-400',
+            colAccent: 'border-l-[3px] border-l-slate-400',
+            panelBg: 'bg-white dark:bg-slate-800/20',
+            panelBorder: 'border-slate-200/80 dark:border-slate-700/60',
+            badgeClass: 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-slate-300',
+        },
+        {
+            key: 'in_progress',
+            label: 'កំពុងធ្វើ',
+            icon: 'mdi:progress-clock',
+            textColor: 'text-amber-600 dark:text-amber-400',
+            dotColor: 'bg-amber-500',
+            colAccent: 'border-l-[3px] border-l-amber-500',
+            panelBg: 'bg-white dark:bg-slate-800/20',
+            panelBorder: 'border-slate-200/80 dark:border-slate-700/60',
+            badgeClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+        },
+        {
+            key: 'in_review',
+            label: 'ស្នើពិនិត្យ',
+            icon: 'mdi:magnify',
+            textColor: 'text-sky-600 dark:text-sky-400',
+            dotColor: 'bg-sky-500',
+            colAccent: 'border-l-[3px] border-l-sky-500',
+            panelBg: 'bg-white dark:bg-slate-800/20',
+            panelBorder: 'border-slate-200/80 dark:border-slate-700/60',
+            badgeClass: 'bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300',
+        },
+        {
+            key: 'reopened',
+            label: 'បើកឡើងវិញ',
+            icon: 'mdi:restore',
+            textColor: 'text-rose-600 dark:text-rose-400',
+            dotColor: 'bg-rose-500',
+            colAccent: 'border-l-[3px] border-l-rose-500',
+            panelBg: 'bg-white dark:bg-slate-800/20',
+            panelBorder: 'border-slate-200/80 dark:border-slate-700/60',
+            badgeClass: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
+        },
+        {
+            key: 'done',
+            label: 'បញ្ចប់',
+            icon: 'mdi:check-circle',
+            textColor: 'text-emerald-600 dark:text-emerald-400',
+            dotColor: 'bg-emerald-500',
+            colAccent: 'border-l-[3px] border-l-emerald-500',
+            panelBg: 'bg-white dark:bg-slate-800/20',
+            panelBorder: 'border-slate-200/80 dark:border-slate-700/60',
+            badgeClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
+        },
+    ];
 
     isAdmin = computed(() => {
         const u: any = this._userService.getUser();
@@ -243,20 +351,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             nameKh === 'រដ្ឋបាល';
 
         return isAdminSlug || isAdminName;
-    });
-
-    taskCounts = computed(() => {
-        const list = this.tasks();
-        return {
-            all: list.length,
-            new: list.filter((t) => (t.status || '').toLowerCase() === 'new' || (t.status || '').toLowerCase() === 'pending').length,
-            confirmed: list.filter((t) => (t.status || '').toLowerCase() === 'confirmed').length,
-            unconfirmed: list.filter((t) => (t.status || '').toLowerCase() === 'unconfirmed' || (t.status || '').toLowerCase() === 'todo').length,
-            in_progress: list.filter((t) => (t.status || '').toLowerCase() === 'in_progress').length,
-            in_review: list.filter((t) => (t.status || '').toLowerCase() === 'in_review' || (t.status || '').toLowerCase() === 'review').length,
-            reopened: list.filter((t) => (t.status || '').toLowerCase() === 'reopened').length,
-            done: list.filter((t) => (t.status || '').toLowerCase() === 'done' || (t.status || '').toLowerCase() === 'completed').length,
-        };
     });
 
     taskToDelete = signal<AdminTaskItem | null>(null);
@@ -373,16 +467,19 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     // Budget modal
     showBudgetModal = signal<boolean>(false);
     budgetProject = signal<AdminProject | null>(null);
+    isBudgetSaving = signal<boolean>(false);
     budgetForm: FormGroup;
 
     // Lead assignment modal
     showLeadModal = signal<boolean>(false);
     leadProject = signal<AdminProject | null>(null);
     selectedLeadId = signal<number | null>(null);
+    isLeadSaving = signal<boolean>(false);
 
     // Delete modal
     deleteTarget = signal<AdminProject | null>(null);
     showDeleteModal = signal<boolean>(false);
+    isDeleting = signal<boolean>(false);
 
     projectCounts = computed(() => {
         const list = this.projects();
@@ -418,7 +515,23 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     filteredProjectTasks = computed(() => {
         const q = this.taskSearchQuery().toLowerCase().trim();
+        const status = this.taskStatusFilter();
         let list = this.tasks();
+
+        if (status !== 'all') {
+            list = list.filter((t) => {
+                const s = (t.status || '').toLowerCase();
+                if (status === 'new') return s === 'new' || s === 'pending';
+                if (status === 'confirmed') return s === 'confirmed';
+                if (status === 'unconfirmed') return s === 'unconfirmed' || s === 'todo';
+                if (status === 'in_progress') return s === 'in_progress';
+                if (status === 'in_review') return s === 'in_review' || s === 'review';
+                if (status === 'reopened') return s === 'reopened';
+                if (status === 'done') return s === 'done' || s === 'completed';
+                return s === status;
+            });
+        }
+
         if (q) {
             list = list.filter((t) =>
                 t.title?.toLowerCase().includes(q) ||
@@ -426,12 +539,188 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 t.description?.toLowerCase().includes(q),
             );
         }
-        const filter = this.subtaskFilter();
-        if (filter !== 'all') {
-            list = list.filter((t) => t.status === filter);
-        }
+
         return list;
     });
+
+    tasksByColumn = computed<Record<string, AdminTaskItem[]>>(() => {
+        const all = this.filteredProjectTasks();
+        const map: Record<string, AdminTaskItem[]> = {
+            new: [],
+            confirmed: [],
+            unconfirmed: [],
+            in_progress: [],
+            in_review: [],
+            reopened: [],
+            done: [],
+        };
+        for (const t of all) {
+            const s = (t.status || '').toLowerCase();
+            if (s === 'new' || s === 'pending') map['new'].push(t);
+            else if (s === 'confirmed') map['confirmed'].push(t);
+            else if (s === 'unconfirmed' || s === 'todo') map['unconfirmed'].push(t);
+            else if (s === 'in_progress') map['in_progress'].push(t);
+            else if (s === 'in_review' || s === 'review') map['in_review'].push(t);
+            else if (s === 'reopened') map['reopened'].push(t);
+            else if (s === 'done' || s === 'completed') map['done'].push(t);
+            else {
+                if (!map[s]) map[s] = [];
+                map[s].push(t);
+            }
+        }
+        return map;
+    });
+
+    getTasksByColumn(colKey: string): AdminTaskItem[] {
+        return this.tasksByColumn()[colKey] || [];
+    }
+
+    getTaskTypeInfo(type?: string): TaskTypeOption {
+        const found = this.taskTypes.find((t) => t.id === type || t.id?.toLowerCase() === type?.toLowerCase());
+        return found || this.taskTypes[0];
+    }
+
+    getDaysRemainingInfo(dueDateStr?: string | null): { text: string; isOverdue: boolean; isToday: boolean; isUpcoming: boolean } {
+        if (!dueDateStr) {
+            return { text: 'សល់ 7 ថ្ងៃ', isOverdue: false, isToday: false, isUpcoming: true };
+        }
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const dueDate = new Date(dueDateStr);
+        if (isNaN(dueDate.getTime())) {
+            return { text: 'កំណត់រួចរាល់', isOverdue: false, isToday: false, isUpcoming: true };
+        }
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) {
+            return { text: 'ហួសកាលកំណត់', isOverdue: true, isToday: false, isUpcoming: false };
+        } else if (diffDays === 0) {
+            return { text: 'ថ្ងៃនេះ (Today)', isOverdue: false, isToday: true, isUpcoming: false };
+        } else {
+            return { text: `សល់ ${diffDays} ថ្ងៃ`, isOverdue: false, isToday: false, isUpcoming: true };
+        }
+    }
+
+    onTaskDrop(event: CdkDragDrop<any>, targetStatus: string): void {
+        const task = event.item.data as AdminTaskItem;
+        if (!task) return;
+
+        const previousContainer = event.previousContainer;
+        const currentContainer = event.container;
+
+        if (previousContainer === currentContainer) {
+            if (event.previousIndex === event.currentIndex) return;
+            const currentList = [...(this.tasksByColumn()[targetStatus] || [])];
+            moveItemInArray(currentList, event.previousIndex, event.currentIndex);
+            const otherTasks = this.tasks().filter(
+                (t) => (t.status || '').toLowerCase() !== targetStatus
+            );
+            this.tasks.set([...otherTasks, ...currentList]);
+            return;
+        }
+
+        const originalStatus = task.status;
+        const updatedTask: AdminTaskItem = { ...task, status: targetStatus };
+
+        this.tasks.update((tasks) =>
+            tasks.map((t) => (t.id === task.id ? updatedTask : t))
+        );
+        this.updateLocalCountDelta(originalStatus, targetStatus);
+
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        const targetId = !isNaN(numericId) && numericId > 0 ? numericId : task.id;
+
+        this._userTaskService.updateTask(targetId, { status: targetStatus as any }).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    this.tasks.update((tasks) =>
+                        tasks.map((t) => (t.id === task.id ? { ...t, ...this.mapTaskToAdminTaskItem(res.data) } : t))
+                    );
+                }
+            },
+            error: (err) => {
+                console.error('Failed to update task status on drag drop', err);
+                this.tasks.update((tasks) =>
+                    tasks.map((t) => (t.id === task.id ? { ...t, status: originalStatus } : t))
+                );
+                this.updateLocalCountDelta(targetStatus, originalStatus);
+                this._snackbarService.error('មិនអាចផ្លាស់ប្តូរស្ថានភាពការងារបានទេ');
+            },
+        });
+    }
+
+    updateLocalCountDelta(fromStatus: string, toStatus: string): void {
+        this.taskCounts.update((c) => {
+            const next = { ...c };
+            const fromKey = this.normalizeStatusKey(fromStatus);
+            const toKey = this.normalizeStatusKey(toStatus);
+            if (fromKey && (next as any)[fromKey] !== undefined) {
+                (next as any)[fromKey] = Math.max(0, (next as any)[fromKey] - 1);
+            }
+            if (toKey && (next as any)[toKey] !== undefined) {
+                (next as any)[toKey] = ((next as any)[toKey] || 0) + 1;
+            }
+            return next;
+        });
+    }
+
+    normalizeStatusKey(status: string): string {
+        const s = (status || '').toLowerCase();
+        if (s === 'new' || s === 'pending') return 'new';
+        if (s === 'confirmed') return 'confirmed';
+        if (s === 'unconfirmed' || s === 'todo') return 'unconfirmed';
+        if (s === 'in_progress') return 'in_progress';
+        if (s === 'in_review' || s === 'review') return 'in_review';
+        if (s === 'reopened') return 'reopened';
+        if (s === 'done' || s === 'completed') return 'done';
+        return s;
+    }
+
+    onKanbanWheel(event: WheelEvent, el: HTMLElement): void {
+        const target = event.target as HTMLElement | null;
+        const scrollableCol = target?.closest('.kanban-column-scroll') as HTMLElement | null;
+
+        if (scrollableCol) {
+            const hasVerticalScroll = scrollableCol.scrollHeight > scrollableCol.clientHeight;
+            if (hasVerticalScroll) {
+                return;
+            }
+        }
+
+        if (event.deltaY !== 0 && !event.shiftKey) {
+            el.scrollLeft += event.deltaY * 0.8;
+            event.preventDefault();
+        }
+    }
+
+    openTaskChat(task: AdminTaskItem, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.openTaskModal(task, 'chat');
+    }
+
+    openTaskDetails(task: AdminTaskItem, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.openTaskModal(task, 'details');
+    }
+
+    trackByTaskId(index: number, item: AdminTaskItem): string | number {
+        return item?.id || index;
+    }
+
+    getTaskAssignees(task: AdminTaskItem | null | undefined): TaskMember[] {
+        if (!task) return [];
+        if (task.assignees !== undefined && Array.isArray(task.assignees)) {
+            return task.assignees;
+        }
+        if (task.assignee) return [task.assignee];
+        if (task.members && Array.isArray(task.members)) return task.members;
+        return [];
+    }
 
     allProjectLinks = computed(() => {
         const q = this.linkSearchQuery().toLowerCase().trim();
@@ -644,7 +933,18 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 }
             });
 
-        this._route.queryParams.subscribe((params) => {
+        // Real-time task updates (Status changes, drag drop, creations)
+        this._taskSocket
+            .taskUpdates()
+            .pipe(takeUntil(this._destroy$))
+            .subscribe(() => {
+                const currentProj = this.selectedProject();
+                if (currentProj) {
+                    this.loadProjectTasks(currentProj);
+                }
+            });
+
+        this._route.queryParams.pipe(takeUntil(this._destroy$)).subscribe((params) => {
             const taskCode = (params['taskCode'] || params['task_code'] || '').trim().toLowerCase();
             const taskId = (params['taskId'] || params['task_id'] || '').trim();
             if (taskCode || taskId) {
@@ -941,10 +1241,12 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     onTaskDrawerStatusChange(event: { task: TaskItem; status: string }): void {
+        const oldStatus = event.task.status;
         this.selectedTaskDrawerItem.update((t) => (t ? { ...t, status: event.status } : null));
         this.tasks.update((items) =>
             items.map((t) => (t.id === event.task.id ? { ...t, status: event.status } : t))
         );
+        this.updateLocalCountDelta(oldStatus, event.status);
         const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
         if (!isNaN(numericId)) {
             this._userTaskService.updateTask(numericId, { status: event.status }).subscribe({ error: () => {} });
@@ -1465,17 +1767,54 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         });
     }
 
-    // Project Dialog
+    // Project Dialogs (Unified Create & Edit via CreateProjectDialogComponent)
     openCreateProjectModal(): void {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             existingProjects: this.projects().map((p) => ({ id: p.id, code: p.code })),
-            onProjectCreated: () => this.loadData(),
+            onProjectCreated: () => {
+                this._snackbarService.success('បានបង្កើតគម្រោងថ្មីដោយជោគជ័យ!');
+                this.loadData();
+            },
         });
         const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result?.created) {
+                this._snackbarService.success('បានបង្កើតគម្រោងថ្មីដោយជោគជ័យ!');
                 this.loadData();
+            }
+        });
+    }
+
+    openEditProjectModal(project: AdminProject): void {
+        const dialogConfig = this._dialogConfigService.getDialogConfig({
+            user: this._userService.getUser(),
+            existingProjects: this.projects().map((p) => ({ id: p.id, code: p.code })),
+            isEditing: true,
+            project: project,
+        });
+        const dialogRef = this._matDialog.open(CreateProjectDialogComponent, dialogConfig);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result?.edited && result?.project) {
+                this.loading.set(true);
+                this._adminService.updateProject(String(project.id), result.project).subscribe({
+                    next: (res) => {
+                        this.projects.update((list) =>
+                            list.map((p) => (p.id === res.data.id || String(p.id) === String(project.id) ? { ...p, ...res.data } : p)),
+                        );
+                        if (this.selectedProject()?.id === project.id || String(this.selectedProject()?.id) === String(project.id)) {
+                            this.selectedProject.set({ ...this.selectedProject()!, ...res.data });
+                        }
+                        this.loading.set(false);
+                        this._snackbarService.success('បានកែប្រែព័ត៌មានគម្រោងដោយជោគជ័យ!');
+                        this.loadData();
+                    },
+                    error: (err) => {
+                        this.loading.set(false);
+                        console.error('Failed to update project:', err);
+                        this._snackbarService.error('មិនអាចកែប្រែព័ត៌មានគម្រោងបានទេ សូមព្យាយាមម្តងទៀត!');
+                    },
+                });
             }
         });
     }
@@ -1789,13 +2128,14 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     // Create Task modal
-    openCreateTaskModal(): void {
+    openCreateTaskModal(defaultStatus?: string): void {
         const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             projectId: proj?.id,
             projectCode: proj?.code,
             projectName: proj?.name,
+            defaultStatus: defaultStatus,
             projects: this.projects().map((p) => ({
                 id: String(p.id),
                 name: p.name,
@@ -1806,16 +2146,14 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             existingTasks: this.tasks(),
             onTaskCreated: () => {
                 if (proj) {
-                    this.selectProject(proj);
+                    this.loadProjectTasks(proj);
                 }
             },
         });
         const dialogRef = this._matDialog.open(CreateTaskDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
-            if (result && result.title) {
-                if (proj) {
-                    this.selectProject(proj);
-                }
+            if (result && proj) {
+                this.loadProjectTasks(proj);
             }
         });
     }
@@ -1912,28 +2250,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             return this.formatDate(d.toISOString());
         }
         return '15/09/2026';
-    }
-
-    getDaysRemainingInfo(dueDateStr?: string | null): { text: string; isOverdue: boolean; isToday: boolean; isUpcoming: boolean } {
-        if (!dueDateStr) {
-            return { text: 'សល់ 7 ថ្ងៃ', isOverdue: false, isToday: false, isUpcoming: true };
-        }
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        const dueDate = new Date(dueDateStr);
-        if (isNaN(dueDate.getTime())) {
-            return { text: 'កំណត់រួចរាល់', isOverdue: false, isToday: false, isUpcoming: true };
-        }
-        dueDate.setHours(0, 0, 0, 0);
-
-        const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        if (diffDays < 0) {
-            return { text: 'ហួសកាលកំណត់', isOverdue: true, isToday: false, isUpcoming: false };
-        } else if (diffDays === 0) {
-            return { text: 'ថ្ងៃនេះ (Today)', isOverdue: false, isToday: true, isUpcoming: false };
-        } else {
-            return { text: `សល់ ${diffDays} ថ្ងៃ`, isOverdue: false, isToday: false, isUpcoming: true };
-        }
     }
 
     getTaskStatusLabel(status: string): string {
@@ -2307,11 +2623,13 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 avatar: t.reporter?.avatar || null,
             },
             assignee: assigneeObj,
+            assignees: members.length > 0 ? members : (assigneeObj ? [assigneeObj] : []),
             members: members.length > 0 ? members : (assigneeObj ? [assigneeObj] : []),
             progress: t.progress || (['done', 'completed'].includes(status) ? 100 : 0),
             subtasks: t.subtasks || [],
             links: t.links || [],
             documents: t.documents || [],
+            task_type: t.task_type || 'feature',
         };
     }
 
@@ -2354,8 +2672,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         this.selectedProject.set(project);
         this.projectNavTab.set('tasks');
         this.taskSearchQuery.set('');
-        this.subtaskFilter.set('all');
-        this.isTasksLoading.set(true);
+        this.taskStatusFilter.set('all');
 
         if (project.members && Array.isArray(project.members) && project.members.length > 0) {
             this.teamMembers.set(project.members.map((m: any) => this.mapProjectMemberToTaskMember(m)));
@@ -2381,7 +2698,30 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             this.links.set([]);
         }
 
-        this._adminService.getAgileTasks(String(project.id)).subscribe({
+        // Fresh load of project sub-resources from database
+        this._adminService.getProjectById(String(project.id)).pipe(takeUntil(this._destroy$)).subscribe({
+            next: (res) => {
+                if (res?.data) {
+                    const fullProj = res.data;
+                    this.selectedProject.set(fullProj);
+                    if (fullProj.members && Array.isArray(fullProj.members)) {
+                        this.teamMembers.set(fullProj.members.map((m: any) => this.mapProjectMemberToTaskMember(m)));
+                    }
+                    if (fullProj.phases && Array.isArray(fullProj.phases)) {
+                        this.phases.set(fullProj.phases);
+                    }
+                    if (fullProj.meetings && Array.isArray(fullProj.meetings)) {
+                        this.meetings.set(fullProj.meetings);
+                    }
+                    if ((fullProj as any).links && Array.isArray((fullProj as any).links)) {
+                        this.links.set((fullProj as any).links);
+                    }
+                }
+            },
+            error: () => {},
+        });
+
+        this._adminService.getAgileTasks(String(project.id)).pipe(takeUntil(this._destroy$)).subscribe({
             next: (res) => {
                 if (res?.data && Array.isArray(res.data)) {
                     this.agileTasks.set(res.data);
@@ -2396,34 +2736,35 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             },
         });
 
+        this.loadProjectTasks(project);
+    }
+
+    loadProjectTasks(project: AdminProject): void {
+        this.isTasksLoading.set(true);
+        const projectIdStr = String(project.id);
         this._userTaskService
-            .getTasks({ scope: 'all' })
+            .getTasks({ project_id: projectIdStr })
             .pipe(
                 catchError(() => of(null)),
-                finalize(() => this.isTasksLoading.set(false))
+                finalize(() => this.isTasksLoading.set(false)),
+                takeUntil(this._destroy$)
             )
             .subscribe((res) => {
-                if (res?.data?.results?.length) {
-                    const allTasks = res.data.results;
-                    const pid = String(project.id || '').toLowerCase();
-                    const pcode = (project.code || '').toLowerCase().replace('#', '');
-                    const pname = (project.name || '').toLowerCase();
-                    const pPrefix = pcode.split('-')[0];
-
-                    const projectTasks = allTasks.filter((t: any) => {
-                        const tPid = (t.project_id || '').toLowerCase();
-                        const tPname = (t.project_name || '').toLowerCase();
-                        const tCode = (t.code || '').toLowerCase().replace('#', '');
-
-                        return (
-                            (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
-                            (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
-                            (pPrefix && (tCode.startsWith(pPrefix + '-') || tPid.startsWith(pPrefix))) ||
-                            (pname && (tPname.includes(pname) || pname.includes(tPname)))
-                        );
-                    });
-
-                    this.tasks.set(projectTasks.map((t: any) => this.mapTaskToAdminTaskItem(t)));
+                if (res?.data) {
+                    const results = res.data.results || [];
+                    this.tasks.set(results.map((t: any) => this.mapTaskToAdminTaskItem(t)));
+                    if (res.data.counts) {
+                        this.taskCounts.set({
+                            all: res.data.counts.all || results.length,
+                            new: res.data.counts.new || 0,
+                            confirmed: res.data.counts.confirmed || 0,
+                            unconfirmed: res.data.counts.unconfirmed || 0,
+                            in_progress: res.data.counts.in_progress || 0,
+                            in_review: (res.data.counts as any).in_review || (res.data.counts as any).review || 0,
+                            reopened: res.data.counts.reopened || 0,
+                            done: res.data.counts.done || (res.data.counts as any).completed || 0,
+                        });
+                    }
                 } else {
                     this.tasks.set([]);
                 }
@@ -2443,39 +2784,11 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     openCreateDrawer(): void {
-        this.isEditing.set(false);
-        this.editingProject.set(null);
-        this.projectForm.reset({
-            name: '',
-            code: `PMS-${Math.floor(100 + Math.random() * 900)}`,
-            description: '',
-            status: 'active',
-            progress: 0,
-            start_date: new Date().toISOString().slice(0, 10),
-            end_date: new Date(Date.now() + 86400000 * 45).toISOString().slice(0, 10),
-            budget: 0,
-            logo: '',
-            image: '',
-        });
-        this.isDrawerOpen.set(true);
+        this.openCreateProjectModal();
     }
 
     openEditDrawer(project: AdminProject): void {
-        this.isEditing.set(true);
-        this.editingProject.set(project);
-        this.projectForm.patchValue({
-            name: project.name,
-            code: project.code,
-            description: project.description,
-            status: project.status,
-            progress: project.progress,
-            start_date: project.start_date ? project.start_date.slice(0, 10) : '',
-            end_date: project.end_date ? project.end_date.slice(0, 10) : '',
-            budget: project.budget || 0,
-            logo: project.logo || project.image || '',
-            image: project.image || project.logo || '',
-        });
-        this.isDrawerOpen.set(true);
+        this.openEditProjectModal(project);
     }
 
     onLogoSelected(event: Event): void {
@@ -2507,46 +2820,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     submitProjectForm(): void {
-        if (this.projectForm.invalid) {
-            this.projectForm.markAllAsTouched();
-            return;
-        }
-
-        this.saving.set(true);
-        const formVal = this.projectForm.value;
-        const targetProject = this.editingProject() || this.selectedProject();
-
-        if (this.isEditing() && targetProject) {
-            this._adminService.updateProject(targetProject.id, formVal).subscribe({
-                next: (res) => {
-                    const updated = res.data;
-                    this.projects.update((list) =>
-                        list.map((p) => (p.id === updated.id || String(p.id) === String(targetProject.id) ? { ...p, ...updated } : p)),
-                    );
-                    if (this.selectedProject()?.id === targetProject.id || String(this.selectedProject()?.id) === String(targetProject.id)) {
-                        this.selectedProject.set({ ...this.selectedProject()!, ...updated });
-                    }
-                    this.saving.set(false);
-                    this.closeDrawer();
-                },
-                error: (err) => {
-                    console.error('Failed to update project:', err);
-                    this.saving.set(false);
-                },
-            });
-        } else {
-            this._adminService.createProject(formVal).subscribe({
-                next: (res) => {
-                    this.projects.update((list) => [res.data, ...list]);
-                    this.saving.set(false);
-                    this.closeDrawer();
-                },
-                error: (err) => {
-                    console.error('Failed to create project:', err);
-                    this.saving.set(false);
-                },
-            });
-        }
+        this.closeDrawer();
     }
 
     openBudgetModal(project: AdminProject, event?: Event): void {
@@ -2561,8 +2835,9 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     saveBudget(): void {
         const project = this.budgetProject();
-        if (!project || this.budgetForm.invalid) return;
+        if (!project || this.budgetForm.invalid || this.isBudgetSaving()) return;
 
+        this.isBudgetSaving.set(true);
         const val = this.budgetForm.value;
         this._adminService.updateProjectBudget(project.id, val.budget, val.spent).subscribe({
             next: (res) => {
@@ -2572,10 +2847,16 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 if (this.selectedProject()?.id === res.data.id) {
                     this.selectedProject.update((p) => p ? { ...p, budget: val.budget, spent: val.spent } : null);
                 }
+                this.isBudgetSaving.set(false);
                 this.showBudgetModal.set(false);
                 this.budgetProject.set(null);
+                this._snackbarService.success('បានកែប្រែថវិកាគម្រោងដោយជោគជ័យ!');
             },
-            error: (err) => console.error('Failed to update budget:', err),
+            error: (err) => {
+                this.isBudgetSaving.set(false);
+                console.error('Failed to update budget:', err);
+                this._snackbarService.error('មិនអាចកែប្រែថវិកាគម្រោងបានទេ!');
+            },
         });
     }
 
@@ -2590,12 +2871,14 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     saveLead(): void {
         const project = this.leadProject();
         const leadId = this.selectedLeadId();
-        if (!project || !leadId) return;
+        if (!project || !leadId || this.isLeadSaving()) return;
 
+        this.isLeadSaving.set(true);
         const leadUser = this.users().find((u) => u.id === Number(leadId));
-        const leadName = leadUser ? leadUser.name_kh : 'Project Lead';
+        const leadName = leadUser ? (leadUser.name_kh || leadUser.name_en) : 'ប្រធានគម្រោង';
+        const leadRole = leadUser?.position || leadUser?.role || 'Project Lead';
 
-        this._adminService.updateProjectLead(project.id, Number(leadId), leadName).subscribe({
+        this._adminService.updateProjectLead(project.id, Number(leadId), leadName, leadRole).subscribe({
             next: (res) => {
                 this.projects.update((list) =>
                     list.map((p) => (p.id === res.data.id ? res.data : p)),
@@ -2603,10 +2886,16 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 if (this.selectedProject()?.id === res.data.id) {
                     this.selectedProject.set(res.data);
                 }
+                this.isLeadSaving.set(false);
                 this.showLeadModal.set(false);
                 this.leadProject.set(null);
+                this._snackbarService.success(`បានចាត់តាំង «${leadName}» ជាប្រធានគម្រោងដោយជោគជ័យ!`);
             },
-            error: (err) => console.error('Failed to update lead:', err),
+            error: (err) => {
+                this.isLeadSaving.set(false);
+                console.error('Failed to update lead:', err);
+                this._snackbarService.error('មិនអាចចាត់តាំងប្រធានគម្រោងបានទេ!');
+            },
         });
     }
 
@@ -2617,18 +2906,26 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     deleteProject(): void {
         const target = this.deleteTarget();
-        if (!target) return;
+        if (!target || this.isDeleting()) return;
 
+        this.isDeleting.set(true);
         this._adminService.deleteProject(target.id).subscribe({
             next: () => {
+                const pName = target.name;
                 this.projects.update((list) => list.filter((p) => p.id !== target.id));
                 if (this.selectedProject()?.id === target.id) {
                     this.clearSelectedProject();
                 }
+                this.isDeleting.set(false);
                 this.showDeleteModal.set(false);
                 this.deleteTarget.set(null);
+                this._snackbarService.success(`បានលុបគម្រោង «${pName}» ដោយជោគជ័យ!`);
             },
-            error: (err) => console.error('Failed to delete project:', err),
+            error: (err) => {
+                this.isDeleting.set(false);
+                console.error('Failed to delete project:', err);
+                this._snackbarService.error('មិនអាចលុបគម្រោងបានទេ សូមព្យាយាមម្តងទៀត!');
+            },
         });
     }
 
