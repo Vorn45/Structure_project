@@ -7,7 +7,9 @@ import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { ActivityStore } from 'src/app/model/user/activity-store.entity';
+
 import {
     CreateActivityDto,
     CreateRoadmapProjectDto,
@@ -277,52 +279,9 @@ export class ActivityService {
     }
 
     private isAdmin(user?: UserPayload): boolean {
-        if (!user) return false;
-        const phoneClean = (user.phone || '').replace(/\D/g, '');
-        if (phoneClean === '010843612' || phoneClean === '087280875' || user.id === 5 || user.id === 6) {
-            return true;
-        }
-
-        const roles = Array.isArray(user?.roles) ? user.roles : [];
-        const activeRole: any =
-            roles.find((r: any) => r.is_default) ??
-            roles.find((r: any) => Number(r.id) === Number(user?.is_active)) ??
-            roles[0];
-
-        const slug = (activeRole?.slug || '').toLowerCase().trim();
-        const nameEn = (activeRole?.name_en || '').toLowerCase().trim();
-        const nameKh = (activeRole?.name_kh || '').trim();
-
-        const isUserRole =
-            slug === 'user' ||
-            slug === 'org_user' ||
-            slug === 'member' ||
-            slug === 'personal_workspace' ||
-            slug === 'employee' ||
-            slug === 'staff' ||
-            nameEn === 'user' ||
-            nameEn === 'member' ||
-            nameKh === 'អ្នកប្រើប្រាស់' ||
-            nameKh === 'សមាជិក';
-
-        if (isUserRole) {
-            return false;
-        }
-
-        return (
-            slug === 'superadmin' ||
-            slug === 'super_admin' ||
-            slug === 'org_admin' ||
-            slug === 'admin' ||
-            slug === 'org_owner' ||
-            nameEn === 'superadmin' ||
-            nameEn === 'super admin' ||
-            nameEn === 'org admin' ||
-            nameEn === 'admin' ||
-            nameKh === 'អភិបាលប្រព័ន្ធ' ||
-            nameKh === 'រដ្ឋបាល'
-        );
+        return isAdminOrSuperAdmin(user);
     }
+
 
     private getUserAssignedProjects(user?: UserPayload): RoadmapProject[] {
         if (!user) return [];

@@ -2,7 +2,7 @@ import { HelperNavigationItem } from 'helper/components/navigation';
 
 // `title` holds a transloco translation key here, not display text —
 // NavigationService resolves it into the actual title on every emission.
-const adminNavigation: HelperNavigationItem[] = [
+const superAdminNavigation: HelperNavigationItem[] = [
     {
         id: 'dashboard',
         title: 'Navigation.Dashboard',
@@ -25,11 +25,11 @@ const adminNavigation: HelperNavigationItem[] = [
         link: '/admin/projects',
     },
     {
-        id: 'staff',
-        title: 'Navigation.Staff',
+        id: 'users',
+        title: 'Navigation.User',
         type: 'basic',
         icon: 'mdi:account-plus-outline',
-        link: '/admin/staff',
+        link: '/admin/users',
     },
     {
         id: 'clients',
@@ -39,25 +39,18 @@ const adminNavigation: HelperNavigationItem[] = [
         link: '/admin/clients',
     },
     {
-        id: 'financials',
-        title: 'Navigation.Financials',
+        id: 'attendance',
+        title: 'Navigation.Attendance',
         type: 'basic',
-        icon: 'mdi:bank-outline',
-        link: '/admin/financials',
+        icon: 'mdi:calendar-check-outline',
+        link: '/admin/attendance',
     },
     {
-        id: 'reports',
-        title: 'Navigation.Reports',
-        type: 'basic',
-        icon: 'mdi:clipboard-text-outline',
-        link: '/admin/reports',
-    },
-    {
-        id: 'admin',
-        title: 'Navigation.Admin',
+        id: 'settings',
+        title: 'Navigation.Settings',
         type: 'basic',
         icon: 'mdi:key-outline',
-        link: '/admin/admin',
+        link: '/admin/settings',
     },
 ];
 
@@ -98,27 +91,22 @@ const orgAdminNavigation: HelperNavigationItem[] = [
         link: '/admin/clients',
     },
     {
-        id: 'financials',
-        title: 'Navigation.Financials',
+        id: 'attendance',
+        title: 'Navigation.Attendance',
         type: 'basic',
-        icon: 'mdi:bank-outline',
-        link: '/admin/financials',
+        icon: 'mdi:calendar-check-outline',
+        link: '/admin/attendance',
     },
     {
-        id: 'reports',
-        title: 'Navigation.Reports',
-        type: 'basic',
-        icon: 'mdi:clipboard-text-outline',
-        link: '/admin/reports',
-    },
-    {
-        id: 'admin',
-        title: 'Navigation.Admin',
+        id: 'organization',
+        title: 'Navigation.Organization',
         type: 'basic',
         icon: 'mdi:key-outline',
-        link: '/admin/admin',
+        link: '/admin/organization',
     },
 ];
+
+const adminNavigation: HelperNavigationItem[] = superAdminNavigation;
 
 const memberNavigation: HelperNavigationItem[] = [
     {
@@ -200,6 +188,7 @@ const personalWorkspaceNavigation: HelperNavigationItem[] = [
 
 export const navigationData = {
     admin: adminNavigation,
+    superAdmin: superAdminNavigation,
     orgAdmin: orgAdminNavigation,
     member: memberNavigation,
     personalWorkspace: personalWorkspaceNavigation,

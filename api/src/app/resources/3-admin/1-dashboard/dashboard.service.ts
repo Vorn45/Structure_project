@@ -68,8 +68,9 @@ export class DashboardService {
         const activeUsers = allUsers.filter((u) => u.is_active === 1).length;
 
         // 4. LEAVES (Dynamic from AdminAttendanceService)
-        const allLeaves = this._attendanceService.getRawLeaves() || [];
+        const allLeaves = (await this._attendanceService.getRawLeaves()) || [];
         const pendingLeaves = allLeaves.filter((l) => l.status === 'pending').length;
+
 
         // 5. SCHEDULED MEETINGS (Dynamic from PlannerService)
         let scheduledMeetings: any[] = [];

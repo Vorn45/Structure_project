@@ -10,6 +10,9 @@ import { Role } from 'src/app/model/user/role.entity';
 import { UserRole } from 'src/app/model/user/user_role.entity';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { UserInvitation } from 'src/app/model/user/user-invitation.entity';
+import { Client } from 'src/app/model/organization/client.entity';
+import { LeaveRequest } from 'src/app/model/organization/leave-request.entity';
+import { Organization } from 'src/app/model/organization/organization.entity';
 import { MailModule } from 'src/app/shared/mail/mail.module';
 import { UserModule } from '../2-user/user.module';
 
@@ -19,6 +22,7 @@ import { AdminUserController } from './2-user/user.controller';
 import { AdminProjectController } from './3-project/project.controller';
 import { AdminAttendanceController } from './4-attendance/attendance.controller';
 import { AdminSettingController } from './5-setting/setting.controller';
+import { AdminClientController } from './6-client/client.controller';
 
 // Services
 import { DashboardService } from './1-dashboard/dashboard.service';
@@ -26,6 +30,7 @@ import { AdminUserService } from './2-user/user.service';
 import { AdminProjectService } from './3-project/project.service';
 import { AdminAttendanceService } from './4-attendance/attendance.service';
 import { AdminSettingService } from './5-setting/setting.service';
+import { AdminClientService } from './6-client/client.service';
 import { FileService } from 'src/app/shared/file/file.service';
 
 @Module({
@@ -34,8 +39,18 @@ import { FileService } from 'src/app/shared/file/file.service';
         CommonModule,
         UserModule,
         MailModule,
-        TypeOrmModule.forFeature([User, Role, UserRole, PlanStore, UserInvitation]),
+        TypeOrmModule.forFeature([
+            User,
+            Role,
+            UserRole,
+            PlanStore,
+            UserInvitation,
+            Client,
+            LeaveRequest,
+            Organization,
+        ]),
     ],
+
     controllers: [
         DashboardController,
         StatsController,
@@ -43,6 +58,7 @@ import { FileService } from 'src/app/shared/file/file.service';
         AdminProjectController,
         AdminAttendanceController,
         AdminSettingController,
+        AdminClientController,
     ],
     providers: [
         DashboardService,
@@ -50,6 +66,7 @@ import { FileService } from 'src/app/shared/file/file.service';
         AdminProjectService,
         AdminAttendanceService,
         AdminSettingService,
+        AdminClientService,
         FileService,
     ],
     exports: [
@@ -58,6 +75,8 @@ import { FileService } from 'src/app/shared/file/file.service';
         AdminProjectService,
         AdminAttendanceService,
         AdminSettingService,
+        AdminClientService,
     ],
 })
 export class AdminModule {}
+

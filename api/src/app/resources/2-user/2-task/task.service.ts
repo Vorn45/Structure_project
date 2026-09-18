@@ -13,7 +13,9 @@ import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { NotificationService, NotificationItem } from 'src/app/shared/notification/notification.service';
 import { RealtimeGateway } from 'src/app/shared/realtime/realtime.gateway';
+import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { PlanService } from '../4-plan/plan.service';
+
 import { CreateTaskDto, QueryTasksDto, TaskPriorityEnum, TaskStatusEnum, UpdateTaskDto } from './task.dto';
 
 // In-memory / mock store to serve user task operations
@@ -576,14 +578,12 @@ export class TaskService {
         return this.tasks;
     }
 
-    private isAdmin(user?: UserPayload): boolean {
+    private isAdmin(user: UserPayload): boolean {
         if (!user) return false;
         if (this._planService) {
             return this._planService.isAdmin(user);
         }
-        const phoneClean = (user.phone || '').replace(/\D/g, '');
-        const uId = Number(user.id || 0);
-        return phoneClean === '010843612' || phoneClean === '087280875' || uId === 5 || uId === 6;
+        return isAdminOrSuperAdmin(user);
     }
 
     private isUserPlanMember(user: UserPayload, plan: any): boolean {

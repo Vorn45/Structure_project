@@ -18,7 +18,7 @@ export class RoleGuard implements CanActivate {
     constructor(private reflector: Reflector) {}
 
     canActivate(context: ExecutionContext): boolean {
-        const requiredRoles = this.reflector.getAllAndOverride<RoleEnum[]>(
+        const requiredRoles = this.reflector.getAllAndOverride<(RoleEnum | string)[]>(
             ROLES_KEY,
             [context.getHandler(), context.getClass()],
         );
@@ -28,7 +28,55 @@ export class RoleGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const user = this.resolveUser(request);
 
-        if (!requiredRoles.includes(user.is_active as RoleEnum)) {
+        const roles = Array.isArray(user?.roles) ? user.roles : [];
+        if (!roles.length) {
+            throw new ForbiddenException('Insufficient role privileges: no roles assigned.');
+        }
+
+        const normalizedRequired = requiredRoles.map((r) => {
+            if (typeof r === 'number') {
+                if (r === RoleEnum.SUPER_ADMIN) return 'superadmin';
+                if (r === RoleEnum.ORG_ADMIN) return 'org_admin';
+                if (r === RoleEnum.ORG_OWNER) return 'org_owner';
+                if (r === RoleEnum.ORG_USER) return 'user';
+            }
+            return String(r).toLowerCase().trim();
+        });
+
+        // User's role identifiers
+        const userSlugs = roles.map((r) => (r.slug || '').toLowerCase().trim());
+        const userNamesEn = roles.map((r) => (r.name_en || '').toLowerCase().trim());
+
+        // Superadmin has universal administrative access
+        const isSuperAdmin =
+            userSlugs.includes('superadmin') ||
+            userSlugs.includes('super_admin') ||
+            userNamesEn.includes('super administrator') ||
+            userNamesEn.includes('super admin');
+
+        if (isSuperAdmin) {
+            return true;
+        }
+
+        // Check for matching role slug or name
+        const hasRequiredRole = normalizedRequired.some((req) => {
+            if (userSlugs.includes(req)) return true;
+            if (userNamesEn.includes(req)) return true;
+
+            // Alias handling: 'admin' and 'org_admin'
+            if (req === 'admin' || req === 'org_admin') {
+                return (
+                    userSlugs.includes('admin') ||
+                    userSlugs.includes('org_admin') ||
+                    userSlugs.includes('org_owner') ||
+                    userNamesEn.includes('administrator') ||
+                    userNamesEn.includes('organization admin')
+                );
+            }
+            return false;
+        });
+
+        if (!hasRequiredRole) {
             throw new ForbiddenException('Insufficient role privileges.');
         }
 

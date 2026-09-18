@@ -9,7 +9,9 @@ import * as path from 'path';
 import { RoleEnum } from 'src/app/enum/role.enum';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
+import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { QueryPlanDto } from './plan.dto';
+
 
 export interface ProjectPlanItem {
     id: string;
@@ -453,55 +455,9 @@ export class PlanService {
     }
 
     public isAdmin(user?: UserPayload): boolean {
-        if (!user) return false;
-        const phoneClean = (user.phone || '').replace(/\D/g, '');
-        const uId = Number(user.id || 0);
-
-        // 1. Root founders / system superadmins by verified phone or DB ID
-        if (phoneClean === '010843612' || phoneClean === '087280875') return true;
-        if (uId === 5 || uId === 6) return true;
-
-        // 2. Check roles array
-        const roles = Array.isArray(user.roles) ? user.roles : [];
-        const isSuperOrAdmin = roles.some((r: any) => {
-            const slug = (r?.slug || '').toLowerCase().trim();
-            const nameEn = (r?.name_en || '').toLowerCase().trim();
-            const nameKh = (r?.name_kh || '').trim();
-            return (
-                slug === 'superadmin' ||
-                slug === 'super_admin' ||
-                slug === 'org_admin' ||
-                slug === 'admin' ||
-                slug === 'org_owner' ||
-                nameEn === 'superadmin' ||
-                nameEn === 'super administrator' ||
-                nameEn === 'org admin' ||
-                nameEn === 'administrator' ||
-                nameKh === 'អភិបាលប្រព័ន្ធ' ||
-                nameKh === 'រដ្ឋបាល'
-            );
-        });
-
-        // Ordinary user/member/staff cannot be admin unless they have explicit admin role
-        const activeRole: any =
-            roles.find((r: any) => r.is_default) ??
-            roles.find((r: any) => Number(r.id) === Number(user.is_active)) ??
-            roles[0];
-        const activeSlug = (activeRole?.slug || '').toLowerCase().trim();
-        const isUserRole =
-            activeSlug === 'user' ||
-            activeSlug === 'org_user' ||
-            activeSlug === 'member' ||
-            activeSlug === 'personal_workspace' ||
-            activeSlug === 'employee' ||
-            activeSlug === 'staff';
-
-        if (isUserRole && !isSuperOrAdmin) {
-            return false;
-        }
-
-        return isSuperOrAdmin;
+        return isAdminOrSuperAdmin(user);
     }
+
 
     public isUserProjectMember(user: UserPayload, project: ProjectPlanItem): boolean {
         if (!user) return false;

@@ -2,8 +2,11 @@
 
 import { Injectable } from '@angular/core';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
+import { AdminGuard } from 'app/core/auth/guards/admin.guard';
+import { SuperAdminGuard } from 'app/core/auth/guards/super-admin.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LocalPasscodeGuard } from 'app/core/local-passcode/local-passcode.guard';
+
 import { LayoutComponent } from 'app/layout/component';
 import { initialDataResolver } from './app.resolver';
 import { ActivatedRouteSnapshot, CanActivate, Route, Router, UrlTree } from '@angular/router';
@@ -110,14 +113,17 @@ export const appRoutes: Route[] = [
             },
             {
                 path: 'admin',
+                canActivate: [AdminGuard],
                 loadChildren: () => import('app/resources/3-admin/admin.routes'),
             },
             {
                 path: 'org-admin',
+                canActivate: [AdminGuard],
                 loadChildren: () => import('app/resources/3-admin/admin.routes'),
             },
             {
                 path: 'super-admin',
+                canActivate: [SuperAdminGuard],
                 loadChildren: () => import('app/resources/3-admin/admin.routes'),
             },
             { path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/shared/error/not-found.routes') },

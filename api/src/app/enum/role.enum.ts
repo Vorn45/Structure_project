@@ -4,3 +4,11 @@ export enum RoleEnum {
     ORG_OWNER = 3, // Admin main organization
     SUPER_ADMIN = 4, // Global super administrator
 }
+
+export enum RoleSlug {
+    SUPERADMIN = 'superadmin',
+    ORG_ADMIN = 'org_admin',
+    USER = 'user',
+    PERSONAL_WORKSPACE = 'personal_workspace',
+}
+
