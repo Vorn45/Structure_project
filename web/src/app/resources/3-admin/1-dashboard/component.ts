@@ -6,8 +6,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import * as echarts from 'echarts';
 import { AdminService, AdminStats } from '../admin.service';
-
 import { UserService } from 'app/core/user/user.service';
+import { resolveFileUrl } from 'helper/shared/file-url';
 
 export interface DashboardMetricCard {
     id: string;
@@ -120,9 +120,12 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     stats = signal<AdminStats>(EMPTY_STATS);
     loading = signal<boolean>(true);
 
+    readonly resolveFileUrl = resolveFileUrl;
+
     // Filter controls
     activePerformerPeriod = signal<'1d' | '7d' | '1m' | '1y' | 'all'>('7d');
     calendarBaseDate = signal<Date>(new Date());
+    selectedCalendarDate = signal<Date>(new Date());
     activeCalendarDay = signal<number>(new Date().getDate());
 
     get calendarMonthLabel(): string {
@@ -131,7 +134,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
         return `${khmerMonths[d.getMonth()]} ${d.getFullYear()}`;
     }
 
-    get calendarDaysList(): Array<{ name: string; date: number; fullDate: Date; isCurrent: boolean }> {
+    get calendarDaysList(): Array<{ name: string; date: number; fullDate: Date; isCurrent: boolean; isToday: boolean }> {
         const base = new Date(this.calendarBaseDate());
         const dayOfWeek = base.getDay(); // 0 (Sun) to 6 (Sat)
         const diffToMonday = (dayOfWeek + 6) % 7; // Monday = 0
@@ -139,7 +142,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
         monday.setDate(base.getDate() - diffToMonday);
 
         const khmerDays = ['ចន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហ', 'សុក្រ', 'សៅរ៍', 'អាទិត្យ'];
-        const days: Array<{ name: string; date: number; fullDate: Date; isCurrent: boolean }> = [];
+        const days: Array<{ name: string; date: number; fullDate: Date; isCurrent: boolean; isToday: boolean }> = [];
+        const todayStr = new Date().toDateString();
+        const selectedStr = this.selectedCalendarDate().toDateString();
 
         for (let i = 0; i < 7; i++) {
             const d = new Date(monday);
@@ -148,7 +153,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
                 name: khmerDays[i],
                 date: d.getDate(),
                 fullDate: d,
-                isCurrent: d.getDate() === this.activeCalendarDay(),
+                isCurrent: d.toDateString() === selectedStr,
+                isToday: d.toDateString() === todayStr,
             });
         }
         return days;
@@ -319,6 +325,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
         const khmerMonths = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
         this.selectedDateRangeLabel.set(`${s.getDate()} ${khmerMonths[s.getMonth()]} - ${e.getDate()} ${khmerMonths[e.getMonth()]} ${e.getFullYear()}`);
         this.calendarBaseDate.set(s);
+        this.selectedCalendarDate.set(s);
         this.activeCalendarDay.set(s.getDate());
         this.closeDateFilter();
     }
@@ -400,7 +407,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
         this.initGreeting();
         this._userService.user$.subscribe((u) => {
             if (u) {
-                const name = (u as any).name_kh || (u as any).kh_name || (u as any).name_en || (u as any).en_name || (u as any).name || 'ពិសិទ្ធិ បញ្ញាវន្ត័';
+                const name = (u as any).name_kh || (u as any).kh_name || (u as any).name_en || (u as any).en_name || (u as any).name || 'អ្នកគ្រប់គ្រង';
                 this.userName.set(name);
 
                 const enName = (u as any).en_name || (u as any).name_en || '';
@@ -480,9 +487,9 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
                         this.kpiCards[2].change = res.data.kpi_badges.leaves || '0';
                     }
                     if (res.data.sparklines) {
-                        this.kpiCards[0].sparklineData = res.data.sparklines.members || [1, 2, 3, 4, 5];
-                        this.kpiCards[1].sparklineData = res.data.sparklines.projects || [1, 2, 1, 2, 2];
-                        this.kpiCards[2].sparklineData = res.data.sparklines.leaves || [0, 1, 0, 1, 1];
+                        this.kpiCards[0].sparklineData = res.data.sparklines.members || [0, 0, 0, 0, 0];
+                        this.kpiCards[1].sparklineData = res.data.sparklines.projects || [0, 0, 0, 0, 0];
+                        this.kpiCards[2].sparklineData = res.data.sparklines.leaves || [0, 0, 0, 0, 0];
                     }
                     if (res.data.scheduled_meetings && res.data.scheduled_meetings.length > 0) {
                         this.scheduledMeetings = res.data.scheduled_meetings.map((m: any) => ({
@@ -496,12 +503,16 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
                             members: m.members || [],
                             extraCount: m.extra_count ?? m.extraCount ?? 0,
                         }));
+                    } else {
+                        this.scheduledMeetings = [];
                     }
                     if (res.data.top_performers && res.data.top_performers.length > 0) {
                         this.performers = res.data.top_performers.map((p: any) => ({
                             ...p,
                             avatarBg: p.avatar_bg || p.avatarBg || 'bg-slate-700 text-white',
                         }));
+                    } else {
+                        this.performers = [];
                     }
                 }
                 this.loading.set(false);
@@ -519,22 +530,64 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
         this.activePerformerPeriod.set(period);
     }
 
-    selectCalendarDay(day: number): void {
-        this.activeCalendarDay.set(day);
+    selectCalendarDay(dayInput: Date | number): void {
+        if (dayInput instanceof Date) {
+            this.selectedCalendarDate.set(dayInput);
+            this.activeCalendarDay.set(dayInput.getDate());
+        } else {
+            const d = new Date(this.calendarBaseDate());
+            d.setDate(dayInput);
+            this.selectedCalendarDate.set(d);
+            this.activeCalendarDay.set(dayInput);
+        }
     }
 
     previousWeek(): void {
         const d = new Date(this.calendarBaseDate());
         d.setDate(d.getDate() - 7);
         this.calendarBaseDate.set(d);
-        this.activeCalendarDay.set(d.getDate());
+        const sel = new Date(this.selectedCalendarDate());
+        sel.setDate(sel.getDate() - 7);
+        this.selectedCalendarDate.set(sel);
+        this.activeCalendarDay.set(sel.getDate());
     }
 
     nextWeek(): void {
         const d = new Date(this.calendarBaseDate());
         d.setDate(d.getDate() + 7);
         this.calendarBaseDate.set(d);
-        this.activeCalendarDay.set(d.getDate());
+        const sel = new Date(this.selectedCalendarDate());
+        sel.setDate(sel.getDate() + 7);
+        this.selectedCalendarDate.set(sel);
+        this.activeCalendarDay.set(sel.getDate());
+    }
+
+    getProjectStatusBadgeClass(status: string): string {
+        switch (status) {
+            case 'active':
+                return 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40';
+            case 'completed':
+                return 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/40';
+            case 'on_hold':
+                return 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40';
+            default:
+                return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600';
+        }
+    }
+
+    getProjectStatusKhmer(status: string): string {
+        switch (status) {
+            case 'active':
+                return 'ដំណើរការ';
+            case 'completed':
+                return 'បានបញ្ចប់';
+            case 'on_hold':
+                return 'ផ្អាក';
+            case 'planning':
+                return 'គ្រោងទុក';
+            default:
+                return status || 'មិនទាន់កំណត់';
+        }
     }
 
     navigateTo(path: string): void {

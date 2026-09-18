@@ -94,7 +94,7 @@ export class DashboardService {
                     borderClass: sch.category === 'work' ? 'border-l-4 border-teal-600' : sch.category === 'breaks' ? 'border-l-4 border-rose-500' : 'border-l-4 border-indigo-500',
                     members: Array.isArray(sch.members)
                         ? sch.members.map((m: any) => m.initials || m.name?.slice(0, 2)?.toUpperCase() || 'MB')
-                        : ['PP', 'PB'],
+                        : [],
                     extraCount: Math.max(0, (sch.members?.length || 0) - 2),
                 };
             });
@@ -234,16 +234,16 @@ export class DashboardService {
 
         // 8. KPI SPARKLINE ARRAYS
         const membersSparkline = [
-            Math.max(1, totalUsers - 3),
-            Math.max(2, totalUsers - 2),
-            Math.max(3, totalUsers - 1),
+            Math.max(0, totalUsers - 3),
+            Math.max(0, totalUsers - 2),
+            Math.max(0, totalUsers - 1),
             totalUsers,
             totalUsers,
             totalUsers,
         ];
         const projectsSparkline = [
+            Math.max(0, activeProjects - 2),
             Math.max(0, activeProjects - 1),
-            Math.max(1, activeProjects),
             activeProjects,
             activeProjects,
             activeProjects,
@@ -253,7 +253,53 @@ export class DashboardService {
             pendingLeaves,
             Math.max(0, pendingLeaves),
             pendingLeaves,
+            pendingLeaves,
         ];
+
+        // 9. DYNAMIC DEPARTMENT STATS (from allUsers)
+        const deptMap = new Map<string, { members: number; name_en: string }>();
+        allUsers.forEach((u) => {
+            const dept = u.department || 'ទូទៅ';
+            const cur = deptMap.get(dept) || { members: 0, name_en: dept };
+            cur.members++;
+            deptMap.set(dept, cur);
+        });
+        const dynamicDeptStats = Array.from(deptMap.entries()).map(([deptName, val]) => ({
+            name: deptName,
+            name_en: val.name_en,
+            members: val.members,
+            progress: completionRate,
+        }));
+
+        // 10. DYNAMIC RECENT ACTIVITY (from real tasks, projects & leaves)
+        const dynamicRecentActivity: Array<{ id: string; text: string; user: string; time: string }> = [];
+        rawTasks.slice(-3).reverse().forEach((t: any, idx: number) => {
+            const title = t.name || t.title || `Task #${idx + 1}`;
+            const isDone = (t.status || '').toLowerCase() === 'completed' || (t.status || '').toLowerCase() === 'done';
+            dynamicRecentActivity.push({
+                id: `task-act-${t.id || idx}`,
+                text: isDone ? `បានបញ្ចប់ភារកិច្ច "${title}"` : `បានធ្វើបច្ចុប្បន្នភាពភារកិច្ច "${title}"`,
+                user: t.assignee?.name || t.assignee?.name_kh || 'សមាជិកក្រុម',
+                time: 'ថ្មីៗនេះ',
+            });
+        });
+        allLeaves.slice(-2).reverse().forEach((l: any, idx: number) => {
+            const statusKh = l.status === 'approved' ? 'បានអនុម័ត' : l.status === 'rejected' ? 'បានបដិសេធ' : 'រង់ចាំការអនុម័ត';
+            dynamicRecentActivity.push({
+                id: `leave-act-${l.id || idx}`,
+                text: `សំណើសុំច្បាប់ (${l.leave_type || 'ប្រចាំឆ្នាំ'}) ស្ថានភាព ${statusKh}`,
+                user: l.user_name || 'បុគ្គលិក',
+                time: 'ថ្មីៗនេះ',
+            });
+        });
+        rawProjects.slice(-2).reverse().forEach((p: any, idx: number) => {
+            dynamicRecentActivity.push({
+                id: `proj-act-${p.id || idx}`,
+                text: `គម្រោង "${p.name}" ដំណើរការបាន ${p.progress || 0}%`,
+                user: p.members?.[0]?.name || 'ប្រធានគម្រោង',
+                time: 'ថ្មីៗនេះ',
+            });
+        });
 
         return {
             status_code: 200,
@@ -318,17 +364,8 @@ export class DashboardService {
                     completed_tasks: p.completed_tasks || 0,
                     lead: p.members?.[0]?.name || 'Project Lead',
                 })),
-                department_stats: [
-                    { name: 'ព័ត៌មានវិទ្យា (IT)', name_en: 'Information Technology', members: 14, progress: 85 },
-                    { name: 'គ្រប់គ្រងគម្រោង (PMO)', name_en: 'Project Management', members: 6, progress: 75 },
-                    { name: 'រចនា UI/UX', name_en: 'Product Design', members: 5, progress: 90 },
-                    { name: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)', name_en: 'DevOps & Security', members: 4, progress: 70 },
-                ],
-                recent_activity: [
-                    { id: 'act-1', text: 'បានបង្កើតគម្រោងថ្មី WFM-V2 ជោគជ័យ', user: 'សុខ សុភា', time: '១០ នាទីមុន' },
-                    { id: 'act-2', text: 'បានអនុម័តច្បាប់ឈប់សម្រាករបស់ រ័ត្ន វិចិត្រ', user: 'Admin', time: '១ ម៉ោងមុន' },
-                    { id: 'act-3', text: 'បានបញ្ចប់ Task #WMS-0001 នៅក្នុងប្រព័ន្ធ WMS', user: 'ចេង ច័ន្ទបញ្ញា', time: '៣ ម៉ោងមុន' },
-                ],
+                department_stats: dynamicDeptStats,
+                recent_activity: dynamicRecentActivity,
             },
         };
     }

@@ -162,35 +162,121 @@
                     </div>
                 </div>
 
-                <!-- 2-Column Grid of Performers -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-4">
-                    @for (p of displayedPerformers; track p.id) {
-                        <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-700/40 hover:bg-slate-100/80 dark:hover:bg-slate-700 transition-all flex items-center justify-between group border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div [class]="'w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center text-[13px] font-medium shrink-0 shadow-2xs ' + p.avatarBg">
-                                    {{ p.initials }}
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="text-[15px] font-medium text-slate-900 dark:text-white truncate">
-                                        {{ p.name }}
-                                    </div>
-                                    <div class="text-[13px] text-slate-500 dark:text-slate-400 truncate font-medium">
-                                        {{ p.email }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2 shrink-0">
-                                <span class="px-2 py-0.5 rounded-lg text-[11.5px] font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
-                                    {{ p.displayCount }} កិច្ចការ
-                                </span>
-                                <button type="button" class="w-8 h-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center cursor-pointer">
-                                    <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
-                                </button>
-                            </div>
+                <!-- Performers Grid or Empty State -->
+                @if (displayedPerformers.length === 0) {
+                    <div class="py-8 flex flex-col items-center justify-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center text-slate-400 mb-2">
+                            <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-6"></mat-icon>
                         </div>
-                    }
+                        <p class="text-[14px] text-slate-500 dark:text-slate-400 font-medium">មិនទាន់មានទិន្នន័យបុគ្គលិកនៅឡើយទេ</p>
+                    </div>
+                } @else {
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-4">
+                        @for (p of displayedPerformers; track p.id) {
+                            <div class="p-3.5 rounded-xl bg-slate-50/70 dark:bg-slate-700/40 hover:bg-slate-100/80 dark:hover:bg-slate-700 transition-all flex items-center justify-between group border border-transparent hover:border-slate-200 dark:hover:border-slate-600">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full overflow-hidden flex items-center justify-center text-[13px] font-medium shrink-0 shadow-2xs" [class]="p.avatarBg">
+                                        @if (resolveFileUrl(p.avatar)) {
+                                            <img [src]="resolveFileUrl(p.avatar)" [alt]="p.name" class="w-full h-full object-cover" />
+                                        } @else {
+                                            <span>{{ p.initials }}</span>
+                                        }
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-[15px] font-medium text-slate-900 dark:text-white truncate">
+                                            {{ p.name }}
+                                        </div>
+                                        <div class="text-[13px] text-slate-500 dark:text-slate-400 truncate font-medium">
+                                            {{ p.email }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="px-2 py-0.5 rounded-lg text-[11.5px] font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+                                        {{ p.displayCount }} កិច្ចការ
+                                    </span>
+                                    <button
+                                        type="button"
+                                        (click)="navigateTo('/admin/users')"
+                                        matTooltip="គ្រប់គ្រងបុគ្គលិក"
+                                        class="w-8 h-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-600/50 flex items-center justify-center cursor-pointer transition-colors">
+                                        <mat-icon svgIcon="mdi:dots-vertical" class="icon-size-4"></mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- 4. Active Projects Progress Overview -->
+            <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700/80">
+                    <div>
+                        <h3 class="text-[18px] font-medium text-slate-900 dark:text-white">
+                            ដំណើរការគម្រោងសកម្ម
+                        </h3>
+                        <p class="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                            ស្ថានភាព និងវឌ្ឍនភាពគម្រោងក្នុងប្រព័ន្ធ
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        (click)="navigateTo('/admin/projects')"
+                        class="text-[13.5px] font-medium text-teal-700 dark:text-teal-400 hover:underline flex items-center gap-1 cursor-pointer">
+                        <span>មើលគម្រោងទាំងអស់</span>
+                        <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4"></mat-icon>
+                    </button>
                 </div>
+
+                @if (!stats().projects_summary || stats().projects_summary.length === 0) {
+                    <div class="py-8 flex flex-col items-center justify-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center text-slate-400 mb-2">
+                            <mat-icon svgIcon="mdi:folder-outline" class="icon-size-6"></mat-icon>
+                        </div>
+                        <p class="text-[14px] text-slate-500 dark:text-slate-400 font-medium">
+                            មិនទាន់មានគម្រោងសកម្មនៅឡើយទេ
+                        </p>
+                    </div>
+                } @else {
+                    <div class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                        @for (proj of stats().projects_summary.slice(0, 5); track proj.id) {
+                            <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-slate-50/50 dark:hover:bg-slate-700/20 rounded-xl px-2 -mx-2 transition-colors cursor-pointer"
+                                 (click)="navigateTo('/admin/projects')">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[12px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                            {{ proj.code }}
+                                        </span>
+                                        <span class="text-[15px] font-medium text-slate-900 dark:text-white truncate">
+                                            {{ proj.name }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-[12.5px] text-slate-500 dark:text-slate-400 mt-1.5 font-medium">
+                                        <span>ប្រធាន: {{ proj.lead }}</span>
+                                        <span>កិច្ចការ: {{ proj.completed_tasks }}/{{ proj.total_tasks }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-4 shrink-0 sm:w-56">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between text-[12px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                                            <span>វឌ្ឍនភាព</span>
+                                            <span>{{ proj.progress || 0 }}%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                                            <div class="bg-teal-600 h-full rounded-full transition-all duration-300" [style.width.%]="proj.progress || 0"></div>
+                                        </div>
+                                    </div>
+                                    <span [class]="'px-2.5 py-1 rounded-lg text-[11.5px] font-medium shrink-0 ' + getProjectStatusBadgeClass(proj.status)">
+                                        {{ getProjectStatusKhmer(proj.status) }}
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
 
         </div>
@@ -206,9 +292,27 @@
                 
                 <!-- Month Selector & Date Range Filter Header -->
                 <div class="flex items-center justify-between pb-3 relative">
-                    <h3 class="text-[17px] font-medium text-slate-900 dark:text-white">
-                        {{ calendarMonthLabel }}
-                    </h3>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-[17px] font-medium text-slate-900 dark:text-white">
+                            {{ calendarMonthLabel }}
+                        </h3>
+                        <div class="flex items-center gap-1 ml-1">
+                            <button
+                                type="button"
+                                (click)="previousWeek()"
+                                matTooltip="សប្តាហ៍មុន"
+                                class="w-7 h-7 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer shadow-2xs">
+                                <mat-icon svgIcon="mdi:chevron-left" class="icon-size-4"></mat-icon>
+                            </button>
+                            <button
+                                type="button"
+                                (click)="nextWeek()"
+                                matTooltip="សប្តាហ៍បន្ទាប់"
+                                class="w-7 h-7 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer shadow-2xs">
+                                <mat-icon svgIcon="mdi:chevron-right" class="icon-size-4"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
 
                     <div class="flex items-center gap-2">
                         <!-- Date Range Filter Trigger Button & Dropdown Popover -->
@@ -324,11 +428,11 @@
                 <div class="grid grid-cols-7 text-center gap-1 mt-2 pb-4 border-b border-slate-100 dark:border-slate-700/80">
                     @for (day of calendarDaysList; track day.name + day.date) {
                         <div
-                            (click)="selectCalendarDay(day.date)"
+                            (click)="selectCalendarDay(day.fullDate)"
                             class="flex flex-col items-center py-1.5 rounded-xl cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-slate-700/40">
                             <span class="text-[11.5px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ day.name }}</span>
                             <span
-                                [class]="activeCalendarDay() === day.date ? 'mt-1 w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium bg-teal-800 text-white shadow-xs' : 'mt-1 w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium text-slate-700 dark:text-slate-300'">
+                                [class]="day.isCurrent ? 'mt-1 w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium bg-teal-800 text-white shadow-xs' : (day.isToday ? 'mt-1 w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium text-teal-700 dark:text-teal-400 border border-teal-600/40 dark:border-teal-400/40' : 'mt-1 w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium text-slate-700 dark:text-slate-300')">
                                 {{ day.date }}
                             </span>
                         </div>
@@ -337,48 +441,66 @@
 
                 <!-- Meeting Schedule Timeline List -->
                 <div class="mt-5 space-y-4">
-                    @for (m of scheduledMeetings; track m.id) {
-                        <div>
-                            @if ($index === 0 && m.dateGroup === 'today') {
-                                <div class="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                                    {{ m.dateLabel }}
-                                </div>
-                            } @else if (m.dateGroup === 'upcoming' && ($index === 0 || scheduledMeetings[$index - 1]?.dateGroup !== 'upcoming')) {
-                                <div class="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 mt-4">
-                                    {{ m.dateLabel }}
-                                </div>
-                            }
+                    @if (scheduledMeetings.length === 0) {
+                        <div class="py-7 flex flex-col items-center justify-center text-center">
+                            <div class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center text-slate-400 mb-2">
+                                <mat-icon svgIcon="mdi:calendar-blank-outline" class="icon-size-5"></mat-icon>
+                            </div>
+                            <p class="text-[13.5px] text-slate-500 dark:text-slate-400 font-medium">
+                                មិនមានកាលវិភាគ ឬការប្រជុំដែលបានកំណត់ទេ
+                            </p>
+                            <button
+                                type="button"
+                                (click)="navigateTo('/admin/planner')"
+                                class="mt-3 px-3.5 py-1.5 rounded-xl bg-teal-800 text-white text-[13px] font-medium hover:bg-teal-900 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                <mat-icon svgIcon="mdi:calendar-plus" class="icon-size-4"></mat-icon>
+                                <span>បើកកាលវិភាគ</span>
+                            </button>
+                        </div>
+                    } @else {
+                        @for (m of scheduledMeetings; track m.id) {
+                            <div>
+                                @if ($index === 0 && m.dateGroup === 'today') {
+                                    <div class="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                                        {{ m.dateLabel }}
+                                    </div>
+                                } @else if (m.dateGroup === 'upcoming' && ($index === 0 || scheduledMeetings[$index - 1]?.dateGroup !== 'upcoming')) {
+                                    <div class="text-[12px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 mt-4">
+                                        {{ m.dateLabel }}
+                                    </div>
+                                }
 
-                            <!-- Meeting Item Box with Crisp Accent Bar -->
-                            <div class="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-700/40 hover:bg-slate-100/80 dark:hover:bg-slate-700/60 transition-all flex items-center justify-between border border-slate-100/80 dark:border-slate-700/50 group">
-                                <div class="flex items-center gap-3 min-w-0 pr-2">
-                                    <div class="w-1.5 self-stretch min-h-[36px] rounded-full shrink-0" [style.backgroundColor]="m.badgeColor"></div>
-                                    <div class="min-w-0">
-                                        <div class="text-[14px] font-medium text-slate-900 dark:text-white leading-snug truncate">
-                                            {{ m.title }}
-                                        </div>
-                                        <div class="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium flex items-center gap-1.5">
-                                            <mat-icon svgIcon="mdi:clock-outline" class="icon-size-3.5 text-slate-400 shrink-0"></mat-icon>
-                                            <span class="truncate">{{ m.time }}</span>
+                                <!-- Meeting Item Box with Crisp Accent Bar -->
+                                <div class="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-700/40 hover:bg-slate-100/80 dark:hover:bg-slate-700/60 transition-all flex items-center justify-between border border-slate-100/80 dark:border-slate-700/50 group">
+                                    <div class="flex items-center gap-3 min-w-0 pr-2">
+                                        <div class="w-1.5 self-stretch min-h-[36px] rounded-full shrink-0" [style.backgroundColor]="m.badgeColor"></div>
+                                        <div class="min-w-0">
+                                            <div class="text-[14px] font-medium text-slate-900 dark:text-white leading-snug truncate">
+                                                {{ m.title }}
+                                            </div>
+                                            <div class="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium flex items-center gap-1.5">
+                                                <mat-icon svgIcon="mdi:clock-outline" class="icon-size-3.5 text-slate-400 shrink-0"></mat-icon>
+                                                <span class="truncate">{{ m.time }}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Avatars Stack -->
-                                <div class="flex items-center shrink-0 pl-2">
-                                    @for (init of (m.members || []).slice(0, 2); track $index) {
-                                        <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + ($index === 0 ? 'bg-slate-700' : 'bg-teal-700') + ' text-white flex items-center justify-center text-[10px] font-medium ring-2 ring-white dark:ring-slate-800 shadow-xs ' + ($index > 0 ? '-ml-2' : '')">
-                                            {{ init }}
-                                        </div>
-                                    }
-                                    @if (m.extraCount > 0) {
-                                        <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center text-[10px] font-medium ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-xs">
-                                            +{{ m.extraCount }}
-                                        </div>
-                                    }
+                                    <!-- Avatars Stack -->
+                                    <div class="flex items-center shrink-0 pl-2">
+                                        @for (init of (m.members || []).slice(0, 2); track $index) {
+                                            <div [class]="'w-7 h-7 min-w-[28px] min-h-[28px] rounded-full ' + ($index === 0 ? 'bg-slate-700' : 'bg-teal-700') + ' text-white flex items-center justify-center text-[10px] font-medium ring-2 ring-white dark:ring-slate-800 shadow-xs ' + ($index > 0 ? '-ml-2' : '')">
+                                                {{ init }}
+                                            </div>
+                                        }
+                                        @if (m.extraCount > 0) {
+                                            <div class="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center text-[10px] font-medium ring-2 ring-white dark:ring-slate-800 -ml-2 shadow-xs">
+                                                +{{ m.extraCount }}
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     }
                 </div>
             </div>
@@ -461,6 +583,51 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- 3. Recent Activity Card -->
+            <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/80">
+                    <div>
+                        <h4 class="text-[17px] font-medium text-slate-900 dark:text-white">
+                            សកម្មភាពថ្មីៗ
+                        </h4>
+                        <p class="text-[13px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                            ព្រឹត្តិការណ៍ និងការផ្លាស់ប្តូរថ្មីៗ
+                        </p>
+                    </div>
+                </div>
+
+                @if (!stats().recent_activity || stats().recent_activity.length === 0) {
+                    <div class="py-6 flex flex-col items-center justify-center text-center">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center text-slate-400 mb-2">
+                            <mat-icon svgIcon="mdi:history" class="icon-size-5"></mat-icon>
+                        </div>
+                        <p class="text-[13px] text-slate-500 dark:text-slate-400 font-medium">
+                            មិនទាន់មានសកម្មភាពថ្មីៗទេ
+                        </p>
+                    </div>
+                } @else {
+                    <div class="mt-4 space-y-3">
+                        @for (act of stats().recent_activity; track act.id) {
+                            <div class="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-700/30 flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-400 flex items-center justify-center shrink-0 mt-0.5">
+                                    <mat-icon svgIcon="mdi:bell-outline" class="icon-size-4"></mat-icon>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[13.5px] font-medium text-slate-800 dark:text-slate-200 leading-snug">
+                                        {{ act.text }}
+                                    </p>
+                                    <div class="flex items-center gap-2 mt-1 text-[12px] text-slate-500 dark:text-slate-400 font-medium">
+                                        <span>{{ act.user }}</span>
+                                        <span>•</span>
+                                        <span>{{ act.time }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
 
         </div>
