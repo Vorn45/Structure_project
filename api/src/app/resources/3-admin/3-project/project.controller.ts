@@ -1,13 +1,17 @@
-// ===========================================================================>> Core Library
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import express from 'express';
 
 // ===========================================================================>> Custom Library
 import { AdminProjectService } from './project.service';
 import { QueryAdminProjectDto, UpdateProjectBudgetDto, UpdateProjectLeadDto } from './project.dto';
+import { RoleGuard } from 'src/app/common/guards/role.guard';
+import { Roles } from 'src/app/common/decorators/roles.decorator';
 
 @Controller('projects')
+@UseGuards(RoleGuard)
+@Roles('superadmin', 'org_admin')
 export class AdminProjectController {
+
     constructor(private readonly _service: AdminProjectService) {}
 
     @Get('')

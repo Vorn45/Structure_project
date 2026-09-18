@@ -1,11 +1,8 @@
-// ===========================================================================>> Core Library
 import { SetMetadata } from '@nestjs/common';
+import { RoleEnum, RoleSlug } from 'src/app/enum/role.enum';
 
-// ===========================================================================>> Custom Library
-// > Local
-import { RoleEnum } from 'src/app/enum/role.enum';
-
-// ======================================= >> Code Starts Here << ========================== //
 export const ROLES_KEY = 'roles';
 
-export const Roles = (...roles: RoleEnum[]) => SetMetadata(ROLES_KEY, roles);
+export const Roles = (...roles: (RoleEnum | RoleSlug | string)[]) =>
+    SetMetadata(ROLES_KEY, roles);
+

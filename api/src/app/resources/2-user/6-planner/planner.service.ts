@@ -5,7 +5,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { PlannerStore } from 'src/app/model/user/planner-store.entity';
+
 import { CreateScheduleDto, QueryPlannerDto, UpdateScheduleDto } from './planner.dto';
 
 export interface PlannerScheduleItem {
@@ -274,15 +276,8 @@ export class PlannerService {
     // =========================================================================
     async getSchedules(user: UserPayload, query: QueryPlannerDto) {
         const allSchedules = await this._readSchedules();
-        const userRoles = Array.isArray(user?.roles) ? user.roles : [];
-        const phoneClean = (user?.phone || '').replace(/\D/g, '');
-        const isRootAdmin = phoneClean === '010843612' || phoneClean === '087280875' || user?.id === 5 || user?.id === 6;
-        const hasAdminRole = userRoles.some((r: any) => {
-            const slug = (r.slug || '').toLowerCase();
-            const en = (r.name_en || '').toLowerCase();
-            return slug.includes('admin') || slug.includes('owner') || en.includes('admin');
-        });
-        const isAdmin = Boolean(user && (isRootAdmin || hasAdminRole));
+        const isAdmin = Boolean(user && isAdminOrSuperAdmin(user));
+
 
         const currentUserId = user?.id;
         const nameKh = user?.name_kh?.trim()?.toLowerCase() || '';

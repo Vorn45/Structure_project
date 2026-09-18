@@ -1,11 +1,14 @@
-// ===========================================================================>> Core Library
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import express from 'express';
 
 // ===========================================================================>> Custom Library
 import { DashboardService } from './dashboard.service';
+import { RoleGuard } from 'src/app/common/guards/role.guard';
+import { Roles } from 'src/app/common/decorators/roles.decorator';
 
 @Controller('dashboard')
+@UseGuards(RoleGuard)
+@Roles('superadmin', 'org_admin')
 export class DashboardController {
     constructor(private readonly _service: DashboardService) {}
 
@@ -21,6 +24,8 @@ export class DashboardController {
 }
 
 @Controller('stats')
+@UseGuards(RoleGuard)
+@Roles('superadmin', 'org_admin')
 export class StatsController {
     constructor(private readonly _service: DashboardService) {}
 
@@ -29,3 +34,4 @@ export class StatsController {
         return this._service.getStats(res.locals.user);
     }
 }
+

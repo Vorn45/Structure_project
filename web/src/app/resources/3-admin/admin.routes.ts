@@ -63,13 +63,13 @@ export default [
     },
     {
         path: 'financials',
-        loadComponent: () =>
-            import('./5-settings/component').then((m) => m.AdminSettingsComponent),
+        pathMatch: 'full',
+        redirectTo: 'settings',
     },
     {
         path: 'reports',
-        loadComponent: () =>
-            import('./1-dashboard/component').then((m) => m.AdminDashboardComponent),
+        pathMatch: 'full',
+        redirectTo: 'dashboard',
     },
     {
         path: 'admin',

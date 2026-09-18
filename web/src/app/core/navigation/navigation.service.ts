@@ -21,8 +21,11 @@ export class NavigationService {
     }
 
     set navigations(role: Role) {
-        switch (role.slug) {
+        const slug = (role?.slug || '').toLowerCase().trim();
+        switch (slug) {
             case 'org_admin':
+            case 'org-admin':
+            case 'orgadmin':
                 this._rawItems = navigationData.orgAdmin;
                 break;
             case 'personal_workspace':
@@ -32,6 +35,10 @@ export class NavigationService {
                 this._rawItems = navigationData.member;
                 break;
             case 'superadmin':
+            case 'super_admin':
+            case 'super-admin':
+                this._rawItems = navigationData.superAdmin;
+                break;
             case 'admin':
             default:
                 this._rawItems = navigationData.admin;

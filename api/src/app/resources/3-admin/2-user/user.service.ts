@@ -202,48 +202,9 @@ export class AdminUserService implements OnModuleInit {
     }
 
     async onModuleInit(): Promise<void> {
-        try {
-            await this.autoHealUserRoles();
-        } catch (e: any) {
-            console.warn('[AdminUserService] autoHealUserRoles warning:', e?.message || e);
-        }
+        // Initialization without overriding real database roles
     }
 
-    private async autoHealUserRoles(): Promise<void> {
-        const userRole = await this._roleRepo.findOne({ where: { slug: 'user' } });
-        if (!userRole) return;
-
-        const users = await this._userRepo.find({
-            relations: ['user_roles', 'user_roles.role'],
-        });
-
-        const superadminPhones = ['010843612', '087280875'];
-
-        for (const u of users) {
-            const phoneClean = (u.phone || '').replace(/\D/g, '');
-
-            const isGenuineSuperadmin =
-                superadminPhones.includes(phoneClean) || u.id === 5 || u.id === 6;
-
-            if (!isGenuineSuperadmin) {
-                const meta = this.getUserMeta(u.id, u.email, u.phone);
-                const roleName = (meta?.role || '').toLowerCase();
-                const isExplicitAdmin = roleName.includes('super admin') || roleName.includes('superadmin');
-
-                // If not genuine superadmin and not explicitly set as Super Admin in meta,
-                // ensure they don't hold role_id: 1 (superadmin)
-                if (!isExplicitAdmin) {
-                    for (const ur of u.user_roles || []) {
-                        if (ur.role?.slug === 'superadmin' || ur.role?.slug === 'org_admin') {
-                            ur.role_id = userRole.id;
-                            await this._userRoleRepo.save(ur);
-                            console.log(`[AdminUserService] Auto-healed role for user #${u.id} (${u.name_en || u.name_kh}) to user role.`);
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private loadFromDisk(): void {
         try {

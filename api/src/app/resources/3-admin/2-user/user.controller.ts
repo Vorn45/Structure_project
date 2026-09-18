@@ -1,5 +1,4 @@
-// ===========================================================================>> Core Library
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import express from 'express';
 
@@ -7,9 +6,14 @@ import express from 'express';
 import { AdminUserService } from './user.service';
 import { CreateAdminUserDto, InviteUserDto, QueryAdminUserDto, QueryInvitationsDto, UpdateAdminUserDto } from './user.dto';
 import { IMAGE_UPLOAD_OPTIONS } from 'src/app/shared/file/file-upload.util';
+import { RoleGuard } from 'src/app/common/guards/role.guard';
+import { Roles } from 'src/app/common/decorators/roles.decorator';
 
 @Controller('users')
+@UseGuards(RoleGuard)
+@Roles('superadmin', 'org_admin')
 export class AdminUserController {
+
     constructor(private readonly _service: AdminUserService) {}
 
     @Get('invitations')

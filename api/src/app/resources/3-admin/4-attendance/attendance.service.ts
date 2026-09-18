@@ -1,10 +1,12 @@
 // ===========================================================================>> Core Library
-import { Injectable, NotFoundException } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { User } from 'src/app/model/user/users.entity';
+import { LeaveRequest } from 'src/app/model/organization/leave-request.entity';
 import { ActionLeaveDto } from './attendance.dto';
 
 export interface AdminLeaveItem {
@@ -22,79 +24,75 @@ export interface AdminLeaveItem {
     reviewer_comment?: string;
 }
 
-const DEFAULT_LEAVES: AdminLeaveItem[] = [
+const DEFAULT_LEAVES = [
     {
-        id: 'lv-101',
         user_id: 3,
         user_name: 'រ័ត្ន វិចិត្រ',
         department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)',
-        leave_type: 'annual',
+        leave_type: 'annual' as const,
         start_date: '2026-09-10',
         end_date: '2026-09-12',
         duration_days: 3,
         reason: 'សម្រាកលំហែកាយប្រចាំឆ្នាំជាមួយក្រុមគ្រួសារ',
-        status: 'pending',
-        applied_at: '2026-09-04T09:30:00.000Z',
+        status: 'pending' as const,
     },
     {
-        id: 'lv-102',
         user_id: 5,
         user_name: 'កែវ ធីតា',
         department: 'រចនា និងបទពិសោធន៍ (UI/UX)',
-        leave_type: 'sick',
+        leave_type: 'sick' as const,
         start_date: '2026-09-01',
         end_date: '2026-09-02',
         duration_days: 2,
         reason: 'ឈឺក្បាល ផ្ដាសាយ និងគ្រុនក្តៅ',
-        status: 'approved',
-        applied_at: '2026-08-31T14:00:00.000Z',
+        status: 'approved' as const,
         reviewer_comment: 'អនុញ្ញាត សូមសម្រាកព្យាបាលឱ្យឆាប់ជាសះស្បើយ',
     },
 ];
 
 @Injectable()
-export class AdminAttendanceService {
-    private leaves: AdminLeaveItem[] = [...DEFAULT_LEAVES];
-    private readonly storeFilePath = path.join(process.cwd(), 'storage', 'admin_leaves_store.json');
+export class AdminAttendanceService implements OnModuleInit {
+    constructor(
+        @InjectRepository(LeaveRequest)
+        private readonly _leaveRepo: Repository<LeaveRequest>,
+        @InjectRepository(User)
+        private readonly _userRepo: Repository<User>,
+    ) {}
 
-    constructor() {
-        this.loadFromDisk();
-    }
-
-    getRawLeaves(): AdminLeaveItem[] {
-        return this.leaves;
-    }
-
-    private loadFromDisk(): void {
+    async onModuleInit() {
         try {
-            if (fs.existsSync(this.storeFilePath)) {
-                const raw = fs.readFileSync(this.storeFilePath, 'utf8');
-                const data = JSON.parse(raw);
-                if (data && Array.isArray(data)) this.leaves = data;
+            const count = await this._leaveRepo.count();
+            if (count === 0) {
+                for (const item of DEFAULT_LEAVES) {
+                    await this._leaveRepo.save(this._leaveRepo.create(item));
+                }
             }
         } catch (e) {
-            console.warn('Failed to load leaves from disk:', e);
+            console.warn('[AdminAttendanceService] initial leaves seed warning:', e);
         }
     }
 
-    private saveToDisk(): void {
-        try {
-            const dir = path.dirname(this.storeFilePath);
-            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-            fs.writeFileSync(this.storeFilePath, JSON.stringify(this.leaves, null, 2), 'utf8');
-        } catch (e) {
-            console.warn('Failed to save leaves to disk:', e);
-        }
+    async getRawLeaves(): Promise<LeaveRequest[]> {
+        return this._leaveRepo.find({ order: { created_at: 'DESC' } });
     }
 
     async getOverview(user: UserPayload) {
+        let totalStaff = 6;
+        try {
+            totalStaff = await this._userRepo.count({ where: { is_active: 1 } }) || 6;
+        } catch {
+            totalStaff = 6;
+        }
+
+        const pendingLeaves = await this._leaveRepo.count({ where: { status: 'pending' } }).catch(() => 1);
+
         return {
             status_code: 200,
             data: {
-                total_staff: 6,
-                present_today: 5,
+                total_staff: totalStaff,
+                present_today: Math.max(1, totalStaff - pendingLeaves),
                 late_today: 1,
-                on_leave: 1,
+                on_leave: pendingLeaves,
                 logs: [
                     { id: 'att-1', user_name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', user_en: 'Piseth Panhavorn', department: 'ព័ត៌មានវិទ្យា (IT)', check_in: '07:55 AM', check_out: '05:30 PM', status: 'on_time' },
                     { id: 'att-2', user_name: 'ពុំ ប្រុសមុន្នី', user_en: 'Pum Brusmuny', department: 'គ្រប់គ្រងគម្រោង (PMO)', check_in: '07:58 AM', check_out: null, status: 'on_time' },
@@ -107,24 +105,46 @@ export class AdminAttendanceService {
     }
 
     async getLeaves(user: UserPayload) {
+        const list = await this._leaveRepo.find({
+            order: { created_at: 'DESC' },
+        });
+
+        const formatted = list.map((l) => ({
+            id: l.id,
+            user_id: l.user_id,
+            user_name: l.user_name,
+            department: l.department,
+            leave_type: l.leave_type,
+            start_date: l.start_date,
+            end_date: l.end_date,
+            duration_days: l.duration_days,
+            reason: l.reason,
+            status: l.status,
+            applied_at: l.created_at.toISOString(),
+            reviewer_comment: l.reviewer_comment,
+        }));
+
         return {
             status_code: 200,
-            data: this.leaves,
+            data: formatted,
         };
     }
 
     async actionLeave(user: UserPayload, id: string, dto: ActionLeaveDto) {
-        const item = this.leaves.find((l) => l.id === id);
+        const item = await this._leaveRepo.findOne({ where: { id } });
         if (!item) throw new NotFoundException(`Leave request "${id}" not found`);
 
         item.status = dto.status;
         if (dto.comment) item.reviewer_comment = dto.comment;
-        this.saveToDisk();
+        item.reviewer_id = user?.id;
+
+        const updated = await this._leaveRepo.save(item);
 
         return {
             status_code: 200,
             message: `Leave request ${dto.status} successfully`,
-            data: item,
+            data: updated,
         };
     }
 }
+
