@@ -419,18 +419,12 @@ export class UserManagementComponent implements OnInit {
                     );
                     this.saving.set(false);
                     this.closeDrawer();
+                    this._snackbar?.success('បានកែប្រែព័ត៌មានអ្នកប្រើប្រាស់ដោយជោគជ័យ');
                 },
                 error: (err) => {
                     console.error('Failed to update user on server:', err);
-                    const updated: AdminUser = {
-                        ...this.selectedUser()!,
-                        ...formVal,
-                    };
-                    this.users.update((list) =>
-                        list.map((u) => (u.id === updated.id ? updated : u)),
-                    );
                     this.saving.set(false);
-                    this.closeDrawer();
+                    this._snackbar?.error(err?.error?.message || 'បរាជ័យក្នុងការកែប្រែព័ត៌មានអ្នកប្រើប្រាស់');
                 },
             });
         } else {
@@ -449,33 +443,19 @@ export class UserManagementComponent implements OnInit {
                     this.users.update((list) => [res.data, ...list]);
                     this.saving.set(false);
                     this.closeDrawer();
+                    this._snackbar?.success('បានបង្កើតគណនីអ្នកប្រើប្រាស់ថ្មីដោយជោគជ័យ');
                 },
                 error: (err) => {
                     console.error('Failed to create user on server:', err);
-                    const newUser: AdminUser = {
-                        id: Date.now(),
-                        name_kh: formVal.name_kh || '',
-                        name_en: formVal.name_en || '',
-                        email: formVal.email || '',
-                        phone: formVal.phone || '',
-                        role: formVal.role || 'Member',
-                        department: formVal.department || 'ព័ត៌មានវិទ្យា (IT)',
-                        position: formVal.position || 'Staff',
-                        is_active: formVal.is_active ?? 1,
-                        projects_count: 0,
-                        avatar: formVal.avatar || '/images/placeholder/avatar.jpg',
-                        created_at: new Date().toISOString(),
-                        ...formVal,
-                    };
-                    this.users.update((list) => [newUser, ...list]);
                     this.saving.set(false);
-                    this.closeDrawer();
+                    this._snackbar?.error(err?.error?.message || 'បរាជ័យក្នុងការបង្កើតគណនីអ្នកប្រើប្រាស់');
                 },
             });
         }
     }
 
     toggleStatus(user: AdminUser): void {
+        const prevActive = user.is_active;
         const nextActive = user.is_active === 1 ? 0 : 1;
         // Optimistic update
         this.users.update((list) =>
@@ -489,9 +469,14 @@ export class UserManagementComponent implements OnInit {
                         list.map((u) => (u.id === res.data.id ? res.data : u)),
                     );
                 }
+                this._snackbar?.success(`បានផ្លាស់ប្តូរស្ថានភាពទៅជា ${nextActive === 1 ? 'សកម្ម' : 'អសកម្ម'}`);
             },
             error: (err) => {
                 console.error('Failed to toggle status on server:', err);
+                this.users.update((list) =>
+                    list.map((u) => (u.id === user.id ? { ...u, is_active: prevActive } : u)),
+                );
+                this._snackbar?.error('បរាជ័យក្នុងការផ្លាស់ប្តូរស្ថានភាព');
             },
         });
     }
@@ -505,13 +490,20 @@ export class UserManagementComponent implements OnInit {
         const target = this.deleteTarget();
         if (!target) return;
 
+        const previousList = this.users();
         this.users.update((list) => list.filter((u) => u.id !== target.id));
         this.showDeleteModal.set(false);
         this.deleteTarget.set(null);
 
         this._adminService.deleteUser(target.id).subscribe({
-            next: () => {},
-            error: (err) => console.error('Failed to delete user:', err),
+            next: () => {
+                this._snackbar?.success('បានលុបគណនីអ្នកប្រើប្រាស់ដោយជោគជ័យ');
+            },
+            error: (err) => {
+                console.error('Failed to delete user:', err);
+                this.users.set(previousList);
+                this._snackbar?.error(err?.error?.message || 'បរាជ័យក្នុងការលុបគណនីអ្នកប្រើប្រាស់');
+            },
         });
     }
 

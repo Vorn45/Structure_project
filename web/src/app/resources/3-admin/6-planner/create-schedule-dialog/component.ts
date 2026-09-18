@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, signal } from '@angular/core';
+import { Component, Inject, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { AdminService } from '../../admin.service';
 
 export interface CreateScheduleDialogData {
     dayIndex?: number;
@@ -409,13 +410,10 @@ export class CreateScheduleDialogComponent implements OnInit {
         'ផ្សេងៗ',
     ];
 
-    availableMembers = signal<TeamMemberItem[]>([
-        { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត (Piseth Panhavorn)', role: 'Super Admin & Lead', initials: 'PP', bg: 'bg-emerald-700 text-white' },
-        { id: 2, name: 'ពុំ ប្រុសមុន្នី (Pum Brusmuny)', role: 'Frontend Engineer', initials: 'PB', bg: 'bg-blue-700 text-white' },
-        { id: 3, name: 'ថា វីនណឺរ (Tha Winner)', role: 'QA & DevOps Engineer', initials: 'TW', bg: 'bg-indigo-700 text-white' },
-    ]);
+    private readonly _adminService = inject(AdminService, { optional: true });
 
-    selectedMemberIds = signal<Array<string | number>>([1, 2]);
+    availableMembers = signal<TeamMemberItem[]>([]);
+    selectedMemberIds = signal<Array<string | number>>([]);
 
     constructor(
         public dialogRef: MatDialogRef<CreateScheduleDialogComponent>,
@@ -423,6 +421,39 @@ export class CreateScheduleDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
+        if (this._adminService) {
+            this._adminService.getUsers({ limit: 100 }).subscribe({
+                next: (res) => {
+                    const users = res?.data?.results || (res?.data as any)?.users || [];
+                    if (Array.isArray(users) && users.length > 0) {
+                        const colors = [
+                            'bg-emerald-700 text-white',
+                            'bg-blue-700 text-white',
+                            'bg-indigo-700 text-white',
+                            'bg-purple-700 text-white',
+                            'bg-amber-700 text-white',
+                        ];
+                        const members: TeamMemberItem[] = users.map((u: any, idx: number) => {
+                            const name = u.name_kh || u.name_en || u.name || 'User';
+                            const en = (u.name_en || u.name || 'U').trim();
+                            const parts = en.split(' ');
+                            const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : en.slice(0, 2).toUpperCase();
+                            return {
+                                id: u.id,
+                                name: u.name_kh && u.name_en ? `${u.name_kh} (${u.name_en})` : name,
+                                role: u.position || u.role || 'Member',
+                                initials: initials || 'U',
+                                avatar: u.avatar,
+                                bg: colors[idx % colors.length],
+                            };
+                        });
+                        this.availableMembers.set(members);
+                    }
+                },
+                error: (err) => console.warn('Could not load members for planner dialog:', err),
+            });
+        }
+
         if (this.data) {
             if (this.data.category) this.category.set(this.data.category);
             if (this.data.time) this.startTimeRaw.set(this.parseTimeTo24h(this.data.time));

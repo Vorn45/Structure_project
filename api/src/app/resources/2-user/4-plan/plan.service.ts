@@ -667,6 +667,7 @@ export class PlanService {
             phases: dto.phases?.length ? dto.phases : starterPhases,
             meetings: dto.meetings?.length ? dto.meetings : starterMeetings,
             agileTasks: dto.agileTasks?.length ? dto.agileTasks : [],
+            links: dto.links || [],
             attachments: dto.attachments || [],
             attachments_count: dto.attachments?.length || 0,
             logo: dto.logo || dto.image || null,
@@ -712,6 +713,7 @@ export class PlanService {
             phases: dto.phases ?? (current as any).phases,
             meetings: dto.meetings ?? (current as any).meetings,
             agileTasks: dto.agileTasks ?? (current as any).agileTasks,
+            links: dto.links !== undefined ? dto.links : (current as any).links,
             logo: dto.logo !== undefined ? dto.logo : current.logo,
             image: dto.image !== undefined ? dto.image : current.image,
         };

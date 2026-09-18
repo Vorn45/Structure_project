@@ -134,191 +134,12 @@ export interface AdminTaskItem {
     documents?: TaskDocument[];
 }
 
-export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [
-    {
-        id: 'task-1',
-        name: 'ការប្រមូលតម្រូវការ & Architecture',
-        segments: [
-            { iteration: 1, startWeek: 14, durationWeeks: 2 },
-            { iteration: 2, startWeek: 16, durationWeeks: 1 },
-            { iteration: 3, startWeek: 17, durationWeeks: 3, label: '3W' },
-        ],
-    },
-    {
-        id: 'task-2',
-        name: 'ការរចនាទម្រង់ទូទៅ UI/UX Design System',
-        segments: [
-            { iteration: 1, startWeek: 15, durationWeeks: 3, label: 'Sprint 1' },
-            { iteration: 2, startWeek: 18, durationWeeks: 2 },
-            { iteration: 3, startWeek: 20, durationWeeks: 4, label: '4W' },
-        ],
-    },
-    {
-        id: 'task-3',
-        name: 'ការរៀបចំ Database & Rest APIs',
-        segments: [
-            { iteration: 1, startWeek: 18, durationWeeks: 2 },
-            { iteration: 2, startWeek: 20, durationWeeks: 4, label: 'Sprint 2' },
-            { iteration: 3, startWeek: 24, durationWeeks: 5, label: '5W' },
-        ],
-    },
-    {
-        id: 'task-4',
-        name: 'Frontend State & Angular Signals Integration',
-        segments: [
-            { iteration: 1, startWeek: 22, durationWeeks: 3 },
-            { iteration: 2, startWeek: 25, durationWeeks: 3 },
-            { iteration: 3, startWeek: 28, durationWeeks: 6, label: 'Sprint 3' },
-        ],
-    },
-    {
-        id: 'task-5',
-        name: 'ការធ្វើតេស្តសមាហរណកម្ម & UAT QA Testing',
-        segments: [
-            { iteration: 1, startWeek: 27, durationWeeks: 2 },
-            { iteration: 2, startWeek: 29, durationWeeks: 3 },
-            { iteration: 3, startWeek: 32, durationWeeks: 5, label: '5W' },
-        ],
-    },
-    {
-        id: 'task-6',
-        name: 'ការវាយតម្លៃសុវត្ថិភាព & ដាក់ឱ្យដំណើរការ Deployment',
-        segments: [
-            { iteration: 1, startWeek: 31, durationWeeks: 2 },
-            { iteration: 2, startWeek: 33, durationWeeks: 3 },
-            { iteration: 3, startWeek: 36, durationWeeks: 4, label: 'Release' },
-        ],
-    },
-];
-
+export const DEFAULT_AGILE_TASKS: AgilePlanTask[] = [];
 export const DEFAULT_PROJECT_TASKS: AdminTaskItem[] = [];
-
-export const DEFAULT_PROJECT_PHASES: ProjectPhaseItem[] = [
-    {
-        id: 'ph-1',
-        title: 'ដំណាក់កាលទី ១៖ តម្រូវការ & គម្រោងប្លង់ UI/UX (Phase 1)',
-        quarter: 'ត្រីមាសទី ២ (Q2)',
-        status: 'completed',
-        startDate: '០១ មេសា ២០២៦',
-        endDate: '៣០ មិថុនា ២០២៦',
-        tasksCount: 6,
-    },
-    {
-        id: 'ph-2',
-        title: 'ដំណាក់កាលទី ២៖ ការអភិវឌ្ឍ Core Modules & State Signals (Phase 2)',
-        quarter: 'ត្រីមាសទី ៣ (Q3)',
-        status: 'in_progress',
-        startDate: '០១ កក្កដា ២០២៦',
-        endDate: '៣០ កញ្ញា ២០២៦',
-        tasksCount: 12,
-    },
-    {
-        id: 'ph-3',
-        title: 'ដំណាក់កាលទី ៣៖ ការធ្វើតេស្ត QA, Security Audit & Deploy (Phase 3)',
-        quarter: 'ត្រីមាសទី ៤ (Q4)',
-        status: 'planned',
-        startDate: '០១ តុលា ២០២៦',
-        endDate: '៣១ ធ្នូ ២០២៦',
-        tasksCount: 6,
-    },
-];
-
-export const DEFAULT_PROJECT_TEAM_MEMBERS: TaskMember[] = [
-    { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin & Lead Developer', initial: 'PP', bgClass: 'bg-emerald-600 text-white', email: 'pisethpanhavorn544@gmail.com' },
-    { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Engineer', initial: 'PB', bgClass: 'bg-blue-600 text-white', email: 'pumprusmuny@example.com' },
-    { id: 3, name: 'ថា វីនណឺរ', role: 'QA & DevOps Engineer', initial: 'TW', bgClass: 'bg-blue-700 text-white', email: 'thawinner@example.com' },
-];
-
-export const DEFAULT_PROJECT_MEETINGS: ProjectMeetingItem[] = [
-    {
-        id: 'm-1',
-        title: 'Weekly Sprint Sync & Task Progress Review',
-        description: 'ពិនិត្យមើលវឌ្ឍនភាពការងារប្រចាំសប្តាហ៍ បញ្ហាស្ទះ (Blockers) និងកាលវិភាគ Sprint បន្ទាប់។',
-        date: 'ថ្ងៃនេះ (Today)',
-        time: 'ម៉ោង ០២:០០ រសៀល - ០៣:០០ រសៀល',
-        platform: 'Google Meet',
-        link: 'https://meet.google.com/pms-sync-2026',
-        status: 'upcoming',
-        attendees: [
-            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
-            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
-            { id: 3, name: 'ថា វីនណឺរ', role: 'User', initial: 'TW', bgClass: 'bg-blue-700' },
-        ],
-    },
-    {
-        id: 'm-2',
-        title: 'UI/UX Design Review & Department Flow Alignment',
-        description: 'ពិភាក្សាលើ Design Specs នៃ Department Hierarchy ក្នុង Figma ជាមួយក្រុម UI/UX។',
-        date: 'ថ្ងៃស្អែក (Tomorrow)',
-        time: 'ម៉ោង ១០:០០ ព្រឹក - ១១:០០ ព្រឹក',
-        platform: 'Zoom',
-        link: 'https://zoom.us/j/987654321',
-        status: 'upcoming',
-        attendees: [
-            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
-            { id: 2, name: 'ពុំ ប្រុសមុន្នី', role: 'User', initial: 'PB', bgClass: 'bg-blue-600' },
-        ],
-    },
-    {
-        id: 'm-3',
-        title: 'Monthly Architecture & Security Retrospective',
-        description: 'កិច្ចប្រជុំបូកសរុបរចនាសម្ព័ន្ធប្រព័ន្ធ សុវត្ថិភាពទិន្នន័យ និងផែនការកែលម្អប្រចាំខែ។',
-        date: '២៥ សីហា ២០២៦',
-        time: 'ម៉ោង ០៣:៣០ រសៀល',
-        platform: 'Office',
-        link: 'បន្ទប់ប្រជុំ A2',
-        status: 'completed',
-        attendees: [
-            { id: 1, name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin', initial: 'PP', bgClass: 'bg-emerald-600' },
-            { id: 3, name: 'រ័ត្ន វិចិត្រ', role: 'DevOps / QA', initial: 'R', bgClass: 'bg-blue-800' },
-        ],
-    },
-];
-
-export const DEFAULT_PROJECT_LINKS: TaskLink[] = [
-    {
-        id: 'l-1',
-        title: 'Git Repository — WFM Enterprise V2',
-        url: 'https://github.com/vorn45/wfm-v2',
-        type: 'github',
-        taskCode: '#WMS-CORE',
-    },
-    {
-        id: 'l-2',
-        title: 'Figma Design System & Token UI Kit',
-        url: 'https://figma.com/file/wfm-design-v2',
-        type: 'figma',
-        taskCode: '#BMS-UI',
-    },
-    {
-        id: 'l-3',
-        title: 'Swagger API Documentation & Specifications',
-        url: 'http://localhost:3000/api/docs',
-        type: 'doc',
-        taskCode: '#WMS-API',
-    },
-    {
-        id: 'l-4',
-        title: 'Security Compliance & Audit Checklist',
-        url: 'https://docs.google.com/spreadsheets/wfm-security-audit',
-        type: 'doc',
-        taskCode: '#WMS-0002',
-    },
-    {
-        id: 'l-5',
-        title: 'System Architecture & Database Schema Diagram',
-        url: 'https://dbdiagram.io/d/wfm-enterprise-schema',
-        type: 'external',
-        taskCode: '#WMS-0000',
-    },
-    {
-        id: 'l-6',
-        title: 'Sprint 2 Planning Board & Milestones',
-        url: 'https://jira.wfm.gov.kh/projects/WFM/boards/2',
-        type: 'external',
-        taskCode: '#BMS-SPRINT2',
-    },
-];
+export const DEFAULT_PROJECT_PHASES: ProjectPhaseItem[] = [];
+export const DEFAULT_PROJECT_TEAM_MEMBERS: TaskMember[] = [];
+export const DEFAULT_PROJECT_MEETINGS: ProjectMeetingItem[] = [];
+export const DEFAULT_PROJECT_LINKS: TaskLink[] = [];
 
 @Component({
     selector: 'app-project-management',
@@ -444,11 +265,11 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     // Collections
     tasks = signal<AdminTaskItem[]>([]);
     isTasksLoading = signal<boolean>(false);
-    phases = signal<ProjectPhaseItem[]>(DEFAULT_PROJECT_PHASES);
-    teamMembers = signal<TaskMember[]>(DEFAULT_PROJECT_TEAM_MEMBERS);
-    meetings = signal<ProjectMeetingItem[]>(DEFAULT_PROJECT_MEETINGS);
-    links = signal<TaskLink[]>(DEFAULT_PROJECT_LINKS);
-    agileTasks = signal<AgilePlanTask[]>(DEFAULT_AGILE_TASKS);
+    phases = signal<ProjectPhaseItem[]>([]);
+    teamMembers = signal<TaskMember[]>([]);
+    meetings = signal<ProjectMeetingItem[]>([]);
+    links = signal<TaskLink[]>([]);
+    agileTasks = signal<AgilePlanTask[]>([]);
 
     // Links search and clipboard
     linkSearchQuery = signal<string>('');
@@ -1004,9 +825,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             return;
         }
 
-        const reporterName = task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
-        const assigneeName = task.assignee?.name || (task.members?.[0]?.name) || '';
-
         const initialMsgs: TaskChatMessage[] = [
             {
                 id: 1,
@@ -1016,30 +834,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 is_self: false,
                 is_system: true,
             },
-            {
-                id: 2,
-                sender_id: task.reporter?.id || 1,
-                sender_name: reporterName,
-                sender_avatar: task.reporter?.avatar || '/images/placeholder/avatar.jpg',
-                text: `សួស្តីក្រុមការងារ! សូមពិនិត្យមើលព័ត៌មានលម្អិត និងកិច្ចការសម្រាប់ ${task.title} នេះផង។`,
-                time: '១០ នាទីមុន',
-                is_self: false,
-                is_system: false,
-            },
         ];
-
-        if (assigneeName) {
-            initialMsgs.push({
-                id: 3,
-                sender_id: task.assignee?.id || 2,
-                sender_name: assigneeName,
-                sender_avatar: task.assignee?.avatar || '/images/placeholder/avatar.jpg',
-                text: 'បានទទួលហើយបង! ខ្ញុំកំពុងត្រៀមអនុវត្ត និងធ្វើតេស្តតាមដំណាក់កាល។',
-                time: '៥ នាទីមុន',
-                is_self: false,
-                is_system: false,
-            });
-        }
 
         this.taskDrawerChatMessages.set(initialMsgs);
         this._drawerChatHistoryMap.set(task.id, initialMsgs);
@@ -1399,26 +1194,6 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     is_self: false,
                     is_system: true,
                 },
-                {
-                    id: `msg-${Date.now()}-2`,
-                    sender_name: 'ពុំ ប្រុសមុន្នី',
-                    sender_initial: 'PB',
-                    sender_bg: 'bg-blue-600',
-                    text: `សួស្តីក្រុមការងារ! សូមពិនិត្យមើលព័ត៌មានលម្អិត និងកិច្ចការរងសម្រាប់ ${task.title} នេះផង។`,
-                    time: '១០ នាទីមុន',
-                    is_self: false,
-                    is_system: false,
-                },
-                {
-                    id: `msg-${Date.now()}-3`,
-                    sender_name: 'ថា វីនណឺរ',
-                    sender_initial: 'TW',
-                    sender_bg: 'bg-blue-700',
-                    text: 'បានទទួលហើយបង! ខ្ញុំកំពុងត្រៀមអនុវត្ត និងធ្វើតេស្តតាមដំណាក់កាល។',
-                    time: '៥ នាទីមុន',
-                    is_self: false,
-                    is_system: false,
-                },
             ];
             this._taskChatMap.set(task.id, initialChats);
         }
@@ -1543,14 +1318,31 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     triggerUploadDocument(task: AdminTaskItem): void {
-        if (!task.documents) task.documents = [];
-        const sampleDocs: TaskDocument[] = [
-            { id: `doc-${Date.now()}`, name: 'System_Functional_Requirements_v1.pdf', size: '1.9 MB', type: 'pdf', upload_date: 'ថ្ងៃនេះ' },
-            { id: `doc-${Date.now() + 1}`, name: 'API_Contract_Review.xlsx', size: '420 KB', type: 'sheet', upload_date: 'ថ្ងៃនេះ' },
-        ];
-        const randomDoc = sampleDocs[Math.floor(Math.random() * sampleDocs.length)];
-        task.documents.push(randomDoc);
-        task.attachments_count = task.documents.length;
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg';
+        fileInput.onchange = (e: any) => {
+            const files = e.target?.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                if (!task.documents) task.documents = [];
+                const isImage = file.type.startsWith('image/');
+                const isPdf = file.name.endsWith('.pdf');
+                const isSheet = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+                const docType = isImage ? 'image' : isPdf ? 'pdf' : isSheet ? 'sheet' : 'doc';
+                const newDoc: TaskDocument = {
+                    id: `doc-${Date.now()}`,
+                    name: file.name,
+                    size: file.size > 1024 * 1024 ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`,
+                    type: docType,
+                    upload_date: 'ថ្ងៃនេះ',
+                };
+                task.documents.push(newDoc);
+                task.attachments_count = task.documents.length;
+                this._snackbarService.success(`បានភ្ជាប់ឯកសារ ${file.name} ដោយជោគជ័យ`);
+            }
+        };
+        fileInput.click();
     }
 
     removeDocument(task: AdminTaskItem, docId: string): void {
@@ -1571,6 +1363,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     openCreatePhaseModal(): void {
         if (!this.isAdmin()) return;
         const proj = this.selectedProject();
+        if (!proj) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             currentPhasesCount: this.phases().length,
@@ -1579,8 +1372,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const dialogRef = this._matDialog.open(CreatePhaseDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.title) {
-                const newPhase: ProjectPhaseItem = {
-                    id: `ph-${Date.now()}`,
+                const phaseDto = {
                     title: result.title,
                     quarter: result.quarter || 'ត្រីមាស',
                     startDate: result.startDate || '01/10/2026',
@@ -1588,7 +1380,20 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     tasksCount: 0,
                     status: result.status || 'planned',
                 };
-                this.phases.update((list) => [...list, newPhase]);
+                this._adminService.createProjectPhase(String(proj.id), phaseDto).subscribe({
+                    next: (res) => {
+                        const newPhase: ProjectPhaseItem = res?.data || {
+                            id: `ph-${Date.now()}`,
+                            ...phaseDto,
+                        };
+                        this.phases.update((list) => [...list, newPhase]);
+                        this._snackbarService.success('បានបន្ថែមដំណាក់កាលគម្រោងដោយជោគជ័យ');
+                    },
+                    error: (err) => {
+                        console.error('Failed to create phase:', err);
+                        this._snackbarService.error('មានបញ្ហាក្នុងការបង្កើតដំណាក់កាលគម្រោង');
+                    },
+                });
             }
         });
     }
@@ -1596,7 +1401,18 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     deletePhase(phaseId: string, event: Event): void {
         event.stopPropagation();
         if (!this.isAdmin()) return;
-        this.phases.update((list) => list.filter((p) => p.id !== phaseId));
+        const proj = this.selectedProject();
+        if (!proj) return;
+        this._adminService.deleteProjectPhase(String(proj.id), phaseId).subscribe({
+            next: () => {
+                this.phases.update((list) => list.filter((p) => p.id !== phaseId));
+                this._snackbarService.success('បានលុបដំណាក់កាលគម្រោងដោយជោគជ័យ');
+            },
+            error: (err) => {
+                console.error('Failed to delete phase:', err);
+                this._snackbarService.error('មានបញ្ហាក្នុងការលុបដំណាក់កាលគម្រោង');
+            },
+        });
     }
 
     // Project Dialog
@@ -1618,6 +1434,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     openAddPlanDialog(proj?: AdminProject | null): void {
         if (!this.isAdmin()) return;
         const p = proj || this.selectedProject();
+        if (!p) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             totalWeeks: this.totalWeeks,
@@ -1632,7 +1449,17 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         dialogRef.afterClosed().subscribe((result?: any) => {
             if (result) {
                 const newTask: AgilePlanTask = result.task || result;
-                this.agileTasks.update((list) => [newTask, ...list]);
+                this._adminService.createAgileTask(String(p.id), newTask).subscribe({
+                    next: (res) => {
+                        const created = res?.data || newTask;
+                        this.agileTasks.update((list) => [created, ...list]);
+                        this._snackbarService.success('បានបន្ថែមផែនការអនុវត្តដោយជោគជ័យ');
+                    },
+                    error: (err) => {
+                        console.error('Failed to create agile task:', err);
+                        this._snackbarService.error('មានបញ្ហាក្នុងការបង្កើតផែនការអនុវត្ត');
+                    },
+                });
             }
         });
     }
@@ -1641,6 +1468,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         if (event) event.stopPropagation();
         if (!this.isAdmin()) return;
         const p = this.selectedProject();
+        if (!p) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
             totalWeeks: this.totalWeeks,
@@ -1657,9 +1485,19 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         dialogRef.afterClosed().subscribe((result?: any) => {
             if (result) {
                 const updated: AgilePlanTask = result.task || result;
-                this.agileTasks.update((list) =>
-                    list.map((t) => (t.id === task.id ? { ...t, ...updated } : t)),
-                );
+                this._adminService.updateAgileTask(String(p.id), task.id, updated).subscribe({
+                    next: (res) => {
+                        const saved = res?.data || updated;
+                        this.agileTasks.update((list) =>
+                            list.map((t) => (t.id === task.id ? { ...t, ...saved } : t)),
+                        );
+                        this._snackbarService.success('បានកែប្រែផែនការអនុវត្តដោយជោគជ័យ');
+                    },
+                    error: (err) => {
+                        console.error('Failed to update agile task:', err);
+                        this._snackbarService.error('មានបញ្ហាក្នុងការកែប្រែផែនការអនុវត្ត');
+                    },
+                });
             }
         });
     }
@@ -1667,7 +1505,18 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     deleteAgileTask(taskId: string, event: Event): void {
         event.stopPropagation();
         if (!this.isAdmin()) return;
-        this.agileTasks.update((list) => list.filter((t) => t.id !== taskId));
+        const p = this.selectedProject();
+        if (!p) return;
+        this._adminService.deleteAgileTask(String(p.id), taskId).subscribe({
+            next: () => {
+                this.agileTasks.update((list) => list.filter((t) => t.id !== taskId));
+                this._snackbarService.success('បានលុបផែនការអនុវត្តដោយជោគជ័យ');
+            },
+            error: (err) => {
+                console.error('Failed to delete agile task:', err);
+                this._snackbarService.error('មានបញ្ហាក្នុងការលុបផែនការអនុវត្ត');
+            },
+        });
     }
 
     confirmDeleteTask(task: AdminTaskItem, event?: Event): void {
@@ -1704,14 +1553,15 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     // Meeting management
     openCreateMeetingModal(): void {
+        const proj = this.selectedProject();
+        if (!proj) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
         });
         const dialogRef = this._matDialog.open(CreateMeetingDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                const newM: ProjectMeetingItem = {
-                    id: `m-${Date.now()}`,
+                const meetingDto = {
                     title: result.title || result.name || 'កិច្ចប្រជុំថ្មី',
                     description: result.description || 'ការពិភាក្សា និងសម្របសម្រួលការងារគម្រោង',
                     date: result.date || 'ថ្ងៃនេះ',
@@ -1721,14 +1571,38 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     status: 'upcoming',
                     attendees: [...this.teamMembers().slice(0, 3)],
                 };
-                this.meetings.update((list) => [newM, ...list]);
+                this._adminService.createProjectMeeting(String(proj.id), meetingDto).subscribe({
+                    next: (res) => {
+                        const newM: ProjectMeetingItem = res?.data || {
+                            id: `m-${Date.now()}`,
+                            ...meetingDto,
+                        };
+                        this.meetings.update((list) => [newM, ...list]);
+                        this._snackbarService.success('បានបង្កើតកិច្ចប្រជុំដោយជោគជ័យ');
+                    },
+                    error: (err) => {
+                        console.error('Failed to create meeting:', err);
+                        this._snackbarService.error('មានបញ្ហាក្នុងការបង្កើតកិច្ចប្រជុំ');
+                    },
+                });
             }
         });
     }
 
     deleteMeeting(meetingId: string, event: Event): void {
         event.stopPropagation();
-        this.meetings.update((list) => list.filter((m) => m.id !== meetingId));
+        const proj = this.selectedProject();
+        if (!proj) return;
+        this._adminService.deleteProjectMeeting(String(proj.id), meetingId).subscribe({
+            next: () => {
+                this.meetings.update((list) => list.filter((m) => m.id !== meetingId));
+                this._snackbarService.success('បានលុបកិច្ចប្រជុំដោយជោគជ័យ');
+            },
+            error: (err) => {
+                console.error('Failed to delete meeting:', err);
+                this._snackbarService.error('មានបញ្ហាក្នុងការលុបកិច្ចប្រជុំ');
+            },
+        });
     }
 
     // Member management
@@ -1809,10 +1683,11 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     // Link management
     openCreateLinkModal(): void {
         const proj = this.selectedProject();
+        if (!proj) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
-            taskCode: proj ? `#${proj.code}-001` : '#WMS-001',
-            projectName: proj?.name,
+            taskCode: `#${proj.code}-001`,
+            projectName: proj.name,
         });
         const dialogRef = this._matDialog.open(CreateLinkDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
@@ -1822,17 +1697,45 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                     title: result.title,
                     url: result.url,
                     type: result.type || 'figma',
-                    taskCode: result.taskCode || (proj ? `#${proj.code}-CORE` : '#WMS-CORE'),
+                    taskCode: result.taskCode || `#${proj.code}-CORE`,
                     createdAt: 'ថ្ងៃនេះ',
                 };
-                this.links.update((list) => [newLink, ...list]);
+                const updatedLinks = [newLink, ...this.links()];
+                this._adminService.updateProject(String(proj.id), { links: updatedLinks as any }).subscribe({
+                    next: (res) => {
+                        this.links.set(updatedLinks);
+                        if (res.data) {
+                            this.selectedProject.set(res.data);
+                        }
+                        this._snackbarService.success('បានបន្ថែមតំណភ្ជាប់ដោយជោគជ័យ');
+                    },
+                    error: (err) => {
+                        console.error('Failed to save project link:', err);
+                        this._snackbarService.error('មានបញ្ហាក្នុងការបន្ថែមតំណភ្ជាប់');
+                    },
+                });
             }
         });
     }
 
     deleteProjectLink(linkId: string, event: Event): void {
         event.stopPropagation();
-        this.links.update((list) => list.filter((l) => l.id !== linkId));
+        const proj = this.selectedProject();
+        if (!proj) return;
+        const updatedLinks = this.links().filter((l) => l.id !== linkId);
+        this._adminService.updateProject(String(proj.id), { links: updatedLinks as any }).subscribe({
+            next: (res) => {
+                this.links.set(updatedLinks);
+                if (res.data) {
+                    this.selectedProject.set(res.data);
+                }
+                this._snackbarService.success('បានលុបតំណភ្ជាប់ដោយជោគជ័យ');
+            },
+            error: (err) => {
+                console.error('Failed to delete project link:', err);
+                this._snackbarService.error('មានបញ្ហាក្នុងការលុបតំណភ្ជាប់');
+            },
+        });
     }
 
     // Create Task modal
@@ -2397,23 +2300,42 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
         if (project.members && Array.isArray(project.members) && project.members.length > 0) {
             this.teamMembers.set(project.members.map((m: any) => this.mapProjectMemberToTaskMember(m)));
-        } else if (project.code === 'WMS-DIGI' || project.name?.includes('WMS')) {
-            this.teamMembers.set([...DEFAULT_PROJECT_TEAM_MEMBERS]);
         } else {
             this.teamMembers.set([]);
         }
 
-        if (project.phases && Array.isArray(project.phases) && project.phases.length > 0) {
+        if (project.phases && Array.isArray(project.phases)) {
             this.phases.set(project.phases);
         } else {
-            this.phases.set(DEFAULT_PROJECT_PHASES);
+            this.phases.set([]);
         }
 
-        if (project.meetings && Array.isArray(project.meetings) && project.meetings.length > 0) {
+        if (project.meetings && Array.isArray(project.meetings)) {
             this.meetings.set(project.meetings);
         } else {
-            this.meetings.set(DEFAULT_PROJECT_MEETINGS);
+            this.meetings.set([]);
         }
+
+        if ((project as any).links && Array.isArray((project as any).links)) {
+            this.links.set((project as any).links);
+        } else {
+            this.links.set([]);
+        }
+
+        this._adminService.getAgileTasks(String(project.id)).subscribe({
+            next: (res) => {
+                if (res?.data && Array.isArray(res.data)) {
+                    this.agileTasks.set(res.data);
+                } else if ((project as any).agileTasks && Array.isArray((project as any).agileTasks)) {
+                    this.agileTasks.set((project as any).agileTasks);
+                } else {
+                    this.agileTasks.set([]);
+                }
+            },
+            error: () => {
+                this.agileTasks.set((project as any).agileTasks || []);
+            },
+        });
 
         this._userTaskService
             .getTasks({ scope: 'all' })

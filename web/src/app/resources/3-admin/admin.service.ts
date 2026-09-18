@@ -153,6 +153,8 @@ export interface AdminProject {
     tasks?: any[];
     phases?: any[];
     meetings?: any[];
+    links?: any[];
+    agileTasks?: any[];
 }
 
 export interface AdminLeaveRequest {
@@ -390,6 +392,47 @@ export class AdminService {
             lead_name,
             lead_role,
         });
+    }
+
+    // 3.1 Project Sub-Resources (Phases, Meetings, Members, Agile Tasks)
+    createProjectPhase(projectId: string, dto: any): Observable<{ status_code: number; message: string; data: any }> {
+        return this._http.post<{ status_code: number; message: string; data: any }>(`${this._baseUrl}/projects/${projectId}/phases`, dto);
+    }
+
+    deleteProjectPhase(projectId: string, phaseId: string): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/projects/${projectId}/phases/${phaseId}`);
+    }
+
+    createProjectMeeting(projectId: string, dto: any): Observable<{ status_code: number; message: string; data: any }> {
+        return this._http.post<{ status_code: number; message: string; data: any }>(`${this._baseUrl}/projects/${projectId}/meetings`, dto);
+    }
+
+    deleteProjectMeeting(projectId: string, meetingId: string): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/projects/${projectId}/meetings/${meetingId}`);
+    }
+
+    createProjectMember(projectId: string, dto: any): Observable<{ status_code: number; message: string; data: any }> {
+        return this._http.post<{ status_code: number; message: string; data: any }>(`${this._baseUrl}/projects/${projectId}/members`, dto);
+    }
+
+    deleteProjectMember(projectId: string, memberId: number | string): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/projects/${projectId}/members/${memberId}`);
+    }
+
+    getAgileTasks(projectId: string): Observable<{ status_code: number; data: any[] }> {
+        return this._http.get<{ status_code: number; data: any[] }>(`${this._baseUrl}/projects/${projectId}/agile-tasks`);
+    }
+
+    createAgileTask(projectId: string, dto: any): Observable<{ status_code: number; message: string; data: any }> {
+        return this._http.post<{ status_code: number; message: string; data: any }>(`${this._baseUrl}/projects/${projectId}/agile-tasks`, dto);
+    }
+
+    updateAgileTask(projectId: string, taskId: string, dto: any): Observable<{ status_code: number; message: string; data: any }> {
+        return this._http.patch<{ status_code: number; message: string; data: any }>(`${this._baseUrl}/projects/${projectId}/agile-tasks/${taskId}`, dto);
+    }
+
+    deleteAgileTask(projectId: string, taskId: string): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/projects/${projectId}/agile-tasks/${taskId}`);
     }
 
     // 4. Attendance & Leaves

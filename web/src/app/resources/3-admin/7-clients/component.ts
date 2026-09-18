@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
+import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { AdminService, AdminClient } from '../admin.service';
 
 @Component({
@@ -39,6 +40,7 @@ import { AdminService, AdminClient } from '../admin.service';
 export class ClientManagementComponent implements OnInit {
     private readonly _adminService = inject(AdminService);
     private readonly _fb = inject(FormBuilder);
+    private readonly _snackbar = inject(SnackbarService, { optional: true });
 
     clients = signal<AdminClient[]>([]);
     loading = signal<boolean>(true);
@@ -258,14 +260,12 @@ export class ClientManagementComponent implements OnInit {
                     );
                     this.saving.set(false);
                     this.closeDrawer();
+                    this._snackbar?.success('បានកែប្រែព័ត៌មានអតិថិជនដោយជោគជ័យ');
                 },
                 error: (err) => {
-                    console.warn('Backend updateClient error, updating locally:', err);
-                    this.clients.update((list) =>
-                        list.map((c) => (c.id === currentId ? { ...c, ...formVal } : c)),
-                    );
+                    console.error('Backend updateClient error:', err);
                     this.saving.set(false);
-                    this.closeDrawer();
+                    this._snackbar?.error(err?.error?.message || 'បរាជ័យក្នុងការកែប្រែព័ត៌មានអតិថិជន');
                 },
             });
         } else {
@@ -274,37 +274,19 @@ export class ClientManagementComponent implements OnInit {
                     this.clients.update((list) => [res.data, ...list]);
                     this.saving.set(false);
                     this.closeDrawer();
+                    this._snackbar?.success('បានបង្កើតអតិថិជនថ្មីដោយជោគជ័យ');
                 },
                 error: (err) => {
-                    console.warn('Backend createClient error, creating locally:', err);
-                    const newClient: AdminClient = {
-                        id: Date.now(),
-                        company_name: formVal.company_name,
-                        name_kh: formVal.name_kh,
-                        name_en: formVal.name_en,
-                        industry: formVal.industry,
-                        contact_person: formVal.contact_person,
-                        contact_phone: formVal.contact_phone,
-                        contact_email: formVal.contact_email,
-                        phone: formVal.phone,
-                        email: formVal.email,
-                        website: formVal.website,
-                        address: formVal.address,
-                        status: formVal.status || 'active',
-                        projects_count: formVal.projects_count || 0,
-                        logo: formVal.logo || '',
-                        note: formVal.note || '',
-                        created_at: new Date().toISOString(),
-                    };
-                    this.clients.update((list) => [newClient, ...list]);
+                    console.error('Backend createClient error:', err);
                     this.saving.set(false);
-                    this.closeDrawer();
+                    this._snackbar?.error(err?.error?.message || 'បរាជ័យក្នុងការបង្កើតអតិថិជន');
                 },
             });
         }
     }
 
     toggleStatus(client: AdminClient): void {
+        const prevStatus = client.status;
         const nextStatus = client.status === 'active' ? 'inactive' : 'active';
         this.clients.update((list) =>
             list.map((c) => (c.id === client.id ? { ...c, status: nextStatus } : c)),
@@ -316,9 +298,14 @@ export class ClientManagementComponent implements OnInit {
                         list.map((c) => (c.id === res.data.id ? res.data : c)),
                     );
                 }
+                this._snackbar?.success(`បានផ្លាស់ប្តូរស្ថានភាពទៅជា ${nextStatus === 'active' ? 'សកម្ម' : 'អសកម្ម'}`);
             },
             error: (err) => {
-                console.warn('Backend toggleClientStatus error, kept local status update:', err);
+                console.error('Backend toggleClientStatus error:', err);
+                this.clients.update((list) =>
+                    list.map((c) => (c.id === client.id ? { ...c, status: prevStatus } : c)),
+                );
+                this._snackbar?.error('បរាជ័យក្នុងការផ្លាស់ប្តូរស្ថានភាព');
             },
         });
     }
@@ -332,13 +319,20 @@ export class ClientManagementComponent implements OnInit {
         const target = this.deleteTarget();
         if (!target) return;
 
+        const previousList = this.clients();
         this.clients.update((list) => list.filter((c) => c.id !== target.id));
         this.showDeleteModal.set(false);
         this.deleteTarget.set(null);
 
         this._adminService.deleteClient(target.id).subscribe({
-            next: () => {},
-            error: (err) => console.warn('Backend deleteClient error, deleted locally:', err),
+            next: () => {
+                this._snackbar?.success('បានលុបព័ត៌មានអតិថិជនដោយជោគជ័យ');
+            },
+            error: (err) => {
+                console.error('Backend deleteClient error:', err);
+                this.clients.set(previousList);
+                this._snackbar?.error(err?.error?.message || 'បរាជ័យក្នុងការលុបព័ត៌មានអតិថិជន');
+            },
         });
     }
 

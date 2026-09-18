@@ -822,11 +822,8 @@ export class CreateTaskDialogComponent implements OnInit {
     isDraggingOver = signal<boolean>(false);
     private dragCounter = 0;
 
-    projectList: Array<{ id: string; name: string; code: string }> = [
-        { id: 'bms-digitech', name: 'BMS Digitech', code: 'BMS' },
-        { id: 'wms-digitech', name: 'WMS Digitech', code: 'WMS' },
-    ];
-    selectedProjectId: string = 'bms-digitech';
+    projectList: Array<{ id: string; name: string; code: string }> = [];
+    selectedProjectId: string = '';
 
     // State for continuous creation, notifications, and smooth closing
     isSubmitting = signal<boolean>(false);
@@ -1012,12 +1009,7 @@ export class CreateTaskDialogComponent implements OnInit {
     reporterId: string | number | null = null;
 
     // Team Members for Assignee / Response - Empty by default
-    teamMembers: TeamMember[] = [
-        { id: '1', name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin / Lead Developer' },
-        { id: '2', name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead' },
-        { id: '3', name: 'ថា វីនណឺរ', role: 'Backend Lead' },
-        { id: '4', name: 'ភឿង សុវណ្ណារ៉ា', role: 'Developer' },
-    ];
+    teamMembers: TeamMember[] = [];
     selectedAssigneeIds = signal<string[]>([]);
     assigneeSearch: string = '';
     reporterSearch: string = '';
