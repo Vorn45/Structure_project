@@ -268,8 +268,12 @@
                         }
                         <button
                             type="button"
+                            (click)="toggleArchiveView()"
+                            [class.!bg-blue-50]="selectedStatus() === 'inactive'"
+                            [class.!text-blue-600]="selectedStatus() === 'inactive'"
+                            [class.!border-blue-500]="selectedStatus() === 'inactive'"
                             class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
-                            matTooltip="ប័ណ្ណសារ (Archive)">
+                            [matTooltip]="selectedStatus() === 'inactive' ? 'បង្ហាញទាំងអស់ (Show All)' : 'មើលគណនីផ្អាក (Archived/Inactive Users)'">
                             <mat-icon svgIcon="mdi:archive-outline" class="icon-size-4.5"></mat-icon>
                         </button>
                     </div>

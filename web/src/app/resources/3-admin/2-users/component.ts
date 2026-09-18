@@ -273,22 +273,22 @@ export class UserManagementComponent implements OnInit {
             }
         }
 
-        // 3. If account has not yet uploaded profile, use default placeholder avatar
-        return '/images/placeholder/avatar.jpg';
+        // 3. If account has not yet uploaded profile, return null to show stylish initials badge
+        return null;
     }
 
     onAvatarError(event: Event, user: AdminUser): void {
-        const target = event.target as HTMLImageElement;
-        if (target && !target.src.includes('placeholder')) {
-            target.src = '/images/placeholder/avatar.jpg';
-            return;
-        }
-        if (target) {
-            target.style.display = 'none';
-        }
         if (user) {
             (user as any)._avatarFailed = true;
             this.users.update((list) => [...list]);
+        }
+    }
+
+    toggleArchiveView(): void {
+        if (this.selectedStatus() === 'inactive') {
+            this.selectedStatus.set('all');
+        } else {
+            this.selectedStatus.set('inactive');
         }
     }
 
@@ -405,6 +405,10 @@ export class UserManagementComponent implements OnInit {
         if (formVal.email) formVal.email = formVal.email.trim();
         if (formVal.phone) formVal.phone = formVal.phone.trim();
 
+        if (formVal.avatar && (typeof formVal.avatar !== 'string' || formVal.avatar.includes('placeholder'))) {
+            formVal.avatar = null;
+        }
+
         if (this.isEditing() && this.selectedUser()) {
             if (!formVal.password || !formVal.password.trim()) {
                 delete formVal.password;
@@ -434,8 +438,8 @@ export class UserManagementComponent implements OnInit {
                 delete formVal.password;
             }
 
-            if (!formVal.avatar || !formVal.avatar.trim()) {
-                formVal.avatar = '/images/placeholder/avatar.jpg';
+            if (!formVal.avatar || !formVal.avatar.trim() || formVal.avatar.includes('placeholder')) {
+                formVal.avatar = null;
             }
 
             this._adminService.createUser(formVal).subscribe({
