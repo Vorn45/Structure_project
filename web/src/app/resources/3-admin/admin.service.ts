@@ -213,6 +213,7 @@ export interface AdminClient {
 }
 
 export interface AdminSettingsData {
+    id?: string;
     organization_name_kh: string;
     organization_name_en: string;
     code: string;
@@ -226,6 +227,16 @@ export interface AdminSettingsData {
     }>;
     work_categories: string[];
     logo?: string | null;
+    contact_email?: string;
+    contact_phone?: string;
+    address?: string;
+    currency?: string;
+    timezone?: string;
+    primary_color?: string;
+    preferences?: {
+        allow_mobile_checkin?: boolean;
+        auto_notify_telegram?: boolean;
+    };
 }
 
 export interface AdminUserInvitation {

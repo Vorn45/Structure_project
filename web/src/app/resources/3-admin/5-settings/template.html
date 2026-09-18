@@ -8,86 +8,163 @@
         <!-- Top Header Row -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                    <mat-icon svgIcon="mdi:cog-outline" class="icon-size-5.5"></mat-icon>
+                <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200 dark:border-blue-800 shrink-0">
+                    <mat-icon svgIcon="mdi:cog-outline" class="icon-size-6"></mat-icon>
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-medium text-slate-900 dark:text-white tracking-tight">
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
                         ការកំណត់អង្គភាព និងរចនាសម្ព័ន្ធ (Settings)
                     </h1>
                     <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        ព័ត៌មានទូទៅអំពីអង្គភាព រចនាសម្ព័ន្ធនាយកដ្ឋាន និងប្រភេទការងារក្នុងប្រព័ន្ធ
+                        គ្រប់គ្រងព័ត៌មានទូទៅរបស់អង្គភាព រចនាសម្ព័ន្ធនាយកដ្ឋាន ប្រភេទការងារ និងចំណូលចិត្តប្រព័ន្ធ
                     </p>
                 </div>
             </div>
 
             <!-- Header Actions -->
             <div class="flex items-center gap-2 shrink-0">
+                <button
+                    type="button"
+                    (click)="loadSettings()"
+                    matTooltip="ផ្ទុកការកំណត់ឡើងវិញ"
+                    class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
+                    <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
+                    <span class="hidden sm:inline">ផ្ទុកឡើងវិញ</span>
+                </button>
+
                 @if (saveSuccess()) {
                     <span class="text-[13px] text-emerald-600 font-medium flex items-center animate-in fade-in">
                         <mat-icon svgIcon="mdi:check-circle-outline" class="icon-size-4 mr-1 text-emerald-600"></mat-icon>
-                        <span>បានរក្សាទុកជោគជ័យ</span>
+                        <span>បានរក្សាទុក</span>
                     </span>
                 }
+
                 <button
                     type="button"
                     (click)="saveAllSettings()"
                     [disabled]="saving() || settingsForm.invalid"
-                    class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
-                    <mat-icon svgIcon="mdi:content-save-outline" class="icon-size-4.5"></mat-icon>
-                    <span>រក្សាទុកការកំណត់</span>
+                    class="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+                    @if (saving()) {
+                        <mat-icon svgIcon="mdi:loading" class="icon-size-4.5 animate-spin"></mat-icon>
+                        <span>កំពុងរក្សាទុក...</span>
+                    } @else {
+                        <mat-icon svgIcon="mdi:content-save-outline" class="icon-size-4.5"></mat-icon>
+                        <span>រក្សាទុកការកំណត់</span>
+                    }
                 </button>
             </div>
         </div>
 
-        <!-- Main Settings Form Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Settings Sub-Tabs Row -->
+        <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 overflow-x-auto no-scrollbar">
+            <button
+                type="button"
+                (click)="activeSubTab.set('general')"
+                class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                [ngClass]="activeSubTab() === 'general' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
+                <mat-icon svgIcon="mdi:office-building-cog" class="icon-size-4.5"></mat-icon>
+                <span>ព័ត៌មានទូទៅរបស់អង្គភាព</span>
+            </button>
 
-            <!-- Left: General Org Info (2 Cols) -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Organization Profile Card -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
-                    <h2 class="text-[16px] font-medium text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-100 dark:border-slate-700/60">
-                        ព័ត៌មានទូទៅរបស់អង្គភាព (Organization Profile)
-                    </h2>
+            <button
+                type="button"
+                (click)="activeSubTab.set('departments')"
+                class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                [ngClass]="activeSubTab() === 'departments' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
+                <mat-icon svgIcon="mdi:sitemap-outline" class="icon-size-4.5"></mat-icon>
+                <span>រចនាសម្ព័ន្ធនាយកដ្ឋាន</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold"
+                    [ngClass]="activeSubTab() === 'departments' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                    {{ (settings()?.departments || []).length }}
+                </span>
+            </button>
 
-                    <form [formGroup]="settingsForm" class="space-y-4">
-                        <!-- Organization Logo Upload Section -->
-                        <div class="flex items-center gap-4 pb-2">
-                            <div class="flex flex-col items-center justify-center shrink-0">
-                                <div
-                                    class="relative w-20 h-20 rounded-2xl overflow-visible border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 bg-slate-50 dark:bg-slate-900 transition-colors group"
-                                    (click)="orgLogoInput.click()"
-                                    [matTooltip]="'ជ្រើសរើសរូបសញ្ញាអង្គភាព (Logo)'">
-                                    @if (orgLogo()) {
-                                        <img
-                                            class="w-full h-full object-contain p-1.5 rounded-2xl shadow-xs"
-                                            [src]="orgLogo()!"
-                                            alt="Organization Logo">
-                                    } @else {
-                                        <div class="flex flex-col items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors">
-                                            <mat-icon svgIcon="mdi:office-building" class="icon-size-8"></mat-icon>
-                                        </div>
-                                    }
+            <button
+                type="button"
+                (click)="activeSubTab.set('categories')"
+                class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                [ngClass]="activeSubTab() === 'categories' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
+                <mat-icon svgIcon="mdi:tag-multiple-outline" class="icon-size-4.5"></mat-icon>
+                <span>ប្រភេទការងារ និងស្លាក (Tags)</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold"
+                    [ngClass]="activeSubTab() === 'categories' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                    {{ (settings()?.work_categories || []).length }}
+                </span>
+            </button>
 
-                                    <div class="absolute -bottom-1 -right-1 flex items-center justify-center border rounded-full border-blue-500 p-1 bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-blue-400">
-                                        <mat-icon class="icon-size-4 text-blue-600 dark:text-blue-400" svgIcon="mdi:camera"></mat-icon>
-                                    </div>
+            <button
+                type="button"
+                (click)="activeSubTab.set('preferences')"
+                class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
+                [ngClass]="activeSubTab() === 'preferences' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
+                <mat-icon svgIcon="mdi:tune-vertical" class="icon-size-4.5"></mat-icon>
+                <span>ចំណូលចិត្ត និងប្រព័ន្ធ (Preferences)</span>
+            </button>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SUB-TAB 1: General Organization Profile -->
+        <!-- ============================================================= -->
+        @if (activeSubTab() === 'general') {
+            <form [formGroup]="settingsForm" class="space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Logo & Identification (1 Col) -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs flex flex-col items-center text-center">
+                        <span class="text-[15px] font-bold text-slate-900 dark:text-white mb-1">រូបសញ្ញារបស់អង្គភាព</span>
+                        <span class="text-[12.5px] text-slate-500 dark:text-slate-400 mb-5">រូបភាពបង្ហាញលើ Header, Menu និងរបាយការណ៍ផ្លូវការ</span>
+
+                        <div
+                            class="relative w-32 h-32 rounded-2xl overflow-visible border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 bg-slate-50 dark:bg-slate-900 transition-colors group"
+                            (click)="orgLogoInput.click()"
+                            matTooltip="ចុចដើម្បីជ្រើសរើសរូបសញ្ញាអង្គភាព (Logo)">
+                            @if (orgLogo()) {
+                                <img
+                                    class="w-full h-full object-contain p-2 rounded-2xl"
+                                    [src]="orgLogo()!"
+                                    alt="Organization Logo">
+                            } @else {
+                                <div class="flex flex-col items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors">
+                                    <mat-icon svgIcon="mdi:office-building" class="icon-size-12"></mat-icon>
+                                    <span class="text-[11px] mt-1">ជ្រើសរើស Logo</span>
                                 </div>
-                                <input #orgLogoInput type="file" accept="image/*" (change)="onLogoSelected($event)" class="hidden" />
-                                @if (orgLogo()) {
-                                    <button type="button" (click)="removeLogo()" class="mt-1 text-[12px] font-medium text-rose-500 hover:underline cursor-pointer">
-                                        លុបរូបភាព
-                                    </button>
-                                }
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <span class="block text-[14px] font-medium text-slate-900 dark:text-white">រូបសញ្ញាផ្លូវការរបស់អង្គភាព (Organization Logo)</span>
-                                <span class="block text-[12.5px] text-slate-500 dark:text-slate-400 mt-0.5">រូបភាពនេះនឹងបង្ហាញនៅលើ Header របារម៉ឺនុយ និងរបាយការណ៍ផ្លូវការនានា</span>
+                            }
+
+                            <div class="absolute -bottom-2 -right-2 flex items-center justify-center border rounded-full border-blue-500 p-1.5 bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-blue-400">
+                                <mat-icon class="icon-size-4.5 text-blue-600 dark:text-blue-400" svgIcon="mdi:camera"></mat-icon>
                             </div>
                         </div>
 
-                        <!-- KH Name -->
+                        <input #orgLogoInput type="file" accept="image/*" (change)="onLogoSelected($event)" class="hidden" />
+
+                        @if (orgLogo()) {
+                            <button
+                                type="button"
+                                (click)="removeLogo()"
+                                class="mt-3 text-[12.5px] font-medium text-rose-500 hover:underline cursor-pointer flex items-center gap-1">
+                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-3.5"></mat-icon>
+                                <span>លុបរូបភាព</span>
+                            </button>
+                        }
+
+                        <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700/60 w-full text-left space-y-3 text-[13px]">
+                            <div>
+                                <span class="text-slate-400 block text-[12px]">កូដសម្គាល់អង្គភាព:</span>
+                                <span class="font-mono font-bold text-slate-800 dark:text-slate-200 text-[14px]">{{ settingsForm.get('code')?.value || 'DIGITECH-HQ' }}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[12px]">ដែនផ្ទៃក្នុង (Internal Domain):</span>
+                                <span class="font-mono text-slate-700 dark:text-slate-300 text-[12px]">{{ settingsForm.get('domain')?.value || 'pms.digitech.com.kh' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Form Fields (2 Cols) -->
+                    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs space-y-4">
+                        <h2 class="text-[16px] font-bold text-slate-900 dark:text-white pb-3 border-b border-slate-100 dark:border-slate-700/60">
+                            ព័ត៌មានលម្អិតផ្លូវការ (Official Organization Info)
+                        </h2>
+
+                        <!-- Name KH -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
                                 ឈ្មោះអង្គភាពជាភាសាខ្មែរ <span class="text-rose-500">*</span>
@@ -95,10 +172,10 @@
                             <input
                                 type="text"
                                 formControlName="organization_name_kh"
-                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
                         </div>
 
-                        <!-- EN Name -->
+                        <!-- Name EN -->
                         <div>
                             <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
                                 ឈ្មោះអង្គភាពជាអក្សរឡាតាំង (English Name) <span class="text-rose-500">*</span>
@@ -106,185 +183,391 @@
                             <input
                                 type="text"
                                 formControlName="organization_name_en"
-                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
                         </div>
 
-                        <!-- Code & Domain Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Contact Email & Phone -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    កូដកន្លែងធ្វើការ (Organization Code)
+                                    អ៊ីមែលទំនាក់ទំនង (Contact Email)
                                 </label>
                                 <input
-                                    type="text"
-                                    formControlName="code"
-                                    class="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] font-mono text-slate-500 cursor-not-allowed outline-none" />
+                                    type="email"
+                                    formControlName="contact_email"
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
                             </div>
                             <div>
                                 <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    ដែនផ្ទៃក្នុង (Internal Domain)
+                                    លេខទូរស័ព្ទ (Contact Phone)
                                 </label>
                                 <input
                                     type="text"
-                                    formControlName="domain"
-                                    class="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] font-mono text-slate-500 cursor-not-allowed outline-none" />
+                                    formControlName="contact_phone"
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
                             </div>
                         </div>
-                    </form>
+
+                        <!-- Office Address -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                អាសយដ្ឋានការិយាល័យកណ្តាល (Headquarters Address)
+                            </label>
+                            <textarea
+                                rows="2"
+                                formControlName="address"
+                                class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        }
+
+        <!-- ============================================================= -->
+        <!-- SUB-TAB 2: Departments Hierarchy -->
+        <!-- ============================================================= -->
+        @if (activeSubTab() === 'departments') {
+            <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-700/60">
+                    <div>
+                        <h2 class="text-[16px] font-bold text-slate-900 dark:text-white">រចនាសម្ព័ន្ធនាយកដ្ឋានក្នុងអង្គភាព (Departments Hierarchy)</h2>
+                        <p class="text-[13px] text-slate-400">គ្រប់គ្រងឈ្មោះនាយកដ្ឋាន ប្រធានដឹកនាំ និងចំនួនសមាជិក</p>
+                    </div>
+                    <button
+                        type="button"
+                        (click)="openAddDeptModal()"
+                        class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all shrink-0">
+                        <mat-icon svgIcon="mdi:plus" class="icon-size-4.5"></mat-icon>
+                        <span>បន្ថែមនាយកដ្ឋានថ្មី</span>
+                    </button>
                 </div>
 
-                <!-- Departments Structure Card -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-700/60">
-                        <div>
-                            <h2 class="text-[16px] font-medium text-slate-900 dark:text-white">រចនាសម្ព័ន្ធនាយកដ្ឋាន (Departments Hierarchy)</h2>
-                            <p class="text-[13px] text-slate-400">បញ្ជីនាយកដ្ឋាន និងប្រធានដឹកនាំ</p>
-                        </div>
-                        <button
-                            type="button"
-                            (click)="openAddDeptModal()"
-                            class="h-8 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 text-blue-600 text-[13px] font-medium flex items-center gap-1 cursor-pointer">
-                            <mat-icon svgIcon="mdi:plus" class="icon-size-4"></mat-icon>
-                            <span>បន្ថែមនាយកដ្ឋាន</span>
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="text-[13px] font-medium text-slate-400 bg-slate-50/70 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700/60">
-                                    <th class="py-2.5 px-3">ឈ្មោះនាយកដ្ឋាន</th>
-                                    <th class="py-2.5 px-3">ប្រធានផ្នែក (Head)</th>
-                                    <th class="py-2.5 px-3">ចំនួនសមាជិក</th>
-                                    <th class="py-2.5 px-3 text-right">សកម្មភាព</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
-                                @for (dept of settings()?.departments || []; track dept.id) {
-                                    <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30">
-                                        <td class="py-2.5 px-3">
-                                            <div class="font-medium text-slate-800 dark:text-slate-200">{{ dept.name_kh }}</div>
-                                            <div class="text-[11px] text-slate-400">{{ dept.name_en }}</div>
-                                        </td>
-                                        <td class="py-2.5 px-3 text-[13px] text-slate-700 dark:text-slate-300">{{ dept.head }}</td>
-                                        <td class="py-2.5 px-3 text-[13px] font-mono text-slate-400">{{ dept.member_count }} នាក់</td>
-                                        <td class="py-2.5 px-3 text-right">
+                <div class="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-[13px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-900/50 border-b border-slate-200/80 dark:border-slate-700/80">
+                                <th class="py-3 px-4">ឈ្មោះនាយកដ្ឋាន (Khmer & English)</th>
+                                <th class="py-3 px-4">ប្រធានផ្នែក (Head of Department)</th>
+                                <th class="py-3 px-4 text-center">ចំនួនសមាជិក</th>
+                                <th class="py-3 px-4 text-right">សកម្មភាព</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
+                            @for (dept of settings()?.departments || []; track dept.id) {
+                                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-700/30 transition-colors">
+                                    <td class="py-3 px-4">
+                                        <div class="font-bold text-slate-900 dark:text-white text-[14.5px]">{{ dept.name_kh }}</div>
+                                        <div class="text-[12px] text-slate-400 font-medium">{{ dept.name_en }}</div>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-300 font-bold flex items-center justify-center text-[11px]">
+                                                {{ dept.head.slice(0, 1) }}
+                                            </div>
+                                            <span class="text-[13.5px] font-medium text-slate-700 dark:text-slate-300">{{ dept.head }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-4 text-center font-mono font-semibold text-slate-700 dark:text-slate-300">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[12px] bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                            {{ dept.member_count }} នាក់
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1">
                                             <button
                                                 type="button"
-                                                (click)="removeDepartment(dept.id)"
-                                                class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 flex items-center justify-center transition-all cursor-pointer">
+                                                (click)="openEditDeptModal(dept)"
+                                                matTooltip="កែប្រែព័ត៌មាននាយកដ្ឋាន"
+                                                class="w-8 h-8 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-center transition-all cursor-pointer">
+                                                <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4.5"></mat-icon>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                (click)="confirmDeleteDepartment(dept)"
+                                                matTooltip="លុបនាយកដ្ឋាននេះ"
+                                                class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-all cursor-pointer">
                                                 <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
                                             </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Work Categories & Tags (1 Col) -->
-            <div class="space-y-6">
-                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
-                    <h2 class="text-[16px] font-medium text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-100 dark:border-slate-700/60">
-                        ប្រភេទការងារ និងស្លាក (Categories & Tags)
-                    </h2>
-
-                    <!-- Add Category input -->
-                    <div class="flex items-center gap-2">
-                        <input
-                            type="text"
-                            [ngModel]="newCategoryInput()"
-                            (ngModelChange)="newCategoryInput.set($event)"
-                            (keydown.enter)="addCategory()"
-                            placeholder="បញ្ចូលប្រភេទការងារថ្មី..."
-                            class="w-full px-3.5 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
-                        <button
-                            type="button"
-                            (click)="addCategory()"
-                            class="h-8 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium shrink-0 cursor-pointer shadow-2xs">
-                            បន្ថែម
-                        </button>
-                    </div>
-
-                    <!-- Tags List -->
-                    <div class="flex flex-wrap gap-2 mt-4">
-                        @for (cat of settings()?.work_categories || []; track cat) {
-                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-[13px] font-medium text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600">
-                                {{ cat }}
-                                <button
-                                    type="button"
-                                    (click)="removeCategory(cat)"
-                                    class="w-4 h-4 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center text-slate-400 hover:text-rose-500 cursor-pointer">
-                                    <mat-icon svgIcon="mdi:close" class="icon-size-3"></mat-icon>
-                                </button>
-                            </span>
-                        }
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Add Department Modal -->
-        @if (showDeptModal()) {
-            <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
-                    <h3 class="text-[16px] font-medium text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-100 dark:border-slate-700">
-                        បន្ថែមនាយកដ្ឋានថ្មី
-                    </h3>
-
-                    <form [formGroup]="deptForm" (ngSubmit)="saveDepartment()" class="space-y-3">
-                        <div>
-                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ឈ្មោះនាយកដ្ឋាន (ភាសាខ្មែរ) <span class="text-rose-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                formControlName="name_kh"
-                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] outline-none" />
-                        </div>
-                        <div>
-                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                English Name <span class="text-rose-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                formControlName="name_en"
-                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] outline-none" />
-                        </div>
-                        <div>
-                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ប្រធានដឹកនាំ (Head) <span class="text-rose-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                formControlName="head"
-                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] outline-none" />
-                        </div>
-                        <div>
-                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ចំនួនសមាជិកដំបូង
-                            </label>
-                            <input
-                                type="number"
-                                formControlName="member_count"
-                                class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] outline-none" />
-                        </div>
-
-                        <div class="mt-5 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
-                            <button (click)="showDeptModal.set(false)" type="button" class="h-9 px-4 rounded-xl border border-slate-200 text-slate-600 text-[14px] font-medium cursor-pointer">
-                                បោះបង់
-                            </button>
-                            <button type="submit" [disabled]="deptForm.invalid" class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs">
-                                បន្ថែម
-                            </button>
-                        </div>
-                    </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr>
+                                    <td colspan="4" class="py-12 text-center text-slate-400">
+                                        <mat-icon svgIcon="mdi:sitemap-outline" class="icon-size-8 text-slate-300 mx-auto"></mat-icon>
+                                        <div class="mt-2 text-[14px]">មិនទាន់មាននាយកដ្ឋានត្រូវបានបង្កើតនៅឡើយទេ</div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         }
 
+        <!-- ============================================================= -->
+        <!-- SUB-TAB 3: Categories & Tags -->
+        <!-- ============================================================= -->
+        @if (activeSubTab() === 'categories') {
+            <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs space-y-5">
+                <div>
+                    <h2 class="text-[16px] font-bold text-slate-900 dark:text-white">ប្រភេទការងារ និងស្លាកសម្គាល់ (Categories & Tags)</h2>
+                    <p class="text-[13px] text-slate-400 mt-0.5">ស្លាកទាំងនេះប្រើសម្រាប់បែងចែកប្រភេទកិច្ចការ និងគម្រោងក្នុងប្រព័ន្ធទាំងមូល</p>
+                </div>
+
+                <!-- Add Category Input -->
+                <div class="flex items-center gap-2 max-w-lg">
+                    <input
+                        type="text"
+                        [ngModel]="newCategoryInput()"
+                        (ngModelChange)="newCategoryInput.set($event)"
+                        (keydown.enter)="addCategory()"
+                        placeholder="បញ្ចូលឈ្មោះប្រភេទការងារថ្មី..."
+                        class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none" />
+                    <button
+                        type="button"
+                        (click)="addCategory()"
+                        class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-medium shrink-0 cursor-pointer shadow-2xs transition-all">
+                        + បន្ថែម
+                    </button>
+                </div>
+
+                <!-- Suggested Presets -->
+                <div>
+                    <div class="text-[12.5px] font-medium text-slate-400 mb-2">ស្លាកពេញនិយមដែលបានណែនាំ (ចុចដើម្បីបន្ថែមរហ័ស):</div>
+                    <div class="flex flex-wrap gap-1.5">
+                        @for (sug of suggestedCategories; track sug) {
+                            <button
+                                type="button"
+                                (click)="addCategory(sug)"
+                                class="px-3 py-1 rounded-lg text-[12px] font-medium border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 text-slate-600 dark:text-slate-300 hover:text-blue-600 transition-all cursor-pointer">
+                                + {{ sug }}
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Active Tags List -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-700/60">
+                    <div class="text-[13.5px] font-bold text-slate-800 dark:text-slate-200 mb-3">
+                        ស្លាកការងារសកម្មបច្ចុប្បន្ន ({{ (settings()?.work_categories || []).length }})
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        @for (cat of settings()?.work_categories || []; track cat) {
+                            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[13px] font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 shadow-2xs">
+                                <span>{{ cat }}</span>
+                                <button
+                                    type="button"
+                                    (click)="removeCategory(cat)"
+                                    class="w-4 h-4 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 flex items-center justify-center text-blue-400 hover:text-rose-600 cursor-pointer transition-colors">
+                                    <mat-icon svgIcon="mdi:close" class="icon-size-3"></mat-icon>
+                                </button>
+                            </span>
+                        } @empty {
+                            <div class="text-[13px] text-slate-400 italic">មិនទាន់មានស្លាកការងារនៅឡើយទេ</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- ============================================================= -->
+        <!-- SUB-TAB 4: Preferences & System Config -->
+        <!-- ============================================================= -->
+        @if (activeSubTab() === 'preferences') {
+            <form [formGroup]="settingsForm" class="space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs space-y-6">
+                    <div>
+                        <h2 class="text-[16px] font-bold text-slate-900 dark:text-white">ចំណូលចិត្ត និងការកំណត់ប្រព័ន្ធ (System Preferences)</h2>
+                        <p class="text-[13px] text-slate-400 mt-0.5">កំណត់រូបិយប័ណ្ណ តំបន់ម៉ោង និងសិទ្ធិស្កេនវត្តមានស្វ័យប្រវត្តិ</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Currency -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                រូបិយប័ណ្ណគោល (Default Currency)
+                            </label>
+                            <select
+                                formControlName="currency"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white outline-none">
+                                <option value="USD ($)">USD - ប្រាក់ដុល្លារអាមេរិក ($)</option>
+                                <option value="KHR (៛)">KHR - ប្រាក់រៀលខ្មែរ (៛)</option>
+                            </select>
+                        </div>
+
+                        <!-- Timezone -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                តំបន់ម៉ោង (System Timezone)
+                            </label>
+                            <select
+                                formControlName="timezone"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] text-slate-900 dark:text-white outline-none">
+                                <option value="Asia/Phnom_Penh (GMT+7)">Asia/Phnom_Penh (GMT+7) - កម្ពុជា</option>
+                                <option value="UTC (GMT+0)">UTC (GMT+0) - Universal Time</option>
+                                <option value="Asia/Bangkok (GMT+7)">Asia/Bangkok (GMT+7)</option>
+                                <option value="Asia/Singapore (GMT+8)">Asia/Singapore (GMT+8)</option>
+                            </select>
+                        </div>
+
+                        <!-- Primary Color -->
+                        <div>
+                            <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                ពណ៌គោលនៃម៉ាកយីហោ (Brand Theme Color)
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="color"
+                                    formControlName="primary_color"
+                                    class="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer p-0.5 bg-transparent" />
+                                <input
+                                    type="text"
+                                    formControlName="primary_color"
+                                    class="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[14px] font-mono text-slate-900 dark:text-white outline-none" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toggle Switches -->
+                    <div class="pt-5 border-t border-slate-100 dark:border-slate-700/60 space-y-4">
+                        <label class="flex items-start gap-3 cursor-pointer p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                            <input
+                                type="checkbox"
+                                formControlName="allow_mobile_checkin"
+                                class="mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer" />
+                            <div>
+                                <div class="font-medium text-slate-900 dark:text-white text-[14px]">អនុញ្ញាតឱ្យបុគ្គលិកស្កេនវត្តមានតាមទូរស័ព្ទ (Mobile GPS Check-in)</div>
+                                <div class="text-[12.5px] text-slate-500 dark:text-slate-400">បុគ្គលិកអាចប្រើទូរស័ព្ទដៃស្កេនវត្តមានដោយភ្ជាប់ជាមួយប្រព័ន្ធផ្ទៀងផ្ទាត់ទីតាំង GPS</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-3 cursor-pointer p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                            <input
+                                type="checkbox"
+                                formControlName="auto_notify_telegram"
+                                class="mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer" />
+                            <div>
+                                <div class="font-medium text-slate-900 dark:text-white text-[14px]">ផ្ញើដំណឹងស្វ័យប្រវត្តិតាម Telegram Bot (Automated Telegram Notifications)</div>
+                                <div class="text-[12.5px] text-slate-500 dark:text-slate-400">ផ្ញើការជូនដំណឹងនៅពេលមានការអនុម័តច្បាប់ ការបង្កើតកិច្ចការថ្មី ឬការប្រជុំបន្ទាន់</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        }
+
     </div>
+
+    <!-- ============================================================= -->
+    <!-- Add / Edit Department Modal -->
+    <!-- ============================================================= -->
+    @if (showDeptModal()) {
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+                    <h3 class="text-[17px] font-bold text-slate-900 dark:text-white">
+                        {{ isEditingDept() ? 'កែប្រែព័ត៌មាននាយកដ្ឋាន' : 'បន្ថែមនាយកដ្ឋានថ្មី' }}
+                    </h3>
+                    <button type="button" (click)="showDeptModal.set(false)" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
+                    </button>
+                </div>
+
+                <form [formGroup]="deptForm" (ngSubmit)="saveDepartment()" class="mt-4 space-y-3.5 text-[14px]">
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ឈ្មោះនាយកដ្ឋានជាភាសាខ្មែរ <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="name_kh"
+                            placeholder="ឧ. ព័ត៌មានវិទ្យា និងអភិវឌ្ឍន៍សូហ្វវែរ"
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            English Name <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="name_en"
+                            placeholder="e.g. Information Technology & Software"
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ប្រធានផ្នែកដឹកនាំ (Head of Department) <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="head"
+                            placeholder="ឧ. លី ម៉េងហួរ"
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ចំនួនសមាជិកដំបូង
+                        </label>
+                        <input
+                            type="number"
+                            formControlName="member_count"
+                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
+                    </div>
+
+                    <div class="mt-6 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            (click)="showDeptModal.set(false)"
+                            class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
+                            បោះបង់
+                        </button>
+                        <button
+                            type="submit"
+                            [disabled]="deptForm.invalid"
+                            class="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium cursor-pointer shadow-2xs">
+                            {{ isEditingDept() ? 'រក្សាទុកការកែប្រែ' : 'បន្ថែមនាយកដ្ឋាន' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <!-- ============================================================= -->
+    <!-- Delete Department Confirmation Modal -->
+    <!-- ============================================================= -->
+    @if (deleteDeptModalOpen()) {
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+                <div class="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-800 mb-3">
+                    <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-6"></mat-icon>
+                </div>
+                <h3 class="text-[17px] font-bold text-slate-900 dark:text-white">តើអ្នកពិតជាចង់លុបនាយកដ្ឋាននេះមែនទេ?</h3>
+                <p class="text-[13px] text-slate-500 mt-2">
+                    នាយកដ្ឋាន <strong class="text-slate-800 dark:text-slate-200">{{ deptToDelete()?.name_kh }}</strong> នឹងត្រូវដកចេញពីប្រព័ន្ធ។
+                </p>
+
+                <div class="mt-6 flex justify-end gap-2">
+                    <button
+                        type="button"
+                        (click)="deleteDeptModalOpen.set(false)"
+                        class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[14px] font-medium cursor-pointer">
+                        បោះបង់
+                    </button>
+                    <button
+                        type="button"
+                        (click)="submitDeleteDepartment()"
+                        class="h-9 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[14px] font-medium cursor-pointer shadow-2xs">
+                        យល់ព្រមលុប
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
 </div>
+
