@@ -60,3 +60,15 @@ docker compose ps
 echo --------------------------------------------------------
 echo  Rebuild complete! Application is running cleanly.
 echo --------------------------------------------------------
+
+echo --------------------------------------------------------
+echo  Cleaning up Docker build cache to free storage...
+echo --------------------------------------------------------
+docker image prune --force
+docker builder prune --force
+docker container prune --force
+
+echo --------------------------------------------------------
+echo  Docker storage usage after cleanup:
+echo --------------------------------------------------------
+docker system df

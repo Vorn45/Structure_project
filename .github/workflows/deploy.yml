@@ -311,8 +311,20 @@ jobs:
           -f docker-compose.yml
           ps
 
-      - name: Remove dangling Docker images
-        run: docker image prune --force
+      - name: Clean up Docker build cache and unused images
+        shell: bash
+        run: |
+          echo "==> Removing dangling images (untagged leftover layers)..."
+          docker image prune --force
+
+          echo "==> Removing unused Docker build cache (biggest storage offender)..."
+          docker builder prune --force
+
+          echo "==> Removing stopped containers..."
+          docker container prune --force
+
+          echo "==> Docker disk usage after cleanup:"
+          docker system df
 
       - name: Remove temporary files
         if: always()

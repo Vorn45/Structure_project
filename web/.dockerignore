@@ -7,3 +7,6 @@ npm-debug.log*
 .git
 .vscode
 .idea
+# Exclude local dev/test/doc files not needed in Docker build
+*.md
+scripts/
