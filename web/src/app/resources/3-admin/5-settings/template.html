@@ -460,79 +460,92 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- Add / Edit Department Modal -->
+    <!-- ============================================================= -->
+    <!-- Add / Edit Department Side Drawer                             -->
     <!-- ============================================================= -->
     @if (showDeptModal()) {
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
-                    <h3 class="text-[17px] font-bold text-slate-900 dark:text-white">
-                        {{ isEditingDept() ? 'កែប្រែព័ត៌មាននាយកដ្ឋាន' : 'បន្ថែមនាយកដ្ឋានថ្មី' }}
-                    </h3>
-                    <button type="button" (click)="showDeptModal.set(false)" class="text-slate-400 hover:text-slate-600 cursor-pointer">
-                        <mat-icon svgIcon="mdi:close" class="icon-size-5"></mat-icon>
-                    </button>
+        <!-- Backdrop: Subtle clear dismiss overlay -->
+        <div (click)="showDeptModal.set(false)" class="fixed inset-0 bg-slate-900/30 dark:bg-black/50 z-50 transition-opacity"></div>
+
+        <!-- Drawer Content: Exactly 600px width matching standard side dialog -->
+        <div class="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[600px] max-w-[600px] bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy"
+            style="font-family: 'Kantumruy Pro', sans-serif !important;">
+            
+            <!-- Standard Side Dialog Close Button -->
+            <shared-side-dialog-close-button
+                [isReturn]="false"
+                [closeOnClick]="false"
+                (buttonClick)="showDeptModal.set(false)">
+            </shared-side-dialog-close-button>
+
+            <!-- 56px Header: Matching standard dialog header style with centered title -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 bg-white dark:bg-slate-900 relative px-4 shrink-0 font-kantumruy">
+                <span class="w-full text-center text-xl sm:text-2xl font-medium text-slate-700 dark:text-slate-200">
+                    {{ isEditingDept() ? 'កែប្រែព័ត៌មាននាយកដ្ឋាន' : 'បន្ថែមនាយកដ្ឋានថ្មី' }}
+                </span>
+            </div>
+
+            <!-- Drawer Form Body -->
+            <form [formGroup]="deptForm" (ngSubmit)="saveDepartment()" class="flex-1 overflow-y-auto p-6 space-y-5 text-[14px]">
+                <div>
+                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        ឈ្មោះនាយកដ្ឋានជាភាសាខ្មែរ <span class="text-rose-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        formControlName="name_kh"
+                        placeholder="ឧ. ព័ត៌មានវិទ្យា និងអភិវឌ្ឍន៍សូហ្វវែរ"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
 
-                <form [formGroup]="deptForm" (ngSubmit)="saveDepartment()" class="mt-4 space-y-3.5 text-[14px]">
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            ឈ្មោះនាយកដ្ឋានជាភាសាខ្មែរ <span class="text-rose-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            formControlName="name_kh"
-                            placeholder="ឧ. ព័ត៌មានវិទ្យា និងអភិវឌ្ឍន៍សូហ្វវែរ"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        English Name <span class="text-rose-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        formControlName="name_en"
+                        placeholder="e.g. Information Technology & Software"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
+                </div>
 
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            English Name <span class="text-rose-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            formControlName="name_en"
-                            placeholder="e.g. Information Technology & Software"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        ប្រធានផ្នែកដឹកនាំ (Head of Department) <span class="text-rose-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        formControlName="head"
+                        placeholder="ឧ. លី ម៉េងហួរ"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
+                </div>
 
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            ប្រធានផ្នែកដឹកនាំ (Head of Department) <span class="text-rose-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            formControlName="head"
-                            placeholder="ឧ. លី ម៉េងហួរ"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
+                <div>
+                    <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        ចំនួនសមាជិកដំបូង
+                    </label>
+                    <input
+                        type="number"
+                        formControlName="member_count"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
+                </div>
+            </form>
 
-                    <div>
-                        <label class="block text-[13px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            ចំនួនសមាជិកដំបូង
-                        </label>
-                        <input
-                            type="number"
-                            formControlName="member_count"
-                            class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
-
-                    <div class="mt-6 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
-                        <button
-                            type="button"
-                            (click)="showDeptModal.set(false)"
-                            class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
-                            បោះបង់
-                        </button>
-                        <button
-                            type="submit"
-                            [disabled]="deptForm.invalid"
-                            class="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium cursor-pointer shadow-2xs">
-                            {{ isEditingDept() ? 'រក្សាទុកការកែប្រែ' : 'បន្ថែមនាយកដ្ឋាន' }}
-                        </button>
-                    </div>
-                </form>
+            <!-- Fixed Bottom Action Bar -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-end gap-3 shrink-0">
+                <button
+                    type="button"
+                    (click)="showDeptModal.set(false)"
+                    class="h-10 px-5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-[14px] font-medium transition-all cursor-pointer">
+                    បោះបង់
+                </button>
+                <button
+                    type="button"
+                    (click)="saveDepartment()"
+                    [disabled]="deptForm.invalid"
+                    class="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-2 shadow-sm transition-all cursor-pointer">
+                    <span>{{ isEditingDept() ? 'រក្សាទុកការកែប្រែ' : 'បន្ថែមនាយកដ្ឋាន' }}</span>
+                </button>
             </div>
         </div>
     }

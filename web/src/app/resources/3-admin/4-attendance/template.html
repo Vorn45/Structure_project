@@ -573,141 +573,146 @@
     <!-- Create Leave Request Slide-over Drawer -->
     <!-- ============================================================= -->
     @if (createDrawerOpen()) {
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex justify-end">
-            <div class="w-full max-w-md bg-white dark:bg-slate-800 h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-200">
-                <!-- Drawer Header -->
-                <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-200 dark:border-blue-800">
-                            <mat-icon svgIcon="mdi:calendar-plus" class="icon-size-4.5"></mat-icon>
-                        </div>
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">ស្នើសុំច្បាប់ឈប់សម្រាក</h2>
-                    </div>
-                    <app-side-dialog-close-button (closeDialog)="closeCreateDrawer()"></app-side-dialog-close-button>
-                </div>
+        <!-- Backdrop: Subtle clear dismiss overlay -->
+        <div (click)="closeCreateDrawer()" class="fixed inset-0 bg-slate-900/30 dark:bg-black/50 z-50 transition-opacity"></div>
 
-                <!-- Drawer Body Form -->
-                <div class="p-5 overflow-y-auto flex-1 space-y-4 text-[14px]">
-                    <form [formGroup]="createLeaveForm" class="space-y-4">
-                        <!-- Select Staff -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ជ្រើសរើសបុគ្គលិក <span class="text-rose-500">*</span>
-                            </label>
-                            <select
-                                formControlName="user_id"
-                                (change)="onEmployeeSelect($event)"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                                <option [ngValue]="null" disabled>-- ជ្រើសរើសបុគ្គលិក --</option>
-                                @for (u of users(); track u.id) {
-                                    <option [value]="u.id">{{ u.name_kh || u.name_en }} ({{ u.department }})</option>
-                                }
-                            </select>
-                        </div>
+        <!-- Drawer Content: Exactly 600px width matching standard side dialog -->
+        <div class="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[600px] max-w-[600px] bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy"
+            style="font-family: 'Kantumruy Pro', sans-serif !important;">
+            <!-- Standard Side Dialog Close Button -->
+            <shared-side-dialog-close-button
+                [isReturn]="false"
+                [closeOnClick]="false"
+                (buttonClick)="closeCreateDrawer()">
+            </shared-side-dialog-close-button>
 
-                        <!-- Department -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">នាយកដ្ឋាន</label>
-                            <input
-                                type="text"
-                                formControlName="department"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                        </div>
+            <!-- 56px Header: Centered title matching standard side dialog design -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 bg-white dark:bg-slate-900 relative px-4 shrink-0 font-kantumruy">
+                <span class="w-full text-center text-xl sm:text-2xl font-medium text-slate-700 dark:text-slate-200">
+                    ស្នើសុំច្បាប់ឈប់សម្រាក
+                </span>
+            </div>
 
-                        <!-- Leave Type -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ប្រភេទច្បាប់ឈប់សម្រាក <span class="text-rose-500">*</span>
-                            </label>
-                            <select
-                                formControlName="leave_type"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                                <option value="annual">ច្បាប់ប្រចាំឆ្នាំ (Annual Leave)</option>
-                                <option value="sick">ច្បាប់ឈឺ / ព្យាបាលជំងឺ (Sick Leave)</option>
-                                <option value="special">ច្បាប់ពិសេស / ធុរៈផ្ទាល់ខ្លួន (Special Leave)</option>
-                                <option value="maternity">ច្បាប់លំហែមាតុភាព (Maternity Leave)</option>
-                            </select>
-                        </div>
-
-                        <!-- Start Date & End Date -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    ចាប់ពីថ្ងៃ <span class="text-rose-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    formControlName="start_date"
-                                    (change)="calculateDuration()"
-                                    class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                            </div>
-                            <div>
-                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    ដល់ថ្ងៃ <span class="text-rose-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    formControlName="end_date"
-                                    (change)="calculateDuration()"
-                                    class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                            </div>
-                        </div>
-
-                        <!-- Duration Days -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ចំនួនថ្ងៃសរុប</label>
-                            <input
-                                type="number"
-                                step="0.5"
-                                formControlName="duration_days"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                        </div>
-
-                        <!-- Reason -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                មូលហេតុនៃការសុំច្បាប់ <span class="text-rose-500">*</span>
-                            </label>
-                            <textarea
-                                rows="3"
-                                formControlName="reason"
-                                placeholder="បញ្ជាក់មូលហេតុច្បាស់លាស់..."
-                                class="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none resize-none"></textarea>
-                        </div>
-
-                        <!-- Immediate Status (Admin can approve directly) -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ស្ថានភាពសម្រេច</label>
-                            <select
-                                formControlName="status"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                                <option value="pending">កំពុងរង់ចាំការសម្រេច (Pending)</option>
-                                <option value="approved">អនុម័តភ្លាមៗ (Approved immediately)</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Drawer Footer -->
-                <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-end gap-2 bg-slate-50/50 dark:bg-slate-900/30">
-                    <button
-                        type="button"
-                        (click)="closeCreateDrawer()"
-                        class="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
-                        បោះបង់
-                    </button>
-                    <button
-                        type="button"
-                        (click)="submitCreateLeave()"
-                        [disabled]="createLoading()"
-                        class="h-10 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer shadow-2xs">
-                        @if (createLoading()) {
-                            <span>កំពុងរក្សាទុក...</span>
-                        } @else {
-                            <span>រក្សាទុកសំណើរសុំច្បាប់</span>
+            <!-- Drawer Body Form -->
+            <form [formGroup]="createLeaveForm" (ngSubmit)="submitCreateLeave()" class="flex-1 overflow-y-auto p-6 space-y-4 text-[14px]">
+                <!-- Select Staff -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        ជ្រើសរើសបុគ្គលិក <span class="text-rose-500">*</span>
+                    </label>
+                    <select
+                        formControlName="user_id"
+                        (change)="onEmployeeSelect($event)"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none cursor-pointer">
+                        <option [ngValue]="null" disabled>-- ជ្រើសរើសបុគ្គលិក --</option>
+                        @for (u of users(); track u.id) {
+                            <option [value]="u.id">{{ u.name_kh || u.name_en }} ({{ u.department }})</option>
                         }
-                    </button>
+                    </select>
                 </div>
+
+                <!-- Department -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">នាយកដ្ឋាន</label>
+                    <input
+                        type="text"
+                        formControlName="department"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                </div>
+
+                <!-- Leave Type -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        ប្រភេទច្បាប់ឈប់សម្រាក <span class="text-rose-500">*</span>
+                    </label>
+                    <select
+                        formControlName="leave_type"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none cursor-pointer">
+                        <option value="annual">ច្បាប់ប្រចាំឆ្នាំ (Annual Leave)</option>
+                        <option value="sick">ច្បាប់ឈឺ / ព្យាបាលជំងឺ (Sick Leave)</option>
+                        <option value="special">ច្បាប់ពិសេស / ធុរៈផ្ទាល់ខ្លួន (Special Leave)</option>
+                        <option value="maternity">ច្បាប់លំហែមាតុភាព (Maternity Leave)</option>
+                    </select>
+                </div>
+
+                <!-- Start Date & End Date -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ចាប់ពីថ្ងៃ <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            formControlName="start_date"
+                            (change)="calculateDuration()"
+                            class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ដល់ថ្ងៃ <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            formControlName="end_date"
+                            (change)="calculateDuration()"
+                            class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                    </div>
+                </div>
+
+                <!-- Duration Days -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ចំនួនថ្ងៃសរុប</label>
+                    <input
+                        type="number"
+                        step="0.5"
+                        formControlName="duration_days"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                </div>
+
+                <!-- Reason -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        មូលហេតុនៃការសុំច្បាប់ <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea
+                        rows="3"
+                        formControlName="reason"
+                        placeholder="បញ្ជាក់មូលហេតុច្បាស់លាស់..."
+                        class="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none resize-none"></textarea>
+                </div>
+
+                <!-- Immediate Status (Admin can approve directly) -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ស្ថានភាពសម្រេច</label>
+                    <select
+                        formControlName="status"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none cursor-pointer">
+                        <option value="pending">កំពុងរង់ចាំការសម្រេច (Pending)</option>
+                        <option value="approved">អនុម័តភ្លាមៗ (Approved immediately)</option>
+                    </select>
+                </div>
+            </form>
+
+            <!-- Fixed Bottom Action Bar -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-end gap-3 shrink-0">
+                <button
+                    type="button"
+                    (click)="closeCreateDrawer()"
+                    class="h-10 px-5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-[14px] font-medium transition-all cursor-pointer">
+                    បោះបង់
+                </button>
+                <button
+                    type="button"
+                    (click)="submitCreateLeave()"
+                    [disabled]="createLoading() || createLeaveForm.invalid"
+                    class="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-2 shadow-sm transition-all cursor-pointer">
+                    @if (createLoading()) {
+                        <span class="animate-spin text-[12px]">⏳</span>
+                        <span>កំពុងរក្សាទុក...</span>
+                    } @else {
+                        <span>រក្សាទុកសំណើរសុំច្បាប់</span>
+                    }
+                </button>
             </div>
         </div>
     }
@@ -716,123 +721,128 @@
     <!-- Manual Attendance Log Slide-over Drawer -->
     <!-- ============================================================= -->
     @if (manualLogDrawerOpen()) {
-        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex justify-end">
-            <div class="w-full max-w-md bg-white dark:bg-slate-800 h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-200">
-                <!-- Drawer Header -->
-                <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
-                            <mat-icon svgIcon="mdi:clock-check" class="icon-size-4.5"></mat-icon>
-                        </div>
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">កត់ត្រាវត្តមានបុគ្គលិក</h2>
-                    </div>
-                    <app-side-dialog-close-button (closeDialog)="closeManualLogDrawer()"></app-side-dialog-close-button>
-                </div>
+        <!-- Backdrop: Subtle clear dismiss overlay -->
+        <div (click)="closeManualLogDrawer()" class="fixed inset-0 bg-slate-900/30 dark:bg-black/50 z-50 transition-opacity"></div>
 
-                <!-- Drawer Body Form -->
-                <div class="p-5 overflow-y-auto flex-1 space-y-4 text-[14px]">
-                    <form [formGroup]="manualLogForm" class="space-y-4">
-                        <!-- Select Staff -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                ជ្រើសរើសបុគ្គលិក <span class="text-rose-500">*</span>
-                            </label>
-                            <select
-                                formControlName="user_id"
-                                (change)="onManualLogEmployeeSelect($event)"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                                <option [ngValue]="null" disabled>-- ជ្រើសរើសបុគ្គលិក --</option>
-                                @for (u of users(); track u.id) {
-                                    <option [value]="u.id">{{ u.name_kh || u.name_en }} ({{ u.department }})</option>
-                                }
-                            </select>
-                        </div>
+        <!-- Drawer Content: Exactly 600px width matching standard side dialog -->
+        <div class="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[600px] max-w-[600px] bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 border-l border-slate-200 dark:border-slate-800 overflow-visible font-kantumruy"
+            style="font-family: 'Kantumruy Pro', sans-serif !important;">
+            <!-- Standard Side Dialog Close Button -->
+            <shared-side-dialog-close-button
+                [isReturn]="false"
+                [closeOnClick]="false"
+                (buttonClick)="closeManualLogDrawer()">
+            </shared-side-dialog-close-button>
 
-                        <!-- Department -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">នាយកដ្ឋាន</label>
-                            <input
-                                type="text"
-                                formControlName="department"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                        </div>
+            <!-- 56px Header: Centered title matching standard side dialog design -->
+            <div class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 bg-white dark:bg-slate-900 relative px-4 shrink-0 font-kantumruy">
+                <span class="w-full text-center text-xl sm:text-2xl font-medium text-slate-700 dark:text-slate-200">
+                    កត់ត្រាវត្តមានបុគ្គលិក
+                </span>
+            </div>
 
-                        <!-- Date -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">កាលបរិច្ឆេទ</label>
-                            <input
-                                type="date"
-                                formControlName="date"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                        </div>
-
-                        <!-- Check In & Check Out -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    ម៉ោងចូល (Check In) <span class="text-rose-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    formControlName="check_in"
-                                    placeholder="ឧ. 07:55 AM"
-                                    class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                            </div>
-                            <div>
-                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    ម៉ោងចេញ (Check Out)
-                                </label>
-                                <input
-                                    type="text"
-                                    formControlName="check_out"
-                                    placeholder="ឧ. 05:30 PM"
-                                    class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ស្ថានភាពវត្តមាន</label>
-                            <select
-                                formControlName="status"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                                <option value="on_time">ទាន់ពេលវេលា (On Time)</option>
-                                <option value="late">មកយឺត (Late)</option>
-                            </select>
-                        </div>
-
-                        <!-- Location -->
-                        <div>
-                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ទីតាំង / ចំណាំ</label>
-                            <input
-                                type="text"
-                                formControlName="location"
-                                placeholder="ឧ. ការិយាល័យកណ្តាល (Phnom Penh HQ)"
-                                class="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Drawer Footer -->
-                <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-end gap-2 bg-slate-50/50 dark:bg-slate-900/30">
-                    <button
-                        type="button"
-                        (click)="closeManualLogDrawer()"
-                        class="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium cursor-pointer">
-                        បោះបង់
-                    </button>
-                    <button
-                        type="button"
-                        (click)="submitManualLog()"
-                        [disabled]="manualLogLoading()"
-                        class="h-10 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer shadow-2xs">
-                        @if (manualLogLoading()) {
-                            <span>កំពុងរក្សាទុក...</span>
-                        } @else {
-                            <span>រក្សាទុកវត្តមាន</span>
+            <!-- Drawer Body Form -->
+            <form [formGroup]="manualLogForm" (ngSubmit)="submitManualLog()" class="flex-1 overflow-y-auto p-6 space-y-4 text-[14px]">
+                <!-- Select Staff -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        ជ្រើសរើសបុគ្គលិក <span class="text-rose-500">*</span>
+                    </label>
+                    <select
+                        formControlName="user_id"
+                        (change)="onManualLogEmployeeSelect($event)"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none cursor-pointer">
+                        <option [ngValue]="null" disabled>-- ជ្រើសរើសបុគ្គលិក --</option>
+                        @for (u of users(); track u.id) {
+                            <option [value]="u.id">{{ u.name_kh || u.name_en }} ({{ u.department }})</option>
                         }
-                    </button>
+                    </select>
                 </div>
+
+                <!-- Department -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">នាយកដ្ឋាន</label>
+                    <input
+                        type="text"
+                        formControlName="department"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                </div>
+
+                <!-- Date -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">កាលបរិច្ឆេទ</label>
+                    <input
+                        type="date"
+                        formControlName="date"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                </div>
+
+                <!-- Check In & Check Out -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ម៉ោងចូល (Check In) <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="check_in"
+                            placeholder="ឧ. 07:55 AM"
+                            class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            ម៉ោងចេញ (Check Out)
+                        </label>
+                        <input
+                            type="text"
+                            formControlName="check_out"
+                            placeholder="ឧ. 05:30 PM"
+                            class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ស្ថានភាពវត្តមាន</label>
+                    <select
+                        formControlName="status"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none cursor-pointer">
+                        <option value="on_time">ទាន់ពេលវេលា (On Time)</option>
+                        <option value="late">មកយឺត (Late)</option>
+                    </select>
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">ទីតាំង / ចំណាំ</label>
+                    <input
+                        type="text"
+                        formControlName="location"
+                        placeholder="ឧ. ការិយាល័យកណ្តាល (Phnom Penh HQ)"
+                        class="w-full h-11 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white outline-none">
+                </div>
+            </form>
+
+            <!-- Fixed Bottom Action Bar -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-end gap-3 shrink-0">
+                <button
+                    type="button"
+                    (click)="closeManualLogDrawer()"
+                    class="h-10 px-5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-[14px] font-medium transition-all cursor-pointer">
+                    បោះបង់
+                </button>
+                <button
+                    type="button"
+                    (click)="submitManualLog()"
+                    [disabled]="manualLogLoading() || manualLogForm.invalid"
+                    class="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[14px] font-medium flex items-center gap-2 shadow-sm transition-all cursor-pointer">
+                    @if (manualLogLoading()) {
+                        <span class="animate-spin text-[12px]">⏳</span>
+                        <span>កំពុងរក្សាទុក...</span>
+                    } @else {
+                        <span>រក្សាទុកវត្តមាន</span>
+                    }
+                </button>
             </div>
         </div>
     }
