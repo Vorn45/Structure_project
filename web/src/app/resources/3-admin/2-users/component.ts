@@ -673,7 +673,7 @@ export class UserManagementComponent implements OnInit {
     }
 
     copyInviteLink(inv: AdminUserInvitation): void {
-        const link = inv.invite_link || `${window.location.origin}/auth/accept-invite?token=${inv.id}`;
+        const link = inv.invite_link || `${window.location.origin}/#/auth/accept-invite?token=${inv.token || inv.id}`;
         navigator.clipboard.writeText(link).then(() => {
             this.copiedInviteId.set(inv.id);
             this._snackbar?.success('បានចម្លងតំណភ្ជាប់អញ្ជើញរួចរាល់!');

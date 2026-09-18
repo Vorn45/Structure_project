@@ -34,7 +34,14 @@ export class SesService implements OnModuleInit, OnModuleDestroy {
     private _transporter: nodemailer.Transporter | null = null;
 
     onModuleInit() {
-        this.getTransporter();
+        const host = appConfig.SES.SMTP_HOST;
+        const port = Number(appConfig.SES.SMTP_PORT) || 465;
+        const isGmail = (host || '').toLowerCase().includes('gmail');
+        if (!isGmail) {
+            this.getTransporter();
+        } else {
+            this._logger.log(`Gmail SMTP direct-transport initialized for ${host}:${port} (non-pooled to prevent idle timeout hangs)`);
+        }
     }
 
     onModuleDestroy() {
@@ -54,11 +61,34 @@ export class SesService implements OnModuleInit, OnModuleDestroy {
     private getTransporter(): nodemailer.Transporter | null {
         if (!this.isConfigured()) return null;
 
-        if (!this._transporter) {
-            const host = appConfig.SES.SMTP_HOST;
-            const port = Number(appConfig.SES.SMTP_PORT) || 465;
-            const isSecure = port === 465;
+        const host = appConfig.SES.SMTP_HOST;
+        const port = Number(appConfig.SES.SMTP_PORT) || 465;
+        const isSecure = port === 465;
+        const isGmail = host.toLowerCase().includes('gmail');
 
+        // For Gmail SMTP (smtp.gmail.com), connection pooling causes 30s hangs on idle sockets
+        // because Google silently terminates half-open connections after 60-120s.
+        // Direct non-pooled connections connect, authenticate, send, and close cleanly in ~1.2s.
+        if (isGmail) {
+            return nodemailer.createTransport({
+                host,
+                port,
+                secure: isSecure,
+                pool: false,
+                auth: {
+                    user: appConfig.SES.SMTP_USERNAME,
+                    pass: appConfig.SES.SMTP_PASSWORD,
+                },
+                connectionTimeout: 10000,
+                greetingTimeout: 10000,
+                socketTimeout: 15000,
+                tls: {
+                    rejectUnauthorized: false,
+                },
+            });
+        }
+
+        if (!this._transporter) {
             this._transporter = nodemailer.createTransport({
                 host,
                 port,
@@ -106,12 +136,24 @@ export class SesService implements OnModuleInit, OnModuleDestroy {
             contentDisposition: 'inline' as const,
         }));
 
-        const mailOptions = {
+        const mailOptions: nodemailer.SendMailOptions = {
             from: `"WMS Digitech" <${appConfig.SES.FROM}>`,
             to: payload.to,
+            replyTo: appConfig.SES.FROM,
             subject: payload.subject,
             text: payload.text,
             html: payload.html,
+            priority: 'high',
+            headers: {
+                'X-Priority': '1',
+                'X-MSMail-Priority': 'High',
+                'Importance': 'high',
+                'X-Auto-Response-Suppress': 'All',
+            },
+            envelope: {
+                from: appConfig.SES.FROM,
+                to: payload.to,
+            },
             attachments,
         };
 

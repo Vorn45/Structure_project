@@ -235,6 +235,7 @@ export interface AdminUserInvitation {
     expires_at: string;
     created_at: string;
     invite_link?: string;
+    token?: string;
 }
 
 export interface InviteUserPayload {

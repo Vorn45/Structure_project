@@ -938,13 +938,7 @@ export class AdminUserService implements OnModuleInit {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WMS Digitech - Invitation</title>
-    <!-- Google Fonts Kantumruy Pro -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap');
-
         * {
             font-family: 'Kantumruy Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
         }
@@ -1123,6 +1117,8 @@ export class AdminUserService implements OnModuleInit {
             </div>
 
             <div class="note" style="font-family:'Kantumruy Pro', sans-serif;">
+                ចំណាំ៖ ប្រសិនបើលោកអ្នកមិនឃើញអ៊ីមែលក្នុង Inbox សូមពិនិត្យមើលក្នុងប្រអប់ <strong>Spam</strong> ឬ <strong>Promotions</strong>។<br>
+                (Note: If you do not see this email in your Inbox, please check your <strong>Spam</strong> or <strong>Promotions</strong> folder.)<br><br>
                 ប្រសិនបើលោកអ្នកមិនបានរំពឹងទុកការអញ្ជើញនេះទេ សូមមិនបាច់អើពើចំពោះអ៊ីមែលនេះ។<br>
                 If you were not expecting this invitation, you can safely ignore this email.
             </div>
@@ -1205,7 +1201,24 @@ export class AdminUserService implements OnModuleInit {
         });
 
         const subject = `WMS Digitech - ការអញ្ជើញចូលរួមប្រព័ន្ធ`;
-        const text = `សួស្តី ${nameDisplay}, អ្នកត្រូវបានអញ្ជើញឱ្យចូលរួម WMS Digitech ក្នុងតួនាទី ${roleDisplay}។ សូមចុចតំណភ្ជាប់នេះដើម្បីទទួលយក: ${inviteLink}`;
+        const text = [
+            `WMS Digitech - ការអញ្ជើញចូលរួមប្រព័ន្ធ`,
+            `-------------------------------------------`,
+            `សួស្តី ${nameDisplay},`,
+            `លោកអ្នកត្រូវបានអញ្ជើញដោយ ${user?.name_kh || user?.name_en || 'អ្នកគ្រប់គ្រងប្រព័ន្ធ'} ឱ្យចូលរួមក្នុងប្រព័ន្ធ WMS Digitech Platform ក្នុងតួនាទី ${roleDisplay} (${savedInvitation.department || 'ព័ត៌មានវិទ្យា (IT)'})។`,
+            ``,
+            `សូមចុចតំណភ្ជាប់ខាងក្រោមដើម្បីទទួលយកការអញ្ជើញ និងកំណត់ពាក្យសម្ងាត់៖`,
+            inviteLink,
+            ``,
+            `សុពលភាពតំណភ្ជាប់៖ 7 ថ្ងៃ`,
+            ``,
+            `ចំណាំ៖ ប្រសិនបើលោកអ្នកមិនឃើញអ៊ីមែលក្នុង Inbox សូមពិនិត្យមើលក្នុងប្រអប់ Spam ឬ Promotions។`,
+            `(Note: If you do not see this email in your Inbox, please check your Spam or Promotions folder.)`,
+            ``,
+            `ប្រសិនបើលោកអ្នកមិនបានរំពឹងទុកការអញ្ជើញនេះទេ សូមមិនបាច់អើពើចំពោះអ៊ីមែលនេះ។`,
+            `-------------------------------------------`,
+            `© 2026 WMS Digitech KH`,
+        ].join('\n');
 
         // Send via SMTP
         const sendResult = await this._sesService.send({
@@ -1246,9 +1259,19 @@ export class AdminUserService implements OnModuleInit {
             order: { created_at: 'DESC' },
         });
 
+        let frontendUrl = (appConfig.APP.FRONTEND_URL || 'https://wms.digitechkh.site').replace(/\/+$/, '');
+        if (appConfig.APP.ENV === 'production' || !frontendUrl || frontendUrl.includes('localhost')) {
+            frontendUrl = 'https://wms.digitechkh.site';
+        }
+
+        const dataWithLinks = list.map((inv) => ({
+            ...inv,
+            invite_link: `${frontendUrl}/#/auth/accept-invite?token=${inv.token}`,
+        }));
+
         return {
             status_code: 200,
-            data: list,
+            data: dataWithLinks,
         };
     }
 
@@ -1280,11 +1303,30 @@ export class AdminUserService implements OnModuleInit {
             inviterName: user?.name_kh || user?.name_en || 'អ្នកគ្រប់គ្រងប្រព័ន្ធ',
         });
 
+        const text = [
+            `WMS Digitech - ការអញ្ជើញចូលរួមប្រព័ន្ធ`,
+            `-------------------------------------------`,
+            `សួស្តី ${saved.name || saved.email.split('@')[0]},`,
+            `លោកអ្នកត្រូវបានអញ្ជើញដោយ ${user?.name_kh || user?.name_en || 'អ្នកគ្រប់គ្រងប្រព័ន្ធ'} ឱ្យចូលរួមក្នុងប្រព័ន្ធ WMS Digitech Platform ក្នុងតួនាទី ${saved.role || 'Member'} (${saved.department || 'ព័ត៌មានវិទ្យា (IT)'})។`,
+            ``,
+            `សូមចុចតំណភ្ជាប់ខាងក្រោមដើម្បីទទួលយកការអញ្ជើញ និងកំណត់ពាក្យសម្ងាត់៖`,
+            inviteLink,
+            ``,
+            `សុពលភាពតំណភ្ជាប់៖ 7 ថ្ងៃ`,
+            ``,
+            `ចំណាំ៖ ប្រសិនបើលោកអ្នកមិនឃើញអ៊ីមែលក្នុង Inbox សូមពិនិត្យមើលក្នុងប្រអប់ Spam ឬ Promotions។`,
+            `(Note: If you do not see this email in your Inbox, please check your Spam or Promotions folder.)`,
+            ``,
+            `ប្រសិនបើលោកអ្នកមិនបានរំពឹងទុកការអញ្ជើញនេះទេ សូមមិនបាច់អើពើចំពោះអ៊ីមែលនេះ។`,
+            `-------------------------------------------`,
+            `© 2026 WMS Digitech KH`,
+        ].join('\n');
+
         const sendResult = await this._sesService.send({
             to: saved.email,
             subject: `WMS Digitech - ការអញ្ជើញចូលរួមប្រព័ន្ធ`,
             html,
-            text: `តំណភ្ជាប់ការអញ្ជើញរបស់អ្នក: ${inviteLink}`,
+            text,
             inline_images: [getDigitechLogo()],
         });
 
