@@ -752,22 +752,22 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             id: task.reporter.id,
             name: task.reporter.name,
             role: task.reporter.role,
-            avatar: task.reporter.avatar || '/images/placeholder/avatar.jpg',
+            avatar: resolveFileUrl(task.reporter.avatar) || null,
             initial: task.reporter.initial,
             bgClass: task.reporter.bgClass,
             email: task.reporter.email,
         } : {
             id: 1,
-            name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+            name: 'អ្នកគ្រប់គ្រង',
             role: 'Super Admin',
-            avatar: '/images/placeholder/avatar.jpg',
+            avatar: null,
         };
 
         const assigneeMember: TaskMember = task.assignee ? {
             id: task.assignee.id,
             name: task.assignee.name,
             role: task.assignee.role,
-            avatar: task.assignee.avatar || '/images/placeholder/avatar.jpg',
+            avatar: resolveFileUrl(task.assignee.avatar) || null,
             initial: task.assignee.initial,
             bgClass: task.assignee.bgClass,
             email: task.assignee.email,
@@ -781,7 +781,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                   id: m.id,
                   name: m.name,
                   role: m.role,
-                  avatar: m.avatar || '/images/placeholder/avatar.jpg',
+                  avatar: resolveFileUrl(m.avatar) || null,
                   initial: m.initial,
                   bgClass: m.bgClass,
                   email: m.email,
@@ -1074,9 +1074,9 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         document.body.removeChild(a);
     }
 
-    getCurrentUserAvatar(): string {
+    getCurrentUserAvatar(): string | null {
         const user = this._userService.getUser();
-        return resolveFileUrl(user?.avatar) || '/images/placeholder/avatar.jpg';
+        return resolveFileUrl(user?.avatar) || null;
     }
 
     getProjectLogo(plan: any): string {
@@ -1262,10 +1262,20 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             task.progress = total > 0 ? Math.round((done / total) * 100) : 0;
             if (task.progress === 100) {
                 task.status = 'done';
-            } else if (task.progress > 0) {
+            } else if (task.progress > 0 && task.status !== 'in_progress') {
                 task.status = 'in_progress';
             }
         }
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === task.id ? { ...t, subtasks: task.subtasks, progress: task.progress, status: task.status } : t))
+        );
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        const targetId = !isNaN(numericId) ? numericId : task.id;
+        this._userTaskService.updateTask(targetId, {
+            subtasks: task.subtasks,
+            progress: task.progress,
+            status: task.status,
+        } as any).subscribe({ error: (err) => console.error('Failed to sync subtask toggle:', err) });
     }
 
     addSubtask(task: AdminTaskItem): void {
@@ -1281,6 +1291,16 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const total = task.subtasks.length;
         const done = task.subtasks.filter((s) => s.completed).length;
         task.progress = Math.round((done / total) * 100);
+
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === task.id ? { ...t, subtasks: task.subtasks, progress: task.progress } : t))
+        );
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        const targetId = !isNaN(numericId) ? numericId : task.id;
+        this._userTaskService.updateTask(targetId, {
+            subtasks: task.subtasks,
+            progress: task.progress,
+        } as any).subscribe({ error: (err) => console.error('Failed to sync new subtask:', err) });
     }
 
     addLink(task: AdminTaskItem): void {
@@ -1309,11 +1329,28 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         this.newLinkTitle.set('');
         this.newLinkUrl.set('');
         this.showAddLinkForm.set(false);
+
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === task.id ? { ...t, links: task.links } : t))
+        );
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        const targetId = !isNaN(numericId) ? numericId : task.id;
+        this._userTaskService.updateTask(targetId, { links: task.links } as any).subscribe({
+            error: (err) => console.error('Failed to sync link addition:', err),
+        });
     }
 
     removeLink(task: AdminTaskItem, linkId: string): void {
         if (task.links) {
             task.links = task.links.filter((l) => l.id !== linkId);
+            this.tasks.update((items) =>
+                items.map((t) => (t.id === task.id ? { ...t, links: task.links } : t))
+            );
+            const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+            const targetId = !isNaN(numericId) ? numericId : task.id;
+            this._userTaskService.updateTask(targetId, { links: task.links } as any).subscribe({
+                error: (err) => console.error('Failed to sync link removal:', err),
+            });
         }
     }
 
@@ -1339,6 +1376,9 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                 };
                 task.documents.push(newDoc);
                 task.attachments_count = task.documents.length;
+                this.tasks.update((items) =>
+                    items.map((t) => (t.id === task.id ? { ...t, documents: task.documents, attachments_count: task.attachments_count } : t))
+                );
                 this._snackbarService.success(`បានភ្ជាប់ឯកសារ ${file.name} ដោយជោគជ័យ`);
             }
         };
@@ -1349,14 +1389,24 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         if (task.documents) {
             task.documents = task.documents.filter((d) => d.id !== docId);
             task.attachments_count = task.documents.length;
+            this.tasks.update((items) =>
+                items.map((t) => (t.id === task.id ? { ...t, documents: task.documents, attachments_count: task.attachments_count } : t))
+            );
         }
     }
 
     updateTaskStatus(task: AdminTaskItem, status: string): void {
+        const newProgress = status === 'done' ? 100 : task.progress;
         task.status = status;
-        if (status === 'done') {
-            task.progress = 100;
-        }
+        task.progress = newProgress;
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === task.id ? { ...t, status, progress: newProgress } : t))
+        );
+        const numericId = parseInt(String(task.id).replace(/\D/g, ''), 10);
+        const targetId = !isNaN(numericId) ? numericId : task.id;
+        this._userTaskService.updateTask(targetId, { status: status as any, progress: newProgress }).subscribe({
+            error: (err) => console.error('Failed to sync task status to backend:', err),
+        });
     }
 
     // Phase management
@@ -1973,6 +2023,15 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             }
             this._progressChart = echarts.init(this.progressChartRef.nativeElement);
             
+            const actualProgress = this.projectProgress(proj);
+            const actualCompleted = proj.completed_tasks ?? 0;
+            const progressData = actualProgress > 0
+                ? [Math.round(actualProgress * 0.2), Math.round(actualProgress * 0.4), Math.round(actualProgress * 0.65), Math.round(actualProgress * 0.85), actualProgress]
+                : [0];
+            const completedData = actualCompleted > 0
+                ? [Math.round(actualCompleted * 0.2), Math.round(actualCompleted * 0.45), Math.round(actualCompleted * 0.7), actualCompleted]
+                : [0];
+
             const option: echarts.EChartsOption = {
                 tooltip: {
                     trigger: 'axis',
@@ -2021,7 +2080,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                         type: 'value',
                         name: 'ចំនួនការងារ',
                         min: 0,
-                        max: 30,
+                        max: Math.max(30, (proj.total_tasks || 0) + 5),
                         nameTextStyle: { fontFamily: "'Kantumruy Pro', sans-serif", fontSize: 14, color: '#475569' },
                         axisLabel: { color: '#64748b', fontFamily: "'Kantumruy Pro', sans-serif", fontSize: 13.5 },
                         splitLine: { show: false }
@@ -2048,7 +2107,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                                 { offset: 1, color: 'rgba(37, 99, 235, 0.01)' }
                             ])
                         },
-                        data: [12, 22, 38, 48, proj.progress || 58]
+                        data: progressData
                     },
                     {
                         name: 'ការងារបានបញ្ចប់ (Tasks)',
@@ -2062,7 +2121,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                                 { offset: 1, color: '#0284c7' }
                             ])
                         },
-                        data: [2, 5, 8, 11, proj.completed_tasks || 14]
+                        data: completedData
                     }
                 ]
             };
@@ -2179,8 +2238,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
         const priority = (t.priority || 'medium').toLowerCase().trim();
 
-        const reporterName = t.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត';
-        const reporterInitial = (reporterName.charAt(0) || 'P').toUpperCase();
+        const reporterName = t.reporter?.name || 'អ្នកគ្រប់គ្រង';
+        const reporterInitial = (reporterName.charAt(0) || 'U').toUpperCase();
 
         let assigneeObj: TaskMember | null = null;
         if (t.assignee) {
@@ -2388,13 +2447,13 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         this.editingProject.set(null);
         this.projectForm.reset({
             name: '',
-            code: `WFM-${Math.floor(100 + Math.random() * 900)}`,
+            code: `PMS-${Math.floor(100 + Math.random() * 900)}`,
             description: '',
             status: 'active',
             progress: 0,
             start_date: new Date().toISOString().slice(0, 10),
             end_date: new Date(Date.now() + 86400000 * 45).toISOString().slice(0, 10),
-            budget: 5000,
+            budget: 0,
             logo: '',
             image: '',
         });

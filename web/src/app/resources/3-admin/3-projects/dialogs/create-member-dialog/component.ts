@@ -204,7 +204,7 @@ export interface CreateMemberDialogData {
                                     [ngModel]="memberEmail()"
                                     (ngModelChange)="memberEmail.set($event)"
                                     (keyup.enter)="submit()"
-                                    placeholder="member@wfm.gov.kh"
+                                    placeholder="member@example.com"
                                     class="w-full px-4 py-3 text-[15px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 />
                             </div>
@@ -256,7 +256,7 @@ export interface CreateMemberDialogData {
                                 [ngModel]="memberEmail()"
                                 (ngModelChange)="memberEmail.set($event)"
                                 (keyup.enter)="submit()"
-                                placeholder="member@wfm.gov.kh"
+                                placeholder="member@example.com"
                                 class="w-full px-4 py-3 text-[15px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                             />
                         </div>
@@ -294,7 +294,7 @@ export class CreateMemberDialogComponent implements OnInit {
     selectedStaff = signal<AdminUser | null>(null);
 
     memberName = signal<string>('');
-    memberRole = signal<string>('Frontend Developer');
+    memberRole = signal<string>('');
     memberEmail = signal<string>('');
     memberAvatar = signal<string | null>(null);
 
@@ -357,7 +357,7 @@ export class CreateMemberDialogComponent implements OnInit {
     selectStaff(u: AdminUser): void {
         this.selectedStaff.set(u);
         this.memberName.set(u.name_kh || u.name_en || '');
-        this.memberRole.set(u.position || u.role || 'Frontend Developer');
+        this.memberRole.set(u.position || u.role || 'សមាជិកក្រុម');
         this.memberEmail.set(u.email || '');
         this.memberAvatar.set(u.avatar || null);
     }
@@ -365,7 +365,7 @@ export class CreateMemberDialogComponent implements OnInit {
     clearSelectedStaff(): void {
         this.selectedStaff.set(null);
         this.memberName.set('');
-        this.memberRole.set('Frontend Developer');
+        this.memberRole.set('');
         this.memberEmail.set('');
         this.memberAvatar.set(null);
     }
@@ -402,8 +402,8 @@ export class CreateMemberDialogComponent implements OnInit {
         this._dialogRef.close({
             id: staff?.id || Date.now(),
             name,
-            role: this.memberRole().trim() || 'Frontend Developer',
-            email: this.memberEmail().trim() || (staff?.email ? staff.email : `${name.toLowerCase().replace(/\s+/g, '')}@wfm.gov.kh`),
+            role: this.memberRole().trim() || staff?.position || staff?.role || 'សមាជិកក្រុម',
+            email: this.memberEmail().trim() || staff?.email || '',
             avatar: this.memberAvatar() || staff?.avatar || undefined,
             initial: this.getInitial(staff, name),
             department: staff?.department,
