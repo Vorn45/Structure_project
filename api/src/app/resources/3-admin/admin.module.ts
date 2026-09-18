@@ -20,7 +20,7 @@ import { UserModule } from '../2-user/user.module';
 import { DashboardController, StatsController } from './1-dashboard/dashboard.controller';
 import { AdminUserController } from './2-user/user.controller';
 import { AdminProjectController } from './3-project/project.controller';
-import { AdminAttendanceController } from './4-attendance/attendance.controller';
+import { AdminAttendanceController, AdminLeavesController } from './4-attendance/attendance.controller';
 import { AdminSettingController } from './5-setting/setting.controller';
 import { AdminClientController } from './6-client/client.controller';
 
@@ -57,6 +57,7 @@ import { FileService } from 'src/app/shared/file/file.service';
         AdminUserController,
         AdminProjectController,
         AdminAttendanceController,
+        AdminLeavesController,
         AdminSettingController,
         AdminClientController,
     ],

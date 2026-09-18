@@ -187,6 +187,8 @@ export interface AdminAttendanceData {
         check_out?: string | null;
         status: 'on_time' | 'late';
         date: string;
+        location?: string;
+        avatar?: string | null;
     }>;
 }
 
@@ -436,19 +438,33 @@ export class AdminService {
     }
 
     // 4. Attendance & Leaves
-    getAttendance(): Observable<{ status_code: number; data: AdminAttendanceData }> {
-        return this._http.get<{ status_code: number; data: AdminAttendanceData }>(`${this._baseUrl}/attendance`);
+    getAttendance(date?: string): Observable<{ status_code: number; data: AdminAttendanceData }> {
+        let params = new HttpParams();
+        if (date) params = params.set('date', date);
+        return this._http.get<{ status_code: number; data: AdminAttendanceData }>(`${this._baseUrl}/attendance`, { params });
     }
 
     getLeaves(): Observable<{ status_code: number; data: AdminLeaveRequest[] }> {
-        return this._http.get<{ status_code: number; data: AdminLeaveRequest[] }>(`${this._baseUrl}/leaves`);
+        return this._http.get<{ status_code: number; data: AdminLeaveRequest[] }>(`${this._baseUrl}/attendance/leaves`);
+    }
+
+    createLeave(payload: Partial<AdminLeaveRequest>): Observable<{ status_code: number; message: string; data: AdminLeaveRequest }> {
+        return this._http.post<{ status_code: number; message: string; data: AdminLeaveRequest }>(`${this._baseUrl}/attendance/leaves`, payload);
     }
 
     actionLeave(id: string, status: 'approved' | 'rejected', comment?: string): Observable<{ status_code: number; data: AdminLeaveRequest }> {
-        return this._http.patch<{ status_code: number; data: AdminLeaveRequest }>(`${this._baseUrl}/leaves/${id}/action`, {
+        return this._http.patch<{ status_code: number; data: AdminLeaveRequest }>(`${this._baseUrl}/attendance/leaves/${id}/action`, {
             status,
             comment,
         });
+    }
+
+    deleteLeave(id: string): Observable<{ status_code: number; message: string }> {
+        return this._http.delete<{ status_code: number; message: string }>(`${this._baseUrl}/attendance/leaves/${id}`);
+    }
+
+    recordAttendanceLog(payload: any): Observable<{ status_code: number; message: string; data: any }> {
+        return this._http.post<{ status_code: number; message: string; data: any }>(`${this._baseUrl}/attendance/logs`, payload);
     }
 
     // 5. Settings
