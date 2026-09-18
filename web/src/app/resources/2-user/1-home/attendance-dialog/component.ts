@@ -9,19 +9,9 @@ import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-but
 import { UserHomeService } from '../home.service';
 import { TakeAttendanceDialogComponent } from './take-attendance-dialog/component';
 
-export interface AttendanceDialogData {
-    user?: any;
-}
 
-export interface AttendanceHistoryRow {
-    date: string;
-    check_in: string;
-    check_out: string;
-    hours: string;
-    status: string;
-    is_late?: boolean;
-    is_today?: boolean;
-}
+export * from './attendance-dialog.types';
+import { AttendanceDialogData, AttendanceHistoryRow } from './attendance-dialog.types';
 
 @Component({
     selector: 'app-attendance-dialog',
@@ -34,127 +24,8 @@ export interface AttendanceHistoryRow {
         MatTooltipModule,
         SideDialogCloseButtonComponent,
     ],
-    template: `
-        <div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[15px] font-normal relative overflow-visible" style="font-family: 'Kantumruy Pro', sans-serif;">
-            
-            <!-- Header -->
-            <div mat-dialog-title
-                class="w-full flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 font-kantumruy bg-white dark:bg-slate-900 relative px-4 shrink-0">
-                <span class="w-full text-center text-[19px] font-semibold font-kantumruy text-slate-800 dark:text-slate-100">
-                    សម្រង់វត្តមាន និង ម៉ោងធ្វើការ
-                </span>
-            </div>
-
-            <!-- Standard Side Drawer Close Button -->
-            <shared-side-dialog-close-button [isReturn]="false"></shared-side-dialog-close-button>
-
-            <!-- Scrollable Body -->
-            <mat-dialog-content class="w-full !m-0 !p-0 overflow-y-auto flex-1 bg-white dark:bg-slate-900 font-kantumruy text-[15px]">
-                <div class="p-5 space-y-6 font-kantumruy">
-
-
-
-                    <!-- 2. Monthly Summary Stat Cards (Using Kantumruy Pro font) -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 shadow-2xs">
-                            <p class="text-[13px] text-slate-500 dark:text-slate-400 font-medium">ថ្ងៃធ្វើការសរុប</p>
-                            <p class="text-[22px] font-semibold text-slate-900 dark:text-white mt-1 font-kantumruy">
-                                {{ stats()?.present_days ?? 22 }} <span class="text-[13px] font-normal text-slate-400">ថ្ងៃ</span>
-                            </p>
-                        </div>
-                        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 shadow-2xs">
-                            <p class="text-[13px] text-emerald-600 dark:text-emerald-400 font-medium">វត្តមានពេញលេញ</p>
-                            <p class="text-[22px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 font-kantumruy">
-                                {{ fullPresentDays() }} <span class="text-[13px] font-normal text-emerald-500/70">ថ្ងៃ</span>
-                            </p>
-                        </div>
-                        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 shadow-2xs">
-                            <p class="text-[13px] text-amber-600 dark:text-amber-400 font-medium">យឺត/ចេញមុន</p>
-                            <p class="text-[22px] font-semibold text-amber-600 dark:text-amber-400 mt-1 font-kantumruy">
-                                {{ stats()?.late_days ?? 1 }} <span class="text-[13px] font-normal text-amber-500/70">លើក</span>
-                            </p>
-                        </div>
-                        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 shadow-2xs">
-                            <p class="text-[13px] text-blue-600 dark:text-blue-400 font-medium">អត្រាវត្តមាន</p>
-                            <p class="text-[22px] font-semibold text-blue-600 dark:text-blue-400 mt-1 font-kantumruy">
-                                {{ stats()?.attendance_rate ?? 98.5 }}%
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- 3. Recent Attendance History Table (Using Kantumruy Pro font) -->
-                    <div class="space-y-3 font-kantumruy">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-[16px] font-semibold text-slate-800 dark:text-white">
-                                កំណត់ត្រាវត្តមានចុងក្រោយ
-                            </h3>
-                            <span class="text-[13px] text-slate-500 dark:text-slate-400 font-medium">
-                                សរុប 5 ថ្ងៃចុងក្រោយ
-                            </span>
-                        </div>
-
-                        <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-800/40 shadow-xs">
-                            <table class="w-full text-left text-[14px] font-kantumruy">
-                                <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-[13px] font-medium border-b border-slate-200 dark:border-slate-800">
-                                    <tr>
-                                        <th class="px-4 py-3">កាលបរិច្ឆេទ</th>
-                                        <th class="px-4 py-3">ម៉ោងចូល</th>
-                                        <th class="px-4 py-3">ម៉ោងចេញ</th>
-                                        <th class="px-4 py-3">ម៉ោងសរុប</th>
-                                        <th class="px-4 py-3 text-right">ស្ថានភាព</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                    <tr *ngFor="let row of dynamicHistory()" class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                                        <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">
-                                            <span [class.text-emerald-600]="row.is_today && row.status !== 'មិនទាន់កត់ត្រា'" [class.dark:text-emerald-400]="row.is_today && row.status !== 'មិនទាន់កត់ត្រា'">
-                                                {{ row.date }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy font-medium">{{ row.check_in }}</td>
-                                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy">
-                                            <span *ngIf="row.check_out === 'កំពុងបំពេញការងារ'" class="inline-flex items-center gap-1.5 text-[12px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/30">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                <span>កំពុងបំពេញការងារ</span>
-                                            </span>
-                                            <span *ngIf="row.check_out !== 'កំពុងបំពេញការងារ'">{{ row.check_out }}</span>
-                                        </td>
-                                        <td class="px-4 py-3 text-slate-700 dark:text-slate-300 font-kantumruy">{{ row.hours }}</td>
-                                        <td class="px-4 py-3 text-right">
-                                            <span
-                                                class="px-2 py-0.5 rounded text-[11px] font-medium font-kantumruy"
-                                                [ngClass]="row.status === 'មិនទាន់កត់ត្រា'
-                                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700'
-                                                    : row.is_late 
-                                                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200 dark:border-amber-800/40' 
-                                                        : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-200 dark:border-emerald-800/40'"
-                                            >
-                                                {{ row.status }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-            </mat-dialog-content>
-
-            <!-- Bottom Sticky Action (Full width styled with system primary brand) -->
-            <div class="w-full flex items-center p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 font-kantumruy">
-                <button
-                    type="button"
-                    (click)="openTakeAttendance()"
-                    class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] transition-all duration-200 active:scale-[0.98] cursor-pointer shadow-sm"
-                >
-                    <mat-icon svgIcon="mdi:qrcode-scan" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
-                    <span>កត់ត្រាវត្តមាន</span>
-                </button>
-            </div>
-
-        </div>
-    `,
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
 })
 export class AttendanceDialogComponent {
     todayKhmerDate = '';

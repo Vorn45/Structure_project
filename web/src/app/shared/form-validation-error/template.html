@@ -1,0 +1,32 @@
+@if (control?.invalid && (control?.dirty || control?.touched)) {
+    @if (control?.hasError('required')) {
+        <mat-error>{{ 'Validation.Required' | transloco }}</mat-error>
+    }
+    @else if (control?.hasError('maxlength')) {
+        <mat-error>
+            {{ 'Validation.MaxLength' | transloco: { length: control?.getError('maxlength')?.requiredLength } }}
+        </mat-error>
+    }
+    @else if (control?.hasError('minlength')) {
+        <mat-error>
+            {{ 'Validation.MinLength' | transloco: { length: control?.getError('minlength')?.requiredLength } }}
+        </mat-error>
+    }
+    @else if (control?.hasError('min')) {
+        <mat-error>
+            {{ 'Validation.Min' | transloco: { min: control?.getError('min')?.min } }}
+        </mat-error>
+    }
+    @else if (control?.hasError('max')) {
+        <mat-error>
+            {{ 'Validation.Max' | transloco: { max: control?.getError('max')?.max } }}
+        </mat-error>
+    }
+    @else if (control?.hasError('email')) {
+        <mat-error>{{ 'Validation.Pattern-Email' | transloco }}</mat-error>
+    }
+    @else if (control?.hasError('pattern')) {
+        <mat-error>{{ getPatternError() | transloco }}</mat-error>
+    }
+}
+    `,

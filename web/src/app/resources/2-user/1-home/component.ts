@@ -22,6 +22,7 @@ import { HelpSupportDialogComponent } from './help-support-dialog/component';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
 import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
+export * from './home.types';
 import { HomeOverviewData, UserHomeService } from './home.service';
 import { TaskDrawerComponent } from '../2-task/task-drawer/component';
 import { FilePreviewModalComponent } from '../2-task/file-preview-modal/component';

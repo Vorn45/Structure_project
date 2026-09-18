@@ -1,0 +1,45 @@
+<div class="px-6 sm:px-8 py-6 space-y-5 font-kantumruy">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div>
+            <h3 class="text-lg font-medium text-slate-900 dark:text-white">សមាជិកក្រុមការងារ ({{ teamMembers().length }} នាក់)</h3>
+            <p class="text-[14px] text-slate-400">បញ្ជីសមាជិកដែលចូលរួមក្នុងការអភិវឌ្ឍគម្រោងនេះ</p>
+        </div>
+        @if (isAdmin()) {
+        <button type="button" (click)="createMember.emit()"
+            class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto">
+            <mat-icon svgIcon="mdi:account-plus-outline" class="icon-size-4.5 text-white"></mat-icon>
+            <span>បន្ថែមសមាជិក</span>
+        </button>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        @for (m of teamMembers(); track m.id) {
+        <div class="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:shadow-xs hover:border-blue-300 dark:hover:border-blue-700 transition-all flex items-center justify-between gap-4 group">
+            <div class="flex items-center gap-4 min-w-0 flex-1">
+                <div class="w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-blue-100 text-blue-900 dark:bg-blue-950/70 dark:text-blue-300 font-semibold text-[18px] flex items-center justify-center ring-2 ring-blue-50 dark:ring-blue-900/30 shrink-0 overflow-hidden">
+                    <img *ngIf="m.avatar" [src]="m.avatar" [alt]="m.name" class="w-full h-full object-cover" />
+                    <span *ngIf="!m.avatar">{{ m.initial || m.name.charAt(0) }}</span>
+                </div>
+                <div class="min-w-0 flex-1 space-y-0.5">
+                    <h4 class="text-[16px] font-medium text-slate-900 dark:text-white truncate">{{ m.name }}</h4>
+                    <p class="text-[14px] text-slate-500 dark:text-slate-400 truncate">{{ m.role }}</p>
+                    <p *ngIf="m.email" class="text-[13px] text-slate-400 dark:text-slate-500 truncate">{{ m.email }}</p>
+                </div>
+            </div>
+            @if (isAdmin()) {
+            <button type="button" (click)="deleteMember.emit({ id: m.id, event: $event })"
+                class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer shrink-0"
+                [matTooltip]="'ដកសមាជិកនេះ'">
+                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+            </button>
+            }
+        </div>
+        } @empty {
+        <div class="col-span-full py-12 px-6 text-center text-slate-400 font-kantumruy border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+            <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-8 text-slate-300 dark:text-slate-600 mb-2"></mat-icon>
+            <p class="text-[14.5px]">មិនទាន់មានសមាជិកក្រុមការងារនៅឡើយទេ</p>
+        </div>
+        }
+    </div>
+</div>

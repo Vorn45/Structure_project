@@ -1,0 +1,657 @@
+<div class="w-full h-full flex flex-col bg-white dark:bg-slate-900 font-kantumruy text-[15px] font-normal relative overflow-visible">
+    
+    <!-- Clean Header (Centered like Profile Dialog) -->
+    <div mat-dialog-title
+        class="w-full relative flex justify-center items-center min-h-14 max-h-14 h-14 border-b border-slate-200 dark:border-slate-800 m-0 !py-0 px-4 font-kantumruy bg-white dark:bg-slate-900 shrink-0">
+        <span class="w-full text-center text-[18px] sm:text-[20px] font-semibold font-kantumruy text-slate-800 dark:text-slate-100">
+            បង្កើតការងារថ្មី
+        </span>
+    </div>
+
+    <!-- Standard Side Drawer Close Button (Exact Profile Dialog Style) -->
+    <shared-side-dialog-close-button [isReturn]="false" [closeOnClick]="false" (buttonClick)="cancel()"></shared-side-dialog-close-button>
+
+    <!-- Inline Success Toast Notice for Continuous Creation -->
+    <div *ngIf="successNotice()" class="mx-5 mt-3 px-4 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-[14px] flex items-center justify-between shadow-2xs">
+        <div class="flex items-center gap-2 min-w-0">
+            <mat-icon svgIcon="mdi:check-circle" class="icon-size-4.5 text-emerald-600 dark:text-emerald-400 shrink-0"></mat-icon>
+            <span class="font-medium truncate">{{ successNotice() }}</span>
+        </div>
+        <button type="button" (click)="successNotice.set('')" class="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-200 shrink-0 ml-2">
+            <mat-icon svgIcon="mdi:close" class="icon-size-4"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Scrollable Body -->
+    <mat-dialog-content class="w-full !m-0 !p-0 overflow-y-auto flex-1 bg-white dark:bg-slate-900 font-kantumruy text-[15px]">
+        
+        <div class="p-5 space-y-5 font-kantumruy">
+            
+            <!-- 1. Task Name / Title Input -->
+            <div>
+                <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[15px]">
+                    ឈ្មោះការងារ <span class="text-rose-500">*</span>
+                </label>
+                <input
+                    #taskTitleInput
+                    type="text"
+                    [(ngModel)]="taskTitle"
+                    (keyup.enter)="submitAndClose()"
+                    placeholder="ឧ. រៀបចំ UI Dashboard និងភ្ជាប់ API ផ្ទៀងផ្ទាត់ទិន្នន័យ..."
+                    class="w-full px-3.5 py-2.5 text-[15px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                />
+            </div>
+
+            <!-- 2. Project Selection & Auto Task Code Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                    <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1.5 text-[13.5px]">
+                        គម្រោង <span class="text-rose-500">*</span>
+                    </label>
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="projectMenu"
+                        class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-left cursor-pointer"
+                    >
+                        <span class="truncate font-medium">{{ getSelectedProjectName() }}</span>
+                        <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400 shrink-0 ml-1.5"></mat-icon>
+                    </button>
+
+                    <mat-menu #projectMenu="matMenu" class="custom-saas-menu !rounded-2xl !p-1.5 shadow-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 max-h-72 overflow-y-auto">
+                        <button
+                            mat-menu-item
+                            *ngFor="let p of projectList"
+                            (click)="onProjectSelected(p.id)"
+                            class="!flex items-center justify-between !h-10 !px-3.5 !rounded-xl transition-colors"
+                            [ngClass]="selectedProjectId === p.id ? '!bg-blue-50 dark:!bg-blue-950/40 font-semibold text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'"
+                        >
+                            <span class="text-[14px] font-kantumruy truncate">{{ p.name }}</span>
+                            <mat-icon *ngIf="selectedProjectId === p.id" svgIcon="heroicons_solid:check" class="!w-4 !h-4 text-blue-600 dark:text-blue-400 ml-2"></mat-icon>
+                        </button>
+                    </mat-menu>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block font-medium text-slate-700 dark:text-slate-300 text-[13.5px]">
+                            កូដសម្គាល់ការងារ
+                        </label>
+                        <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                            ស្វ័យប្រវត្តិ
+                        </span>
+                    </div>
+                    <input
+                        type="text"
+                        [value]="taskCode"
+                        readonly
+                        tabindex="-1"
+                        class="w-full px-3.5 py-2 text-[14px] font-kantumruy font-mono uppercase font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 cursor-not-allowed select-none focus:outline-none"
+                    />
+                </div>
+            </div>
+
+            <!-- 3. Work Status Selection -->
+            <div>
+                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1.5 text-[13.5px]">
+                    ស្ថានភាពការងារ <span class="text-rose-500">*</span>
+                </label>
+                <div>
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="createTaskStatusMenu"
+                        class="inline-flex items-center gap-2 px-3.5 py-2 text-[14px] font-medium font-kantumruy rounded-xl border select-none transition-all shadow-2xs cursor-pointer"
+                        [ngClass]="getStatusClass(selectedStatus())"
+                    >
+                        <mat-icon [svgIcon]="getStatusIcon(selectedStatus())" class="icon-size-4 !w-4.5 !h-4.5"></mat-icon>
+                        <span>{{ getStatusLabel(selectedStatus()) }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="!w-4 !h-4 opacity-70 ml-1"></mat-icon>
+                    </button>
+
+                    <mat-menu #createTaskStatusMenu="matMenu" panelClass="task-dropdown-menu" class="min-w-[170px] font-kantumruy">
+                        <button mat-menu-item (click)="selectedStatus.set('new')" class="!text-[14px] flex items-center gap-2.5">
+                            <mat-icon svgIcon="mdi:clipboard-text-outline" class="text-blue-500 !w-4.5 !h-4.5"></mat-icon>
+                            <span>ថ្មី</span>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('confirmed')" class="!text-[14px] flex items-center gap-2.5">
+                            <mat-icon svgIcon="mdi:clipboard-check-outline" class="text-indigo-500 !w-4.5 !h-4.5"></mat-icon>
+                            <span>បញ្ជាក់</span>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('unconfirmed')" class="!text-[14px] flex items-center gap-2.5">
+                            <mat-icon svgIcon="mdi:clipboard-minus-outline" class="text-slate-500 !w-4.5 !h-4.5"></mat-icon>
+                            <span>មិនបញ្ជាក់</span>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('in_progress')" class="!text-[14px] flex items-center gap-2.5">
+                            <mat-icon svgIcon="mdi:progress-clock" class="text-amber-500 !w-4.5 !h-4.5"></mat-icon>
+                            <span>កំពុងធ្វើ</span>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('in_review')" class="!text-[14px] flex items-center gap-2.5">
+                            <mat-icon svgIcon="mdi:magnify" class="text-sky-500 !w-4.5 !h-4.5"></mat-icon>
+                            <span>ស្នើពិនិត្យ</span>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('reopened')" class="!text-[14px] flex items-center gap-2.5">
+                            <mat-icon svgIcon="mdi:restore" class="text-rose-500 !w-4.5 !h-4.5"></mat-icon>
+                            <span>បើកឡើងវិញ</span>
+                        </button>
+                        <button mat-menu-item (click)="selectedStatus.set('done')" class="!text-[14px] flex items-center gap-2.5">
+                            <mat-icon svgIcon="mdi:check-circle" class="text-emerald-500 !w-4.5 !h-4.5"></mat-icon>
+                            <span>បញ្ចប់</span>
+                        </button>
+                    </mat-menu>
+                </div>
+            </div>
+
+            <!-- 4. REPORTER & ASSIGNEE (NO DEFAULTS, CLEAN SELECTION) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-start">
+                
+                <!-- Reporter (អ្នករាយការណ៍) -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                            <span>អ្នករាយការណ៍</span>
+                        </label>
+                        <div class="flex items-center gap-1.5">
+                            <button
+                                *ngIf="reporterName"
+                                type="button"
+                                (click)="clearReporter()"
+                                class="text-[12px] text-slate-400 hover:text-rose-500 transition-colors cursor-pointer mr-1"
+                            >
+                                សម្អាត
+                            </button>
+                            <button
+                                type="button"
+                                [matMenuTriggerFor]="reporterMenu"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer">
+                                <mat-icon svgIcon="mdi:account-plus-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                                <span>{{ reporterName ? 'ប្តូរ' : 'ចាត់តាំង' }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Selected Reporter Card -->
+                    <div *ngIf="reporterName" class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                            <img *ngIf="reporterAvatar" [src]="reporterAvatar" alt="Avatar" class="w-full h-full object-cover" />
+                            <mat-icon *ngIf="!reporterAvatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[13px] font-medium text-slate-800 dark:text-white truncate leading-tight">
+                                {{ reporterName }}
+                            </p>
+                            <p class="text-[11px] text-slate-400 truncate">
+                                {{ reporterRole || 'អ្នករាយការណ៍' }}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            (click)="clearReporter()"
+                            class="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                            matTooltip="ដកចេញ"
+                            matTooltipPosition="above"
+                        >
+                            <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- Unselected Reporter Placeholder -->
+                    <button *ngIf="!reporterName"
+                        type="button"
+                        [matMenuTriggerFor]="reporterMenu"
+                        class="w-full py-2.5 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 bg-white dark:bg-slate-800 text-left flex items-center justify-between text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
+                        <span class="text-[13px] font-medium">+ ជ្រើសរើសអ្នករាយការណ៍</span>
+                        <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400"></mat-icon>
+                    </button>
+                </div>
+
+                <!-- Assignees Section -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                            <span>អ្នកទទួលបន្ទុក</span>
+                            <span *ngIf="selectedAssignees.length > 0" class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 font-semibold">
+                                {{ selectedAssignees.length }} នាក់
+                            </span>
+                        </label>
+                        <button
+                            type="button"
+                            [matMenuTriggerFor]="assigneeMenu"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-lg transition-colors cursor-pointer">
+                            <mat-icon svgIcon="mdi:account-plus-outline" class="!w-3.5 !h-3.5"></mat-icon>
+                            <span>ចាត់តាំង</span>
+                        </button>
+                    </div>
+
+                    <!-- Selected Assignees List -->
+                    <div *ngIf="selectedAssignees.length > 0" class="space-y-1.5 max-h-36 overflow-y-auto pr-0.5">
+                        <div *ngFor="let m of selectedAssignees"
+                            class="flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                <img *ngIf="m.avatar" [src]="m.avatar" alt="Avatar" class="w-full h-full object-cover" />
+                                <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[13px] font-medium text-slate-800 dark:text-white truncate leading-tight">
+                                    {{ m.name }}
+                                </p>
+                                <p class="text-[11px] text-slate-400 truncate">
+                                    {{ m.role || 'អ្នកទទួលបន្ទុក' }}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                (click)="toggleAssignee(m.id)"
+                                class="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                                matTooltip="ដកចេញ"
+                                matTooltipPosition="above"
+                            >
+                                <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Unselected Assignee Placeholder -->
+                    <button *ngIf="selectedAssignees.length === 0"
+                        type="button"
+                        [matMenuTriggerFor]="assigneeMenu"
+                        class="w-full py-2.5 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 bg-white dark:bg-slate-800 text-left flex items-center justify-between text-slate-500 dark:text-slate-400 hover:text-blue-600 transition-all cursor-pointer">
+                        <span class="text-[13px] font-medium">+ ជ្រើសរើសអ្នកទទួលខុសត្រូវ</span>
+                        <mat-icon svgIcon="heroicons_outline:chevron-down" class="!w-4 !h-4 text-slate-400"></mat-icon>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Multi-Select Menu for Assignee -->
+            <!-- Multi-Select Menu for Assignee -->
+            <mat-menu #assigneeMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[300px] !p-1.5">
+                <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
+                    <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសអ្នកទទួលខុសត្រូវ</span>
+                    <span *ngIf="selectedAssignees.length > 0" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
+                        {{ selectedAssignees.length }} នាក់
+                    </span>
+                </div>
+
+                <!-- Live Search Input for Assignee -->
+                <div (click)="$event.stopPropagation()" class="px-2 pb-1.5 pt-0.5 border-b border-slate-100 dark:border-slate-800/60 mb-1">
+                    <div class="relative flex items-center">
+                        <mat-icon svgIcon="mdi:magnify" class="!w-4 !h-4 text-slate-400 absolute left-2 pointer-events-none"></mat-icon>
+                        <input
+                            type="text"
+                            [(ngModel)]="assigneeSearch"
+                            (click)="$event.stopPropagation()"
+                            placeholder="ស្វែងរកតាមឈ្មោះ ឬតួនាទី..."
+                            class="w-full pl-7 pr-6 py-1.5 text-[12px] font-kantumruy rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                        />
+                        <button *ngIf="assigneeSearch" (click)="assigneeSearch = ''; $event.stopPropagation()" class="absolute right-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
+                            <mat-icon svgIcon="mdi:close-circle" class="!w-3.5 !h-3.5"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div (click)="$event.stopPropagation()" class="max-h-80 overflow-y-auto space-y-0.5">
+                    <div *ngFor="let m of filteredAssigneeMembers"
+                        (click)="toggleAssignee(m.id)"
+                        class="flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors font-kantumruy select-none my-0.5">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+                            <!-- Avatar or Default Icon User -->
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                <img *ngIf="getMemberAvatar(m)" [src]="getMemberAvatar(m)" class="w-full h-full object-cover" />
+                                <mat-icon *ngIf="!getMemberAvatar(m)" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                            </div>
+                            <div class="min-w-0 text-left flex-1">
+                                <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">
+                                    {{ m.name }}
+                                </p>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate leading-tight">
+                                    {{ m.role || 'អ្នកទទួលបន្ទុក' }}
+                                </p>
+                            </div>
+                        </div>
+                        <mat-icon *ngIf="isAssigneeSelected(m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 text-blue-500 shrink-0 ml-auto"></mat-icon>
+                    </div>
+
+                    <div *ngIf="filteredAssigneeMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
+                        រកមិនឃើញសមាជិកទេ
+                    </div>
+                </div>
+            </mat-menu>
+
+            <!-- Menu for Reporter -->
+            <mat-menu #reporterMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[300px] !p-1.5">
+                <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
+                    <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសអ្នករាយការណ៍</span>
+                    <span *ngIf="reporterName" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
+                        បានជ្រើសរើស
+                    </span>
+                </div>
+
+                <!-- Live Search Input for Reporter -->
+                <div (click)="$event.stopPropagation()" class="px-2 pb-1.5 pt-0.5 border-b border-slate-100 dark:border-slate-800/60 mb-1">
+                    <div class="relative flex items-center">
+                        <mat-icon svgIcon="mdi:magnify" class="!w-4 !h-4 text-slate-400 absolute left-2 pointer-events-none"></mat-icon>
+                        <input
+                            type="text"
+                            [(ngModel)]="reporterSearch"
+                            (click)="$event.stopPropagation()"
+                            placeholder="ស្វែងរកតាមឈ្មោះ ឬតួនាទី..."
+                            class="w-full pl-7 pr-6 py-1.5 text-[12px] font-kantumruy rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                        />
+                        <button *ngIf="reporterSearch" (click)="reporterSearch = ''; $event.stopPropagation()" class="absolute right-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
+                            <mat-icon svgIcon="mdi:close-circle" class="!w-3.5 !h-3.5"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="max-h-80 overflow-y-auto space-y-0.5">
+                    <button *ngFor="let m of filteredReporterMembers" mat-menu-item (click)="selectReporter(m)"
+                        class="!text-[13px] !rounded-xl !h-auto !py-1.5 my-0.5">
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <!-- Avatar or Default Icon User -->
+                                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                    <img *ngIf="getMemberAvatar(m)" [src]="getMemberAvatar(m)" class="w-full h-full object-cover" />
+                                    <mat-icon *ngIf="!getMemberAvatar(m)" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                                </div>
+                                <div class="min-w-0 text-left">
+                                    <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">{{ m.name }}</p>
+                                    <p class="text-[11px] text-slate-400 truncate leading-tight">{{ m.role || 'អ្នករាយការណ៍' }}</p>
+                                </div>
+                            </div>
+                            <mat-icon *ngIf="reporterName === m.name || (reporterId && reporterId === m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 shrink-0 text-blue-500 ml-auto"></mat-icon>
+                        </div>
+                    </button>
+
+                    <div *ngIf="filteredReporterMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
+                        រកមិនឃើញសមាជិកទេ
+                    </div>
+                </div>
+                <div *ngIf="reporterName" class="border-t border-slate-100 dark:border-slate-700/80 mt-1 pt-1">
+                    <button mat-menu-item (click)="clearReporter()"
+                        class="!text-[12.5px] !rounded-xl !h-auto !py-1.5 !text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/30">
+                        <div class="flex items-center gap-2">
+                            <mat-icon svgIcon="mdi:account-off-outline" class="!w-4 !h-4 text-rose-500"></mat-icon>
+                            <span>សម្អាត (មិនកំណត់)</span>
+                        </div>
+                    </button>
+                </div>
+            </mat-menu>
+
+            <!-- 5. Priority & Category Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                    <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[14px]">
+                        កម្រិតអាទិភាព
+                    </label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button
+                            type="button"
+                            (click)="priority.set('low')"
+                            class="py-2 px-1 rounded-xl border font-kantumruy text-[13px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            [ngClass]="priority() === 'low'
+                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
+                        >
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <span>ទាប</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            (click)="priority.set('medium')"
+                            class="py-2 px-1 rounded-xl border font-kantumruy text-[13px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            [ngClass]="priority() === 'medium'
+                                ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
+                        >
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            <span>មធ្យម</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            (click)="priority.set('high')"
+                            class="py-2 px-1 rounded-xl border font-kantumruy text-[13px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            [ngClass]="priority() === 'high'
+                                ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
+                        >
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                            <span>ខ្ពស់</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[14px]">
+                        ប្រភេទការងារ (Task Type)
+                    </label>
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="taskTypeMenu"
+                        class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-left cursor-pointer"
+                    >
+                        <div class="flex items-center gap-2.5">
+                            <mat-icon [svgIcon]="getTaskTypeOption(selectedTaskType).icon" class="!w-4.5 !h-4.5 shrink-0" [ngClass]="getTaskTypeOption(selectedTaskType).iconColor"></mat-icon>
+                            <span class="font-medium truncate">{{ getTaskTypeOption(selectedTaskType).label }}</span>
+                        </div>
+                        <mat-icon svgIcon="mdi:chevron-down" class="!w-4 !h-4 opacity-70 text-slate-500 dark:text-slate-400 shrink-0 ml-1.5"></mat-icon>
+                    </button>
+
+                    <mat-menu #taskTypeMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy min-w-[200px]">
+                        <button
+                            mat-menu-item
+                            *ngFor="let item of taskTypesList"
+                            (click)="selectedTaskType = item.id"
+                        >
+                            <div class="flex items-center gap-2.5 w-full">
+                                <mat-icon [svgIcon]="item.icon" class="!w-4.5 !h-4.5 shrink-0" [ngClass]="item.iconColor"></mat-icon>
+                                <span class="font-medium text-[13px] text-slate-800 dark:text-slate-200">{{ item.label }}</span>
+                                <mat-icon *ngIf="selectedTaskType === item.id" svgIcon="mdi:check" class="!w-4 !h-4 text-blue-500 ml-auto"></mat-icon>
+                            </div>
+                        </button>
+                    </mat-menu>
+                </div>
+            </div>
+
+            <!-- 6. Start & Due Dates (Custom Material Datepicker with SaaS Styling) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                    <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[14px]">
+                        កាលបរិច្ឆេទចាប់ផ្តើម
+                    </label>
+                    <div class="relative group">
+                        <div
+                            class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white group-hover:border-slate-300 dark:group-hover:border-slate-600 transition-all text-left pointer-events-none select-none shadow-2xs"
+                        >
+                            <span class="truncate">{{ formatDisplayDate(startDate) }}</span>
+                            <mat-icon svgIcon="heroicons_outline:calendar" class="!w-4 !h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 shrink-0 transition-colors"></mat-icon>
+                        </div>
+                        <input
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            readonly
+                            (click)="startPicker.open()"
+                            [matDatepicker]="startPicker"
+                            [(ngModel)]="startDate"
+                        />
+                        <mat-datepicker #startPicker panelClass="custom-saas-datepicker"></mat-datepicker>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[14px]">
+                        កាលបរិច្ឆេទទទួលបញ្ចប់
+                    </label>
+                    <div class="relative group">
+                        <div
+                            class="w-full flex items-center justify-between px-3.5 py-2 text-[14px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white group-hover:border-slate-300 dark:group-hover:border-slate-600 transition-all text-left pointer-events-none select-none shadow-2xs"
+                        >
+                            <span class="truncate">{{ formatDisplayDate(endDate) }}</span>
+                            <mat-icon svgIcon="heroicons_outline:calendar" class="!w-4 !h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 shrink-0 transition-colors"></mat-icon>
+                        </div>
+                        <input
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            readonly
+                            (click)="endPicker.open()"
+                            [matDatepicker]="endPicker"
+                            [(ngModel)]="endDate"
+                        />
+                        <mat-datepicker #endPicker [xPosition]="'end'" panelClass="custom-saas-datepicker"></mat-datepicker>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Description Input -->
+            <div>
+                <label class="block font-medium text-slate-800 dark:text-slate-200 mb-1.5 text-[14px]">
+                    ការពិពណ៌នាការងារ
+                </label>
+                <textarea
+                    rows="3"
+                    [(ngModel)]="description"
+                    placeholder="ពិពណ៌នាអំពីខ្លឹមសារ និងលទ្ធផលរំពឹងទុកនៃការងារ..."
+                    class="w-full p-3 text-[14px] font-normal font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all"
+                ></textarea>
+            </div>
+
+            <!-- 8. Attachments Section (ឯកសារភ្ជាប់) -->
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <label class="block font-medium text-slate-800 dark:text-slate-200 text-[14px]">
+                            ឯកសារភ្ជាប់
+                        </label>
+                        <span *ngIf="attachedFiles().length > 0" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60">
+                            {{ attachedFiles().length }} ឯកសារ
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        (click)="fileInput.click()"
+                        class="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors"
+                    >
+                        <mat-icon svgIcon="mdi:paperclip" class="!w-3.5 !h-3.5"></mat-icon>
+                        <span>+ ភ្ជាប់ឯកសារ</span>
+                    </button>
+                    <input #fileInput type="file" multiple (change)="onFileInputChange($event)" class="hidden" />
+                </div>
+
+                <!-- Dropzone when empty -->
+                <div
+                    *ngIf="attachedFiles().length === 0"
+                    (click)="fileInput.click()"
+                    (dragover)="onDragOver($event)"
+                    (dragenter)="onDragEnter($event)"
+                    (dragleave)="onDragLeave($event)"
+                    (drop)="onFileDrop($event)"
+                    class="py-4 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/20 dark:hover:bg-blue-950/20 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 group select-none shadow-2xs"
+                    [ngClass]="{ 'border-blue-500 bg-blue-50/40': isDraggingOver() }"
+                >
+                    <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 transition-colors">
+                        <mat-icon svgIcon="mdi:cloud-upload-outline" class="!w-5 !h-5"></mat-icon>
+                    </div>
+                    <div class="text-[13px] text-slate-600 dark:text-slate-300 font-medium">
+                        ចុច ឬទម្លាក់ឯកសារនៅទីនេះ
+                    </div>
+                    <div class="text-[11px] text-slate-400 dark:text-slate-500">
+                        រូបភាព (PNG, JPG), PDF, Word, Excel ឬឯកសារផ្សេងៗ
+                    </div>
+                </div>
+
+                <!-- Attached Files Preview Grid / List -->
+                <div
+                    *ngIf="attachedFiles().length > 0"
+                    (dragover)="onDragOver($event)"
+                    (dragenter)="onDragEnter($event)"
+                    (dragleave)="onDragLeave($event)"
+                    (drop)="onFileDrop($event)"
+                    class="space-y-2 p-2.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-700/80 bg-slate-50/40 dark:bg-slate-900/30"
+                    [class.border-blue-500]="isDraggingOver()"
+                >
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div
+                            *ngFor="let file of attachedFiles(); let idx = index"
+                            class="flex items-center gap-2.5 p-2 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-2xs group relative"
+                        >
+                            <!-- Image thumbnail or file icon -->
+                            <div class="w-9 h-9 rounded-lg shrink-0 overflow-hidden flex items-center justify-center border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
+                                <img *ngIf="isImageAttachment(file) && file.url" [src]="file.url" [alt]="file.name" class="w-full h-full object-cover" />
+                                <div *ngIf="!isImageAttachment(file) || !file.url" class="w-full h-full flex items-center justify-center" [ngClass]="getFileIconColor(file.name)">
+                                    <mat-icon [svgIcon]="getFileIcon(file.name, file.type)" class="!w-4.5 !h-4.5"></mat-icon>
+                                </div>
+                            </div>
+
+                            <!-- File Info -->
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug" [matTooltip]="file.name">
+                                    {{ file.name }}
+                                </p>
+                                <p class="text-[10.5px] text-slate-400 truncate">
+                                    {{ file.size }}
+                                </p>
+                            </div>
+
+                            <!-- Remove Button -->
+                            <button
+                                type="button"
+                                (click)="removeAttachment(idx)"
+                                class="inline-flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer shrink-0"
+                                matTooltip="ដកចេញ"
+                                matTooltipPosition="above"
+                            >
+                                <mat-icon svgIcon="mdi:close" class="!w-4 !h-4"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mini Add More button row -->
+                    <div class="flex justify-end pt-0.5">
+                        <button
+                            type="button"
+                            (click)="fileInput.click()"
+                            class="text-[12px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer inline-flex items-center gap-1 font-medium"
+                        >
+                            <mat-icon svgIcon="mdi:plus" class="!w-3.5 !h-3.5"></mat-icon>
+                            <span>បន្ថែមឯកសារទៀត</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </mat-dialog-content>
+
+    <!-- Bottom Sticky Action Bar -->
+    <div class="w-full flex items-center justify-between p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 font-kantumruy gap-2.5">
+        <!-- Cancel -->
+        <button
+            type="button"
+            (click)="cancel()"
+            class="h-10 px-4 rounded-xl font-medium font-kantumruy text-[14px] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        >
+            បោះបង់
+        </button>
+
+        <!-- Actions: Create & Add Another + Create & Close -->
+        <div class="flex items-center gap-2">
+            <button
+                type="button"
+                (click)="submitAndAddAnother()"
+                [disabled]="!taskTitle.trim() || isSubmitting()"
+                class="h-10 px-4 rounded-xl font-medium font-kantumruy text-[14px] text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 dark:hover:bg-blue-900/80 border border-blue-200 dark:border-blue-800/60 disabled:opacity-50 transition-all cursor-pointer shadow-2xs"
+            >
+                + បង្កើត និងបន្តបន្ថែម
+            </button>
+
+            <button
+                type="button"
+                (click)="submitAndClose()"
+                [disabled]="!taskTitle.trim() || isSubmitting()"
+                class="h-10 px-5 rounded-xl font-medium font-kantumruy text-[14px] text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 transition-all cursor-pointer shadow-2xs"
+            >
+                បង្កើតការងារ
+            </button>
+        </div>
+    </div>
+
+</div>

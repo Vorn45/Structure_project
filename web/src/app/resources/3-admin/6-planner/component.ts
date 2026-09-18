@@ -55,40 +55,6 @@ export interface DayColumn {
     ],
     templateUrl: './template.html',
     styleUrl: './style.scss',
-    styles: [`
-        :host {
-            font-family: 'Kantumruy Pro', sans-serif !important;
-            font-size: 14px;
-            font-weight: 400;
-            display: flex;
-            flex-direction: column;
-            flex: 1 1 auto;
-            width: 100%;
-            min-height: 100vh;
-        }
-
-        .planner-root {
-            font-family: 'Kantumruy Pro', sans-serif !important;
-            font-weight: 400;
-        }
-
-        .planner-root *:not(.mat-icon):not([class*='material-icons']):not([class*='icon-']):not([class*='mdi']) {
-            font-family: 'Kantumruy Pro', sans-serif !important;
-        }
-
-        /* Custom Scrollbar for time grid */
-        .custom-calendar-scroll::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-calendar-scroll::-webkit-scrollbar-thumb {
-            background-color: rgba(148, 163, 184, 0.4);
-            border-radius: 9999px;
-        }
-        .custom-calendar-scroll::-webkit-scrollbar-track {
-            background: transparent;
-        }
-    `],
 })
 export class PlannerComponent implements OnInit {
     private _router = inject(Router);

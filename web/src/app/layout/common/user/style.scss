@@ -1,0 +1,14 @@
+::ng-deep .user-dropdown-menu.mat-mdc-menu-panel {
+    border-radius: 10px !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    padding: 4px !important;
+}
+::ng-deep .dark .user-dropdown-menu.mat-mdc-menu-panel {
+    border-color: rgba(51, 65, 85, 0.9) !important;
+    background-color: #0f172a !important;
+}
+::ng-deep .user-dropdown-menu .mat-mdc-menu-item {
+    border-radius: 6px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+}

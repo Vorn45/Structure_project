@@ -1,0 +1,65 @@
+<div class="px-6 sm:px-8 py-6 space-y-5 font-kantumruy">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div>
+            <h3 class="text-lg font-medium text-slate-900 dark:text-white">កិច្ចប្រជុំគម្រោង (Meetings)</h3>
+            <p class="text-[14px] text-slate-400">កាលវិភាគ និងតំណភ្ជាប់ចូលរួមប្រជុំតាមអនឡាញ</p>
+        </div>
+        <button type="button" (click)="createMeeting.emit()"
+            class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto">
+            <mat-icon svgIcon="mdi:plus" class="icon-size-4.5 text-white"></mat-icon>
+            <span>បង្កើតកិច្ចប្រជុំ</span>
+        </button>
+    </div>
+
+    <div class="space-y-3">
+        @for (m of meetings(); track m.id) {
+        <div class="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:shadow-xs transition-all space-y-3 group">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[13px] font-medium px-2.5 py-0.5 rounded-full"
+                            [ngClass]="m.status === 'upcoming' ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800' : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'">
+                            {{ m.status === 'upcoming' ? 'ជិតមកដល់' : 'បានបញ្ចប់' }}
+                        </span>
+                        <span class="text-[13px] font-medium text-blue-600 bg-blue-50 dark:bg-blue-950/60 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                            {{ m.platform }}
+                        </span>
+                    </div>
+                    <h4 class="text-[16px] font-medium text-slate-900 dark:text-white">{{ m.title }}</h4>
+                    <p class="text-[14px] text-slate-500 dark:text-slate-400">{{ m.description }}</p>
+                </div>
+
+                <div class="flex items-center gap-2.5 self-start sm:self-auto">
+                    <a *ngIf="m.status === 'upcoming'" [href]="m.link" target="_blank"
+                        class="h-10 px-4 rounded-xl border border-blue-200 dark:border-blue-800/80 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer transition-colors">
+                        <mat-icon svgIcon="mdi:video-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                        <span>ចូលរួមប្រជុំ</span>
+                    </a>
+
+                    <!-- Delete Button -->
+                    <button type="button" (click)="deleteMeeting.emit({ id: m.id, event: $event })"
+                        class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                        [matTooltip]="'លុបកិច្ចប្រជុំនេះ'">
+                        <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                    </button>
+                </div>
+            </div>
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[14px] text-slate-500 dark:text-slate-400">
+                <span class="flex items-center gap-1.5">
+                    <mat-icon svgIcon="mdi:calendar-outline" class="icon-size-4 text-slate-400"></mat-icon>
+                    {{ m.date }} • {{ m.time }}
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-4 text-slate-400"></mat-icon>
+                    {{ m.attendees?.length || 0 }} នាក់ចូលរួម
+                </span>
+            </div>
+        </div>
+        } @empty {
+        <div class="py-12 px-6 text-center text-slate-400 font-kantumruy border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+            <mat-icon svgIcon="mdi:video-off-outline" class="icon-size-8 text-slate-300 dark:text-slate-600 mb-2"></mat-icon>
+            <p class="text-[14.5px]">មិនទាន់មានកិច្ចប្រជុំគម្រោងគ្រោងទុកនៅឡើយទេ</p>
+        </div>
+        }
+    </div>
+</div>

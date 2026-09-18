@@ -21,6 +21,10 @@ import { CreateTaskDialogComponent } from './dialogs/create-task-dialog/componen
 import { CreatePhaseDialogComponent } from './dialogs/create-phase-dialog/component';
 import { CreateMemberDialogComponent } from './dialogs/create-member-dialog/component';
 import { CreateLinkDialogComponent } from './dialogs/create-link-dialog/component';
+import { ProjectPhasesTabComponent } from './components/phases-tab/phases-tab.component';
+import { ProjectTeamTabComponent } from './components/team-tab/team-tab.component';
+import { ProjectMeetingsTabComponent } from './components/meetings-tab/meetings-tab.component';
+
 import { AdminService, AdminProject, AdminUser } from '../admin.service';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { TaskDrawerComponent } from 'app/resources/2-user/2-task/task-drawer/component';
@@ -163,16 +167,12 @@ export const DEFAULT_PROJECT_LINKS: TaskLink[] = [];
         SideDialogCloseButtonComponent,
         TaskDrawerComponent,
         FilePreviewModalComponent,
+        ProjectPhasesTabComponent,
+        ProjectTeamTabComponent,
+        ProjectMeetingsTabComponent,
     ],
     templateUrl: './template.html',
     styleUrl: './style.scss',
-    styles: [`
-        :host {
-            display: block;
-            font-family: 'Kantumruy Pro', sans-serif !important;
-            font-size: 16px;
-        }
-    `],
 })
 export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly _adminService = inject(AdminService);

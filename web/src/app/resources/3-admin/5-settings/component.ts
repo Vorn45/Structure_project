@@ -31,19 +31,6 @@ export interface DepartmentItem {
     ],
     templateUrl: './template.html',
     styleUrl: './style.scss',
-    styles: [`
-        :host {
-            display: block;
-            font-family: 'Kantumruy Pro', sans-serif !important;
-            font-size: 16px;
-        }
-        :host *, :host ::ng-deep * {
-            font-family: 'Kantumruy Pro', sans-serif !important;
-        }
-        input, select, textarea, button, label, span, p, div, table, th, td, h1, h2, h3 {
-            font-family: 'Kantumruy Pro', sans-serif !important;
-        }
-    `],
 })
 export class AdminSettingsComponent implements OnInit {
     private readonly _adminService = inject(AdminService);

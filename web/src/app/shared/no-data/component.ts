@@ -4,75 +4,23 @@ import { MatIconModule } from '@angular/material/icon';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { animate, style, transition, trigger } from '@angular/animations';
 
-/** Types with a real illustration in `images/apps/no-{type}.svg`; everything else falls back to `images/avatars/{type}.png`. */
-const APPS_ICON_TYPES = new Set([
-    'task', 'task-priority', 'activity', 'milestone', 'project', 'team', 'org', 'chat', 'mail',
-    'meeting', 'progress', 'invoice', 'file', 'tech', 'error', 'search',
-    'meeting-purpose', 'meeting-result', 'meeting-next-task', 'phone-login',
-]);
 
-/** Full-color illustrations rendered as an <img> (not a primary-tinted mat-icon), keyed to their own file path. */
-const IMAGE_ILLUSTRATIONS: Record<string, string> = {
-    'under-construction': 'images/apps/under-construction.svg',
-};
-
-/** Illustrations fetched as inline SVG text so their `#FF725E` accent fills can be recolored to the
- *  org's theme color at runtime (same technique as under-construction/dialog.ts), keyed to file path. */
-const RECOLORED_ILLUSTRATIONS: Record<string, string> = {
-    'in-progress-loading': 'images/apps/in_progress_loading.svg',
-};
-
-/** Per-type overrides for the illustration's top margin, for icons whose built-in whitespace
- *  doesn't match the shared `calc(var(--nd-icon) * -0.24)` default. */
-const ICON_MARGIN_OVERRIDES: Record<string, string> = {
-    'task-priority': '1rem',
-};
+export * from './no-data.types';
+import { APPS_ICON_TYPES, IMAGE_ILLUSTRATIONS, RECOLORED_ILLUSTRATIONS, ICON_MARGIN_OVERRIDES, NoDataType } from './no-data.types';
 
 @Component({
     standalone: true,
     imports: [MatIconModule],
     selector: 'no-data-component',
     host: { class: 'block w-full' },
-    template: `
-        <div class="w-full max-w-full flex flex-col justify-center items-center px-4"
-             [class]="resolvedContainerClass"
-             [class.h-full]="fullHeight"
-             [class.mt-12]="!fullHeight && !surface"
-             [style.--nd-icon]="iconSize">
-        @if (isAppsIcon) {
-            <mat-icon [svgIcon]="'no-' + type" class="text-primary"
-                      style="width:var(--nd-icon);height:var(--nd-icon);font-size:var(--nd-icon)"
-                      [style.margin-top]="iconMargin" />
-        } @else if (isRecoloredIllustration && recoloredSvg) {
-            <div [innerHTML]="recoloredSvg" class="object-contain"
-                 style="width:var(--nd-icon);height:var(--nd-icon)"
-                 [style.margin-top]="iconMargin"></div>
-        } @else if (!isRecoloredIllustration) {
-            <img [src]="imgSrc" alt="No data" class="object-contain"
-                 style="width:var(--nd-icon);height:var(--nd-icon)"
-                 [style.margin-top]="iconMargin">
-        }
-        <h3 [class]="titleClasses" [style.margin-top]="messageMargin">{{ displayTitle }}</h3>
-        @if (description) {
-            <p class="mt-1 max-w-xl text-center text-md text-slate-500 dark:text-slate-400">
-                {{ description }}
-            </p>
-        }
-        @if (actionLabel) {
-            <button type="button" (click)="actionClick.emit()"
-                    class="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-md font-medium text-white transition-colors hover:bg-primary/90">
-                <mat-icon class="icon-size-5 text-white" [svgIcon]="'mdi:plus'"></mat-icon>
-                <span>{{ actionLabel }}</span>
-            </button>
-        }
-        </div>
-    `
+    templateUrl: './template.html',
+    styleUrl: './style.scss',
 })
 export class NoDataComponent implements OnChanges {
     private readonly _http = inject(HttpClient);
     private readonly _sanitizer = inject(DomSanitizer);
 
-    @Input() type: 'user' | 'file' | 'chat' | 'search' | 'study' | 'users' | 'invoice' | 'task' | 'task-priority' | 'activity' | 'milestone' | 'project' | 'team' | 'org' | 'mail' | 'meeting' | 'progress' | 'tech' | 'error' | 'under-construction' | 'in-progress-loading' | 'meeting-purpose' | 'meeting-result' | 'meeting-next-task' | 'phone-login' = 'user';
+    @Input() type: NoDataType = 'user';
     @Input() message = 'មិនមានទិន្នន័យ';
     @Input() title?: string;
     @Input() description = '';

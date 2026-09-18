@@ -131,3 +131,14 @@ export interface TaskListResponse {
         };
     };
 }
+
+export interface ProjectFilterOption {
+    id: string;
+    code?: string;
+    name: string;
+    logo?: string;
+    image?: string;
+    icon?: string;
+    bgClass?: string;
+    _logoFailed?: boolean;
+}
