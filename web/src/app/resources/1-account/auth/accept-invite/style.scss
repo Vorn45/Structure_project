@@ -1,9 +1,33 @@
 :host {
     display: block;
     width: 100%;
-    font-family: 'Kantumruy Pro', sans-serif !important;
+    font-family: 'Kantumruy Pro', 'Inter var', sans-serif !important;
 }
 
 :host *, :host ::ng-deep * {
+    font-family: 'Kantumruy Pro', 'Inter var', sans-serif !important;
+    letter-spacing: normal !important;
+}
+
+// Ensure all headings and form labels use Kantumruy Pro strictly
+h1, h2, h3, h4, span, p, label, input, button {
     font-family: 'Kantumruy Pro', sans-serif !important;
+    letter-spacing: normal !important;
+}
+
+// System primary color fallbacks if CSS variables are not initialized
+.bg-system-primary {
+    background-color: var(--helper-primary, #192675) !important;
+    color: #ffffff !important;
+    &:hover {
+        opacity: 0.92;
+    }
+}
+
+.text-system-primary {
+    color: var(--helper-primary, #192675) !important;
+}
+
+.border-system-primary {
+    border-color: var(--helper-primary, #192675) !important;
 }
