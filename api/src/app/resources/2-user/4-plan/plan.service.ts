@@ -102,13 +102,83 @@ export class PlanService {
         this.initDbStore();
     }
 
+    private sanitizeTask(task: any): any {
+        if (!task) return task;
+        const copy: any = { ...task };
+
+        // Ensure attachments_count is preserved before removing attachments array
+        copy.attachments_count = copy.attachments_count ?? (Array.isArray(copy.attachments) ? copy.attachments.length : (Array.isArray(copy.documents) ? copy.documents.length : 0));
+        delete copy.attachments;
+
+        // Ensure comments_count is preserved before removing comments array
+        if (Array.isArray(copy.comments)) {
+            copy.comments_count = copy.comments_count ?? copy.comments.length;
+            delete copy.comments;
+        }
+
+        // Strip heavy inline base64 images from description
+        if (typeof copy.description === 'string' && copy.description.includes('data:image/')) {
+            copy.description = copy.description.replace(/src="data:image\/[^;]+;base64,[^"]+"/g, 'src=""');
+        }
+
+        // Strip base64 data URLs from documents
+        if (Array.isArray(copy.documents)) {
+            copy.documents = copy.documents.map((d: any) => {
+                if (!d) return d;
+                const docCopy = { ...d };
+                if (typeof docCopy.url === 'string' && docCopy.url.startsWith('data:')) {
+                    docCopy.url = '';
+                }
+                if (docCopy.data) {
+                    delete docCopy.data;
+                }
+                return docCopy;
+            });
+        }
+
+        return copy;
+    }
+
+    private sanitizeProject(project: ProjectPlanItem, includeTasks = true): any {
+        if (!project) return project;
+        const copy: any = { ...project };
+
+        if (Array.isArray(copy.tasks)) {
+            if (!includeTasks) {
+                delete copy.tasks;
+            } else {
+                copy.tasks = copy.tasks.map((t: any) => this.sanitizeTask(t));
+            }
+        }
+
+        // Sanitize project attachments
+        if (Array.isArray(copy.attachments)) {
+            copy.attachments_count = copy.attachments_count ?? copy.attachments.length;
+            copy.attachments = copy.attachments.map((att: any) => {
+                if (!att) return att;
+                const attCopy = { ...att };
+                if (typeof attCopy.url === 'string' && attCopy.url.startsWith('data:')) {
+                    attCopy.url = '';
+                }
+                if (attCopy.data) {
+                    delete attCopy.data;
+                }
+                return attCopy;
+            });
+        }
+
+        return copy;
+    }
+
     private loadFromDisk(): void {
         try {
             if (fs.existsSync(this.storeFilePath)) {
                 const raw = fs.readFileSync(this.storeFilePath, 'utf8');
                 const data = JSON.parse(raw);
                 if (data && Array.isArray(data.plans) && data.plans.length > 0) {
-                    this.projects = data.plans.filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id));
+                    this.projects = data.plans
+                        .filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id))
+                        .map((p: any) => this.sanitizeProject(p));
                     if (this.projects.length === 0) {
                         this.projects = [...PROJECTS];
                     } else {
@@ -132,7 +202,7 @@ export class PlanService {
                 fs.mkdirSync(dir, { recursive: true });
             }
             const data = {
-                plans: this.projects,
+                plans: this.projects.map((p) => this.sanitizeProject(p)),
                 updated_at: new Date().toISOString(),
             };
             fs.writeFileSync(this.storeFilePath, JSON.stringify(data, null, 2), 'utf8');
@@ -165,7 +235,9 @@ export class PlanService {
         try {
             const dbStore = await this._planStoreRepo.findOne({ where: { key: 'default_plans_store' } });
             if (dbStore && Array.isArray(dbStore.plans) && dbStore.plans.length > 0) {
-                this.projects = dbStore.plans.filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id));
+                this.projects = dbStore.plans
+                    .filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id))
+                    .map((p: any) => this.sanitizeProject(p));
                 if (this.projects.length === 0) {
                     this.projects = [...PROJECTS];
                 } else {
@@ -199,13 +271,14 @@ export class PlanService {
     private async saveToDb(): Promise<void> {
         try {
             let dbStore = await this._planStoreRepo.findOne({ where: { key: 'default_plans_store' } });
+            const sanitizedPlans = this.projects.map((p) => this.sanitizeProject(p));
             if (!dbStore) {
                 dbStore = this._planStoreRepo.create({
                     key: 'default_plans_store',
-                    plans: this.projects,
+                    plans: sanitizedPlans,
                 });
             } else {
-                dbStore.plans = this.projects;
+                dbStore.plans = sanitizedPlans;
             }
             await this._planStoreRepo.save(dbStore);
         } catch (err) {
@@ -215,7 +288,7 @@ export class PlanService {
 
     getRawProjects(): ProjectPlanItem[] {
         this.syncTaskCounts(this.projects);
-        return this.projects;
+        return this.projects.map((p) => this.sanitizeProject(p));
     }
 
     private syncTaskCounts(plans: ProjectPlanItem[]): void {
@@ -248,7 +321,7 @@ export class PlanService {
                             ['done', 'completed'].includes((t.status || '').toLowerCase())
                         ).length;
                         p.progress = p.total_tasks > 0 ? Math.round((p.completed_tasks / p.total_tasks) * 100) : 0;
-                        p.tasks = projectTasks;
+                        p.tasks = projectTasks.map((t: any) => this.sanitizeTask(t));
                     }
                 }
             }
@@ -312,7 +385,7 @@ export class PlanService {
 
         const limit = query.limit ? parseInt(query.limit, 10) : 50;
         const offset = query.offset ? parseInt(query.offset, 10) : 0;
-        const paginated = list.slice(offset, offset + limit);
+        const paginated = list.slice(offset, offset + limit).map((p) => this.sanitizeProject(p));
 
         return {
             status_code: 200,
@@ -348,7 +421,7 @@ export class PlanService {
         return {
             status_code: 200,
             message: 'Plan retrieved successfully',
-            data: plan,
+            data: this.sanitizeProject(plan),
         };
     }
 
@@ -634,7 +707,7 @@ export class PlanService {
             total_tasks: dto.tasks?.length || starterTasks.length,
             completed_tasks: dto.tasks?.filter((t: any) => t.status === 'done' || t.status === 'completed')?.length || 0,
             members: dto.members?.length ? dto.members : [effectiveLead],
-            tasks: dto.tasks?.length ? dto.tasks : starterTasks,
+            tasks: (dto.tasks?.length ? dto.tasks : starterTasks).map((t: any) => this.sanitizeTask(t)),
             phases: dto.phases?.length ? dto.phases : starterPhases,
             meetings: dto.meetings?.length ? dto.meetings : starterMeetings,
             agileTasks: dto.agileTasks?.length ? dto.agileTasks : [],
@@ -679,7 +752,7 @@ export class PlanService {
             start_date: dto.start_date ?? current.start_date,
             end_date: dto.end_date ?? current.end_date,
             members: dto.members ?? current.members,
-            tasks: dto.tasks ?? (current as any).tasks,
+            tasks: dto.tasks ? dto.tasks.map((t: any) => this.sanitizeTask(t)) : (current as any).tasks,
             phases: dto.phases ?? (current as any).phases,
             meetings: dto.meetings ?? (current as any).meetings,
             agileTasks: dto.agileTasks ?? (current as any).agileTasks,
@@ -735,7 +808,7 @@ export class PlanService {
         this.syncTaskCounts([plan]);
         return {
             status_code: 200,
-            data: plan.tasks || [],
+            data: (plan.tasks || []).map((t: any) => this.sanitizeTask(t)),
         };
     }
 
