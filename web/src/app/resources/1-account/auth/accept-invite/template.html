@@ -1,21 +1,21 @@
-<div class="min-h-screen w-full bg-slate-100/80 dark:bg-[#070c18] flex items-center justify-center p-4 sm:p-6 lg:p-10 font-kantumruy relative overflow-hidden"
+<div class="min-h-screen w-full bg-slate-100/70 dark:bg-[#070c18] flex items-center justify-center p-4 sm:p-6 lg:p-10 font-kantumruy relative overflow-hidden"
      style="font-family: 'Kantumruy Pro', sans-serif !important;">
 
-    <!-- Subtle Ambient Background Light Effects -->
-    <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Ambient Gradient Backdrops -->
+    <div class="absolute -top-40 -left-40 w-[30rem] h-[30rem] bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-[30rem] h-[30rem] bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
     <!-- ========================================================================= -->
     <!-- 1. LOADING / VERIFYING STATE                                              -->
     <!-- ========================================================================= -->
     @if (verifying()) {
-        <div class="w-full max-w-md bg-white dark:bg-[#0f172a] rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 p-8 text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div class="w-16 h-16 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900 shadow-sm animate-pulse">
+        <div class="w-full max-w-md bg-white dark:bg-[#0e172a] rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-slate-800 p-8 sm:p-10 text-center space-y-5 animate-in fade-in zoom-in-95 duration-200 relative z-10">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900/60 shadow-sm animate-pulse">
                 <mat-progress-spinner [diameter]="36" [mode]="'indeterminate'"></mat-progress-spinner>
             </div>
             <div>
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white">កំពុងផ្ទៀងផ្ទាត់ការអញ្ជើញ...</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">សូមរង់ចាំមួយភ្លែត ប្រព័ន្ធកំពុងពិនិត្យសុពលភាពតំណភ្ជាប់</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">សូមរង់ចាំមួយភ្លែត ប្រព័ន្ធកំពុងពិនិត្យសុពលភាពតំណភ្ជាប់</p>
             </div>
         </div>
     }
@@ -24,8 +24,8 @@
     <!-- 2. VERIFICATION ERROR STATE                                               -->
     <!-- ========================================================================= -->
     @else if (verifyError()) {
-        <div class="w-full max-w-md bg-white dark:bg-[#0f172a] rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 p-8 text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div class="w-16 h-16 mx-auto rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-100 dark:border-rose-900 shadow-sm">
+        <div class="w-full max-w-md bg-white dark:bg-[#0e172a] rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-slate-800 p-8 sm:p-10 text-center space-y-6 animate-in fade-in zoom-in-95 duration-200 relative z-10">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-100 dark:border-rose-900/60 shadow-sm">
                 <mat-icon svgIcon="mdi:alert-circle-outline" class="icon-size-8"></mat-icon>
             </div>
             <div>
@@ -36,7 +36,7 @@
             </div>
             <div class="pt-2">
                 <a routerLink="/auth/sign-in"
-                   class="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium shadow-md transition-all cursor-pointer">
+                   class="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md shadow-blue-500/20 transition-all cursor-pointer">
                     <mat-icon svgIcon="mdi:arrow-left" class="icon-size-4.5"></mat-icon>
                     <span>ត្រឡប់ទៅទំព័រចូល (Sign In)</span>
                 </a>
@@ -45,25 +45,25 @@
     }
 
     <!-- ========================================================================= -->
-    <!-- 3. MAIN INVITATION CARD (TWO COLUMNS)                                     -->
+    <!-- 3. MAIN INVITATION CARD (TWO COLUMNS MATCHING REFERENCE DESIGN)           -->
     <!-- ========================================================================= -->
     @else if (invitation()) {
-        <div class="w-full max-w-5xl bg-white dark:bg-[#0f172a] rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800/90 overflow-hidden flex flex-col md:flex-row relative z-10 transition-all duration-300">
+        <div class="w-full max-w-5xl bg-white dark:bg-[#0e172a] rounded-[28px] sm:rounded-[32px] shadow-[0_20px_60px_-15px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-200/80 dark:border-slate-800/80 overflow-hidden flex flex-col md:flex-row relative z-10 transition-all duration-300">
 
             <!-- ----------------------------------------------------------------- -->
-            <!-- LEFT COLUMN: BRANDING, INVITATION CONTEXT, AND BENEFITS           -->
+            <!-- LEFT COLUMN: BRANDING & 3D VISUAL ILLUSTRATION PANEL              -->
             <!-- ----------------------------------------------------------------- -->
-            <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800/80 bg-gradient-to-b from-slate-50/70 to-white dark:from-[#0c1424] dark:to-[#0f172a]">
+            <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800/80 bg-gradient-to-b from-slate-50/90 via-slate-50/50 to-white dark:from-[#0b1324] dark:to-[#0e172a]">
 
-                <!-- Top Row: Logo & Language Switcher / Flag -->
+                <!-- Top Row: App Brand Logo & Language Switcher -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <img class="h-10 w-auto object-contain" src="images/logo/default_logo.png" alt="WMS DIGITECHKH Logo" />
+                        <img class="h-9 w-9 object-contain drop-shadow-sm" src="images/logo/default_logo.png" alt="DIGITECHKH Logo" />
                         <div class="flex flex-col">
-                            <span class="text-[16px] sm:text-[17px] font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-tight">
+                            <span class="text-[15px] sm:text-[16px] font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-none">
                                 ប្រព័ន្ធគ្រប់គ្រងការងារ
                             </span>
-                            <span class="text-xs font-bold text-blue-600 dark:text-emerald-400 tracking-wider">
+                            <span class="text-[11px] font-extrabold text-blue-600 dark:text-blue-400 tracking-wider mt-0.5">
                                 DIGITECHKH
                             </span>
                         </div>
@@ -73,164 +73,166 @@
                     </div>
                 </div>
 
-                <!-- Main Heading & Subtitle -->
-                <div class="my-6 space-y-2">
+                <!-- Invitation Context Header -->
+                <div class="my-5 space-y-2">
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 text-[11px] font-semibold">
+                        <mat-icon svgIcon="mdi:email-check-outline" class="icon-size-3.5"></mat-icon>
+                        <span>លិខិតអញ្ជើញចូលរួមផ្លូវការ</span>
+                    </div>
                     <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-snug">
-                        អ្នកត្រូវបានអញ្ជើញចូលរួមក្នុងអង្គភាព
-                        <span class="text-blue-700 dark:text-blue-400 block mt-1 font-extrabold">
+                        អ្នកត្រូវបានអញ្ជើញចូលរួម
+                        <span class="text-blue-600 dark:text-blue-400 block mt-0.5 font-extrabold">
                             {{ invitation()?.company_name || 'ក្រុមហ៊ុន ឌីជីថេក ខេអេច ឯ.ក' }}
                         </span>
                     </h1>
                     <p class="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                        អ្នកត្រូវបានអញ្ជើញចូលរួមក្នុងអង្គភាព <span class="font-medium text-slate-700 dark:text-slate-300">{{ invitation()?.company_name || 'ក្រុមហ៊ុន ឌីជីថេក ខេអេច' }}</span> នៅលើ DIGITECHKH WMS។ បង្កើតគណនីរបស់អ្នកដើម្បីចាប់ផ្តើមធ្វើការជាមួយក្រុមរបស់អ្នក។
+                        សូមបំពេញព័ត៌មានខាងក្រោមដើម្បីបញ្ចប់ការចុះឈ្មោះ និងចាប់ផ្តើមសហការការងារជាមួយក្រុមរបស់អ្នក។
                     </p>
                 </div>
 
-                <!-- Center Illustration: Envelope With Invitation Letter & Confetti -->
-                <div class="my-3 flex items-center justify-center relative py-4">
-                    <div class="relative w-64 h-44 flex items-center justify-center">
-                        <!-- Vector Envelope & Card Illustration -->
-                        <svg class="w-full h-full drop-shadow-md select-none" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Confetti dots and stars -->
-                            <circle cx="35" cy="40" r="3.5" fill="#3b82f6" opacity="0.8"/>
-                            <rect x="50" y="80" width="6" height="6" rx="1.5" fill="#f59e0b" transform="rotate(25 50 80)"/>
-                            <circle cx="245" cy="50" r="3" fill="#10b981" opacity="0.8"/>
-                            <rect x="230" y="110" width="5" height="5" rx="1" fill="#ec4899" transform="rotate(45 230 110)"/>
-                            <circle cx="70" cy="140" r="2.5" fill="#6366f1"/>
-                            <circle cx="225" cy="150" r="3" fill="#06b6d4"/>
-                            <rect x="85" y="30" width="7" height="4" rx="1" fill="#8b5cf6" transform="rotate(-20 85 30)"/>
-                            <rect x="210" y="35" width="6" height="4" rx="1" fill="#f97316" transform="rotate(15 210 35)"/>
+                <!-- Center: Framed 3D Visual Illustration Panel (Matches Reference Style) -->
+                <div class="my-2 bg-slate-100/80 dark:bg-[#131d33] border border-slate-200/70 dark:border-slate-800/80 rounded-2xl p-6 sm:p-7 relative overflow-hidden flex flex-col items-center justify-center shadow-inner">
+
+                    <!-- Ambient Glow Behind Illustration -->
+                    <div class="absolute w-40 h-40 bg-blue-400/20 dark:bg-blue-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <!-- Enhanced 3D-Styled Vector Illustration -->
+                    <div class="relative w-full max-w-[260px] h-40 flex items-center justify-center">
+                        <svg class="w-full h-full drop-shadow-lg select-none" viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="envGrad" x1="40" y1="90" x2="240" y2="180" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#3b82f6"/>
+                                    <stop offset="100%" stop-color="#1d4ed8"/>
+                                </linearGradient>
+                                <linearGradient id="envFlapGrad" x1="140" y1="30" x2="140" y2="130" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#60a5fa"/>
+                                    <stop offset="100%" stop-color="#2563eb"/>
+                                </linearGradient>
+                                <linearGradient id="cardGrad" x1="0" y1="0" x2="160" y2="130" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#ffffff"/>
+                                    <stop offset="100%" stop-color="#f8fafc"/>
+                                </linearGradient>
+                                <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+                                    <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+                                </filter>
+                            </defs>
+
+                            <!-- Ambient Floating Confetti -->
+                            <circle cx="35" cy="35" r="4" fill="#3b82f6" opacity="0.7"/>
+                            <rect x="52" y="70" width="7" height="7" rx="2" fill="#f59e0b" transform="rotate(25 52 70)"/>
+                            <circle cx="245" cy="45" r="3.5" fill="#10b981" opacity="0.8"/>
+                            <rect x="232" y="100" width="6" height="6" rx="2" fill="#ec4899" transform="rotate(45 232 100)"/>
+                            <circle cx="75" cy="130" r="3" fill="#6366f1" opacity="0.6"/>
+                            <circle cx="225" cy="140" r="3" fill="#06b6d4" opacity="0.7"/>
+                            <rect x="85" y="24" width="8" height="5" rx="2" fill="#8b5cf6" transform="rotate(-20 85 24)"/>
 
                             <!-- Paper Airplane Flying -->
-                            <g transform="translate(195, 12) rotate(15)">
-                                <path d="M0 15L32 0L20 28L15 19L0 15Z" fill="#93c5fd"/>
-                                <path d="M15 19L32 0L20 28L15 19Z" fill="#60a5fa"/>
-                                <path d="M15 19L20 28L17 24L15 19Z" fill="#3b82f6"/>
+                            <g transform="translate(195, 10) rotate(12)">
+                                <path d="M0 16L34 0L22 30L16 20L0 16Z" fill="#93c5fd"/>
+                                <path d="M16 20L34 0L22 30L16 20Z" fill="#60a5fa"/>
+                                <path d="M16 20L22 30L19 25L16 20Z" fill="#2563eb"/>
                             </g>
 
-                            <!-- Envelope Back / Interior Pocket -->
-                            <rect x="40" y="70" width="200" height="110" rx="14" fill="#60a5fa" opacity="0.3"/>
+                            <!-- Envelope Interior Pocket -->
+                            <rect x="40" y="65" width="200" height="115" rx="14" fill="#1e3a8a" opacity="0.25"/>
 
-                            <!-- Invitation Letter Card popping out -->
-                            <g transform="translate(60, 25)">
-                                <rect x="0" y="0" width="160" height="125" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" class="dark:fill-slate-800 dark:stroke-slate-700 shadow-lg"/>
-                                <!-- Card Brand Mark -->
-                                <circle cx="80" cy="45" r="22" fill="#eff6ff" class="dark:fill-blue-950/60"/>
-                                <circle cx="80" cy="45" r="18" fill="#dbeafe" class="dark:fill-blue-900/60"/>
-                                <!-- Seal Emblem -->
-                                <circle cx="80" cy="45" r="12" fill="#2563eb"/>
-                                <path d="M75 45L78 48L85 41" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <!-- Small Star Badge on seal -->
-                                <circle cx="92" cy="56" r="6.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>
-                                <path d="M92 52.5L93.2 55.2L96 55.4L93.8 57.2L94.5 60L92 58.5L89.5 60L90.2 57.2L88 55.4L90.8 55.2L92 52.5Z" fill="#ffffff"/>
+                            <!-- Invitation Letter Popping Out with 3D Depth -->
+                            <g transform="translate(60, 20)" filter="url(#softShadow)">
+                                <rect x="0" y="0" width="160" height="125" rx="12" fill="url(#cardGrad)" stroke="#e2e8f0" stroke-width="1.5" class="dark:fill-[#1e293b] dark:stroke-slate-700"/>
+                                
+                                <!-- Card Brand Crest -->
+                                <circle cx="80" cy="42" r="20" fill="#eff6ff" class="dark:fill-blue-950/70"/>
+                                <circle cx="80" cy="42" r="15" fill="#dbeafe" class="dark:fill-blue-900/60"/>
+                                <circle cx="80" cy="42" r="11" fill="#2563eb"/>
+                                <path d="M75.5 42L78.5 45L84.5 38.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                
+                                <!-- Verification Gold Badge -->
+                                <circle cx="91" cy="52" r="6" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>
+                                <path d="M91 49L92 51.5L94.5 51.7L92.5 53.2L93.2 55.7L91 54.3L88.8 55.7L89.5 53.2L87.5 51.7L90 51.5L91 49Z" fill="#ffffff"/>
 
-                                <!-- Text lines placeholder on letter -->
-                                <rect x="35" y="76" width="90" height="5" rx="2.5" fill="#cbd5e1" class="dark:fill-slate-600"/>
-                                <rect x="45" y="87" width="70" height="4" rx="2" fill="#e2e8f0" class="dark:fill-slate-700"/>
-                                <rect x="55" y="97" width="50" height="4" rx="2" fill="#e2e8f0" class="dark:fill-slate-700"/>
+                                <!-- Text Placeholder Bars -->
+                                <rect x="35" y="72" width="90" height="5" rx="2.5" fill="#cbd5e1" class="dark:fill-slate-600"/>
+                                <rect x="45" y="83" width="70" height="4.5" rx="2.2" fill="#e2e8f0" class="dark:fill-slate-700"/>
+                                <rect x="55" y="93" width="50" height="4" rx="2" fill="#e2e8f0" class="dark:fill-slate-700"/>
                             </g>
 
-                            <!-- Envelope Body (Front Fold) -->
-                            <path d="M40 90L140 155L240 90V166C240 173.732 233.732 180 226 180H54C46.268 180 40 173.732 40 166V90Z" fill="#3b82f6"/>
-                            <!-- Envelope Left/Right Side Flaps -->
-                            <path d="M40 92L115 145L40 180V92Z" fill="#2563eb" opacity="0.6"/>
-                            <path d="M240 92L165 145L240 180V92Z" fill="#1d4ed8" opacity="0.6"/>
+                            <!-- Envelope Body Front -->
+                            <path d="M40 85L140 150L240 85V164C240 171.732 233.732 178 226 178H54C46.268 178 40 171.732 40 164V85Z" fill="url(#envGrad)"/>
+                            <!-- Envelope Side Flaps -->
+                            <path d="M40 87L115 140L40 178V87Z" fill="#1d4ed8" opacity="0.7"/>
+                            <path d="M240 87L165 140L240 178V87Z" fill="#1e40af" opacity="0.7"/>
                             <!-- Envelope Bottom Flap -->
-                            <path d="M40 180L140 120L240 180H40Z" fill="#1e40af" opacity="0.4"/>
+                            <path d="M40 178L140 115L240 178H40Z" fill="#172554" opacity="0.35"/>
                         </svg>
                     </div>
+
+                    <!-- Visual Pagination Dots (Matches Image 1 Reference Style) -->
+                    <div class="flex items-center gap-1.5 mt-3">
+                        <span class="w-5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-500 transition-all"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                    </div>
+
                 </div>
 
-                <!-- Benefit / Feature Highlights -->
-                <div class="mt-4 space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800/80">
-                    <!-- Feature 1 -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                            <mat-icon svgIcon="mdi:account-group" class="icon-size-5"></mat-icon>
-                        </div>
-                        <div>
-                            <h4 class="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-tight">
-                                ធ្វើការជាមួយគ្នា
-                            </h4>
-                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-                                សហការជាមួយក្រុមការងាររបស់អ្នកនៅកន្លែងតែមួយ
-                            </p>
-                        </div>
+                <!-- Bottom 3 Compact Feature Chips -->
+                <div class="mt-4 grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                    <div class="p-2 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+                        <mat-icon svgIcon="mdi:account-group-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400 mx-auto"></mat-icon>
+                        <span class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mt-1">សហការគ្នា</span>
                     </div>
-
-                    <!-- Feature 2 -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                            <mat-icon svgIcon="mdi:folder-outline" class="icon-size-5"></mat-icon>
-                        </div>
-                        <div>
-                            <h4 class="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-tight">
-                                រក្សាសណ្តាប់ធ្នាប់
-                            </h4>
-                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-                                គ្រប់គ្រងការងារ និងគម្រោងប្រកបដោយប្រសិទ្ធភាព
-                            </p>
-                        </div>
+                    <div class="p-2 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+                        <mat-icon svgIcon="mdi:folder-star-outline" class="icon-size-4.5 text-emerald-600 dark:text-emerald-400 mx-auto"></mat-icon>
+                        <span class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mt-1">គ្រប់គ្រងគម្រោង</span>
                     </div>
-
-                    <!-- Feature 3 -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                            <mat-icon svgIcon="mdi:shield-check-outline" class="icon-size-5"></mat-icon>
-                        </div>
-                        <div>
-                            <h4 class="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-tight">
-                                សុវត្ថិភាព និងអាចទុកចិត្តបាន
-                            </h4>
-                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-                                ទិន្នន័យរបស់អ្នកមានសុវត្ថិភាពជាមួយយើង
-                            </p>
-                        </div>
+                    <div class="p-2 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+                        <mat-icon svgIcon="mdi:shield-check-outline" class="icon-size-4.5 text-purple-600 dark:text-purple-400 mx-auto"></mat-icon>
+                        <span class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mt-1">សុវត្ថិភាពខ្ពស់</span>
                     </div>
                 </div>
 
             </div>
 
             <!-- ----------------------------------------------------------------- -->
-            <!-- RIGHT COLUMN: STEPPER PROGRESS & REGISTRATION FORM                -->
+            <!-- RIGHT COLUMN: STEPPER PROGRESS & CLEAN REGISTRATION FORM          -->
             <!-- ----------------------------------------------------------------- -->
-            <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-white dark:bg-[#0f172a]">
+            <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-white dark:bg-[#0e172a]">
 
-                <!-- 1. STEPPER PROGRESS BAR (3 STEPS) -->
-                <div class="w-full mb-6">
+                <!-- 1. SLEEK STEPPER PROGRESS BAR -->
+                <div class="w-full mb-5">
                     <div class="relative flex items-center justify-between">
-                        <!-- Connecting Line Background -->
-                        <div class="absolute left-8 right-8 top-4 h-0.5 bg-slate-200 dark:bg-slate-800 -z-0"></div>
+                        <!-- Connecting Track Line -->
+                        <div class="absolute left-8 right-8 top-4 h-0.5 bg-slate-100 dark:bg-slate-800 -z-0"></div>
 
                         <!-- Progress Highlight Line -->
-                        <div class="absolute left-8 top-4 h-0.5 bg-amber-500 transition-all duration-300 -z-0"
+                        <div class="absolute left-8 top-4 h-0.5 bg-blue-600 transition-all duration-300 -z-0"
                              [style.width]="currentStep() === 'info' ? '0%' : (currentStep() === 'password' ? '50%' : '100%')">
                         </div>
 
                         <!-- Step 1: Info / Register -->
-                        <div class="relative z-10 flex flex-col items-center cursor-pointer" (click)="backToInfo()">
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all shadow-sm"
-                                 [ngClass]="currentStep() === 'info' ? 'bg-amber-500 ring-4 ring-amber-100 dark:ring-amber-950/60' : 'bg-emerald-500'">
+                        <div class="relative z-10 flex flex-col items-center cursor-pointer select-none" (click)="backToInfo()">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white transition-all shadow-sm"
+                                 [ngClass]="currentStep() === 'info' ? 'bg-blue-600 ring-4 ring-blue-100 dark:ring-blue-950/70 font-bold' : 'bg-emerald-500'">
                                 @if (currentStep() === 'info') {
-                                    <mat-icon svgIcon="mdi:account-plus" class="icon-size-4.5"></mat-icon>
+                                    <span class="text-xs font-bold">១</span>
                                 } @else {
-                                    <mat-icon svgIcon="mdi:check" class="icon-size-4.5"></mat-icon>
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4"></mat-icon>
                                 }
                             </div>
                             <span class="text-[11.5px] font-semibold mt-1.5 transition-colors"
-                                  [ngClass]="currentStep() === 'info' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'">
+                                  [ngClass]="currentStep() === 'info' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'">
                                 ចុះឈ្មោះ
                             </span>
                         </div>
 
                         <!-- Step 2: Password -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm"
-                                 [ngClass]="currentStep() === 'password' ? 'bg-blue-600 text-white ring-4 ring-blue-100 dark:ring-blue-950/60' : (currentStep() === 'success' ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400')">
+                        <div class="relative z-10 flex flex-col items-center select-none">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm"
+                                 [ngClass]="currentStep() === 'password' ? 'bg-blue-600 text-white ring-4 ring-blue-100 dark:ring-blue-950/70' : (currentStep() === 'success' ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400')">
                                 @if (currentStep() === 'success') {
-                                    <mat-icon svgIcon="mdi:check" class="icon-size-4.5"></mat-icon>
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4"></mat-icon>
                                 } @else {
-                                    <mat-icon svgIcon="mdi:lock" class="icon-size-4.5"></mat-icon>
+                                    <span class="text-xs font-bold">២</span>
                                 }
                             </div>
                             <span class="text-[11.5px] font-medium mt-1.5 transition-colors"
@@ -240,10 +242,10 @@
                         </div>
 
                         <!-- Step 3: Access / Complete -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm"
+                        <div class="relative z-10 flex flex-col items-center select-none">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm"
                                  [ngClass]="currentStep() === 'success' ? 'bg-emerald-500 text-white ring-4 ring-emerald-100 dark:ring-emerald-950/60' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'">
-                                <mat-icon svgIcon="mdi:rocket-launch-outline" class="icon-size-4.5"></mat-icon>
+                                <span class="text-xs font-bold">៣</span>
                             </div>
                             <span class="text-[11.5px] font-medium mt-1.5 transition-colors"
                                   [ngClass]="currentStep() === 'success' ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-400 dark:text-slate-500'">
@@ -253,13 +255,13 @@
                     </div>
                 </div>
 
-                <!-- Pre-filled Email Banner (Subtle and clean) -->
-                <div class="mb-4 px-3.5 py-2.5 bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 rounded-xl flex items-center justify-between text-xs">
+                <!-- Pre-filled Email Display Pill -->
+                <div class="mb-4 px-3.5 py-2 bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 rounded-xl flex items-center justify-between text-xs">
                     <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                        <mat-icon svgIcon="mdi:email-outline" class="icon-size-4 text-slate-400 shrink-0"></mat-icon>
+                        <mat-icon svgIcon="mdi:email-outline" class="icon-size-4 text-blue-500 shrink-0"></mat-icon>
                         <span class="font-medium truncate max-w-[190px] sm:max-w-[240px]">{{ invitation()?.email }}</span>
                     </div>
-                    <span class="px-2 py-0.5 rounded-full text-[10.5px] font-semibold border shrink-0"
+                    <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-semibold border shrink-0"
                           [ngClass]="getRoleBadgeClass(invitation()?.role)">
                         {{ invitation()?.role || 'Member' }}
                     </span>
@@ -276,88 +278,102 @@
 
                             <!-- Khmer Name -->
                             <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                    ឈ្មោះជាភាសាខ្មែរ <span class="text-rose-500">*</span>
+                                </label>
                                 <div class="relative flex items-center">
-                                    <mat-icon svgIcon="mdi:account" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
+                                    <mat-icon svgIcon="mdi:account-outline" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
                                     <input
                                         type="text"
                                         formControlName="name_kh"
-                                        placeholder="ឈ្មោះជាភាសាខ្មែរ *"
-                                        class="w-full pl-11 pr-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                                        placeholder="ឧ. សុខ ចិន្តា"
+                                        class="w-full h-11 pl-11 pr-3.5 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                                 </div>
                                 @if (form.get('name_kh')?.touched && form.get('name_kh')?.hasError('required')) {
-                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1">សូមបញ្ចូលឈ្មោះជាភាសាខ្មែរ</p>
+                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1 font-medium">សូមបញ្ចូលឈ្មោះជាភាសាខ្មែរ</p>
                                 }
                             </div>
 
                             <!-- Latin / English Name -->
                             <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                    ឈ្មោះជាអក្សរឡាតាំង <span class="text-rose-500">*</span>
+                                </label>
                                 <div class="relative flex items-center">
-                                    <mat-icon svgIcon="mdi:account" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
+                                    <mat-icon svgIcon="mdi:account-outline" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
                                     <input
                                         type="text"
                                         formControlName="name_en"
-                                        placeholder="ឈ្មោះជាអក្សរឡាតាំង *"
-                                        class="w-full pl-11 pr-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                                        placeholder="ឧ. Sok Chenda"
+                                        class="w-full h-11 pl-11 pr-3.5 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                                 </div>
                                 @if (form.get('name_en')?.touched && form.get('name_en')?.hasError('required')) {
-                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1">សូមបញ្ចូលឈ្មោះជាអក្សរឡាតាំង</p>
+                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1 font-medium">សូមបញ្ចូលឈ្មោះជាអក្សរឡាតាំង</p>
                                 }
                             </div>
 
-                            <!-- Gender Pill Toggle (Exactly like Reference) -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <!-- Male Pill Button -->
-                                <button
-                                    type="button"
-                                    (click)="setGender('male')"
-                                    class="h-11 px-4 rounded-xl border flex items-center justify-between text-sm transition-all cursor-pointer select-none"
-                                    [ngClass]="gender() === 'male' ? 'border-blue-600 bg-blue-50/70 text-blue-700 dark:bg-blue-950/50 dark:border-blue-500 dark:text-blue-300 font-semibold shadow-xs' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300 bg-white dark:bg-slate-900'">
-                                    <div class="flex items-center gap-2">
-                                        <mat-icon svgIcon="mdi:gender-male" class="icon-size-5 text-blue-500"></mat-icon>
-                                        <span>ប្រុស</span>
-                                    </div>
-                                    @if (gender() === 'male') {
-                                        <mat-icon svgIcon="mdi:check" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
-                                    }
-                                </button>
+                            <!-- Gender Pill Toggle -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                    ភេទ (Gender) <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <!-- Male Pill -->
+                                    <button
+                                        type="button"
+                                        (click)="setGender('male')"
+                                        class="h-11 px-4 rounded-xl border flex items-center justify-between text-sm transition-all cursor-pointer select-none"
+                                        [ngClass]="gender() === 'male' ? 'border-blue-600 bg-blue-50/80 text-blue-700 dark:bg-blue-950/60 dark:border-blue-500 dark:text-blue-300 font-bold shadow-xs' : 'border-slate-200 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 hover:border-slate-300 bg-slate-50/50 dark:bg-slate-900/60'">
+                                        <div class="flex items-center gap-2">
+                                            <mat-icon svgIcon="mdi:gender-male" class="icon-size-5 text-blue-500"></mat-icon>
+                                            <span>ប្រុស</span>
+                                        </div>
+                                        @if (gender() === 'male') {
+                                            <mat-icon svgIcon="mdi:check-circle" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                                        }
+                                    </button>
 
-                                <!-- Female Pill Button -->
-                                <button
-                                    type="button"
-                                    (click)="setGender('female')"
-                                    class="h-11 px-4 rounded-xl border flex items-center justify-between text-sm transition-all cursor-pointer select-none"
-                                    [ngClass]="gender() === 'female' ? 'border-blue-600 bg-blue-50/70 text-blue-700 dark:bg-blue-950/50 dark:border-blue-500 dark:text-blue-300 font-semibold shadow-xs' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300 bg-white dark:bg-slate-900'">
-                                    <div class="flex items-center gap-2">
-                                        <mat-icon svgIcon="mdi:gender-female" class="icon-size-5 text-pink-500"></mat-icon>
-                                        <span>ស្រី</span>
-                                    </div>
-                                    @if (gender() === 'female') {
-                                        <mat-icon svgIcon="mdi:check" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
-                                    }
-                                </button>
+                                    <!-- Female Pill -->
+                                    <button
+                                        type="button"
+                                        (click)="setGender('female')"
+                                        class="h-11 px-4 rounded-xl border flex items-center justify-between text-sm transition-all cursor-pointer select-none"
+                                        [ngClass]="gender() === 'female' ? 'border-blue-600 bg-blue-50/80 text-blue-700 dark:bg-blue-950/60 dark:border-blue-500 dark:text-blue-300 font-bold shadow-xs' : 'border-slate-200 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 hover:border-slate-300 bg-slate-50/50 dark:bg-slate-900/60'">
+                                        <div class="flex items-center gap-2">
+                                            <mat-icon svgIcon="mdi:gender-female" class="icon-size-5 text-pink-500"></mat-icon>
+                                            <span>ស្រី</span>
+                                        </div>
+                                        @if (gender() === 'female') {
+                                            <mat-icon svgIcon="mdi:check-circle" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                                        }
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Phone Number -->
                             <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                    លេខទូរស័ព្ទ <span class="text-rose-500">*</span>
+                                </label>
                                 <div class="relative flex items-center">
-                                    <mat-icon svgIcon="mdi:phone" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
+                                    <mat-icon svgIcon="mdi:phone-outline" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
                                     <input
                                         type="tel"
                                         formControlName="phone"
-                                        placeholder="លេខទូរស័ព្ទ *"
-                                        class="w-full pl-11 pr-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                                        placeholder="ឧ. 012 345 678"
+                                        class="w-full h-11 pl-11 pr-3.5 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                                 </div>
                                 @if (form.get('phone')?.touched && form.get('phone')?.hasError('required')) {
-                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1">សូមបញ្ចូលលេខទូរស័ព្ទ</p>
+                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1 font-medium">សូមបញ្ចូលលេខទូរស័ព្ទ</p>
                                 }
                             </div>
 
-                            <!-- Next Step Button (matches reference 'ចុះឈ្មោះ' deep navy button) -->
+                            <!-- Next Step Primary Button (Modern Vibrant Blue matching Image 1) -->
                             <div class="pt-2">
                                 <button
                                     type="button"
                                     (click)="nextToPassword()"
-                                    class="w-full h-11 bg-[#1e2b58] hover:bg-[#162042] text-white rounded-xl font-medium shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                    class="w-full h-12 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
                                     <span>បន្តទៅកំណត់ពាក្យសម្ងាត់</span>
                                     <mat-icon svgIcon="mdi:arrow-right" class="icon-size-4.5"></mat-icon>
                                 </button>
@@ -373,13 +389,16 @@
 
                             <!-- Password -->
                             <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                    ពាក្យសម្ងាត់ថ្មី <span class="text-rose-500">*</span>
+                                </label>
                                 <div class="relative flex items-center">
-                                    <mat-icon svgIcon="mdi:lock" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
+                                    <mat-icon svgIcon="mdi:lock-outline" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
                                     <input
                                         [type]="showPassword() ? 'text' : 'password'"
                                         formControlName="password"
-                                        placeholder="ពាក្យសម្ងាត់ (យ៉ាងតិច ៦ តួអក្សរ) *"
-                                        class="w-full pl-11 pr-11 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                                        placeholder="យ៉ាងតិច ៦ តួអក្សរ"
+                                        class="w-full h-11 pl-11 pr-11 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                                     <button
                                         type="button"
                                         (click)="togglePassword()"
@@ -388,22 +407,25 @@
                                     </button>
                                 </div>
                                 @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
-                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1">សូមកំណត់ពាក្យសម្ងាត់</p>
+                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1 font-medium">សូមកំណត់ពាក្យសម្ងាត់</p>
                                 }
                                 @if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
-                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1">ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ</p>
+                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1 font-medium">ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ</p>
                                 }
                             </div>
 
                             <!-- Confirm Password -->
                             <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                    បញ្ជាក់ពាក្យសម្ងាត់ <span class="text-rose-500">*</span>
+                                </label>
                                 <div class="relative flex items-center">
-                                    <mat-icon svgIcon="mdi:lock-check" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
+                                    <mat-icon svgIcon="mdi:lock-check-outline" class="absolute left-3.5 text-slate-400 icon-size-5 pointer-events-none"></mat-icon>
                                     <input
                                         [type]="showConfirmPassword() ? 'text' : 'password'"
                                         formControlName="confirm_password"
-                                        placeholder="បញ្ជាក់ពាក្យសម្ងាត់ *"
-                                        class="w-full pl-11 pr-11 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" />
+                                        placeholder="បញ្ចូលពាក្យសម្ងាត់ម្តងទៀត"
+                                        class="w-full h-11 pl-11 pr-11 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                                     <button
                                         type="button"
                                         (click)="toggleConfirmPassword()"
@@ -412,16 +434,16 @@
                                     </button>
                                 </div>
                                 @if (form.touched && form.hasError('passwordMismatch')) {
-                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1">ពាក្យសម្ងាត់ផ្ទៀងផ្ទាត់មិនដូចគ្នាឡើយ</p>
+                                    <p class="text-[11.5px] text-rose-500 mt-1 pl-1 font-medium">ពាក្យសម្ងាត់ផ្ទៀងផ្ទាត់មិនដូចគ្នាឡើយ</p>
                                 }
                             </div>
 
-                            <!-- Buttons: Back and Submit -->
+                            <!-- Action Buttons: Back & Submit -->
                             <div class="pt-2 flex items-center gap-3">
                                 <button
                                     type="button"
                                     (click)="backToInfo()"
-                                    class="h-11 px-5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-medium transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                    class="h-12 px-5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer">
                                     <mat-icon svgIcon="mdi:arrow-left" class="icon-size-4.5"></mat-icon>
                                     <span>ថយក្រោយ</span>
                                 </button>
@@ -429,7 +451,7 @@
                                 <button
                                     type="submit"
                                     [disabled]="submitting() || form.invalid"
-                                    class="flex-1 h-11 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-medium shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                    class="flex-1 h-12 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white rounded-xl font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
                                     @if (submitting()) {
                                         <mat-progress-spinner [diameter]="20" [mode]="'indeterminate'"></mat-progress-spinner>
                                         <span>កំពុងដំណើរការ...</span>
@@ -446,28 +468,28 @@
                     <!-- STEP 3: SUCCESS STATE                                     -->
                     <!-- ========================================================= -->
                     @else if (currentStep() === 'success') {
-                        <div class="py-8 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in-95 duration-300">
-                            <div class="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-md">
+                        <div class="py-10 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                            <div class="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm border border-emerald-100 dark:border-emerald-900/60">
                                 <mat-icon svgIcon="mdi:check-bold" class="icon-size-8"></mat-icon>
                             </div>
                             <div>
                                 <h3 class="text-xl font-bold text-slate-900 dark:text-white">សូមស្វាគមន៍មកកាន់ប្រព័ន្ធ!</h3>
-                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-xs leading-relaxed">
                                     គណនីរបស់អ្នកត្រូវបានបង្កើតដោយជោគជ័យ។ កំពុងរៀបចំប្រព័ន្ធ និងបញ្ជូនលោកអ្នកទៅកាន់ផ្ទាំងគ្រប់គ្រង...
                                 </p>
                             </div>
-                            <div class="pt-2">
-                                <mat-progress-spinner [diameter]="28" [mode]="'indeterminate'"></mat-progress-spinner>
+                            <div class="pt-3">
+                                <mat-progress-spinner [diameter]="30" [mode]="'indeterminate'"></mat-progress-spinner>
                             </div>
                         </div>
                     }
 
-                    <!-- 3. BOTTOM INFO CALLOUT (Exact match with reference image) -->
-                    <div class="mt-5 px-4 py-3 bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 rounded-xl flex items-start gap-2.5 text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-300">
-                        <mat-icon svgIcon="mdi:information" class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5"></mat-icon>
+                    <!-- 3. BOTTOM INFO CALLOUT -->
+                    <div class="mt-5 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800 rounded-xl flex items-start gap-2.5 text-[12px] leading-relaxed text-slate-600 dark:text-slate-400">
+                        <mat-icon svgIcon="mdi:information-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5"></mat-icon>
                         <div>
-                            <span>បន្ទាប់ពីអ្នកបង្កើតគណនីរបស់អ្នករួច យើងនឹងបញ្ជូនអ្នកទៅកាន់កន្លែងធ្វើការ </span>
-                            <span class="font-semibold text-slate-800 dark:text-white">
+                            <span>បន្ទាប់ពីអ្នកបង្កើតគណនីរួច ប្រព័ន្ធនឹងបញ្ជូនទៅកាន់កន្លែងធ្វើការ </span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200">
                                 {{ invitation()?.company_name || 'ក្រុមហ៊ុន ឌីជីថេក ខេអេច ឯ.ក' }}
                             </span>
                         </div>
