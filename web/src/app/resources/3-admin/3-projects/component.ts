@@ -2416,7 +2416,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         }
 
         this._userTaskService
-            .getTasks()
+            .getTasks({ scope: 'all' })
             .pipe(
                 catchError(() => of(null)),
                 finalize(() => this.isTasksLoading.set(false))
