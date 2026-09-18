@@ -22,7 +22,7 @@ import { AdminUserController } from './2-user/user.controller';
 import { AdminProjectController } from './3-project/project.controller';
 import { AdminAttendanceController, AdminLeavesController } from './4-attendance/attendance.controller';
 import { AdminSettingController } from './5-setting/setting.controller';
-import { AdminClientController } from './6-client/client.controller';
+import { AdminClientController } from './7-client/client.controller';
 
 // Services
 import { DashboardService } from './1-dashboard/dashboard.service';
@@ -30,7 +30,7 @@ import { AdminUserService } from './2-user/user.service';
 import { AdminProjectService } from './3-project/project.service';
 import { AdminAttendanceService } from './4-attendance/attendance.service';
 import { AdminSettingService } from './5-setting/setting.service';
-import { AdminClientService } from './6-client/client.service';
+import { AdminClientService } from './7-client/client.service';
 import { FileService } from 'src/app/shared/file/file.service';
 
 @Module({
