@@ -1932,69 +1932,72 @@ export class TaskService {
 
         const pid = projectId.toLowerCase().trim();
         const cleanPid = pid.replace('#', '');
-        const paddedCleanPid = cleanPid.padStart(4, '0');
-        const numPid = Number(cleanPid);
+        const paddedCleanPid = /^\d+$/.test(cleanPid)
+            ? cleanPid.padStart(4, '0')
+            : cleanPid;
         const tPid = (task.project_id || '').toLowerCase().trim();
         const tPname = (task.project_name || '').toLowerCase().trim();
         const tCode = (task.code || '').toLowerCase().trim().replace('#', '');
-        // Specific aliases for BMS Digitech (0002)
+        const tCodePrefix = tCode.split('-')[0].trim();
+
+        // 1. Direct project ID / code equality (matches '0006', '0007', etc.)
+        if (
+            tPid === pid ||
+            tPid === cleanPid ||
+            tPid === paddedCleanPid
+        ) {
+            return true;
+        }
+
+        // 2. Exact code prefix equality (#0006-1 -> prefix '0006')
+        if (
+            tCodePrefix === cleanPid ||
+            tCodePrefix === paddedCleanPid
+        ) {
+            return true;
+        }
+
+        // 3. Exact project name equality (never substring .includes which causes bleeding)
+        if (tPname && (tPname === pid || tPname === cleanPid)) {
+            return true;
+        }
+
+        // 4. Legacy backward-compatibility aliases (ONLY for pre-redesign BMS & WMS data)
         const isBmsFilter =
             cleanPid === '0002' ||
             cleanPid === 'bms' ||
             cleanPid === 'bms-digitech' ||
             cleanPid === '4';
-        const isTaskBms =
-            tPid === '0002' ||
-            tPid === 'bms' ||
-            tPid === 'bms-digitech' ||
-            tPid === '4' ||
-            tCode.startsWith('0002-') ||
-            tCode.startsWith('bms-') ||
-            tPname.includes('bms');
         if (isBmsFilter) {
-            return isTaskBms;
+            return (
+                tPid === '0002' ||
+                tPid === 'bms' ||
+                tPid === 'bms-digitech' ||
+                tPid === '4' ||
+                tCodePrefix === '0002' ||
+                tCodePrefix === 'bms' ||
+                tPname === 'bms digitech'
+            );
         }
 
-        // Specific aliases for WMS Digitech (0001)
         const isWmsFilter =
             cleanPid === '0001' ||
             cleanPid === 'wms' ||
             cleanPid === 'wms-digitech' ||
             cleanPid === '5';
-        const isTaskWms =
-            tPid === '0001' ||
-            tPid === 'wms' ||
-            tPid === 'wms-digitech' ||
-            tPid === '5' ||
-            tCode.startsWith('0001-') ||
-            tCode.startsWith('wms-') ||
-            tPname.includes('wms');
         if (isWmsFilter) {
-            return isTaskWms;
+            return (
+                tPid === '0001' ||
+                tPid === 'wms' ||
+                tPid === 'wms-digitech' ||
+                tPid === '5' ||
+                tCodePrefix === '0001' ||
+                tCodePrefix === 'wms' ||
+                tPname === 'wms digitech'
+            );
         }
 
-        const numTPid = Number(tPid);
-        const isNumericMatch =
-            !isNaN(numPid) &&
-            !isNaN(numTPid) &&
-            numPid > 0 &&
-            numPid === numTPid;
-
-        return Boolean(
-            (tPid &&
-                (tPid === pid ||
-                    tPid === cleanPid ||
-                    tPid === paddedCleanPid ||
-                    isNumericMatch)) ||
-            (tPname &&
-                (tPname === pid ||
-                    tPname.includes(pid) ||
-                    pid.includes(tPname))) ||
-            (tCode &&
-                (tCode === cleanPid ||
-                    tCode.startsWith(cleanPid + '-') ||
-                    tCode.startsWith(paddedCleanPid + '-'))),
-        );
+        return false;
     }
 
     private matchesMember(task: TaskItem, memberId?: string): boolean {
@@ -2513,26 +2516,22 @@ export class TaskService {
                 ? dto.attachments
                 : [];
 
-        const targetPid =
-            dto.project_id ||
-            (prefix === 'WMS'
-                ? 'wms-digitech'
-                : prefix === 'BMS'
-                  ? 'bms-digitech'
-                  : prefix.toLowerCase());
+        const rawTargetPid = (dto.project_id || prefix).toLowerCase().trim();
         const foundPlan = this.getPlanProjects().find(
             (p) =>
-                String(p.id).toLowerCase() === targetPid.toLowerCase() ||
-                String(p.code || '').toLowerCase() === targetPid.toLowerCase(),
+                String(p.id).toLowerCase().trim() === rawTargetPid ||
+                String(p.code || '').toLowerCase().trim().replace('#', '') ===
+                    rawTargetPid.replace('#', ''),
         );
+        const targetPid =
+            foundPlan?.id ||
+            foundPlan?.code ||
+            dto.project_id ||
+            prefix;
         const resolvedProjectName =
-            dto.project_name ||
             foundPlan?.name ||
-            (prefix === 'WMS'
-                ? 'WMS Digitech'
-                : prefix === 'BMS'
-                  ? 'BMS Digitech'
-                  : foundPlan?.code || prefix);
+            dto.project_name ||
+            (foundPlan?.code ? foundPlan.code : prefix);
 
         const newTask: TaskItem = {
             id: Date.now(),
