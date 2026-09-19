@@ -329,7 +329,7 @@ export class CreateTaskDialogComponent implements OnInit {
         const found = this.projectList.find((p) => p.id === projId);
         let prefix = found?.code || this.data?.projectCode;
         if (!prefix) {
-            prefix = projId.toUpperCase().includes('WMS') ? 'WMS' : (projId.toUpperCase().includes('BMS') ? 'BMS' : 'PRJ');
+            prefix = projId.toUpperCase().includes('WMS') ? '0001' : (projId.toUpperCase().includes('BMS') ? '0002' : '0001');
         }
         prefix = prefix.replace(/^#/, '');
 
@@ -351,7 +351,7 @@ export class CreateTaskDialogComponent implements OnInit {
         }
 
         const nextNum = maxNum >= 0 ? maxNum + 1 : 1;
-        return `${prefix}-${String(nextNum).padStart(4, '0')}`;
+        return `${prefix}-${nextNum}`;
     }
 
     incrementTaskCode(): void {
@@ -361,7 +361,7 @@ export class CreateTaskDialogComponent implements OnInit {
             const numPart = this.taskCode.substring(lastDash + 1);
             const num = parseInt(numPart, 10);
             if (!isNaN(num)) {
-                this.taskCode = `${prefix}-${String(num + 1).padStart(numPart.length || 4, '0')}`;
+                this.taskCode = `${prefix}-${num + 1}`;
                 return;
             }
         }

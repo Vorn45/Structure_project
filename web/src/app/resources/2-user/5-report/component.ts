@@ -74,8 +74,8 @@ export class UserReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Project Options
     projects: ReportProjectItem[] = [
-        { id: '4', code: 'BMS-DIGI', name: 'BMS Digitech' },
-        { id: '5', code: 'WMS-DIGI', name: 'WMS Digitech' },
+        { id: '4', code: '0002', name: 'BMS Digitech' },
+        { id: '5', code: '0001', name: 'WMS Digitech' },
     ];
     selectedProjectId = signal<string>('4');
 

@@ -367,24 +367,18 @@
                             [ngClass]="getPriorityColor(task.priority)"
                             [matTooltip]="getPriorityLabel(task.priority)"></mat-icon>
 
-                        <!-- Code -->
-                        <span class="font-mono font-medium text-[13.5px] text-slate-500 dark:text-slate-400 w-24 text-center shrink-0">
-                            {{ task.code || ('#' + task.id) }}
+                        <!-- Unified Ticket Badge (Type Icon + Code) -->
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 shrink-0 font-mono text-[12px] font-semibold"
+                              [matTooltip]="getTaskTypeInfo(task.task_type).label">
+                            <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-3.5 !h-3.5 shrink-0"
+                                [ngClass]="getTaskTypeInfo(task.task_type).iconColor"></mat-icon>
+                            <span>{{ task.code || ('#' + task.id) }}</span>
                         </span>
 
-                        <span class="text-slate-300 dark:text-slate-600 shrink-0">•</span>
-
-                        <!-- Title & Task Type Badge -->
-                        <div class="flex items-center gap-2 flex-1 min-w-0">
-                            <span class="w-4 h-4 rounded flex items-center justify-center shrink-0"
-                                [matTooltip]="getTaskTypeInfo(task.task_type).label">
-                                <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon" class="!w-3.5 !h-3.5"
-                                    [ngClass]="getTaskTypeInfo(task.task_type).iconColor"></mat-icon>
-                            </span>
-                            <p class="min-w-0 text-[14.5px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
-                                {{ task.title }}
-                            </p>
-                        </div>
+                        <!-- Task Title -->
+                        <p class="min-w-0 text-[14.5px] font-normal text-slate-900 dark:text-slate-100 truncate flex-1 leading-6 font-kantumruy">
+                            {{ task.title }}
+                        </p>
 
                         <!-- Reporter Avatar with small R note badge -->
                         <div class="relative shrink-0 cursor-pointer ml-2"
@@ -548,14 +542,12 @@
 
                             <!-- Card Top: Type Icon + Code | Priority + Chat -->
                             <div class="flex items-center justify-between gap-2">
-                                <div class="flex items-center gap-1.5 min-w-0">
-                                    <!-- Task Type Icon -->
+                                <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 min-w-0 font-mono text-[11.5px] font-semibold"
+                                     [matTooltip]="getTaskTypeInfo(task.task_type).label">
                                     <mat-icon [svgIcon]="getTaskTypeInfo(task.task_type).icon"
                                         class="!w-3.5 !h-3.5 shrink-0"
-                                        [ngClass]="getTaskTypeInfo(task.task_type).iconColor"
-                                        [matTooltip]="getTaskTypeInfo(task.task_type).label"></mat-icon>
-                                    <!-- Task Code -->
-                                    <span class="font-mono text-[11.5px] font-medium text-slate-400 dark:text-slate-500 truncate">
+                                        [ngClass]="getTaskTypeInfo(task.task_type).iconColor"></mat-icon>
+                                    <span class="truncate">
                                         {{ task.code || ('#' + task.id) }}
                                     </span>
                                 </div>

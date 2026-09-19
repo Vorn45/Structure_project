@@ -1,5 +1,9 @@
 // ===========================================================================>> Core Library
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
@@ -11,7 +15,6 @@ import { UserPayload } from 'src/app/interface/jwt.interface';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { QueryPlanDto } from './plan.dto';
-
 
 export interface ProjectPlanItem {
     id: string;
@@ -26,9 +29,21 @@ export interface ProjectPlanItem {
     completed_tasks: number;
     logo?: string | null;
     image?: string | null;
-    lead?: { id?: number; name?: string; role?: string; avatar?: string | null };
-    team_lead?: { id?: number; name?: string; role?: string; avatar?: string | null };
-    reporter?: string | { id?: number; name?: string; role?: string; avatar?: string | null };
+    lead?: {
+        id?: number;
+        name?: string;
+        role?: string;
+        avatar?: string | null;
+    };
+    team_lead?: {
+        id?: number;
+        name?: string;
+        role?: string;
+        avatar?: string | null;
+    };
+    reporter?:
+        | string
+        | { id?: number; name?: string; role?: string; avatar?: string | null };
     members: Array<{
         id: number;
         name: string;
@@ -43,16 +58,19 @@ export interface ProjectPlanItem {
     agileTasks?: any[];
 }
 
-export const BMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="bmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230284c7"/><stop offset="100%" stop-color="%230369a1"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><circle cx="60" cy="60" r="34" fill="url(%23bmsGrad)"/><line x1="39" y1="76" x2="81" y2="76" stroke="%2393c5fd" stroke-width="2.5" stroke-linecap="round"/><rect x="42" y="62" width="7" height="14" rx="2" fill="%23bae6fd"/><rect x="52" y="51" width="7" height="25" rx="2" fill="%23ffffff"/><rect x="62" y="57" width="7" height="19" rx="2" fill="%23bae6fd"/><rect x="72" y="44" width="7" height="32" rx="2" fill="%2338bdf8"/><path d="M 41 65 L 53 49 L 64 55 L 78 39" fill="none" stroke="%2338bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="78" cy="39" r="4" fill="%23ffffff" stroke="%230284c7" stroke-width="2"/><circle cx="53" cy="49" r="2.5" fill="%23ffffff"/><circle cx="64" cy="55" r="2.5" fill="%23ffffff"/></svg>';
+export const BMS_PROJECT_LOGO =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="bmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230284c7"/><stop offset="100%" stop-color="%230369a1"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><circle cx="60" cy="60" r="34" fill="url(%23bmsGrad)"/><line x1="39" y1="76" x2="81" y2="76" stroke="%2393c5fd" stroke-width="2.5" stroke-linecap="round"/><rect x="42" y="62" width="7" height="14" rx="2" fill="%23bae6fd"/><rect x="52" y="51" width="7" height="25" rx="2" fill="%23ffffff"/><rect x="62" y="57" width="7" height="19" rx="2" fill="%23bae6fd"/><rect x="72" y="44" width="7" height="32" rx="2" fill="%2338bdf8"/><path d="M 41 65 L 53 49 L 64 55 L 78 39" fill="none" stroke="%2338bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="78" cy="39" r="4" fill="%23ffffff" stroke="%230284c7" stroke-width="2"/><circle cx="53" cy="49" r="2.5" fill="%23ffffff"/><circle cx="64" cy="55" r="2.5" fill="%23ffffff"/></svg>';
 
-export const WMS_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><g transform="translate(60, 60)"><path d="M 0 -25 L 23 -12 L 0 1 L -23 -12 Z" fill="%23fb923c" stroke="%23ea580c" stroke-width="1.5" stroke-linejoin="round"/><path d="M -23 -12 L 0 1 L 0 26 L -23 13 Z" fill="%230284c7" stroke="%230369a1" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 23 -12 L 23 13 L 0 26 Z" fill="%23ea580c" stroke="%23c2410c" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 0 26 M 0 1 L -23 -12 M 0 1 L 23 -12" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M -11.5 -5.5 L 0 -12 L 11.5 -5.5 L 0 1 Z" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/><path d="M -11.5 7 L -11.5 -5.5 M 11.5 7 L 11.5 -5.5" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/></g></svg>';
+export const WMS_PROJECT_LOGO =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><g transform="translate(60, 60)"><path d="M 0 -25 L 23 -12 L 0 1 L -23 -12 Z" fill="%23fb923c" stroke="%23ea580c" stroke-width="1.5" stroke-linejoin="round"/><path d="M -23 -12 L 0 1 L 0 26 L -23 13 Z" fill="%230284c7" stroke="%230369a1" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 23 -12 L 23 13 L 0 26 Z" fill="%23ea580c" stroke="%23c2410c" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 0 26 M 0 1 L -23 -12 M 0 1 L 23 -12" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M -11.5 -5.5 L 0 -12 L 11.5 -5.5 L 0 1 Z" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/><path d="M -11.5 7 L -11.5 -5.5 M 11.5 7 L 11.5 -5.5" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/></g></svg>';
 
 const PROJECTS: ProjectPlanItem[] = [
     {
         id: '4',
-        code: 'BMS-DIGI',
+        code: '0002',
         name: 'BMS Digitech',
-        description: 'Business Management System - Digitech Project Management & Workflow.',
+        description:
+            'Business Management System - Digitech Project Management & Workflow.',
         status: 'active',
         progress: 20,
         start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
@@ -62,15 +80,39 @@ const PROJECTS: ProjectPlanItem[] = [
         logo: BMS_PROJECT_LOGO,
         image: BMS_PROJECT_LOGO,
         members: [
-            { id: 101, name: 'PISETH PANHAVORN', role: 'Lead Developer', phone: '010843612', avatar: null },
-            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
-            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null },
+            {
+                id: 101,
+                name: 'PISETH PANHAVORN',
+                role: 'Lead Developer',
+                phone: '010843612',
+                avatar: null,
+            },
+            {
+                id: 102,
+                name: 'PUM BRUSMUNY',
+                role: 'Developer',
+                phone: '087280875',
+                avatar: null,
+            },
+            {
+                id: 103,
+                name: 'THA WINNER',
+                role: 'Developer',
+                phone: '067776682',
+                avatar: null,
+            },
+            {
+                id: 104,
+                name: 'PHUONG SOVANNARA',
+                role: 'Developer',
+                phone: '011242425',
+                avatar: null,
+            },
         ],
     },
     {
         id: '5',
-        code: 'WMS-DIGI',
+        code: '0001',
         name: 'WMS Digitech',
         description: 'Workforce & Attendance Management System - Digitech.',
         status: 'active',
@@ -82,10 +124,34 @@ const PROJECTS: ProjectPlanItem[] = [
         logo: WMS_PROJECT_LOGO,
         image: WMS_PROJECT_LOGO,
         members: [
-            { id: 101, name: 'PISETH PANHAVORN', role: 'Project Manager', phone: '010843612', avatar: null },
-            { id: 102, name: 'PUM BRUSMUNY', role: 'Developer', phone: '087280875', avatar: null },
-            { id: 103, name: 'THA WINNER', role: 'Developer', phone: '067776682', avatar: null },
-            { id: 104, name: 'PHUONG SOVANNARA', role: 'Developer', phone: '011242425', avatar: null },
+            {
+                id: 101,
+                name: 'PISETH PANHAVORN',
+                role: 'Project Manager',
+                phone: '010843612',
+                avatar: null,
+            },
+            {
+                id: 102,
+                name: 'PUM BRUSMUNY',
+                role: 'Developer',
+                phone: '087280875',
+                avatar: null,
+            },
+            {
+                id: 103,
+                name: 'THA WINNER',
+                role: 'Developer',
+                phone: '067776682',
+                avatar: null,
+            },
+            {
+                id: 104,
+                name: 'PHUONG SOVANNARA',
+                role: 'Developer',
+                phone: '011242425',
+                avatar: null,
+            },
         ],
     },
 ];
@@ -93,7 +159,11 @@ const PROJECTS: ProjectPlanItem[] = [
 @Injectable()
 export class PlanService {
     private projects: ProjectPlanItem[] = [...PROJECTS];
-    private readonly storeFilePath = path.join(process.cwd(), 'storage', 'plans_data_store.json');
+    private readonly storeFilePath = path.join(
+        process.cwd(),
+        'storage',
+        'plans_data_store.json',
+    );
     private isDbLoaded = false;
 
     constructor(
@@ -109,7 +179,13 @@ export class PlanService {
         const copy: any = { ...task };
 
         // Ensure attachments_count is preserved before removing attachments array
-        copy.attachments_count = copy.attachments_count ?? (Array.isArray(copy.attachments) ? copy.attachments.length : (Array.isArray(copy.documents) ? copy.documents.length : 0));
+        copy.attachments_count =
+            copy.attachments_count ??
+            (Array.isArray(copy.attachments)
+                ? copy.attachments.length
+                : Array.isArray(copy.documents)
+                  ? copy.documents.length
+                  : 0);
         delete copy.attachments;
 
         // Ensure comments_count is preserved before removing comments array
@@ -119,8 +195,14 @@ export class PlanService {
         }
 
         // Strip heavy inline base64 images from description
-        if (typeof copy.description === 'string' && copy.description.includes('data:image/')) {
-            copy.description = copy.description.replace(/src="data:image\/[^;]+;base64,[^"]+"/g, 'src=""');
+        if (
+            typeof copy.description === 'string' &&
+            copy.description.includes('data:image/')
+        ) {
+            copy.description = copy.description.replace(
+                /src="data:image\/[^;]+;base64,[^"]+"/g,
+                'src=""',
+            );
         }
 
         // Strip base64 data URLs from documents
@@ -128,7 +210,10 @@ export class PlanService {
             copy.documents = copy.documents.map((d: any) => {
                 if (!d) return d;
                 const docCopy = { ...d };
-                if (typeof docCopy.url === 'string' && docCopy.url.startsWith('data:')) {
+                if (
+                    typeof docCopy.url === 'string' &&
+                    docCopy.url.startsWith('data:')
+                ) {
                     docCopy.url = '';
                 }
                 if (docCopy.data) {
@@ -141,7 +226,10 @@ export class PlanService {
         return copy;
     }
 
-    private sanitizeProject(project: ProjectPlanItem, includeTasks = true): any {
+    private sanitizeProject(
+        project: ProjectPlanItem,
+        includeTasks = true,
+    ): any {
         if (!project) return project;
         const copy: any = { ...project };
 
@@ -155,11 +243,15 @@ export class PlanService {
 
         // Sanitize project attachments
         if (Array.isArray(copy.attachments)) {
-            copy.attachments_count = copy.attachments_count ?? copy.attachments.length;
+            copy.attachments_count =
+                copy.attachments_count ?? copy.attachments.length;
             copy.attachments = copy.attachments.map((att: any) => {
                 if (!att) return att;
                 const attCopy = { ...att };
-                if (typeof attCopy.url === 'string' && attCopy.url.startsWith('data:')) {
+                if (
+                    typeof attCopy.url === 'string' &&
+                    attCopy.url.startsWith('data:')
+                ) {
                     attCopy.url = '';
                 }
                 if (attCopy.data) {
@@ -177,15 +269,36 @@ export class PlanService {
             if (fs.existsSync(this.storeFilePath)) {
                 const raw = fs.readFileSync(this.storeFilePath, 'utf8');
                 const data = JSON.parse(raw);
-                if (data && Array.isArray(data.plans) && data.plans.length > 0) {
+                if (
+                    data &&
+                    Array.isArray(data.plans) &&
+                    data.plans.length > 0
+                ) {
                     this.projects = data.plans
-                        .filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id))
+                        .filter(
+                            (p: any) =>
+                                ![
+                                    'PMS-V2',
+                                    'WMS-HR',
+                                    'E-GOV',
+                                    '1',
+                                    '2',
+                                    '3',
+                                ].includes(p.code) &&
+                                !['1', '2', '3'].includes(p.id),
+                        )
                         .map((p: any) => this.sanitizeProject(p));
                     if (this.projects.length === 0) {
                         this.projects = [...PROJECTS];
                     } else {
                         for (const defP of PROJECTS) {
-                            if (!this.projects.some((p: any) => p.code === defP.code || p.id === defP.id)) {
+                            if (
+                                !this.projects.some(
+                                    (p: any) =>
+                                        p.code === defP.code ||
+                                        p.id === defP.id,
+                                )
+                            ) {
                                 this.projects.push(defP);
                             }
                         }
@@ -207,7 +320,11 @@ export class PlanService {
                 plans: this.projects.map((p) => this.sanitizeProject(p)),
                 updated_at: new Date().toISOString(),
             };
-            fs.writeFileSync(this.storeFilePath, JSON.stringify(data, null, 2), 'utf8');
+            fs.writeFileSync(
+                this.storeFilePath,
+                JSON.stringify(data, null, 2),
+                'utf8',
+            );
         } catch (e) {
             console.warn('Failed to save plans to disk:', e);
         }
@@ -235,16 +352,38 @@ export class PlanService {
     private async initDbStore(): Promise<void> {
         await this.ensureTableExists();
         try {
-            const dbStore = await this._planStoreRepo.findOne({ where: { key: 'default_plans_store' } });
-            if (dbStore && Array.isArray(dbStore.plans) && dbStore.plans.length > 0) {
+            const dbStore = await this._planStoreRepo.findOne({
+                where: { key: 'default_plans_store' },
+            });
+            if (
+                dbStore &&
+                Array.isArray(dbStore.plans) &&
+                dbStore.plans.length > 0
+            ) {
                 this.projects = dbStore.plans
-                    .filter((p: any) => !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(p.code) && !['1', '2', '3'].includes(p.id))
+                    .filter(
+                        (p: any) =>
+                            ![
+                                'PMS-V2',
+                                'WMS-HR',
+                                'E-GOV',
+                                '1',
+                                '2',
+                                '3',
+                            ].includes(p.code) &&
+                            !['1', '2', '3'].includes(p.id),
+                    )
                     .map((p: any) => this.sanitizeProject(p));
                 if (this.projects.length === 0) {
                     this.projects = [...PROJECTS];
                 } else {
                     for (const defP of PROJECTS) {
-                        if (!this.projects.some((p: any) => p.code === defP.code || p.id === defP.id)) {
+                        if (
+                            !this.projects.some(
+                                (p: any) =>
+                                    p.code === defP.code || p.id === defP.id,
+                            )
+                        ) {
                             this.projects.push(defP);
                         }
                     }
@@ -255,7 +394,10 @@ export class PlanService {
             }
             this.isDbLoaded = true;
         } catch (err) {
-            console.warn('Could not load plan store from DB, using memory/disk store:', err);
+            console.warn(
+                'Could not load plan store from DB, using memory/disk store:',
+                err,
+            );
         }
     }
 
@@ -272,8 +414,12 @@ export class PlanService {
 
     private async saveToDb(): Promise<void> {
         try {
-            let dbStore = await this._planStoreRepo.findOne({ where: { key: 'default_plans_store' } });
-            const sanitizedPlans = this.projects.map((p) => this.sanitizeProject(p));
+            let dbStore = await this._planStoreRepo.findOne({
+                where: { key: 'default_plans_store' },
+            });
+            const sanitizedPlans = this.projects.map((p) =>
+                this.sanitizeProject(p),
+            );
             if (!dbStore) {
                 dbStore = this._planStoreRepo.create({
                     key: 'default_plans_store',
@@ -295,7 +441,11 @@ export class PlanService {
 
     private syncTaskCounts(plans: ProjectPlanItem[]): void {
         try {
-            const taskStorePath = path.join(process.cwd(), 'storage', 'tasks_data_store.json');
+            const taskStorePath = path.join(
+                process.cwd(),
+                'storage',
+                'tasks_data_store.json',
+            );
             if (fs.existsSync(taskStorePath)) {
                 const raw = fs.readFileSync(taskStorePath, 'utf8');
                 const parsed = JSON.parse(raw);
@@ -303,27 +453,47 @@ export class PlanService {
                     const tasks: any[] = parsed.tasks;
                     for (const p of plans) {
                         const pid = (p.id || '').toLowerCase();
-                        const pcode = (p.code || '').toLowerCase().replace('#', '');
+                        const pcode = (p.code || '')
+                            .toLowerCase()
+                            .replace('#', '');
                         const pname = (p.name || '').toLowerCase();
 
                         const projectTasks = tasks.filter((t: any) => {
                             const tPid = (t.project_id || '').toLowerCase();
                             const tPname = (t.project_name || '').toLowerCase();
-                            const tCode = (t.code || '').toLowerCase().replace('#', '');
+                            const tCode = (t.code || '')
+                                .toLowerCase()
+                                .replace('#', '');
 
                             return (
-                                (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
-                                (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
-                                (pname && (tPname.includes(pname) || pname.includes(tPname)))
+                                (tPid &&
+                                    (tPid === pid ||
+                                        tPid.includes(pid) ||
+                                        pid.includes(tPid))) ||
+                                (pcode &&
+                                    (tCode.includes(pcode) ||
+                                        tPid.includes(pcode))) ||
+                                (pname &&
+                                    (tPname.includes(pname) ||
+                                        pname.includes(tPname)))
                             );
                         });
 
                         p.total_tasks = projectTasks.length;
                         p.completed_tasks = projectTasks.filter((t: any) =>
-                            ['done', 'completed'].includes((t.status || '').toLowerCase())
+                            ['done', 'completed'].includes(
+                                (t.status || '').toLowerCase(),
+                            ),
                         ).length;
-                        p.progress = p.total_tasks > 0 ? Math.round((p.completed_tasks / p.total_tasks) * 100) : 0;
-                        p.tasks = projectTasks.map((t: any) => this.sanitizeTask(t));
+                        p.progress =
+                            p.total_tasks > 0
+                                ? Math.round(
+                                      (p.completed_tasks / p.total_tasks) * 100,
+                                  )
+                                : 0;
+                        p.tasks = projectTasks.map((t: any) =>
+                            this.sanitizeTask(t),
+                        );
                     }
                 }
             }
@@ -337,23 +507,43 @@ export class PlanService {
         this.syncTaskCounts(this.projects);
 
         // Sanitize any accidental duplicates: Project 4 is BMS Digitech
-        this.projects = this.projects.filter((p) => !(p.code && /^BMS-DIGI-\d+$/i.test(p.code)));
+        this.projects = this.projects.filter(
+            (p) => !(p.code && /^BMS-DIGI-\d+$/i.test(p.code)),
+        );
         for (const p of this.projects) {
-            if ((p.id === '4' || p.description?.toLowerCase().includes('business management')) && p.name === 'WMS Digitech') {
+            if (
+                (p.id === '4' ||
+                    p.description
+                        ?.toLowerCase()
+                        .includes('business management')) &&
+                p.name === 'WMS Digitech'
+            ) {
                 p.name = 'BMS Digitech';
                 p.code = 'BMS-DIGI';
             }
-            if (p.code === 'BMS-DIGI' || p.name?.includes('BMS') || (p.code && p.code.includes('BMS'))) {
+            if (
+                p.code === 'BMS-DIGI' ||
+                p.name?.includes('BMS') ||
+                (p.code && p.code.includes('BMS'))
+            ) {
                 p.logo = BMS_PROJECT_LOGO;
                 p.image = BMS_PROJECT_LOGO;
             }
-            if (p.code === 'WMS-DIGI' || p.name?.includes('WMS') || (p.code && p.code.includes('WMS'))) {
+            if (
+                p.code === 'WMS-DIGI' ||
+                p.name?.includes('WMS') ||
+                (p.code && p.code.includes('WMS'))
+            ) {
                 p.logo = WMS_PROJECT_LOGO;
                 p.image = WMS_PROJECT_LOGO;
             }
             if (p.members && Array.isArray(p.members)) {
                 for (const m of p.members) {
-                    if (typeof m.avatar === 'string' && (m.avatar.includes('portrait') || m.avatar.includes('placeholder'))) {
+                    if (
+                        typeof m.avatar === 'string' &&
+                        (m.avatar.includes('portrait') ||
+                            m.avatar.includes('placeholder'))
+                    ) {
                         m.avatar = null;
                     }
                 }
@@ -387,7 +577,9 @@ export class PlanService {
 
         const limit = query.limit ? parseInt(query.limit, 10) : 50;
         const offset = query.offset ? parseInt(query.offset, 10) : 0;
-        const paginated = list.slice(offset, offset + limit).map((p) => this.sanitizeProject(p));
+        const paginated = list
+            .slice(offset, offset + limit)
+            .map((p) => this.sanitizeProject(p));
 
         return {
             status_code: 200,
@@ -403,20 +595,31 @@ export class PlanService {
 
     async getPlanById(user: UserPayload, id: string) {
         await this.ensureLoaded();
-        const normId = String(id || '').toLowerCase().replace(/^#/, '').trim();
+        const normId = String(id || '')
+            .toLowerCase()
+            .replace(/^#/, '')
+            .trim();
         const plan = this.projects.find(
             (p) =>
                 String(p.id || '').toLowerCase() === normId ||
-                String(p.code || '').toLowerCase().replace(/^#/, '') === normId ||
+                String(p.code || '')
+                    .toLowerCase()
+                    .replace(/^#/, '') === normId ||
                 String(p.name || '').toLowerCase() === normId ||
-                (normId.includes('wms') && (p.name.toLowerCase().includes('wms') || (p.code && p.code.toLowerCase().includes('wms')))) ||
-                (normId.includes('bms') && (p.name.toLowerCase().includes('bms') || (p.code && p.code.toLowerCase().includes('bms'))))
+                (normId.includes('wms') &&
+                    (p.name.toLowerCase().includes('wms') ||
+                        (p.code && p.code.toLowerCase().includes('wms')))) ||
+                (normId.includes('bms') &&
+                    (p.name.toLowerCase().includes('bms') ||
+                        (p.code && p.code.toLowerCase().includes('bms')))),
         );
         if (!plan) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
         if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
-            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលគម្រោងនេះទេ (You do not have permission to view this project).');
+            throw new ForbiddenException(
+                'អ្នកមិនមានសិទ្ធិចូលមើលគម្រោងនេះទេ (You do not have permission to view this project).',
+            );
         }
         this.syncTaskCounts([plan]);
 
@@ -434,7 +637,9 @@ export class PlanService {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
         if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
-            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលសមាជិកនៃគម្រោងនេះទេ (You do not have permission to view members of this project).');
+            throw new ForbiddenException(
+                'អ្នកមិនមានសិទ្ធិចូលមើលសមាជិកនៃគម្រោងនេះទេ (You do not have permission to view members of this project).',
+            );
         }
 
         return {
@@ -450,7 +655,11 @@ export class PlanService {
 
     private isFilterActive(value?: string): boolean {
         return Boolean(
-            value && value !== 'all' && value !== 'undefined' && value !== 'null' && value.trim(),
+            value &&
+            value !== 'all' &&
+            value !== 'undefined' &&
+            value !== 'null' &&
+            value.trim(),
         );
     }
 
@@ -458,8 +667,10 @@ export class PlanService {
         return isAdminOrSuperAdmin(user);
     }
 
-
-    public isUserProjectMember(user: UserPayload, project: ProjectPlanItem): boolean {
+    public isUserProjectMember(
+        user: UserPayload,
+        project: ProjectPlanItem,
+    ): boolean {
         if (!user) return false;
         if (this.isAdmin(user)) return true;
 
@@ -473,8 +684,16 @@ export class PlanService {
             const leadId = Number(lead.id || lead.user_id || 0);
             if (leadId && uId && leadId === uId) return true;
             const leadPhone = String(lead.phone || '').replace(/\D/g, '');
-            if (leadPhone && uPhone && (leadPhone === uPhone || leadPhone.slice(-8) === uPhone.slice(-8))) return true;
-            const leadEmail = String(lead.email || '').toLowerCase().trim();
+            if (
+                leadPhone &&
+                uPhone &&
+                (leadPhone === uPhone ||
+                    leadPhone.slice(-8) === uPhone.slice(-8))
+            )
+                return true;
+            const leadEmail = String(lead.email || '')
+                .toLowerCase()
+                .trim();
             if (leadEmail && uEmail && leadEmail === uEmail) {
                 if (leadEmail === 'pisethpanhavorn544@gmail.com') {
                     if (uPhone === '010843612' || uId === 5) return true;
@@ -492,12 +711,25 @@ export class PlanService {
             if (!m) return false;
             // Match by numeric user ID (excluding mock seed IDs 101-104)
             const mId = Number(m.user_id || m.id || 0);
-            if (mId && uId && mId === uId && mId !== 101 && mId !== 102 && mId !== 103 && mId !== 104) return true;
+            if (
+                mId &&
+                uId &&
+                mId === uId &&
+                mId !== 101 &&
+                mId !== 102 &&
+                mId !== 103 &&
+                mId !== 104
+            )
+                return true;
 
             // Match by phone number (unique per person)
             if (m.phone && uPhone) {
                 const cleanMPhone = String(m.phone).replace(/\D/g, '');
-                if (cleanMPhone === uPhone || (cleanMPhone.length >= 8 && cleanMPhone.slice(-8) === uPhone.slice(-8))) {
+                if (
+                    cleanMPhone === uPhone ||
+                    (cleanMPhone.length >= 8 &&
+                        cleanMPhone.slice(-8) === uPhone.slice(-8))
+                ) {
                     return true;
                 }
             }
@@ -510,14 +742,23 @@ export class PlanService {
                 return uPhone === '087280875' || uId === 6;
             }
             if (m.id === 103) {
-                return uPhone === '078776682' || uPhone === '067776682' || uId === 7 || uId === 8;
+                return (
+                    uPhone === '078776682' ||
+                    uPhone === '067776682' ||
+                    uId === 7 ||
+                    uId === 8
+                );
             }
             if (m.id === 104) {
                 return uPhone === '011242425' || uId === 9;
             }
 
             // Match by email ONLY if not the admin's shared/reused email
-            if (m.email && uEmail && String(m.email).toLowerCase().trim() === uEmail) {
+            if (
+                m.email &&
+                uEmail &&
+                String(m.email).toLowerCase().trim() === uEmail
+            ) {
                 if (uEmail === 'pisethpanhavorn544@gmail.com') {
                     return uPhone === '010843612' || uId === 5;
                 }
@@ -531,9 +772,14 @@ export class PlanService {
         });
     }
 
-    assertAdminOrSuperAdmin(user: UserPayload, actionDesc: string = 'កែប្រែ ឬគ្រប់គ្រងគម្រោង'): void {
+    assertAdminOrSuperAdmin(
+        user: UserPayload,
+        actionDesc: string = 'កែប្រែ ឬគ្រប់គ្រងគម្រោង',
+    ): void {
         if (!this.isAdmin(user)) {
-            throw new ForbiddenException(`មានតែ Administrator ឬ Super Administrator ប៉ុណ្ណោះដែលអាច${actionDesc}បាន (Only Admin or Super Admin can perform this action).`);
+            throw new ForbiddenException(
+                `មានតែ Administrator ឬ Super Administrator ប៉ុណ្ណោះដែលអាច${actionDesc}បាន (Only Admin or Super Admin can perform this action).`,
+            );
         }
     }
 
@@ -542,32 +788,49 @@ export class PlanService {
 
         await this.ensureLoaded();
         const projName = dto.name;
-        let projCode = dto.code || `PMS-${Math.floor(100 + Math.random() * 900)}`;
-        if (this.projects.some((p) => p.code?.toUpperCase() === projCode.toUpperCase())) {
-            projCode = `${projCode}-${Math.floor(10 + Math.random() * 90)}`;
+        let projCode = (dto.code || '').trim().replace(/^#/, '');
+        if (!projCode) {
+            let maxNum = 0;
+            for (const p of this.projects) {
+                if (p.code) {
+                    const match = p.code.match(/\d+/);
+                    if (match) {
+                        const val = parseInt(match[0], 10);
+                        if (!isNaN(val) && val > maxNum) maxNum = val;
+                    }
+                }
+            }
+            projCode = String(maxNum + 1).padStart(4, '0');
         }
 
-        const effectiveLead = dto.team_lead || dto.lead || (dto.members?.[0] ? {
-            id: Number(dto.members[0].id) || 1,
-            name: dto.members[0].name,
-            role: dto.members[0].role || 'Leader',
-            avatar: dto.members[0].avatar || null,
-        } : {
-            id: user?.id || 1,
-            name: user?.name_en || user?.name_kh || 'Project Lead',
-            role: 'Leader',
-            avatar: null,
-        });
+        const effectiveLead =
+            dto.team_lead ||
+            dto.lead ||
+            (dto.members?.[0]
+                ? {
+                      id: Number(dto.members[0].id) || 1,
+                      name: dto.members[0].name,
+                      role: dto.members[0].role || 'Leader',
+                      avatar: dto.members[0].avatar || null,
+                  }
+                : {
+                      id: user?.id || 1,
+                      name: user?.name_en || user?.name_kh || 'Project Lead',
+                      role: 'Leader',
+                      avatar: null,
+                  });
 
         const starterTasks = [
             {
                 id: `task-${Date.now()}-1`,
-                code: `#${projCode}-001`,
+                code: `#${projCode}-1`,
                 title: `${projName} | ការរៀបចំស្ថាបត្យកម្ម & ផែនការអនុវត្ត`,
                 description: `រៀបចំផែនការអនុវត្តគម្រោង ${projName} បែងចែកភារកិច្ច និងកំណត់កាលវិភាគ Sprint។`,
                 priority: 'high',
                 status: 'in_progress',
-                due_date: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
+                due_date: new Date(Date.now() + 86400000 * 7)
+                    .toISOString()
+                    .split('T')[0],
                 created_at: new Date().toISOString().split('T')[0],
                 time_ago: 'ទើបបង្កើត',
                 comments_count: 0,
@@ -576,20 +839,30 @@ export class PlanService {
                 members: dto.members?.length ? dto.members : [effectiveLead],
                 progress: 50,
                 subtasks: [
-                    { id: `st-${Date.now()}-1`, title: 'កំណត់គោលដៅ និងតម្រូវការប្រព័ន្ធ (SRS)', completed: true },
-                    { id: `st-${Date.now()}-2`, title: 'បែងចែកការងារជូនសមាជិកក្រុម', completed: false },
+                    {
+                        id: `st-${Date.now()}-1`,
+                        title: 'កំណត់គោលដៅ និងតម្រូវការប្រព័ន្ធ (SRS)',
+                        completed: true,
+                    },
+                    {
+                        id: `st-${Date.now()}-2`,
+                        title: 'បែងចែកការងារជូនសមាជិកក្រុម',
+                        completed: false,
+                    },
                 ],
                 links: [],
                 documents: [],
             },
             {
                 id: `task-${Date.now()}-2`,
-                code: `#${projCode}-002`,
+                code: `#${projCode}-2`,
                 title: `${projName} | ការរចនា UI/UX & Prototypes`,
                 description: `រចនាទម្រង់ផ្ទៃមុខងារប្រព័ន្ធ (UI Components) ក្នុង Figma សម្រាប់គម្រោង ${projName}។`,
                 priority: 'medium',
                 status: 'new',
-                due_date: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
+                due_date: new Date(Date.now() + 86400000 * 14)
+                    .toISOString()
+                    .split('T')[0],
                 created_at: new Date().toISOString().split('T')[0],
                 time_ago: 'ទើបបង្កើត',
                 comments_count: 0,
@@ -598,7 +871,11 @@ export class PlanService {
                 members: dto.members?.length ? dto.members : [effectiveLead],
                 progress: 0,
                 subtasks: [
-                    { id: `st-${Date.now()}-3`, title: 'Design Layout & Mobile responsive mockups', completed: false },
+                    {
+                        id: `st-${Date.now()}-3`,
+                        title: 'Design Layout & Mobile responsive mockups',
+                        completed: false,
+                    },
                 ],
                 links: [],
                 documents: [],
@@ -614,7 +891,9 @@ export class PlanService {
                 status: 'in_progress',
                 progress: 50,
                 startDate: new Date().toISOString().split('T')[0],
-                endDate: new Date(Date.now() + 86400000 * 30).toISOString().split('T')[0],
+                endDate: new Date(Date.now() + 86400000 * 30)
+                    .toISOString()
+                    .split('T')[0],
                 tasksCount: 2,
             },
             {
@@ -624,8 +903,12 @@ export class PlanService {
                 quarter: 'ត្រីមាសទី ៣ (Q3)',
                 status: 'planned',
                 progress: 0,
-                startDate: new Date(Date.now() + 86400000 * 31).toISOString().split('T')[0],
-                endDate: new Date(Date.now() + 86400000 * 90).toISOString().split('T')[0],
+                startDate: new Date(Date.now() + 86400000 * 31)
+                    .toISOString()
+                    .split('T')[0],
+                endDate: new Date(Date.now() + 86400000 * 90)
+                    .toISOString()
+                    .split('T')[0],
                 tasksCount: 0,
             },
         ];
@@ -653,17 +936,26 @@ export class PlanService {
             status: dto.status || 'active',
             priority: dto.priority || 'medium',
             category: dto.category || 'it',
-            budget_allocated: Number(dto.budget_allocated || dto.budget || 5000),
+            budget_allocated: Number(
+                dto.budget_allocated || dto.budget || 5000,
+            ),
             budget_spent: Number(dto.budget_spent || 0),
             progress: dto.progress || 0,
             start_date: dto.start_date || new Date().toISOString(),
-            end_date: dto.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
+            end_date:
+                dto.end_date ||
+                new Date(Date.now() + 86400000 * 30).toISOString(),
             team_lead: effectiveLead,
             lead: effectiveLead,
             total_tasks: dto.tasks?.length || starterTasks.length,
-            completed_tasks: dto.tasks?.filter((t: any) => t.status === 'done' || t.status === 'completed')?.length || 0,
+            completed_tasks:
+                dto.tasks?.filter(
+                    (t: any) => t.status === 'done' || t.status === 'completed',
+                )?.length || 0,
             members: dto.members?.length ? dto.members : [effectiveLead],
-            tasks: (dto.tasks?.length ? dto.tasks : starterTasks).map((t: any) => this.sanitizeTask(t)),
+            tasks: (dto.tasks?.length ? dto.tasks : starterTasks).map(
+                (t: any) => this.sanitizeTask(t),
+            ),
             phases: dto.phases?.length ? dto.phases : starterPhases,
             meetings: dto.meetings?.length ? dto.meetings : starterMeetings,
             agileTasks: dto.agileTasks?.length ? dto.agileTasks : [],
@@ -687,11 +979,16 @@ export class PlanService {
     async updatePlan(user: UserPayload, id: string, dto: any) {
         this.assertAdminOrSuperAdmin(user, 'កែប្រែព័ត៌មានគម្រោង');
         await this.ensureLoaded();
-        const normId = String(id || '').toLowerCase().replace(/^#/, '').trim();
+        const normId = String(id || '')
+            .toLowerCase()
+            .replace(/^#/, '')
+            .trim();
         const index = this.projects.findIndex(
             (p) =>
                 String(p.id || '').toLowerCase() === normId ||
-                String(p.code || '').toLowerCase().replace(/^#/, '') === normId
+                String(p.code || '')
+                    .toLowerCase()
+                    .replace(/^#/, '') === normId,
         );
         if (index === -1) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
@@ -705,11 +1002,14 @@ export class PlanService {
             code: dto.code ?? current.code,
             description: dto.description ?? current.description,
             status: dto.status ?? current.status,
-            progress: dto.progress !== undefined ? dto.progress : current.progress,
+            progress:
+                dto.progress !== undefined ? dto.progress : current.progress,
             start_date: dto.start_date ?? current.start_date,
             end_date: dto.end_date ?? current.end_date,
             members: dto.members ?? current.members,
-            tasks: dto.tasks ? dto.tasks.map((t: any) => this.sanitizeTask(t)) : (current as any).tasks,
+            tasks: dto.tasks
+                ? dto.tasks.map((t: any) => this.sanitizeTask(t))
+                : (current as any).tasks,
             phases: dto.phases ?? (current as any).phases,
             meetings: dto.meetings ?? (current as any).meetings,
             agileTasks: dto.agileTasks ?? (current as any).agileTasks,
@@ -731,7 +1031,9 @@ export class PlanService {
     async deletePlan(user: UserPayload, id: string) {
         this.assertAdminOrSuperAdmin(user, 'លុបគម្រោង');
         await this.ensureLoaded();
-        const index = this.projects.findIndex((p) => p.id === id || p.code === id);
+        const index = this.projects.findIndex(
+            (p) => p.id === id || p.code === id,
+        );
         if (index === -1) {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
@@ -750,18 +1052,30 @@ export class PlanService {
     // =========================================================================
     async getTasks(user: UserPayload, id: string) {
         await this.ensureLoaded();
-        const normId = String(id || '').toLowerCase().replace(/^#/, '').trim();
+        const normId = String(id || '')
+            .toLowerCase()
+            .replace(/^#/, '')
+            .trim();
         const plan = this.projects.find(
             (p) =>
                 String(p.id || '').toLowerCase() === normId ||
-                String(p.code || '').toLowerCase().replace(/^#/, '') === normId ||
+                String(p.code || '')
+                    .toLowerCase()
+                    .replace(/^#/, '') === normId ||
                 String(p.name || '').toLowerCase() === normId ||
-                (normId.includes('wms') && (p.name.toLowerCase().includes('wms') || (p.code && p.code.toLowerCase().includes('wms')))) ||
-                (normId.includes('bms') && (p.name.toLowerCase().includes('bms') || (p.code && p.code.toLowerCase().includes('bms'))))
+                (normId.includes('wms') &&
+                    (p.name.toLowerCase().includes('wms') ||
+                        (p.code && p.code.toLowerCase().includes('wms')))) ||
+                (normId.includes('bms') &&
+                    (p.name.toLowerCase().includes('bms') ||
+                        (p.code && p.code.toLowerCase().includes('bms')))),
         );
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
-            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលកិច្ចការនៃគម្រោងនេះទេ (You do not have permission to view tasks in this project).');
+            throw new ForbiddenException(
+                'អ្នកមិនមានសិទ្ធិចូលមើលកិច្ចការនៃគម្រោងនេះទេ (You do not have permission to view tasks in this project).',
+            );
         }
         this.syncTaskCounts([plan]);
         return {
@@ -773,9 +1087,12 @@ export class PlanService {
     async createTask(user: UserPayload, id: string, dto: any) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
-            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិបង្កើតកិច្ចការក្នុងគម្រោងនេះទេ (You do not have permission to create tasks in this project).');
+            throw new ForbiddenException(
+                'អ្នកមិនមានសិទ្ធិបង្កើតកិច្ចការក្នុងគម្រោងនេះទេ (You do not have permission to create tasks in this project).',
+            );
         }
         if (!plan.tasks) plan.tasks = [];
 
@@ -788,7 +1105,11 @@ export class PlanService {
             priority: dto.priority || 'medium',
             due_date: dto.due_date,
             assignee: dto.assignee || null,
-            reporter: dto.reporter || { id: 1, name: 'Admin', role: 'Project Manager' },
+            reporter: dto.reporter || {
+                id: 1,
+                name: 'Admin',
+                role: 'Project Manager',
+            },
             subtasks: dto.subtasks || [],
             links: dto.links || [],
             documents: dto.documents || [],
@@ -809,11 +1130,15 @@ export class PlanService {
     async updateTask(user: UserPayload, id: string, taskId: string, dto: any) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.tasks) plan.tasks = [];
 
-        const tIndex = plan.tasks.findIndex((t: any) => t.id === taskId || t.code === taskId);
-        if (tIndex === -1) throw new NotFoundException(`Task "${taskId}" not found`);
+        const tIndex = plan.tasks.findIndex(
+            (t: any) => t.id === taskId || t.code === taskId,
+        );
+        if (tIndex === -1)
+            throw new NotFoundException(`Task "${taskId}" not found`);
 
         plan.tasks[tIndex] = {
             ...plan.tasks[tIndex],
@@ -831,10 +1156,13 @@ export class PlanService {
     async deleteTask(user: UserPayload, id: string, taskId: string) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.tasks) return { status_code: 200, message: 'Deleted' };
 
-        plan.tasks = plan.tasks.filter((t: any) => t.id !== taskId && t.code !== taskId);
+        plan.tasks = plan.tasks.filter(
+            (t: any) => t.id !== taskId && t.code !== taskId,
+        );
         plan.total_tasks = plan.tasks.length;
         await this.saveStore();
 
@@ -847,7 +1175,8 @@ export class PlanService {
     async createPhase(user: UserPayload, id: string, dto: any) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.phases) plan.phases = [];
 
         const newPhase = {
@@ -873,7 +1202,8 @@ export class PlanService {
     async deletePhase(user: UserPayload, id: string, phaseId: string) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.phases) return { status_code: 200, message: 'Deleted' };
 
         plan.phases = plan.phases.filter((p: any) => p.id !== phaseId);
@@ -888,7 +1218,8 @@ export class PlanService {
     async createMeeting(user: UserPayload, id: string, dto: any) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.meetings) plan.meetings = [];
 
         const newMeeting = {
@@ -916,7 +1247,8 @@ export class PlanService {
     async deleteMeeting(user: UserPayload, id: string, meetingId: string) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.meetings) return { status_code: 200, message: 'Deleted' };
 
         plan.meetings = plan.meetings.filter((m: any) => m.id !== meetingId);
@@ -931,14 +1263,17 @@ export class PlanService {
     async createMember(user: UserPayload, id: string, dto: any) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
 
         if (!this.isAdmin(user)) {
             const uId = user.id ? String(user.id) : '';
             const leadId = plan.lead?.id || (plan as any).team_lead?.id;
             const isLead = leadId && String(leadId) === uId;
             if (!isLead) {
-                throw new ForbiddenException('មានតែ Administrator ឬ ប្រធានគម្រោងប៉ុណ្ណោះដែលអាចបន្ថែមសមាជិកបាន (Only Admin or Project Lead can add members).');
+                throw new ForbiddenException(
+                    'មានតែ Administrator ឬ ប្រធានគម្រោងប៉ុណ្ណោះដែលអាចបន្ថែមសមាជិកបាន (Only Admin or Project Lead can add members).',
+                );
             }
         }
 
@@ -967,20 +1302,25 @@ export class PlanService {
     async deleteMember(user: UserPayload, id: string, memberId: number) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
 
         if (!this.isAdmin(user)) {
             const uId = user.id ? String(user.id) : '';
             const leadId = plan.lead?.id || (plan as any).team_lead?.id;
             const isLead = leadId && String(leadId) === uId;
             if (!isLead) {
-                throw new ForbiddenException('មានតែ Administrator ឬ ប្រធានគម្រោងប៉ុណ្ណោះដែលអាចលុបសមាជិកបាន (Only Admin or Project Lead can remove members).');
+                throw new ForbiddenException(
+                    'មានតែ Administrator ឬ ប្រធានគម្រោងប៉ុណ្ណោះដែលអាចលុបសមាជិកបាន (Only Admin or Project Lead can remove members).',
+                );
             }
         }
 
         if (!plan.members) return { status_code: 200, message: 'Deleted' };
 
-        plan.members = plan.members.filter((m: any) => m.id !== memberId && m.id !== Number(memberId));
+        plan.members = plan.members.filter(
+            (m: any) => m.id !== memberId && m.id !== Number(memberId),
+        );
         await this.saveStore();
 
         return {
@@ -992,9 +1332,12 @@ export class PlanService {
     async getAgileTasks(user: UserPayload, id: string) {
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!this.isAdmin(user) && !this.isUserProjectMember(user, plan)) {
-            throw new ForbiddenException('អ្នកមិនមានសិទ្ធិចូលមើលផែនការនៃគម្រោងនេះទេ (You do not have permission to view agile plans in this project).');
+            throw new ForbiddenException(
+                'អ្នកមិនមានសិទ្ធិចូលមើលផែនការនៃគម្រោងនេះទេ (You do not have permission to view agile plans in this project).',
+            );
         }
         return {
             status_code: 200,
@@ -1006,13 +1349,16 @@ export class PlanService {
         this.assertAdminOrSuperAdmin(user, 'បង្កើតផែនការអនុវត្ត');
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.agileTasks) plan.agileTasks = [];
 
         const newTask = {
             id: dto.id || `at-${Date.now()}`,
             name: dto.name,
-            segments: dto.segments || [{ iteration: 1, startWeek: 14, durationWeeks: 2 }],
+            segments: dto.segments || [
+                { iteration: 1, startWeek: 14, durationWeeks: 2 },
+            ],
         };
 
         plan.agileTasks.unshift(newTask);
@@ -1025,15 +1371,22 @@ export class PlanService {
         };
     }
 
-    async updateAgileTask(user: UserPayload, id: string, taskId: string, dto: any) {
+    async updateAgileTask(
+        user: UserPayload,
+        id: string,
+        taskId: string,
+        dto: any,
+    ) {
         this.assertAdminOrSuperAdmin(user, 'កែប្រែផែនការអនុវត្ត');
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.agileTasks) plan.agileTasks = [];
 
         const idx = plan.agileTasks.findIndex((t: any) => t.id === taskId);
-        if (idx === -1) throw new NotFoundException(`Agile task "${taskId}" not found`);
+        if (idx === -1)
+            throw new NotFoundException(`Agile task "${taskId}" not found`);
 
         plan.agileTasks[idx] = {
             ...plan.agileTasks[idx],
@@ -1054,7 +1407,8 @@ export class PlanService {
         this.assertAdminOrSuperAdmin(user, 'លុបផែនការអនុវត្ត');
         await this.ensureLoaded();
         const plan = this.projects.find((p) => p.id === id || p.code === id);
-        if (!plan) throw new NotFoundException(`Plan / Project "${id}" not found`);
+        if (!plan)
+            throw new NotFoundException(`Plan / Project "${id}" not found`);
         if (!plan.agileTasks) return { status_code: 200, message: 'Deleted' };
 
         plan.agileTasks = plan.agileTasks.filter((t: any) => t.id !== taskId);

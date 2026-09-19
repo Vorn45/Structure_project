@@ -327,7 +327,7 @@ export function getProjectFallbackLogo(code?: string, name?: string): string {
 export const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
     {
         id: '4',
-        code: 'BMS-DIGI',
+        code: '0002',
         name: 'BMS Digitech',
         logo: BMS_PROJECT_LOGO,
         image: BMS_PROJECT_LOGO,
@@ -410,7 +410,7 @@ export const DEFAULT_INVITED_PROJECTS: ExtendedProjectItem[] = [
     },
     {
         id: '5',
-        code: 'WMS-DIGI',
+        code: '0001',
         name: 'WMS Digitech',
         logo: WMS_PROJECT_LOGO,
         image: WMS_PROJECT_LOGO,

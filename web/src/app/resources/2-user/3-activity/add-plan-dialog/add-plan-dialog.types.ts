@@ -20,6 +20,6 @@ export interface AddPlanDialogData {
 }
 
 export const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
-    { id: '4', code: 'BMS-DIGI', name: 'BMS Digitech' },
-    { id: '5', code: 'WMS-DIGI', name: 'WMS Digitech' },
+    { id: '4', code: '0002', name: 'BMS Digitech' },
+    { id: '5', code: '0001', name: 'WMS Digitech' },
 ];

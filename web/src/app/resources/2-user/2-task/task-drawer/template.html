@@ -76,7 +76,7 @@
 
                     <!-- Task Code -->
                     <span class="font-mono text-[14px] font-bold text-slate-800 dark:text-slate-100 select-all truncate">
-                        {{ task()?.code || ('#WMS-' + task()?.id) }}
+                        {{ task()?.code || ('#' + (task()?.id || '1')) }}
                     </span>
                 </div>
 

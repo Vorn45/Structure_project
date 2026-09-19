@@ -53,7 +53,7 @@ export class CreateProjectDialogComponent implements OnInit {
     @ViewChild('projectNameInput') projectNameInput?: ElementRef<HTMLInputElement>;
 
     projectName: string = '';
-    projectCode: string = 'PRJ-0001';
+    projectCode: string = '0001';
     category: string = 'it';
     budget: number = 5000;
     startDate: Date | string | null = new Date();
@@ -195,8 +195,7 @@ export class CreateProjectDialogComponent implements OnInit {
     }
 
     generateNextCode(): string {
-        const prefix = 'PRJ';
-        let maxNum = -1;
+        let maxNum = 0;
         for (const p of this.data?.existingProjects || []) {
             if (p.code) {
                 const match = p.code.match(/\d+/);
@@ -206,16 +205,15 @@ export class CreateProjectDialogComponent implements OnInit {
                 }
             }
         }
-        const nextNum = maxNum >= 0 ? maxNum + 1 : 1;
-        return `${prefix}-${String(nextNum).padStart(4, '0')}`;
+        const nextNum = maxNum + 1;
+        return String(nextNum).padStart(4, '0');
     }
 
     incrementProjectCode(): void {
-        const match = this.projectCode.match(/^([A-Za-z]+)-(\d+)$/);
+        const match = this.projectCode.match(/\d+/);
         if (match) {
-            const prefix = match[1];
-            const num = parseInt(match[2], 10) + 1;
-            this.projectCode = `${prefix}-${String(num).padStart(4, '0')}`;
+            const num = parseInt(match[0], 10) + 1;
+            this.projectCode = String(num).padStart(4, '0');
         } else {
             this.projectCode = this.generateNextCode();
         }
