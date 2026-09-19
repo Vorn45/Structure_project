@@ -398,12 +398,10 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
                     this.userInitials.set(khName.slice(0, 2));
                 }
 
-                if (u.avatar && typeof u.avatar === 'object') {
-                    const domain = (u.avatar as any).file_domain || '';
-                    const uri = (u.avatar as any).uri || '';
-                    if (uri) {
-                        this.userAvatarUrl.set(domain ? `${domain}/${uri}` : uri);
-                    }
+                const avatar = u.avatar || (u as any).avatar_file;
+                const resolvedAvatar = resolveFileUrl(avatar);
+                if (resolvedAvatar) {
+                    this.userAvatarUrl.set(resolvedAvatar);
                 } else if (typeof u.avatar === 'string' && u.avatar) {
                     this.userAvatarUrl.set(u.avatar);
                 }

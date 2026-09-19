@@ -63,7 +63,10 @@ export class DashboardService {
         const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
         // 3. USERS (Dynamic from AdminUserService)
-        const allUsers = this._adminUserService.getRawUsers() || [];
+        let allUsers = this._adminUserService.getRawUsers() || [];
+        if (allUsers.length === 0) {
+            allUsers = (await this._adminUserService.syncUsersFromDb()) || [];
+        }
         const totalUsers = allUsers.length;
         const activeUsers = allUsers.filter((u) => u.is_active === 1).length;
 

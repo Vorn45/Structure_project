@@ -94,9 +94,32 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     }
 
     openDigitalCardDialog(): void {
+        const u: any = this.currentUser() || this.overview()?.user;
+        const preferredRoleId = readPreferredRoleId();
+        const activeRole = u?.roles?.find((r: any) => r.id === preferredRoleId)
+            ?? u?.roles?.find((r: any) => r.id === u?.is_active)
+            ?? u?.roles?.[0];
+
+        const roleName = activeRole?.name_kh
+            || activeRole?.name_en
+            || (activeRole?.slug === 'superadmin' ? 'អភិបាលប្រព័ន្ធ' : activeRole?.slug === 'org_admin' ? 'រដ្ឋបាល' : null)
+            || u?.role_name
+            || u?.role_name_kh
+            || 'សមាជិក';
+
+        const orgName = activeRole?.organization?.name_kh
+            || activeRole?.organization?.name_en
+            || u?.organization_name
+            || u?.organization?.name
+            || 'DIGITECHKH';
+
         this._matDialog.open(DigitalCardDialogComponent, {
             data: {
-                user: this.currentUser() || this.overview()?.user,
+                user: {
+                    ...u,
+                    role_name: roleName,
+                    organization_name: orgName,
+                },
                 avatarUrl: this.getAvatarUrl(),
             },
             maxWidth: '95vw',
@@ -398,6 +421,11 @@ export class UserHomeComponent implements OnInit, OnDestroy {
                         const mergedUser = {
                             ...currentUser,
                             ...overviewUser,
+                            roles: (currentUser.roles && currentUser.roles.length > 0) ? currentUser.roles : (overviewUser.roles || []),
+                            role_name: overviewUser.role_name || currentUser.role_name,
+                            role_name_kh: overviewUser.role_name_kh || currentUser.role_name_kh,
+                            role_name_en: overviewUser.role_name_en || currentUser.role_name_en,
+                            organization_name: overviewUser.organization_name || currentUser.organization_name,
                             avatar: currentUser.avatar || overviewUser.avatar,
                             cover: currentUser.cover || currentUser.background || overviewUser.cover || overviewUser.background,
                             background: currentUser.background || currentUser.cover || overviewUser.background || overviewUser.cover,

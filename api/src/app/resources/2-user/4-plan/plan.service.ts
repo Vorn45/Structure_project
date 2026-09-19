@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // ===========================================================================>> Custom Library
 import { RoleEnum } from 'src/app/enum/role.enum';
 import { UserPayload } from 'src/app/interface/jwt.interface';
+import { User } from 'src/app/model/user/users.entity';
+import { TaskEntity } from 'src/app/model/task/task.entity';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { ProjectEntity } from 'src/app/model/project/project.entity';
 import { ProjectPhaseEntity } from 'src/app/model/project/project-phase.entity';
@@ -61,148 +61,122 @@ export interface ProjectPlanItem {
     agileTasks?: any[];
 }
 
-export const BMS_PROJECT_LOGO =
-    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="bmsGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230284c7"/><stop offset="100%" stop-color="%230369a1"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><circle cx="60" cy="60" r="34" fill="url(%23bmsGrad)"/><line x1="39" y1="76" x2="81" y2="76" stroke="%2393c5fd" stroke-width="2.5" stroke-linecap="round"/><rect x="42" y="62" width="7" height="14" rx="2" fill="%23bae6fd"/><rect x="52" y="51" width="7" height="25" rx="2" fill="%23ffffff"/><rect x="62" y="57" width="7" height="19" rx="2" fill="%23bae6fd"/><rect x="72" y="44" width="7" height="32" rx="2" fill="%2338bdf8"/><path d="M 41 65 L 53 49 L 64 55 L 78 39" fill="none" stroke="%2338bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="78" cy="39" r="4" fill="%23ffffff" stroke="%230284c7" stroke-width="2"/><circle cx="53" cy="49" r="2.5" fill="%23ffffff"/><circle cx="64" cy="55" r="2.5" fill="%23ffffff"/></svg>';
 
-export const WMS_PROJECT_LOGO =
-    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><g transform="translate(60, 60)"><path d="M 0 -25 L 23 -12 L 0 1 L -23 -12 Z" fill="%23fb923c" stroke="%23ea580c" stroke-width="1.5" stroke-linejoin="round"/><path d="M -23 -12 L 0 1 L 0 26 L -23 13 Z" fill="%230284c7" stroke="%230369a1" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 23 -12 L 23 13 L 0 26 Z" fill="%23ea580c" stroke="%23c2410c" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 0 26 M 0 1 L -23 -12 M 0 1 L 23 -12" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M -11.5 -5.5 L 0 -12 L 11.5 -5.5 L 0 1 Z" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/><path d="M -11.5 7 L -11.5 -5.5 M 11.5 7 L 11.5 -5.5" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/></g></svg>';
 
-export const PRJ_PROJECT_LOGO = '/images/logo/logo.png';
+export interface LiveMemberInfo {
+    id: number;
+    name: string;
+    role: string;
+    avatar: string | null;
+    email: string;
+    phone: string;
+}
 
-const DEFAULT_MEMBERS = [
-    {
-        id: 101,
-        name: 'PISETH PANHAVORN',
-        role: 'Project Manager',
-        phone: '010843612',
-        email: 'pisethpanhavorn544@gmail.com',
-        avatar: null,
-    },
-    {
-        id: 102,
-        name: 'PUM BRUSMUNY',
-        role: 'Developer',
-        phone: '087280875',
-        email: 'pumprusmuny@example.com',
-        avatar: null,
-    },
-    {
-        id: 103,
-        name: 'THA WINNER',
-        role: 'Developer',
-        phone: '067776682',
-        email: 'thawinner@example.com',
-        avatar: null,
-    },
-    {
-        id: 104,
-        name: 'PHUONG SOVANNARA',
-        role: 'Developer',
-        phone: '011242425',
-        email: 'phuongsovannara@gmail.com',
-        avatar: null,
-    },
-];
+export class LiveMemberLookup {
+    public byId = new Map<number, LiveMemberInfo>();
+    public byPhone = new Map<string, LiveMemberInfo>();
+    public byEmail = new Map<string, LiveMemberInfo>();
+    public byName = new Map<string, LiveMemberInfo>();
+    public avatarMap = new Map<string, string>();
 
-const PROJECTS: ProjectPlanItem[] = [
-    {
-        id: '0001',
-        code: '0001',
-        name: 'WMS Digitech',
-        description:
-            'Workforce & Attendance Management System - Digitech Real-time QR & Payroll.',
-        status: 'active',
-        progress: 30,
-        start_date: '2026-08-09T09:24:17.350Z',
-        end_date: '2026-10-23T09:24:17.350Z',
-        total_tasks: 4,
-        completed_tasks: 1,
-        logo: WMS_PROJECT_LOGO,
-        image: WMS_PROJECT_LOGO,
-        lead: DEFAULT_MEMBERS[0],
-        team_lead: DEFAULT_MEMBERS[0],
-        members: DEFAULT_MEMBERS,
-    },
-    {
-        id: '0002',
-        code: '0002',
-        name: 'BMS Digitech',
-        description:
-            'Business Management System - Digitech Project Management, Sales & Invoicing Workflow.',
-        status: 'active',
-        progress: 33,
-        start_date: '2026-08-24T09:24:17.350Z',
-        end_date: '2026-11-07T09:24:17.350Z',
-        total_tasks: 6,
-        completed_tasks: 1,
-        logo: BMS_PROJECT_LOGO,
-        image: BMS_PROJECT_LOGO,
-        lead: DEFAULT_MEMBERS[0],
-        team_lead: DEFAULT_MEMBERS[0],
-        members: DEFAULT_MEMBERS,
-    },
-    {
-        id: '0003',
-        code: '0003',
-        name: 'EBMS',
-        description: 'EBMS Enterprise Business Management System.',
-        status: 'planning',
-        progress: 0,
-        start_date: '2026-09-18T00:00:00.000Z',
-        end_date: '2026-11-17T00:00:00.000Z',
-        total_tasks: 0,
-        completed_tasks: 0,
-        logo: PRJ_PROJECT_LOGO,
-        image: PRJ_PROJECT_LOGO,
-        lead: DEFAULT_MEMBERS[0],
-        team_lead: DEFAULT_MEMBERS[0],
-        members: DEFAULT_MEMBERS.slice(0, 3),
-    },
-    {
-        id: '0004',
-        code: '0004',
-        name: 'Evenbooking-System',
-        description:
-            'Evenbooking-System Online Event Booking & Ticketing Platform.',
-        status: 'active',
-        progress: 40,
-        start_date: '2026-09-18T00:00:00.000Z',
-        end_date: '2026-11-17T00:00:00.000Z',
-        total_tasks: 10,
-        completed_tasks: 4,
-        logo: PRJ_PROJECT_LOGO,
-        image: PRJ_PROJECT_LOGO,
-        lead: DEFAULT_MEMBERS[0],
-        team_lead: DEFAULT_MEMBERS[0],
-        members: DEFAULT_MEMBERS,
-    },
-    {
-        id: '0005',
-        code: '0005',
-        name: 'TESTER',
-        description: 'Testing and Quality Assurance Project.',
-        status: 'active',
-        progress: 0,
-        start_date: '2026-09-17T00:00:00.000Z',
-        end_date: '2026-11-16T00:00:00.000Z',
-        total_tasks: 1,
-        completed_tasks: 0,
-        logo: PRJ_PROJECT_LOGO,
-        image: PRJ_PROJECT_LOGO,
-        lead: DEFAULT_MEMBERS[0],
-        team_lead: DEFAULT_MEMBERS[0],
-        members: DEFAULT_MEMBERS.slice(0, 3),
-    },
-];
+    add(member: LiveMemberInfo, u: User) {
+        this.byId.set(member.id, member);
+        if (member.email) {
+            this.byEmail.set(member.email.toLowerCase().trim(), member);
+        }
+        if (member.phone) {
+            const clean = member.phone.replace(/\D/g, '');
+            if (clean) {
+                this.byPhone.set(clean, member);
+                if (clean.length >= 8) {
+                    this.byPhone.set(clean.slice(-8), member);
+                }
+            }
+        }
+        if (u.name_en) {
+            this.byName.set(u.name_en.toLowerCase().trim(), member);
+        }
+        if (u.name_kh) {
+            this.byName.set(u.name_kh.toLowerCase().trim(), member);
+        }
+        if (member.name) {
+            this.byName.set(member.name.toLowerCase().trim(), member);
+        }
+        if (member.avatar) {
+            this.avatarMap.set(`id:${member.id}`, member.avatar);
+            if (member.email)
+                this.avatarMap.set(
+                    `email:${member.email.toLowerCase().trim()}`,
+                    member.avatar,
+                );
+            if (member.phone) {
+                const clean = member.phone.replace(/\D/g, '');
+                if (clean) {
+                    this.avatarMap.set(`phone:${clean}`, member.avatar);
+                    if (clean.length >= 8)
+                        this.avatarMap.set(
+                            `phone:${clean.slice(-8)}`,
+                            member.avatar,
+                        );
+                }
+            }
+            if (member.name)
+                this.avatarMap.set(
+                    `name:${member.name.toLowerCase().trim()}`,
+                    member.avatar,
+                );
+            if (u.name_en)
+                this.avatarMap.set(
+                    `name:${u.name_en.toLowerCase().trim()}`,
+                    member.avatar,
+                );
+            if (u.name_kh)
+                this.avatarMap.set(
+                    `name:${u.name_kh.toLowerCase().trim()}`,
+                    member.avatar,
+                );
+            const parts = `${u.name_en || ''} ${u.name_kh || ''}`
+                .toLowerCase()
+                .split(/\s+/)
+                .filter(Boolean);
+            for (const part of parts) {
+                if (part.length >= 3 && !this.avatarMap.has(`part:${part}`)) {
+                    this.avatarMap.set(`part:${part}`, member.avatar);
+                }
+            }
+        }
+    }
+
+    find(candidate: any): LiveMemberInfo | null {
+        if (!candidate) return null;
+        const cId = Number(candidate.id || candidate.user_id || 0);
+        if (cId && this.byId.has(cId)) {
+            return this.byId.get(cId)!;
+        }
+        if (candidate.email) {
+            const em = String(candidate.email).toLowerCase().trim();
+            if (this.byEmail.has(em)) return this.byEmail.get(em)!;
+        }
+        if (candidate.phone) {
+            const ph = String(candidate.phone).replace(/\D/g, '');
+            if (ph) {
+                if (this.byPhone.has(ph)) return this.byPhone.get(ph)!;
+                if (ph.length >= 8 && this.byPhone.has(ph.slice(-8))) {
+                    return this.byPhone.get(ph.slice(-8))!;
+                }
+            }
+        }
+        if (candidate.name) {
+            const nm = String(candidate.name).toLowerCase().trim();
+            if (this.byName.has(nm)) return this.byName.get(nm)!;
+        }
+        return null;
+    }
+}
 
 @Injectable()
 export class PlanService {
-    private projects: ProjectPlanItem[] = [...PROJECTS];
-    private readonly storeFilePath = path.join(
-        process.cwd(),
-        'storage',
-        'plans_data_store.json',
-    );
+    private projects: ProjectPlanItem[] = [];
     private isDbLoaded = false;
 
     constructor(
@@ -212,10 +186,13 @@ export class PlanService {
         private readonly _projectRepo: Repository<ProjectEntity>,
         @InjectRepository(ProjectPhaseEntity)
         private readonly _phaseRepo: Repository<ProjectPhaseEntity>,
+        @InjectRepository(User)
+        private readonly _userRepo: Repository<User>,
+        @InjectRepository(TaskEntity)
+        private readonly _taskRepo: Repository<TaskEntity>,
         @Optional()
         private readonly _realtimeGateway?: RealtimeGateway,
     ) {
-        this.loadFromDisk();
         this.initDbStore();
     }
 
@@ -309,72 +286,6 @@ export class PlanService {
         return copy;
     }
 
-    private loadFromDisk(): void {
-        try {
-            if (fs.existsSync(this.storeFilePath)) {
-                const raw = fs.readFileSync(this.storeFilePath, 'utf8');
-                const data = JSON.parse(raw);
-                if (
-                    data &&
-                    Array.isArray(data.plans) &&
-                    data.plans.length > 0
-                ) {
-                    this.projects = data.plans
-                        .filter(
-                            (p: any) =>
-                                ![
-                                    'PMS-V2',
-                                    'WMS-HR',
-                                    'E-GOV',
-                                    '1',
-                                    '2',
-                                    '3',
-                                ].includes(p.code) &&
-                                !['1', '2', '3'].includes(p.id),
-                        )
-                        .map((p: any) => this.sanitizeProject(p));
-                    if (this.projects.length === 0) {
-                        this.projects = [...PROJECTS];
-                    } else {
-                        for (const defP of PROJECTS) {
-                            if (
-                                !this.projects.some(
-                                    (p: any) =>
-                                        p.code === defP.code ||
-                                        p.id === defP.id,
-                                )
-                            ) {
-                                this.projects.push(defP);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.warn('Failed to load plans from disk:', e);
-        }
-    }
-
-    private saveToDisk(): void {
-        try {
-            const dir = path.dirname(this.storeFilePath);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            const data = {
-                plans: this.projects.map((p) => this.sanitizeProject(p)),
-                updated_at: new Date().toISOString(),
-            };
-            fs.writeFileSync(
-                this.storeFilePath,
-                JSON.stringify(data, null, 2),
-                'utf8',
-            );
-        } catch (e) {
-            console.warn('Failed to save plans to disk:', e);
-        }
-    }
-
     private async ensureTableExists(): Promise<void> {
         try {
             await this._planStoreRepo.query(`
@@ -398,7 +309,6 @@ export class PlanService {
     private async initDbStore(): Promise<void> {
         await this.ensureTableExists();
         try {
-            // Check if relational table has records
             const count = await this._projectRepo.count();
             if (count > 0) {
                 const dbProjects = await this._projectRepo.find({
@@ -446,98 +356,60 @@ export class PlanService {
                 return;
             }
 
-            // Seed relational tables from planStoreRepo or disk
+            // Fallback: check planStoreRepo
             const dbStore = await this._planStoreRepo.findOne({
                 where: { key: 'default_plans_store' },
             });
-            let sourcePlans: any[] = [];
             if (
                 dbStore &&
                 Array.isArray(dbStore.plans) &&
                 dbStore.plans.length > 0
             ) {
-                sourcePlans = dbStore.plans;
-            } else {
-                sourcePlans = [...PROJECTS];
-            }
+                this.projects = dbStore.plans
+                    .filter(
+                        (p: any) =>
+                            ![
+                                'PMS-V2',
+                                'WMS-HR',
+                                'E-GOV',
+                                '1',
+                                '2',
+                                '3',
+                            ].includes(p.code) &&
+                            !['1', '2', '3'].includes(p.id),
+                    )
+                    .map((p: any) => this.sanitizeProject(p));
 
-            this.projects = sourcePlans
-                .filter(
-                    (p: any) =>
-                        !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(
-                            p.code,
-                        ) && !['1', '2', '3'].includes(p.id),
-                )
-                .map((p: any) => this.sanitizeProject(p));
-
-            if (this.projects.length === 0) {
-                this.projects = [...PROJECTS];
-            } else {
-                for (const defP of PROJECTS) {
-                    if (
-                        !this.projects.some(
-                            (p: any) =>
-                                p.code === defP.code || p.id === defP.id,
-                        )
-                    ) {
-                        this.projects.push(defP);
-                    }
+                for (const p of this.projects) {
+                    const projectEntity = this._projectRepo.create({
+                        id: p.id,
+                        code: p.code,
+                        name: p.name,
+                        description: p.description,
+                        status: p.status,
+                        progress: p.progress,
+                        start_date: p.start_date,
+                        end_date: p.end_date,
+                        total_tasks: p.total_tasks,
+                        completed_tasks: p.completed_tasks,
+                        logo: p.logo,
+                        image: p.image,
+                        lead: p.lead,
+                        team_lead: p.team_lead,
+                        members: p.members || [],
+                        links: (p as any).links || [],
+                        meetings: (p as any).meetings || [],
+                        attachments: (p as any).attachments || [],
+                        attachments_count: (p as any).attachments_count || 0,
+                    });
+                    await this._projectRepo.save(projectEntity);
                 }
+            } else {
+                this.projects = [];
             }
-
-            // Migrate into relational PostgreSQL tables
-            for (const p of this.projects) {
-                const projectEntity = this._projectRepo.create({
-                    id: p.id,
-                    code: p.code,
-                    name: p.name,
-                    description: p.description,
-                    status: p.status,
-                    progress: p.progress,
-                    start_date: p.start_date,
-                    end_date: p.end_date,
-                    total_tasks: p.total_tasks,
-                    completed_tasks: p.completed_tasks,
-                    logo: p.logo,
-                    image: p.image,
-                    lead: p.lead,
-                    team_lead: p.team_lead,
-                    members: p.members || [],
-                    links: (p as any).links || [],
-                    meetings: (p as any).meetings || [],
-                    attachments: (p as any).attachments || [],
-                    attachments_count: (p as any).attachments_count || 0,
-                });
-                await this._projectRepo.save(projectEntity);
-
-                if (Array.isArray(p.phases)) {
-                    for (const ph of p.phases) {
-                        const phaseEntity = this._phaseRepo.create({
-                            id:
-                                ph.id ||
-                                `phs-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-                            project_id: p.id,
-                            number: ph.number || 1,
-                            title: ph.title || 'Phase',
-                            quarter: ph.quarter || null,
-                            status: ph.status || 'planned',
-                            progress: ph.progress || 0,
-                            start_date: ph.start_date || null,
-                            end_date: ph.end_date || null,
-                            tasks_count: ph.tasks_count || 0,
-                        });
-                        await this._phaseRepo.save(phaseEntity);
-                    }
-                }
-            }
-
-            await this.saveStore();
             this.isDbLoaded = true;
         } catch (err) {
-            console.warn(
-                'Could not load plan store from DB, using memory/disk store:',
-                err,
-            );
+            console.warn('Could not load plan store from DB:', err);
         }
     }
 
@@ -548,13 +420,11 @@ export class PlanService {
     }
 
     private async saveStore(): Promise<void> {
-        this.saveToDisk();
         await this.saveToDb();
     }
 
     private async saveToDb(): Promise<void> {
         try {
-            // Dual-write: update relational PostgreSQL table
             for (const p of this.projects) {
                 await this._projectRepo.save({
                     id: p.id,
@@ -579,7 +449,6 @@ export class PlanService {
                 });
             }
 
-            // Dual-write: update legacy plan_store backup
             let dbStore = await this._planStoreRepo.findOne({
                 where: { key: 'default_plans_store' },
             });
@@ -600,71 +469,158 @@ export class PlanService {
         }
     }
 
+    /** Load database user members for live role, name, and avatar enrichment */
+    private async getLiveMemberLookup(): Promise<LiveMemberLookup> {
+        const lookup = new LiveMemberLookup();
+        try {
+            const users = await this._userRepo.find({
+                relations: ['user_roles', 'user_roles.role', 'avatar_file'],
+                order: { id: 'ASC' },
+            });
+            for (const u of users) {
+                if ((u as any).deleted_at || (u as any).is_active === 0) continue;
+                const activeUserRole =
+                    u.user_roles?.find((ur) => ur.is_default) ||
+                    u.user_roles?.[0];
+                const roleName =
+                    activeUserRole?.role?.name_kh ||
+                    activeUserRole?.role?.name_en ||
+                    activeUserRole?.role?.slug ||
+                    'សមាជិក (Member)';
+
+                let avatarUrl: string | null = null;
+                if (u.avatar_file?.uri) {
+                    let domain = (u.avatar_file.file_domain || '').replace(
+                        /\/+$/,
+                        '',
+                    );
+                    let uri = (u.avatar_file.uri || '').replace(/^\/+/, '');
+                    avatarUrl = `${domain}/${uri}`;
+                    if (
+                        avatarUrl.includes('localhost') ||
+                        avatarUrl.includes('127.0.0.1')
+                    ) {
+                        const idx = avatarUrl.indexOf('/uploads');
+                        if (idx !== -1) {
+                            avatarUrl = avatarUrl.substring(idx);
+                        }
+                    }
+                } else if (u.telegram_photo_url) {
+                    avatarUrl = u.telegram_photo_url;
+                }
+
+                const displayName =
+                    u.name_kh || u.name_en || `User #${u.id}`;
+                lookup.add(
+                    {
+                        id: u.id,
+                        name: displayName,
+                        role: roleName,
+                        avatar: avatarUrl,
+                        email: u.email || '',
+                        phone: u.phone || '',
+                    },
+                    u,
+                );
+            }
+        } catch (e) {
+            console.error(
+                'Failed to load user members for live lookup in PlanService:',
+                e,
+            );
+        }
+        return lookup;
+    }
+
+    private resolveMember(m: any, lookup: LiveMemberLookup): any {
+        if (!m) return m;
+        const matched = lookup.find(m);
+        if (matched) {
+            return {
+                ...m,
+                id: matched.id,
+                name: matched.name,
+                role: matched.role,
+                avatar: matched.avatar || m.avatar || null,
+                email: matched.email || m.email || '',
+                phone: matched.phone || m.phone || '',
+            };
+        }
+        return m;
+    }
+
+    private enrichProjectWithMembers(
+        p: ProjectPlanItem,
+        lookup: LiveMemberLookup,
+    ): ProjectPlanItem {
+        const copy: any = { ...p };
+        if (copy.lead) {
+            copy.lead = this.resolveMember(copy.lead, lookup);
+        }
+        if (copy.team_lead) {
+            copy.team_lead = this.resolveMember(copy.team_lead, lookup);
+        }
+        if (copy.reporter && typeof copy.reporter === 'object') {
+            copy.reporter = this.resolveMember(copy.reporter, lookup);
+        }
+        if (Array.isArray(copy.members)) {
+            copy.members = copy.members.map((m: any) =>
+                this.resolveMember(m, lookup),
+            );
+        }
+        return copy;
+    }
+
     getRawProjects(): ProjectPlanItem[] {
-        this.syncTaskCounts(this.projects);
         return this.projects.map((p) => this.sanitizeProject(p));
     }
 
-    private syncTaskCounts(plans: ProjectPlanItem[]): void {
+    private async syncTaskCounts(plans: ProjectPlanItem[]): Promise<void> {
         try {
-            const taskStorePath = path.join(
-                process.cwd(),
-                'storage',
-                'tasks_data_store.json',
-            );
-            if (fs.existsSync(taskStorePath)) {
-                const raw = fs.readFileSync(taskStorePath, 'utf8');
-                const parsed = JSON.parse(raw);
-                if (parsed && Array.isArray(parsed.tasks)) {
-                    const tasks: any[] = parsed.tasks;
-                    for (const p of plans) {
-                        const pid = (p.id || '').toLowerCase();
-                        const pcode = (p.code || '')
-                            .toLowerCase()
-                            .replace('#', '');
-                        const pname = (p.name || '').toLowerCase();
+            const dbTasks = await this._taskRepo.find();
+            for (const p of plans) {
+                const pid = (p.id || '').toLowerCase();
+                const pcode = (p.code || '')
+                    .toLowerCase()
+                    .replace('#', '');
+                const pname = (p.name || '').toLowerCase();
 
-                        const projectTasks = tasks.filter((t: any) => {
-                            const tPid = (t.project_id || '')
-                                .toLowerCase()
-                                .trim();
-                            const tPname = (t.project_name || '')
-                                .toLowerCase()
-                                .trim();
-                            const tCode = (t.code || '')
-                                .toLowerCase()
-                                .trim()
-                                .replace('#', '');
+                const projectTasks = dbTasks.filter((t: any) => {
+                    const tPid = (t.project_id || '')
+                        .toLowerCase()
+                        .trim();
+                    const tPname = (t.project_name || '')
+                        .toLowerCase()
+                        .trim();
+                    const tCode = (t.code || '')
+                        .toLowerCase()
+                        .trim()
+                        .replace('#', '');
 
-                            return (
-                                (tPid && (tPid === pid || tPid === pcode)) ||
-                                (pcode &&
-                                    (tCode === pcode ||
-                                        tCode.startsWith(pcode + '-'))) ||
-                                (pname && tPname === pname)
-                            );
-                        });
+                    return (
+                        (tPid && (tPid === pid || tPid === pcode)) ||
+                        (pcode &&
+                            (tCode === pcode ||
+                                tCode.startsWith(pcode + '-'))) ||
+                        (pname && tPname === pname)
+                    );
+                });
 
-                        p.total_tasks = projectTasks.length;
-                        p.completed_tasks = projectTasks.filter((t: any) =>
-                            ['done', 'completed'].includes(
-                                (t.status || '').toLowerCase(),
-                            ),
-                        ).length;
-                        p.progress =
-                            p.total_tasks > 0
-                                ? Math.round(
-                                      (p.completed_tasks / p.total_tasks) * 100,
-                                  )
-                                : 0;
-                        p.tasks = projectTasks.map((t: any) =>
-                            this.sanitizeTask(t),
-                        );
-                    }
-                }
+                p.total_tasks = projectTasks.length;
+                p.completed_tasks = projectTasks.filter((t: any) =>
+                    ['done', 'completed'].includes(
+                        (t.status || '').toLowerCase(),
+                    ),
+                ).length;
+                p.progress =
+                    p.total_tasks > 0
+                        ? Math.round(
+                              (p.completed_tasks / p.total_tasks) * 100,
+                          )
+                        : 0;
             }
         } catch (e) {
-            console.warn('Failed to sync task counts:', e);
+            // Safe fallback
         }
     }
 
@@ -726,11 +682,17 @@ export class PlanService {
             list = list.filter((p) => p.status === query.status);
         }
 
+        const lookup = await this.getLiveMemberLookup();
         const limit = query.limit ? parseInt(query.limit, 10) : 50;
         const offset = query.offset ? parseInt(query.offset, 10) : 0;
         const paginated = list
             .slice(offset, offset + limit)
-            .map((p) => this.sanitizeProject(p));
+            .map((p) =>
+                this.enrichProjectWithMembers(
+                    this.sanitizeProject(p),
+                    lookup,
+                ),
+            );
 
         return {
             status_code: 200,
@@ -774,12 +736,16 @@ export class PlanService {
                 'អ្នកមិនមានសិទ្ធិចូលមើលគម្រោងនេះទេ (You do not have permission to view this project).',
             );
         }
-        this.syncTaskCounts([plan]);
+        await this.syncTaskCounts([plan]);
 
+        const lookup = await this.getLiveMemberLookup();
         return {
             status_code: 200,
             message: 'Plan retrieved successfully',
-            data: this.sanitizeProject(plan),
+            data: this.enrichProjectWithMembers(
+                this.sanitizeProject(plan),
+                lookup,
+            ),
         };
     }
 
@@ -795,13 +761,18 @@ export class PlanService {
             );
         }
 
+        const lookup = await this.getLiveMemberLookup();
+        const enrichedMembers = (plan.members || []).map((m: any) =>
+            this.resolveMember(m, lookup),
+        );
+
         return {
             status_code: 200,
             message: 'Team members retrieved successfully',
             data: {
                 project_id: plan.id,
                 project_name: plan.name,
-                members: plan.members || [],
+                members: enrichedMembers,
             },
         };
     }
@@ -956,22 +927,29 @@ export class PlanService {
             projCode = String(maxNum + 1).padStart(4, '0');
         }
 
-        const effectiveLead =
+        const lookup = await this.getLiveMemberLookup();
+        const rawLead =
             dto.team_lead ||
             dto.lead ||
-            (dto.members?.[0]
+            (dto.members?.[0] ? dto.members[0] : null) ||
+            (user
                 ? {
-                      id: Number(dto.members[0].id) || 1,
-                      name: dto.members[0].name,
-                      role: dto.members[0].role || 'Leader',
-                      avatar: dto.members[0].avatar || null,
+                      id: user.id,
+                      email: user.email,
+                      name: user.name_kh || user.name_en,
                   }
-                : {
-                      id: user?.id || 1,
-                      name: user?.name_en || user?.name_kh || 'Project Lead',
-                      role: 'Leader',
-                      avatar: null,
-                  });
+                : null);
+        const resolvedLead = rawLead ? this.resolveMember(rawLead, lookup) : null;
+        const effectiveLead = resolvedLead || {
+            id: user?.id || 1,
+            name: user?.name_en || user?.name_kh || 'Project Lead',
+            role: 'Leader',
+            avatar: null,
+        };
+
+        const resolvedMembers = (
+            dto.members?.length ? dto.members : [effectiveLead]
+        ).map((m: any) => this.resolveMember(m, lookup));
 
         const newPlan: any = {
             ...dto,
@@ -998,7 +976,7 @@ export class PlanService {
                 dto.tasks?.filter(
                     (t: any) => t.status === 'done' || t.status === 'completed',
                 )?.length || 0,
-            members: dto.members?.length ? dto.members : [effectiveLead],
+            members: resolvedMembers,
             tasks: (dto.tasks?.length ? dto.tasks : []).map((t: any) =>
                 this.sanitizeTask(t),
             ),
@@ -1388,14 +1366,16 @@ export class PlanService {
 
         if (!plan.members) plan.members = [];
 
+        const lookup = await this.getLiveMemberLookup();
+        const matched = lookup.find(dto);
         const newMember = {
-            id: dto.id || dto.user_id || Date.now(),
-            user_id: dto.user_id || dto.id,
-            name: dto.name,
-            role: dto.role || 'Developer',
-            email: dto.email,
-            phone: dto.phone,
-            avatar: dto.avatar || null,
+            id: matched?.id || dto.id || dto.user_id || Date.now(),
+            user_id: matched?.id || dto.user_id || dto.id,
+            name: matched?.name || dto.name,
+            role: matched?.role || dto.role || 'Developer',
+            email: matched?.email || dto.email,
+            phone: matched?.phone || dto.phone,
+            avatar: matched?.avatar || dto.avatar || null,
         };
 
         plan.members.push(newMember);

@@ -15,6 +15,7 @@ import { ProjectEntity } from 'src/app/model/project/project.entity';
 import { ProjectPhaseEntity } from 'src/app/model/project/project-phase.entity';
 import { TaskEntity } from 'src/app/model/task/task.entity';
 import { TaskCommentEntity } from 'src/app/model/task/task-comment.entity';
+import { MeetingEntity } from 'src/app/model/meeting/meeting.entity';
 import { NotificationModule } from 'src/app/shared/notification/notification.module';
 import { RealtimeModule } from 'src/app/shared/realtime/realtime.module';
 
@@ -71,6 +72,7 @@ import { FileService } from 'src/app/shared/file/file.service';
             ProjectPhaseEntity,
             TaskEntity,
             TaskCommentEntity,
+            MeetingEntity,
         ]),
     ],
     controllers: [

@@ -68,10 +68,10 @@
 
             <!-- Center: Branding -->
             <div class="text-center my-auto relative z-10">
-                <div class="w-12 h-12 mx-auto rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center mb-2 shadow-inner">
-                    <mat-icon svgIcon="mdi:cube-scan" class="icon-size-7 text-blue-300"></mat-icon>
+                <div class="w-14 h-14 mx-auto rounded-xl bg-white/10 backdrop-blur-sm border border-blue-400/30 flex items-center justify-center mb-2 shadow-inner p-2">
+                    <img src="/images/logo/logo.png" alt="Logo" class="w-full h-full object-contain" (error)="$any($event.target).style.display='none'" />
                 </div>
-                <h3 class="text-xl font-medium tracking-widest text-white uppercase">WMS | SYSTEM</h3>
+                <h3 class="text-xl font-medium tracking-widest text-white uppercase">{{ data.user?.organization_name || 'WMS | SYSTEM' }}</h3>
                 <p class="text-xs text-blue-300/80 tracking-wider mt-0.5">DIGITAL MEMBERSHIP IDENTITY</p>
             </div>
 
@@ -109,7 +109,7 @@
                         <h3 class="text-base font-normal text-white uppercase tracking-wide">
                             {{ data.user?.kh_name || data.user?.name_kh || data.user?.en_name || data.user?.name_en || 'សមាជិក' }}
                         </h3>
-                        <p class="text-xs text-blue-200">{{ data.user?.role_name || 'សមាជិកប្រព័ន្ធ (Core Member)' }}</p>
+                        <p class="text-xs text-blue-200">{{ data.user?.role_name || 'សមាជិក' }}</p>
                     </div>
                     <span class="text-[11px] px-2 py-0.5 rounded bg-white/20 text-white font-mono">
                         #ID-{{ data.user?.id || '2026' }}

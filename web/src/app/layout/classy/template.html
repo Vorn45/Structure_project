@@ -15,8 +15,8 @@
         <div class="flex justify-center p-4">
             <!-- Logo -->
             <img
-                class="h-20 w-20"
-                src="images/logo/payment_logo.png"
+                class="h-16 w-16 object-contain rounded-full"
+                [src]="isSuperAdmin ? 'images/logo/default_logo.png' : (orgLogo || 'images/logo/default_logo.png')"
                 alt="img"
             />
         </div>

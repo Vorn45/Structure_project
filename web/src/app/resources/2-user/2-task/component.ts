@@ -29,7 +29,7 @@ import {
 } from './models/task.types';
 import { UserTaskService } from './task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
-import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO, DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
+import { DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 
 export interface ProjectFilterOption {
     id: string;
@@ -319,11 +319,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     private taskChatHistoryMap = new Map<number | string, TaskChatMessage[]>();
 
     // Team Members Pool for Multi-Assignee Selection (Loaded dynamically from DB)
-    teamMembers = signal<TaskMember[]>([
-        { id: 1, name: 'PISETH PANHAVORN', role: 'Super Admin / Lead Developer', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-indigo-600', email: 'pisethpanhavorn544@gmail.com' },
-        { id: 2, name: 'PUM BRUSMUNY', role: 'Frontend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-blue-600', email: 'pumprusmuny@example.com' },
-        { id: 3, name: 'THA WINNER', role: 'Backend Lead', avatar: '/images/placeholder/avatar.jpg', colorClass: 'bg-emerald-600', email: 'thawinner@example.com' },
-    ]);
+    teamMembers = signal<TaskMember[]>([]);
 
     // Aggregated list of all files for the task (task attachments + uploaded in chat)
     allTaskFiles = computed<TaskAttachment[]>(() => {

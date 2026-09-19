@@ -52,8 +52,6 @@ import {
     TaskChatMessageItem,
     ExtendedProjectItem,
     DEFAULT_AGILE_TASKS,
-    BMS_PROJECT_LOGO,
-    WMS_PROJECT_LOGO,
     DEFAULT_PROJECT_LOGO,
     getProjectFallbackLogo,
 } from './plan.types';

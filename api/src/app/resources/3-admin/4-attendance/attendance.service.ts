@@ -42,32 +42,6 @@ export interface AttendanceLogItem {
     avatar?: string | null;
 }
 
-const DEFAULT_LEAVES = [
-    {
-        user_id: 3,
-        user_name: 'រ័ត្ន វិចិត្រ',
-        department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)',
-        leave_type: 'annual' as const,
-        start_date: '2026-09-10',
-        end_date: '2026-09-12',
-        duration_days: 3,
-        reason: 'សម្រាកលំហែកាយប្រចាំឆ្នាំជាមួយក្រុមគ្រួសារ',
-        status: 'pending' as const,
-    },
-    {
-        user_id: 5,
-        user_name: 'កែវ ធីតា',
-        department: 'រចនា និងបទពិសោធន៍ (UI/UX)',
-        leave_type: 'sick' as const,
-        start_date: '2026-09-01',
-        end_date: '2026-09-02',
-        duration_days: 2,
-        reason: 'ឈឺក្បាល ផ្ដាសាយ និងគ្រុនក្តៅ',
-        status: 'approved' as const,
-        reviewer_comment: 'អនុញ្ញាត សូមសម្រាកព្យាបាលឱ្យឆាប់ជាសះស្បើយ',
-    },
-];
-
 @Injectable()
 export class AdminAttendanceService implements OnModuleInit {
     private readonly logsFilePath = path.join(process.cwd(), 'storage', 'data', 'admin_attendance_logs.json');
@@ -113,16 +87,7 @@ export class AdminAttendanceService implements OnModuleInit {
     }
 
     async onModuleInit() {
-        try {
-            const count = await this._leaveRepo.count();
-            if (count === 0) {
-                for (const item of DEFAULT_LEAVES) {
-                    await this._leaveRepo.save(this._leaveRepo.create(item));
-                }
-            }
-        } catch (e) {
-            console.warn('[AdminAttendanceService] initial leaves seed warning:', e);
-        }
+        // Pure database driven - no mock leaves seeding
     }
 
     async getRawLeaves(): Promise<LeaveRequest[]> {

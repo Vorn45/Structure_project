@@ -42,7 +42,7 @@ import {
 } from 'app/resources/2-user/2-task/models/task.types';
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
-import { BMS_PROJECT_LOGO, WMS_PROJECT_LOGO, DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
+import { DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 

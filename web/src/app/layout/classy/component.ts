@@ -62,6 +62,12 @@
 
         translatedRole: RoleEnum;
 
+        orgLogo: string | null = null;
+
+        get isSuperAdmin(): boolean {
+            return ['superadmin', 'admin'].includes(this.role?.slug ?? '');
+        }
+
         /** Personal workspace pages build their own header row, so this bar
          *  would just duplicate it. */
         get isPersonalWorkspace(): boolean {
@@ -105,6 +111,11 @@
                         user?.roles?.find((role) => role.id === preferredRoleId) ??
                         user?.roles?.find((role) => role.id === user?.is_active) ??
                         user?.roles?.find((role) => role.is_default);
+
+                    const logo = this.role?.organization?.logo;
+                    this.orgLogo = logo?.uri
+                        ? `${(logo.file_domain ?? '').replace(/\/+$/, '')}/${logo.uri.replace(/^\/+/, '')}`
+                        : null;
 
                     // Mark for check
                     this._changeDetectorRef.markForCheck();

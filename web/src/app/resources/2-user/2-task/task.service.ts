@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { env } from 'envs/env';
 import { Observable } from 'rxjs';
+import { TaskMember } from './models/task.types';
 
 export type TaskStatus =
     | 'new'
@@ -80,14 +81,6 @@ export interface TaskListResponse {
     };
 }
 
-export interface TaskMember {
-    id: number;
-    name: string;
-    avatar?: string | null;
-    role?: string;
-    email?: string;
-    colorClass?: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class UserTaskService {

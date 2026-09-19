@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 
 export * from './add-plan-dialog.types';
-import { AddPlanProjectOption, AddPlanDialogData, DEFAULT_PROJECT_OPTIONS, AgilePlanTask } from './add-plan-dialog.types';
+import { AddPlanProjectOption, AddPlanDialogData, AgilePlanTask } from './add-plan-dialog.types';
 
 @Component({
     selector: 'app-add-plan-dialog',
@@ -35,10 +35,10 @@ export class AddPlanDialogComponent {
     currentWeekNum = 36;
     weeksList: number[] = Array.from({ length: 27 }, (_, i) => 14 + i);
 
-    projectList: AddPlanProjectOption[] = DEFAULT_PROJECT_OPTIONS;
-    selectedProjectId = '4';
-    selectedProjectCode = 'BMS-DIGI';
-    selectedProjectName = 'BMS Digitech';
+    projectList: AddPlanProjectOption[] = [];
+    selectedProjectId = '';
+    selectedProjectCode = '';
+    selectedProjectName = '';
 
     constructor(
         private readonly _dialogRef: MatDialogRef<AddPlanDialogComponent>,
@@ -53,6 +53,10 @@ export class AddPlanDialogComponent {
         }
         if (data?.projects && data.projects.length > 0) {
             this.projectList = data.projects;
+            const first = data.projects[0];
+            this.selectedProjectId = String(first.id);
+            this.selectedProjectCode = first.code;
+            this.selectedProjectName = first.name;
         }
         if (data?.selectedProjectId) {
             this.selectedProjectId = String(data.selectedProjectId);

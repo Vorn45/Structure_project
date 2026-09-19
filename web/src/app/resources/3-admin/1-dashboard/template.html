@@ -7,7 +7,7 @@
             <!-- Profile Avatar in front of Greeting -->
             <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center bg-teal-800 text-white text-[15px] font-medium">
                 @if (userAvatarUrl()) {
-                    <img [src]="userAvatarUrl()" alt="Profile Avatar" class="w-full h-full object-cover" />
+                    <img [src]="userAvatarUrl()" (error)="userAvatarUrl.set(null)" alt="Profile Avatar" class="w-full h-full object-cover" />
                 } @else {
                     <span>{{ userInitials() }}</span>
                 }

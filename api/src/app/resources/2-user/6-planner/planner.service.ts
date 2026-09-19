@@ -1,24 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as fs from 'fs';
-import * as path from 'path';
-
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { PlannerStore } from 'src/app/model/user/planner-store.entity';
 import { User } from 'src/app/model/user/users.entity';
 
 import { CreateScheduleDto, QueryPlannerDto, UpdateScheduleDto } from './planner.dto';
-
-function getRelativeWeekDate(dayOffset: number): string {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day; // Monday of current week
-    const target = new Date(d);
-    target.setDate(d.getDate() + diff + dayOffset);
-    return target.toISOString().split('T')[0];
-}
 
 export interface PlannerScheduleItem {
     id: string;
@@ -55,185 +43,8 @@ export interface PlannerScheduleItem {
     updated_at: string;
 }
 
-const DEFAULT_SCHEDULES: PlannerScheduleItem[] = [
-    {
-        id: 'sch_1',
-        title: 'កែប្រែប្រព័ន្ធ Web & ពិនិត្យ UI',
-        time: '09:00 ព្រឹក - 11:30 ព្រឹក',
-        date: getRelativeWeekDate(0),
-        start_date: getRelativeWeekDate(0),
-        end_date: getRelativeWeekDate(0),
-        day_index: 0,
-        start_day_index: 0,
-        end_day_index: 0,
-        start_time: '09:00 ព្រឹក',
-        end_time: '11:30 ព្រឹក',
-        category: 'work',
-        type: 'កិច្ចប្រជុំទូទៅ',
-        color_theme: 'peach',
-        top_position: 80,
-        height: 120,
-        members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា (Panha)', role: 'Frontend Lead', initials: 'CP', bg: 'bg-slate-700 text-white' },
-            { id: 2, name: 'សុខ សុភា (Sopheak)', role: 'Project Lead', initials: 'SP', bg: 'bg-teal-700 text-white' },
-            { id: 3, name: 'រ័ត្ន វិចិត្រ (Vichet)', role: 'DevOps', initials: 'VC', bg: 'bg-indigo-700 text-white' },
-        ],
-        extra_count: 1,
-        note: 'ពិនិត្យផ្ទាំង Dashboard និង Planner ថ្មីសម្រាប់ដាក់ឱ្យប្រើប្រាស់',
-        plan_id: '4',
-        plan_name: 'BMS Digitech',
-        created_by: 1,
-        created_by_name: 'ចេង ច័ន្ទបញ្ញា',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    },
-    {
-        id: 'sch_2',
-        title: 'ត្រួតពិនិត្យគម្រោង PMS & WMS',
-        time: '01:30 រសៀល - 03:30 រសៀល',
-        date: getRelativeWeekDate(1),
-        start_date: getRelativeWeekDate(1),
-        end_date: getRelativeWeekDate(1),
-        day_index: 1,
-        start_day_index: 1,
-        end_day_index: 1,
-        start_time: '01:30 រសៀល',
-        end_time: '03:30 រសៀល',
-        category: 'work',
-        type: 'ត្រួតពិនិត្យគម្រោង',
-        color_theme: 'lavender',
-        top_position: 130,
-        height: 110,
-        members: [
-            { id: 2, name: 'សុខ សុភា (Sopheak)', role: 'Project Lead', initials: 'SP', bg: 'bg-purple-700 text-white' },
-            { id: 4, name: 'លី ម៉េងហួរ (Menghour)', role: 'Backend Lead', initials: 'MH', bg: 'bg-slate-700 text-white' },
-        ],
-        extra_count: 0,
-        note: 'ត្រួតពិនិត្យលទ្ធផលការងារសប្តាហ៍មុន និងរៀបចំកាលវិភាគ Sprint ថ្មី',
-        plan_id: '2',
-        plan_name: 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន និងបុគ្គលិក (WMS)',
-        created_by: 2,
-        created_by_name: 'សុខ សុភា',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    },
-    {
-        id: 'sch_3',
-        title: 'ប្រជុំអនឡាញក្រុមការងារបច្ចេកវិទ្យា',
-        time: '10:00 ព្រឹក - 11:30 ព្រឹក',
-        date: getRelativeWeekDate(2),
-        start_date: getRelativeWeekDate(2),
-        end_date: getRelativeWeekDate(2),
-        day_index: 2,
-        start_day_index: 2,
-        end_day_index: 2,
-        start_time: '10:00 ព្រឹក',
-        end_time: '11:30 ព្រឹក',
-        category: 'work',
-        type: 'ប្រជុំអនឡាញ',
-        color_theme: 'peach',
-        top_position: 90,
-        height: 115,
-        members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា (Panha)', role: 'Frontend Lead', initials: 'CP', bg: 'bg-indigo-700 text-white' },
-            { id: 5, name: 'គង់ ចរិយា (Chariya)', role: 'QA Lead', initials: 'CY', bg: 'bg-amber-600 text-white' },
-            { id: 6, name: 'ហេង ពិសាល (Piseth)', role: 'Mobile Dev', initials: 'PS', bg: 'bg-emerald-600 text-white' },
-        ],
-        extra_count: 1,
-        note: 'តភ្ជាប់ប្រព័ន្ធ Real-time Notification និង Telegram Bot Service',
-        created_by: 1,
-        created_by_name: 'ចេង ច័ន្ទបញ្ញា',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    },
-    {
-        id: 'sch_4',
-        title: 'ពិភាក្សាស្ថាបត្យកម្មប្រព័ន្ធ & Database',
-        time: '02:00 រសៀល - 04:30 រសៀល',
-        date: getRelativeWeekDate(3),
-        start_date: getRelativeWeekDate(3),
-        end_date: getRelativeWeekDate(3),
-        day_index: 3,
-        start_day_index: 3,
-        end_day_index: 3,
-        start_time: '02:00 រសៀល',
-        end_time: '04:30 រសៀល',
-        category: 'work',
-        type: 'ពិភាក្សាការងារ',
-        color_theme: 'mint',
-        top_position: 140,
-        height: 125,
-        members: [
-            { id: 3, name: 'រ័ត្ន វិចិត្រ (Vichet)', role: 'DevOps', initials: 'VC', bg: 'bg-emerald-700 text-white' },
-            { id: 4, name: 'លី ម៉េងហួរ (Menghour)', role: 'Backend Lead', initials: 'MH', bg: 'bg-slate-800 text-white' },
-        ],
-        extra_count: 0,
-        note: 'រៀបចំ Read Replicas និង Optimization លើ Postgres Tables',
-        created_by: 3,
-        created_by_name: 'រ័ត្ន វិចិត្រ',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    },
-    {
-        id: 'sch_5',
-        title: 'សម្រាកខ្លី និងជួបញ៉ាំកាហ្វេ',
-        time: '03:30 រសៀល - 04:00 រសៀល',
-        date: getRelativeWeekDate(4),
-        start_date: getRelativeWeekDate(4),
-        end_date: getRelativeWeekDate(4),
-        day_index: 4,
-        start_day_index: 4,
-        end_day_index: 4,
-        start_time: '03:30 រសៀល',
-        end_time: '04:00 រសៀល',
-        category: 'breaks',
-        type: 'សម្រាកខ្លី',
-        color_theme: 'pink',
-        top_position: 210,
-        height: 90,
-        members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initials: 'CP', bg: 'bg-rose-600 text-white' },
-        ],
-        extra_count: 0,
-        note: 'សម្រាកយកថាមពលជាមួយកាហ្វេ',
-        created_by: 1,
-        created_by_name: 'ចេង ច័ន្ទបញ្ញា',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    },
-    {
-        id: 'sch_6',
-        title: 'រៀបចំផែនការ & សង្ខេបលទ្ធផលសប្តាហ៍',
-        time: '09:30 ព្រឹក - 11:30 ព្រឹក',
-        date: getRelativeWeekDate(5),
-        start_date: getRelativeWeekDate(5),
-        end_date: getRelativeWeekDate(5),
-        day_index: 5,
-        start_day_index: 5,
-        end_day_index: 5,
-        start_time: '09:30 ព្រឹក',
-        end_time: '11:30 ព្រឹក',
-        category: 'myself',
-        type: 'ផ្ទាល់ខ្លួន',
-        color_theme: 'peach',
-        top_position: 90,
-        height: 100,
-        members: [
-            { id: 1, name: 'ចេង ច័ន្ទបញ្ញា', role: 'Frontend Lead', initials: 'CP', bg: 'bg-amber-700 text-white' },
-        ],
-        extra_count: 0,
-        note: 'សង្ខេបការងារសម្រេចបានក្នុងសប្តាហ៍ និងរៀបចំកិច្ចការអាទិភាពបន្ទាប់',
-        created_by: 1,
-        created_by_name: 'ចេង ច័ន្ទបញ្ញា',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    },
-];
-
 @Injectable()
 export class PlannerService {
-    private readonly _storageFile = path.resolve(process.cwd(), 'storage', 'data', 'planner_schedules.json');
-
     constructor(
         @InjectRepository(PlannerStore)
         private readonly _storeRepo: Repository<PlannerStore>,
@@ -242,49 +53,95 @@ export class PlannerService {
     ) {}
 
     // =========================================================================
+    // LIVE USER HYDRATION HELPERS
+    // =========================================================================
+    private formatAvatarUrl(file?: { uri?: string | null; file_domain?: string | null } | null): string | null {
+        if (!file || !file.uri) return null;
+        const rawUri = file.uri.trim();
+        if (!rawUri) return null;
+
+        if (/^https?:\/\//i.test(rawUri)) {
+            if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/(uploads|storage)\//i.test(rawUri)) {
+                const stripped = rawUri.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i, '');
+                return `/${stripped.replace(/^\/+/, '')}`;
+            }
+            return rawUri;
+        }
+
+        let domain = (file.file_domain || '').trim().replace(/\/+$/, '');
+        if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(domain)) {
+            domain = '';
+        }
+
+        const uri = rawUri.replace(/^\/+/, '');
+        return domain ? `${domain}/${uri}` : `/${uri}`;
+    }
+
+    private async getLiveMemberLookup(): Promise<Map<string, { id: number; name: string; avatar: string | null; role: string; email: string }>> {
+        const lookup = new Map<string, { id: number; name: string; avatar: string | null; role: string; email: string }>();
+        try {
+            const users = await this._userRepo.find({
+                relations: ['user_roles', 'user_roles.role', 'avatar_file'],
+            });
+            for (const u of users) {
+                const avatar = this.formatAvatarUrl(u.avatar_file) || u.telegram_photo_url || null;
+                const role = u.user_roles?.[0]?.role?.name_en || u.user_roles?.[0]?.role?.name_kh || 'Member';
+                const name = u.name_kh || u.name_en || `User #${u.id}`;
+                const entry = { id: u.id, name, avatar, role, email: u.email || '' };
+                lookup.set(String(u.id), entry);
+                if (u.email) lookup.set(u.email.toLowerCase().trim(), entry);
+                if (u.phone) lookup.set(u.phone.replace(/\D/g, ''), entry);
+                if (u.name_kh) lookup.set(u.name_kh.toLowerCase().trim(), entry);
+                if (u.name_en) lookup.set(u.name_en.toLowerCase().trim(), entry);
+            }
+        } catch (e) {
+            console.warn('[PlannerService] Failed to load live users for lookup:', e);
+        }
+        return lookup;
+    }
+
+    private enrichSchedulesWithLiveMembers(
+        schedules: PlannerScheduleItem[],
+        lookup: Map<string, { id: number; name: string; avatar: string | null; role: string; email: string }>
+    ): PlannerScheduleItem[] {
+        return schedules.map((sch) => {
+            const enrichedMembers = (sch.members || []).map((m) => {
+                const key = String(m.id || m.name || '');
+                const live = lookup.get(key) || (m.name ? lookup.get(m.name.toLowerCase().trim()) : null);
+                if (live) {
+                    return {
+                        ...m,
+                        id: live.id,
+                        name: live.name,
+                        role: live.role || m.role,
+                        avatar: live.avatar ?? m.avatar,
+                    };
+                }
+                return m;
+            });
+
+            return {
+                ...sch,
+                members: enrichedMembers,
+            };
+        });
+    }
+
+    // =========================================================================
     // STORE HELPERS
     // =========================================================================
     private async _readSchedules(): Promise<PlannerScheduleItem[]> {
-        let schedules: PlannerScheduleItem[] = [];
-        let hasStore = false;
-
         try {
             const dbStore = await this._storeRepo.findOne({
                 where: { key: 'default_planner_store' },
             });
             if (dbStore && Array.isArray(dbStore.schedules)) {
-                schedules = dbStore.schedules;
-                hasStore = true;
+                return dbStore.schedules;
             }
         } catch (e) {
-            // Fallback to disk storage
+            console.warn('[PlannerService] Failed to read schedules from DB:', e);
         }
-
-        if (!hasStore && fs.existsSync(this._storageFile)) {
-            try {
-                const data = fs.readFileSync(this._storageFile, 'utf8');
-                schedules = JSON.parse(data);
-                hasStore = true;
-            } catch (err) {}
-        }
-
-        // Backward compatibility fallback to scratch file if present
-        const legacyFile = path.resolve(process.cwd(), 'scratch_planner_store.json');
-        if (!hasStore && fs.existsSync(legacyFile)) {
-            try {
-                const data = fs.readFileSync(legacyFile, 'utf8');
-                schedules = JSON.parse(data);
-                hasStore = true;
-            } catch (err) {}
-        }
-
-        // Only initialize defaults on fresh first-ever run
-        if (!hasStore) {
-            schedules = DEFAULT_SCHEDULES;
-            await this._writeSchedules(schedules);
-        }
-
-        return schedules;
+        return [];
     }
 
     private async _writeSchedules(schedules: PlannerScheduleItem[]): Promise<void> {
@@ -301,15 +158,9 @@ export class PlannerService {
                 dbStore.schedules = schedules;
             }
             await this._storeRepo.save(dbStore);
-        } catch (e) {}
-
-        try {
-            const dir = path.dirname(this._storageFile);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            fs.writeFileSync(this._storageFile, JSON.stringify(schedules, null, 2), 'utf8');
-        } catch (err) {}
+        } catch (e) {
+            console.warn('[PlannerService] Failed to write schedules to DB:', e);
+        }
     }
 
     // =========================================================================
@@ -400,12 +251,15 @@ export class PlannerService {
             breaks: visibleSchedules.filter((s) => s.category === 'breaks').length,
         };
 
+        const lookup = await this.getLiveMemberLookup();
+        const enrichedResults = this.enrichSchedulesWithLiveMembers(filtered, lookup);
+
         return {
             status_code: 200,
             message: 'ទាញយកទិន្នន័យកាលវិភាគបានជោគជ័យ',
             data: {
-                results: filtered,
-                total: filtered.length,
+                results: enrichedResults,
+                total: enrichedResults.length,
                 counts,
             },
         };
@@ -420,10 +274,12 @@ export class PlannerService {
         if (!schedule) {
             throw new NotFoundException(`រកមិនឃើញកាលវិភាគសម្គាល់ ${id}`);
         }
+        const lookup = await this.getLiveMemberLookup();
+        const enriched = this.enrichSchedulesWithLiveMembers([schedule], lookup)[0];
         return {
             status_code: 200,
             message: 'ទាញយកកាលវិភាគបានជោគជ័យ',
-            data: schedule,
+            data: enriched,
         };
     }
 

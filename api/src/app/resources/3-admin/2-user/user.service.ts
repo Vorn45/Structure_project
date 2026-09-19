@@ -42,132 +42,9 @@ export interface AdminUserItem {
     note?: string | null;
 }
 
-const DEFAULT_USERS: AdminUserItem[] = [
-    {
-        id: 1,
-        name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-        name_en: 'Piseth Panhavorn',
-        email: 'pisethpanhavorn544@gmail.com',
-        phone: '010 843 612',
-        role: 'Super Admin',
-        department: 'ព័ត៌មានវិទ្យា (IT)',
-        position: 'Super Admin Architect',
-        avatar: null,
-        is_active: 1,
-        projects_count: 2,
-        created_at: '2026-01-10T08:00:00.000Z',
-        telegram_username: '@piseth_p',
-        gender: 'male',
-        date_of_birth: '1996-05-12',
-        address: 'រាជធានីភ្នំពេញ',
-        join_date: '2024-01-10',
-        note: 'ប្រធានផ្នែកបច្ចេកទេស និងស្ថាបត្យកម្មប្រព័ន្ធ',
-    },
-    {
-        id: 2,
-        name_kh: 'ពុំ ប្រុសមុន្នី',
-        name_en: 'Pum Brusmuny',
-        email: 'pumprusmuny@example.com',
-        phone: '087 280 875',
-        role: 'Super Admin',
-        department: 'គ្រប់គ្រងគម្រោង (PMO)',
-        position: 'Project Director & Lead',
-        avatar: null,
-        is_active: 1,
-        projects_count: 2,
-        created_at: '2026-01-15T08:00:00.000Z',
-        telegram_username: '@brusmuny',
-        gender: 'male',
-        date_of_birth: '1994-08-20',
-        address: 'រាជធានីភ្នំពេញ',
-        join_date: '2024-01-15',
-        note: 'ដឹកនាំគម្រោង និងការគ្រប់គ្រងទូទៅ',
-    },
-    {
-        id: 3,
-        name_kh: 'ថា វីនណឺរ',
-        name_en: 'Tha Winner',
-        email: 'thawinner@example.com',
-        phone: '067 776 682',
-        role: 'Team Lead',
-        department: 'ព័ត៌មានវិទ្យា (IT)',
-        position: 'Senior Frontend Architect',
-        avatar: null,
-        is_active: 1,
-        projects_count: 2,
-        created_at: '2026-02-01T08:00:00.000Z',
-        telegram_username: '@thawinner',
-        gender: 'male',
-        date_of_birth: '1998-11-03',
-        address: 'រាជធានីភ្នំពេញ',
-        join_date: '2024-02-01',
-        note: 'ឯកទេសខាង Angular, Web Architecture',
-    },
-    {
-        id: 4,
-        name_kh: 'ភួង សុវណ្ណារ៉ា',
-        name_en: 'Phuong Sovannara',
-        email: 'phuongsovannara@gmail.com',
-        phone: '011 242 425',
-        role: 'Member',
-        department: 'ហេដ្ឋារចនាសម្ព័ន្ធ (DevOps)',
-        position: 'Cloud & Security Specialist',
-        avatar: null,
-        is_active: 1,
-        projects_count: 1,
-        created_at: '2026-02-15T08:00:00.000Z',
-        telegram_username: '@sovannara_devops',
-        gender: 'male',
-        date_of_birth: '1997-03-15',
-        address: 'ខេត្តកណ្ដាល',
-        join_date: '2024-02-15',
-        note: 'មើលការខុសត្រូវ CI/CD និង Cloud Security',
-    },
-    {
-        id: 5,
-        name_kh: 'លី ម៉េងហួរ',
-        name_en: 'Ly Menghour',
-        email: 'menghour.ly@gmail.com',
-        phone: '077 889 900',
-        role: 'Team Lead',
-        department: 'ព័ត៌មានវិទ្យា (IT)',
-        position: 'Backend Lead Architect',
-        avatar: null,
-        is_active: 1,
-        projects_count: 1,
-        created_at: '2026-03-01T08:00:00.000Z',
-        telegram_username: '@ly_menghour',
-        gender: 'male',
-        date_of_birth: '1995-09-28',
-        address: 'រាជធានីភ្នំពេញ',
-        join_date: '2024-03-01',
-        note: 'មើលការខុសត្រូវ API & Database Performance',
-    },
-    {
-        id: 6,
-        name_kh: 'កែវ ធីតា',
-        name_en: 'Keo Thida',
-        email: 'thida.keo@gmail.com',
-        phone: '010 445 566',
-        role: 'Member',
-        department: 'រចនា និងបទពិសោធន៍ (UI/UX)',
-        position: 'Lead UI/UX Designer',
-        avatar: null,
-        is_active: 1,
-        projects_count: 2,
-        created_at: '2026-03-10T08:00:00.000Z',
-        telegram_username: '@thida_keo',
-        gender: 'female',
-        date_of_birth: '1999-07-19',
-        address: 'ខេត្តសៀមរាប',
-        join_date: '2024-03-10',
-        note: 'រចនា Design System និងបទពិសោធន៍អ្នកប្រើប្រាស់',
-    },
-];
-
 @Injectable()
 export class AdminUserService implements OnModuleInit {
-    private localUsers: AdminUserItem[] = [...DEFAULT_USERS];
+    private localUsers: AdminUserItem[] = [];
     private userMeta: Record<string, {
         department?: string;
         position?: string;
@@ -202,9 +79,30 @@ export class AdminUserService implements OnModuleInit {
     }
 
     async onModuleInit(): Promise<void> {
-        // Initialization without overriding real database roles
+        await this.syncUsersFromDb();
     }
 
+    async syncUsersFromDb(): Promise<AdminUserItem[]> {
+        try {
+            const dbUsers = await this._userRepo.find({
+                relations: {
+                    avatar_file: true,
+                    user_roles: {
+                        role: true,
+                    },
+                },
+                order: { id: 'ASC' },
+            });
+
+            if (dbUsers && dbUsers.length > 0) {
+                const rawProjects = this._planService?.getRawProjects?.() || [];
+                this.localUsers = dbUsers.map((u) => this.mapDbUserToAdminUser(u, rawProjects));
+            }
+        } catch (e) {
+            console.warn('[AdminUserService] syncUsersFromDb error:', e);
+        }
+        return this.localUsers;
+    }
 
     private loadFromDisk(): void {
         try {
@@ -214,16 +112,6 @@ export class AdminUserService implements OnModuleInit {
             }
         } catch (e) {
             console.warn('Failed to load admin user meta:', e);
-        }
-
-        try {
-            if (fs.existsSync(this.storeFilePath)) {
-                const raw = fs.readFileSync(this.storeFilePath, 'utf8');
-                const data = JSON.parse(raw);
-                if (data && Array.isArray(data) && data.length > 0) this.localUsers = data;
-            }
-        } catch (e) {
-            console.warn('Failed to load admin users from disk:', e);
         }
     }
 
@@ -332,6 +220,65 @@ export class AdminUserService implements OnModuleInit {
         };
     }
 
+    private mapDbUserToAdminUser(u: User, rawProjects: any[] = []): AdminUserItem {
+        const meta = this.getUserMeta(u.id, u.email, u.phone);
+        let detectedRole = meta.role || 'Member';
+
+        const roleSlugs = (u.user_roles || []).map((ur) => ur.role?.slug?.toLowerCase() || '');
+        if (roleSlugs.includes('superadmin') || roleSlugs.includes('super_admin')) {
+            detectedRole = 'Super Admin';
+        } else if (roleSlugs.includes('manager') || roleSlugs.includes('admin')) {
+            detectedRole = 'Manager';
+        } else if (roleSlugs.includes('lead') || roleSlugs.includes('team_lead')) {
+            detectedRole = 'Team Lead';
+        }
+
+        const userPhoneNorm = (u.phone || '').replace(/\D/g, '');
+        const userEmailNorm = (u.email || '').toLowerCase().trim();
+
+        const assignedProjects = rawProjects.filter((p) => {
+            return (p.members || []).some((m: any) => {
+                if (m.id && String(m.id) === String(u.id)) return true;
+                if (m.email && userEmailNorm && m.email.toLowerCase().trim() === userEmailNorm) return true;
+                if (m.phone && userPhoneNorm && m.phone.replace(/\D/g, '') === userPhoneNorm) return true;
+                if (m.name && (m.name === u.name_kh || m.name === u.name_en)) return true;
+                return false;
+            });
+        });
+
+        const projectsCount = assignedProjects.length > 0 ? assignedProjects.length : (meta.projects_count ?? 0);
+
+        let userAvatarUrl: string | null = null;
+        if (u.avatar_file?.uri) {
+            userAvatarUrl = this.formatAvatarUrl(u.avatar_file);
+        } else if (u.telegram_photo_url) {
+            userAvatarUrl = u.telegram_photo_url;
+        } else if (meta.avatar && !meta.avatar.includes('portrait')) {
+            userAvatarUrl = this.sanitizeAvatarUrl(meta.avatar);
+        }
+
+        return {
+            id: u.id,
+            name_kh: u.name_kh || u.name_en || 'បុគ្គលិក',
+            name_en: u.name_en || u.name_kh || 'Staff Member',
+            email: u.email || '',
+            phone: u.phone || '',
+            role: detectedRole,
+            department: meta.department || 'ព័ត៌មានវិទ្យា (IT)',
+            position: meta.position || 'Software Engineer',
+            avatar: userAvatarUrl,
+            is_active: u.is_active !== undefined ? u.is_active : 1,
+            projects_count: projectsCount,
+            created_at: u.created_at ? u.created_at.toISOString() : new Date().toISOString(),
+            telegram_username: u.telegram_username || meta.telegram_username || null,
+            gender: meta.gender || (u.sex_id === 2 ? 'female' : 'male'),
+            date_of_birth: meta.date_of_birth || (u.date_of_birth ? new Date(u.date_of_birth).toISOString().split('T')[0] : null),
+            address: meta.address || null,
+            join_date: meta.join_date || (u.created_at ? u.created_at.toISOString().split('T')[0] : null),
+            note: meta.note || null,
+        };
+    }
+
     async getUsers(user: UserPayload, query: QueryAdminUserDto) {
         let list: AdminUserItem[] = [];
 
@@ -348,74 +295,15 @@ export class AdminUserService implements OnModuleInit {
 
             if (dbUsers && dbUsers.length > 0) {
                 const rawProjects = this._planService?.getRawProjects?.() || [];
-
-                list = dbUsers.map((u) => {
-                    // Derive role
-                    const meta = this.getUserMeta(u.id, u.email, u.phone);
-                    let detectedRole = meta.role || 'Member';
-
-                    const roleSlugs = (u.user_roles || []).map((ur) => ur.role?.slug?.toLowerCase() || '');
-                    if (roleSlugs.includes('superadmin') || roleSlugs.includes('super_admin')) {
-                        detectedRole = 'Super Admin';
-                    } else if (roleSlugs.includes('manager') || roleSlugs.includes('admin')) {
-                        detectedRole = 'Manager';
-                    } else if (roleSlugs.includes('lead') || roleSlugs.includes('team_lead')) {
-                        detectedRole = 'Team Lead';
-                    }
-
-                    // Calculate real project assignments
-                    const userPhoneNorm = (u.phone || '').replace(/\D/g, '');
-                    const userEmailNorm = (u.email || '').toLowerCase().trim();
-
-                    const assignedProjects = rawProjects.filter((p) => {
-                        return (p.members || []).some((m: any) => {
-                            if (m.id && String(m.id) === String(u.id)) return true;
-                            if (m.email && userEmailNorm && m.email.toLowerCase().trim() === userEmailNorm) return true;
-                            if (m.phone && userPhoneNorm && m.phone.replace(/\D/g, '') === userPhoneNorm) return true;
-                            if (m.name && (m.name === u.name_kh || m.name === u.name_en)) return true;
-                            return false;
-                        });
-                    });
-
-                    const projectsCount = assignedProjects.length > 0 ? assignedProjects.length : (meta.projects_count ?? 0);
-
-                    let userAvatarUrl: string | null = null;
-                    if (u.avatar_file?.uri) {
-                        userAvatarUrl = this.formatAvatarUrl(u.avatar_file);
-                    } else if (u.telegram_photo_url) {
-                        userAvatarUrl = u.telegram_photo_url;
-                    } else if (meta.avatar && !meta.avatar.includes('portrait')) {
-                        userAvatarUrl = this.sanitizeAvatarUrl(meta.avatar);
-                    }
-
-                    return {
-                        id: u.id,
-                        name_kh: u.name_kh || u.name_en || 'បុគ្គលិក',
-                        name_en: u.name_en || u.name_kh || 'Staff Member',
-                        email: u.email || '',
-                        phone: u.phone || '',
-                        role: detectedRole,
-                        department: meta.department || 'ព័ត៌មានវិទ្យា (IT)',
-                        position: meta.position || 'Software Engineer',
-                        avatar: userAvatarUrl,
-                        is_active: u.is_active !== undefined ? u.is_active : 1,
-                        projects_count: projectsCount,
-                        created_at: u.created_at ? u.created_at.toISOString() : new Date().toISOString(),
-                        telegram_username: u.telegram_username || meta.telegram_username || null,
-                        gender: meta.gender || (u.sex_id === 2 ? 'female' : 'male'),
-                        date_of_birth: meta.date_of_birth || (u.date_of_birth ? new Date(u.date_of_birth).toISOString().split('T')[0] : null),
-                        address: meta.address || null,
-                        join_date: meta.join_date || (u.created_at ? u.created_at.toISOString().split('T')[0] : null),
-                        note: meta.note || null,
-                    };
-                });
+                list = dbUsers.map((u) => this.mapDbUserToAdminUser(u, rawProjects));
+                this.localUsers = list;
             }
         } catch (err: any) {
             console.warn('[AdminUserService] DB users query failed, using local store:', err?.message || err);
         }
 
         // Fallback to local store if DB returns empty
-        if (list.length === 0) {
+        if (list.length === 0 && this.localUsers.length > 0) {
             list = [...this.localUsers].map((u) => ({
                 ...u,
                 avatar: this.sanitizeAvatarUrl(u.avatar),

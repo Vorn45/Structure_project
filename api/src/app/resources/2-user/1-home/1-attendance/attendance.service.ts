@@ -32,49 +32,15 @@ export class AttendanceService {
         todayHours: '0.0h',
     };
 
-    private realtimeLogs: AttendanceRealtimeLog[] = [
-        {
-            id: '1',
-            name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-            time: '07:55 AM',
-            location: '11.5564° N, 104.9282° E (Phnom Penh HQ)',
-            latitude: 11.5564,
-            longitude: 104.9282,
-            accuracy: 8,
-            device: 'iPhone 15 Pro',
-            status: 'on_time',
-        },
-        {
-            id: '2',
-            name: 'ពុំ ប្រុសមុន្នី',
-            time: '07:58 AM',
-            location: '11.5568° N, 104.9285° E (Phnom Penh HQ)',
-            latitude: 11.5568,
-            longitude: 104.9285,
-            accuracy: 12,
-            device: 'Samsung Galaxy S24',
-            status: 'on_time',
-        },
-        {
-            id: '3',
-            name: 'ថា វីនណឺរ',
-            time: '08:02 AM',
-            location: '11.5570° N, 104.9290° E (Phnom Penh HQ)',
-            latitude: 11.5570,
-            longitude: 104.9290,
-            accuracy: 15,
-            device: 'Xiaomi 14',
-            status: 'on_time',
-        },
-    ];
+    private realtimeLogs: AttendanceRealtimeLog[] = [];
 
     private stats = {
-        present_days: 22,
-        late_days: 1,
+        present_days: 0,
+        late_days: 0,
         leave_days: 0,
-        total_working_hours: 176,
-        overtime_hours: 8.5,
-        attendance_rate: 98.5,
+        total_working_hours: 0,
+        overtime_hours: 0,
+        attendance_rate: 100,
     };
 
     async getAttendance(user?: UserPayload) {

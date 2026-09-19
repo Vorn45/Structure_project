@@ -14,28 +14,9 @@ export interface SupportTicketItem {
     created_at: string;
 }
 
-const INITIAL_TICKETS: SupportTicketItem[] = [
-    {
-        id: 'TCK-8812',
-        subject: 'បញ្ហាមិនអាចស្នើសុំច្បាប់លើទូរស័ព្ទដៃ',
-        category: 'attendance',
-        description: 'នៅពេលចុចលើប្រតិទិន មិនបង្ហាញកាលបរិច្ឆេទជ្រើសរើស។',
-        status: 'in_review',
-        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-    },
-    {
-        id: 'TCK-7740',
-        subject: 'ស្នើសុំភ្ជាប់ឧបករណ៍ Passkey ទីពីរ',
-        category: 'security',
-        description: 'ចង់បន្ថែម MacBook Pro M3 សម្រាប់ Scan TouchID ចូលប្រព័ន្ធ។',
-        status: 'resolved',
-        created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-    },
-];
-
 @Injectable()
 export class SupportService {
-    private tickets: SupportTicketItem[] = [...INITIAL_TICKETS];
+    private tickets: SupportTicketItem[] = [];
 
     async getHelpSupport(user: UserPayload) {
         return {

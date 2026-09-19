@@ -110,522 +110,97 @@ export interface TaskCommentItem {
     }>;
 }
 
-const INITIAL_MEMBERS = [
-    {
-        id: 101,
-        name: 'PISETH PANHAVORN',
-        role: 'Project Manager',
-        phone: '010843612',
-        email: 'pisethpanhavorn544@gmail.com',
-        avatar: null,
-    },
-    {
-        id: 102,
-        name: 'PUM BRUSMUNY',
-        role: 'Developer',
-        phone: '087280875',
-        email: 'pumbrusmuny@example.com',
-        avatar: null,
-    },
-    {
-        id: 103,
-        name: 'THA WINNER',
-        role: 'Developer',
-        phone: '067776682',
-        email: 'thawinner@example.com',
-        avatar: null,
-    },
-    {
-        id: 104,
-        name: 'PHUONG SOVANNARA',
-        role: 'Developer',
-        phone: '011242425',
-        email: 'phuongsovannara@gmail.com',
-        avatar: null,
-    },
-];
+export interface LiveMemberInfo {
+    id: number;
+    name: string;
+    role: string;
+    avatar: string | null;
+    email: string;
+    phone: string;
+}
 
-const INITIAL_TASKS: TaskItem[] = [
-    // 10 Evenbooking Tasks
-    {
-        id: 1001,
-        code: '#0004-1',
-        title: 'About us and contact us',
-        description:
-            'Implement about us page layout, company contact details, and inquiry form submission.',
-        task_type: 'feature',
-        module: 'Information',
-        status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.HIGH,
-        progress: 100,
-        comments_count: 8,
-        attachments_count: 0,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T08:00:00.000Z',
-        updated_at: '2026-09-10T12:00:00.000Z',
-    },
-    {
-        id: 1002,
-        code: '#0004-2',
-        title: 'Improve Navbar',
-        description:
-            'Refactor responsive navigation bar with mobile burger menu and active route highlight.',
-        task_type: 'feature',
-        module: 'Navigation',
-        status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 100,
-        comments_count: 10,
-        attachments_count: 2,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T08:15:00.000Z',
-        updated_at: '2026-09-10T12:00:00.000Z',
-    },
-    {
-        id: 1003,
-        code: '#0004-3',
-        title: 'Improve profile panel',
-        description:
-            'Design user profile side drawer with account summary, edit button, and logout option.',
-        task_type: 'feature',
-        module: 'User Profile',
-        status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 100,
-        comments_count: 6,
-        attachments_count: 1,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T08:30:00.000Z',
-        updated_at: '2026-09-10T12:00:00.000Z',
-    },
-    {
-        id: 1004,
-        code: '#0004-4',
-        title: 'Redesign event layout',
-        description:
-            'Modernize event cards grid with banner images, date badge, venue tag, and book button.',
-        task_type: 'feature',
-        module: 'Events',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.URGENT,
-        progress: 20,
-        comments_count: 6,
-        attachments_count: 2,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T08:45:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 1005,
-        code: '#0004-5',
-        title: 'Improve Footer UI',
-        description:
-            'Update footer links, social media icons, copyright notice, and dark mode styling.',
-        task_type: 'improvement',
-        module: 'Footer',
-        status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 100,
-        comments_count: 5,
-        attachments_count: 2,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T09:00:00.000Z',
-        updated_at: '2026-09-10T12:00:00.000Z',
-    },
-    {
-        id: 1006,
-        code: '#0004-6',
-        title: 'Improve or redesign home page',
-        description:
-            'Implement hero banner slider, trending events carousel, and category pill filters.',
-        task_type: 'feature',
-        module: 'Home Page',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.URGENT,
-        progress: 15,
-        comments_count: 5,
-        attachments_count: 1,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T09:15:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 1007,
-        code: '#0004-7',
-        title: 'Improve bar chart change to use echart',
-        description:
-            'Replace standard canvas chart with Apache ECharts for ticket sales analytics.',
-        task_type: 'feature',
-        module: 'Analytics',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 30,
-        comments_count: 5,
-        attachments_count: 1,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T09:30:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 1008,
-        code: '#0004-8',
-        title: 'Allow change phone number',
-        description:
-            'Add OTP verification step when user requests phone number update in settings.',
-        task_type: 'feature',
-        module: 'User Settings',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 0,
-        comments_count: 3,
-        attachments_count: 1,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T09:45:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 1009,
-        code: '#0004-9',
-        title: 'Add organizer name in event',
-        description:
-            'Display organizer brand, profile avatar, and verified badge on event detail screen.',
-        task_type: 'feature',
-        module: 'Events',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 0,
-        comments_count: 3,
-        attachments_count: 1,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T10:00:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 1010,
-        code: '#0004-10',
-        title: 'Make it can upload profile',
-        description:
-            'Enable profile image cropping, drag and drop upload, and cloud image optimization.',
-        task_type: 'feature',
-        module: 'User Profile',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 0,
-        comments_count: 2,
-        attachments_count: 1,
-        due_date: '2026-09-25T00:00:00.000Z',
-        project_id: '0004',
-        project_name: 'Evenbooking-System',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-08-25T10:15:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
+export class LiveMemberLookup {
+    public byId = new Map<number, LiveMemberInfo>();
+    public byPhone = new Map<string, LiveMemberInfo>();
+    public byEmail = new Map<string, LiveMemberInfo>();
+    public byName = new Map<string, LiveMemberInfo>();
+    public avatarMap = new Map<string, string>();
 
-    // 6 BMS Digitech Tasks
-    {
-        id: 2001,
-        code: '#0002-1',
-        title: 'Project | Folder | Drag & Drop',
-        description:
-            'Implement intuitive drag and drop folder organization for project documents.',
-        task_type: 'feature',
-        module: 'Project | Folder',
-        status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.HIGH,
-        progress: 100,
-        comments_count: 4,
-        attachments_count: 2,
-        due_date: '2026-10-15T00:00:00.000Z',
-        project_id: '0002',
-        project_name: 'BMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[1],
-        assignees: [INITIAL_MEMBERS[1]],
-        created_at: '2026-08-24T09:00:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 2002,
-        code: '#0002-2',
-        title: 'My Work | Profile | Missing Cover',
-        description:
-            'Fix image cover banner rendering on responsive mobile screens.',
-        task_type: 'bug',
-        module: 'My Work | Profile',
-        status: TaskStatusEnum.CONFIRMED,
-        priority: TaskPriorityEnum.HIGH,
-        progress: 90,
-        comments_count: 2,
-        attachments_count: 1,
-        due_date: '2026-10-18T00:00:00.000Z',
-        project_id: '0002',
-        project_name: 'BMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[1],
-        assignees: [INITIAL_MEMBERS[1]],
-        created_at: '2026-08-24T09:30:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 2003,
-        code: '#0002-3',
-        title: 'User | Report | Progress Compare',
-        description:
-            'Generate visual analytics comparing team velocity across sprints.',
-        task_type: 'feature',
-        module: 'User | Report',
-        status: TaskStatusEnum.IN_REVIEW,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 85,
-        comments_count: 3,
-        attachments_count: 0,
-        due_date: '2026-10-20T00:00:00.000Z',
-        project_id: '0002',
-        project_name: 'BMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[1],
-        assignees: [INITIAL_MEMBERS[1]],
-        created_at: '2026-08-24T10:00:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 2004,
-        code: '#0002-4',
-        title: 'Profile | Switch Org | Exit Org',
-        description:
-            'Ensure smooth transition and state purge when switching organization context.',
-        task_type: 'feature',
-        module: 'Profile',
-        status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.LOW,
-        progress: 100,
-        comments_count: 2,
-        attachments_count: 0,
-        due_date: '2026-09-12T00:00:00.000Z',
-        project_id: '0002',
-        project_name: 'BMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[1],
-        assignees: [INITIAL_MEMBERS[1]],
-        created_at: '2026-08-24T10:30:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 2005,
-        code: '#0002-14',
-        title: 'Api | Payment | Home Page + CRUD',
-        description:
-            'Build payment gateway callback webhooks and transaction ledger.',
-        task_type: 'feature',
-        module: 'Api | Payment',
-        status: TaskStatusEnum.IN_PROGRESS,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 50,
-        comments_count: 7,
-        attachments_count: 1,
-        due_date: '2026-09-18T00:00:00.000Z',
-        project_id: '0002',
-        project_name: 'BMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[0],
-        assignees: [INITIAL_MEMBERS[0]],
-        created_at: '2026-09-01T08:00:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 2006,
-        code: '#0002-24',
-        title: 'Web | Report | Purchases Page',
-        description:
-            'Purchases data export to Excel and PDF formats for finance audit.',
-        task_type: 'feature',
-        module: 'Web | Report',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 10,
-        comments_count: 2,
-        attachments_count: 1,
-        due_date: '2026-09-18T00:00:00.000Z',
-        project_id: '0002',
-        project_name: 'BMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[0],
-        assignees: [INITIAL_MEMBERS[0]],
-        created_at: '2026-09-01T08:30:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
+    add(member: LiveMemberInfo, u: User) {
+        this.byId.set(member.id, member);
+        if (member.email) {
+            this.byEmail.set(member.email.toLowerCase().trim(), member);
+        }
+        if (member.phone) {
+            const clean = member.phone.replace(/\D/g, '');
+            if (clean) {
+                this.byPhone.set(clean, member);
+                if (clean.length >= 8) {
+                    this.byPhone.set(clean.slice(-8), member);
+                }
+            }
+        }
+        if (u.name_en) {
+            this.byName.set(u.name_en.toLowerCase().trim(), member);
+        }
+        if (u.name_kh) {
+            this.byName.set(u.name_kh.toLowerCase().trim(), member);
+        }
+        if (member.name) {
+            this.byName.set(member.name.toLowerCase().trim(), member);
+        }
+        if (member.avatar) {
+            this.avatarMap.set(`id:${member.id}`, member.avatar);
+            if (member.email) this.avatarMap.set(`email:${member.email.toLowerCase().trim()}`, member.avatar);
+            if (member.phone) {
+                const clean = member.phone.replace(/\D/g, '');
+                if (clean) {
+                    this.avatarMap.set(`phone:${clean}`, member.avatar);
+                    if (clean.length >= 8) this.avatarMap.set(`phone:${clean.slice(-8)}`, member.avatar);
+                }
+            }
+            if (member.name) this.avatarMap.set(`name:${member.name.toLowerCase().trim()}`, member.avatar);
+            if (u.name_en) this.avatarMap.set(`name:${u.name_en.toLowerCase().trim()}`, member.avatar);
+            if (u.name_kh) this.avatarMap.set(`name:${u.name_kh.toLowerCase().trim()}`, member.avatar);
+            const parts = `${u.name_en || ''} ${u.name_kh || ''}`.toLowerCase().split(/\s+/).filter(Boolean);
+            for (const part of parts) {
+                if (part.length >= 3 && !this.avatarMap.has(`part:${part}`)) {
+                    this.avatarMap.set(`part:${part}`, member.avatar);
+                }
+            }
+        }
+    }
 
-    // 4 WMS Digitech Tasks
-    {
-        id: 101,
-        code: '#0001-1',
-        title: 'Org Admin | Structure | Department',
-        description:
-            'Manage departmental structures, permissions, and organizational units in core hierarchy.',
-        task_type: 'feature',
-        module: 'Org Admin | Structure',
-        status: TaskStatusEnum.IN_REVIEW,
-        priority: TaskPriorityEnum.HIGH,
-        progress: 85,
-        comments_count: 1,
-        attachments_count: 2,
-        due_date: '2026-10-15T00:00:00.000Z',
-        project_id: '0001',
-        project_name: 'WMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[0],
-        assignees: [INITIAL_MEMBERS[0]],
-        created_at: '2026-08-09T08:00:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 102,
-        code: '#0001-2',
-        title: 'Project | Folder | Cannot Scroll PDF',
-        description:
-            'Resolve touch and trackpad event bubbling preventing embedded PDF scrolling.',
-        task_type: 'bug',
-        module: 'Project | Folder',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.URGENT,
-        progress: 0,
-        comments_count: 3,
-        attachments_count: 1,
-        due_date: '2026-10-18T00:00:00.000Z',
-        project_id: '0001',
-        project_name: 'WMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[1],
-        assignees: [INITIAL_MEMBERS[1]],
-        created_at: '2026-08-09T08:30:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 103,
-        code: '#0001-3',
-        title: 'Security setting UI improvements',
-        description:
-            'Enhance 2FA configuration flow and passkey biometric enrollment prompts.',
-        task_type: 'improvement',
-        module: 'Security Settings',
-        status: TaskStatusEnum.CONFIRMED,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 75,
-        comments_count: 2,
-        attachments_count: 0,
-        due_date: '2026-10-22T00:00:00.000Z',
-        project_id: '0001',
-        project_name: 'WMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[1],
-        assignees: [INITIAL_MEMBERS[1]],
-        created_at: '2026-08-09T09:00:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-    {
-        id: 104,
-        code: '#0001-4',
-        title: 'User | Report | Progress',
-        description:
-            'Export daily attendance timesheets and check-in geolocation heatmaps.',
-        task_type: 'feature',
-        module: 'User | Report',
-        status: TaskStatusEnum.DONE,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 100,
-        comments_count: 2,
-        attachments_count: 0,
-        due_date: '2026-09-10T00:00:00.000Z',
-        project_id: '0001',
-        project_name: 'WMS Digitech',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[1],
-        assignees: [INITIAL_MEMBERS[1]],
-        created_at: '2026-08-09T09:30:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-
-    // 1 TESTER Task
-    {
-        id: 3001,
-        code: '#0005-1',
-        title: 'Testing project setup and verification',
-        description:
-            'End to end smoke testing for newly deployed microservices.',
-        task_type: 'feature',
-        module: 'Testing',
-        status: TaskStatusEnum.NEW,
-        priority: TaskPriorityEnum.MEDIUM,
-        progress: 0,
-        comments_count: 1,
-        attachments_count: 0,
-        due_date: '2026-11-16T00:00:00.000Z',
-        project_id: '0005',
-        project_name: 'TESTER',
-        reporter: INITIAL_MEMBERS[0],
-        assignee: INITIAL_MEMBERS[2],
-        assignees: [INITIAL_MEMBERS[2]],
-        created_at: '2026-09-17T08:00:00.000Z',
-        updated_at: '2026-09-18T12:00:00.000Z',
-    },
-];
+    find(candidate: any): LiveMemberInfo | null {
+        if (!candidate) return null;
+        const cId = Number(candidate.id || candidate.user_id || 0);
+        if (cId && this.byId.has(cId)) {
+            return this.byId.get(cId)!;
+        }
+        if (candidate.email) {
+            const eKey = String(candidate.email).toLowerCase().trim();
+            if (this.byEmail.has(eKey)) return this.byEmail.get(eKey)!;
+        }
+        if (candidate.phone) {
+            const p = String(candidate.phone).replace(/\D/g, '');
+            if (p && this.byPhone.has(p)) return this.byPhone.get(p)!;
+            if (p.length >= 8 && this.byPhone.has(p.slice(-8))) return this.byPhone.get(p.slice(-8))!;
+        }
+        const nKey = (candidate.name || '').toLowerCase().trim();
+        if (nKey) {
+            if (this.byName.has(nKey)) return this.byName.get(nKey)!;
+            for (const [k, v] of this.byName.entries()) {
+                if (k === nKey || k.includes(nKey) || nKey.includes(k)) return v;
+            }
+        }
+        return null;
+    }
+}
 
 @Injectable()
 export class TaskService {
-    private tasks: TaskItem[] = [...INITIAL_TASKS];
+    private tasks: TaskItem[] = [];
     private taskComments = new Map<number, TaskCommentItem[]>();
-    private readonly storeFilePath = path.join(
-        process.cwd(),
-        'storage',
-        'tasks_data_store.json',
-    );
 
     private isStoreLoaded = false;
 
@@ -646,32 +221,12 @@ export class TaskService {
         @Inject(forwardRef(() => PlanService))
         private readonly _planService?: PlanService,
     ) {
-        this.loadFromDisk();
         this.initDbStore();
     }
 
     private getPlanProjects(): any[] {
         if (this._planService) {
             return this._planService.getRawProjects();
-        }
-        try {
-            const planStorePath = path.join(
-                process.cwd(),
-                'storage',
-                'plans_data_store.json',
-            );
-            if (fs.existsSync(planStorePath)) {
-                const raw = fs.readFileSync(planStorePath, 'utf8');
-                const parsed = JSON.parse(raw);
-                if (parsed && Array.isArray(parsed.plans)) {
-                    return parsed.plans;
-                }
-            }
-        } catch (e) {
-            console.warn(
-                'Failed to read plans_data_store.json for task projects:',
-                e,
-            );
         }
         return [];
     }
@@ -823,21 +378,6 @@ export class TaskService {
                         : new Date().toISOString(),
                 }));
 
-                for (const defTask of INITIAL_TASKS) {
-                    if (
-                        !this.tasks.some(
-                            (t) =>
-                                t.id === defTask.id ||
-                                (t.code &&
-                                    defTask.code &&
-                                    t.code.trim().toUpperCase() ===
-                                        defTask.code.trim().toUpperCase()),
-                        )
-                    ) {
-                        this.tasks.push({ ...defTask });
-                    }
-                }
-
                 const dbComments = await this._taskCommentRepo.find({
                     order: { id: 'ASC' },
                 });
@@ -878,58 +418,36 @@ export class TaskService {
                 return;
             }
 
-            // Seed relational tables from taskStoreRepo or disk
+            // Seed relational tables from taskStoreRepo or legacy disk store if DB table was empty
+            let sourceTasks: any[] = [];
+            let sourceComments: Record<string, any[]> = {};
+
             const dbStore = await this._taskStoreRepo.findOne({
                 where: { key: 'default_tasks_store' },
             });
-            if (dbStore) {
-                if (Array.isArray(dbStore.tasks) && dbStore.tasks.length > 0) {
-                    const nonPms = dbStore.tasks
-                        .filter((t: any) => !this.isPmsTask(t))
-                        .map((t: any) => this.sanitizeEventbookingTask(t));
-                    if (nonPms.length > 0) {
-                        this.tasks = nonPms.map((t: any) => ({
-                            ...t,
-                            task_type: t.task_type || this.inferTaskType(t),
-                        }));
-                    } else {
-                        this.tasks = [...INITIAL_TASKS];
-                    }
-                }
+            if (dbStore && Array.isArray(dbStore.tasks) && dbStore.tasks.length > 0) {
+                sourceTasks = dbStore.tasks;
                 if (dbStore.comments && typeof dbStore.comments === 'object') {
-                    for (const [k, v] of Object.entries(dbStore.comments)) {
-                        const numKey = Number(k);
-                        if (!isNaN(numKey) && Array.isArray(v)) {
-                            this.taskComments.set(numKey, v);
-                        }
-                    }
+                    sourceComments = dbStore.comments as any;
                 }
-                this.healMissingReporters();
-            } else {
-                this.tasks = [...INITIAL_TASKS];
             }
 
-            this.tasks = this.tasks
+            const nonPms = sourceTasks
                 .filter((t: any) => !this.isPmsTask(t))
                 .map((t: any) => this.sanitizeEventbookingTask(t));
-            if (this.tasks.length === 0) {
-                this.tasks = [...INITIAL_TASKS];
-            } else {
-                for (const defTask of INITIAL_TASKS) {
-                    if (
-                        !this.tasks.some(
-                            (t) =>
-                                t.id === defTask.id ||
-                                (t.code &&
-                                    defTask.code &&
-                                    t.code.trim().toUpperCase() ===
-                                        defTask.code.trim().toUpperCase()),
-                        )
-                    ) {
-                        this.tasks.push({ ...defTask });
-                    }
+
+            this.tasks = nonPms.map((t: any) => ({
+                ...t,
+                task_type: t.task_type || this.inferTaskType(t),
+            }));
+
+            for (const [k, v] of Object.entries(sourceComments)) {
+                const numKey = Number(k);
+                if (!isNaN(numKey) && Array.isArray(v)) {
+                    this.taskComments.set(numKey, v);
                 }
             }
+            this.healMissingReporters();
 
             for (const task of this.tasks) {
                 if (
@@ -984,7 +502,6 @@ export class TaskService {
             }
 
             await this.saveToDb();
-            this.saveToDisk();
             this.isStoreLoaded = true;
         } catch (err) {
             console.warn(
@@ -1139,63 +656,6 @@ export class TaskService {
         return comments;
     }
 
-    private loadFromDisk(): void {
-        try {
-            if (fs.existsSync(this.storeFilePath)) {
-                const raw = fs.readFileSync(this.storeFilePath, 'utf8');
-                const data = JSON.parse(raw);
-                if (
-                    data &&
-                    Array.isArray(data.tasks) &&
-                    data.tasks.length > 0
-                ) {
-                    const nonPms = data.tasks
-                        .filter((t: any) => !this.isPmsTask(t))
-                        .map((t: any) => this.sanitizeEventbookingTask(t));
-                    if (nonPms.length > 0) {
-                        this.tasks = nonPms.map((t: any) => ({
-                            ...t,
-                            task_type: t.task_type || this.inferTaskType(t),
-                        }));
-                    } else {
-                        this.tasks = [...INITIAL_TASKS];
-                    }
-                }
-                for (const defTask of INITIAL_TASKS) {
-                    if (
-                        !this.tasks.some(
-                            (t) =>
-                                t.id === defTask.id ||
-                                (t.code &&
-                                    defTask.code &&
-                                    t.code.trim().toUpperCase() ===
-                                        defTask.code.trim().toUpperCase()),
-                        )
-                    ) {
-                        this.tasks.push({ ...defTask });
-                    }
-                }
-                if (
-                    data &&
-                    data.comments &&
-                    typeof data.comments === 'object'
-                ) {
-                    for (const [k, v] of Object.entries(data.comments)) {
-                        const numKey = Number(k);
-                        if (!isNaN(numKey) && Array.isArray(v)) {
-                            this.taskComments.set(numKey, v);
-                        }
-                    }
-                }
-                if (this.healMissingReporters()) {
-                    this.saveToDisk();
-                }
-            }
-        } catch (e) {
-            console.error('Failed to load tasks from disk store:', e);
-        }
-    }
-
     private healMissingReporters(): boolean {
         let modified = false;
         for (const t of this.tasks) {
@@ -1207,7 +667,7 @@ export class TaskService {
                 t.reporter = {
                     id: 2,
                     name: 'PUM BRUSMUNY',
-                    role: 'Frontend Lead',
+                    role: 'Super Admin / Project Lead',
                     avatar: null,
                 };
                 modified = true;
@@ -1217,7 +677,6 @@ export class TaskService {
     }
 
     private saveStore(): void {
-        this.saveToDisk();
         this.saveToDb().catch(() => {});
     }
 
@@ -1241,31 +700,6 @@ export class TaskService {
             }
             return copy;
         });
-    }
-
-    private saveToDisk(): void {
-        try {
-            const dir = path.dirname(this.storeFilePath);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            const commentsObj: Record<number, any[]> = {};
-            for (const [k, v] of this.taskComments.entries()) {
-                commentsObj[k] = this.sanitizeCommentAttachments(v);
-            }
-            const data = {
-                tasks: this.tasks,
-                comments: commentsObj,
-                updated_at: new Date().toISOString(),
-            };
-            fs.writeFileSync(
-                this.storeFilePath,
-                JSON.stringify(data, null, 2),
-                'utf8',
-            );
-        } catch (e) {
-            console.error('Failed to save tasks to disk store:', e);
-        }
     }
 
     private async saveToDb(): Promise<void> {
@@ -1715,58 +1149,14 @@ export class TaskService {
             'bg-rose-600',
         ];
 
-        const defaultFallbacks = [
-            {
-                id: 64,
-                name: 'Piseth Panhavorn',
-                name_en: 'Piseth Panhavorn',
-                name_kh: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-                role: 'Super Administrator',
-                email: 'pisethpanhavorn544@gmail.com',
-                avatar: null,
-                colorClass: 'bg-indigo-600',
-                phone: '010843612',
-            },
-            {
-                id: 65,
-                name: 'Pum Brusmuny',
-                name_en: 'PUM BRUSMUNY',
-                name_kh: 'ពុំ ប្រុសមុន្នី',
-                role: 'Frontend Lead',
-                email: 'pumprusmuny@example.com',
-                avatar: null,
-                colorClass: 'bg-blue-600',
-                phone: '087280875',
-            },
-            {
-                id: 66,
-                name: 'Tha Winner',
-                name_en: 'THA WINNER',
-                name_kh: 'ថា វីនណឺរ',
-                role: 'Backend Lead',
-                email: 'thawinner@example.com',
-                avatar: null,
-                colorClass: 'bg-emerald-600',
-                phone: '067776682',
-            },
-            {
-                id: 67,
-                name: 'Phuong Sovannara',
-                name_en: 'Phuong Sovannara',
-                name_kh: 'ភួង សុវណ្ណារ៉ា',
-                role: 'Developer',
-                email: 'phuongsovannara@gmail.com',
-                avatar: null,
-                colorClass: 'bg-amber-600',
-                phone: '011242425',
-            },
-        ];
-
         const mapped = dbUsers.map((u, idx) => {
+            const activeUserRole =
+                u.user_roles?.find((ur) => ur.is_default) ||
+                u.user_roles?.[0];
             const roleName =
-                u.user_roles?.[0]?.role?.name_kh ||
-                u.user_roles?.[0]?.role?.name_en ||
-                u.user_roles?.[0]?.role?.slug ||
+                activeUserRole?.role?.name_kh ||
+                activeUserRole?.role?.name_en ||
+                activeUserRole?.role?.slug ||
                 'សមាជិក (Member)';
 
             let avatarUrl: string | null = null;
@@ -1796,91 +1186,9 @@ export class TaskService {
             };
         });
 
-        // Also check if admin store has additional team members
-        try {
-            const storePath = path.join(
-                process.cwd(),
-                'storage',
-                'admin_users_store.json',
-            );
-            if (fs.existsSync(storePath)) {
-                const raw = fs.readFileSync(storePath, 'utf8');
-                const storeUsers = JSON.parse(raw);
-                if (Array.isArray(storeUsers)) {
-                    for (const su of storeUsers) {
-                        const suPhone = (su.phone || '')
-                            .replace(/\D/g, '')
-                            .slice(-8);
-                        const exists = mapped.some(
-                            (m) =>
-                                (suPhone &&
-                                    m.phone &&
-                                    m.phone.replace(/\D/g, '').slice(-8) ===
-                                        suPhone) ||
-                                (su.email &&
-                                    m.email &&
-                                    m.email.toLowerCase() ===
-                                        su.email.toLowerCase()) ||
-                                (su.name_kh &&
-                                    m.name_kh &&
-                                    m.name_kh.trim() === su.name_kh.trim()) ||
-                                (su.name_en &&
-                                    m.name_en &&
-                                    m.name_en.toLowerCase().trim() ===
-                                        su.name_en.toLowerCase().trim()),
-                        );
-                        if (!exists) {
-                            mapped.push({
-                                id: su.id || 1000 + mapped.length,
-                                name:
-                                    su.name_kh ||
-                                    su.name_en ||
-                                    `Staff #${su.id}`,
-                                name_kh: su.name_kh,
-                                name_en: su.name_en,
-                                email: su.email || '',
-                                phone: su.phone || '',
-                                role:
-                                    su.position || su.role || 'សមាជិក (Member)',
-                                avatar: su.avatar || null,
-                                colorClass:
-                                    colors[mapped.length % colors.length],
-                            });
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            console.error('Error loading admin_users_store for members:', err);
-        }
-
-        // Ensure default fallbacks are present if list is small or missing key team leads
-        for (const def of defaultFallbacks) {
-            const exists = mapped.some(
-                (m) =>
-                    (m.phone &&
-                        def.phone &&
-                        m.phone.replace(/\D/g, '').slice(-8) ===
-                            def.phone.replace(/\D/g, '').slice(-8)) ||
-                    (m.email &&
-                        def.email &&
-                        m.email.toLowerCase() === def.email.toLowerCase()) ||
-                    (m.name_kh &&
-                        def.name_kh &&
-                        m.name_kh.trim() === def.name_kh.trim()) ||
-                    (m.name_en &&
-                        def.name_en &&
-                        m.name_en.toLowerCase().trim() ===
-                            def.name_en.toLowerCase().trim()),
-            );
-            if (!exists) {
-                mapped.push(def);
-            }
-        }
-
         return {
             status_code: 200,
-            message: 'Task team members retrieved successfully',
+            message: 'Members retrieved successfully',
             data: mapped,
         };
     }
@@ -2059,14 +1367,25 @@ export class TaskService {
         return this.isTaskBelongToUser(task, user);
     }
 
-    /** Load database user avatars map for high-performance task avatar enrichment */
-    private async getAvatarMap(): Promise<Map<string, string>> {
-        const avatarMap = new Map<string, string>();
+    /** Load database user members map for live role, name, and avatar enrichment */
+    private async getLiveMemberLookup(): Promise<LiveMemberLookup> {
+        const lookup = new LiveMemberLookup();
         try {
             const users = await this._userRepo.find({
-                relations: ['avatar_file'],
+                relations: ['user_roles', 'user_roles.role', 'avatar_file'],
+                order: { id: 'ASC' },
             });
             for (const u of users) {
+                if ((u as any).deleted_at || (u as any).is_active === 0) continue;
+                const activeUserRole =
+                    u.user_roles?.find((ur) => ur.is_default) ||
+                    u.user_roles?.[0];
+                const roleName =
+                    activeUserRole?.role?.name_kh ||
+                    activeUserRole?.role?.name_en ||
+                    activeUserRole?.role?.slug ||
+                    'សមាជិក (Member)';
+
                 let avatarUrl: string | null = null;
                 if (u.avatar_file?.uri) {
                     let domain = (u.avatar_file.file_domain || '').replace(
@@ -2085,50 +1404,25 @@ export class TaskService {
                 } else if (u.telegram_photo_url) {
                     avatarUrl = u.telegram_photo_url;
                 }
-                if (avatarUrl) {
-                    if (u.id) avatarMap.set(`id:${u.id}`, avatarUrl);
-                    if (u.phone) {
-                        const cleanPhone = u.phone.replace(/\D/g, '');
-                        avatarMap.set(`phone:${cleanPhone}`, avatarUrl);
-                        if (cleanPhone.length >= 8)
-                            avatarMap.set(
-                                `phone:${cleanPhone.slice(-8)}`,
-                                avatarUrl,
-                            );
-                    }
-                    if (u.email)
-                        avatarMap.set(
-                            `email:${u.email.toLowerCase().trim()}`,
-                            avatarUrl,
-                        );
-                    if (u.name_en)
-                        avatarMap.set(
-                            `name:${u.name_en.toLowerCase().trim()}`,
-                            avatarUrl,
-                        );
-                    if (u.name_kh)
-                        avatarMap.set(
-                            `name:${u.name_kh.toLowerCase().trim()}`,
-                            avatarUrl,
-                        );
-                    const parts = `${u.name_en || ''} ${u.name_kh || ''}`
-                        .toLowerCase()
-                        .split(/\s+/)
-                        .filter(Boolean);
-                    for (const part of parts) {
-                        if (
-                            part.length >= 3 &&
-                            !avatarMap.has(`part:${part}`)
-                        ) {
-                            avatarMap.set(`part:${part}`, avatarUrl);
-                        }
-                    }
-                }
+
+                const displayName = u.name_kh || u.name_en || `User #${u.id}`;
+
+                lookup.add(
+                    {
+                        id: u.id,
+                        name: displayName,
+                        role: roleName,
+                        avatar: avatarUrl,
+                        email: u.email || '',
+                        phone: u.phone || '',
+                    },
+                    u,
+                );
             }
         } catch (e) {
-            console.error('Failed to load user avatars:', e);
+            console.error('Failed to load user members for live lookup:', e);
         }
-        return avatarMap;
+        return lookup;
     }
 
     private resolveMemberAvatar(
@@ -2187,12 +1481,30 @@ export class TaskService {
         return null;
     }
 
-    private async enrichTasksWithAvatars(
+    private resolveMember(m: any, lookup: LiveMemberLookup): any {
+        if (!m) return m;
+        const matched = lookup.find(m);
+        if (matched) {
+            return {
+                ...m,
+                id: matched.id,
+                name: matched.name,
+                role: matched.role,
+                avatar: matched.avatar || this.resolveMemberAvatar(m, lookup.avatarMap),
+                email: matched.email || m.email || '',
+                phone: matched.phone || m.phone || '',
+            };
+        }
+        const av = this.resolveMemberAvatar(m, lookup.avatarMap);
+        return av ? { ...m, avatar: av } : m;
+    }
+
+    private async enrichTasksWithMembers(
         tasks: TaskItem[],
-        currentUser?: UserPayload,
+        _currentUser?: UserPayload,
     ): Promise<TaskItem[]> {
         if (!tasks || tasks.length === 0) return tasks;
-        const avatarMap = await this.getAvatarMap();
+        const lookup = await this.getLiveMemberLookup();
         return tasks.map((t) => {
             const copy = { ...t };
             if (
@@ -2212,25 +1524,25 @@ export class TaskService {
                 copy.assignee = copy.assignees[0];
             }
             if (copy.assignee) {
-                const av = this.resolveMemberAvatar(copy.assignee, avatarMap);
-                if (av) {
-                    copy.assignee = { ...copy.assignee, avatar: av };
-                }
+                copy.assignee = this.resolveMember(copy.assignee, lookup);
             }
             if (Array.isArray(copy.assignees)) {
-                copy.assignees = copy.assignees.map((a) => {
-                    const av = this.resolveMemberAvatar(a, avatarMap);
-                    return av ? { ...a, avatar: av } : a;
-                });
+                copy.assignees = copy.assignees.map((a) =>
+                    this.resolveMember(a, lookup),
+                );
             }
             if (copy.reporter) {
-                const av = this.resolveMemberAvatar(copy.reporter, avatarMap);
-                if (av) {
-                    copy.reporter = { ...copy.reporter, avatar: av };
-                }
+                copy.reporter = this.resolveMember(copy.reporter, lookup);
             }
             return copy;
         });
+    }
+
+    private async enrichTasksWithAvatars(
+        tasks: TaskItem[],
+        currentUser?: UserPayload,
+    ): Promise<TaskItem[]> {
+        return this.enrichTasksWithMembers(tasks, currentUser);
     }
 
     async getTasks(user: UserPayload, query: QueryTasksDto) {
@@ -3415,22 +2727,28 @@ export class TaskService {
 
         const comments = this.ensureTaskComments(taskId);
 
-        const avatarMap = await this.getAvatarMap();
+        const lookup = await this.getLiveMemberLookup();
 
         // Record current viewer into seen_by for comments sent by others
         if (user && user.id) {
             const viewerName =
                 (user.name_kh || user.name_en || '').trim() || 'User';
+            const viewerMatched = lookup.find({
+                id: user.id,
+                email: user.email,
+                name: viewerName,
+            });
             const userAvatar =
+                viewerMatched?.avatar ||
                 this.resolveMemberAvatar(
                     { id: user.id, email: user.email, name: viewerName },
-                    avatarMap,
+                    lookup.avatarMap,
                 ) ||
                 (user.avatar as any)?.uri ||
                 null;
             const currentViewer = {
                 id: user.id,
-                name: viewerName,
+                name: viewerMatched?.name || viewerName,
                 avatar: userAvatar,
                 seen_at: new Date().toISOString(),
             };
@@ -3489,7 +2807,15 @@ export class TaskService {
                             is_system: true,
                         };
                     }
-                    const senderName = (c.sender_name || '')
+                    const senderMatch = lookup.find({
+                        id: c.sender_id,
+                        name: c.sender_name,
+                    });
+                    const senderName = (
+                        senderMatch?.name ||
+                        c.sender_name ||
+                        ''
+                    )
                         .toLowerCase()
                         .trim();
                     const isSelf = Boolean(
@@ -3504,12 +2830,12 @@ export class TaskService {
                         (userEmail && senderName === userEmail) ||
                         (user?.id && c.sender_id === user.id),
                     );
-                    let senderAvatar = c.sender_avatar;
+                    let senderAvatar = senderMatch?.avatar || c.sender_avatar;
                     if (!senderAvatar || senderAvatar.includes('placeholder')) {
                         senderAvatar =
                             this.resolveMemberAvatar(
                                 { id: c.sender_id, name: c.sender_name },
-                                avatarMap,
+                                lookup.avatarMap,
                             ) ||
                             senderAvatar ||
                             null;
@@ -3517,12 +2843,18 @@ export class TaskService {
                     const seenByList = (
                         Array.isArray(c.seen_by) ? c.seen_by : []
                     ).map((s: any) => {
-                        const sAv = this.resolveMemberAvatar(s, avatarMap);
-                        return sAv ? { ...s, avatar: sAv } : s;
+                        const sMatch = lookup.find(s);
+                        const sAv =
+                            sMatch?.avatar ||
+                            this.resolveMemberAvatar(s, lookup.avatarMap);
+                        return sAv
+                            ? { ...s, name: sMatch?.name || s.name, avatar: sAv }
+                            : s;
                     });
                     return {
                         ...c,
                         time: formattedTime,
+                        sender_name: senderMatch?.name || c.sender_name,
                         sender_avatar: senderAvatar,
                         is_self: isSelf,
                         seen_by: seenByList,
@@ -3550,15 +2882,21 @@ export class TaskService {
             );
         }
 
-        const avatarMap = await this.getAvatarMap();
+        const lookup = await this.getLiveMemberLookup();
+        const matchedSender = lookup.find({
+            id: user.id,
+            email: user.email,
+            name: user.name_kh || user.name_en,
+        });
         const userAvatar =
+            matchedSender?.avatar ||
             this.resolveMemberAvatar(
                 {
                     id: user.id,
                     email: user.email,
                     name: user.name_kh || user.name_en,
                 },
-                avatarMap,
+                lookup.avatarMap,
             ) ||
             (user.avatar as any)?.uri ||
             null;
@@ -3568,7 +2906,10 @@ export class TaskService {
             id: Date.now(),
             sender_id: user.id,
             sender_name:
-                user.name_kh || user.name_en || 'អ្នកប្រើប្រាស់ (User)',
+                matchedSender?.name ||
+                user.name_kh ||
+                user.name_en ||
+                'អ្នកប្រើប្រាស់ (User)',
             sender_avatar: userAvatar,
             text: (text || '').trim(),
             time: new Date().toLocaleTimeString('en-US', {

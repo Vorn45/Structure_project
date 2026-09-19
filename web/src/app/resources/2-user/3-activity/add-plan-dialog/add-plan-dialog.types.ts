@@ -18,8 +18,3 @@ export interface AddPlanDialogData {
     task?: AgilePlanTask;
     isEditing?: boolean;
 }
-
-export const DEFAULT_PROJECT_OPTIONS: AddPlanProjectOption[] = [
-    { id: '4', code: '0002', name: 'BMS Digitech' },
-    { id: '5', code: '0001', name: 'WMS Digitech' },
-];

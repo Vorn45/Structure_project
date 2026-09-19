@@ -128,10 +128,12 @@ export class HomeService {
             total_tasks > 0 ? Math.round((completed_tasks / total_tasks) * 100) : 0;
 
         // Dynamic recent tasks strictly within user's accessible scope
-        const recent_tasks = accessibleTasks.slice(0, 5).map((t) => ({
+        const recent_tasks = accessibleTasks.slice(0, 10).map((t) => ({
             id: t.id,
             code: t.code,
             title: t.title,
+            module: t.module,
+            task_type: t.task_type || 'research',
             status: t.status,
             priority: t.priority,
             due_date: t.due_date || new Date().toISOString(),
@@ -194,11 +196,22 @@ export class HomeService {
             };
         }
 
-        const defaultUserRole =
+        const activeRoleId = user?.is_active ?? user?.roles?.[0]?.id;
+        const matchedUserRole =
+            userInfo?.user_roles?.find((ur) => ur.id === activeRoleId || ur.role?.id === activeRoleId) ||
             userInfo?.user_roles?.find((ur) => ur.is_default) ||
             userInfo?.user_roles?.[0];
-        const defaultOrg = defaultUserRole?.organization;
-        const defaultRole = defaultUserRole?.role;
+        const activeOrg = matchedUserRole?.organization;
+        const activeRole = matchedUserRole?.role;
+
+        const roleSlug = user?.roles?.[0]?.slug || activeRole?.slug || '';
+        const roleNameKh =
+            activeRole?.name_kh ||
+            (roleSlug === 'superadmin' ? 'អភិបាលប្រព័ន្ធ' : roleSlug === 'org_admin' ? 'រដ្ឋបាល' : 'អ្នកប្រើប្រាស់');
+        const roleNameEn =
+            activeRole?.name_en ||
+            (roleSlug === 'superadmin' ? 'Super Admin' : roleSlug === 'org_admin' ? 'Org Admin' : 'Member');
+        const role_name = roleNameKh || roleNameEn;
 
         const name_kh =
             userInfo?.name_kh || user?.name_kh || (user as any)?.kh_name || '';
@@ -221,10 +234,15 @@ export class HomeService {
                     phone,
                     avatar: avatarObj,
                     cover: coverObj,
-                    active_role_id: user?.roles?.[0]?.id ?? defaultRole?.id ?? 1,
-                    role_name: defaultRole?.name_kh || defaultRole?.name_en || defaultRole?.slug || null,
-                    organization_id: defaultOrg?.id ?? user?.organization_id ?? null,
-                    organization_name: defaultOrg?.name_kh || defaultOrg?.name_en || null,
+                    is_active: activeRoleId ?? 1,
+                    active_role_id: activeRoleId ?? 1,
+                    role_name,
+                    role_name_kh: roleNameKh,
+                    role_name_en: roleNameEn,
+                    role_slug: roleSlug,
+                    roles: user?.roles ?? (activeRole ? [activeRole] : []),
+                    organization_id: activeOrg?.id ?? user?.organization_id ?? null,
+                    organization_name: activeOrg?.name_kh || activeOrg?.name_en || (user as any)?.organization?.name || null,
                 },
                 metrics: {
                     total_tasks,
