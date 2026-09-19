@@ -14,6 +14,7 @@ import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-but
 import { UserHomeService } from '../home.service';
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
+import { resolveFileUrl } from 'helper/shared/file-url';
 
 
 export * from './create-project-dialog.types';
@@ -281,8 +282,20 @@ export class CreateProjectDialogComponent implements OnInit {
             if (p.members && p.members.length > 0) {
                 this.selectedMemberIds.set(p.members.map((m: any) => String(m.id)));
             }
-            if (p.logo || p.image) {
-                this.projectLogo.set(p.logo || p.image);
+            const rawLogo = p.logo || p.image;
+            if (
+                rawLogo &&
+                typeof rawLogo === 'string' &&
+                rawLogo.trim() !== '' &&
+                rawLogo !== 'null' &&
+                rawLogo !== 'undefined' &&
+                !rawLogo.includes('placeholder') &&
+                !rawLogo.includes('/images/logo/logo.png') &&
+                !rawLogo.includes('/images/logo/wfm_logo.png')
+            ) {
+                this.projectLogo.set(rawLogo);
+            } else {
+                this.projectLogo.set(null);
             }
         }
     }
@@ -365,14 +378,35 @@ export class CreateProjectDialogComponent implements OnInit {
         };
     }
 
+    getDisplayLogo(): string | null {
+        const logo = this.projectLogo();
+        if (!logo) return null;
+        if (logo.startsWith('data:') || logo.startsWith('blob:')) return logo;
+        return resolveFileUrl(logo) || logo;
+    }
+
     onProjectLogoSelected(event: Event): void {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (file) {
+            // Immediate local preview for instant UI responsiveness
             const reader = new FileReader();
             reader.onload = (e) => {
                 this.projectLogo.set(e.target?.result as string);
             };
             reader.readAsDataURL(file);
+
+            // Background upload to store as clean URL on server
+            this._taskService.uploadAttachment(file).subscribe({
+                next: (res) => {
+                    const uploadedUrl = res?.data?.url || res?.data?.uri;
+                    if (uploadedUrl) {
+                        this.projectLogo.set(uploadedUrl);
+                    }
+                },
+                error: (err) => {
+                    console.warn('Background logo upload failed, keeping base64 preview:', err);
+                },
+            });
         }
     }
 

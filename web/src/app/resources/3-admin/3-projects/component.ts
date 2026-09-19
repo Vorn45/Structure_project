@@ -1387,32 +1387,25 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     getProjectLogo(plan: any): string {
         if (!plan) return DEFAULT_PROJECT_LOGO;
-        const code = (plan.code || '').toUpperCase();
-        const name = (plan.name || '').toUpperCase();
-        const id = String(plan.id || '').toLowerCase();
-
-        // 1. Signature project overrides (BMS & WMS)
-        if (code.includes('BMS') || name.includes('BMS') || id.includes('bms')) {
-            const raw = plan.logo || plan.image;
-            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
-                return resolveFileUrl(raw) || BMS_PROJECT_LOGO;
-            }
-            return BMS_PROJECT_LOGO;
-        }
-
-        if (code.includes('WMS') || name.includes('WMS') || id.includes('wms')) {
-            const raw = plan.logo || plan.image;
-            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
-                return resolveFileUrl(raw) || WMS_PROJECT_LOGO;
-            }
-            return WMS_PROJECT_LOGO;
-        }
 
         const raw = plan.logo || plan.image;
-        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png') && !raw.includes('/images/logo/wfm_logo.png')) {
+        if (
+            raw &&
+            typeof raw === 'string' &&
+            raw.trim() !== '' &&
+            raw !== 'null' &&
+            raw !== 'undefined' &&
+            !raw.includes('placeholder') &&
+            !raw.includes('/images/logo/logo.png') &&
+            !raw.includes('/images/logo/wfm_logo.png')
+        ) {
+            if (raw.startsWith('data:') || raw.startsWith('blob:')) {
+                return raw;
+            }
             const resolved = resolveFileUrl(raw);
             if (resolved) return resolved;
         }
+
         return getProjectFallbackLogo(plan.code, plan.name);
     }
 

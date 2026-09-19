@@ -2403,9 +2403,9 @@ export class TaskService {
             );
             if (foundPlan?.code) {
                 prefix = foundPlan.code.replace(/^#/, '').toUpperCase();
-            } else if (targetPid.toUpperCase().includes('WMS')) {
+            } else if (/\bWMS\b|^WMS-/i.test(targetPid)) {
                 prefix = '0001';
-            } else if (targetPid.toUpperCase().includes('BMS')) {
+            } else if (/\bBMS\b|^BMS-/i.test(targetPid)) {
                 prefix = '0002';
             } else if (targetPid) {
                 prefix = targetPid.replace(/^#/, '').toUpperCase();
@@ -2733,13 +2733,13 @@ export class TaskService {
         if (
             task.project_id === 'bms-digitech' ||
             task.code?.startsWith('#BMS') ||
-            task.project_name?.includes('BMS')
+            /\bBMS\b|^BMS-/i.test(task.project_name || '')
         )
             return 'BMS';
         if (
             task.project_id === 'wms-digitech' ||
             task.code?.startsWith('#WMS') ||
-            task.project_name?.includes('WMS')
+            /\bWMS\b|^WMS-/i.test(task.project_name || '')
         )
             return 'WMS';
         return 'WMS';

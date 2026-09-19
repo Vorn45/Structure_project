@@ -115,32 +115,25 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
     getProjectLogo(plan: any): string {
         if (!plan) return DEFAULT_PROJECT_LOGO;
-        const code = (plan.code || '').toUpperCase();
-        const name = (plan.name || '').toUpperCase();
-        const id = String(plan.id || '').toLowerCase();
-
-        // 1. Signature project overrides (BMS & WMS)
-        if (code.includes('BMS') || name.includes('BMS') || id.includes('bms')) {
-            const raw = plan.logo || plan.image;
-            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
-                return resolveFileUrl(raw) || BMS_PROJECT_LOGO;
-            }
-            return BMS_PROJECT_LOGO;
-        }
-
-        if (code.includes('WMS') || name.includes('WMS') || id.includes('wms')) {
-            const raw = plan.logo || plan.image;
-            if (raw && typeof raw === 'string' && (raw.startsWith('data:') || raw.startsWith('blob:') || raw.includes('/uploads/'))) {
-                return resolveFileUrl(raw) || WMS_PROJECT_LOGO;
-            }
-            return WMS_PROJECT_LOGO;
-        }
 
         const raw = plan.logo || plan.image;
-        if (raw && typeof raw === 'string' && !raw.includes('placeholder') && !raw.includes('/images/logo/logo.png') && !raw.includes('/images/logo/wfm_logo.png')) {
+        if (
+            raw &&
+            typeof raw === 'string' &&
+            raw.trim() !== '' &&
+            raw !== 'null' &&
+            raw !== 'undefined' &&
+            !raw.includes('placeholder') &&
+            !raw.includes('/images/logo/logo.png') &&
+            !raw.includes('/images/logo/wfm_logo.png')
+        ) {
+            if (raw.startsWith('data:') || raw.startsWith('blob:')) {
+                return raw;
+            }
             const resolved = resolveFileUrl(raw);
             if (resolved) return resolved;
         }
+
         return getProjectFallbackLogo(plan.code, plan.name);
     }
 
@@ -459,8 +452,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                             budget_allocated: updatedPayload.budget_allocated || (plan as any).budget_allocated,
                             members: updatedPayload.members || plan.members,
                             team_lead: updatedPayload.team_lead || (plan as any).team_lead,
-                            logo: updatedPayload.logo !== undefined ? updatedPayload.logo : ((plan as any).logo || '/images/logo/logo.png'),
-                            image: updatedPayload.image !== undefined ? updatedPayload.image : ((plan as any).image || '/images/logo/logo.png'),
+                            logo: updatedPayload.logo !== undefined ? updatedPayload.logo : null,
+                            image: updatedPayload.image !== undefined ? updatedPayload.image : null,
                         };
                         this.plans.update((list) => list.map((p) => (p.id === plan.id ? updated : p)));
                         if (this.selectedProject()?.id === plan.id) {

@@ -144,16 +144,42 @@ export const DEFAULT_PROJECT_LOGO = 'data:image/svg+xml;utf8,<svg xmlns="http://
 export function getProjectFallbackLogo(code?: string, name?: string): string {
     const cleanCode = (code || '').replace(/^#/, '').trim().toUpperCase();
     const cleanName = (name || '').trim().toUpperCase();
-    if (cleanCode.includes('BMS') || cleanName.includes('BMS')) return BMS_PROJECT_LOGO;
-    if (cleanCode.includes('WMS') || cleanName.includes('WMS')) return WMS_PROJECT_LOGO;
 
-    // Use clean project code prefix (e.g. PRJ, PMS, HR, ACC) or project initials
-    const rawPrefix = cleanCode ? cleanCode.split(/[-_]/)[0] : (cleanName ? cleanName.slice(0, 3) : '');
-    const initials = rawPrefix.slice(0, 4);
-
-    if (initials && initials.length >= 2 && !/^\d+$/.test(initials)) {
-        return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%231e293b"/><stop offset="100%" stop-color="%230f172a"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%23334155" stroke-width="2"/><circle cx="60" cy="60" r="38" fill="url(%23pGrad)" stroke="%233b82f6" stroke-width="1.5"/><text x="60" y="${initials.length > 3 ? '66' : '68'}" text-anchor="middle" fill="%2360a5fa" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="${initials.length > 3 ? 20 : 23}" letter-spacing="1">${initials}</text></svg>`;
+    // Determine initials
+    let initials = '';
+    // If code has letters (e.g. BMS, WMS, PRJ, PMS-V2, HR):
+    if (cleanCode && !/^\d+$/.test(cleanCode)) {
+        initials = cleanCode.split(/[-_]/)[0].slice(0, 4);
+    } else if (cleanName) {
+        // If code is digits or empty, extract initials from name
+        const words = cleanName.split(/[\s\-_]+/).filter(Boolean);
+        if (words.length > 1) {
+            initials = words.map((w) => w[0]).join('').slice(0, 4);
+        } else if (words.length === 1) {
+            initials = words[0].slice(0, 4);
+        }
     }
+
+    if (initials && initials.length >= 1 && !/^\d+$/.test(initials)) {
+        // Color palette based on name/code hash
+        const str = cleanName || cleanCode || 'PRJ';
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const colors = [
+            { from: '%230284c7', to: '%230369a1', stroke: '%2338bdf8', text: '%237dd3fc' }, // Sky/Blue
+            { from: '%237c3aed', to: '%235b21b6', stroke: '%23a78bfa', text: '%23c4b5fd' }, // Violet
+            { from: '%23059669', to: '%23047857', stroke: '%2334d399', text: '%236ee7b7' }, // Emerald
+            { from: '%23ea580c', to: '%23c2410c', stroke: '%23fb923c', text: '%23fdba74' }, // Orange
+            { from: '%23e11d48', to: '%23be123c', stroke: '%23fb7185', text: '%23fda4af' }, // Rose
+            { from: '%234f46e5', to: '%233730a3', stroke: '%23818cf8', text: '%23a5b4fc' }, // Indigo
+        ];
+        const color = colors[Math.abs(hash) % colors.length];
+
+        return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${color.from}"/><stop offset="100%" stop-color="${color.to}"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%23334155" stroke-width="2"/><circle cx="60" cy="60" r="38" fill="url(%23pGrad)" stroke="${color.stroke}" stroke-width="1.5"/><text x="60" y="${initials.length > 3 ? '66' : '68'}" text-anchor="middle" fill="${color.text}" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="${initials.length > 3 ? 20 : 23}" letter-spacing="1">${initials}</text></svg>`;
+    }
+
     return DEFAULT_PROJECT_LOGO;
 }
 

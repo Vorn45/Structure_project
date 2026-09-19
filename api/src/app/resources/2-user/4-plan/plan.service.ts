@@ -687,22 +687,7 @@ export class PlanService {
                 p.name = 'BMS Digitech';
                 p.code = 'BMS-DIGI';
             }
-            if (
-                p.code === 'BMS-DIGI' ||
-                p.name?.includes('BMS') ||
-                (p.code && p.code.includes('BMS'))
-            ) {
-                p.logo = BMS_PROJECT_LOGO;
-                p.image = BMS_PROJECT_LOGO;
-            }
-            if (
-                p.code === 'WMS-DIGI' ||
-                p.name?.includes('WMS') ||
-                (p.code && p.code.includes('WMS'))
-            ) {
-                p.logo = WMS_PROJECT_LOGO;
-                p.image = WMS_PROJECT_LOGO;
-            }
+
             if (p.members && Array.isArray(p.members)) {
                 for (const m of p.members) {
                     if (
@@ -1079,15 +1064,47 @@ export class PlanService {
             meetings: dto.meetings ?? (current as any).meetings,
             agileTasks: dto.agileTasks ?? (current as any).agileTasks,
             links: dto.links !== undefined ? dto.links : (current as any).links,
-            logo: dto.logo !== undefined ? dto.logo : current.logo,
-            image: dto.image !== undefined ? dto.image : current.image,
+            logo:
+                dto.logo !== undefined
+                    ? dto.logo
+                    : dto.image !== undefined
+                      ? dto.image
+                      : current.logo,
+            image:
+                dto.image !== undefined
+                    ? dto.image
+                    : dto.logo !== undefined
+                      ? dto.logo
+                      : current.image,
         };
 
         this.projects[index] = updated;
         await this.saveStore();
         try {
-            await this._projectRepo.save(this._projectRepo.create(updated));
-        } catch (e) {}
+            await this._projectRepo.save({
+                id: updated.id,
+                code: updated.code,
+                name: updated.name,
+                description: updated.description,
+                status: updated.status,
+                progress: updated.progress,
+                start_date: updated.start_date,
+                end_date: updated.end_date,
+                total_tasks: updated.total_tasks,
+                completed_tasks: updated.completed_tasks,
+                logo: updated.logo,
+                image: updated.image,
+                lead: updated.lead,
+                team_lead: updated.team_lead,
+                members: updated.members || [],
+                links: updated.links || [],
+                meetings: updated.meetings || [],
+                attachments: updated.attachments || [],
+                attachments_count: updated.attachments_count || 0,
+            });
+        } catch (e) {
+            console.error('Failed to save project entity in updatePlan:', e);
+        }
         this._realtimeGateway?.emitProjectUpdated({ project: updated });
 
         return {

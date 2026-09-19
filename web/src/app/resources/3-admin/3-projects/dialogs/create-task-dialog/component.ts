@@ -329,7 +329,7 @@ export class CreateTaskDialogComponent implements OnInit {
         const found = this.projectList.find((p) => p.id === projId || p.code === projId);
         let prefix = found?.code || this.data?.projectCode || projId;
         if (!prefix) {
-            prefix = projId.toUpperCase().includes('WMS') ? '0001' : (projId.toUpperCase().includes('BMS') ? '0002' : projId);
+            prefix = /\bWMS\b|^WMS-/i.test(projId) ? '0001' : (/\bBMS\b|^BMS-/i.test(projId) ? '0002' : projId);
         }
         prefix = prefix.replace(/^#/, '');
 
