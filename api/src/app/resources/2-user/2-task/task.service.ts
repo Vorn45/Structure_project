@@ -823,6 +823,21 @@ export class TaskService {
                         : new Date().toISOString(),
                 }));
 
+                for (const defTask of INITIAL_TASKS) {
+                    if (
+                        !this.tasks.some(
+                            (t) =>
+                                t.id === defTask.id ||
+                                (t.code &&
+                                    defTask.code &&
+                                    t.code.trim().toUpperCase() ===
+                                        defTask.code.trim().toUpperCase()),
+                        )
+                    ) {
+                        this.tasks.push({ ...defTask });
+                    }
+                }
+
                 const dbComments = await this._taskCommentRepo.find({
                     order: { id: 'ASC' },
                 });
@@ -899,6 +914,21 @@ export class TaskService {
                 .map((t: any) => this.sanitizeEventbookingTask(t));
             if (this.tasks.length === 0) {
                 this.tasks = [...INITIAL_TASKS];
+            } else {
+                for (const defTask of INITIAL_TASKS) {
+                    if (
+                        !this.tasks.some(
+                            (t) =>
+                                t.id === defTask.id ||
+                                (t.code &&
+                                    defTask.code &&
+                                    t.code.trim().toUpperCase() ===
+                                        defTask.code.trim().toUpperCase()),
+                        )
+                    ) {
+                        this.tasks.push({ ...defTask });
+                    }
+                }
             }
 
             for (const task of this.tasks) {
@@ -1131,6 +1161,20 @@ export class TaskService {
                         this.tasks = [...INITIAL_TASKS];
                     }
                 }
+                for (const defTask of INITIAL_TASKS) {
+                    if (
+                        !this.tasks.some(
+                            (t) =>
+                                t.id === defTask.id ||
+                                (t.code &&
+                                    defTask.code &&
+                                    t.code.trim().toUpperCase() ===
+                                        defTask.code.trim().toUpperCase()),
+                        )
+                    ) {
+                        this.tasks.push({ ...defTask });
+                    }
+                }
                 if (
                     data &&
                     data.comments &&
@@ -1280,17 +1324,11 @@ export class TaskService {
 
     private isAdmin(user: UserPayload): boolean {
         if (!user) return false;
-        if (this._planService) {
-            return this._planService.isAdmin(user);
-        }
         return isAdminOrSuperAdmin(user);
     }
 
     private isUserPlanMember(user: UserPayload, plan: any): boolean {
         if (!user) return false;
-        if (this._planService) {
-            return this._planService.isUserProjectMember(user, plan);
-        }
         if (this.isAdmin(user)) return true;
 
         const uId = Number(user.id || 0);
@@ -1894,10 +1932,11 @@ export class TaskService {
 
         const pid = projectId.toLowerCase().trim();
         const cleanPid = pid.replace('#', '');
+        const paddedCleanPid = cleanPid.padStart(4, '0');
+        const numPid = Number(cleanPid);
         const tPid = (task.project_id || '').toLowerCase().trim();
         const tPname = (task.project_name || '').toLowerCase().trim();
         const tCode = (task.code || '').toLowerCase().trim().replace('#', '');
-
         // Specific aliases for BMS Digitech (0002)
         const isBmsFilter =
             cleanPid === '0002' ||
@@ -1934,10 +1973,27 @@ export class TaskService {
             return isTaskWms;
         }
 
+        const numTPid = Number(tPid);
+        const isNumericMatch =
+            !isNaN(numPid) &&
+            !isNaN(numTPid) &&
+            numPid > 0 &&
+            numPid === numTPid;
+
         return Boolean(
-            (tPid && (tPid === pid || tPid === cleanPid)) ||
-            (tPname && tPname === pid) ||
-            (tCode && (tCode === cleanPid || tCode.startsWith(cleanPid + '-'))),
+            (tPid &&
+                (tPid === pid ||
+                    tPid === cleanPid ||
+                    tPid === paddedCleanPid ||
+                    isNumericMatch)) ||
+            (tPname &&
+                (tPname === pid ||
+                    tPname.includes(pid) ||
+                    pid.includes(tPname))) ||
+            (tCode &&
+                (tCode === cleanPid ||
+                    tCode.startsWith(cleanPid + '-') ||
+                    tCode.startsWith(paddedCleanPid + '-'))),
         );
     }
 
