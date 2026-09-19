@@ -67,95 +67,131 @@ export const BMS_PROJECT_LOGO =
 export const WMS_PROJECT_LOGO =
     'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><rect width="120" height="120" rx="28" fill="%230b1329"/><rect x="1.5" y="1.5" width="117" height="117" rx="27" fill="none" stroke="%231e293b" stroke-width="2"/><circle cx="60" cy="60" r="41" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="1.5"/><g transform="translate(60, 60)"><path d="M 0 -25 L 23 -12 L 0 1 L -23 -12 Z" fill="%23fb923c" stroke="%23ea580c" stroke-width="1.5" stroke-linejoin="round"/><path d="M -23 -12 L 0 1 L 0 26 L -23 13 Z" fill="%230284c7" stroke="%230369a1" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 23 -12 L 23 13 L 0 26 Z" fill="%23ea580c" stroke="%23c2410c" stroke-width="1.5" stroke-linejoin="round"/><path d="M 0 1 L 0 26 M 0 1 L -23 -12 M 0 1 L 23 -12" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M -11.5 -5.5 L 0 -12 L 11.5 -5.5 L 0 1 Z" fill="none" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/><path d="M -11.5 7 L -11.5 -5.5 M 11.5 7 L 11.5 -5.5" stroke="%23ffffff" stroke-width="1.5" stroke-opacity="0.7"/></g></svg>';
 
+export const PRJ_PROJECT_LOGO = '/images/logo/logo.png';
+
+const DEFAULT_MEMBERS = [
+    {
+        id: 101,
+        name: 'PISETH PANHAVORN',
+        role: 'Project Manager',
+        phone: '010843612',
+        email: 'pisethpanhavorn544@gmail.com',
+        avatar: null,
+    },
+    {
+        id: 102,
+        name: 'PUM BRUSMUNY',
+        role: 'Developer',
+        phone: '087280875',
+        email: 'pumprusmuny@example.com',
+        avatar: null,
+    },
+    {
+        id: 103,
+        name: 'THA WINNER',
+        role: 'Developer',
+        phone: '067776682',
+        email: 'thawinner@example.com',
+        avatar: null,
+    },
+    {
+        id: 104,
+        name: 'PHUONG SOVANNARA',
+        role: 'Developer',
+        phone: '011242425',
+        email: 'phuongsovannara@gmail.com',
+        avatar: null,
+    },
+];
+
 const PROJECTS: ProjectPlanItem[] = [
     {
-        id: '4',
+        id: '0001',
+        code: '0001',
+        name: 'WMS Digitech',
+        description:
+            'Workforce & Attendance Management System - Digitech Real-time QR & Payroll.',
+        status: 'active',
+        progress: 30,
+        start_date: '2026-08-09T09:24:17.350Z',
+        end_date: '2026-10-23T09:24:17.350Z',
+        total_tasks: 4,
+        completed_tasks: 1,
+        logo: WMS_PROJECT_LOGO,
+        image: WMS_PROJECT_LOGO,
+        lead: DEFAULT_MEMBERS[0],
+        team_lead: DEFAULT_MEMBERS[0],
+        members: DEFAULT_MEMBERS,
+    },
+    {
+        id: '0002',
         code: '0002',
         name: 'BMS Digitech',
         description:
-            'Business Management System - Digitech Project Management & Workflow.',
+            'Business Management System - Digitech Project Management, Sales & Invoicing Workflow.',
         status: 'active',
-        progress: 20,
-        start_date: new Date(Date.now() - 86400000 * 15).toISOString(),
-        end_date: new Date(Date.now() + 86400000 * 60).toISOString(),
-        total_tasks: 5,
+        progress: 33,
+        start_date: '2026-08-24T09:24:17.350Z',
+        end_date: '2026-11-07T09:24:17.350Z',
+        total_tasks: 6,
         completed_tasks: 1,
         logo: BMS_PROJECT_LOGO,
         image: BMS_PROJECT_LOGO,
-        members: [
-            {
-                id: 101,
-                name: 'PISETH PANHAVORN',
-                role: 'Lead Developer',
-                phone: '010843612',
-                avatar: null,
-            },
-            {
-                id: 102,
-                name: 'PUM BRUSMUNY',
-                role: 'Developer',
-                phone: '087280875',
-                avatar: null,
-            },
-            {
-                id: 103,
-                name: 'THA WINNER',
-                role: 'Developer',
-                phone: '067776682',
-                avatar: null,
-            },
-            {
-                id: 104,
-                name: 'PHUONG SOVANNARA',
-                role: 'Developer',
-                phone: '011242425',
-                avatar: null,
-            },
-        ],
+        lead: DEFAULT_MEMBERS[0],
+        team_lead: DEFAULT_MEMBERS[0],
+        members: DEFAULT_MEMBERS,
     },
     {
-        id: '5',
-        code: '0001',
-        name: 'WMS Digitech',
-        description: 'Workforce & Attendance Management System - Digitech.',
+        id: '0003',
+        code: '0003',
+        name: 'EBMS',
+        description: 'EBMS Enterprise Business Management System.',
+        status: 'planning',
+        progress: 0,
+        start_date: '2026-09-18T00:00:00.000Z',
+        end_date: '2026-11-17T00:00:00.000Z',
+        total_tasks: 0,
+        completed_tasks: 0,
+        logo: PRJ_PROJECT_LOGO,
+        image: PRJ_PROJECT_LOGO,
+        lead: DEFAULT_MEMBERS[0],
+        team_lead: DEFAULT_MEMBERS[0],
+        members: DEFAULT_MEMBERS.slice(0, 3),
+    },
+    {
+        id: '0004',
+        code: '0004',
+        name: 'Evenbooking-System',
+        description:
+            'Evenbooking-System Online Event Booking & Ticketing Platform.',
+        status: 'active',
+        progress: 40,
+        start_date: '2026-09-18T00:00:00.000Z',
+        end_date: '2026-11-17T00:00:00.000Z',
+        total_tasks: 10,
+        completed_tasks: 4,
+        logo: PRJ_PROJECT_LOGO,
+        image: PRJ_PROJECT_LOGO,
+        lead: DEFAULT_MEMBERS[0],
+        team_lead: DEFAULT_MEMBERS[0],
+        members: DEFAULT_MEMBERS,
+    },
+    {
+        id: '0005',
+        code: '0005',
+        name: 'TESTER',
+        description: 'Testing and Quality Assurance Project.',
         status: 'active',
         progress: 0,
-        start_date: new Date(Date.now() - 86400000 * 30).toISOString(),
-        end_date: new Date(Date.now() + 86400000 * 45).toISOString(),
-        total_tasks: 4,
+        start_date: '2026-09-17T00:00:00.000Z',
+        end_date: '2026-11-16T00:00:00.000Z',
+        total_tasks: 1,
         completed_tasks: 0,
-        logo: WMS_PROJECT_LOGO,
-        image: WMS_PROJECT_LOGO,
-        members: [
-            {
-                id: 101,
-                name: 'PISETH PANHAVORN',
-                role: 'Project Manager',
-                phone: '010843612',
-                avatar: null,
-            },
-            {
-                id: 102,
-                name: 'PUM BRUSMUNY',
-                role: 'Developer',
-                phone: '087280875',
-                avatar: null,
-            },
-            {
-                id: 103,
-                name: 'THA WINNER',
-                role: 'Developer',
-                phone: '067776682',
-                avatar: null,
-            },
-            {
-                id: 104,
-                name: 'PHUONG SOVANNARA',
-                role: 'Developer',
-                phone: '011242425',
-                avatar: null,
-            },
-        ],
+        logo: PRJ_PROJECT_LOGO,
+        image: PRJ_PROJECT_LOGO,
+        lead: DEFAULT_MEMBERS[0],
+        team_lead: DEFAULT_MEMBERS[0],
+        members: DEFAULT_MEMBERS.slice(0, 3),
     },
 ];
 
@@ -736,6 +772,8 @@ export class PlanService {
                     .toLowerCase()
                     .replace(/^#/, '') === normId ||
                 String(p.name || '').toLowerCase() === normId ||
+                (normId === '4' && (p.code === '0002' || p.id === '0002')) ||
+                (normId === '5' && (p.code === '0001' || p.id === '0001')) ||
                 (normId.includes('wms') &&
                     (p.name.toLowerCase().includes('wms') ||
                         (p.code && p.code.toLowerCase().includes('wms')))) ||

@@ -41,6 +41,7 @@ uploads/
 */uploads/
 *.ps1
 *.sql
+!api/database/*.sql
 *.dump
 scratch*.js
 */scratch*.js

@@ -1,810 +1,866 @@
 {
   "tasks": [
     {
-      "id": 1,
-      "code": "#WMS-0000",
+      "id": 1001,
+      "code": "#0004-1",
+      "title": "About us and contact us",
+      "description": "Implement about us page layout, company contact details, and inquiry form submission.",
+      "task_type": "feature",
+      "module": "Information",
+      "status": "done",
+      "priority": "high",
+      "progress": 100,
+      "comments_count": 8,
+      "attachments_count": 0,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T08:00:00.000Z",
+      "updated_at": "2026-09-10T12:00:00.000Z"
+    },
+    {
+      "id": 1002,
+      "code": "#0004-2",
+      "title": "Improve Navbar",
+      "description": "Refactor responsive navigation bar with mobile burger menu and active route highlight.",
+      "task_type": "feature",
+      "module": "Navigation",
+      "status": "done",
+      "priority": "medium",
+      "progress": 100,
+      "comments_count": 10,
+      "attachments_count": 2,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T08:15:00.000Z",
+      "updated_at": "2026-09-10T12:00:00.000Z"
+    },
+    {
+      "id": 1003,
+      "code": "#0004-3",
+      "title": "Improve profile panel",
+      "description": "Design user profile side drawer with account summary, edit button, and logout option.",
+      "task_type": "feature",
+      "module": "User Profile",
+      "status": "done",
+      "priority": "medium",
+      "progress": 100,
+      "comments_count": 6,
+      "attachments_count": 1,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T08:30:00.000Z",
+      "updated_at": "2026-09-10T12:00:00.000Z"
+    },
+    {
+      "id": 1004,
+      "code": "#0004-4",
+      "title": "Redesign event layout",
+      "description": "Modernize event cards grid with banner images, date badge, venue tag, and book button.",
+      "task_type": "feature",
+      "module": "Events",
+      "status": "new",
+      "priority": "urgent",
+      "progress": 20,
+      "comments_count": 6,
+      "attachments_count": 2,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T08:45:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 1005,
+      "code": "#0004-5",
+      "title": "Improve Footer UI",
+      "description": "Update footer links, social media icons, copyright notice, and dark mode styling.",
+      "task_type": "improvement",
+      "module": "Footer",
+      "status": "done",
+      "priority": "medium",
+      "progress": 100,
+      "comments_count": 5,
+      "attachments_count": 2,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T09:00:00.000Z",
+      "updated_at": "2026-09-10T12:00:00.000Z"
+    },
+    {
+      "id": 1006,
+      "code": "#0004-6",
+      "title": "Improve or redesign home page",
+      "description": "Implement hero banner slider, trending events carousel, and category pill filters.",
+      "task_type": "feature",
+      "module": "Home Page",
+      "status": "new",
+      "priority": "urgent",
+      "progress": 15,
+      "comments_count": 5,
+      "attachments_count": 1,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T09:15:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 1007,
+      "code": "#0004-7",
+      "title": "Improve bar chart change to use echart",
+      "description": "Replace standard canvas chart with Apache ECharts for ticket sales analytics.",
+      "task_type": "feature",
+      "module": "Analytics",
+      "status": "new",
+      "priority": "medium",
+      "progress": 30,
+      "comments_count": 5,
+      "attachments_count": 1,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T09:30:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 1008,
+      "code": "#0004-8",
+      "title": "Allow change phone number",
+      "description": "Add OTP verification step when user requests phone number update in settings.",
+      "task_type": "feature",
+      "module": "User Settings",
+      "status": "new",
+      "priority": "medium",
+      "progress": 0,
+      "comments_count": 3,
+      "attachments_count": 1,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T09:45:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 1009,
+      "code": "#0004-9",
+      "title": "Add organizer name in event",
+      "description": "Display organizer brand, profile avatar, and verified badge on event detail screen.",
+      "task_type": "feature",
+      "module": "Events",
+      "status": "new",
+      "priority": "medium",
+      "progress": 0,
+      "comments_count": 3,
+      "attachments_count": 1,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T10:00:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 1010,
+      "code": "#0004-10",
+      "title": "Make it can upload profile",
+      "description": "Enable profile image cropping, drag and drop upload, and cloud image optimization.",
+      "task_type": "feature",
+      "module": "User Profile",
+      "status": "new",
+      "priority": "medium",
+      "progress": 0,
+      "comments_count": 2,
+      "attachments_count": 1,
+      "due_date": "2026-09-25T00:00:00.000Z",
+      "project_id": "0004",
+      "project_name": "Evenbooking-System",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-25T10:15:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 2001,
+      "code": "#0002-1",
+      "title": "Project | Folder | Drag & Drop",
+      "description": "Implement intuitive drag and drop folder organization for project documents.",
+      "task_type": "feature",
+      "module": "Project | Folder",
+      "status": "done",
+      "priority": "high",
+      "progress": 100,
+      "comments_count": 4,
+      "attachments_count": 2,
+      "due_date": "2026-10-15T00:00:00.000Z",
+      "project_id": "0002",
+      "project_name": "BMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 102,
+        "name": "PUM BRUSMUNY",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 102,
+          "name": "PUM BRUSMUNY",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-24T09:00:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 2002,
+      "code": "#0002-2",
+      "title": "My Work | Profile | Missing Cover",
+      "description": "Fix image cover banner rendering on responsive mobile screens.",
+      "task_type": "bug",
+      "module": "My Work | Profile",
+      "status": "confirmed",
+      "priority": "high",
+      "progress": 90,
+      "comments_count": 2,
+      "attachments_count": 1,
+      "due_date": "2026-10-18T00:00:00.000Z",
+      "project_id": "0002",
+      "project_name": "BMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 102,
+        "name": "PUM BRUSMUNY",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 102,
+          "name": "PUM BRUSMUNY",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-24T09:30:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 2003,
+      "code": "#0002-3",
+      "title": "User | Report | Progress Compare",
+      "description": "Generate visual analytics comparing team velocity across sprints.",
+      "task_type": "feature",
+      "module": "User | Report",
+      "status": "in_review",
+      "priority": "medium",
+      "progress": 85,
+      "comments_count": 3,
+      "attachments_count": 0,
+      "due_date": "2026-10-20T00:00:00.000Z",
+      "project_id": "0002",
+      "project_name": "BMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 102,
+        "name": "PUM BRUSMUNY",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 102,
+          "name": "PUM BRUSMUNY",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-24T10:00:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 2004,
+      "code": "#0002-4",
+      "title": "Profile | Switch Org | Exit Org",
+      "description": "Ensure smooth transition and state purge when switching organization context.",
+      "task_type": "feature",
+      "module": "Profile",
+      "status": "done",
+      "priority": "low",
+      "progress": 100,
+      "comments_count": 2,
+      "attachments_count": 0,
+      "due_date": "2026-09-12T00:00:00.000Z",
+      "project_id": "0002",
+      "project_name": "BMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 102,
+        "name": "PUM BRUSMUNY",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 102,
+          "name": "PUM BRUSMUNY",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-24T10:30:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 2005,
+      "code": "#0002-14",
+      "title": "Api | Payment | Home Page + CRUD",
+      "description": "Build payment gateway callback webhooks and transaction ledger.",
+      "task_type": "feature",
+      "module": "Api | Payment",
+      "status": "in_progress",
+      "priority": "medium",
+      "progress": 50,
+      "comments_count": 7,
+      "attachments_count": 1,
+      "due_date": "2026-09-18T00:00:00.000Z",
+      "project_id": "0002",
+      "project_name": "BMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 101,
+          "name": "PISETH PANHAVORN",
+          "role": "Project Manager",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-09-01T08:00:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 2006,
+      "code": "#0002-24",
+      "title": "Web | Report | Purchases Page",
+      "description": "Purchases data export to Excel and PDF formats for finance audit.",
+      "task_type": "feature",
+      "module": "Web | Report",
+      "status": "new",
+      "priority": "medium",
+      "progress": 10,
+      "comments_count": 2,
+      "attachments_count": 1,
+      "due_date": "2026-09-18T00:00:00.000Z",
+      "project_id": "0002",
+      "project_name": "BMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 101,
+          "name": "PISETH PANHAVORN",
+          "role": "Project Manager",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-09-01T08:30:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 101,
+      "code": "#0001-1",
       "title": "Org Admin | Structure | Department",
+      "description": "Manage departmental structures, permissions, and organizational units in core hierarchy.",
+      "task_type": "feature",
       "module": "Org Admin | Structure",
-      "status": "review",
-      "assignee": null,
-      "due_date": "2026-09-15T03:42:06.770Z",
+      "status": "in_review",
       "priority": "high",
       "progress": 85,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [],
-      "task_type": "feature",
-      "created_at": "2026-09-03T03:42:06.771Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T03:42:06.771Z",
-      "description": "Manage departmental structures, permissions, and organizational units in core hierarchy.",
-      "project_name": "WMS Digitech",
       "comments_count": 1,
-      "attachments_count": 2
-    },
-    {
-      "id": 2,
-      "code": "#BMS-0000",
-      "title": "Project | Folder | Drag & Drop",
-      "module": "Project | Folder",
-      "status": "completed",
-      "assignee": {
-        "id": 2,
-        "name": "ពុំ ប្រុសមុន្នី",
-        "role": "User",
+      "attachments_count": 2,
+      "due_date": "2026-10-15T00:00:00.000Z",
+      "project_id": "0001",
+      "project_name": "WMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
         "avatar": null
       },
-      "due_date": "2026-09-07T03:42:06.771Z",
-      "priority": "high",
-      "progress": 100,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
+      "assignee": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
         "avatar": null
       },
       "assignees": [
         {
-          "id": 2,
-          "name": "ពុំ ប្រុសមុន្នី",
-          "role": "User",
+          "id": 101,
+          "name": "PISETH PANHAVORN",
+          "role": "Project Manager",
           "avatar": null
         }
       ],
-      "task_type": "feature",
-      "created_at": "2026-09-02T03:42:06.771Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-09T03:42:06.771Z",
-      "description": "Implement intuitive drag and drop folder organization for project documents.",
-      "project_name": "BMS Digitech",
-      "comments_count": 0,
-      "attachments_count": 2
+      "created_at": "2026-08-09T08:00:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
     },
     {
-      "id": 3,
-      "code": "#WMS-0001",
+      "id": 102,
+      "code": "#0001-2",
       "title": "Project | Folder | Cannot Scroll PDF",
+      "description": "Resolve touch and trackpad event bubbling preventing embedded PDF scrolling.",
+      "task_type": "bug",
       "module": "Project | Folder",
-      "status": "confirmed",
-      "assignee": {
-        "id": 3,
-        "name": "ថា វីនណឺរ",
-        "role": "User",
-        "avatar": null
-      },
-      "due_date": "2026-09-06T03:42:06.771Z",
-      "priority": "urgent",
-      "progress": 100,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [
-        {
-          "id": 3,
-          "name": "ថា វីនណឺរ",
-          "role": "User",
-          "avatar": null
-        }
-      ],
-      "task_type": "bug",
-      "created_at": "2026-09-02T03:42:06.771Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T03:42:06.771Z",
-      "description": "Fix scrolling and pinch-to-zoom issues inside nested PDF preview modal containers.",
-      "project_name": "WMS Digitech",
-      "comments_count": 2,
-      "attachments_count": 1
-    },
-    {
-      "id": 4,
-      "code": "#BMS-0001",
-      "title": "My Work | Profile | Missing Cover",
-      "module": "My Work | Profile",
-      "status": "reopened",
-      "assignee": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin & User",
-        "avatar": null
-      },
-      "due_date": "2026-09-04T03:42:06.771Z",
-      "priority": "urgent",
-      "progress": 40,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [
-        {
-          "id": 1,
-          "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-          "role": "Super Admin & User",
-          "avatar": null
-        }
-      ],
-      "task_type": "bug",
-      "created_at": "2026-09-02T03:42:06.771Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-09T03:42:06.771Z",
-      "description": "Provide fallback default cover gradient when user cover photo URL is empty or unverified.",
-      "project_name": "BMS Digitech",
-      "comments_count": 1,
-      "attachments_count": 1
-    },
-    {
-      "id": 5,
-      "code": "#WMS-0002",
-      "title": "Security setting UI improvements",
-      "module": "Security Settings",
-      "status": "pending",
-      "assignee": {
-        "id": 2,
-        "name": "ពុំ ប្រុសមុន្នី",
-        "role": "User",
-        "avatar": null
-      },
-      "due_date": "2026-09-03T03:42:06.771Z",
-      "priority": "high",
-      "progress": 10,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [
-        {
-          "id": 2,
-          "name": "ពុំ ប្រុសមុន្នី",
-          "role": "User",
-          "avatar": null
-        }
-      ],
-      "task_type": "improvement",
-      "created_at": "2026-09-02T03:42:06.771Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T03:42:06.771Z",
-      "description": "Refactor passkey registration dialog, 2FA toggle switches, and active login sessions table.",
-      "project_name": "WMS Digitech",
-      "comments_count": 1,
-      "attachments_count": 1
-    },
-    {
-      "id": 6,
-      "code": "#BMS-0002",
-      "title": "User | Report | Progress Compare",
-      "module": "User | Report",
       "status": "new",
-      "assignee": {
-        "id": 3,
-        "name": "ថា វីនណឺរ",
-        "role": "User",
-        "avatar": null
-      },
-      "due_date": "2026-09-13T03:42:06.771Z",
-      "priority": "medium",
-      "progress": 55,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [
-        {
-          "id": 3,
-          "name": "ថា វីនណឺរ",
-          "role": "User",
-          "avatar": null
-        }
-      ],
-      "task_type": "feature",
-      "created_at": "2026-08-26T03:42:06.771Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-10T22:28:03.959Z",
-      "description": "Render interactive comparison charts comparing weekly member work hours and sprint deliverables.",
-      "project_name": "BMS Digitech",
-      "comments_count": 14,
-      "attachments_count": 1
-    },
-    {
-      "id": 7,
-      "code": "#WMS-0003",
-      "title": "User | Report | Progress",
-      "module": "User | Report",
-      "status": "confirmed",
-      "assignee": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin & User",
-        "avatar": null
-      },
-      "due_date": "2026-09-11T03:42:06.771Z",
-      "priority": "medium",
-      "progress": 88,
-      "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
-        "avatar": null
-      },
-      "assignees": [
-        {
-          "id": 1,
-          "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-          "role": "Super Admin & User",
-          "avatar": null
-        }
-      ],
-      "task_type": "feature",
-      "created_at": "2026-08-26T03:42:06.771Z",
-      "project_id": "wms-digitech",
-      "updated_at": "2026-09-09T03:42:06.771Z",
-      "description": "Real-time sync of task milestone updates and aggregated department productivity scorecards.",
-      "project_name": "WMS Digitech",
-      "comments_count": 2,
-      "attachments_count": 1
-    },
-    {
-      "id": 8,
-      "code": "#BMS-0003",
-      "title": "Profile | Switch Org | Exit Org",
-      "module": "Profile | Switch Org",
-      "status": "todo",
-      "assignee": {
-        "id": 2,
-        "name": "ពុំ ប្រុសមុន្នី",
-        "role": "User",
-        "avatar": null
-      },
-      "due_date": "2026-09-17T03:42:06.771Z",
-      "priority": "low",
+      "priority": "urgent",
       "progress": 0,
+      "comments_count": 3,
+      "attachments_count": 1,
+      "due_date": "2026-10-18T00:00:00.000Z",
+      "project_id": "0001",
+      "project_name": "WMS Digitech",
       "reporter": {
-        "id": 1,
-        "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "role": "Super Admin",
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 102,
+        "name": "PUM BRUSMUNY",
+        "role": "Developer",
         "avatar": null
       },
       "assignees": [
         {
-          "id": 2,
-          "name": "ពុំ ប្រុសមុន្នី",
-          "role": "User",
+          "id": 102,
+          "name": "PUM BRUSMUNY",
+          "role": "Developer",
           "avatar": null
         }
       ],
+      "created_at": "2026-08-09T08:30:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 103,
+      "code": "#0001-3",
+      "title": "Security setting UI improvements",
+      "description": "Enhance 2FA configuration flow and passkey biometric enrollment prompts.",
+      "task_type": "improvement",
+      "module": "Security Settings",
+      "status": "confirmed",
+      "priority": "medium",
+      "progress": 75,
+      "comments_count": 2,
+      "attachments_count": 0,
+      "due_date": "2026-10-22T00:00:00.000Z",
+      "project_id": "0001",
+      "project_name": "WMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 102,
+        "name": "PUM BRUSMUNY",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 102,
+          "name": "PUM BRUSMUNY",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-09T09:00:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 104,
+      "code": "#0001-4",
+      "title": "User | Report | Progress",
+      "description": "Export daily attendance timesheets and check-in geolocation heatmaps.",
       "task_type": "feature",
-      "created_at": "2026-08-26T03:42:06.771Z",
-      "project_id": "bms-digitech",
-      "updated_at": "2026-09-09T03:42:06.771Z",
-      "description": "Provide safe confirmation step and revoke tenant session when member switches workspace.",
-      "project_name": "BMS Digitech",
+      "module": "User | Report",
+      "status": "done",
+      "priority": "medium",
+      "progress": 100,
+      "comments_count": 2,
+      "attachments_count": 0,
+      "due_date": "2026-09-10T00:00:00.000Z",
+      "project_id": "0001",
+      "project_name": "WMS Digitech",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 102,
+        "name": "PUM BRUSMUNY",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 102,
+          "name": "PUM BRUSMUNY",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-08-09T09:30:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
+    },
+    {
+      "id": 3001,
+      "code": "#0005-1",
+      "title": "Testing project setup and verification",
+      "description": "End to end smoke testing for newly deployed microservices.",
+      "task_type": "feature",
+      "module": "Testing",
+      "status": "new",
+      "priority": "medium",
+      "progress": 0,
       "comments_count": 1,
-      "attachments_count": 0
+      "attachments_count": 0,
+      "due_date": "2026-11-16T00:00:00.000Z",
+      "project_id": "0005",
+      "project_name": "TESTER",
+      "reporter": {
+        "id": 101,
+        "name": "PISETH PANHAVORN",
+        "role": "Project Manager",
+        "avatar": null
+      },
+      "assignee": {
+        "id": 103,
+        "name": "THA WINNER",
+        "role": "Developer",
+        "avatar": null
+      },
+      "assignees": [
+        {
+          "id": 103,
+          "name": "THA WINNER",
+          "role": "Developer",
+          "avatar": null
+        }
+      ],
+      "created_at": "2026-09-17T08:00:00.000Z",
+      "updated_at": "2026-09-18T12:00:00.000Z"
     }
   ],
   "comments": {
-    "1": [
+    "101": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #PMS-675 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
-        "time": "8:30 AM",
+        "sender_id": 0,
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null,
+        "text": "ភារកិច្ច #0001-1 ត្រូវបានបង្កើតឡើង",
+        "time": "08:00 AM",
         "is_self": false,
         "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T07:42:50.922Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Org Admin | Structure | Department\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "seen_by": [
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-13T03:21:27.850Z"
-          }
-        ],
-        "sender_id": 999,
-        "created_at": "2026-09-04T08:12:50.923Z",
-        "sender_name": "ឡេង សុខឆាយ",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
+        "created_at": "2026-08-09T08:00:00.000Z"
       }
     ],
-    "2": [
+    "1001": [
       {
         "id": 1,
-        "text": "ភារកិច្ច #PMS-671 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ស៊ន់ ​លាង",
-        "time": "8:30 AM",
+        "sender_id": 0,
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null,
+        "text": "ភារកិច្ច #0004-1 ត្រូវបានបង្កើតឡើង",
+        "time": "08:00 AM",
         "is_self": false,
         "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T22:50:50.945Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
+        "created_at": "2026-08-25T08:00:00.000Z"
       },
       {
         "id": 2,
-        "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Drag & Drop\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "seen_by": [
-          {
-            "id": 2,
-            "name": "ពុំ ប្រុសមុន្នី",
-            "avatar": null
-          },
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-11T04:05:53.636Z"
-          }
-        ],
-        "sender_id": 1,
-        "created_at": "2026-09-04T23:20:50.945Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
-      }
-    ],
-    "3": [
-      {
-        "id": 1,
-        "text": "ភារកិច្ច #PMS-670 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T22:50:50.952Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @ថា វីនណឺរ! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Project | Folder | Cannot Scroll PDF\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "sender_id": 1,
-        "created_at": "2026-09-04T23:20:50.952Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
-      }
-    ],
-    "4": [
-      {
-        "id": 1,
-        "text": "ភារកិច្ច #PMS-574 ត្រូវបានបង្កើតដោយ ចេង ច័ន្ទបញ្ញា និងចាត់តាំងទៅកាន់ បញ្ញា វិរៈទិត្យា",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T07:42:54.657Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @ពិសិដ្ឋ បញ្ញាវ័ន្ត! ខ្ញុំបានចាត់តាំងភារកិច្ច \"My Work | Profile | Missing Cover\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "seen_by": [
-          {
-            "id": 1,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null
-          },
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-13T01:33:07.418Z"
-          }
-        ],
-        "sender_id": 1,
-        "created_at": "2026-09-04T08:12:54.657Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788522180662,
-        "text": "hii",
-        "time": "06:43 PM",
-        "is_self": true,
-        "seen_by": [
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-13T01:33:07.418Z"
-          }
-        ],
-        "is_system": false,
-        "sender_id": 2,
-        "created_at": "2026-09-04T11:43:00.662Z",
-        "attachments": [],
-        "sender_name": "ចេង ច័ន្ទបញ្ញា",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788522221293,
-        "text": "បានផ្ញើឯកសារ បញ្ជីវត្តមាននិស្សិតកម្មសិក្សាក្រុមទី3.pdf",
-        "time": "06:43 PM",
-        "is_self": true,
-        "seen_by": [
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-13T01:33:07.418Z"
-          }
-        ],
-        "is_system": false,
-        "sender_id": 2,
-        "created_at": "2026-09-04T11:43:41.294Z",
-        "attachments": [
-          {
-            "url": "",
-            "name": "បញ្ជីវត្តមាននិស្សិតកម្មសិក្សាក្រុមទី3.pdf",
-            "size": "268.7 KB",
-            "type": "application/pdf",
-            "isImage": false,
-            "fileBlob": {}
-          }
-        ],
-        "sender_name": "ចេង ច័ន្ទបញ្ញា",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788522416513,
-        "text": "",
-        "time": "06:46 PM",
-        "is_self": true,
-        "seen_by": [
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-13T01:33:07.418Z"
-          }
-        ],
-        "is_system": false,
-        "sender_id": 2,
-        "created_at": "2026-09-04T11:46:56.517Z",
-        "attachments": [
-          {
-            "url": "",
-            "name": "បញ្ជីវត្តមាននិស្សិតកម្មសិក្សាក្រុមទី3.pdf",
-            "size": "268.7 KB",
-            "type": "application/pdf",
-            "isImage": false,
-            "fileBlob": {}
-          }
-        ],
-        "sender_name": "ចេង ច័ន្ទបញ្ញា",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788522653618,
-        "text": "បានផ្ញើឯកសារ",
-        "time": "06:50 PM",
-        "is_self": true,
-        "seen_by": [
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-13T01:33:07.418Z"
-          }
-        ],
-        "is_system": false,
-        "sender_id": 2,
-        "created_at": "2026-09-04T11:50:53.619Z",
-        "attachments": [
-          {
-            "url": "",
-            "name": "បញ្ជីវត្តមាននិស្សិតកម្មសិក្សាក្រុមទី3.pdf",
-            "size": "268.7 KB",
-            "type": "application/pdf",
-            "isImage": false,
-            "fileBlob": {}
-          }
-        ],
-        "sender_name": "ចេង ច័ន្ទបញ្ញា",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      }
-    ],
-    "5": [
-      {
-        "id": 1,
-        "text": "ភារកិច្ច #PMS-554 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T07:42:40.850Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Security setting UI improvements\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "sender_id": 1,
-        "created_at": "2026-09-04T08:12:40.850Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
-      }
-    ],
-    "6": [
-      {
-        "id": 1,
-        "text": "ភារកិច្ច #PMS-532 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ស៊ន់ ​លាង",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T22:50:50.958Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @ថា វីនណឺរ! ខ្ញុំបានចាត់តាំងភារកិច្ច \"User | Report | Progress Compare\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "seen_by": [
-          {
-            "id": 3,
-            "name": "ថា វីនណឺរ",
-            "avatar": null
-          },
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-10T14:10:26.301Z"
-          }
-        ],
-        "sender_id": 1,
-        "created_at": "2026-09-04T23:20:50.958Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788875784856,
-        "text": "បានធ្វើបច្ចុប្បន្នភាពអ្នកទទួលបន្ទុក៖ ស៊ន់ ​លាង, PISETH PANHAVORN",
-        "time": "08:56 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T13:56:24.852Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1788875820738,
-        "text": "check task",
-        "time": "08:57 PM",
-        "is_self": true,
-        "is_system": false,
-        "sender_id": 64,
-        "created_at": "2026-09-08T13:57:00.738Z",
-        "attachments": [],
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788876852738,
-        "text": "hii",
-        "time": "09:14 PM",
-        "is_self": true,
-        "is_system": false,
-        "sender_id": 64,
-        "created_at": "2026-09-08T14:14:12.739Z",
-        "attachments": [],
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788876978802,
-        "text": "check task",
-        "time": "09:16 PM",
-        "is_self": true,
-        "is_system": false,
-        "sender_id": 64,
-        "created_at": "2026-09-08T14:16:18.802Z",
-        "attachments": [],
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788877019484,
-        "text": "hii",
-        "time": "09:16 PM",
-        "is_self": true,
-        "is_system": false,
-        "sender_id": 64,
-        "created_at": "2026-09-08T14:16:59.484Z",
-        "attachments": [],
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1788877032499,
-        "text": "hii",
-        "time": "09:17 PM",
-        "is_self": true,
-        "is_system": false,
-        "sender_id": 64,
-        "created_at": "2026-09-08T14:17:12.500Z",
-        "attachments": [],
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      },
-      {
-        "id": 1789049436231,
-        "text": "ពិសិដ្ឋ បញ្ញាវ័ន្ត បានប្តូរស្ថានភាពពី \"កំពុងធ្វើ\" ទៅជា \"បញ្ជាក់\"",
-        "time": "09:10 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-10T14:10:36.230Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1789053779046,
-        "text": "ពិសិដ្ឋ បញ្ញាវ័ន្ត បានប្តូរស្ថានភាពពី \"បញ្ជាក់\" ទៅជា \"ថ្មី\"",
-        "time": "10:22 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-10T15:22:59.046Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1789056152802,
-        "text": "ពិសិដ្ឋ បញ្ញាវ័ន្ត បានប្តូរស្ថានភាពពី \"ថ្មី\" ទៅជា \"បញ្ជាក់\"",
-        "time": "11:02 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-10T16:02:32.801Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1789056154900,
-        "text": "ពិសិដ្ឋ បញ្ញាវ័ន្ត បានប្តូរស្ថានភាពពី \"បញ្ជាក់\" ទៅជា \"ថ្មី\"",
-        "time": "11:02 PM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-10T16:02:34.899Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1789079282704,
-        "text": "ពិសិដ្ឋ បញ្ញាវ័ន្ត បានប្តូរស្ថានភាពពី \"ថ្មី\" ទៅជា \"បញ្ជាក់\"",
-        "time": "05:28 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-10T22:28:02.703Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 1789079283972,
-        "text": "ពិសិដ្ឋ បញ្ញាវ័ន្ត បានប្តូរស្ថានភាពពី \"បញ្ជាក់\" ទៅជា \"ថ្មី\"",
-        "time": "05:28 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-10T22:28:03.971Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      }
-    ],
-    "7": [
-      {
-        "id": 1,
-        "text": "ភារកិច្ច #PMS-531 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T07:42:45.448Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @ចេង ច័ន្ទបញ្ញា! ខ្ញុំបានចាត់តាំងភារកិច្ច \"User | Report | Progress\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "sender_id": 999,
-        "created_at": "2026-09-04T08:12:45.448Z",
-        "sender_name": "ឡេង សុខឆាយ",
-        "sender_avatar": "/images/placeholder/avatar.jpg"
-      }
-    ],
-    "8": [
-      {
-        "id": 1,
-        "text": "ភារកិច្ច #PMS-513 ត្រូវបានបង្កើតដោយ ឡេង សុខឆាយ និងចាត់តាំងទៅកាន់ ចេង ច័ន្ទបញ្ញា",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-04T07:42:48.356Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @ពុំ ប្រុសមុន្នី! ខ្ញុំបានចាត់តាំងភារកិច្ច \"Profile | Switch Org | Exit Org\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "seen_by": [
-          {
-            "id": 2,
-            "name": "ពុំ ប្រុសមុន្នី",
-            "avatar": null
-          },
-          {
-            "id": 64,
-            "name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-            "avatar": null,
-            "seen_at": "2026-09-13T01:33:23.959Z"
-          }
-        ],
-        "sender_id": 1,
-        "created_at": "2026-09-04T08:12:48.356Z",
-        "sender_name": "ពិសិដ្ឋ បញ្ញាវ័ន្ត",
-        "sender_avatar": null
-      }
-    ],
-    "1788882595357": [
-      {
-        "id": 1,
-        "text": "ភារកិច្ច #BMS-0004 ត្រូវបានបង្កើតដោយ PISETH PANHAVORN និងចាត់តាំងទៅកាន់ THA WINNER",
-        "time": "8:30 AM",
-        "is_self": false,
-        "is_system": true,
-        "sender_id": 0,
-        "created_at": "2026-09-08T15:49:55.357Z",
-        "sender_name": "ប្រព័ន្ធ (System)",
-        "sender_avatar": null
-      },
-      {
-        "id": 2,
-        "text": "សួស្តី @THA WINNER! ខ្ញុំបានចាត់តាំងភារកិច្ច \"test\" នេះជូនអ្នក។ សូមជួយពិនិត្យមើល និងអនុវត្តតាមលក្ខខណ្ឌការងារ។",
-        "time": "8:45 AM",
-        "is_self": false,
-        "sender_id": 1,
-        "created_at": "2026-09-08T15:49:55.357Z",
+        "sender_id": 101,
         "sender_name": "PISETH PANHAVORN",
-        "sender_avatar": null
+        "sender_avatar": null,
+        "text": "សួស្តី @THA WINNER! សូមជួយរៀបចំទំព័រ About Us និង Contact Us តាមលក្ខខណ្ឌការងារ។",
+        "time": "08:15 AM",
+        "is_self": false,
+        "is_system": false,
+        "created_at": "2026-08-25T08:15:00.000Z"
+      }
+    ],
+    "2001": [
+      {
+        "id": 1,
+        "sender_id": 0,
+        "sender_name": "ប្រព័ន្ធ (System)",
+        "sender_avatar": null,
+        "text": "ភារកិច្ច #0002-1 ត្រូវបានបង្កើតឡើង",
+        "time": "09:00 AM",
+        "is_self": false,
+        "is_system": true,
+        "created_at": "2026-08-24T09:00:00.000Z"
+      },
+      {
+        "id": 2,
+        "sender_id": 101,
+        "sender_name": "PISETH PANHAVORN",
+        "sender_avatar": null,
+        "text": "សួស្តី @PUM BRUSMUNY! សូមពិនិត្យមើល drag & drop folder ក្នុង BMS។",
+        "time": "09:15 AM",
+        "is_self": false,
+        "is_system": false,
+        "created_at": "2026-08-24T09:15:00.000Z"
       }
     ]
   },
-  "updated_at": "2026-09-18T03:30:29.785Z"
+  "updated_at": "2026-09-19T06:18:04.097Z"
 }
