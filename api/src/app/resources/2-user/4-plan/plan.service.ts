@@ -990,7 +990,7 @@ export class PlanService {
 
         const newPlan: any = {
             ...dto,
-            id: dto.id || `proj-${Date.now().toString().slice(-4)}`,
+            id: dto.id || projCode,
             code: projCode,
             name: projName,
             description: dto.description || '',
