@@ -120,7 +120,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS "IDX_plan_store_key" ON "user"."plan_store" ("
 CREATE UNIQUE INDEX IF NOT EXISTS "IDX_task_store_key" ON "user"."task_store" ("key");
 
 -- =============================================================================
--- 3. SEED RELATIONAL PROJECTS (5 Projects)
+-- 3. CLEAN UP ANY PREVIOUS/CONFLICTING RECORDS FOR THESE 5 PROJECTS
+-- =============================================================================
+DELETE FROM "project"."project_phases" WHERE "project_id" IN ('0001', '0002', '0003', '0004', '0005', '4', '5');
+DELETE FROM "task"."task_comments" WHERE "task_id" IN (101, 102, 103, 104, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 2001, 2002, 2003, 2004, 2005, 2006, 3001);
+DELETE FROM "task"."tasks" WHERE "project_id" IN ('0001', '0002', '0003', '0004', '0005', '4', '5')
+   OR "id" IN (101, 102, 103, 104, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 2001, 2002, 2003, 2004, 2005, 2006, 3001);
+DELETE FROM "project"."projects" WHERE "code" IN ('0001', '0002', '0003', '0004', '0005') OR "id" IN ('0001', '0002', '0003', '0004', '0005', '4', '5');
+
+-- =============================================================================
+-- 4. SEED RELATIONAL PROJECTS (5 Projects)
 -- =============================================================================
 
 INSERT INTO "project"."projects" (
@@ -154,8 +163,8 @@ INSERT INTO "project"."projects" (
     '[]'::jsonb,
     now()
 )
-ON CONFLICT ("id") DO UPDATE SET
-    "code" = EXCLUDED."code",
+ON CONFLICT ("code") DO UPDATE SET
+    "id" = EXCLUDED."id",
     "name" = EXCLUDED."name",
     "description" = EXCLUDED."description",
     "status" = EXCLUDED."status",
@@ -206,8 +215,8 @@ INSERT INTO "project"."projects" (
     '[]'::jsonb,
     now()
 )
-ON CONFLICT ("id") DO UPDATE SET
-    "code" = EXCLUDED."code",
+ON CONFLICT ("code") DO UPDATE SET
+    "id" = EXCLUDED."id",
     "name" = EXCLUDED."name",
     "description" = EXCLUDED."description",
     "status" = EXCLUDED."status",
@@ -258,8 +267,8 @@ INSERT INTO "project"."projects" (
     '[]'::jsonb,
     now()
 )
-ON CONFLICT ("id") DO UPDATE SET
-    "code" = EXCLUDED."code",
+ON CONFLICT ("code") DO UPDATE SET
+    "id" = EXCLUDED."id",
     "name" = EXCLUDED."name",
     "description" = EXCLUDED."description",
     "status" = EXCLUDED."status",
@@ -310,8 +319,8 @@ INSERT INTO "project"."projects" (
     '[]'::jsonb,
     now()
 )
-ON CONFLICT ("id") DO UPDATE SET
-    "code" = EXCLUDED."code",
+ON CONFLICT ("code") DO UPDATE SET
+    "id" = EXCLUDED."id",
     "name" = EXCLUDED."name",
     "description" = EXCLUDED."description",
     "status" = EXCLUDED."status",
@@ -362,8 +371,8 @@ INSERT INTO "project"."projects" (
     '[]'::jsonb,
     now()
 )
-ON CONFLICT ("id") DO UPDATE SET
-    "code" = EXCLUDED."code",
+ON CONFLICT ("code") DO UPDATE SET
+    "id" = EXCLUDED."id",
     "name" = EXCLUDED."name",
     "description" = EXCLUDED."description",
     "status" = EXCLUDED."status",
@@ -384,7 +393,7 @@ ON CONFLICT ("id") DO UPDATE SET
     "updated_at" = now();
 
 -- =============================================================================
--- 4. SEED PROJECT PHASES
+-- 5. SEED PROJECT PHASES
 -- =============================================================================
 
 INSERT INTO "project"."project_phases" (
@@ -696,7 +705,7 @@ ON CONFLICT ("id") DO UPDATE SET
     "updated_at" = now();
 
 -- =============================================================================
--- 5. SEED TASKS (21 Tasks across all 5 projects)
+-- 6. SEED TASKS (21 Tasks across all 5 projects)
 -- =============================================================================
 
 INSERT INTO "task"."tasks" (
@@ -1771,7 +1780,7 @@ ON CONFLICT ("id") DO UPDATE SET
     "updated_at" = now();
 
 -- =============================================================================
--- 6. SEED TASK COMMENTS & CHAT HISTORY
+-- 7. SEED TASK COMMENTS & CHAT HISTORY
 -- =============================================================================
 
 INSERT INTO "task"."task_comments" (
@@ -2235,7 +2244,7 @@ ON CONFLICT ("id") DO UPDATE SET
     "updated_at" = now();
 
 -- =============================================================================
--- 7. SEED JSON BACKUP STORES (user.plan_store & user.task_store)
+-- 8. SEED JSON BACKUP STORES (user.plan_store & user.task_store)
 -- =============================================================================
 
 INSERT INTO "user"."plan_store" ("key", "plans", "updated_at")
