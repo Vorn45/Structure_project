@@ -383,10 +383,12 @@ export class TaskDrawerComponent implements OnDestroy {
 
     getTaskAssignees(task: TaskItem | null | undefined): TaskMember[] {
         if (!task) return [];
-        if (task.assignees !== undefined && Array.isArray(task.assignees)) {
+        if (task.assignees && Array.isArray(task.assignees) && task.assignees.length > 0) {
             return task.assignees;
         }
-        if (task.assignee) return [task.assignee];
+        if (task.assignee && (task.assignee.name || task.assignee.id)) {
+            return [task.assignee];
+        }
         return [];
     }
 

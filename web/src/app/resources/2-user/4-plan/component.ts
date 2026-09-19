@@ -207,6 +207,26 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         return this.getAssigneeAvatar(reporter);
     }
 
+    getTaskAssignees(task: any): TaskMember[] {
+        if (!task) return [];
+        if (task.members && Array.isArray(task.members) && task.members.length > 0) {
+            return task.members;
+        }
+        if (task.assignees && Array.isArray(task.assignees) && task.assignees.length > 0) {
+            return task.assignees;
+        }
+        if (task.assignee && (task.assignee.name || task.assignee.id)) {
+            return [task.assignee];
+        }
+        return [];
+    }
+
+    getAssigneeNamesLabel(task: any): string {
+        const assignees = this.getTaskAssignees(task);
+        if (assignees.length === 0) return 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)';
+        return 'អ្នកទទួលបន្ទុក: ' + assignees.map((a: any) => a.name).filter(Boolean).join(', ');
+    }
+
     onMemberAvatarError(event: Event, member?: any): void {
         const target = event.target as HTMLImageElement;
         if (target) {

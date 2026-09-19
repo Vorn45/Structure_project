@@ -2195,6 +2195,22 @@ export class TaskService {
         const avatarMap = await this.getAvatarMap();
         return tasks.map((t) => {
             const copy = { ...t };
+            if (
+                (!copy.assignees ||
+                    !Array.isArray(copy.assignees) ||
+                    copy.assignees.length === 0) &&
+                copy.assignee &&
+                copy.assignee.name
+            ) {
+                copy.assignees = [copy.assignee];
+            }
+            if (
+                Array.isArray(copy.assignees) &&
+                copy.assignees.length > 0 &&
+                (!copy.assignee || !copy.assignee.name)
+            ) {
+                copy.assignee = copy.assignees[0];
+            }
             if (copy.assignee) {
                 const av = this.resolveMemberAvatar(copy.assignee, avatarMap);
                 if (av) {

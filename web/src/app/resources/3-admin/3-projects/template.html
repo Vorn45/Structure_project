@@ -893,15 +893,35 @@
                                         </span>
                                     </div>
 
-                                    <!-- Assignee Avatar (Single avatar column: ONLY Assignee) -->
-                                    <div class="w-10 shrink-0 flex items-center justify-center">
+                                    <!-- Assignee Avatar Stack (Supports 1 or multiple assignees) -->
+                                    <div class="w-16 shrink-0 flex items-center justify-center">
                                         <div class="relative shrink-0 cursor-pointer"
-                                            [matTooltip]="task.assignee?.name ? ('អ្នកទទួលបន្ទុក (Assignee): ' + task.assignee.name) : 'គ្មានអ្នកទទួលបន្ទុក (Unassigned)'">
-                                            <div *ngIf="task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
-                                                <img *ngIf="getAssigneeAvatar(task.assignee)" [src]="getAssigneeAvatar(task.assignee)" [alt]="task.assignee.name" (error)="onMemberAvatarError($event, task.assignee)" class="w-full h-full object-cover block" />
-                                                <span *ngIf="!getAssigneeAvatar(task.assignee)">{{ task.assignee?.initial || task.assignee?.name?.charAt(0) || 'U' }}</span>
-                                            </div>
-                                            <div *ngIf="!task.assignee?.name" class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 flex items-center justify-center text-[10px] bg-slate-50 dark:bg-slate-800">
+                                            [matTooltip]="getAssigneeNamesLabel(task)">
+                                            <ng-container *ngIf="getTaskAssignees(task).length > 0">
+                                                <!-- Single Assignee -->
+                                                <div *ngIf="getTaskAssignees(task).length === 1"
+                                                    class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
+                                                    <img *ngIf="getAssigneeAvatar(getTaskAssignees(task)[0])" [src]="getAssigneeAvatar(getTaskAssignees(task)[0])" [alt]="getTaskAssignees(task)[0].name" (error)="onMemberAvatarError($event, getTaskAssignees(task)[0])" class="w-full h-full object-cover block" />
+                                                    <span *ngIf="!getAssigneeAvatar(getTaskAssignees(task)[0])">{{ getTaskAssignees(task)[0].initial || getTaskAssignees(task)[0].name?.charAt(0) || 'U' }}</span>
+                                                </div>
+
+                                                <!-- Multiple Assignees Stack (Facepile up to 2 + counter badge) -->
+                                                <div *ngIf="getTaskAssignees(task).length > 1" class="flex items-center -space-x-2">
+                                                    <div *ngFor="let m of getTaskAssignees(task).slice(0, 2)"
+                                                        class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-white dark:ring-slate-800 bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
+                                                        <img *ngIf="getAssigneeAvatar(m)" [src]="getAssigneeAvatar(m)" [alt]="m.name" (error)="onMemberAvatarError($event, m)" class="w-full h-full object-cover block" />
+                                                        <span *ngIf="!getAssigneeAvatar(m)">{{ m.initial || m.name?.charAt(0) || 'U' }}</span>
+                                                    </div>
+                                                    <div *ngIf="getTaskAssignees(task).length > 2"
+                                                        class="w-6 h-6 min-w-[24px] min-h-[24px] rounded-full ring-2 ring-white dark:ring-slate-800 bg-slate-600 text-white text-[9.5px] font-bold flex items-center justify-center shadow-2xs">
+                                                        +{{ getTaskAssignees(task).length - 2 }}
+                                                    </div>
+                                                </div>
+                                            </ng-container>
+
+                                            <!-- Unassigned placeholder -->
+                                            <div *ngIf="getTaskAssignees(task).length === 0"
+                                                class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 flex items-center justify-center text-[10px] bg-slate-50 dark:bg-slate-800">
                                                 <mat-icon svgIcon="mdi:account-outline" class="icon-size-3.5"></mat-icon>
                                             </div>
                                         </div>
