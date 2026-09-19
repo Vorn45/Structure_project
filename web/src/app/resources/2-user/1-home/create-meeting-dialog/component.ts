@@ -63,34 +63,7 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     ];
     selectedMemberIds = signal<string[]>(['1', '2']);
 
-    scheduledMeetings = signal<ScheduledMeeting[]>([
-        {
-            id: 'm1',
-            title: 'ប្រជុំពិនិត្យវឌ្ឍនភាពការងារគម្រោង (Sprint Review)',
-            type: 'wms',
-            date: '០១ កញ្ញា ២០២៦ (ថ្ងៃនេះ)',
-            time: '០៩:០០ ព្រឹក - ១០:០០ ព្រឹក',
-            duration: '១ ម៉ោង',
-            roomCode: 'meet-sprint-8821',
-            roomUrl: 'https://meet.wms.gov.kh/room/meet-sprint-8821',
-            organizer: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-            status: 'live',
-            participants: [{ name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }, { name: 'ពុំ ប្រុសមុន្នី' }],
-        },
-        {
-            id: 'm2',
-            title: 'ប្រជុំរៀបចំស្ថាបត្យកម្មប្រព័ន្ធ PMS',
-            type: 'wms',
-            date: '០១ កញ្ញា ២០២៦ (ថ្ងៃនេះ)',
-            time: '០២:៣០ រសៀល - ០៣:៣០ រសៀល',
-            duration: '១ ម៉ោង',
-            roomCode: 'meet-arch-5542',
-            roomUrl: 'https://meet.wms.gov.kh/room/meet-arch-5542',
-            organizer: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
-            status: 'upcoming',
-            participants: [{ name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }, { name: 'ថា វីនណឺរ' }],
-        },
-    ]);
+    scheduledMeetings = signal<ScheduledMeeting[]>([]);
 
     constructor(
         public dialogRef: MatDialogRef<CreateMeetingDialogComponent>,
@@ -150,6 +123,12 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             this.formTitle = 'កិច្ចប្រជុំពិភាក្សាការងារ';
         }
 
+        const orgName =
+            this.data?.user?.kh_name ||
+            this.data?.user?.en_name ||
+            this.data?.user?.name ||
+            'អ្នកគ្រប់គ្រង';
+
         const newMeeting: ScheduledMeeting = {
             id: 'm_' + Date.now(),
             title: this.formTitle.trim(),
@@ -159,9 +138,9 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             duration: this.formDuration,
             roomCode: this.generatedRoomCode,
             roomUrl: this.generatedRoomUrl,
-            organizer: this.data?.user?.kh_name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',
+            organizer: orgName,
             status: 'upcoming',
-            participants: [{ name: this.data?.user?.kh_name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }],
+            participants: [{ name: orgName }],
             agenda: this.formAgenda.trim(),
         };
 

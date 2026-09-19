@@ -12,6 +12,7 @@ import { KhmerDateAdapter } from 'helper/adapter/khmer-date-adapter';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserService } from 'app/core/user/user.service';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
+import { UserTaskService } from '../task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
 import {
     TASK_TYPES_LIST,
@@ -74,6 +75,7 @@ export class TaskDrawerComponent implements OnDestroy {
 
     private readonly _userService = inject(UserService);
     private readonly _taskSocket = inject(TaskSocketService);
+    private readonly _taskService = inject(UserTaskService);
 
     taskTypes = TASK_TYPES_LIST;
 
@@ -953,54 +955,38 @@ export class TaskDrawerComponent implements OnDestroy {
             for (const file of filesArray) {
                 const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/i.test(file.name);
                 const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-                const isText = file.type.startsWith('text/') || /\.(txt|json|csv|md|js|ts|html|xml|sql|log)$/i.test(file.name);
                 const sizeStr = this.formatFileSize(file.size);
 
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const dataUrl = (e.target?.result as string) || '';
-                    const item: TaskAttachment = {
-                        name: file.name,
-                        size: sizeStr,
-                        type: file.type || (isPdf ? 'application/pdf' : isImage ? 'image/png' : 'application/octet-stream'),
-                        url: dataUrl,
-                        isImage: isImage,
-                        fileBlob: file,
-                    };
-
-                    if (isText) {
-                        file.text().then((txt) => {
-                            item.textContent = txt;
-                            processedAttachments.push(item);
-                            remaining--;
-                            checkDone();
-                        }).catch(() => {
-                            processedAttachments.push(item);
-                            remaining--;
-                            checkDone();
+                this._taskService.uploadAttachment(file).subscribe({
+                    next: (res) => {
+                        const serverUrl = res?.data?.url || res?.data?.uri || '';
+                        processedAttachments.push({
+                            name: file.name,
+                            size: sizeStr,
+                            type: file.type || (isPdf ? 'application/pdf' : isImage ? 'image/png' : 'application/octet-stream'),
+                            url: serverUrl,
+                            isImage: isImage,
+                            fileBlob: file,
                         });
-                    } else {
-                        processedAttachments.push(item);
                         remaining--;
                         checkDone();
-                    }
-                };
-                reader.onerror = () => {
-                    const blobUrl = URL.createObjectURL(file);
-                    processedAttachments.push({
-                        name: file.name,
-                        size: sizeStr,
-                        type: file.type || 'application/octet-stream',
-                        url: blobUrl,
-                        isImage: isImage,
-                        fileBlob: file,
-                    });
-                    remaining--;
-                    checkDone();
-                };
-                reader.readAsDataURL(file);
+                    },
+                    error: () => {
+                        const blobUrl = URL.createObjectURL(file);
+                        processedAttachments.push({
+                            name: file.name,
+                            size: sizeStr,
+                            type: file.type || 'application/octet-stream',
+                            url: blobUrl,
+                            isImage: isImage,
+                            fileBlob: file,
+                        });
+                        remaining--;
+                        checkDone();
+                    },
+                });
             }
-    }
+        }
 
     removePendingAttachment(index: number): void {
         this.pendingAttachments.update((prev) => prev.filter((_, i) => i !== index));

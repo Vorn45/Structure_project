@@ -17,6 +17,8 @@ import { appConfig } from 'src/app.config';
 import { User } from 'src/app/model/user/users.entity';
 import { TaskStore } from 'src/app/model/user/task-store.entity';
 import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
+import { TaskEntity } from 'src/app/model/task/task.entity';
+import { TaskCommentEntity } from 'src/app/model/task/task-comment.entity';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import {
     NotificationService,
@@ -391,6 +393,10 @@ export class TaskService {
         private readonly _taskStoreRepo: Repository<TaskStore>,
         @InjectRepository(TelegramThread)
         private readonly _threadRepo: Repository<TelegramThread>,
+        @InjectRepository(TaskEntity)
+        private readonly _taskRepo: Repository<TaskEntity>,
+        @InjectRepository(TaskCommentEntity)
+        private readonly _taskCommentRepo: Repository<TaskCommentEntity>,
         private readonly _notificationService?: NotificationService,
         private readonly _realtimeGateway?: RealtimeGateway,
         @Optional()
@@ -432,6 +438,7 @@ export class TaskService {
             await this._userRepo.query(`
                 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
                 CREATE SCHEMA IF NOT EXISTS "user";
+                CREATE SCHEMA IF NOT EXISTS "task";
                 CREATE TABLE IF NOT EXISTS "user"."task_store" (
                     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                     "key" VARCHAR(255) NOT NULL DEFAULT 'default_tasks_store',
@@ -465,16 +472,116 @@ export class TaskService {
         );
     }
 
+    private isDummyMockTask(t: any): boolean {
+        if (!t) return false;
+        const code = (t.code || '').toUpperCase();
+        const title = (t.title || '').trim();
+        const dummyTitles = [
+            'Make it can upload profile',
+            'Add organizer name in event',
+            'Allow change phone number',
+            'Improve bar chart change to use echart',
+            'Improve or redesign home page',
+            'Improve Footer UI',
+            'Redesign event layout',
+            'Improve profile panel',
+            'Improve Navbar',
+            'About us and contact us',
+        ];
+        return (
+            code.includes('PRJ-0002-') ||
+            dummyTitles.includes(title)
+        );
+    }
+
     private async initDbStore(): Promise<void> {
         await this.ensureTableExists();
         try {
+            // Check if relational table has records
+            const count = await this._taskRepo.count();
+            if (count > 0) {
+                const dbTasks = await this._taskRepo.find({
+                    order: { id: 'DESC' },
+                });
+                const cleanTasks = dbTasks.filter(
+                    (t: any) => !this.isPmsTask(t) && !this.isDummyMockTask(t),
+                );
+                this.tasks = cleanTasks.map((t: any) => ({
+                    id: Number(t.id),
+                    code: t.code,
+                    title: t.title,
+                    description: t.description || '',
+                    task_type: t.task_type || 'feature',
+                    module: t.module,
+                    status: t.status,
+                    priority: t.priority,
+                    progress: t.progress || 0,
+                    comments_count: t.comments_count || 0,
+                    attachments_count: t.attachments_count || 0,
+                    due_date: t.due_date
+                        ? new Date(t.due_date).toISOString()
+                        : null,
+                    project_id: t.project_id,
+                    project_name: t.project_name || '',
+                    reporter: t.reporter,
+                    assignee: t.assignee,
+                    assignees: t.assignees || [],
+                    attachments: t.attachments || [],
+                    created_at: t.created_at
+                        ? new Date(t.created_at).toISOString()
+                        : new Date().toISOString(),
+                    updated_at: t.updated_at
+                        ? new Date(t.updated_at).toISOString()
+                        : new Date().toISOString(),
+                }));
+
+                const dbComments = await this._taskCommentRepo.find({
+                    order: { id: 'ASC' },
+                });
+                this.taskComments.clear();
+                for (const c of dbComments) {
+                    const taskId = Number(c.task_id);
+                    if (!this.taskComments.has(taskId)) {
+                        this.taskComments.set(taskId, []);
+                    }
+                    this.taskComments.get(taskId)!.push({
+                        id: Number(c.id),
+                        sender_id: c.sender_id || 0,
+                        sender_name: c.sender_name,
+                        sender_avatar: c.sender_avatar,
+                        text: c.text || '',
+                        time: c.time || '',
+                        is_self: c.is_self || false,
+                        is_system: c.is_system || false,
+                        attachments: c.attachments || undefined,
+                        seen_by: c.seen_by || [],
+                        created_at: c.created_at
+                            ? new Date(c.created_at).toISOString()
+                            : new Date().toISOString(),
+                    });
+                }
+
+                for (const task of this.tasks) {
+                    if (
+                        !this.taskComments.has(task.id) ||
+                        (this.taskComments.get(task.id)?.length || 0) === 0
+                    ) {
+                        this.ensureTaskComments(task.id);
+                    }
+                }
+                this.isStoreLoaded = true;
+                return;
+            }
+
+            // Seed relational tables from taskStoreRepo or disk
             const dbStore = await this._taskStoreRepo.findOne({
                 where: { key: 'default_tasks_store' },
             });
             if (dbStore) {
                 if (Array.isArray(dbStore.tasks) && dbStore.tasks.length > 0) {
                     const nonPms = dbStore.tasks.filter(
-                        (t: any) => !this.isPmsTask(t),
+                        (t: any) =>
+                            !this.isPmsTask(t) && !this.isDummyMockTask(t),
                     );
                     if (nonPms.length > 0) {
                         this.tasks = nonPms.map((t: any) => ({
@@ -493,35 +600,78 @@ export class TaskService {
                         }
                     }
                 }
-                // Heal any stored tasks that are missing a reporter so they are never orphaned
                 this.healMissingReporters();
-                await this.saveToDb();
-                this.saveToDisk();
             } else {
-                await this.saveToDb();
+                this.tasks = [...INITIAL_TASKS];
             }
+
+            this.tasks = this.tasks.filter(
+                (t: any) => !this.isPmsTask(t) && !this.isDummyMockTask(t),
+            );
+            if (this.tasks.length === 0) {
+                this.tasks = [...INITIAL_TASKS];
+            }
+
+            for (const task of this.tasks) {
+                if (
+                    !this.taskComments.has(task.id) ||
+                    (this.taskComments.get(task.id)?.length || 0) === 0
+                ) {
+                    this.ensureTaskComments(task.id);
+                }
+            }
+
+            // Migrate to relational PostgreSQL tables
+            for (const t of this.tasks) {
+                const entity = this._taskRepo.create({
+                    id: t.id,
+                    code: t.code || null,
+                    project_id: t.project_id,
+                    project_name: t.project_name,
+                    title: t.title,
+                    description: t.description,
+                    task_type: t.task_type || 'feature',
+                    module: t.module,
+                    status: t.status,
+                    priority: t.priority,
+                    progress: t.progress || 0,
+                    comments_count: t.comments_count || 0,
+                    attachments_count: t.attachments_count || 0,
+                    due_date: t.due_date,
+                    reporter: t.reporter,
+                    assignee: t.assignee,
+                    assignees: t.assignees || [],
+                    attachments: t.attachments || [],
+                });
+                await this._taskRepo.save(entity);
+
+                const taskComms = this.taskComments.get(t.id) || [];
+                for (const c of taskComms) {
+                    const cEntity = this._taskCommentRepo.create({
+                        id: c.id,
+                        task_id: t.id,
+                        sender_id: c.sender_id,
+                        sender_name: c.sender_name,
+                        sender_avatar: c.sender_avatar,
+                        text: c.text,
+                        time: c.time,
+                        is_self: c.is_self,
+                        is_system: c.is_system,
+                        attachments: c.attachments || [],
+                        seen_by: c.seen_by || [],
+                    });
+                    await this._taskCommentRepo.save(cEntity);
+                }
+            }
+
+            await this.saveToDb();
+            this.saveToDisk();
             this.isStoreLoaded = true;
         } catch (err) {
             console.warn(
                 'Could not load task store from DB, falling back to disk:',
                 err,
             );
-        }
-
-        // Guarantee no PMS tasks exist in this.tasks
-        this.tasks = this.tasks.filter((t: any) => !this.isPmsTask(t));
-        if (this.tasks.length === 0) {
-            this.tasks = [...INITIAL_TASKS];
-        }
-
-        // Ensure all loaded tasks have default comment threads seeded
-        for (const task of this.tasks) {
-            if (
-                !this.taskComments.has(task.id) ||
-                (this.taskComments.get(task.id)?.length || 0) === 0
-            ) {
-                this.ensureTaskComments(task.id);
-            }
         }
     }
 
@@ -738,6 +888,28 @@ export class TaskService {
         this.saveToDb().catch(() => {});
     }
 
+    private sanitizeCommentAttachments(comments: any[]): any[] {
+        if (!Array.isArray(comments)) return [];
+        return comments.map((c) => {
+            if (!c) return c;
+            const copy = { ...c };
+            if (Array.isArray(copy.attachments)) {
+                copy.attachments = copy.attachments.map((a: any) => {
+                    if (!a) return a;
+                    const aCopy = { ...a };
+                    if (
+                        typeof aCopy.url === 'string' &&
+                        aCopy.url.startsWith('data:')
+                    ) {
+                        aCopy.url = '';
+                    }
+                    return aCopy;
+                });
+            }
+            return copy;
+        });
+    }
+
     private saveToDisk(): void {
         try {
             const dir = path.dirname(this.storeFilePath);
@@ -746,7 +918,7 @@ export class TaskService {
             }
             const commentsObj: Record<number, any[]> = {};
             for (const [k, v] of this.taskComments.entries()) {
-                commentsObj[k] = v;
+                commentsObj[k] = this.sanitizeCommentAttachments(v);
             }
             const data = {
                 tasks: this.tasks,
@@ -765,9 +937,34 @@ export class TaskService {
 
     private async saveToDb(): Promise<void> {
         try {
+            // 1. Dual-write to relational PostgreSQL tables
+            for (const t of this.tasks) {
+                await this._taskRepo.save({
+                    id: t.id,
+                    code: t.code || null,
+                    project_id: t.project_id,
+                    project_name: t.project_name,
+                    title: t.title,
+                    description: t.description,
+                    task_type: t.task_type || 'feature',
+                    module: t.module,
+                    status: t.status,
+                    priority: t.priority,
+                    progress: t.progress || 0,
+                    comments_count: t.comments_count || 0,
+                    attachments_count: t.attachments_count || 0,
+                    due_date: t.due_date,
+                    reporter: t.reporter,
+                    assignee: t.assignee,
+                    assignees: t.assignees || [],
+                    attachments: t.attachments || [],
+                });
+            }
+
+            // 2. Dual-write to legacy task_store backup
             const commentsObj: Record<number, any[]> = {};
             for (const [k, v] of this.taskComments.entries()) {
-                commentsObj[k] = v;
+                commentsObj[k] = this.sanitizeCommentAttachments(v);
             }
             let dbStore = await this._taskStoreRepo.findOne({
                 where: { key: 'default_tasks_store' },
@@ -2000,6 +2197,50 @@ export class TaskService {
         }
 
         this.saveStore();
+        try {
+            await this._taskRepo.save(
+                this._taskRepo.create({
+                    id: newTask.id,
+                    code: newTask.code,
+                    title: newTask.title,
+                    description: newTask.description,
+                    task_type: newTask.task_type,
+                    module: newTask.module,
+                    status: newTask.status,
+                    priority: newTask.priority,
+                    progress: newTask.progress,
+                    due_date: newTask.due_date,
+                    project_id: newTask.project_id,
+                    project_name: newTask.project_name,
+                    reporter: newTask.reporter,
+                    assignee: newTask.assignee,
+                    assignees: newTask.assignees,
+                    attachments: newTask.attachments,
+                    attachments_count: newTask.attachments_count,
+                    comments_count: newTask.comments_count,
+                }),
+            );
+            if (initialAttachments.length > 0) {
+                const comms = this.taskComments.get(newTask.id) || [];
+                for (const c of comms) {
+                    await this._taskCommentRepo.save(
+                        this._taskCommentRepo.create({
+                            id: c.id,
+                            task_id: newTask.id,
+                            sender_id: c.sender_id,
+                            sender_name: c.sender_name,
+                            sender_avatar: c.sender_avatar,
+                            text: c.text,
+                            time: c.time,
+                            is_self: c.is_self,
+                            is_system: c.is_system,
+                            attachments: c.attachments,
+                            seen_by: c.seen_by,
+                        }),
+                    );
+                }
+            }
+        } catch (e) {}
 
         // Dispatch Telegram Notification (Exact PMS format)
         const creatorName =
@@ -2061,8 +2302,8 @@ export class TaskService {
         }
 
         if (this._realtimeGateway) {
-            this._realtimeGateway.emitTaskUpdated({
-                task_id: newTask.id,
+            this._realtimeGateway.emitTaskCreated({
+                task: newTask,
                 project_id: newTask.project_id,
             });
         }
@@ -2533,6 +2774,51 @@ export class TaskService {
 
         this.tasks[index] = updated;
         this.saveStore();
+        try {
+            await this._taskRepo.save(
+                this._taskRepo.create({
+                    id: updated.id,
+                    code: updated.code,
+                    title: updated.title,
+                    description: updated.description,
+                    task_type: updated.task_type,
+                    module: updated.module,
+                    status: updated.status,
+                    priority: updated.priority,
+                    progress: updated.progress,
+                    due_date: updated.due_date,
+                    project_id: updated.project_id,
+                    project_name: updated.project_name,
+                    reporter: updated.reporter,
+                    assignee: updated.assignee,
+                    assignees: updated.assignees,
+                    attachments: updated.attachments,
+                    attachments_count: updated.attachments_count,
+                    comments_count: updated.comments_count,
+                }),
+            );
+            // Save newly added system/audit comment
+            if (comments.length > 0) {
+                const lastComm = comments[comments.length - 1];
+                if (lastComm && lastComm.is_system) {
+                    await this._taskCommentRepo.save(
+                        this._taskCommentRepo.create({
+                            id: lastComm.id,
+                            task_id: id,
+                            sender_id: lastComm.sender_id,
+                            sender_name: lastComm.sender_name,
+                            sender_avatar: lastComm.sender_avatar,
+                            text: lastComm.text,
+                            time: lastComm.time,
+                            is_self: lastComm.is_self,
+                            is_system: lastComm.is_system,
+                            attachments: lastComm.attachments,
+                            seen_by: lastComm.seen_by,
+                        }),
+                    );
+                }
+            }
+        } catch (e) {}
 
         // Send Telegram Notification (Exact PMS format)
         const targetIds = [
@@ -2685,6 +2971,17 @@ export class TaskService {
         this.tasks.splice(index, 1);
         this.taskComments.delete(id);
         this.saveStore();
+        try {
+            await this._taskRepo.delete(id);
+            await this._taskCommentRepo.delete({ task_id: id });
+        } catch (e) {}
+
+        if (this._realtimeGateway) {
+            this._realtimeGateway.emitTaskDeleted({
+                task_id: id,
+                project_id: taskToDelete.project_id,
+            });
+        }
 
         return {
             status_code: 200,
@@ -2888,6 +3185,27 @@ export class TaskService {
         }
         task.updated_at = new Date().toISOString();
         this.saveStore();
+        try {
+            await this._taskCommentRepo.save(
+                this._taskCommentRepo.create({
+                    id: newComment.id,
+                    task_id: taskId,
+                    sender_id: newComment.sender_id,
+                    sender_name: newComment.sender_name,
+                    sender_avatar: newComment.sender_avatar,
+                    text: newComment.text,
+                    time: newComment.time,
+                    is_self: newComment.is_self,
+                    is_system: newComment.is_system,
+                    attachments: newComment.attachments || [],
+                    seen_by: newComment.seen_by || [],
+                }),
+            );
+            await this._taskRepo.update(taskId, {
+                comments_count: task.comments_count,
+                attachments_count: task.attachments_count,
+            });
+        } catch (e) {}
 
         // Send Telegram Notification (Exact PMS format)
         const senderName = user.name_kh || user.name_en || 'Piseth Panhavorn';

@@ -148,6 +148,49 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         this.server.emit('task:updated', taskPayload);
     }
 
+    emitTaskCreated(payload: { task: any; project_id?: string | number | null }) {
+        if (!this.server) return;
+        if (payload.project_id) {
+            this.server.to(`project:${payload.project_id}`).emit('task:created', payload);
+        }
+        this.server.emit('task:created', payload);
+        this.server.emit('task:updated', { task_id: payload.task?.id, project_id: payload.project_id });
+    }
+
+    emitTaskDeleted(payload: { task_id: string | number; project_id?: string | number | null }) {
+        if (!this.server) return;
+        if (payload.project_id) {
+            this.server.to(`project:${payload.project_id}`).emit('task:deleted', payload);
+        }
+        this.server.emit('task:deleted', payload);
+        this.server.emit('task:updated', { task_id: payload.task_id, project_id: payload.project_id });
+    }
+
+    emitProjectCreated(payload: { project: any }) {
+        if (!this.server) return;
+        this.server.emit('project:created', payload);
+    }
+
+    emitProjectUpdated(payload: { project: any }) {
+        if (!this.server) return;
+        const pid = payload.project?.id || payload.project?.code;
+        if (pid) {
+            this.server.to(`project:${pid}`).emit('project:updated', {
+                project_id: pid,
+                ...payload.project,
+            });
+        }
+        this.server.emit('project:updated', {
+            project_id: pid,
+            ...payload.project,
+        });
+    }
+
+    emitProjectDeleted(payload: { project_id: string | number }) {
+        if (!this.server) return;
+        this.server.emit('project:deleted', payload);
+    }
+
     emitTaskComment(payload: {
         task_id: string | number;
         project_id?: string | number | null;

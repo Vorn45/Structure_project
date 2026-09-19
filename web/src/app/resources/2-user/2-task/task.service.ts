@@ -169,4 +169,20 @@ export class UserTaskService {
             withCredentials: true,
         });
     }
+
+    uploadAttachment(file: File): Observable<{
+        status_code: number;
+        message: string;
+        data: { name: string; size: number; mimetype: string; uri: string; url: string };
+    }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this._http.post<{
+            status_code: number;
+            message: string;
+            data: { name: string; size: number; mimetype: string; uri: string; url: string };
+        }>(`${this.baseUrl}/attachment/upload`, formData, {
+            withCredentials: true,
+        });
+    }
 }

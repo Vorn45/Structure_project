@@ -394,7 +394,7 @@
                         </div>
                         <span class="px-2 py-0.2 rounded-full text-[12.5px] font-medium"
                             [ngClass]="projectNavTab() === 'plan' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
-                            {{ (proj.agileTasks || DEFAULT_AGILE_TASKS).length }}
+                            {{ (proj.agileTasks || []).length }}
                         </span>
                     </button>
 
@@ -615,7 +615,7 @@
                                 <div class="flex items-center gap-3 self-end md:self-center shrink-0 font-kantumruy">
                                     <!-- Reporter Avatar with small R note badge (First column in right metadata) -->
                                     <div class="relative shrink-0 cursor-pointer"
-                                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
+                                        [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'មិនបានកំណត់')">
                                         <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full ring-2 ring-emerald-500 dark:ring-emerald-400 bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] overflow-hidden shadow-2xs">
                                             <img *ngIf="getReporterAvatar(task.reporter)" [src]="getReporterAvatar(task.reporter)" [alt]="task.reporter.name" (error)="onMemberAvatarError($event, task.reporter)" class="w-full h-full object-cover block" />
                                             <span *ngIf="!getReporterAvatar(task.reporter)">{{ task.reporter?.initial || task.reporter?.name?.charAt(0) || 'P' }}</span>
@@ -1173,7 +1173,7 @@
                                     (Team Agile Timeline)</span>
                                 <span
                                     class="px-2 py-0.2 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                                    {{ (proj.agileTasks || DEFAULT_AGILE_TASKS).length }}
+                                    {{ (proj.agileTasks || []).length }}
                                 </span>
                             </div>
 
@@ -1254,7 +1254,7 @@
 
                                 <!-- Task Rows -->
                                 <div class="divide-y divide-white dark:divide-slate-800">
-                                    <div *ngFor="let task of (proj.agileTasks || DEFAULT_AGILE_TASKS)"
+                                    <div *ngFor="let task of (proj.agileTasks || [])"
                                         class="flex items-stretch h-9.5 hover:brightness-98 dark:hover:brightness-105 transition-colors">
 
                                         <div
@@ -1299,6 +1299,11 @@
                                                 </ng-container>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div *ngIf="!(proj.agileTasks && proj.agileTasks.length)"
+                                        class="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                                        មិនទាន់មានកិច្ចការផែនការនៅឡើយទេ (No plan timeline tasks yet)
                                     </div>
                                 </div>
                             </div>
@@ -1372,6 +1377,10 @@
                                         <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
                                     </button>
                                 </div>
+                            </div>
+
+                            <div *ngIf="!proj.phases || !proj.phases.length" class="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                                មិនទាន់មានដំណាក់កាលគម្រោងនៅឡើយទេ (No phases created yet)
                             </div>
                         </div>
                     </div>
@@ -1725,7 +1734,7 @@
                         <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold shadow-2xs overflow-hidden">
                             <span>{{ currentTask.reporter?.initial || currentTask.reporter?.name?.charAt(0) || 'P' }}</span>
                         </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ currentTask.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }}</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">{{ currentTask.reporter?.name || 'មិនបានកំណត់' }}</span>
                         <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-medium">Reporter</span>
                     </div>
                     <span>•</span>

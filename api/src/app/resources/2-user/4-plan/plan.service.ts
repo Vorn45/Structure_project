@@ -1,8 +1,8 @@
-// ===========================================================================>> Core Library
 import {
     ForbiddenException,
     Injectable,
     NotFoundException,
+    Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +13,9 @@ import * as path from 'path';
 import { RoleEnum } from 'src/app/enum/role.enum';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
+import { ProjectEntity } from 'src/app/model/project/project.entity';
+import { ProjectPhaseEntity } from 'src/app/model/project/project-phase.entity';
+import { RealtimeGateway } from 'src/app/shared/realtime/realtime.gateway';
 import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { QueryPlanDto } from './plan.dto';
 
@@ -169,6 +172,12 @@ export class PlanService {
     constructor(
         @InjectRepository(PlanStore)
         private readonly _planStoreRepo: Repository<PlanStore>,
+        @InjectRepository(ProjectEntity)
+        private readonly _projectRepo: Repository<ProjectEntity>,
+        @InjectRepository(ProjectPhaseEntity)
+        private readonly _phaseRepo: Repository<ProjectPhaseEntity>,
+        @Optional()
+        private readonly _realtimeGateway?: RealtimeGateway,
     ) {
         this.loadFromDisk();
         this.initDbStore();
@@ -335,6 +344,7 @@ export class PlanService {
             await this._planStoreRepo.query(`
                 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
                 CREATE SCHEMA IF NOT EXISTS "user";
+                CREATE SCHEMA IF NOT EXISTS "project";
                 CREATE TABLE IF NOT EXISTS "user"."plan_store" (
                     "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                     "key" VARCHAR(255) NOT NULL DEFAULT 'default_plans_store',
@@ -352,46 +362,143 @@ export class PlanService {
     private async initDbStore(): Promise<void> {
         await this.ensureTableExists();
         try {
+            // Check if relational table has records
+            const count = await this._projectRepo.count();
+            if (count > 0) {
+                const dbProjects = await this._projectRepo.find({
+                    order: { created_at: 'ASC' },
+                });
+                const allPhases = await this._phaseRepo.find({
+                    order: { number: 'ASC' },
+                });
+
+                this.projects = dbProjects.map((p) => {
+                    const projectPhases = allPhases.filter(
+                        (ph) => ph.project_id === p.id || ph.project_id === p.code,
+                    );
+                    return {
+                        id: p.id,
+                        code: p.code,
+                        name: p.name,
+                        description: p.description || '',
+                        status: (p.status as any) || 'active',
+                        progress: p.progress || 0,
+                        start_date: p.start_date
+                            ? new Date(p.start_date).toISOString()
+                            : new Date().toISOString(),
+                        end_date: p.end_date
+                            ? new Date(p.end_date).toISOString()
+                            : new Date(Date.now() + 86400000 * 30).toISOString(),
+                        total_tasks: p.total_tasks || 0,
+                        completed_tasks: p.completed_tasks || 0,
+                        logo: p.logo,
+                        image: p.image,
+                        lead: p.lead,
+                        team_lead: p.team_lead,
+                        members: p.members || [],
+                        phases: projectPhases,
+                        meetings: p.meetings || [],
+                        links: p.links || [],
+                        attachments: p.attachments || [],
+                        attachments_count: p.attachments_count || 0,
+                    };
+                });
+                this.isDbLoaded = true;
+                return;
+            }
+
+            // Seed relational tables from planStoreRepo or disk
             const dbStore = await this._planStoreRepo.findOne({
                 where: { key: 'default_plans_store' },
             });
+            let sourcePlans: any[] = [];
             if (
                 dbStore &&
                 Array.isArray(dbStore.plans) &&
                 dbStore.plans.length > 0
             ) {
-                this.projects = dbStore.plans
-                    .filter(
-                        (p: any) =>
-                            ![
-                                'PMS-V2',
-                                'WMS-HR',
-                                'E-GOV',
-                                '1',
-                                '2',
-                                '3',
-                            ].includes(p.code) &&
-                            !['1', '2', '3'].includes(p.id),
-                    )
-                    .map((p: any) => this.sanitizeProject(p));
-                if (this.projects.length === 0) {
-                    this.projects = [...PROJECTS];
-                } else {
-                    for (const defP of PROJECTS) {
-                        if (
-                            !this.projects.some(
-                                (p: any) =>
-                                    p.code === defP.code || p.id === defP.id,
-                            )
-                        ) {
-                            this.projects.push(defP);
-                        }
+                sourcePlans = dbStore.plans;
+            } else {
+                sourcePlans = [...PROJECTS];
+            }
+
+            this.projects = sourcePlans
+                .filter(
+                    (p: any) =>
+                        ![
+                            'PMS-V2',
+                            'WMS-HR',
+                            'E-GOV',
+                            '1',
+                            '2',
+                            '3',
+                        ].includes(p.code) &&
+                        !['1', '2', '3'].includes(p.id),
+                )
+                .map((p: any) => this.sanitizeProject(p));
+
+            if (this.projects.length === 0) {
+                this.projects = [...PROJECTS];
+            } else {
+                for (const defP of PROJECTS) {
+                    if (
+                        !this.projects.some(
+                            (p: any) =>
+                                p.code === defP.code || p.id === defP.id,
+                        )
+                    ) {
+                        this.projects.push(defP);
                     }
                 }
-                await this.saveStore();
-            } else {
-                await this.saveToDb();
             }
+
+            // Migrate into relational PostgreSQL tables
+            for (const p of this.projects) {
+                const projectEntity = this._projectRepo.create({
+                    id: p.id,
+                    code: p.code,
+                    name: p.name,
+                    description: p.description,
+                    status: p.status,
+                    progress: p.progress,
+                    start_date: p.start_date,
+                    end_date: p.end_date,
+                    total_tasks: p.total_tasks,
+                    completed_tasks: p.completed_tasks,
+                    logo: p.logo,
+                    image: p.image,
+                    lead: p.lead,
+                    team_lead: p.team_lead,
+                    members: p.members || [],
+                    links: (p as any).links || [],
+                    meetings: (p as any).meetings || [],
+                    attachments: (p as any).attachments || [],
+                    attachments_count: (p as any).attachments_count || 0,
+                });
+                await this._projectRepo.save(projectEntity);
+
+                if (Array.isArray(p.phases)) {
+                    for (const ph of p.phases) {
+                        const phaseEntity = this._phaseRepo.create({
+                            id:
+                                ph.id ||
+                                `phs-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                            project_id: p.id,
+                            number: ph.number || 1,
+                            title: ph.title || 'Phase',
+                            quarter: ph.quarter || null,
+                            status: ph.status || 'planned',
+                            progress: ph.progress || 0,
+                            start_date: ph.start_date || null,
+                            end_date: ph.end_date || null,
+                            tasks_count: ph.tasks_count || 0,
+                        });
+                        await this._phaseRepo.save(phaseEntity);
+                    }
+                }
+            }
+
+            await this.saveStore();
             this.isDbLoaded = true;
         } catch (err) {
             console.warn(
@@ -414,6 +521,32 @@ export class PlanService {
 
     private async saveToDb(): Promise<void> {
         try {
+            // Dual-write: update relational PostgreSQL table
+            for (const p of this.projects) {
+                await this._projectRepo.save({
+                    id: p.id,
+                    code: p.code,
+                    name: p.name,
+                    description: p.description,
+                    status: p.status,
+                    progress: p.progress,
+                    start_date: p.start_date,
+                    end_date: p.end_date,
+                    total_tasks: p.total_tasks,
+                    completed_tasks: p.completed_tasks,
+                    logo: p.logo,
+                    image: p.image,
+                    lead: p.lead,
+                    team_lead: p.team_lead,
+                    members: p.members || [],
+                    links: (p as any).links || [],
+                    meetings: (p as any).meetings || [],
+                    attachments: (p as any).attachments || [],
+                    attachments_count: (p as any).attachments_count || 0,
+                });
+            }
+
+            // Dual-write: update legacy plan_store backup
             let dbStore = await this._planStoreRepo.findOne({
                 where: { key: 'default_plans_store' },
             });
@@ -820,113 +953,6 @@ export class PlanService {
                       avatar: null,
                   });
 
-        const starterTasks = [
-            {
-                id: `task-${Date.now()}-1`,
-                code: `#${projCode}-1`,
-                title: `${projName} | ការរៀបចំស្ថាបត្យកម្ម & ផែនការអនុវត្ត`,
-                description: `រៀបចំផែនការអនុវត្តគម្រោង ${projName} បែងចែកភារកិច្ច និងកំណត់កាលវិភាគ Sprint។`,
-                priority: 'high',
-                status: 'in_progress',
-                due_date: new Date(Date.now() + 86400000 * 7)
-                    .toISOString()
-                    .split('T')[0],
-                created_at: new Date().toISOString().split('T')[0],
-                time_ago: 'ទើបបង្កើត',
-                comments_count: 0,
-                attachments_count: 0,
-                assignee: dto.members?.[0] || effectiveLead,
-                members: dto.members?.length ? dto.members : [effectiveLead],
-                progress: 50,
-                subtasks: [
-                    {
-                        id: `st-${Date.now()}-1`,
-                        title: 'កំណត់គោលដៅ និងតម្រូវការប្រព័ន្ធ (SRS)',
-                        completed: true,
-                    },
-                    {
-                        id: `st-${Date.now()}-2`,
-                        title: 'បែងចែកការងារជូនសមាជិកក្រុម',
-                        completed: false,
-                    },
-                ],
-                links: [],
-                documents: [],
-            },
-            {
-                id: `task-${Date.now()}-2`,
-                code: `#${projCode}-2`,
-                title: `${projName} | ការរចនា UI/UX & Prototypes`,
-                description: `រចនាទម្រង់ផ្ទៃមុខងារប្រព័ន្ធ (UI Components) ក្នុង Figma សម្រាប់គម្រោង ${projName}។`,
-                priority: 'medium',
-                status: 'new',
-                due_date: new Date(Date.now() + 86400000 * 14)
-                    .toISOString()
-                    .split('T')[0],
-                created_at: new Date().toISOString().split('T')[0],
-                time_ago: 'ទើបបង្កើត',
-                comments_count: 0,
-                attachments_count: 0,
-                assignee: dto.members?.[1] || dto.members?.[0] || effectiveLead,
-                members: dto.members?.length ? dto.members : [effectiveLead],
-                progress: 0,
-                subtasks: [
-                    {
-                        id: `st-${Date.now()}-3`,
-                        title: 'Design Layout & Mobile responsive mockups',
-                        completed: false,
-                    },
-                ],
-                links: [],
-                documents: [],
-            },
-        ];
-
-        const starterPhases = [
-            {
-                id: `ph-${Date.now()}-1`,
-                number: 1,
-                title: 'ដំណាក់កាលទី ១៖ ការរៀបចំ និងរចនាប្លង់ប្រព័ន្ធ (Design & Planning)',
-                quarter: 'ត្រីមាសទី ២ (Q2)',
-                status: 'in_progress',
-                progress: 50,
-                startDate: new Date().toISOString().split('T')[0],
-                endDate: new Date(Date.now() + 86400000 * 30)
-                    .toISOString()
-                    .split('T')[0],
-                tasksCount: 2,
-            },
-            {
-                id: `ph-${Date.now()}-2`,
-                number: 2,
-                title: 'ដំណាក់កាលទី ២៖ ការអភិវឌ្ឍមុខងារស្នូល (Core Development)',
-                quarter: 'ត្រីមាសទី ៣ (Q3)',
-                status: 'planned',
-                progress: 0,
-                startDate: new Date(Date.now() + 86400000 * 31)
-                    .toISOString()
-                    .split('T')[0],
-                endDate: new Date(Date.now() + 86400000 * 90)
-                    .toISOString()
-                    .split('T')[0],
-                tasksCount: 0,
-            },
-        ];
-
-        const starterMeetings = [
-            {
-                id: `m-${Date.now()}-1`,
-                title: `${projName} Kickoff & Sprint Planning Sync`,
-                description: `កិច្ចប្រជុំបើកដំណើរការគម្រោង ${projName} និងតម្រង់ទិសក្រុមការងារ។`,
-                date: 'ថ្ងៃស្អែក (Tomorrow)',
-                time: 'ម៉ោង ១០:០០ ព្រឹក - ១១:០០ ព្រឹក',
-                platform: 'Google Meet',
-                link: 'https://meet.google.com/new-project-sync',
-                status: 'upcoming',
-                attendees: dto.members?.length ? dto.members : [effectiveLead],
-            },
-        ];
-
         const newPlan: any = {
             ...dto,
             id: dto.id || `proj-${Date.now().toString().slice(-4)}`,
@@ -947,17 +973,17 @@ export class PlanService {
                 new Date(Date.now() + 86400000 * 30).toISOString(),
             team_lead: effectiveLead,
             lead: effectiveLead,
-            total_tasks: dto.tasks?.length || starterTasks.length,
+            total_tasks: dto.tasks?.length || 0,
             completed_tasks:
                 dto.tasks?.filter(
                     (t: any) => t.status === 'done' || t.status === 'completed',
                 )?.length || 0,
             members: dto.members?.length ? dto.members : [effectiveLead],
-            tasks: (dto.tasks?.length ? dto.tasks : starterTasks).map(
+            tasks: (dto.tasks?.length ? dto.tasks : []).map(
                 (t: any) => this.sanitizeTask(t),
             ),
-            phases: dto.phases?.length ? dto.phases : starterPhases,
-            meetings: dto.meetings?.length ? dto.meetings : starterMeetings,
+            phases: dto.phases?.length ? dto.phases : [],
+            meetings: dto.meetings?.length ? dto.meetings : [],
             agileTasks: dto.agileTasks?.length ? dto.agileTasks : [],
             links: dto.links || [],
             attachments: dto.attachments || [],
@@ -968,6 +994,10 @@ export class PlanService {
 
         this.projects.unshift(newPlan);
         await this.saveStore();
+        try {
+            await this._projectRepo.save(this._projectRepo.create(newPlan));
+        } catch (e) {}
+        this._realtimeGateway?.emitProjectCreated({ project: newPlan });
 
         return {
             status_code: 201,
@@ -1020,6 +1050,10 @@ export class PlanService {
 
         this.projects[index] = updated;
         await this.saveStore();
+        try {
+            await this._projectRepo.save(this._projectRepo.create(updated));
+        } catch (e) {}
+        this._realtimeGateway?.emitProjectUpdated({ project: updated });
 
         return {
             status_code: 200,
@@ -1038,8 +1072,14 @@ export class PlanService {
             throw new NotFoundException(`Plan / Project "${id}" not found`);
         }
 
+        const toDelete = this.projects[index];
         this.projects.splice(index, 1);
         await this.saveStore();
+        try {
+            await this._projectRepo.delete({ id: toDelete.id });
+            await this._phaseRepo.delete({ project_id: toDelete.id });
+        } catch (e) {}
+        this._realtimeGateway?.emitProjectDeleted({ project_id: id });
 
         return {
             status_code: 200,
@@ -1191,6 +1231,20 @@ export class PlanService {
 
         plan.phases.push(newPhase);
         await this.saveStore();
+        try {
+            await this._phaseRepo.save(
+                this._phaseRepo.create({
+                    id: newPhase.id,
+                    project_id: plan.id,
+                    number: plan.phases.length,
+                    title: newPhase.title,
+                    quarter: newPhase.quarter,
+                    status: newPhase.status,
+                    progress: 0,
+                    tasks_count: 0,
+                }),
+            );
+        } catch (e) {}
 
         return {
             status_code: 201,
@@ -1208,6 +1262,9 @@ export class PlanService {
 
         plan.phases = plan.phases.filter((p: any) => p.id !== phaseId);
         await this.saveStore();
+        try {
+            await this._phaseRepo.delete({ id: phaseId });
+        } catch (e) {}
 
         return {
             status_code: 200,

@@ -1,17 +1,63 @@
 // ===========================================================================>> Core Library
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Res, ValidationPipe } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    ParseIntPipe,
+    Patch,
+    Post,
+    Query,
+    Res,
+    UploadedFile,
+    UseInterceptors,
+    ValidationPipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 // ===========================================================================>> Third Party Library
 import express from 'express';
 
 // ===========================================================================>> Custom Library
+import { FileService } from 'src/app/shared/file/file.service';
 import { CreateTaskDto, QueryTasksDto, UpdateTaskDto } from './task.dto';
 import { TaskService } from './task.service';
 
 // ======================================= >> Code Starts Here << ========================== //
 @Controller('task')
 export class TaskController {
-    constructor(private readonly _service: TaskService) {}
+    constructor(
+        private readonly _service: TaskService,
+        private readonly _fileService: FileService,
+    ) {}
+
+    @Post('attachment/upload')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadAttachment(
+        @UploadedFile() file: any,
+    ) {
+        if (!file) {
+            throw new BadRequestException('No file provided');
+        }
+        const uploaded = await this._fileService.uploadMultipartFile('tasks', file);
+        return {
+            status_code: 200,
+            message: 'Attachment uploaded successfully',
+            data: {
+                name: file.originalname,
+                size: file.size,
+                mimetype: file.mimetype,
+                uri: uploaded.uri,
+                url: uploaded.uri
+                    ? uploaded.uri.startsWith('http')
+                        ? uploaded.uri
+                        : `/${uploaded.uri}`
+                    : '',
+            },
+        };
+    }
 
     @Get('')
     async getTasks(

@@ -56,7 +56,6 @@ import {
     WMS_PROJECT_LOGO,
     DEFAULT_PROJECT_LOGO,
     getProjectFallbackLogo,
-    DEFAULT_INVITED_PROJECTS,
 } from './plan.types';
 
 @Component({
@@ -363,91 +362,6 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
                     const leadObj = result.lead || (result.reporter ? { id: 1, name: result.reporter, role: 'Leader' } : (projMembers[0] || { id: 1, name: 'Project Lead', role: 'Leader' }));
 
-                    const starterTasks: IndividualTaskItem[] = [
-                        {
-                            id: `task-${Date.now()}-1`,
-                            code: `#${projCode}-001`,
-                            title: `${projName} | ការរៀបចំស្ថាបត្យកម្ម & ផែនការអនុវត្ត`,
-                            description: `រៀបចំផែនការអនុវត្តគម្រោង ${projName} បែងចែកភារកិច្ច និងកំណត់កាលវិភាគ Sprint។`,
-                            priority: 'high',
-                            status: 'in_progress',
-                            due_date: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
-                            created_at: new Date().toISOString().split('T')[0],
-                            time_ago: 'ទើបបង្កើត',
-                            comments_count: 0,
-                            attachments_count: 0,
-                            assignee: projMembers[0] || { id: 1, name: leadObj.name, role: leadObj.role || 'Leader' },
-                            members: projMembers.length ? projMembers : [{ id: 1, name: leadObj.name, role: leadObj.role || 'Leader', initial: 'L', bgClass: 'bg-blue-600' }],
-                            progress: 50,
-                            subtasks: [
-                                { id: `st-${Date.now()}-1`, title: 'កំណត់គោលដៅ និងតម្រូវការប្រព័ន្ធ (SRS)', completed: true },
-                                { id: `st-${Date.now()}-2`, title: 'បែងចែកការងារជូនសមាជិកក្រុម', completed: false },
-                            ],
-                            links: [],
-                            documents: [],
-                        },
-                        {
-                            id: `task-${Date.now()}-2`,
-                            code: `#${projCode}-002`,
-                            title: `${projName} | ការរចនា UI/UX & Prototypes`,
-                            description: `រចនាទម្រង់ផ្ទៃមុខងារប្រព័ន្ធ (UI Components) ក្នុង Figma សម្រាប់គម្រោង ${projName}។`,
-                            priority: 'medium',
-                            status: 'new',
-                            due_date: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
-                            created_at: new Date().toISOString().split('T')[0],
-                            time_ago: 'ទើបបង្កើត',
-                            comments_count: 0,
-                            attachments_count: 0,
-                            assignee: projMembers[1] || projMembers[0] || { id: 1, name: 'Developer', role: 'Member' },
-                            members: projMembers.length ? projMembers : [{ id: 1, name: 'Developer', role: 'Member', initial: 'D', bgClass: 'bg-indigo-600' }],
-                            progress: 0,
-                            subtasks: [
-                                { id: `st-${Date.now()}-3`, title: 'Design Layout & Mobile responsive mockups', completed: false },
-                            ],
-                            links: [],
-                            documents: [],
-                        },
-                    ];
-
-                    const starterPhases: ProjectPhaseItem[] = [
-                        {
-                            id: `ph-${Date.now()}-1`,
-                            number: 1,
-                            title: 'ដំណាក់កាលទី ១៖ ការរៀបចំ និងរចនាប្លង់ប្រព័ន្ធ (Design & Planning)',
-                            quarter: 'ត្រីមាសទី ២ (Q2)',
-                            status: 'in_progress',
-                            progress: 50,
-                            startDate: new Date().toISOString().split('T')[0],
-                            endDate: new Date(Date.now() + 86400000 * 30).toISOString().split('T')[0],
-                            tasksCount: 2,
-                        },
-                        {
-                            id: `ph-${Date.now()}-2`,
-                            number: 2,
-                            title: 'ដំណាក់កាលទី ២៖ ការអភិវឌ្ឍមុខងារស្នូល (Core Development)',
-                            quarter: 'ត្រីមាសទី ៣ (Q3)',
-                            status: 'planned',
-                            progress: 0,
-                            startDate: new Date(Date.now() + 86400000 * 31).toISOString().split('T')[0],
-                            endDate: new Date(Date.now() + 86400000 * 90).toISOString().split('T')[0],
-                            tasksCount: 0,
-                        },
-                    ];
-
-                    const starterMeetings: ProjectMeetingItem[] = [
-                        {
-                            id: `m-${Date.now()}-1`,
-                            title: `${projName} Kickoff & Sprint Planning Sync`,
-                            description: `កិច្ចប្រជុំបើកដំណើរការគម្រោង ${projName} និងតម្រង់ទិសក្រុមការងារ។`,
-                            date: 'ថ្ងៃស្អែក (Tomorrow)',
-                            time: 'ម៉ោង ១០:០០ ព្រឹក - ១១:០០ ព្រឹក',
-                            platform: 'Google Meet',
-                            link: 'https://meet.google.com/new-project-sync',
-                            status: 'upcoming',
-                            attendees: projMembers.length ? projMembers : [{ id: 1, name: leadObj.name, role: leadObj.role || 'Leader' }],
-                        },
-                    ];
-
                     const newProj: ExtendedProjectItem = {
                         id: String(created.id || `proj-${Date.now()}`),
                         code: projCode,
@@ -456,22 +370,22 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                         status: created.status || result.status || 'active',
                         priority: created.priority || result.priority || 'high',
                         category: created.category || result.category || 'Development',
-                        budget_allocated: Number(created.budget_allocated || created.budget || result.budget || 5000),
+                        budget_allocated: Number(created.budget_allocated || created.budget || result.budget || 0),
                         budget_spent: 0,
-                        total_tasks: starterTasks.length,
+                        total_tasks: (created.tasks && created.tasks.length) || 0,
                         completed_tasks: 0,
-                        progress: 25,
+                        progress: 0,
                         start_date: created.start_date || new Date().toISOString(),
                         end_date: created.end_date || new Date(Date.now() + 86400000 * 30).toISOString(),
                         team_lead: created.team_lead || { id: Number(leadObj.id) || 1, name: leadObj.name, role: leadObj.role || 'Leader' },
                         members: projMembers.length ? projMembers : (created.members || []),
                         logo: created.logo || result.logo || created.image || result.image || '/images/logo/logo.png',
                         image: created.image || result.image || created.logo || result.logo || '/images/logo/logo.png',
-                        tasks: created.tasks?.length ? created.tasks : starterTasks,
-                        phases: created.phases?.length ? created.phases : starterPhases,
-                        meetings: created.meetings?.length ? created.meetings : starterMeetings,
-                        agileTasks: [...DEFAULT_AGILE_TASKS],
-                        links: [],
+                        tasks: created.tasks || [],
+                        phases: created.phases || [],
+                        meetings: created.meetings || [],
+                        agileTasks: created.agileTasks || [],
+                        links: created.links || [],
                     };
                     this.plans.set([newProj, ...this.plans()]);
                     this.selectedProject.set(newProj);
@@ -1049,14 +963,9 @@ export class UserPlanComponent implements OnInit, OnDestroy {
 
                         if (rawPlans.length > 0) {
                             const items: ExtendedProjectItem[] = rawPlans.map((ap) => {
-                                const existing = DEFAULT_INVITED_PROJECTS.find(
-                                    (p) => p.id === String(ap.id) || p.code === ap.code || p.name === ap.name
-                                );
                                 const matchingTaskProj = taskProjects.find(
                                     (tp) => tp.id === String(ap.id) || tp.code === ap.code || tp.name === ap.name
                                 );
-                                const codeUp = (ap.code || '').toUpperCase();
-                                const nameUp = (ap.name || '').toUpperCase();
                                 const fallbackDefaultLogo = getProjectFallbackLogo(ap.code, ap.name);
 
                                 const pid = String(ap.id || '').toLowerCase();
@@ -1082,14 +991,14 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                         ? projectTasks.map((t) => this.mapTaskToIndividualTaskItem(t))
                                         : (ap as any).tasks?.length
                                         ? (ap as any).tasks.map((t: any) => this.mapTaskToIndividualTaskItem(t))
-                                        : existing?.tasks || [];
+                                        : [];
 
                                 const total =
                                     projectTasks.length > 0
                                         ? projectTasks.length
                                         : typeof ap.total_tasks === 'number'
                                         ? ap.total_tasks
-                                        : existing?.total_tasks ?? 0;
+                                        : 0;
 
                                 const completed =
                                     projectTasks.length > 0
@@ -1098,30 +1007,27 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                           ).length
                                         : typeof ap.completed_tasks === 'number'
                                         ? ap.completed_tasks
-                                        : existing?.completed_tasks ?? 0;
+                                        : 0;
 
                                 const progress =
                                     total > 0
                                         ? Math.round((completed / total) * 100)
                                         : typeof ap.progress === 'number'
                                         ? ap.progress
-                                        : existing?.progress ?? 0;
+                                        : 0;
 
-                                const mappedMembers = ((ap as any).members?.length ? (ap as any).members : existing?.members || []).map(
+                                const mappedMembers = ((ap as any).members?.length ? (ap as any).members : []).map(
                                     (m: any, idx: number) => {
-                                        const existingMember = existing?.members?.find(
-                                            (em: any) => em.id === m.id || em.name === m.name
-                                        );
                                         const colors = ['bg-indigo-600', 'bg-emerald-600', 'bg-amber-600', 'bg-rose-600', 'bg-purple-600', 'bg-teal-600'];
                                         return {
                                             id: m.id || idx + 1,
                                             name: m.name || 'Member',
                                             role: m.role || 'Member',
                                             initial: (m.name || 'M').charAt(0).toUpperCase(),
-                                            bgClass: m.bgClass || existingMember?.bgClass || colors[idx % colors.length],
-                                            email: m.email || existingMember?.email || '',
-                                            phone: m.phone || existingMember?.phone || '',
-                                            avatar: m.avatar || existingMember?.avatar || null,
+                                            bgClass: m.bgClass || colors[idx % colors.length],
+                                            email: m.email || '',
+                                            phone: m.phone || '',
+                                            avatar: m.avatar || null,
                                         };
                                     }
                                 );
@@ -1135,44 +1041,38 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                         resolveFileUrl((ap as any).image) ||
                                         resolveFileUrl(matchingTaskProj?.logo) ||
                                         resolveFileUrl(matchingTaskProj?.image) ||
-                                        resolveFileUrl((existing as any)?.logo) ||
-                                        resolveFileUrl((existing as any)?.image) ||
                                         fallbackDefaultLogo,
                                     image:
                                         resolveFileUrl((ap as any).image) ||
                                         resolveFileUrl((ap as any).logo) ||
                                         resolveFileUrl(matchingTaskProj?.image) ||
                                         resolveFileUrl(matchingTaskProj?.logo) ||
-                                        resolveFileUrl((existing as any)?.image) ||
-                                        resolveFileUrl((existing as any)?.logo) ||
                                         fallbackDefaultLogo,
-                                    description: ap.description || existing?.description || '',
-                                    status: (ap.status as any) || existing?.status || 'active',
-                                    priority: (ap as any).priority || existing?.priority || 'high',
-                                    category: (ap as any).category || existing?.category || 'Development',
-                                    budget_allocated: (ap as any).budget_allocated || existing?.budget_allocated || 50000,
-                                    budget_spent: (ap as any).budget_spent || existing?.budget_spent || 20000,
+                                    description: ap.description || '',
+                                    status: (ap.status as any) || 'active',
+                                    priority: (ap as any).priority || 'high',
+                                    category: (ap as any).category || 'Development',
+                                    budget_allocated: Number((ap as any).budget_allocated || (ap as any).budget || 0),
+                                    budget_spent: Number((ap as any).budget_spent || 0),
                                     total_tasks: total,
                                     completed_tasks: completed,
                                     progress: progress,
-                                    start_date: ap.start_date || existing?.start_date || new Date().toISOString(),
+                                    start_date: ap.start_date || new Date().toISOString(),
                                     end_date:
                                         ap.end_date ||
-                                        existing?.end_date ||
                                         new Date(Date.now() + 86400000 * 30).toISOString(),
                                     team_lead:
-                                        (ap as any).team_lead ||
-                                        existing?.team_lead || { id: 1, name: 'Project Lead', role: 'Leader' },
+                                        (ap as any).team_lead || { id: 1, name: 'Project Lead', role: 'Leader' },
                                     members: mappedMembers,
                                     tasks: mappedTasks,
-                                    phases: (ap as any).phases?.length ? (ap as any).phases : existing?.phases || [],
+                                    phases: (ap as any).phases?.length ? (ap as any).phases : [],
                                     meetings: (ap as any).meetings?.length
                                         ? (ap as any).meetings
-                                        : existing?.meetings || [],
+                                        : [],
                                     agileTasks: (ap as any).agileTasks?.length
                                         ? (ap as any).agileTasks
-                                        : existing?.agileTasks || [...DEFAULT_AGILE_TASKS],
-                                    links: (ap as any).links?.length ? (ap as any).links : existing?.links || [],
+                                        : [],
+                                    links: (ap as any).links?.length ? (ap as any).links : [],
                                 };
                             });
                             this.plans.set(items);

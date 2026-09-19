@@ -130,12 +130,7 @@ export class CreateProjectDialogComponent implements OnInit {
     leadAvatar: string | null = null;
     leadId: string | number | null = null;
 
-    availableMembers: TeamMember[] = [
-        { id: '1', name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត', role: 'Super Admin / Lead Developer' },
-        { id: '2', name: 'ពុំ ប្រុសមុន្នី', role: 'Frontend Lead' },
-        { id: '3', name: 'ថា វីនណឺរ', role: 'Backend Lead' },
-        { id: '4', name: 'ភឿង សុវណ្ណារ៉ា', role: 'Developer' },
-    ];
+    availableMembers: TeamMember[] = [];
     selectedMemberIds = signal<string[]>([]);
 
     get selectedMembers(): TeamMember[] {

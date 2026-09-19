@@ -227,10 +227,10 @@ export class TakeAttendanceDialogComponent implements OnInit, OnDestroy {
     }
 
     private executeCheckIn(locationStr: string, device: string, lat?: number, lng?: number): void {
-        let currentUserName = 'ពិសិដ្ឋ បញ្ញាវ័ន្ត (You)';
+        let currentUserName = 'អ្នកប្រើប្រាស់ (You)';
         try {
             const u = this._userService?.user;
-            if (u) currentUserName = u.kh_name || u.en_name || u.name || currentUserName;
+            if (u) currentUserName = (u.kh_name || u.en_name || u.name || 'អ្នកប្រើប្រាស់') + ' (You)';
         } catch (_) {}
 
         this._homeService.checkIn({ location: locationStr }).subscribe({

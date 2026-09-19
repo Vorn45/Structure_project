@@ -725,54 +725,36 @@ export class CreateTaskDialogComponent implements OnInit {
         for (const file of filesArray) {
             const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/i.test(file.name);
             const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-            const isText = file.type.startsWith('text/') || /\.(txt|json|csv|md|js|ts|html|xml|sql|log)$/i.test(file.name);
             const sizeStr = this.formatFileSize(file.size);
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataUrl = (e.target?.result as string) || '';
-                const item: TaskAttachment = {
-                    name: file.name,
-                    size: sizeStr,
-                    type: file.type || (isPdf ? 'application/pdf' : isImage ? 'image/png' : 'application/octet-stream'),
-                    url: dataUrl,
-                    isImage: isImage,
-                    fileBlob: file,
-                };
-
-                if (isText) {
-                    file.text()
-                        .then((txt) => {
-                            item.textContent = txt;
-                            processed.push(item);
-                            remaining--;
-                            checkDone();
-                        })
-                        .catch(() => {
-                            processed.push(item);
-                            remaining--;
-                            checkDone();
-                        });
-                } else {
-                    processed.push(item);
+            this._userTaskService.uploadAttachment(file).subscribe({
+                next: (res) => {
+                    const serverUrl = res?.data?.url || res?.data?.uri || '';
+                    processed.push({
+                        name: file.name,
+                        size: sizeStr,
+                        type: file.type || (isPdf ? 'application/pdf' : isImage ? 'image/png' : 'application/octet-stream'),
+                        url: serverUrl,
+                        isImage: isImage,
+                        fileBlob: file,
+                    });
                     remaining--;
                     checkDone();
-                }
-            };
-            reader.onerror = () => {
-                const blobUrl = URL.createObjectURL(file);
-                processed.push({
-                    name: file.name,
-                    size: sizeStr,
-                    type: file.type || 'application/octet-stream',
-                    url: blobUrl,
-                    isImage: isImage,
-                    fileBlob: file,
-                });
-                remaining--;
-                checkDone();
-            };
-            reader.readAsDataURL(file);
+                },
+                error: () => {
+                    const blobUrl = URL.createObjectURL(file);
+                    processed.push({
+                        name: file.name,
+                        size: sizeStr,
+                        type: file.type || 'application/octet-stream',
+                        url: blobUrl,
+                        isImage: isImage,
+                        fileBlob: file,
+                    });
+                    remaining--;
+                    checkDone();
+                },
+            });
         }
     }
 

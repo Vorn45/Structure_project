@@ -11,6 +11,10 @@ import { ActivityStore } from 'src/app/model/user/activity-store.entity';
 import { PlanStore } from 'src/app/model/user/plan-store.entity';
 import { PlannerStore } from 'src/app/model/user/planner-store.entity';
 import { TelegramThread } from 'src/app/model/user/telegram-thread.entity';
+import { ProjectEntity } from 'src/app/model/project/project.entity';
+import { ProjectPhaseEntity } from 'src/app/model/project/project-phase.entity';
+import { TaskEntity } from 'src/app/model/task/task.entity';
+import { TaskCommentEntity } from 'src/app/model/task/task-comment.entity';
 import { NotificationModule } from 'src/app/shared/notification/notification.module';
 import { RealtimeModule } from 'src/app/shared/realtime/realtime.module';
 
@@ -47,6 +51,7 @@ import { ActivityService } from './3-activity/activity.service';
 import { PlanService } from './4-plan/plan.service';
 import { ReportService } from './5-report/report.service';
 import { PlannerService } from './6-planner/planner.service';
+import { FileService } from 'src/app/shared/file/file.service';
 
 // ======================================= >> Code Starts Here << ========================== //
 @Module({
@@ -55,7 +60,18 @@ import { PlannerService } from './6-planner/planner.service';
         CommonModule,
         NotificationModule,
         RealtimeModule,
-        TypeOrmModule.forFeature([User, TaskStore, ActivityStore, PlanStore, PlannerStore, TelegramThread]),
+        TypeOrmModule.forFeature([
+            User,
+            TaskStore,
+            ActivityStore,
+            PlanStore,
+            PlannerStore,
+            TelegramThread,
+            ProjectEntity,
+            ProjectPhaseEntity,
+            TaskEntity,
+            TaskCommentEntity,
+        ]),
     ],
     controllers: [
         HomeController,
@@ -86,6 +102,7 @@ import { PlannerService } from './6-planner/planner.service';
         PlanService,
         ReportService,
         PlannerService,
+        FileService,
     ],
     exports: [
         HomeService,

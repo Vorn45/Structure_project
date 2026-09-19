@@ -54,6 +54,11 @@ export class MobileAttendanceScanComponent implements OnInit {
 
         if (query['token']) this.token = query['token'];
 
+        const u = this.userService?.user;
+        if (u) {
+            this.attendeeName = u.kh_name || u.en_name || u.name || this.attendeeName;
+        }
+
         const now = new Date();
         const d = String(now.getDate()).padStart(2, '0');
         const m = String(now.getMonth() + 1).padStart(2, '0');

@@ -663,7 +663,7 @@
 
                             <!-- Reporter Avatar with R badge -->
                             <div class="relative shrink-0 cursor-pointer ml-1"
-                                [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត')">
+                                [matTooltip]="'អ្នករាយការណ៍ (Reporter): ' + (task.reporter?.name || 'មិនបានកំណត់')">
                                 <div class="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shadow-2xs">
                                     <img *ngIf="getReporterAvatar(task.reporter)" [src]="getReporterAvatar(task.reporter)" [alt]="task.reporter?.name" (error)="onMemberAvatarError($event, task.reporter)" class="w-full h-full object-cover block" />
                                     <mat-icon *ngIf="!getReporterAvatar(task.reporter)" svgIcon="mdi:account" class="!w-4 !h-4 text-slate-400 dark:text-slate-500"></mat-icon>

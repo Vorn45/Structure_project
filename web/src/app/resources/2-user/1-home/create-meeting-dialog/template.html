@@ -397,7 +397,7 @@
                         <mat-icon svgIcon="mdi:account" class="icon-size-16 text-purple-300"></mat-icon>
                     </div>
                     <div class="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded bg-black/60 text-white text-[13px] flex items-center gap-1.5 font-kantumruy">
-                        <span>{{ data?.user?.kh_name || 'ពិសិដ្ឋ បញ្ញាវ័ន្ត' }} (អ្នក)</span>
+                        <span>{{ data?.user?.kh_name || data?.user?.en_name || data?.user?.name || 'អ្នក' }} (អ្នក)</span>
                         <mat-icon [svgIcon]="micMuted() ? 'mdi:microphone-off' : 'mdi:microphone'"
                             class="icon-size-3.5"
                             [ngClass]="micMuted() ? 'text-red-400' : 'text-emerald-400'"></mat-icon>
