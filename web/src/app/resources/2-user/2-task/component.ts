@@ -744,6 +744,16 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                             const tPname = (t.project_name || '').toLowerCase().trim();
                             const tCode = (t.code || '').toLowerCase().trim().replace('#', '');
 
+                            const isBmsFilter = cleanPid === '0002' || pCode === '0002' || cleanPid === 'bms' || cleanPid === 'bms-digitech';
+                            if (isBmsFilter) {
+                                return tPid === '0002' || tPid === 'bms-digitech' || tPid === 'bms' || tCode.startsWith('0002-') || tCode.startsWith('bms-') || tPname.includes('bms');
+                            }
+
+                            const isWmsFilter = cleanPid === '0001' || pCode === '0001' || cleanPid === 'wms' || cleanPid === 'wms-digitech';
+                            if (isWmsFilter) {
+                                return tPid === '0001' || tPid === 'wms-digitech' || tPid === 'wms' || tCode.startsWith('0001-') || tCode.startsWith('wms-') || tPname.includes('wms');
+                            }
+
                             return (
                                 (tPid && (tPid === pid || tPid === cleanPid || (pCode && tPid === pCode))) ||
                                 (pCode && (tCode === pCode || tCode.startsWith(pCode + '-'))) ||

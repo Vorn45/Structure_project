@@ -977,6 +977,16 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                     const tPname = (t.project_name || '').toLowerCase().trim();
                                     const tCode = (t.code || '').toLowerCase().trim().replace('#', '');
 
+                                    const isBmsPlan = pcode === '0002' || pid === '0002' || pid === 'bms-digitech' || pid === '4';
+                                    if (isBmsPlan) {
+                                        return tPid === '0002' || tPid === 'bms-digitech' || tPid === 'bms' || tCode.startsWith('0002-') || tCode.startsWith('bms-') || tPname.includes('bms');
+                                    }
+
+                                    const isWmsPlan = pcode === '0001' || pid === '0001' || pid === 'wms-digitech' || pid === '5';
+                                    if (isWmsPlan) {
+                                        return tPid === '0001' || tPid === 'wms-digitech' || tPid === 'wms' || tCode.startsWith('0001-') || tCode.startsWith('wms-') || tPname.includes('wms');
+                                    }
+
                                     return (
                                         (tPid && (tPid === pid || tPid === pcode)) ||
                                         (pcode && (tCode === pcode || tCode.startsWith(pcode + '-'))) ||

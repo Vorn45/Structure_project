@@ -1885,11 +1885,55 @@ export class TaskService {
 
     private matchesProject(task: TaskItem, projectId?: string): boolean {
         if (!this.isFilterActive(projectId)) return true;
+        if (this.isEventbookingTask(task)) {
+            const isEventFilter =
+                projectId.toLowerCase().includes('0004') ||
+                projectId.toLowerCase().includes('event');
+            return isEventFilter;
+        }
+
         const pid = projectId.toLowerCase().trim();
         const cleanPid = pid.replace('#', '');
         const tPid = (task.project_id || '').toLowerCase().trim();
         const tPname = (task.project_name || '').toLowerCase().trim();
         const tCode = (task.code || '').toLowerCase().trim().replace('#', '');
+
+        // Specific aliases for BMS Digitech (0002)
+        const isBmsFilter =
+            cleanPid === '0002' ||
+            cleanPid === 'bms' ||
+            cleanPid === 'bms-digitech' ||
+            cleanPid === '4';
+        const isTaskBms =
+            tPid === '0002' ||
+            tPid === 'bms' ||
+            tPid === 'bms-digitech' ||
+            tPid === '4' ||
+            tCode.startsWith('0002-') ||
+            tCode.startsWith('bms-') ||
+            tPname.includes('bms');
+        if (isBmsFilter) {
+            return isTaskBms;
+        }
+
+        // Specific aliases for WMS Digitech (0001)
+        const isWmsFilter =
+            cleanPid === '0001' ||
+            cleanPid === 'wms' ||
+            cleanPid === 'wms-digitech' ||
+            cleanPid === '5';
+        const isTaskWms =
+            tPid === '0001' ||
+            tPid === 'wms' ||
+            tPid === 'wms-digitech' ||
+            tPid === '5' ||
+            tCode.startsWith('0001-') ||
+            tCode.startsWith('wms-') ||
+            tPname.includes('wms');
+        if (isWmsFilter) {
+            return isTaskWms;
+        }
+
         return Boolean(
             (tPid && (tPid === pid || tPid === cleanPid)) ||
             (tPname && tPname === pid) ||
