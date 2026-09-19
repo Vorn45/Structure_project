@@ -374,7 +374,8 @@ export class PlanService {
 
                 this.projects = dbProjects.map((p) => {
                     const projectPhases = allPhases.filter(
-                        (ph) => ph.project_id === p.id || ph.project_id === p.code,
+                        (ph) =>
+                            ph.project_id === p.id || ph.project_id === p.code,
                     );
                     return {
                         id: p.id,
@@ -388,7 +389,9 @@ export class PlanService {
                             : new Date().toISOString(),
                         end_date: p.end_date
                             ? new Date(p.end_date).toISOString()
-                            : new Date(Date.now() + 86400000 * 30).toISOString(),
+                            : new Date(
+                                  Date.now() + 86400000 * 30,
+                              ).toISOString(),
                         total_tasks: p.total_tasks || 0,
                         completed_tasks: p.completed_tasks || 0,
                         logo: p.logo,
@@ -425,15 +428,9 @@ export class PlanService {
             this.projects = sourcePlans
                 .filter(
                     (p: any) =>
-                        ![
-                            'PMS-V2',
-                            'WMS-HR',
-                            'E-GOV',
-                            '1',
-                            '2',
-                            '3',
-                        ].includes(p.code) &&
-                        !['1', '2', '3'].includes(p.id),
+                        !['PMS-V2', 'WMS-HR', 'E-GOV', '1', '2', '3'].includes(
+                            p.code,
+                        ) && !['1', '2', '3'].includes(p.id),
                 )
                 .map((p: any) => this.sanitizeProject(p));
 
@@ -592,23 +589,23 @@ export class PlanService {
                         const pname = (p.name || '').toLowerCase();
 
                         const projectTasks = tasks.filter((t: any) => {
-                            const tPid = (t.project_id || '').toLowerCase();
-                            const tPname = (t.project_name || '').toLowerCase();
+                            const tPid = (t.project_id || '')
+                                .toLowerCase()
+                                .trim();
+                            const tPname = (t.project_name || '')
+                                .toLowerCase()
+                                .trim();
                             const tCode = (t.code || '')
                                 .toLowerCase()
+                                .trim()
                                 .replace('#', '');
 
                             return (
-                                (tPid &&
-                                    (tPid === pid ||
-                                        tPid.includes(pid) ||
-                                        pid.includes(tPid))) ||
+                                (tPid && (tPid === pid || tPid === pcode)) ||
                                 (pcode &&
-                                    (tCode.includes(pcode) ||
-                                        tPid.includes(pcode))) ||
-                                (pname &&
-                                    (tPname.includes(pname) ||
-                                        pname.includes(tPname)))
+                                    (tCode === pcode ||
+                                        tCode.startsWith(pcode + '-'))) ||
+                                (pname && tPname === pname)
                             );
                         });
 
@@ -979,8 +976,8 @@ export class PlanService {
                     (t: any) => t.status === 'done' || t.status === 'completed',
                 )?.length || 0,
             members: dto.members?.length ? dto.members : [effectiveLead],
-            tasks: (dto.tasks?.length ? dto.tasks : []).map(
-                (t: any) => this.sanitizeTask(t),
+            tasks: (dto.tasks?.length ? dto.tasks : []).map((t: any) =>
+                this.sanitizeTask(t),
             ),
             phases: dto.phases?.length ? dto.phases : [],
             meetings: dto.meetings?.length ? dto.meetings : [],

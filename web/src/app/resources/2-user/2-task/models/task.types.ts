@@ -101,7 +101,7 @@ export interface TaskChatMessage {
     id: number;
     sender_id?: number;
     sender_name: string;
-    sender_avatar?: string;
+    sender_avatar?: string | null;
     text: string;
     time: string;
     is_self?: boolean;

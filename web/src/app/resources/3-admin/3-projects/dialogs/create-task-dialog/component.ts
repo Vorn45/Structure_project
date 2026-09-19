@@ -326,16 +326,21 @@ export class CreateTaskDialogComponent implements OnInit {
     }
 
     generateNextCode(projId: string): string {
-        const found = this.projectList.find((p) => p.id === projId);
-        let prefix = found?.code || this.data?.projectCode;
+        const found = this.projectList.find((p) => p.id === projId || p.code === projId);
+        let prefix = found?.code || this.data?.projectCode || projId;
         if (!prefix) {
-            prefix = projId.toUpperCase().includes('WMS') ? '0001' : (projId.toUpperCase().includes('BMS') ? '0002' : '0001');
+            prefix = projId.toUpperCase().includes('WMS') ? '0001' : (projId.toUpperCase().includes('BMS') ? '0002' : projId);
         }
         prefix = prefix.replace(/^#/, '');
 
-        const projectTasks = (this.data?.existingTasks || []).filter(
-            (t) => (t.project_id === projId || (t.code && t.code.toUpperCase().includes(prefix.toUpperCase())))
-        );
+        const projectTasks = (this.data?.existingTasks || []).filter((t) => {
+            const tCode = (t.code || '').toUpperCase().replace(/^#/, '');
+            return (
+                t.project_id === projId ||
+                (found && (t.project_id === found.code || t.project_id === found.id)) ||
+                tCode.startsWith(prefix.toUpperCase() + '-')
+            );
+        });
 
         let maxNum = -1;
         for (const t of projectTasks) {

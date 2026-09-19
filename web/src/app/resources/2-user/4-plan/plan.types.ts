@@ -97,7 +97,7 @@ export interface IndividualTaskItem {
     comments_count: number;
     attachments_count: number;
     reporter?: TaskMember;
-    assignee: TaskMember;
+    assignee?: TaskMember | null;
     members: TaskMember[];
     progress?: number;
     subtasks: ProjectSubtaskItem[];

@@ -6,11 +6,11 @@ import { env } from 'envs/env';
  * domain-join logic duplicated across services (e.g. MemberService.fileUrl).
  */
 export function resolveFileUrl(
-    file: { uri?: string; url?: string; file_domain?: string } | string | null | undefined
+    file: { uri?: string | null; url?: string | null; file_domain?: string | null } | string | null | undefined
 ): string | null {
     if (!file) return null;
 
-    let uri = typeof file === 'string' ? file : (file.url ?? file.uri);
+    let uri = typeof file === 'string' ? file : (file.url ?? file.uri ?? undefined);
     if (!uri) return null;
 
     // Support blob: and data: preview URLs directly

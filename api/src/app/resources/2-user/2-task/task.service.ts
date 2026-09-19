@@ -472,11 +472,13 @@ export class TaskService {
         );
     }
 
-    private isDummyMockTask(t: any): boolean {
+    private isEventbookingTask(t: any): boolean {
         if (!t) return false;
         const code = (t.code || '').toUpperCase();
         const title = (t.title || '').trim();
-        const dummyTitles = [
+        const pid = (t.project_id || '').toLowerCase().trim();
+        const pname = (t.project_name || '').toLowerCase().trim();
+        const eventTitles = [
             'Make it can upload profile',
             'Add organizer name in event',
             'Allow change phone number',
@@ -490,8 +492,37 @@ export class TaskService {
         ];
         return (
             code.includes('PRJ-0002-') ||
-            dummyTitles.includes(title)
+            code.includes('PRJ-002-') ||
+            code.includes('0004-') ||
+            pid === '0004' ||
+            pname === 'eventbooking-system' ||
+            eventTitles.includes(title)
         );
+    }
+
+    private sanitizeEventbookingTask(t: any): any {
+        if (!this.isEventbookingTask(t)) return t;
+        let code = (t.code || '').trim();
+        if (code.includes('PRJ-0002-')) {
+            code = code.replace(/#?PRJ-0002-/gi, '#0004-');
+        } else if (code.includes('PRJ-002-')) {
+            code = code.replace(/#?PRJ-002-/gi, '#0004-');
+        } else if (!code.startsWith('#0004-') && !code.startsWith('0004-')) {
+            code = `#0004-${t.id || 1}`;
+        }
+        if (!code.startsWith('#')) {
+            code = `#${code}`;
+        }
+        return {
+            ...t,
+            code,
+            project_id: '0004',
+            project_name: 'Eventbooking-system',
+        };
+    }
+
+    private isDummyMockTask(_t: any): boolean {
+        return false;
     }
 
     private async initDbStore(): Promise<void> {
@@ -503,9 +534,23 @@ export class TaskService {
                 const dbTasks = await this._taskRepo.find({
                     order: { id: 'DESC' },
                 });
-                const cleanTasks = dbTasks.filter(
-                    (t: any) => !this.isPmsTask(t) && !this.isDummyMockTask(t),
-                );
+                const cleanTasks = dbTasks
+                    .filter((t: any) => !this.isPmsTask(t))
+                    .map((t: any) => this.sanitizeEventbookingTask(t));
+                for (const t of cleanTasks) {
+                    if (this.isEventbookingTask(t)) {
+                        await this._taskRepo
+                            .update(
+                                { id: t.id },
+                                {
+                                    code: t.code,
+                                    project_id: t.project_id,
+                                    project_name: t.project_name,
+                                },
+                            )
+                            .catch(() => {});
+                    }
+                }
                 this.tasks = cleanTasks.map((t: any) => ({
                     id: Number(t.id),
                     code: t.code,
@@ -541,10 +586,12 @@ export class TaskService {
                 this.taskComments.clear();
                 for (const c of dbComments) {
                     const taskId = Number(c.task_id);
-                    if (!this.taskComments.has(taskId)) {
-                        this.taskComments.set(taskId, []);
+                    let commentsList = this.taskComments.get(taskId);
+                    if (!commentsList) {
+                        commentsList = [];
+                        this.taskComments.set(taskId, commentsList);
                     }
-                    this.taskComments.get(taskId)!.push({
+                    commentsList.push({
                         id: Number(c.id),
                         sender_id: c.sender_id || 0,
                         sender_name: c.sender_name,
@@ -579,10 +626,9 @@ export class TaskService {
             });
             if (dbStore) {
                 if (Array.isArray(dbStore.tasks) && dbStore.tasks.length > 0) {
-                    const nonPms = dbStore.tasks.filter(
-                        (t: any) =>
-                            !this.isPmsTask(t) && !this.isDummyMockTask(t),
-                    );
+                    const nonPms = dbStore.tasks
+                        .filter((t: any) => !this.isPmsTask(t))
+                        .map((t: any) => this.sanitizeEventbookingTask(t));
                     if (nonPms.length > 0) {
                         this.tasks = nonPms.map((t: any) => ({
                             ...t,
@@ -605,9 +651,9 @@ export class TaskService {
                 this.tasks = [...INITIAL_TASKS];
             }
 
-            this.tasks = this.tasks.filter(
-                (t: any) => !this.isPmsTask(t) && !this.isDummyMockTask(t),
-            );
+            this.tasks = this.tasks
+                .filter((t: any) => !this.isPmsTask(t))
+                .map((t: any) => this.sanitizeEventbookingTask(t));
             if (this.tasks.length === 0) {
                 this.tasks = [...INITIAL_TASKS];
             }
@@ -830,9 +876,9 @@ export class TaskService {
                     Array.isArray(data.tasks) &&
                     data.tasks.length > 0
                 ) {
-                    const nonPms = data.tasks.filter(
-                        (t: any) => !this.isPmsTask(t),
-                    );
+                    const nonPms = data.tasks
+                        .filter((t: any) => !this.isPmsTask(t))
+                        .map((t: any) => this.sanitizeEventbookingTask(t));
                     if (nonPms.length > 0) {
                         this.tasks = nonPms.map((t: any) => ({
                             ...t,
@@ -1173,10 +1219,23 @@ export class TaskService {
             this.isUserPlanMember(user, p),
         );
         for (const p of userPlans) {
-            if (p.id) allowed.add(String(p.id).toLowerCase());
-            if (p.code)
-                allowed.add(String(p.code).toLowerCase().replace('#', ''));
-            if (p.name) allowed.add(String(p.name).toLowerCase());
+            if (p.id) {
+                const idStr = String(p.id).toLowerCase().trim();
+                allowed.add(idStr);
+                allowed.add(idStr.replace(/\s+/g, '-'));
+            }
+            if (p.code) {
+                const codeStr = String(p.code)
+                    .toLowerCase()
+                    .trim()
+                    .replace('#', '');
+                allowed.add(codeStr);
+            }
+            if (p.name) {
+                const nameStr = String(p.name).toLowerCase().trim();
+                allowed.add(nameStr);
+                allowed.add(nameStr.replace(/\s+/g, '-'));
+            }
         }
         return allowed;
     }
@@ -1186,26 +1245,15 @@ export class TaskService {
         allowedKeys: Set<string>,
     ): boolean {
         if (!allowedKeys || allowedKeys.size === 0) return false;
-        const tPid = (t.project_id || '').toLowerCase();
-        const tPname = (t.project_name || '').toLowerCase();
-        const tCode = (t.code || '').toLowerCase().replace('#', '');
+        const tPid = (t.project_id || '').toLowerCase().trim();
+        const tPname = (t.project_name || '').toLowerCase().trim();
+        const tCode = (t.code || '').toLowerCase().trim().replace('#', '');
         const tCodePrefix = tCode.split('-')[0];
 
         for (const key of allowedKeys) {
-            if (
-                tPid &&
-                (tPid === key || tPid.includes(key) || key.includes(tPid))
-            )
-                return true;
-            if (
-                tPname &&
-                (tPname === key || tPname.includes(key) || key.includes(tPname))
-            )
-                return true;
-            if (
-                tCode &&
-                (tCode === key || tCode.includes(key) || key.includes(tCode))
-            )
+            if (tPid && tPid === key) return true;
+            if (tPname && tPname === key) return true;
+            if (tCode && (tCode === key || tCode.startsWith(key + '-')))
                 return true;
             if (tCodePrefix && tCodePrefix === key) return true;
         }
@@ -1292,9 +1340,10 @@ export class TaskService {
                 ).find(
                     (tp) =>
                         tp.name.toLowerCase() === normName ||
-                        tp.id
-                            .toLowerCase()
-                            .includes(p.code?.toLowerCase() || '___'),
+                        tp.id.toLowerCase() ===
+                            (p.id ? String(p.id).toLowerCase() : '') ||
+                        tp.id.toLowerCase() ===
+                            (p.code ? String(p.code).toLowerCase() : ''),
                 );
                 results.push({
                     id: matchingTaskProj?.id || p.id || p.code,
@@ -1593,17 +1642,15 @@ export class TaskService {
 
     private matchesProject(task: TaskItem, projectId?: string): boolean {
         if (!this.isFilterActive(projectId)) return true;
-        const pid = projectId.toLowerCase();
+        const pid = projectId.toLowerCase().trim();
+        const cleanPid = pid.replace('#', '');
+        const tPid = (task.project_id || '').toLowerCase().trim();
+        const tPname = (task.project_name || '').toLowerCase().trim();
+        const tCode = (task.code || '').toLowerCase().trim().replace('#', '');
         return Boolean(
-            (task.project_id &&
-                (task.project_id.toLowerCase().includes(pid) ||
-                    pid.includes(task.project_id.toLowerCase()))) ||
-            (task.project_name &&
-                (task.project_name.toLowerCase().includes(pid) ||
-                    pid.includes(task.project_name.toLowerCase()))) ||
-            (task.code &&
-                (task.code.toLowerCase().includes(pid) ||
-                    pid.includes(task.code.toLowerCase()))),
+            (tPid && (tPid === pid || tPid === cleanPid)) ||
+            (tPname && tPname === pid) ||
+            (tCode && (tCode === cleanPid || tCode.startsWith(cleanPid + '-'))),
         );
     }
 
@@ -1845,15 +1892,13 @@ export class TaskService {
                             this.isUserTaskAssigneeOrReporter(user, t),
                     );
                 } else if (query.project_id && query.project_id !== 'all') {
-                    const targetProjectId = query.project_id.toLowerCase();
-                    const isMemberOfThisProject = Array.from(
-                        allowedPlanKeys,
-                    ).some(
-                        (k) =>
-                            k === targetProjectId ||
-                            k.includes(targetProjectId) ||
-                            targetProjectId.includes(k),
-                    );
+                    const targetProjectId = query.project_id
+                        .toLowerCase()
+                        .trim();
+                    const cleanTargetPid = targetProjectId.replace('#', '');
+                    const isMemberOfThisProject =
+                        allowedPlanKeys.has(targetProjectId) ||
+                        allowedPlanKeys.has(cleanTargetPid);
                     if (isMemberOfThisProject) {
                         validTasks = validTasks.filter((t) =>
                             this.matchesProject(t, query.project_id),
@@ -1964,13 +2009,11 @@ export class TaskService {
         }
         if (!this.isAdmin(user)) {
             const allowedPlanKeys = this.getUserAccessiblePlanKeys(user);
-            const targetProjectId = (dto.project_id || '').toLowerCase();
-            const isMember = Array.from(allowedPlanKeys).some(
-                (k) =>
-                    k === targetProjectId ||
-                    k.includes(targetProjectId) ||
-                    targetProjectId.includes(k),
-            );
+            const targetProjectId = (dto.project_id || '').toLowerCase().trim();
+            const cleanTargetPid = targetProjectId.replace('#', '');
+            const isMember =
+                allowedPlanKeys.has(targetProjectId) ||
+                allowedPlanKeys.has(cleanTargetPid);
             if (!isMember) {
                 throw new ForbiddenException(
                     'អ្នកអាចបង្កើតភារកិច្ចបានតែក្នុងគម្រោងដែលអ្នកជាសមាជិកប៉ុណ្ណោះ (You can only create tasks in projects you are a member of).',
@@ -2002,11 +2045,18 @@ export class TaskService {
                 prefix = '0001';
             } else if (targetPid.toUpperCase().includes('BMS')) {
                 prefix = '0002';
+            } else if (targetPid) {
+                prefix = targetPid.replace(/^#/, '').toUpperCase();
             }
             const projectTasks = this.tasks.filter(
                 (t) =>
                     t.project_id === dto.project_id ||
-                    t.code?.toUpperCase().includes(prefix),
+                    (foundPlan?.id && t.project_id === String(foundPlan.id)) ||
+                    (t.code &&
+                        t.code
+                            .toUpperCase()
+                            .replace(/^#/, '')
+                            .startsWith(prefix + '-')),
             );
             let maxNum = -1;
             for (const t of projectTasks) {

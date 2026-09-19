@@ -733,20 +733,21 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     let finalTasks = results;
                     
                     if (this.selectedProjectId() !== 'all') {
-                        const pid = this.selectedProjectId().toLowerCase();
+                        const pid = this.selectedProjectId().toLowerCase().trim();
+                        const cleanPid = pid.replace('#', '');
                         const selectedProj = this.projects().find((p) => p.id === this.selectedProjectId());
-                        const pCode = (selectedProj?.code || '').toLowerCase();
-                        const pName = (selectedProj?.name || '').toLowerCase();
+                        const pCode = (selectedProj?.code || '').toLowerCase().trim().replace('#', '');
+                        const pName = (selectedProj?.name || '').toLowerCase().trim();
 
                         finalTasks = finalTasks.filter((t) => {
-                            const tPid = (t.project_id || '').toLowerCase();
-                            const tPname = (t.project_name || '').toLowerCase();
-                            const tCode = (t.code || '').toLowerCase();
+                            const tPid = (t.project_id || '').toLowerCase().trim();
+                            const tPname = (t.project_name || '').toLowerCase().trim();
+                            const tCode = (t.code || '').toLowerCase().trim().replace('#', '');
 
                             return (
-                                (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
-                                (pCode && (tCode.includes(pCode) || tPid.includes(pCode))) ||
-                                (pName && (tPname.includes(pName) || pName.includes(tPname)))
+                                (tPid && (tPid === pid || tPid === cleanPid || (pCode && tPid === pCode))) ||
+                                (pCode && (tCode === pCode || tCode.startsWith(pCode + '-'))) ||
+                                (pName && tPname === pName)
                             );
                         });
                     }

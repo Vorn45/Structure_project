@@ -968,21 +968,19 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                 );
                                 const fallbackDefaultLogo = getProjectFallbackLogo(ap.code, ap.name);
 
-                                const pid = String(ap.id || '').toLowerCase();
-                                const pcode = (ap.code || '').toLowerCase().replace('#', '');
-                                const pname = (ap.name || '').toLowerCase();
-                                const pPrefix = pcode.split('-')[0];
+                                const pid = String(ap.id || '').toLowerCase().trim();
+                                const pcode = (ap.code || '').toLowerCase().trim().replace('#', '');
+                                const pname = (ap.name || '').toLowerCase().trim();
 
                                 const projectTasks = allTasks.filter((t) => {
-                                    const tPid = (t.project_id || '').toLowerCase();
-                                    const tPname = (t.project_name || '').toLowerCase();
-                                    const tCode = (t.code || '').toLowerCase().replace('#', '');
+                                    const tPid = (t.project_id || '').toLowerCase().trim();
+                                    const tPname = (t.project_name || '').toLowerCase().trim();
+                                    const tCode = (t.code || '').toLowerCase().trim().replace('#', '');
 
                                     return (
-                                        (tPid && (tPid === pid || tPid.includes(pid) || pid.includes(tPid))) ||
-                                        (pcode && (tCode.includes(pcode) || tPid.includes(pcode))) ||
-                                        (pPrefix && (tCode.startsWith(pPrefix + '-') || tPid.startsWith(pPrefix))) ||
-                                        (pname && (tPname.includes(pname) || pname.includes(tPname)))
+                                        (tPid && (tPid === pid || tPid === pcode)) ||
+                                        (pcode && (tCode === pcode || tCode.startsWith(pcode + '-'))) ||
+                                        (pname && tPname === pname)
                                     );
                                 });
 
