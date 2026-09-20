@@ -939,7 +939,7 @@ export class TaskDrawerComponent implements OnDestroy {
             if (files.length > 0) this.handleIncomingFiles(files);
         }
 
-        handleIncomingFiles(fileList: FileList | File[], autoSubmit = false): void {
+        async handleIncomingFiles(fileList: FileList | File[], autoSubmit = false): Promise<void> {
             const filesArray = Array.from(fileList);
             const processedAttachments: TaskAttachment[] = [];
             let remaining = filesArray.length;
@@ -959,6 +959,17 @@ export class TaskDrawerComponent implements OnDestroy {
                 const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
                 const sizeStr = this.formatFileSize(file.size);
 
+                let textContent: string | undefined = undefined;
+                const isTextFile = !isImage && !isPdf && (
+                    file.type.startsWith('text/') ||
+                    /\.(md|markdown|txt|json|csv|log|xml|html|js|ts|css|scss)$/i.test(file.name)
+                );
+                if (isTextFile && file.size < 2 * 1024 * 1024) {
+                    try {
+                        textContent = await file.text();
+                    } catch {}
+                }
+
                 this._taskService.uploadAttachment(file).subscribe({
                     next: (res) => {
                         const serverUrl = res?.data?.url || res?.data?.uri || '';
@@ -969,6 +980,7 @@ export class TaskDrawerComponent implements OnDestroy {
                             url: serverUrl,
                             isImage: isImage,
                             fileBlob: file,
+                            textContent: textContent,
                         });
                         remaining--;
                         checkDone();
@@ -982,6 +994,7 @@ export class TaskDrawerComponent implements OnDestroy {
                             url: blobUrl,
                             isImage: isImage,
                             fileBlob: file,
+                            textContent: textContent,
                         });
                         remaining--;
                         checkDone();

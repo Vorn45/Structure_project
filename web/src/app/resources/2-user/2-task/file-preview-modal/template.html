@@ -19,7 +19,7 @@
 
     <!-- Image Container -->
     <div class="relative max-w-5xl max-h-[90vh] flex items-center justify-center" (click)="$event.stopPropagation()">
-        <img [src]="previewImage()" alt="Image Preview"
+        <img [src]="resolveFileUrl(previewImage()) || previewImage()" alt="Image Preview"
             class="max-w-full max-h-[88vh] rounded-2xl object-contain shadow-2xl border border-white/15 animate-in zoom-in-95 duration-150" />
     </div>
 </div>
@@ -30,12 +30,20 @@
     <!-- 2a. Fullscreen Native PDF Viewer -->
     <div *ngIf="isPdfFile(previewFile())" class="relative w-full h-full flex flex-col bg-slate-900 overflow-hidden">
         
-        <!-- Floating Close Button on top-right -->
-        <button type="button" (click)="closeModal.emit()"
-            class="absolute top-3 right-4 z-50 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center shadow-xl border border-white/20 transition-all cursor-pointer backdrop-blur-sm group"
-            [matTooltip]="'បិទផ្ទាំង (Close)'">
-            <mat-icon svgIcon="mdi:close" class="icon-size-5 group-hover:scale-110 transition-transform"></mat-icon>
-        </button>
+        <!-- Floating Action Bar on top-right (Download & Close) -->
+        <div class="absolute top-3 right-4 z-50 flex items-center gap-2">
+            <button type="button" (click)="downloadFile.emit(previewFile()!)"
+                class="px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-white flex items-center gap-1.5 shadow-xl border border-white/20 transition-all cursor-pointer backdrop-blur-sm group text-xs font-semibold"
+                [matTooltip]="'ទាញយក (Download)'">
+                <mat-icon svgIcon="mdi:download" class="icon-size-4 group-hover:scale-110 transition-transform"></mat-icon>
+                <span>ទាញយក</span>
+            </button>
+            <button type="button" (click)="closeModal.emit()"
+                class="w-10 h-10 rounded-xl bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center shadow-xl border border-white/20 transition-all cursor-pointer backdrop-blur-sm group"
+                [matTooltip]="'បិទផ្ទាំង (Close)'">
+                <mat-icon svgIcon="mdi:close" class="icon-size-5 group-hover:scale-110 transition-transform"></mat-icon>
+            </button>
+        </div>
 
         <!-- Native PDF Object / Iframe Embed (Takes 100% viewport) -->
         <div class="flex-1 w-full h-full bg-slate-800 flex items-center justify-center overflow-hidden">
@@ -182,7 +190,7 @@
 
             <!-- Image View Body -->
             <div class="p-4 sm:p-6 bg-slate-900 flex items-center justify-center max-h-[75vh] overflow-auto">
-                <img [src]="previewFile()?.url" [alt]="previewFile()?.name"
+                <img [src]="resolveFileUrl(previewFile()?.url) || previewFile()?.url" [alt]="previewFile()?.name"
                     class="max-w-full max-h-[68vh] rounded-xl object-contain shadow-2xl border border-white/10" />
             </div>
         </div>
@@ -222,8 +230,8 @@
                     <h3 class="text-base font-semibold text-slate-800 dark:text-slate-200">{{ previewFile()?.name }}</h3>
                     <p class="text-xs text-slate-400 mt-0.5">{{ previewFile()?.size }} • {{ previewFile()?.type || 'ឯកសារភ្ជាប់' }}</p>
                 </div>
-                <div *ngIf="previewFile()?.textContent" class="max-h-48 overflow-y-auto text-left p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
-                    {{ previewFile()?.textContent }}
+                <div *ngIf="loadedTextContent() || previewFile()?.textContent" class="max-h-56 overflow-y-auto text-left p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap select-text leading-relaxed">
+                    {{ loadedTextContent() || previewFile()?.textContent }}
                 </div>
                 <div class="pt-2 flex justify-center">
                     <button type="button" (click)="downloadFile.emit(previewFile()!)"

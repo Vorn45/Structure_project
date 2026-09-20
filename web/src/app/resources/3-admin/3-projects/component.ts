@@ -42,6 +42,7 @@ import {
 } from 'app/resources/2-user/2-task/models/task.types';
 import { UserTaskService } from 'app/resources/2-user/2-task/task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
+import { downloadTaskAttachment } from 'helper/shared/file-download';
 import { DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
@@ -1371,13 +1372,12 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     }
 
     downloadTaskFile(file: TaskAttachment): void {
-        if (!file.url) return;
-        const a = document.createElement('a');
-        a.href = file.url;
-        a.download = file.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const cur = this.selectedTaskDrawerItem();
+        downloadTaskAttachment(file, {
+            projectName: cur?.project_name,
+            taskTitle: cur?.title,
+            taskCode: cur?.code || (cur?.id ? '#' + cur.id : undefined),
+        });
     }
 
     getCurrentUserAvatar(): string | null {

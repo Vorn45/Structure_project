@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, input, output, signal } from '@angular/core';
+import { Component, HostListener, effect, input, output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { resolveFileUrl } from 'helper/shared/file-url';
+import { downloadUrl } from 'helper/shared/file-download';
 import { TaskAttachment, TaskItem } from '../models/task.types';
 
 @Component({
@@ -22,6 +24,7 @@ export class FilePreviewModalComponent {
     downloadFile = output<TaskAttachment>();
 
     isFileModalFullscreen = signal<boolean>(false);
+    loadedTextContent = signal<string | null>(null);
 
     @HostListener('document:keydown.escape')
     onEscape(): void {
@@ -30,11 +33,52 @@ export class FilePreviewModalComponent {
         }
     }
 
-    constructor(private readonly _sanitizer: DomSanitizer) {}
+    constructor(private readonly _sanitizer: DomSanitizer) {
+        // Automatically fetch and preview text/markdown content if not already available
+        effect(() => {
+            const file = this.previewFile();
+            if (!file || this.isPdfFile(file) || this.isImageFile(file)) {
+                this.loadedTextContent.set(null);
+                return;
+            }
+
+            if (file.textContent) {
+                this.loadedTextContent.set(file.textContent);
+                return;
+            }
+
+            if (file.fileBlob instanceof Blob) {
+                file.fileBlob
+                    .text()
+                    .then((text) => {
+                        this.loadedTextContent.set(text);
+                        file.textContent = text;
+                    })
+                    .catch(() => {});
+                return;
+            }
+
+            if (file.url) {
+                const resolved = resolveFileUrl(file.url) || file.url;
+                fetch(resolved)
+                    .then((r) => (r.ok ? r.text() : ''))
+                    .then((text) => {
+                        if (text) {
+                            this.loadedTextContent.set(text);
+                            file.textContent = text;
+                        }
+                    })
+                    .catch(() => {});
+            }
+        }, { allowSignalWrites: true });
+    }
+
+    resolveFileUrl = resolveFileUrl;
 
     getSafePdfUrl(url?: string): SafeResourceUrl | null {
         if (!url) return null;
-        const pdfUrl = url.includes('#') ? url : `${url}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`;
+        const resolved = resolveFileUrl(url) || url;
+        const pdfUrl = resolved.includes('#') ? resolved : `${resolved}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`;
         return this._sanitizer.bypassSecurityTrustResourceUrl(pdfUrl);
     }
 
@@ -81,13 +125,8 @@ export class FilePreviewModalComponent {
     }
 
     downloadImageUrl(url: string): void {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'attachment-image.png';
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const resolved = resolveFileUrl(url) || url;
+        downloadUrl(resolved, 'attachment-image.png');
     }
 
     toggleFullscreen(): void {

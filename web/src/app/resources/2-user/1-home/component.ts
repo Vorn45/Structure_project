@@ -21,6 +21,7 @@ import { CreateMeetingDialogComponent } from './create-meeting-dialog/component'
 import { HelpSupportDialogComponent } from './help-support-dialog/component';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
+import { downloadTaskAttachment } from 'helper/shared/file-download';
 import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
 export * from './home.types';
 import { HomeOverviewData, UserHomeService } from './home.service';
@@ -1083,9 +1084,12 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     }
 
     downloadTaskFile(file: TaskAttachment): void {
-        if (file.url) {
-            window.open(file.url, '_blank');
-        }
+        const cur = this.selectedTaskDrawerItem();
+        downloadTaskAttachment(file, {
+            projectName: cur?.project_name,
+            taskTitle: cur?.title,
+            taskCode: cur?.code || (cur?.id ? '#' + cur.id : undefined),
+        });
     }
 
     closeFilePreview(): void {

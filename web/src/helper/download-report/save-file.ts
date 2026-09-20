@@ -1,3 +1,5 @@
+    
+import { downloadBlob } from 'helper/shared/file-download';
 
 export function saveFile(fileName: string = '', file_base64: string = '', type: string = 'PDF') {
 
@@ -13,16 +15,7 @@ export function saveFile(fileName: string = '', file_base64: string = '', type: 
     }
     const blob = new Blob([arrayBuffer], { type: type == 'PDF' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-    // Create a URL for the Blob and trigger download
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName + getFormattedDateTime(); // Set the desired file name
-    document.body.appendChild(a);
-    a.click(); // Trigger the download
-    document.body.removeChild(a); // Clean up
-    window.URL.revokeObjectURL(url); // Free memory
-
+    downloadBlob(blob, fileName + getFormattedDateTime());
 }
 
 

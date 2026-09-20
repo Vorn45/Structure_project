@@ -45,6 +45,7 @@ uploads/
 *.dump
 scratch*.js
 */scratch*.js
+list_users.js
 
 # AI Agents & IDE metadata
 .agents/

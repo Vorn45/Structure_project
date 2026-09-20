@@ -13,12 +13,15 @@ const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']);
 
 const DOCUMENT_EXTENSIONS = new Set([
     'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv',
+    'md', 'markdown', 'json', 'xml', 'log', 'yaml', 'yml', 'sql',
     'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg',
     'zip', 'rar', '7z',
 ]);
 
 // Extensions with no reliable magic-byte signature — content sniffing is skipped for these.
-const SIGNATURE_LESS_EXTENSIONS = new Set(['txt', 'csv', 'svg']);
+const SIGNATURE_LESS_EXTENSIONS = new Set([
+    'txt', 'csv', 'svg', 'md', 'markdown', 'json', 'xml', 'log', 'yaml', 'yml', 'sql',
+]);
 
 // file-type detects legacy MS Office (doc/xls/ppt) as generic 'cfb' and OOXML
 // (docx/xlsx/pptx) as 'zip' — both are container formats it can't disambiguate further.

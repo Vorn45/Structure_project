@@ -716,7 +716,7 @@ export class CreateTaskDialogComponent implements OnInit {
         }
     }
 
-    handleIncomingFiles(fileList: FileList | File[]): void {
+    async handleIncomingFiles(fileList: FileList | File[]): Promise<void> {
         const filesArray = Array.from(fileList);
         const processed: TaskAttachment[] = [];
         let remaining = filesArray.length;
@@ -732,6 +732,17 @@ export class CreateTaskDialogComponent implements OnInit {
             const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
             const sizeStr = this.formatFileSize(file.size);
 
+            let textContent: string | undefined = undefined;
+            const isTextFile = !isImage && !isPdf && (
+                file.type.startsWith('text/') ||
+                /\.(md|markdown|txt|json|csv|log|xml|html|js|ts|css|scss)$/i.test(file.name)
+            );
+            if (isTextFile && file.size < 2 * 1024 * 1024) {
+                try {
+                    textContent = await file.text();
+                } catch {}
+            }
+
             this._userTaskService.uploadAttachment(file).subscribe({
                 next: (res) => {
                     const serverUrl = res?.data?.url || res?.data?.uri || '';
@@ -742,6 +753,7 @@ export class CreateTaskDialogComponent implements OnInit {
                         url: serverUrl,
                         isImage: isImage,
                         fileBlob: file,
+                        textContent: textContent,
                     });
                     remaining--;
                     checkDone();
@@ -755,6 +767,7 @@ export class CreateTaskDialogComponent implements OnInit {
                         url: blobUrl,
                         isImage: isImage,
                         fileBlob: file,
+                        textContent: textContent,
                     });
                     remaining--;
                     checkDone();

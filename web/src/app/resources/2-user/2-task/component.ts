@@ -29,6 +29,7 @@ import {
 } from './models/task.types';
 import { UserTaskService } from './task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
+import { downloadTaskAttachment } from 'helper/shared/file-download';
 import { DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 
 export interface ProjectFilterOption {
@@ -1948,46 +1949,12 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     }
 
     downloadFile(file: TaskAttachment): void {
-        if (file.url && (file.url.startsWith('data:') || file.url.startsWith('blob:'))) {
-            const link = document.createElement('a');
-            link.href = file.url;
-            link.download = file.name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else if (file.textContent) {
-            const blob = new Blob([file.textContent], { type: file.type || 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = file.name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        } else if (file.url && file.url.startsWith('http')) {
-            window.open(file.url, '_blank');
-        } else {
-            const dummyContent = `=====================================================
-${file.name}
-Project: ${this.selectedTask()?.project_name || 'Core'}
-Task: ${this.selectedTask()?.title || 'Task Details'}
-Code: ${this.selectedTask()?.code || ('#' + this.selectedTask()?.id)}
-Generated / Downloaded At: ${new Date().toLocaleString()}
-=====================================================
-
-This is a preview export of the document "${file.name}".
-All specifications, comments, and task workflows are verified.`;
-            const blob = new Blob([dummyContent], { type: file.type || 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = file.name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+        const currentTask = this.selectedTask();
+        downloadTaskAttachment(file, {
+            projectName: currentTask?.project_name,
+            taskTitle: currentTask?.title,
+            taskCode: currentTask?.code || (currentTask?.id ? '#' + currentTask.id : undefined),
+        });
     }
 
     navigateHome(): void {

@@ -9,6 +9,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
+import { downloadBlob } from 'helper/shared/file-download';
 import { AdminService, AdminAttendanceData, AdminLeaveRequest, AdminUser } from '../admin.service';
 
 export interface StaffLeaveSummary {
@@ -577,14 +578,7 @@ export class AttendanceLeaveComponent implements OnInit {
     private downloadFile(content: string, fileName: string): void {
         const bom = '\uFEFF'; // UTF-8 BOM for Khmer fonts in Microsoft Excel
         const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        downloadBlob(blob, fileName);
         this._snackbar.success(`បានទាញយកឯកសារ "${fileName}" ដោយជោគជ័យ`);
     }
 

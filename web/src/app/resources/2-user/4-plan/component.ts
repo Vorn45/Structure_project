@@ -36,6 +36,7 @@ import {
 import { ProfileViewComponent } from 'app/resources/1-account/2-profile/view/component';
 import { readPreferredRoleId } from 'app/core/auth/resolvers/role.util';
 import { resolveFileUrl } from 'helper/shared/file-url';
+import { downloadTaskAttachment } from 'helper/shared/file-download';
 
 export * from './plan.types';
 import {
@@ -1554,9 +1555,12 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     downloadTaskFile(file: TaskAttachment): void {
-        if (file.url) {
-            window.open(file.url, '_blank');
-        }
+        const cur = this.selectedTaskDrawerItem();
+        downloadTaskAttachment(file, {
+            projectName: cur?.project_name,
+            taskTitle: cur?.title,
+            taskCode: cur?.code || (cur?.id ? '#' + cur.id : undefined),
+        });
     }
 
     closeFilePreview(): void {
