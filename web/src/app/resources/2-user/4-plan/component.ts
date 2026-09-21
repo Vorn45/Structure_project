@@ -1259,6 +1259,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             subtasks: t.subtasks || [],
             links: t.links || [],
             documents: t.documents || [],
+            type: t.task_type || t.type || 'feature',
+            task_type: t.task_type || t.type || 'feature',
         };
     }
 
@@ -1319,7 +1321,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             code: task.code,
             title: task.title,
             description: task.description || task.title,
-            task_type: (task.type as any) || 'feature',
+            task_type: (task.task_type as any) || (task.type as any) || 'feature',
             status: (task.status as any) || 'new',
             priority: (task.priority as any) || 'medium',
             progress: task.progress || 0,

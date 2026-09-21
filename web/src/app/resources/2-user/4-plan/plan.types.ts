@@ -87,7 +87,8 @@ export interface IndividualTaskItem {
     code: string;
     title: string;
     description: string;
-    type?: 'bug' | 'feature' | 'improvement';
+    type?: 'bug' | 'feature' | 'improvement' | string;
+    task_type?: string;
     status: 'review' | 'done' | 'confirmed' | 'reopened' | 'new' | 'in_progress' | 'unconfirmed' | string;
     priority: 'urgent' | 'high' | 'medium' | 'low';
     due_date?: string;

@@ -44,6 +44,7 @@ export interface HomeOverviewData {
         due_date: string;
         progress: number;
         project_name: string;
+        task_type?: string;
     }>;
     active_projects: Array<{
         id: string;

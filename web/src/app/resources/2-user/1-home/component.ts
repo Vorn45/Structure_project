@@ -975,8 +975,18 @@ export class UserHomeComponent implements OnInit, OnDestroy {
     }
 
     onTaskDrawerTypeChange(event: { task: TaskItem; taskType: string }): void {
+        const currentOverview = this.overview();
+        if (currentOverview?.recent_tasks) {
+            const t = currentOverview.recent_tasks.find((item) => item.id === Number(event.task.id));
+            if (t) {
+                t.task_type = event.taskType;
+            }
+        }
         this.selectedTaskDrawerItem.update((t) => (t ? { ...t, task_type: event.taskType } : null));
-        this._taskService.updateTask(event.task.id, { task_type: event.taskType }).subscribe();
+        this._taskService.updateTask(event.task.id, { task_type: event.taskType }).subscribe({
+            next: () => this.loadOverview(),
+            error: () => {},
+        });
     }
 
     onTaskDrawerPriorityChange(event: { task: TaskItem; priority: string }): void {

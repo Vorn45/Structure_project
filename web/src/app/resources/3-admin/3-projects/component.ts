@@ -1101,7 +1101,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             title: task.title,
             description: task.description || '',
             module: proj?.code || 'PROJECT',
-            task_type: 'feature',
+            task_type: task.task_type || 'feature',
             status: task.status,
             priority: task.priority,
             progress: task.progress || 0,
@@ -1260,6 +1260,10 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
 
     onTaskDrawerTypeChange(event: { task: TaskItem; taskType: string }): void {
         this.selectedTaskDrawerItem.update((t) => (t ? { ...t, task_type: event.taskType } : null));
+        this.tasks.update((items) =>
+            items.map((t) => (t.id === event.task.id ? { ...t, task_type: event.taskType } : t))
+        );
+        this.activeTaskModal.update((t) => (t && t.id === event.task.id ? { ...t, task_type: event.taskType } : t));
         const numericId = parseInt(String(event.task.id).replace(/\D/g, ''), 10);
         if (!isNaN(numericId)) {
             this._userTaskService.updateTask(numericId, { task_type: event.taskType } as any).subscribe({ error: () => {} });
@@ -1442,26 +1446,34 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             }
         }
 
-        if (member.avatar) {
-            const resolved = resolveFileUrl(member.avatar);
-            if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
-                return resolved;
-            }
-        }
-
         const usersList = this.users();
         if (usersList && usersList.length > 0) {
             const found = usersList.find((u: any) => {
                 const uId = u.id ? Number(u.id) : null;
                 const uPhone = (u.phone || '').replace(/\D/g, '');
+                const mName = (member?.name || '').toLowerCase().trim();
+                const unEn = (u.name_en || '').toLowerCase().trim();
+                const unKh = (u.name_kh || '').trim();
                 return (memberId && uId && memberId === uId) ||
-                       (targetPhone && uPhone && targetPhone === uPhone);
+                       (memberId === 101 && (uId === 5 || uPhone === '010843612')) ||
+                       (memberId === 102 && (uId === 6 || uPhone === '087280875')) ||
+                       (memberId === 103 && (uId === 7 || uPhone === '067776682')) ||
+                       (memberId === 104 && (uId === 9 || uPhone === '011242425')) ||
+                       (targetPhone && uPhone && targetPhone === uPhone) ||
+                       (mName && (unEn === mName || unKh === member?.name?.trim() || unEn.includes(mName) || mName.includes(unEn)));
             });
             if (found?.avatar) {
                 const resolved = resolveFileUrl(found.avatar);
                 if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
                     return resolved;
                 }
+            }
+        }
+
+        if (member.avatar) {
+            const resolved = resolveFileUrl(member.avatar);
+            if (resolved && !resolved.includes('placeholder') && !resolved.includes('portrait')) {
+                return resolved;
             }
         }
 
@@ -2632,7 +2644,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             subtasks: t.subtasks || [],
             links: t.links || [],
             documents: t.documents || [],
-            task_type: t.task_type || 'feature',
+            task_type: t.task_type || t.type || 'feature',
         };
     }
 
@@ -2642,12 +2654,25 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const uEmail = (m.email || '').toLowerCase().trim();
         const mName = (m.name || '').toLowerCase().trim();
 
-        // Match against system users list if available
+        // Match against system users list with phone & name priority over email
         const matchedUser = this.users().find((u) => {
-            if (uId && String(u.id) === uId) return true;
-            if (uPhone && (u.phone || '').replace(/\D/g, '') === uPhone) return true;
-            if (uEmail && (u.email || '').toLowerCase().trim() === uEmail) return true;
-            if (mName && (u.name_en?.toLowerCase().trim() === mName || u.name_kh?.trim() === m.name?.trim())) return true;
+            const up = (u.phone || '').replace(/\D/g, '');
+            const unEn = (u.name_en || '').toLowerCase().trim();
+            const unKh = (u.name_kh || '').trim();
+
+            if (uId && (String(u.id) === uId || 
+                (uId === '101' && (u.id === 5 || up === '010843612')) || 
+                (uId === '102' && (u.id === 6 || up === '087280875')) || 
+                (uId === '103' && (u.id === 7 || up === '067776682')) || 
+                (uId === '104' && (u.id === 9 || up === '011242425')))) return true;
+            if (uPhone && up && uPhone === up) return true;
+            if (mName && (unEn === mName || unKh === m.name?.trim() || unEn.includes(mName) || mName.includes(unEn))) return true;
+            if (uEmail && (u.email || '').toLowerCase().trim() === uEmail) {
+                if (mName && !unEn.includes(mName) && !unKh.includes(m.name?.trim()) && !mName.includes(unEn)) {
+                    return false;
+                }
+                return true;
+            }
             return false;
         });
 
@@ -2655,7 +2680,7 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         const role = m.role || (matchedUser ? (matchedUser.position || matchedUser.role) : 'សមាជិក');
         const email = m.email || matchedUser?.email || undefined;
         const phone = m.phone || matchedUser?.phone || undefined;
-        const avatar = m.avatar || matchedUser?.avatar || undefined;
+        const avatar = matchedUser?.avatar || m.avatar || undefined;
         const initial = m.initial || (name ? name.trim().charAt(0).toUpperCase() : 'M');
 
         return {
