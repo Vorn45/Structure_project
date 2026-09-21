@@ -53,33 +53,33 @@
             <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
                 <!-- Project Filter: Circular Avatars Stack (Matching reference screenshot) -->
                 <div class="flex items-center -space-x-1.5 shrink-0">
-                    <!-- Show first 4 projects as circular avatar buttons -->
-                    <ng-container *ngFor="let p of projects().slice(0, 4); let i = index">
+                    <!-- Show first 4 projects as circular avatar buttons (Selected project goes first) -->
+                    <ng-container *ngFor="let p of displayProjects().slice(0, 4); trackBy: trackProject; let i = index">
                         <button type="button"
                             (click)="toggleProjectFilter(p.id)"
                             [matTooltip]="p.name"
                             class="relative inline-flex w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] items-center justify-center rounded-full ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 overflow-hidden hover:scale-105 shrink-0 bg-white dark:bg-slate-800 p-0.5"
-                            [ngClass]="[selectedProjectId() === p.id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'hover:z-10']">
+                            [ngClass]="[selectedProjectId() === p.id ? 'ring-2 !ring-blue-600 ring-offset-2 scale-105 z-20' : 'hover:z-30']">
                             <!-- Project Logo -->
                             <img [src]="getProjectLogo(p)" (error)="onProjectLogoError($event, p)" [alt]="p.name" class="w-full h-full object-contain rounded-full" />
                         </button>
                     </ng-container>
 
                     <!-- +N Badge Pill Button (When there are more than 4 real projects, e.g. 5 projects -> +1) -->
-                    <button *ngIf="projects().length > 4"
+                    <button *ngIf="displayProjects().length > 4"
                         type="button"
                         [matMenuTriggerFor]="projectMenu"
                         [matTooltip]="isOtherProjectSelected() ? ('គម្រោងបច្ចុប្បន្ន: ' + getSelectedOtherProjectName()) : 'គម្រោងផ្សេងទៀត (Other Projects)'"
                         class="relative inline-flex w-8 h-8 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] items-center justify-center rounded-full text-white text-[11px] font-bold ring-2 ring-white dark:ring-slate-800 shadow-2xs cursor-pointer transition-all duration-150 hover:scale-105 shrink-0"
-                        [ngClass]="isOtherProjectSelected() ? 'bg-blue-600 ring-2 !ring-blue-600 ring-offset-2 scale-105 z-10' : 'bg-slate-600 hover:bg-slate-500 hover:z-10'">
-                        +{{ projects().length - 4 }}
+                        [ngClass]="isOtherProjectSelected() ? 'bg-blue-600 ring-2 !ring-blue-600 ring-offset-2 scale-105 z-20' : 'bg-slate-600 hover:bg-slate-500 hover:z-30'">
+                        +{{ displayProjects().length - 4 }}
                     </button>
                 </div>
 
                 <!-- Project Menu for +N remaining projects -->
                 <mat-menu #projectMenu="matMenu" class="!rounded-xl !p-1.5 font-kantumruy">
                     <!-- List other projects beyond the first 4 -->
-                    <button *ngFor="let p of projects().slice(4)" mat-menu-item (click)="setProjectFilter(p.id)" class="!text-[14px]">
+                    <button *ngFor="let p of displayProjects().slice(4); trackBy: trackProject" mat-menu-item (click)="setProjectFilter(p.id)" class="!text-[14px]">
                         <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] mr-2 shrink-0 overflow-hidden bg-white dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700">
                             <img [src]="getProjectLogo(p)" (error)="onProjectLogoError($event, p)" [alt]="p.name" class="w-full h-full object-contain rounded-full" />
                         </div>

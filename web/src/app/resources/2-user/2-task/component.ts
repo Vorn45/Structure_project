@@ -230,6 +230,22 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     // Available Projects list (Loaded dynamically from database / tasks; default icon used when no image)
     projects = signal<ProjectFilterOption[]>([]);
 
+    // Display projects: when a project is selected, it moves to the FIRST position (index 0)
+    displayProjects = computed(() => {
+        const list = this.projects();
+        const selectedId = this.selectedProjectId();
+        if (!selectedId || selectedId === 'all') {
+            return list;
+        }
+        const selected = list.find((p) => p.id === selectedId);
+        if (!selected) {
+            return list;
+        }
+        return [selected, ...list.filter((p) => p.id !== selectedId)];
+    });
+
+    trackProject = (_index: number, item: ProjectFilterOption): string => item.id;
+
     loadProjects(): void {
         this._taskService.getProjects().subscribe({
             next: (res) => {
@@ -832,8 +848,8 @@ export class UserTaskComponent implements OnInit, OnDestroy {
     isOtherProjectSelected(): boolean {
         const id = this.selectedProjectId();
         if (id === 'all') return false;
-        if (this.projects().length <= 4) return false;
-        const top4Ids = this.projects().slice(0, 4).map((p) => p.id);
+        if (this.displayProjects().length <= 4) return false;
+        const top4Ids = this.displayProjects().slice(0, 4).map((p) => p.id);
         return !top4Ids.includes(id);
     }
 
