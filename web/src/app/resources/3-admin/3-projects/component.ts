@@ -45,12 +45,43 @@ import { resolveFileUrl } from 'helper/shared/file-url';
 import { downloadTaskAttachment } from 'helper/shared/file-download';
 import { DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/component';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
+import { avatarColorClass, avatarInitial } from 'app/shared/avatar-color';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
+import {
+    AgileTimeline,
+    DateRange,
+    buildAgileTimeline,
+    formatFullDate,
+    isRangeOutsideWindow,
+    isoWeekNumber,
+    iterationColorClass,
+    rangeLeftPercent,
+    rangeWeekCount,
+    rangeWidthPercent,
+    resolveSegmentRange,
+    toDateInputValue,
+    toKhmerNumber,
+    TimelineZoom,
+    TimelineMarker,
+    markerPercent,
+    parseDateValue,
+    pixelsToDays,
+    resizeRangeEnd,
+    resizeRangeStart,
+    shiftRange,
+} from 'app/shared/agile-timeline';
 
 export interface AgilePlanSegment {
-    iteration: 1 | 2 | 3;
-    startWeek: number; // 14 to 40
-    durationWeeks: number;
+    iteration: number;
+    /** Preferred positioning (YYYY-MM-DD). */
+    start_date?: string | null;
+    end_date?: string | null;
+    /** Legacy positioning, kept so plans stored before the date migration still render.
+     *  The API round-trips these in snake_case, so both spellings are accepted. */
+    startWeek?: number;
+    durationWeeks?: number;
+    start_week?: number;
+    duration_weeks?: number;
     label?: string;
 }
 
@@ -58,6 +89,10 @@ export interface AgilePlanTask {
     id: string;
     name: string;
     segments: AgilePlanSegment[];
+    /** Optional link to a project phase; drives progress + status on the bar. */
+    phase_id?: string | null;
+    /** Optional link to project tasks; drives progress + assignee avatars. */
+    task_ids?: string[] | null;
 }
 
 export interface TaskLink {
@@ -430,26 +465,43 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
     newLinkUrl = signal<string>('');
     showAddLinkForm = signal<boolean>(false);
 
-    // Gantt / Timeline Configuration (Weeks 14 to 40 = 27 weeks total)
-    readonly startWeek = 14;
-    readonly totalWeeks = 27;
-    readonly weeks = Array.from({ length: 27 }, (_, i) => 14 + i);
+    // Gantt / Timeline: the window is derived from the project + its segments
+    // (see app/shared/agile-timeline.ts), never hardcoded to a fixed quarter.
     readonly currentYear = new Date().getFullYear();
-    readonly currentWeek = this.calculateCurrentWeek();
-
-    readonly quarters = [
-        { name: `${new Date().getFullYear()} ត្រីមាសទី ២ (Q2)`, startWeek: 14, weeksCount: 13, bgClass: 'bg-[#2e1065] text-white' },
-        { name: `${new Date().getFullYear()} ត្រីមាសទី ៣ (Q3)`, startWeek: 27, weeksCount: 14, bgClass: 'bg-[#ea580c] text-white' },
+    readonly timelineZoom = signal<TimelineZoom>('week');
+    readonly zoomOptions: { value: TimelineZoom; label: string }[] = [
+        { value: 'week', label: '\u179f\u1794\u17d2\u178f\u17b6\u17a0\u17cd' },
+        { value: 'month', label: '\u1781\u17c2' },
+        { value: 'quarter', label: '\u178f\u17d2\u179a\u17b8\u1798\u17b6\u179f' },
     ];
 
-    readonly months = [
-        { name: 'មេសា', startWeek: 14, weeksCount: 5, bgClass: 'bg-[#f43f5e] text-white' },
-        { name: 'ឧសភា', startWeek: 19, weeksCount: 4, bgClass: 'bg-[#0d9488] text-white' },
-        { name: 'មិថុនា', startWeek: 23, weeksCount: 4, bgClass: 'bg-[#7c3aed] text-white' },
-        { name: 'កក្កដា', startWeek: 27, weeksCount: 5, bgClass: 'bg-[#eab308] text-slate-900' },
-        { name: 'សីហា', startWeek: 32, weeksCount: 4, bgClass: 'bg-[#0284c7] text-white' },
-        { name: 'កញ្ញា', startWeek: 36, weeksCount: 5, bgClass: 'bg-[#0369a1] text-white' },
-    ];
+    readonly timeline = computed<AgileTimeline>(() =>
+        buildAgileTimeline({
+            tasks: this.agileTasks(),
+            projectStart: (this.selectedProject() as any)?.start_date,
+            projectEnd: (this.selectedProject() as any)?.end_date,
+            zoom: this.timelineZoom(),
+        }),
+    );
+
+    /** Project phases drawn as milestone diamonds on the same grid. */
+    readonly timelineMarkers = computed<TimelineMarker[]>(() => {
+        const tl = this.timeline();
+        const markers: TimelineMarker[] = [];
+        for (const phase of this.phases()) {
+            const date = parseDateValue(phase.endDate) ?? parseDateValue(phase.startDate);
+            const percent = markerPercent(tl, date);
+            if (date === null || percent === null) continue;
+            markers.push({
+                id: phase.id,
+                title: phase.title,
+                date,
+                percent,
+                status: phase.status,
+            });
+        }
+        return markers;
+    });
 
     // ECharts references
     @ViewChild('progressChartRef') progressChartRef?: ElementRef<HTMLDivElement>;
@@ -980,32 +1032,277 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         this.disposeCharts();
     }
 
-    calculateCurrentWeek(): number {
-        const now = new Date();
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
-        const pastDaysOfYear = (now.getTime() - startOfYear.getTime()) / 86400000;
-        return Math.min(40, Math.max(14, Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7)));
-    }
-
-    getSegmentLeftPercent(startWeek: number): number {
-        return Math.max(0, Math.min(100, ((startWeek - this.startWeek) / this.totalWeeks) * 100));
-    }
-
-    getSegmentWidthPercent(durationWeeks: number): number {
-        return Math.max(0, Math.min(100, (durationWeeks / this.totalWeeks) * 100));
-    }
-
-    getIterationColor(iteration: 1 | 2 | 3): string {
-        switch (iteration) {
-            case 1:
-                return 'bg-[#f59e0b] hover:bg-[#d97706]';
-            case 2:
-                return 'bg-[#f43f5e] hover:bg-[#e11d48]';
-            case 3:
-                return 'bg-[#581c87] hover:bg-[#4c1d95]';
-            default:
-                return 'bg-[#581c87] hover:bg-[#4c1d95]';
+    /**
+     * Rolls a plan row up from whatever it is linked to: a project phase, a set
+     * of project tasks, or nothing (in which case the bar stays plain).
+     */
+    planRowMeta(task: AgilePlanTask): {
+        progress: number | null;
+        members: TaskMember[];
+        linkedLabel: string | null;
+        isComplete: boolean;
+    } {
+        if (task.phase_id) {
+            const phase = this.phases().find((p) => String(p.id) === String(task.phase_id));
+            if (phase) {
+                const progress = typeof phase.progress === 'number'
+                    ? phase.progress
+                    : phase.status === 'completed' ? 100 : phase.status === 'in_progress' ? 50 : 0;
+                return {
+                    progress,
+                    members: [],
+                    linkedLabel: phase.title,
+                    isComplete: phase.status === 'completed' || progress >= 100,
+                };
+            }
         }
+
+        const ids = (task.task_ids ?? []).map(String);
+        if (ids.length) {
+            const linked = this.tasks().filter((t) => ids.includes(String(t.id)));
+            if (linked.length) {
+                const done = linked.filter((t) => t.status === 'done' || t.status === 'confirmed').length;
+                const progress = Math.round((done / linked.length) * 100);
+                const members: TaskMember[] = [];
+                const seen = new Set<number>();
+                for (const t of linked) {
+                    for (const m of t.assignees ?? (t.assignee ? [t.assignee] : [])) {
+                        if (m && !seen.has(m.id)) {
+                            seen.add(m.id);
+                            members.push(m);
+                        }
+                    }
+                }
+                return {
+                    progress,
+                    members: members.slice(0, 4),
+                    linkedLabel: `${done}/${linked.length} \u1780\u17b7\u1785\u17d2\u1785\u1780\u17b6\u179a`,
+                    isComplete: done === linked.length,
+                };
+            }
+        }
+
+        return { progress: null, members: [], linkedLabel: null, isComplete: false };
+    }
+
+    /** A linked row whose end date has passed without completing. */
+    isSegmentOverdue(task: AgilePlanTask, seg: AgilePlanSegment): boolean {
+        const range = this.segmentRange(seg);
+        if (!range) return false;
+        const meta = this.planRowMeta(task);
+        if (meta.progress === null || meta.isComplete) return false;
+        return range.end < new Date();
+    }
+
+    segmentProgressWidth(task: AgilePlanTask): number {
+        const progress = this.planRowMeta(task).progress;
+        return progress === null ? 0 : Math.max(0, Math.min(100, progress));
+    }
+
+    /** Avatars shown inline on the plan toolbar; the rest collapse into a +N chip. */
+    private readonly MAX_VISIBLE_MEMBERS = 5;
+
+    readonly visibleTeamMembers = computed(() =>
+        this.teamMembers().slice(0, this.MAX_VISIBLE_MEMBERS),
+    );
+
+    readonly hiddenTeamMemberCount = computed(() =>
+        Math.max(0, this.teamMembers().length - this.MAX_VISIBLE_MEMBERS),
+    );
+
+    readonly hiddenTeamMemberNames = computed(() =>
+        this.teamMembers()
+            .slice(this.MAX_VISIBLE_MEMBERS)
+            .map((m) => m.name)
+            .join(', '),
+    );
+
+    memberColor(member: TaskMember): string {
+        // Members carry a generic bgClass, identical for everyone, so colour by
+        // identity here instead of honouring it.
+        return avatarColorClass({ id: member.id, name: member.name });
+    }
+
+    memberInitial(member: TaskMember): string {
+        return avatarInitial(member);
+    }
+
+    readonly timelineRangeLabel = computed(() => {
+        const tl = this.timeline();
+        return `${formatFullDate(tl.start)} – ${formatFullDate(tl.end)} (${tl.totalWeeks} សប្តាហ៍)`;
+    });
+
+    /** Week grid lines as one gradient instead of one <div> per week per row. */
+    readonly weekGridBackground = computed(() => {
+        const count = this.timeline().totalWeeks;
+        return `repeating-linear-gradient(to right, rgba(148,163,184,0.28) 0 1px, transparent 1px calc(100% / ${count}))`;
+    });
+
+    /** Iterations actually used by this project, so the legend matches the data. */
+    readonly planIterations = computed<number[]>(() => {
+        const used = new Set<number>();
+        for (const task of this.agileTasks()) {
+            for (const seg of task.segments ?? []) {
+                used.add(Number(seg.iteration) || 1);
+            }
+        }
+        const list = Array.from(used).sort((a, b) => a - b);
+        return list.length ? list : [1, 2, 3];
+    });
+
+    iterationLabel(iteration: number): string {
+        return `វដ្តទី ${toKhmerNumber(iteration)} (Iteration ${iteration})`;
+    }
+
+    /* -------- drag to move / resize a segment -------- */
+
+    private _drag: {
+        task: AgilePlanTask;
+        index: number;
+        mode: 'move' | 'start' | 'end';
+        originX: number;
+        trackWidth: number;
+        original: DateRange;
+    } | null = null;
+
+    readonly dragPreview = signal<{ taskId: string; index: number; range: DateRange } | null>(null);
+
+    startSegmentDrag(
+        event: PointerEvent,
+        task: AgilePlanTask,
+        index: number,
+        mode: 'move' | 'start' | 'end',
+        track: HTMLElement,
+    ): void {
+        if (!this.isAdmin()) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const seg = task.segments[index];
+        const original = this.segmentRange(seg);
+        if (!original) return;
+
+        this._drag = {
+            task,
+            index,
+            mode,
+            originX: event.clientX,
+            trackWidth: track.clientWidth,
+            original,
+        };
+        (event.target as HTMLElement).setPointerCapture?.(event.pointerId);
+    }
+
+    onSegmentDragMove(event: PointerEvent): void {
+        const drag = this._drag;
+        if (!drag) return;
+        const days = pixelsToDays(this.timeline(), event.clientX - drag.originX, drag.trackWidth);
+        if (days === 0 && this.dragPreview() === null) return;
+
+        const next =
+            drag.mode === 'move'
+                ? shiftRange(drag.original, days)
+                : drag.mode === 'start'
+                  ? resizeRangeStart(drag.original, days)
+                  : resizeRangeEnd(drag.original, days);
+
+        this.dragPreview.set({ taskId: drag.task.id, index: drag.index, range: next });
+    }
+
+    endSegmentDrag(event: PointerEvent): void {
+        const drag = this._drag;
+        const preview = this.dragPreview();
+        this._drag = null;
+        this.dragPreview.set(null);
+        (event.target as HTMLElement).releasePointerCapture?.(event.pointerId);
+        if (!drag || !preview) return;
+
+        const sameStart = preview.range.start.getTime() === drag.original.start.getTime();
+        const sameEnd = preview.range.end.getTime() === drag.original.end.getTime();
+        if (sameStart && sameEnd) return;
+
+        const updated: AgilePlanTask = {
+            ...drag.task,
+            segments: drag.task.segments.map((seg, i) =>
+                i === drag.index
+                    ? {
+                          ...seg,
+                          start_date: toDateInputValue(preview.range.start),
+                          end_date: toDateInputValue(preview.range.end),
+                          startWeek: isoWeekNumber(preview.range.start),
+                          durationWeeks: rangeWeekCount(preview.range),
+                      }
+                    : seg,
+            ),
+        };
+        this.saveAgileTask(updated);
+    }
+
+    /** Live range while dragging, so the bar follows the pointer. */
+    displayRange(task: AgilePlanTask, seg: AgilePlanSegment, index: number): DateRange | null {
+        const preview = this.dragPreview();
+        if (preview && preview.taskId === task.id && preview.index === index) {
+            return preview.range;
+        }
+        return this.segmentRange(seg);
+    }
+
+    displayLeftPercent(task: AgilePlanTask, seg: AgilePlanSegment, index: number): number {
+        return rangeLeftPercent(this.timeline(), this.displayRange(task, seg, index));
+    }
+
+    displayWidthPercent(task: AgilePlanTask, seg: AgilePlanSegment, index: number): number {
+        return rangeWidthPercent(this.timeline(), this.displayRange(task, seg, index));
+    }
+
+    private saveAgileTask(updated: AgilePlanTask): void {
+        const project = this.selectedProject();
+        if (!project) return;
+        const previous = this.agileTasks();
+        this.agileTasks.update((list) => list.map((t) => (t.id === updated.id ? updated : t)));
+        this._adminService.updateAgileTask(String(project.id), updated.id, updated).subscribe({
+            next: () => this._snackbarService.success('\u1794\u17b6\u1793\u1780\u17c2\u1794\u17d2\u179a\u17c2\u1795\u17c2\u1793\u1780\u17b6\u179a\u17a2\u1793\u17bb\u179c\u178f\u17d2\u178f\u178a\u17c4\u1799\u1787\u1793\u17d2\u1798\u17d0\u1799'),
+            error: (err) => {
+                console.error('Failed to move agile segment:', err);
+                this.agileTasks.set(previous);
+                this._snackbarService.error('\u1798\u17b6\u1793\u1794\u1789\u17d2\u17a0\u17b6\u1780\u17d2\u1793\u17bb\u1784\u1780\u17b6\u179a\u179a\u1780\u17d2\u179f\u17b6\u1791\u17bb\u1780\u1795\u17c2\u1793\u1780\u17b6\u179a');
+            },
+        });
+    }
+
+    segmentRange(seg: AgilePlanSegment): DateRange | null {
+        return resolveSegmentRange(seg, this.timeline());
+    }
+
+    getSegmentLeftPercent(seg: AgilePlanSegment): number {
+        return rangeLeftPercent(this.timeline(), this.segmentRange(seg));
+    }
+
+    getSegmentWidthPercent(seg: AgilePlanSegment): number {
+        return rangeWidthPercent(this.timeline(), this.segmentRange(seg));
+    }
+
+    isSegmentVisible(seg: AgilePlanSegment): boolean {
+        return !isRangeOutsideWindow(this.timeline(), this.segmentRange(seg));
+    }
+
+    segmentTooltip(task: AgilePlanTask, seg: AgilePlanSegment): string {
+        const range = this.segmentRange(seg);
+        if (!range) return task.name;
+        const weeks = rangeWeekCount(range);
+        return `${task.name} - វដ្តទី ${seg.iteration} (${formatFullDate(range.start)} → ${formatFullDate(range.end)}, ${weeks}W)`;
+    }
+
+    getIterationColor(iteration: number): string {
+        return iterationColorClass(iteration);
+    }
+
+    /** Scrolls the gantt container so today's column is in view. */
+    scrollTimelineToToday(container: HTMLElement): void {
+        const tl = this.timeline();
+        if (tl.nowPercent === null) return;
+        const track = Math.max(0, container.scrollWidth - 300);
+        const target = 300 + (track * tl.nowPercent) / 100 - container.clientWidth / 2;
+        container.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
     }
 
     setNavTab(tab: 'general' | 'plan' | 'tasks' | 'phases' | 'team' | 'meetings' | 'links'): void {
@@ -1841,8 +2138,10 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         if (!p) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
-            totalWeeks: this.totalWeeks,
-            weeks: this.weeks,
+            timelineStart: toDateInputValue(this.timeline().start),
+            timelineEnd: toDateInputValue(this.timeline().end),
+            phaseOptions: this.phases().map((ph) => ({ id: String(ph.id), label: ph.title })),
+            taskOptions: this.tasks().map((t) => ({ id: String(t.id), label: `[${t.code}] ${t.title}` })),
             projects: this.projects().map((item) => ({ id: item.id, code: item.code, name: item.name })),
             selectedProjectId: p?.id,
             selectedProjectName: p?.name,
@@ -1875,8 +2174,10 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
         if (!p) return;
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
-            totalWeeks: this.totalWeeks,
-            weeks: this.weeks,
+            timelineStart: toDateInputValue(this.timeline().start),
+            timelineEnd: toDateInputValue(this.timeline().end),
+            phaseOptions: this.phases().map((ph) => ({ id: String(ph.id), label: ph.title })),
+            taskOptions: this.tasks().map((t) => ({ id: String(t.id), label: `[${t.code}] ${t.title}` })),
             projects: this.projects().map((item) => ({ id: item.id, code: item.code, name: item.name })),
             selectedProjectId: p?.id,
             selectedProjectName: p?.name,
