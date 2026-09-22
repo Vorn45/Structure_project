@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserService } from 'app/core/user/user.service';
-import { AdminService } from '../../admin.service';
+import { PlannerService } from '../planner.service';
 
 
 export * from './create-schedule-dialog.types';
@@ -64,7 +64,7 @@ export class CreateScheduleDialogComponent implements OnInit {
         'ផ្សេងៗ',
     ];
 
-    private readonly _adminService = inject(AdminService, { optional: true });
+    private readonly _plannerService = inject(PlannerService);
     private readonly _userService = inject(UserService, { optional: true });
 
     availableMembers = signal<TeamMemberItem[]>([]);
@@ -76,38 +76,15 @@ export class CreateScheduleDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        if (this._adminService) {
-            this._adminService.getUsers({ limit: 100 }).subscribe({
-                next: (res) => {
-                    const users = res?.data?.results || (res?.data as any)?.users || [];
-                    if (Array.isArray(users) && users.length > 0) {
-                        const colors = [
-                            'bg-emerald-700 text-white',
-                            'bg-blue-700 text-white',
-                            'bg-indigo-700 text-white',
-                            'bg-purple-700 text-white',
-                            'bg-amber-700 text-white',
-                        ];
-                        const members: TeamMemberItem[] = users.map((u: any, idx: number) => {
-                            const name = u.name_kh || u.name_en || u.name || 'User';
-                            const en = (u.name_en || u.name || 'U').trim();
-                            const parts = en.split(' ');
-                            const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : en.slice(0, 2).toUpperCase();
-                            return {
-                                id: u.id,
-                                name: u.name_kh && u.name_en ? `${u.name_kh} (${u.name_en})` : name,
-                                role: u.position || u.role || 'Member',
-                                initials: initials || 'U',
-                                avatar: u.avatar,
-                                bg: colors[idx % colors.length],
-                            };
-                        });
-                        this.availableMembers.set(members);
-                    }
-                },
-                error: (err) => console.warn('Could not load members for planner dialog:', err),
-            });
-        }
+        this._plannerService.getTeamMembers().subscribe({
+            next: (res) => {
+                const members = res?.data || [];
+                if (Array.isArray(members) && members.length > 0) {
+                    this.availableMembers.set(members);
+                }
+            },
+            error: (err) => console.warn('Could not load members for planner dialog:', err),
+        });
 
         if (this.data) {
             if (this.data.isEdit && this.data.schedule) {

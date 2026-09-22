@@ -458,7 +458,7 @@ export class PlannerService {
     async getTeamMembers(user: UserPayload) {
         try {
             const users = await this._userRepo.find({
-                select: ['id', 'name_kh', 'name_en', 'first_name', 'last_name', 'telegram_photo_url'],
+                relations: ['user_roles', 'user_roles.role', 'avatar_file'],
                 order: { id: 'ASC' },
                 take: 100,
             });
@@ -476,12 +476,14 @@ export class PlannerService {
                         ? `${u.name_kh} (${u.name_en})`
                         : (u.name_kh || u.name_en || (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : `បុគ្គលិក #${u.id}`));
                     const initials = (u.name_en || u.name_kh || 'U').trim().slice(0, 2).toUpperCase();
+                    const role = u.user_roles?.[0]?.role?.name_en || u.user_roles?.[0]?.role?.name_kh || 'សមាជិកក្រុមការងារ';
+                    const avatar = this.formatAvatarUrl(u.avatar_file) || u.telegram_photo_url || null;
                     return {
                         id: u.id,
                         name,
-                        role: 'សមាជិកក្រុមការងារ',
+                        role,
                         initials,
-                        avatar: u.telegram_photo_url || null,
+                        avatar,
                         bg: colors[i % colors.length],
                     };
                 });
@@ -491,7 +493,9 @@ export class PlannerService {
                     data: mapped,
                 };
             }
-        } catch (err) {}
+        } catch (err) {
+            console.warn('[PlannerService] Failed to load live team members:', err);
+        }
 
         const defaultMembers = [
             { id: 1, name: 'ចេង ច័ន្ទបញ្ញា (Panha)', role: 'Frontend Lead / Developer', initials: 'CP', bg: 'bg-slate-700 text-white', avatar: null },
