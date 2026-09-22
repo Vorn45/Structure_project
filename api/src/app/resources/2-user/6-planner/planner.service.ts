@@ -5,6 +5,8 @@ import { UserPayload } from 'src/app/interface/jwt.interface';
 import { isAdminOrSuperAdmin } from 'src/app/common/utils/access.util';
 import { PlannerStore } from 'src/app/model/user/planner-store.entity';
 import { User } from 'src/app/model/user/users.entity';
+import axios from 'axios';
+import { appConfig } from 'src/app.config';
 import {
     NotificationService,
     NotificationItem,
@@ -99,8 +101,6 @@ export class PlannerService {
         memberIds: number[],
         kind: 'created' | 'updated',
     ): void {
-        if (!this._notificationService) return;
-
         const targetIds = memberIds.filter((id) => Number(id) && Number(id) !== Number(user?.id));
         if (targetIds.length === 0) return;
 
@@ -111,27 +111,128 @@ export class PlannerService {
         const messageKh = `${organizer} បានដាក់អ្នកក្នុងកាលវិភាគ "${schedule.title}" (${when})`;
         const messageEn = `${organizer} added you to the schedule "${schedule.title}" (${when})`;
 
-        const notif: NotificationItem = {
-            id: `notif_planner_${schedule.id}_${Date.now()}`,
-            type: kind === 'created' ? 'planner_assigned' : 'planner_updated',
-            title: titleKh,
-            title_kh: titleKh,
-            title_en: titleEn,
-            message: messageKh,
-            message_kh: messageKh,
-            message_en: messageEn,
-            data: { schedule_id: schedule.id, category: schedule.category },
-            is_unread: true,
-            read_at: null,
-            created_at: new Date().toISOString(),
-        };
+        if (this._notificationService) {
+            const notif: NotificationItem = {
+                id: `notif_planner_${schedule.id}_${Date.now()}`,
+                type: kind === 'created' ? 'planner_assigned' : 'planner_updated',
+                title: titleKh,
+                title_kh: titleKh,
+                title_en: titleEn,
+                message: messageKh,
+                message_kh: messageKh,
+                message_en: messageEn,
+                data: { schedule_id: schedule.id, category: schedule.category },
+                is_unread: true,
+                read_at: null,
+                created_at: new Date().toISOString(),
+            };
+
+            try {
+                this._notificationService.pushNotification(notif, targetIds);
+            } catch (e) {
+                console.warn('[PlannerService] Failed to push planner notification:', e);
+            }
+        }
+
+        // Fire-and-forget private Telegram notification to assigned members
+        this.sendTelegramScheduleNotification(user, schedule, targetIds, kind).catch((e) => {
+            console.warn('[PlannerService] Async Telegram dispatch error:', e);
+        });
+    }
+
+    private async sendTelegramScheduleNotification(
+        user: UserPayload,
+        schedule: PlannerScheduleItem,
+        targetIds: number[],
+        kind: 'created' | 'updated',
+    ): Promise<void> {
+        const botToken =
+            process.env.TELEGRAM_BOT_TOKEN ||
+            appConfig.AUTH?.TELEGRAM_BOT_TOKEN ||
+            appConfig.ORGANIZATION_LOG?.TELEGRAM_BOT_TOKEN ||
+            '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
+
+        if (!botToken || targetIds.length === 0) return;
 
         try {
-            this._notificationService.pushNotification(notif, targetIds);
-        } catch (e) {
-            // A notification failure must never fail the save itself.
-            console.warn('[PlannerService] Failed to push planner notification:', e);
+            const assignedUsers = await this._userRepo
+                .createQueryBuilder('user')
+                .where('user.id IN (:...ids)', { ids: targetIds })
+                .andWhere('user.telegram_id IS NOT NULL')
+                .andWhere('user.is_active = 1')
+                .select(['user.id', 'user.name_en', 'user.name_kh', 'user.telegram_id'])
+                .getMany();
+
+            if (!assignedUsers.length) return;
+
+            const organizer = schedule.created_by_name || user?.name_kh || user?.name_en || 'Admin';
+            const when = `${schedule.start_date || schedule.date || ''} ${schedule.time || ''}`.trim();
+            const actionHeader = kind === 'created'
+                ? '📅 <b>កាលវិភាគថ្មីត្រូវបានចាត់តាំង (New Schedule)</b>'
+                : '🔄 <b>កាលវិភាគត្រូវបានកែប្រែ (Schedule Updated)</b>';
+            const categoryText = schedule.type || (schedule.category === 'work' ? 'ការងារទូទៅ' : schedule.category || 'ទូទៅ');
+            const noteSection = schedule.note ? `\n📝 <b>ចំណាំ:</b> ${this.escapeHtml(schedule.note)}` : '';
+
+            const frontendUrl = (
+                process.env.APP_DEPLOY_URL ||
+                appConfig.APP?.FRONTEND_URL ||
+                'https://wms-digitechkh.vercel.app'
+            ).replace(/\/+$/, '');
+            const plannerUrl = `${frontendUrl}/#/admin/planner`;
+
+            const replyMarkup = {
+                inline_keyboard: [
+                    [
+                        {
+                            text: 'បើកមើលកាលវិភាគ 📅',
+                            url: plannerUrl,
+                        },
+                    ],
+                ],
+            };
+
+            for (const member of assignedUsers) {
+                if (!member.telegram_id) continue;
+
+                const memberName = member.name_kh || member.name_en || 'សមាជិក';
+                const message =
+`${actionHeader}
+
+ជំរាបសួរ <b>${this.escapeHtml(memberName)}</b>, អ្នកត្រូវបានចាត់តាំងក្នុងកាលវិភាគ៖
+📌 <b>ប្រធានបទ:</b> ${this.escapeHtml(schedule.title)}
+🕒 <b>ពេលវេលា:</b> ${this.escapeHtml(when)}
+🏢 <b>ប្រភេទ:</b> ${this.escapeHtml(categoryText)}
+👤 <b>អ្នករៀបចំ:</b> ${this.escapeHtml(organizer)}${noteSection}
+
+សូមចុចប៊ូតុងខាងក្រោមដើម្បីពិនិត្យមើលព័ត៌មានលម្អិត។`;
+
+                try {
+                    await axios.post(
+                        `https://api.telegram.org/bot${botToken}/sendMessage`,
+                        {
+                            chat_id: member.telegram_id,
+                            text: message,
+                            parse_mode: 'HTML',
+                            reply_markup: replyMarkup,
+                        },
+                        { timeout: 10000 },
+                    );
+                } catch (err: any) {
+                    console.warn(`[PlannerService] Failed to send Telegram notification to user ${member.id} (${member.telegram_id}):`, err?.message || err);
+                }
+            }
+        } catch (error: any) {
+            console.warn('[PlannerService] Telegram notification error:', error?.message || error);
         }
+    }
+
+    private escapeHtml(text: string): string {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
     private numericMemberIds(schedule: PlannerScheduleItem): number[] {

@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import axios from 'axios';
+import { appConfig } from 'src/app.config';
 
 // ===========================================================================>> Custom Library
 import { RoleEnum } from 'src/app/enum/role.enum';
@@ -1035,6 +1037,9 @@ export class PlanService {
             await this._projectRepo.save(this._projectRepo.create(newPlan));
         } catch (e) {}
         this._realtimeGateway?.emitProjectCreated({ project: newPlan });
+        this.notifyAssignedPlanMembers(user, newPlan, 'created').catch((e) => {
+            console.warn('[PlanService] Async Telegram dispatch error:', e);
+        });
 
         return {
             status_code: 201,
@@ -1123,6 +1128,11 @@ export class PlanService {
             console.error('Failed to save project entity in updatePlan:', e);
         }
         this._realtimeGateway?.emitProjectUpdated({ project: updated });
+        if (dto.members || dto.status || dto.name) {
+            this.notifyAssignedPlanMembers(user, updated, 'updated').catch((e) => {
+                console.warn('[PlanService] Async Telegram dispatch error:', e);
+            });
+        }
 
         return {
             status_code: 200,
@@ -1546,5 +1556,117 @@ export class PlanService {
             status_code: 200,
             message: 'Agile task deleted successfully',
         };
+    }
+
+    private async notifyAssignedPlanMembers(
+        user: UserPayload,
+        plan: any,
+        kind: 'created' | 'updated',
+    ): Promise<void> {
+        const botToken =
+            process.env.TELEGRAM_BOT_TOKEN ||
+            appConfig.AUTH?.TELEGRAM_BOT_TOKEN ||
+            appConfig.ORGANIZATION_LOG?.TELEGRAM_BOT_TOKEN ||
+            '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
+
+        if (!botToken) return;
+
+        try {
+            const rawMembers: any[] = Array.isArray(plan.members) ? plan.members : [];
+            const targetIds: number[] = rawMembers
+                .map((m) => Number(m.id || m.user_id))
+                .filter((id) => Number.isFinite(id) && id > 0 && id !== Number(user?.id));
+
+            if (!targetIds.length) return;
+
+            const assignedUsers = await this._userRepo
+                .createQueryBuilder('user')
+                .where('user.id IN (:...ids)', { ids: targetIds })
+                .andWhere('user.telegram_id IS NOT NULL')
+                .andWhere('user.is_active = 1')
+                .select(['user.id', 'user.name_en', 'user.name_kh', 'user.telegram_id'])
+                .getMany();
+
+            if (!assignedUsers.length) return;
+
+            const leadName =
+                plan.team_lead?.name ||
+                plan.lead?.name ||
+                user?.name_kh ||
+                user?.name_en ||
+                'Admin';
+            const actionHeader =
+                kind === 'created'
+                    ? '📋 <b>ផែនការគម្រោងថ្មី (New Project Plan)</b>'
+                    : '🔄 <b>ផែនការគម្រោងត្រូវបានកែប្រែ (Project Plan Updated)</b>';
+
+            const when = `${plan.start_date ? new Date(plan.start_date).toLocaleDateString() : ''} ~ ${plan.end_date ? new Date(plan.end_date).toLocaleDateString() : ''}`.trim();
+            const desc = plan.description
+                ? `\n📝 <b>ការពិពណ៌នា:</b> ${this.escapeHtml(plan.description.slice(0, 200))}`
+                : '';
+
+            const frontendUrl = (
+                process.env.APP_DEPLOY_URL ||
+                appConfig.APP?.FRONTEND_URL ||
+                'https://wms-digitechkh.vercel.app'
+            ).replace(/\/+$/, '');
+            const projectUrl = `${frontendUrl}/#/member/projects/${plan.id || plan.code || ''}`;
+
+            const replyMarkup = {
+                inline_keyboard: [
+                    [
+                        {
+                            text: 'បើកមើលគម្រោង 🔍',
+                            url: projectUrl,
+                        },
+                    ],
+                ],
+            };
+
+            for (const member of assignedUsers) {
+                if (!member.telegram_id) continue;
+
+                const memberName = member.name_kh || member.name_en || 'សមាជិក';
+                const message =
+`${actionHeader}
+
+ជំរាបសួរ <b>${this.escapeHtml(memberName)}</b>, អ្នកត្រូវបានដាក់បញ្ចូលក្នុងគម្រោង៖
+📌 <b>គម្រោង:</b> ${this.escapeHtml(plan.name || plan.title || 'គម្រោង')} (<code>#${this.escapeHtml(plan.code || plan.id)}</code>)
+🕒 <b>កាលបរិច្ឆេទ:</b> ${this.escapeHtml(when)}
+📊 <b>វឌ្ឍនភាព:</b> ${plan.progress || 0}% (${this.escapeHtml(plan.status || 'active')})
+👤 <b>ប្រធានគម្រោង:</b> ${this.escapeHtml(leadName)}${desc}
+
+សូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលមើលព័ត៌មានលម្អិត។`;
+
+                try {
+                    await axios.post(
+                        `https://api.telegram.org/bot${botToken}/sendMessage`,
+                        {
+                            chat_id: member.telegram_id,
+                            text: message,
+                            parse_mode: 'HTML',
+                            reply_markup: replyMarkup,
+                        },
+                        { timeout: 10000 },
+                    );
+                } catch (err: any) {
+                    console.warn(
+                        `[PlanService] Failed to send Telegram notification to user ${member.id} (${member.telegram_id}):`,
+                        err?.message || err,
+                    );
+                }
+            }
+        } catch (error: any) {
+            console.warn('[PlanService] Telegram notification error:', error?.message || error);
+        }
+    }
+
+    private escapeHtml(text: string): string {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 }
