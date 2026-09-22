@@ -313,6 +313,7 @@ export class CreateScheduleDialogComponent implements OnInit {
                 name: m.name,
                 role: m.role,
                 initials: m.initials,
+                avatar: m.avatar || null,
                 bg: m.bg,
             }));
 

@@ -1,4 +1,4 @@
-﻿<div class="flex flex-col items-center justify-center p-6 text-center font-kantumruy min-h-[300px]">
+<div class="flex flex-col items-center justify-center p-6 text-center font-kantumruy min-h-[300px]">
     <!-- Loading -->
     <div *ngIf="isLoading()" class="flex flex-col items-center gap-4">
         <div class="size-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
@@ -11,9 +11,18 @@
             <mat-icon svgIcon="heroicons_outline:check-circle" class="icon-size-10"></mat-icon>
         </div>
         <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">ចូលប្រើប្រាស់ជោគជ័យ!</h3>
-        <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
-            ការផ្ទៀងផ្ទាត់ត្រូវបានបញ្ចប់។ កុំព្យូទ័ររបស់អ្នកនឹងចូលទៅក្នុងប្រព័ន្ធដោយស្វ័យប្រវត្តិ។
+        <p *ngIf="userName()" class="text-base font-semibold text-blue-600 dark:text-blue-400">
+            {{ userName() }}
         </p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
+            ការផ្ទៀងផ្ទាត់ត្រូវបានបញ្ចប់។ កំពុងប្តូរទំព័រទៅកាន់ផ្ទាំងគ្រប់គ្រង...
+        </p>
+        <button
+            type="button"
+            (click)="goToHome()"
+            class="mt-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer">
+            ចូលទៅកាន់ទំព័រដើមឥឡូវនេះ
+        </button>
     </div>
 
     <!-- Error / Expired -->
@@ -31,3 +40,4 @@
         </a>
     </div>
 </div>
+
