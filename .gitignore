@@ -46,6 +46,7 @@ uploads/
 scratch*.js
 */scratch*.js
 list_users.js
+express_demo.js
 
 # AI Agents & IDE metadata
 .agents/
