@@ -74,6 +74,13 @@ export class UserHomeService {
         );
     }
 
+    deleteMeeting(id: string): Observable<{ status_code: number }> {
+        return this._http.delete<{ status_code: number }>(
+            `${this.baseUrl}/meetings/${id}`,
+            { withCredentials: true }
+        );
+    }
+
     // 4. Projects
     getActiveProjects(): Observable<{ status_code: number; data: any }> {
         return this._http.get<{ status_code: number; data: any }>(

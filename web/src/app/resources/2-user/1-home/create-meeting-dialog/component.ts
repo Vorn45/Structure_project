@@ -63,14 +63,6 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     // Telegram notification
     notifyTelegram = signal<boolean>(false);
 
-    availableMembers = [
-        { id: '1', name: 'សុខ សុភា', role: 'ប្រធានគម្រោង' },
-        { id: '2', name: 'រ័ត្ន វិចិត្រ', role: 'Frontend' },
-        { id: '3', name: 'កែវ សុវណ្ណ', role: 'Backend' },
-        { id: '4', name: 'ហេង ស្រីពៅ', role: 'UI/UX' },
-    ];
-    selectedMemberIds = signal<string[]>(['1', '2']);
-
     scheduledMeetings = signal<ScheduledMeeting[]>([]);
 
     constructor(
@@ -121,34 +113,17 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         });
     }
 
-    selectProject(project: any): void {
-        if (this.selectedProjectId === project.id) {
-            // Deselect
-            this.selectedProjectId = null;
-            this.selectedProjectName = '';
-        } else {
-            this.selectedProjectId = project.id;
-            this.selectedProjectName = project.name || project.kh_name || project.en_name || '';
-        }
+    onProjectChange(projectId: any): void {
+        const project = this.projects.find((p) => p.id === projectId);
+        this.selectedProjectName = project
+            ? project.name || project.kh_name || project.en_name || ''
+            : '';
     }
 
     generateNewRoomCode(): void {
         const rand = Math.floor(1000 + Math.random() * 9000);
         this.generatedRoomCode = `meet-wms-${rand}`;
         this.generatedRoomUrl = `https://meet.wms.gov.kh/room/${this.generatedRoomCode}`;
-    }
-
-    isMemberSelected(id: string): boolean {
-        return this.selectedMemberIds().includes(id);
-    }
-
-    toggleMember(id: string): void {
-        const current = this.selectedMemberIds();
-        if (current.includes(id)) {
-            this.selectedMemberIds.set(current.filter((m) => m !== id));
-        } else {
-            this.selectedMemberIds.set([...current, id]);
-        }
     }
 
     async copyLink(url: string): Promise<void> {
@@ -218,6 +193,13 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         this.activeTab.set('schedule');
 
         setTimeout(() => this.successMessage.set(''), 4000);
+    }
+
+    deleteMeeting(id: string): void {
+        this.scheduledMeetings.update((m) => m.filter((x) => x.id !== id));
+        this._homeService.deleteMeeting(id).subscribe({
+            error: () => console.error('Failed to delete meeting', id),
+        });
     }
 
     startInstantMeetingDirectly(): void {

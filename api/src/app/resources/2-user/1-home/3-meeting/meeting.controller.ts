@@ -1,5 +1,5 @@
 // ===========================================================================>> Core Library
-import { Body, Controller, Get, Post, Res, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Res, ValidationPipe } from '@nestjs/common';
 
 // ===========================================================================>> Third Party Library
 import express from 'express';
@@ -23,5 +23,13 @@ export class MeetingController {
         @Res({ passthrough: true }) res: express.Response,
     ) {
         return await this._service.createMeeting(res.locals.user, dto);
+    }
+
+    @Delete(':id')
+    async deleteMeeting(
+        @Param('id') id: string,
+        @Res({ passthrough: true }) res: express.Response,
+    ) {
+        return await this._service.deleteMeeting(res.locals.user, id);
     }
 }

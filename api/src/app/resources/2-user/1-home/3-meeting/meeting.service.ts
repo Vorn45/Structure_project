@@ -289,4 +289,14 @@ export class MeetingService implements OnModuleInit {
 
         await this._telegramService.sendMessage(message, TelegramForumTopic.MEETING);
     }
+
+    async deleteMeeting(_user: UserPayload, id: string) {
+        try {
+            await this._meetingRepo.delete(id);
+            return { status_code: 200, message: 'Meeting deleted successfully' };
+        } catch (err) {
+            console.error('Failed to delete meeting:', err);
+            return { status_code: 500, message: 'Failed to delete meeting' };
+        }
+    }
 }

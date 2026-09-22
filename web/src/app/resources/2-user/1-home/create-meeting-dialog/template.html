@@ -120,47 +120,16 @@
                     <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
                         គម្រោង (Project)
                     </label>
-
-                    <!-- Loading state -->
-                    <div *ngIf="projectsLoading()" class="flex items-center gap-2 py-3 text-slate-400 text-[14px]">
-                        <mat-icon svgIcon="mdi:loading" class="icon-size-4 animate-spin"></mat-icon>
-                        <span>កំពុងផ្ទុក...</span>
-                    </div>
-
-                    <!-- Empty state -->
-                    <div *ngIf="!projectsLoading() && projects.length === 0"
-                        class="py-3 text-slate-400 text-[14px] italic">
-                        មិនមានគម្រោង
-                    </div>
-
-                    <!-- Project grid -->
-                    <div *ngIf="!projectsLoading() && projects.length > 0" class="grid grid-cols-1 gap-2">
-                        <div
-                            *ngFor="let project of projects"
-                            (click)="selectProject(project)"
-                            class="p-3 rounded-xl border cursor-pointer transition-all flex items-center gap-3 select-none font-kantumruy"
-                            [ngClass]="selectedProjectId === project.id
-                                ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-900 dark:text-purple-200 ring-1 ring-purple-500'
-                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
-                        >
-                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                                [ngClass]="selectedProjectId === project.id
-                                    ? 'bg-purple-600 text-white'
-                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300'"
-                            >
-                                <mat-icon svgIcon="mdi:briefcase-outline" class="icon-size-4.5"></mat-icon>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-[15px] font-medium truncate">{{ project.name || project.kh_name || project.en_name }}</p>
-                                <p *ngIf="project.status" class="text-[12px] text-slate-400 truncate mt-0.5">{{ project.status }}</p>
-                            </div>
-                            <mat-icon
-                                [svgIcon]="selectedProjectId === project.id ? 'mdi:check-circle' : 'mdi:circle-outline'"
-                                class="icon-size-4 shrink-0"
-                                [ngClass]="selectedProjectId === project.id ? 'text-purple-600' : 'text-slate-300'"
-                            ></mat-icon>
-                        </div>
-                    </div>
+                    <select
+                        [(ngModel)]="selectedProjectId"
+                        (ngModelChange)="onProjectChange($event)"
+                        class="w-full px-3.5 py-2.5 text-[15px] font-kantumruy rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                    >
+                        <option [ngValue]="null">-- ជ្រើសរើសគម្រោង --</option>
+                        <option *ngFor="let project of projects" [ngValue]="project.id">
+                            {{ project.name || project.kh_name || project.en_name }}
+                        </option>
+                    </select>
                 </div>
 
                 <!-- Date & Time & Duration -->
@@ -230,34 +199,6 @@
                     </div>
                 </div>
 
-                <!-- Invite Members -->
-                <div>
-                    <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
-                        អញ្ជើញសមាជិក ({{ selectedMemberIds().length }} នាក់)
-                    </label>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div
-                            *ngFor="let member of availableMembers"
-                            (click)="toggleMember(member.id)"
-                            class="p-2.5 rounded-xl border cursor-pointer transition-all flex items-center gap-2.5 select-none font-kantumruy"
-                            [ngClass]="isMemberSelected(member.id)
-                                ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/40 text-purple-900 dark:text-purple-200 ring-1 ring-purple-500'
-                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 opacity-75 hover:opacity-100'"
-                        >
-                            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 flex items-center justify-center text-[12px] font-medium">
-                                {{ member.name.slice(0, 1) }}
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-[16px] font-normal truncate leading-tight">{{ member.name }}</p>
-                                <p class="text-[13px] text-slate-400 truncate mt-0.5">{{ member.role }}</p>
-                            </div>
-                            <mat-icon
-                                [svgIcon]="isMemberSelected(member.id) ? 'mdi:check-circle' : 'mdi:circle-outline'"
-                                class="icon-size-4 text-purple-600 shrink-0"
-                            ></mat-icon>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Agenda -->
                 <div>
@@ -365,13 +306,31 @@
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        (click)="joinScheduledMeeting(meeting)"
-                        class="px-3.5 py-1.5 rounded-lg text-[14px] font-medium font-kantumruy text-white bg-purple-600 hover:bg-purple-700 shrink-0 cursor-pointer"
-                    >
-                        ចូលរួម
-                    </button>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button
+                            type="button"
+                            (click)="copyLink(meeting.roomUrl)"
+                            matTooltip="ចម្លងតំណភ្ជាប់"
+                            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors cursor-pointer"
+                        >
+                            <mat-icon svgIcon="mdi:link-variant" class="icon-size-4"></mat-icon>
+                        </button>
+                        <button
+                            type="button"
+                            (click)="deleteMeeting(meeting.id)"
+                            matTooltip="លុប"
+                            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                        >
+                            <mat-icon svgIcon="mdi:delete-outline" class="icon-size-4"></mat-icon>
+                        </button>
+                        <button
+                            type="button"
+                            (click)="joinScheduledMeeting(meeting)"
+                            class="px-3.5 py-1.5 rounded-lg text-[14px] font-medium font-kantumruy text-white bg-purple-600 hover:bg-purple-700 cursor-pointer"
+                        >
+                            ចូលរួម
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
