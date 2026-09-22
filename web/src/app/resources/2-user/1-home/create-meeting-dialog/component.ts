@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserHomeService } from '../home.service';
+import { Router } from '@angular/router';
 
 
 export * from './create-meeting-dialog.types';
@@ -58,10 +59,11 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     projects: any[] = [];
     selectedProjectId: number | null = null;
     selectedProjectName: string = '';
+    selectedProjectMembers: any[] = [];
     projectsLoading = signal<boolean>(false);
 
-    // Telegram notification
-    notifyTelegram = signal<boolean>(false);
+    // Telegram notification - Default to true so members are notified
+    notifyTelegram = signal<boolean>(true);
 
     scheduledMeetings = signal<ScheduledMeeting[]>([]);
 
@@ -69,7 +71,15 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         public dialogRef: MatDialogRef<CreateMeetingDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: CreateMeetingDialogData,
         private readonly _homeService: UserHomeService,
+        private readonly _router: Router,
     ) {
+        if (this.data?.projectId) {
+            this.selectedProjectId = Number(this.data.projectId);
+            this.selectedProjectName = this.data.projectName || '';
+        }
+        if (this.data?.members) {
+            this.selectedProjectMembers = this.data.members;
+        }
         this.generateNewRoomCode();
     }
 
@@ -104,6 +114,15 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
                 } else {
                     this.projects = [];
                 }
+                if (this.selectedProjectId && !this.selectedProjectName) {
+                    const match = this.projects.find((p) => p.id === this.selectedProjectId);
+                    if (match) {
+                        this.selectedProjectName = match.name || match.kh_name || match.en_name || '';
+                        if (!this.selectedProjectMembers.length && match.members) {
+                            this.selectedProjectMembers = match.members;
+                        }
+                    }
+                }
                 this.projectsLoading.set(false);
             },
             error: () => {
@@ -118,12 +137,19 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         this.selectedProjectName = project
             ? project.name || project.kh_name || project.en_name || ''
             : '';
+        this.selectedProjectMembers = project?.members || (projectId === this.data?.projectId ? this.data?.members || [] : []);
     }
 
     generateNewRoomCode(): void {
-        const rand = Math.floor(1000 + Math.random() * 9000);
-        this.generatedRoomCode = `meet-wms-${rand}`;
-        this.generatedRoomUrl = `https://meet.wms.gov.kh/room/${this.generatedRoomCode}`;
+        const letters = 'abcdefghijklmnopqrstuvwxyz';
+        const randLetters = (n: number) =>
+            Array.from({ length: n }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
+        this.generatedRoomCode = `${randLetters(3)}-${randLetters(4)}-${randLetters(3)}`;
+        this.generatedRoomUrl = `https://meet.google.com/${this.generatedRoomCode}`;
+    }
+
+    openGoogleMeetNew(): void {
+        window.open('https://meet.google.com/new', '_blank');
     }
 
     async copyLink(url: string): Promise<void> {
@@ -148,23 +174,45 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             this.data?.user?.name ||
             'អ្នកគ្រប់គ្រង';
 
+        const membersList = (this.selectedProjectMembers && this.selectedProjectMembers.length > 0)
+            ? this.selectedProjectMembers
+            : (this.data?.members || []);
+        const participants = membersList.length > 0
+            ? membersList.map((m: any) => ({
+                id: m.id,
+                name: m.name || m.full_name || m.username || 'Member',
+                avatar: m.avatar || null,
+                role: m.role || 'Member'
+            }))
+            : [{ name: orgName, role: 'Organizer' }];
+
+        if (!participants.some((p: any) => p.name === orgName)) {
+            participants.unshift({ id: this.data?.user?.id || 1, name: orgName, avatar: null, role: 'Organizer' });
+        }
+
+        const meetUrl = (this.generatedRoomUrl && this.generatedRoomUrl.trim())
+            ? this.generatedRoomUrl.trim()
+            : `https://meet.google.com/${this.generatedRoomCode}`;
+
         const newMeeting: ScheduledMeeting = {
             id: 'm_' + Date.now(),
             title: this.formTitle.trim(),
-            type: 'wms',
+            type: 'google',
             date: this.formDate,
             time: this.formTime,
             duration: this.formDuration,
             roomCode: this.generatedRoomCode,
-            roomUrl: this.generatedRoomUrl,
+            roomUrl: meetUrl,
             organizer: orgName,
             status: 'upcoming',
-            participants: [{ name: orgName }],
+            participants,
             agenda: this.formAgenda.trim(),
         };
 
         const dto: any = {
             ...newMeeting,
+            room_code: this.generatedRoomCode,
+            room_url: meetUrl,
             project_id: this.selectedProjectId ?? undefined,
             project_name: this.selectedProjectName || undefined,
             notify_telegram: this.notifyTelegram(),
@@ -172,27 +220,29 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
 
         this._homeService.createMeeting(dto).subscribe({
             next: (res) => {
-                if (res?.data) {
-                    this.scheduledMeetings.update((m) => [res.data, ...m]);
-                } else {
-                    this.scheduledMeetings.update((m) => [newMeeting, ...m]);
-                }
+                const item = res?.data || newMeeting;
+                this.scheduledMeetings.update((m) => [item, ...m]);
+                this._finishAndNavigate(item);
             },
             error: () => {
                 this.scheduledMeetings.update((m) => [newMeeting, ...m]);
+                this._finishAndNavigate(newMeeting);
             },
         });
+    }
 
-        this.successMessage.set(`បានបង្កើតអង្គប្រជុំ «${newMeeting.title}» ដោយជោគជ័យ!`);
-        this.formTitle = '';
-        this.formAgenda = '';
-        this.selectedProjectId = null;
-        this.selectedProjectName = '';
-        this.notifyTelegram.set(false);
-        this.generateNewRoomCode();
-        this.activeTab.set('schedule');
+    private _finishAndNavigate(meeting: ScheduledMeeting): void {
+        this.successMessage.set(`បានបង្កើតអង្គប្រជុំ «${meeting.title}» ដោយជោគជ័យ!`);
+        const pId = this.selectedProjectId || this.data?.projectId;
 
-        setTimeout(() => this.successMessage.set(''), 4000);
+        setTimeout(() => {
+            this.dialogRef.close({ created: true, meeting, projectId: pId });
+            if (pId && !this._router.url.includes('/projects')) {
+                this._router.navigate(['/member/projects'], {
+                    queryParams: { projectId: pId, tab: 'meetings' }
+                });
+            }
+        }, 800);
     }
 
     deleteMeeting(id: string): void {
@@ -211,8 +261,11 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     }
 
     joinScheduledMeeting(meeting: ScheduledMeeting): void {
+        if (meeting.roomUrl && (meeting.roomUrl.includes('meet.google.com') || meeting.roomUrl.startsWith('http'))) {
+            window.open(meeting.roomUrl, '_blank');
+            return;
+        }
         this.activeRoomCode.set(meeting.roomCode);
-        this.activeRoomUrl.set(meeting.roomUrl);
         this.inCall.set(true);
         this.startCallTimer();
     }

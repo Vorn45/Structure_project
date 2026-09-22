@@ -28,7 +28,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as echarts from 'echarts';
 import { UserService } from 'app/core/user/user.service';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
@@ -356,6 +356,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     constructor(
         private readonly _planService: UserPlanService,
         private readonly _router: Router,
+        private readonly _route: ActivatedRoute,
         private readonly _matDialog: MatDialog,
         private readonly _dialogConfigService: DialogConfigService,
         private readonly _userService: UserService,
@@ -1265,7 +1266,19 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                                 };
                             });
                             this.plans.set(items);
-                            if (this.selectedProject()) {
+                            const qpProjectId = this._route.snapshot.queryParams['projectId'];
+                            const qpTab = this._route.snapshot.queryParams['tab'];
+                            if (qpProjectId) {
+                                const qpSel = items.find(
+                                    (p) => String(p.id) === String(qpProjectId) || p.code === String(qpProjectId)
+                                );
+                                if (qpSel) {
+                                    this.selectedProject.set(qpSel);
+                                    if (qpTab) {
+                                        this.projectNavTab.set(qpTab as any);
+                                    }
+                                }
+                            } else if (this.selectedProject()) {
                                 const currentSel = this.selectedProject();
                                 const matchingSel = items.find(
                                     (p) => p.id === currentSel?.id || p.code === currentSel?.code
@@ -1972,12 +1985,33 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     }
 
     openCreateMeetingModal(): void {
+        const proj = this.selectedProject();
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             user: this._userService.getUser(),
+            projectId: proj?.id,
+            projectName: proj?.name,
+            members: proj?.members || [],
         });
         const dialogRef = this._matDialog.open(CreateMeetingDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
+            if (result?.meeting && proj) {
+                const meeting = result.meeting;
+                const formattedMeeting = {
+                    id: meeting.id || `m-${Date.now()}`,
+                    title: meeting.title,
+                    description: meeting.agenda || 'កិច្ចប្រជុំគម្រោង',
+                    date: meeting.date,
+                    time: meeting.time,
+                    platform: meeting.type === 'google' ? 'Google Meet' : (meeting.platform || 'Google Meet'),
+                    link: meeting.roomUrl || meeting.link,
+                    status: 'upcoming' as const,
+                    attendees: proj.members || [],
+                };
+                proj.meetings = [formattedMeeting, ...(proj.meetings || [])];
+                this.projectNavTab.set('meetings');
+                this.saveProjectChanges(proj);
+                this.loadPlans();
+            } else if (result) {
                 this.loadPlans();
             }
         });

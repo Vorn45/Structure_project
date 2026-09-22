@@ -2,6 +2,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import axios from 'axios';
+import { appConfig } from 'src/app.config';
 
 // ===========================================================================>> Custom Library
 import { UserPayload } from 'src/app/interface/jwt.interface';
@@ -200,15 +202,25 @@ export class MeetingService implements OnModuleInit {
 
     async createMeeting(user: UserPayload, dto: CreateMeetingDto) {
         const id = `meet-${Date.now().toString().slice(-4)}`;
-        const randomCode = Math.floor(1000 + Math.random() * 9000);
-        const roomCode = dto.type === 'google' ? `meet.google.com/${randomCode}` : `WMS-${randomCode}`;
-        const roomUrl = dto.type === 'google' ? `https://${roomCode}` : `https://meet.wms.digital/room/${roomCode}`;
+        
+        // Generate valid Google Meet style code and link
+        const letters = 'abcdefghijklmnopqrstuvwxyz';
+        const randLetters = (n: number) =>
+            Array.from({ length: n }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
+        const generatedMeetCode = `${randLetters(3)}-${randLetters(4)}-${randLetters(3)}`;
+
+        const roomCode = dto.room_code || dto.roomCode || generatedMeetCode;
+        let roomUrl = dto.room_url || dto.roomUrl || '';
+        if (!roomUrl) {
+            roomUrl = `https://meet.google.com/${roomCode}`;
+        }
+
         const organizer = user?.name_en || user?.name_kh || 'User';
 
         const entity = this._meetingRepo.create({
             id,
             title: dto.title,
-            type: dto.type || 'wms',
+            type: dto.type || 'google',
             date: dto.date,
             time: dto.time,
             duration: dto.duration || '៣០ នាទី',
@@ -241,7 +253,9 @@ export class MeetingService implements OnModuleInit {
         };
 
         if (dto.notify_telegram) {
-            this._sendMeetingTelegramNotification(resultItem, dto.project_name).catch(() => {});
+            this._sendMeetingTelegramNotification(resultItem, dto.project_name).catch((err) => {
+                console.error('Failed to send Telegram meeting notification:', err);
+            });
         }
 
         return {
@@ -255,39 +269,113 @@ export class MeetingService implements OnModuleInit {
         meeting: ScheduledMeetingItem,
         projectName?: string,
     ): Promise<void> {
-        const participantNames = meeting.participants
+        const escapeHtml = (text: string) =>
+            (text || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+        const participantNames = (meeting.participants || [])
             .map((p) => p.name)
+            .filter(Boolean)
             .join(', ');
 
-        const rows: Array<[string, string]> = [
-            ['DATE', meeting.date],
-            ['TIME', meeting.time],
-            ['DURATION', meeting.duration],
-            ['ORGANIZER', meeting.organizer],
-        ];
+        const botToken =
+            process.env.TELEGRAM_BOT_TOKEN ||
+            appConfig.AUTH?.TELEGRAM_BOT_TOKEN ||
+            appConfig.ORGANIZATION_LOG?.TELEGRAM_BOT_TOKEN ||
+            '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
 
+        // 1. NOTIFY MEMBERS OF THE PROJECT DIRECTLY VIA TELEGRAM
+        const participantIds: number[] = (meeting.participants || [])
+            .map((p: any) => Number(p.id))
+            .filter((id) => Number.isFinite(id) && id > 0);
+
+        if (participantIds.length > 0 && botToken) {
+            try {
+                const assignedUsers = await this._userRepo
+                    .createQueryBuilder('user')
+                    .where('user.id IN (:...ids)', { ids: participantIds })
+                    .andWhere('user.telegram_id IS NOT NULL')
+                    .andWhere("LENGTH(TRIM(user.telegram_id)) > 0")
+                    .select(['user.id', 'user.name_en', 'user.name_kh', 'user.telegram_id'])
+                    .getMany();
+
+                const replyMarkup = {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: 'ចូលរួមប្រជុំ (Google Meet) 📹',
+                                url: meeting.roomUrl,
+                            },
+                        ],
+                    ],
+                };
+
+                for (const member of assignedUsers) {
+                    if (!member.telegram_id) continue;
+                    const memberName = member.name_kh || member.name_en || 'សមាជិក';
+                    const personalMsg =
+`📅 <b>ការអញ្ជើញចូលរួមប្រជុំគម្រោង (Project Meeting Invitation)</b>
+
+ជំរាបសួរ <b>${escapeHtml(memberName)}</b>, អ្នកមានកិច្ចប្រជុំថ្មីសម្រាប់គម្រោង៖
+📌 <b>ប្រធានបទ:</b> ${escapeHtml(meeting.title)}
+${projectName ? `📂 <b>គម្រោង:</b> ${escapeHtml(projectName)}\n` : ''}
+🗓 <b>កាលបរិច្ឆេទ:</b> ${escapeHtml(meeting.date)}
+⏰ <b>ម៉ោង:</b> ${escapeHtml(meeting.time)} (${escapeHtml(meeting.duration)})
+👤 <b>អ្នករៀបចំ:</b> ${escapeHtml(meeting.organizer)}
+${meeting.agenda ? `📝 <b>របៀបវារៈ:</b> ${escapeHtml(meeting.agenda)}\n` : ''}
+🔗 <b>Google Meet:</b> <a href="${escapeHtml(meeting.roomUrl)}">${escapeHtml(meeting.roomUrl)}</a>
+
+សូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលរួមប្រជុំ។`;
+
+                    try {
+                        await axios.post(
+                            `https://api.telegram.org/bot${botToken}/sendMessage`,
+                            {
+                                chat_id: member.telegram_id,
+                                text: personalMsg,
+                                parse_mode: 'HTML',
+                                reply_markup: replyMarkup,
+                            },
+                            { timeout: 10000 },
+                        );
+                    } catch (err: any) {
+                        console.warn(`Failed to send direct meeting telegram to ${member.telegram_id}:`, err?.message || err);
+                    }
+                }
+            } catch (err: any) {
+                console.warn('Failed to query project users for meeting notification:', err?.message || err);
+            }
+        }
+
+        // 2. ALSO NOTIFY GROUP / FORUM CHANNEL
+        let groupMsg = `📅 <b>កិច្ចប្រជុំថ្មី (Meeting Scheduled)</b>\n\n`;
+        groupMsg += `• <b>ចំណងជើង:</b> ${escapeHtml(meeting.title)}\n`;
         if (projectName) {
-            rows.push(['PROJECT', projectName]);
+            groupMsg += `• <b>គម្រោង:</b> ${escapeHtml(projectName)}\n`;
         }
-
+        groupMsg += `• <b>កាលបរិច្ឆេទ:</b> ${escapeHtml(meeting.date)}\n`;
+        groupMsg += `• <b>ម៉ោង:</b> ${escapeHtml(meeting.time)} (${escapeHtml(meeting.duration)})\n`;
+        groupMsg += `• <b>អ្នករៀបចំ:</b> ${escapeHtml(meeting.organizer)}\n`;
         if (participantNames) {
-            rows.push(['MEMBERS', participantNames]);
+            groupMsg += `• <b>សមាជិកចូលរួម:</b> ${escapeHtml(participantNames)}\n`;
         }
-
         if (meeting.agenda) {
-            rows.push(['AGENDA', meeting.agenda]);
+            groupMsg += `• <b>របៀបវារៈ:</b> ${escapeHtml(meeting.agenda)}\n`;
         }
+        groupMsg += `• <b>តំណភ្ជាប់ Google Meet:</b> <a href="${escapeHtml(meeting.roomUrl)}">${escapeHtml(meeting.roomUrl)}</a>`;
 
-        rows.push(['ROOM URL', meeting.roomUrl]);
-
-        const maxLen = Math.max(...rows.map(([label]) => label.length));
-        const body = rows
-            .map(([label, value]) => `• ${label.padEnd(maxLen)}: ${value}`)
-            .join('\n');
-
-        const message = `📅 Meeting Scheduled\n${meeting.title}\n\n${body}`;
-
-        await this._telegramService.sendMessage(message, TelegramForumTopic.MEETING);
+        try {
+            await this._telegramService.sendMessage(groupMsg, TelegramForumTopic.MEETING);
+        } catch (topicErr) {
+            console.warn('Telegram topic send failed, sending to main chat:', topicErr?.message || topicErr);
+            try {
+                await this._telegramService.sendMessage(groupMsg);
+            } catch (fallbackErr) {
+                console.error('Telegram notification fallback also failed:', fallbackErr?.message || fallbackErr);
+            }
+        }
     }
 
     async deleteMeeting(_user: UserPayload, id: string) {

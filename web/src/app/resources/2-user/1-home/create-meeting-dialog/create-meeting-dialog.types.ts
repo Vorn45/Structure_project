@@ -1,6 +1,9 @@
 export interface CreateMeetingDialogData {
     user?: any;
     startDirectCall?: boolean;
+    projectId?: number | string;
+    projectName?: string;
+    members?: any[];
 }
 
 export interface ScheduledMeeting {

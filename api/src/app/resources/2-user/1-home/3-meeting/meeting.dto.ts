@@ -22,6 +22,22 @@ export class CreateMeetingDto {
     duration?: string;
 
     @IsOptional()
+    @IsString()
+    room_code?: string;
+
+    @IsOptional()
+    @IsString()
+    room_url?: string;
+
+    @IsOptional()
+    @IsString()
+    roomCode?: string;
+
+    @IsOptional()
+    @IsString()
+    roomUrl?: string;
+
+    @IsOptional()
     @IsArray()
     participants?: Array<{ name: string; avatar?: string | null; role?: string }>;
 
