@@ -15,11 +15,35 @@ import { ActivityItem, UserActivityService } from './activity.service';
 import { AddPlanDialogComponent } from './add-plan-dialog/component';
 import { CreateProjectDialogComponent } from './create-project-dialog/component';
 import { ProjectPlanOption, SelectProjectPlanDialogComponent } from './select-project-plan-dialog/component';
+import {
+    AgileTimeline,
+    DateRange,
+    addDays,
+    buildAgileTimeline,
+    formatFullDate,
+    isRangeOutsideWindow,
+    isoWeekNumber,
+    iterationColorClass,
+    rangeLeftPercent,
+    rangeWeekCount,
+    rangeWidthPercent,
+    resolveSegmentRange,
+    startOfIsoWeek,
+    toDateInputValue,
+    TimelineZoom,
+} from 'app/shared/agile-timeline';
 
 export interface AgilePlanSegment {
-    iteration: 1 | 2 | 3;
-    startWeek: number; // 14 to 40
-    durationWeeks: number; // duration
+    iteration: number;
+    /** Preferred positioning (YYYY-MM-DD). */
+    start_date?: string | null;
+    end_date?: string | null;
+    /** Legacy positioning, kept so plans stored before the date migration still render.
+     *  The API round-trips these in snake_case, so both spellings are accepted. */
+    startWeek?: number;
+    durationWeeks?: number;
+    start_week?: number;
+    duration_weeks?: number;
     label?: string;
 }
 
@@ -27,6 +51,10 @@ export interface AgilePlanTask {
     id: string;
     name: string;
     segments: AgilePlanSegment[];
+    /** Optional link to a project phase; drives progress + status on the bar. */
+    phase_id?: string | null;
+    /** Optional link to project tasks; drives progress + assignee avatars. */
+    task_ids?: string[] | null;
 }
 
 const PMS_TASKS: AgilePlanTask[] = [
@@ -105,37 +133,24 @@ export class UserActivityComponent implements OnInit {
         return map[pId] || map[cur.id] || [];
     });
 
-    // Timeline configuration (Weeks 14 to 40 = 27 weeks total)
-    readonly startWeek = 14;
-    readonly totalWeeks = 27;
-    readonly weeks = Array.from({ length: 27 }, (_, i) => 14 + i);
-
-    // Current Date & Week (Today)
+    // Gantt / Timeline: the window is derived from the visible tasks
+    // (see app/shared/agile-timeline.ts), never hardcoded to a fixed quarter.
     readonly currentYear = new Date().getFullYear();
-    readonly currentWeek = this.calculateCurrentWeek();
-
-    // Quarter definitions (Dynamic year: Q2 April-June, Q3 July-September)
-    readonly quarters = [
-        { name: `${new Date().getFullYear()} ត្រីមាសទី ២ (Q2)`, startWeek: 14, weeksCount: 13, bgClass: 'bg-[#2e1065] text-white' },
-        { name: `${new Date().getFullYear()} ត្រីមាសទី ៣ (Q3)`, startWeek: 27, weeksCount: 14, bgClass: 'bg-[#ea580c] text-white' },
+    readonly timelineZoom = signal<TimelineZoom>('week');
+    readonly zoomOptions: { value: TimelineZoom; label: string }[] = [
+        { value: 'week', label: '\u179f\u1794\u17d2\u178f\u17b6\u17a0\u17cd' },
+        { value: 'month', label: '\u1781\u17c2' },
+        { value: 'quarter', label: '\u178f\u17d2\u179a\u17b8\u1798\u17b6\u179f' },
     ];
 
-    calculateCurrentWeek(): number {
-        const now = new Date();
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
-        const pastDaysOfYear = (now.getTime() - startOfYear.getTime()) / 86400000;
-        return Math.min(40, Math.max(14, Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7)));
-    }
+    readonly timeline = computed<AgileTimeline>(() =>
+        buildAgileTimeline({ tasks: this.currentTasks() as any, zoom: this.timelineZoom() }),
+    );
 
-    // Month definitions in Khmer
-    readonly months = [
-        { name: 'មេសា', startWeek: 14, weeksCount: 5, bgClass: 'bg-[#f43f5e] text-white' },
-        { name: 'ឧសភា', startWeek: 19, weeksCount: 4, bgClass: 'bg-[#0d9488] text-white' },
-        { name: 'មិថុនា', startWeek: 23, weeksCount: 4, bgClass: 'bg-[#7c3aed] text-white' },
-        { name: 'កក្កដា', startWeek: 27, weeksCount: 5, bgClass: 'bg-[#eab308] text-slate-900' },
-        { name: 'សីហា', startWeek: 32, weeksCount: 4, bgClass: 'bg-[#0284c7] text-white' },
-        { name: 'កញ្ញា', startWeek: 36, weeksCount: 5, bgClass: 'bg-[#0369a1] text-white' },
-    ];
+    readonly weekGridBackground = computed(() => {
+        const count = this.timeline().totalWeeks;
+        return `repeating-linear-gradient(to right, rgba(148,163,184,0.28) 0 1px, transparent 1px calc(100% / ${count}))`;
+    });
 
     recentActivities = signal<ActivityItem[]>([]);
 
@@ -305,7 +320,7 @@ export class UserActivityComponent implements OnInit {
                 const starterTask: AgilePlanTask = {
                     id: `task-${Date.now()}`,
                     name: `ដំណាក់កាលទី ១ នៃ ${newProject.name}`,
-                    segments: [{ iteration: 1, startWeek: this.currentWeek, durationWeeks: 3, label: '3W' }],
+                    segments: [this.starterSegment()],
                 };
                 const projectWithCount: ProjectPlanOption = {
                     ...newProject,
@@ -355,7 +370,7 @@ export class UserActivityComponent implements OnInit {
                     const starterTask: AgilePlanTask = {
                         id: `task-${Date.now()}`,
                         name: `ដំណាក់កាលទី ១ នៃ ${selected.name}`,
-                        segments: [{ iteration: 1, startWeek: this.currentWeek, durationWeeks: 3, label: '3W' }],
+                        segments: [this.starterSegment()],
                     };
                     const projectWithCount: ProjectPlanOption = {
                         ...selected,
@@ -402,10 +417,8 @@ export class UserActivityComponent implements OnInit {
         const currentP = this.currentProject() || this.projectOptions()[0];
         const currentPId = currentP?.id ? String(currentP.id) : '1';
         const dialogConfig = this._dialogConfigService.getDialogConfig({
-            currentWeek: this.currentWeek,
-            startWeek: this.startWeek,
-            totalWeeks: this.totalWeeks,
-            weeks: this.weeks,
+            timelineStart: toDateInputValue(this.timeline().start),
+            timelineEnd: toDateInputValue(this.timeline().end),
             projects: this.projectOptions(),
             selectedProjectId: currentPId,
             selectedProjectName: currentP?.name || '',
@@ -502,24 +515,43 @@ export class UserActivityComponent implements OnInit {
         this._router.navigate(['/member/projects']);
     }
 
-    getSegmentLeftPercent(startWeek: number): number {
-        return Math.max(0, ((startWeek - this.startWeek) / this.totalWeeks) * 100);
+    /** A 3-week segment starting this week, used when seeding a new project. */
+    starterSegment(): AgilePlanSegment {
+        const start = startOfIsoWeek(new Date());
+        return {
+            iteration: 1,
+            start_date: toDateInputValue(start),
+            end_date: toDateInputValue(addDays(start, 20)),
+            startWeek: isoWeekNumber(start),
+            durationWeeks: 3,
+            label: '3W',
+        };
     }
 
-    getSegmentWidthPercent(durationWeeks: number): number {
-        return (durationWeeks / this.totalWeeks) * 100;
+    segmentRange(seg: AgilePlanSegment): DateRange | null {
+        return resolveSegmentRange(seg, this.timeline());
     }
 
-    getIterationColor(iteration: 1 | 2 | 3): string {
-        switch (iteration) {
-            case 1:
-                return 'bg-[#f59e0b]'; // Orange
-            case 2:
-                return 'bg-[#f43f5e]'; // Pink/Red
-            case 3:
-                return 'bg-[#581c87]'; // Deep Purple
-            default:
-                return 'bg-blue-600';
-        }
+    getSegmentLeftPercent(seg: AgilePlanSegment): number {
+        return rangeLeftPercent(this.timeline(), this.segmentRange(seg));
+    }
+
+    getSegmentWidthPercent(seg: AgilePlanSegment): number {
+        return rangeWidthPercent(this.timeline(), this.segmentRange(seg));
+    }
+
+    isSegmentVisible(seg: AgilePlanSegment): boolean {
+        return !isRangeOutsideWindow(this.timeline(), this.segmentRange(seg));
+    }
+
+    segmentTooltip(task: AgilePlanTask, seg: AgilePlanSegment): string {
+        const range = this.segmentRange(seg);
+        if (!range) return task.name;
+        const weeks = rangeWeekCount(range);
+        return `${task.name} - \u179c\u178a\u17d2\u178f\u1791\u17b8 ${seg.iteration} (${formatFullDate(range.start)} \u2192 ${formatFullDate(range.end)}, ${weeks}W)`;
+    }
+
+    getIterationColor(iteration: number): string {
+        return iterationColorClass(iteration);
     }
 }

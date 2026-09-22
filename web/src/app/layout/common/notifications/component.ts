@@ -620,6 +620,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         const type = (notification.type || '').toLowerCase();
         const title = (notification.title || notification.title_en || notification.title_kh || '').toLowerCase();
 
+        if (type.includes('planner') || type.includes('schedule')) {
+            return {
+                icon: 'mdi:calendar-clock',
+                bgClass: 'bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/40',
+                textClass: 'text-blue-600 dark:text-blue-400',
+            };
+        }
+
         if (type.includes('fail') || type.includes('error') || type.includes('bug') || title.includes('fail') || title.includes('បញ្ហា')) {
             return {
                 icon: 'mdi:alert-circle-outline',

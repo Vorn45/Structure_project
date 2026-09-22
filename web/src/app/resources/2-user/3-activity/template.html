@@ -39,6 +39,16 @@
 
             <!-- Right: Add Plan Action Button & 3-Dot More Button -->
             <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden h-10">
+                    <button *ngFor="let z of zoomOptions" type="button" (click)="timelineZoom.set(z.value)"
+                        class="px-3 h-full text-[13px] font-medium transition-colors cursor-pointer border-r last:border-r-0 border-slate-300 dark:border-slate-700"
+                        [ngClass]="timelineZoom() === z.value
+                            ? 'bg-[#1c2b6b] text-white'
+                            : 'bg-transparent text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'">
+                        {{ z.label }}
+                    </button>
+                </div>
+
                 <button type="button" (click)="openAddPlanDialog()"
                     [disabled]="projectOptions().length === 0"
                     [class.opacity-50]="projectOptions().length === 0"
@@ -122,7 +132,7 @@
             <!-- Gantt Chart Container (Horizontal Scrollable) -->
             <div
                 class="w-full overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-                <div class="min-w-[1300px] select-none">
+                <div class="select-none" [style.min-width.px]="timeline().minWidthPx">
 
                     <!-- Header Row 1: Left column spacer + Quarters -->
                     <div class="flex border-b border-white dark:border-slate-800 h-9">
@@ -134,7 +144,7 @@
 
                         <!-- Quarters -->
                         <div class="flex-1 flex">
-                            <div *ngFor="let q of quarters"
+                            <div *ngFor="let q of timeline().quarters"
                                 class="h-full flex items-center justify-center text-center font-medium tracking-wider text-[13px] border-r border-white dark:border-slate-800 uppercase"
                                 [ngClass]="q.bgClass" [style.flex]="q.weeksCount">
                                 {{ q.name }}
@@ -148,7 +158,7 @@
                             class="w-[340px] shrink-0 bg-[#d8b4e2] dark:bg-[#4a1d63] border-r border-white dark:border-slate-800">
                         </div>
                         <div class="flex-1 flex">
-                            <div *ngFor="let m of months"
+                            <div *ngFor="let m of timeline().months"
                                 class="h-full flex items-center justify-center text-center font-medium text-[12px] uppercase tracking-wider border-r border-white dark:border-slate-800"
                                 [ngClass]="m.bgClass" [style.flex]="m.weeksCount">
                                 {{ m.name }}
@@ -163,11 +173,12 @@
                             class="w-[340px] shrink-0 bg-[#eed9f5] dark:bg-[#381549] border-r border-white dark:border-slate-800">
                         </div>
                         <div class="flex-1 flex">
-                            <div *ngFor="let week of weeks"
+                            <div *ngFor="let week of timeline().weeks"
                                 class="flex-1 h-full flex items-center justify-center text-center font-medium text-[12px] border-r border-white dark:border-slate-700 relative"
-                                [ngClass]="week === currentWeek ? 'bg-red-500 text-white font-bold' : 'text-slate-800 dark:text-slate-200'">
-                                <span>{{ week }}</span>
-                                <span *ngIf="week === currentWeek"
+                                [ngClass]="week.isCurrent ? 'bg-red-500 text-white font-bold' : 'text-slate-800 dark:text-slate-200'"
+                                [matTooltip]="'សប្តាហ៍ទី ' + week.weekNumber + ' (' + week.rangeLabel + ')'">
+                                <span *ngIf="timeline().showWeekNumbers">{{ week.weekNumber }}</span>
+                                <span *ngIf="week.isCurrent"
                                     class="ml-1 text-[9px] bg-white text-red-600 px-1 py-0.2 rounded-xs font-black uppercase tracking-tighter">NOW</span>
                             </div>
                         </div>
@@ -190,26 +201,23 @@
                             </div>
 
                             <!-- Right Gantt Grid Columns (27 weeks) with Floating Iteration Bars -->
-                            <div class="flex-1 relative flex items-center bg-slate-100/70 dark:bg-slate-800/40">
-
-                                <!-- Background Week Columns Grid Lines -->
-                                <div class="absolute inset-0 flex pointer-events-none">
-                                    <div *ngFor="let week of weeks"
-                                        class="flex-1 border-r border-white dark:border-slate-800/80"></div>
-                                </div>
+                            <div class="flex-1 relative flex items-center bg-slate-100/70 dark:bg-slate-800/40"
+                                [style.background-image]="timeline().showWeekGrid ? weekGridBackground() : ''">
 
                                 <!-- Current Week "NOW" Indicator Vertical Line -->
-                                <div class="absolute top-0 bottom-0 pointer-events-none z-20 border-l-2 border-red-500/80"
-                                    [style.left.%]="getSegmentLeftPercent(currentWeek)"></div>
+                                <div *ngIf="timeline().nowPercent !== null"
+                                    class="absolute top-0 bottom-0 pointer-events-none z-20 border-l-2 border-red-500/80"
+                                    [style.left.%]="timeline().nowPercent"></div>
 
                                 <!-- Timeline Segment Bars -->
                                 <div class="w-full h-full relative flex items-center px-0.5">
                                     <ng-container *ngFor="let seg of task.segments">
-                                        <div class="absolute h-7 rounded-[3px] flex items-center justify-center font-medium text-[12px] shadow-2xs transition-transform hover:scale-y-110 cursor-pointer overflow-hidden z-10"
+                                        <div *ngIf="isSegmentVisible(seg)"
+                                            class="absolute h-7 rounded-[3px] flex items-center justify-center font-medium text-[12px] shadow-2xs transition-transform hover:scale-y-110 cursor-pointer overflow-hidden z-10"
                                             [ngClass]="getIterationColor(seg.iteration)"
-                                            [style.left.%]="getSegmentLeftPercent(seg.startWeek)"
-                                            [style.width.%]="getSegmentWidthPercent(seg.durationWeeks)"
-                                            [matTooltip]="task.name + ' - វដ្តទី ' + seg.iteration + ' (សប្តាហ៍ទី ' + seg.startWeek + ', រយៈពេល ' + seg.durationWeeks + 'W)'">
+                                            [style.left.%]="getSegmentLeftPercent(seg)"
+                                            [style.width.%]="getSegmentWidthPercent(seg)"
+                                            [matTooltip]="segmentTooltip(task, seg)">
                                             <span *ngIf="seg.label"
                                                 class="truncate px-1 tracking-tight text-white drop-shadow-xs font-semibold">
                                                 {{ seg.label }}

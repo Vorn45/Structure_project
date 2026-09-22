@@ -1,9 +1,16 @@
 import { TaskMember } from 'app/resources/2-user/2-task/models/task.types';
 
 export interface AgilePlanSegment {
-    iteration: 1 | 2 | 3;
-    startWeek: number; // 14 to 40
-    durationWeeks: number;
+    iteration: number;
+    /** Preferred positioning (YYYY-MM-DD). */
+    start_date?: string | null;
+    end_date?: string | null;
+    /** Legacy positioning, kept so plans stored before the date migration still render.
+     *  The API round-trips these in snake_case, so both spellings are accepted. */
+    startWeek?: number;
+    durationWeeks?: number;
+    start_week?: number;
+    duration_weeks?: number;
     label?: string;
 }
 
@@ -11,6 +18,10 @@ export interface AgilePlanTask {
     id: string;
     name: string;
     segments: AgilePlanSegment[];
+    /** Optional link to a project phase; drives progress + status on the bar. */
+    phase_id?: string | null;
+    /** Optional link to project tasks; drives progress + assignee avatars. */
+    task_ids?: string[] | null;
 }
 
 export interface TaskLink {

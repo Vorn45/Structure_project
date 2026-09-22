@@ -282,13 +282,16 @@
                                     <div class="rounded-full overflow-hidden shrink-0 shadow-2xs flex items-center justify-center relative"
                                         style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; max-width: 38px !important; max-height: 38px !important; border-radius: 9999px !important; overflow: hidden !important;"
                                         [class]="member.avatar ? 'bg-slate-100 dark:bg-slate-800' : member.bg">
-                                        <img *ngIf="member.avatar" 
-                                            [src]="member.avatar" 
-                                            [alt]="member.name" 
-                                            width="38" 
-                                            height="38"
-                                            style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; max-width: 38px !important; max-height: 38px !important; object-fit: cover !important; border-radius: 9999px !important; display: block !important;" />
-                                        <span *ngIf="!member.avatar" class="text-[12.5px] font-bold leading-none select-none">{{ member.initials }}</span>
+                                        @if (member.avatar) {
+                                            <img
+                                                [src]="member.avatar"
+                                                [alt]="member.name"
+                                                width="38"
+                                                height="38"
+                                                style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; max-width: 38px !important; max-height: 38px !important; object-fit: cover !important; border-radius: 9999px !important; display: block !important;" />
+                                        } @else {
+                                            <span class="text-[12.5px] font-bold leading-none select-none">{{ member.initials }}</span>
+                                        }
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <div class="text-[14px] font-semibold truncate leading-tight text-slate-900 dark:text-slate-100">
@@ -306,7 +309,23 @@
                             </div>
                         }
 
-                        @if (filteredMembers().length === 0) {
+                        @if (filteredMembers().length === 0 && availableMembers().length === 0) {
+                            <div class="sm:col-span-2 p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-[13.5px] text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2">
+                                <span>
+                                    {{ membersError() ? 'មិនអាចទាញយកបញ្ជីសមាជិកបានទេ' : 'មិនមានសមាជិកសម្រាប់ជ្រើសរើសទេ' }}
+                                </span>
+                                @if (membersError()) {
+                                    <button
+                                        type="button"
+                                        (click)="loadMembers()"
+                                        class="px-3 py-1.5 rounded-lg text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 transition-all cursor-pointer shrink-0">
+                                        ព្យាយាមម្តងទៀត
+                                    </button>
+                                }
+                            </div>
+                        }
+
+                        @if (filteredMembers().length === 0 && availableMembers().length > 0) {
                             <div class="col-span-1 sm:col-span-2 p-4 text-center text-sm text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                                 រកមិនឃើញសមាជិកឈ្មោះ "{{ customMemberName() }}" ទេ។ ចុចប៊ូតុង "បន្ថែម" ដើម្បីបញ្ចូលជាសមាជិកថ្មី។
                             </div>

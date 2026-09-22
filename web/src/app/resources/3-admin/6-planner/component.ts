@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
@@ -10,6 +11,38 @@ import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { CreateScheduleDialogComponent } from './create-schedule-dialog/component';
 import { ScheduleDetailDialogComponent } from './schedule-detail-dialog/component';
 import { PlannerService, BackendPlannerSchedule } from './planner.service';
+
+export type PlannerColorTheme = 'peach' | 'lavender' | 'pink' | 'mint';
+
+const PLANNER_THEMES: PlannerColorTheme[] = ['peach', 'lavender', 'pink', 'mint'];
+
+/**
+ * The grid can only paint the four pastel themes above. Older records — and the
+ * palette names the create dialog used to send ('indigo', 'coral', …) — are
+ * folded into the nearest supported theme instead of rendering as `undefined`.
+ */
+const PLANNER_THEME_ALIASES: Record<string, PlannerColorTheme> = {
+    indigo: 'lavender',
+    purple: 'lavender',
+    violet: 'lavender',
+    blue: 'lavender',
+    coral: 'pink',
+    rose: 'pink',
+    red: 'pink',
+    lime: 'mint',
+    green: 'mint',
+    emerald: 'mint',
+    cyan: 'mint',
+    teal: 'mint',
+    amber: 'peach',
+    orange: 'peach',
+};
+
+export function normalizeColorTheme(theme?: string | null): PlannerColorTheme {
+    const raw = (theme || '').trim().toLowerCase();
+    if ((PLANNER_THEMES as string[]).includes(raw)) return raw as PlannerColorTheme;
+    return PLANNER_THEME_ALIASES[raw] || 'peach';
+}
 
 export interface PlannerScheduleEvent {
     id: string;
@@ -27,11 +60,13 @@ export interface PlannerScheduleEvent {
     height: number;
     category: 'work' | 'myself' | 'breaks' | 'meeting' | string;
     type: 'meeting' | 'review' | 'online' | 'recess' | 'coffee' | 'other' | string;
-    colorTheme: 'peach' | 'lavender' | 'pink' | 'mint';
-    members: Array<{ name: string; avatar?: string; initials: string; bg: string }>;
+    colorTheme: PlannerColorTheme;
+    members: Array<{ id?: string | number; name: string; role?: string; avatar?: string; initials: string; bg: string }>;
     extraCount: number;
     note?: string;
     planName?: string;
+    /** Whether the signed-in user may edit or delete this entry (creator or admin). */
+    canModify?: boolean;
 }
 
 export interface DayColumn {
@@ -41,6 +76,7 @@ export interface DayColumn {
     subTime: string;
     fullDate: Date;
     isCurrent: boolean;
+    isToday: boolean;
 }
 
 @Component({
@@ -50,6 +86,7 @@ export interface DayColumn {
         CommonModule,
         FormsModule,
         MatIconModule,
+        MatMenuModule,
         MatTooltipModule,
         MatDialogModule,
     ],
@@ -67,7 +104,12 @@ export class PlannerComponent implements OnInit {
 
     // Current Active Date State (Defaults to current date / today)
     currentBaseDate = signal<Date>(this.getInitialMonday());
-    selectedMiniCalendarDay = signal<number>(new Date().getDate());
+    /**
+     * The selected day as a full ISO date. It used to be only the day-of-month,
+     * which resolved against whatever month the week strip happened to show —
+     * selecting a day from an adjacent month landed on the wrong date.
+     */
+    selectedDateIso = signal<string>(this.formatDateToIso(new Date()));
     activeView = signal<'day' | 'week' | 'month'>('week');
 
     private getInitialMonday(): Date {
@@ -97,19 +139,21 @@ export class PlannerComponent implements OnInit {
         const khmerDays = ['ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍', 'អាទិត្យ'];
         const englishDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const today = new Date();
-        const selectedDay = this.selectedMiniCalendarDay();
+        const selectedIso = this.formatDateToIso(this.selectedDayDate);
 
         const cols: DayColumn[] = [];
         for (let i = 0; i < 7; i++) {
             const d = new Date(base);
             d.setDate(base.getDate() + i);
             const isToday = d.toDateString() === today.toDateString();
-            const isSelected = d.getDate() === selectedDay && d.getMonth() === this.currentBaseDate().getMonth();
+            // Compare the full date, not just the day number — a week that straddles
+            // two months (or years) used to light up the wrong column.
+            const isSelected = this.formatDateToIso(d) === selectedIso;
             const isCurrent = isToday || isSelected;
-            
+
             // Calculate total scheduled time for this day column
             const dayEvents = this.filteredEvents ? this.filteredEvents().filter(e => this.isEventInDay(e, i)) : [];
-            let totalHoursStr = '00:00:00';
+            let totalHoursStr = '';
             if (dayEvents.length > 0) {
                 const totalMinutes = dayEvents.reduce((acc, ev) => {
                     const { startMinutes, endMinutes } = this.extractTimeRange(ev.time, ev.startTime, ev.endTime);
@@ -128,6 +172,7 @@ export class PlannerComponent implements OnInit {
                 subTime: isToday ? 'ថ្ងៃនេះ' : totalHoursStr,
                 fullDate: d,
                 isCurrent: isCurrent,
+                isToday: isToday,
             });
         }
         return cols;
@@ -135,11 +180,13 @@ export class PlannerComponent implements OnInit {
 
     // Selected Day Date & Events for Day View
     get selectedDayDate(): Date {
-        const base = this.currentBaseDate();
-        const year = base.getFullYear();
-        const month = base.getMonth();
-        const day = this.selectedMiniCalendarDay();
-        return new Date(year, month, day);
+        return this.parseIsoDate(this.selectedDateIso());
+    }
+
+    parseIsoDate(iso: string): Date {
+        const parts = (iso || '').split('-');
+        if (parts.length < 3) return new Date();
+        return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
     }
 
     get headerTitle(): string {
@@ -150,31 +197,20 @@ export class PlannerComponent implements OnInit {
     }
 
     get selectedDayEvents(): PlannerScheduleEvent[] {
-        const targetIso = this.formatDateToIso(this.selectedDayDate);
-        return this.filteredEvents().filter(ev => {
-            const sDate = (ev.startDate || ev.date || '').split('T')[0];
-            const eDate = (ev.endDate || sDate || '').split('T')[0];
-            if (sDate) {
-                return targetIso >= sDate && targetIso <= (eDate || sDate);
-            }
-            const dayOfWeek = this.selectedDayDate.getDay();
-            const colIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-            const sIdx = ev.startDayIndex !== undefined ? ev.startDayIndex : ev.dayIndex;
-            const eIdx = ev.endDayIndex !== undefined ? ev.endDayIndex : sIdx;
-            return colIndex >= (sIdx ?? 0) && colIndex <= (eIdx ?? 0);
-        });
+        const target = this.selectedDayDate;
+        return this.filteredEvents().filter((ev) => this.isEventOnDate(ev, target));
     }
 
     // Month Label
     get currentMonthLabel(): string {
-        const d = this.currentBaseDate();
+        const d = this.selectedDayDate;
         const khmerMonths = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
         return `${khmerMonths[d.getMonth()]} ${d.getFullYear()}`;
     }
 
     // Mini Calendar Days
     get miniCalendarGrid(): Array<{ empty: boolean; dayNum?: number; isSelected?: boolean; isToday?: boolean; fullDate?: Date }> {
-        const d = this.currentBaseDate();
+        const d = this.selectedDayDate;
         const year = d.getFullYear();
         const month = d.getMonth();
         const firstDay = new Date(year, month, 1);
@@ -190,7 +226,7 @@ export class PlannerComponent implements OnInit {
 
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-            const isSelected = day === this.selectedMiniCalendarDay();
+            const isSelected = this.formatDateToIso(new Date(year, month, day)) === this.selectedDateIso();
             grid.push({
                 empty: false,
                 dayNum: day,
@@ -213,7 +249,7 @@ export class PlannerComponent implements OnInit {
         dateIso: string;
         events: PlannerScheduleEvent[];
     }>> {
-        const base = this.currentBaseDate();
+        const base = this.selectedDayDate;
         const year = base.getFullYear();
         const month = base.getMonth();
         const firstDayOfMonth = new Date(year, month, 1);
@@ -245,14 +281,8 @@ export class PlannerComponent implements OnInit {
                 const isToday = dateIso === todayStr;
                 const isSunday = d === 0;
 
-                const dayEvents = filtered.filter(ev => {
-                    const sDate = (ev.startDate || ev.date || '').split('T')[0];
-                    const eDate = (ev.endDate || sDate || '').split('T')[0];
-                    if (sDate) {
-                        return dateIso >= sDate && dateIso <= (eDate || sDate);
-                    }
-                    return false;
-                });
+                const cellDate = new Date(currentDay);
+                const dayEvents = filtered.filter((ev) => this.isEventOnDate(ev, cellDate));
 
                 weekDays.push({
                     date: new Date(currentDay),
@@ -276,28 +306,77 @@ export class PlannerComponent implements OnInit {
         return weeks;
     }
 
-    // Time Slots (from 08:00 AM to 06:00 PM - matching calendar grid)
-    timeSlots = [
-        '08:00 ព្រឹក',
-        '09:00 ព្រឹក',
-        '10:00 ព្រឹក',
-        '11:00 ព្រឹក',
-        '12:00 ថ្ងៃត្រង់',
-        '01:00 រសៀល',
-        '02:00 រសៀល',
-        '03:00 រសៀល',
-        '04:00 រសៀល',
-        '05:00 រសៀល',
-        '06:00 ល្ងាច'
-    ];
-
-    readonly GRID_START_MINUTES = 8 * 60; // 08:00 AM (480 mins)
+    // Default visible window: 08:00 → 18:00. The grid grows beyond it when a
+    // schedule falls outside, instead of squashing that event onto the edge row.
+    readonly DEFAULT_GRID_START_HOUR = 8;
+    readonly DEFAULT_GRID_END_HOUR = 18;
     readonly HOUR_ROW_HEIGHT = 60; // 60px per hour
+
+    get gridRange(): { startHour: number; endHour: number } {
+        let startHour = this.DEFAULT_GRID_START_HOUR;
+        let endHour = this.DEFAULT_GRID_END_HOUR;
+
+        for (const ev of this.filteredEvents()) {
+            const { startMinutes, endMinutes } = this.extractTimeRange(ev.time, ev.startTime, ev.endTime);
+            startHour = Math.min(startHour, Math.floor(startMinutes / 60));
+            endHour = Math.max(endHour, Math.ceil(endMinutes / 60));
+        }
+
+        return {
+            startHour: Math.max(0, Math.min(startHour, this.DEFAULT_GRID_START_HOUR)),
+            endHour: Math.min(24, Math.max(endHour, this.DEFAULT_GRID_END_HOUR)),
+        };
+    }
+
+    get GRID_START_MINUTES(): number {
+        return this.gridRange.startHour * 60;
+    }
+
+    get GRID_END_MINUTES(): number {
+        return this.gridRange.endHour * 60;
+    }
+
+    get timeSlots(): string[] {
+        const { startHour, endHour } = this.gridRange;
+        const slots: string[] = [];
+        for (let h = startHour; h <= endHour; h++) {
+            slots.push(this.formatKhmerHour(h));
+        }
+        return slots;
+    }
+
+    formatKhmerHour(hour: number): string {
+        const h = ((hour % 24) + 24) % 24;
+        let period: string;
+        let display: number;
+
+        if (h === 0) {
+            period = 'យប់';
+            display = 12;
+        } else if (h < 12) {
+            period = 'ព្រឹក';
+            display = h;
+        } else if (h === 12) {
+            period = 'ថ្ងៃត្រង់';
+            display = 12;
+        } else if (h < 17) {
+            period = 'រសៀល';
+            display = h - 12;
+        } else if (h < 19) {
+            period = 'ល្ងាច';
+            display = h - 12;
+        } else {
+            period = 'យប់';
+            display = h - 12;
+        }
+
+        return `${String(display).padStart(2, '0')}:00 ${period}`;
+    }
 
     get currentTimeTop(): number | null {
         const now = new Date();
         const mins = now.getHours() * 60 + now.getMinutes();
-        if (mins < this.GRID_START_MINUTES || mins > 18 * 60) return null;
+        if (mins < this.GRID_START_MINUTES || mins > this.GRID_END_MINUTES) return null;
         return ((mins - this.GRID_START_MINUTES) / 60) * this.HOUR_ROW_HEIGHT;
     }
 
@@ -358,7 +437,7 @@ export class PlannerComponent implements OnInit {
     // Helper to calculate top position from time string (exact px grid alignment)
     calculateTopPosition(timeStr?: string, startTimeStr?: string, category?: string): number {
         const { startMinutes } = this.extractTimeRange(timeStr, startTimeStr);
-        const clampedStart = Math.max(this.GRID_START_MINUTES, Math.min(18 * 60, startMinutes));
+        const clampedStart = Math.max(this.GRID_START_MINUTES, Math.min(this.GRID_END_MINUTES, startMinutes));
         const top = ((clampedStart - this.GRID_START_MINUTES) / 60) * this.HOUR_ROW_HEIGHT;
         return Math.round(top);
     }
@@ -368,6 +447,15 @@ export class PlannerComponent implements OnInit {
         const diffMins = Math.max(30, endMinutes - startMinutes);
         const calcHeight = (diffMins / 60) * this.HOUR_ROW_HEIGHT;
         return Math.max(48, Math.round(calcHeight));
+    }
+
+    /** Live position of an event card inside the week grid. */
+    eventTop(ev: PlannerScheduleEvent): number {
+        return this.calculateTopPosition(ev.time, ev.startTime);
+    }
+
+    eventHeight(ev: PlannerScheduleEvent): number {
+        return this.calculateHeight(ev.time, ev.startTime, ev.endTime);
     }
 
     private getMondayIso(d: Date): string {
@@ -403,30 +491,55 @@ export class PlannerComponent implements OnInit {
         return `${dayName} ទី ${dayNum} ${monthName} ${yearNum}`;
     }
 
-    isEventInDay(ev: PlannerScheduleEvent, colIndex: number): boolean {
-        const base = new Date(this.currentBaseDate());
-        const colDate = new Date(base);
-        colDate.setDate(base.getDate() + colIndex);
-        const colDateIso = this.formatDateToIso(colDate);
+    /** Does this event fall on the given calendar date? Single source of truth
+     *  for the week, month and day views, which used to disagree. */
+    isEventOnDate(ev: PlannerScheduleEvent, date: Date): boolean {
+        const targetIso = this.formatDateToIso(date);
 
-        // 1. If event has explicit ISO dates (startDate / endDate / date)
-        const sDate = ev.startDate || ev.date;
-        const eDate = ev.endDate || sDate;
-
+        // 1. Event has explicit ISO dates (startDate / endDate / date)
+        const sDate = (ev.startDate || ev.date || '').split('T')[0];
         if (sDate) {
-            const actualStart = sDate.split('T')[0];
-            const actualEnd = eDate ? eDate.split('T')[0] : actualStart;
-            return colDateIso >= actualStart && colDateIso <= actualEnd;
+            const eDate = (ev.endDate || '').split('T')[0] || sDate;
+            return targetIso >= sDate && targetIso <= eDate;
         }
 
-        // 2. For legacy items without dates, match dayIndex
-        const sIdx = ev.startDayIndex !== undefined ? ev.startDayIndex : ev.dayIndex;
-        const eIdx = ev.endDayIndex !== undefined ? ev.endDayIndex : sIdx;
+        // 2. Nothing to place it on. Dateless records are resolved to a real date
+        //    when they are loaded, so this only guards against malformed data —
+        //    it must not fall back to a weekday, which would repeat the event on
+        //    every matching day of every month.
+        return false;
+    }
 
-        const minIdx = Math.min(sIdx !== undefined ? sIdx : 0, eIdx !== undefined ? eIdx : 0);
-        const maxIdx = Math.max(sIdx !== undefined ? sIdx : 0, eIdx !== undefined ? eIdx : 0);
+    /**
+     * Legacy records carry only a dayIndex and no date. Anchor them to the week
+     * they were created in so each one lands on exactly one day.
+     */
+    private resolveEventDates(s: BackendPlannerSchedule): { startDate: string; endDate: string } {
+        const existingStart = (s.start_date || s.date || '').split('T')[0];
+        if (existingStart) {
+            const existingEnd = (s.end_date || '').split('T')[0] || existingStart;
+            return { startDate: existingStart, endDate: existingEnd };
+        }
 
-        return colIndex >= minIdx && colIndex <= maxIdx;
+        const anchor = s.created_at ? new Date(s.created_at) : new Date();
+        const base = isNaN(anchor.getTime()) ? new Date() : anchor;
+        const monday = this.getMondayDate(base);
+
+        const startIdx = Number(s.start_day_index ?? s.day_index ?? 0) || 0;
+        const endIdx = Number(s.end_day_index ?? startIdx) || startIdx;
+
+        const start = new Date(monday);
+        start.setDate(monday.getDate() + Math.max(0, Math.min(6, startIdx)));
+        const end = new Date(monday);
+        end.setDate(monday.getDate() + Math.max(0, Math.min(6, Math.max(startIdx, endIdx))));
+
+        return { startDate: this.formatDateToIso(start), endDate: this.formatDateToIso(end) };
+    }
+
+    isEventInDay(ev: PlannerScheduleEvent, colIndex: number): boolean {
+        const colDate = new Date(this.currentBaseDate());
+        colDate.setDate(colDate.getDate() + colIndex);
+        return this.isEventOnDate(ev, colDate);
     }
 
     // Dynamic events signal loaded from Backend API
@@ -483,7 +596,7 @@ export class PlannerComponent implements OnInit {
 
     loadSchedules(): void {
         this.isLoading.set(true);
-        this._plannerService.getSchedules({ admin: 'true' }).subscribe({
+        this._plannerService.getSchedules().subscribe({
             next: (res) => {
                 this.isLoading.set(false);
                 if (res?.data?.results) {
@@ -498,13 +611,15 @@ export class PlannerComponent implements OnInit {
                         return t;
                     };
 
-                    const mapped: PlannerScheduleEvent[] = res.data.results.map((s) => ({
+                    const mapped: PlannerScheduleEvent[] = res.data.results.map((s) => {
+                        const { startDate, endDate } = this.resolveEventDates(s);
+                        return {
                         id: s.id,
                         title: s.title,
                         time: formatCleanTime(s.time),
-                        date: s.date || s.start_date,
-                        startDate: s.start_date || s.date,
-                        endDate: s.end_date || s.date || s.start_date,
+                        date: startDate,
+                        startDate,
+                        endDate,
                         dayIndex: Number(s.day_index !== undefined ? s.day_index : (s.start_day_index !== undefined ? s.start_day_index : 0)),
                         startDayIndex: s.start_day_index,
                         endDayIndex: s.end_day_index,
@@ -514,7 +629,7 @@ export class PlannerComponent implements OnInit {
                         height: this.calculateHeight(s.time, s.start_time, s.end_time, s.category),
                         category: s.category,
                         type: s.type,
-                        colorTheme: (s.color_theme as any) || 'peach',
+                        colorTheme: normalizeColorTheme(s.color_theme),
                         members: (s.members || []).map((m) => ({
                             id: m.id,
                             name: m.name,
@@ -526,7 +641,9 @@ export class PlannerComponent implements OnInit {
                         extraCount: s.extra_count !== undefined ? s.extra_count : Math.max(0, (s.members?.length || 0) - 2),
                         note: s.note,
                         planName: s.plan_name,
-                    }));
+                        canModify: s.can_modify !== false,
+                        };
+                    });
                     this.events.set(mapped);
                 }
             },
@@ -545,6 +662,34 @@ export class PlannerComponent implements OnInit {
         }
     }
 
+    /** Sources offered by the calendar picker in the sidebar. */
+    readonly calendarSources: Array<{
+        value: 'all' | 'work' | 'myself' | 'breaks';
+        label: string;
+        sub: string;
+        icon: string;
+    }> = [
+        { value: 'all', label: 'ប្រតិទិនទាំងអស់', sub: 'ផ្ទាល់ខ្លួន, ក្រុមការងារ', icon: 'mdi:calendar-month' },
+        { value: 'work', label: 'កាលវិភាគការងារ', sub: 'ក្រុមការងារ', icon: 'mdi:briefcase-outline' },
+        { value: 'myself', label: 'ផ្ទាល់ខ្លួន', sub: 'កាលវិភាគរបស់ខ្ញុំ', icon: 'mdi:account-outline' },
+        { value: 'breaks', label: 'ការសម្រាក', sub: 'ពេលសម្រាក, កាហ្វេ', icon: 'mdi:coffee-outline' },
+    ];
+
+    get activeCalendarSource() {
+        return this.calendarSources.find((c) => c.value === this.selectedCategory()) || this.calendarSources[0];
+    }
+
+    getCalendarSourceCount(value: 'all' | 'work' | 'myself' | 'breaks'): number {
+        const counts = this.categoryCounts();
+        if (value === 'all') return counts.work + counts.myself + counts.breaks;
+        return counts[value];
+    }
+
+    /** Picks a source outright — unlike setCategoryFilter, which toggles. */
+    selectCalendarSource(cat: 'all' | 'work' | 'myself' | 'breaks'): void {
+        this.selectedCategory.set(cat);
+    }
+
     setCategoryFilter(cat: 'all' | 'work' | 'myself' | 'breaks'): void {
         if (cat === 'all') {
             this.selectedCategory.set('all');
@@ -560,7 +705,7 @@ export class PlannerComponent implements OnInit {
     // Navigation methods
     goToToday(): void {
         const today = new Date();
-        this.selectedMiniCalendarDay.set(today.getDate());
+        this.selectedDateIso.set(this.formatDateToIso(today));
         const dayOfWeek = today.getDay();
         const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
         const mondayDate = new Date(today);
@@ -573,9 +718,7 @@ export class PlannerComponent implements OnInit {
         if (this.activeView() === 'day') {
             const d = new Date(this.selectedDayDate);
             d.setDate(d.getDate() - 1);
-            this.selectedMiniCalendarDay.set(d.getDate());
-            const monday = this.getMondayDate(d);
-            this.currentBaseDate.set(monday);
+            this.selectDate(d);
         } else if (this.activeView() === 'week') {
             this.previousWeek();
         } else {
@@ -587,14 +730,18 @@ export class PlannerComponent implements OnInit {
         if (this.activeView() === 'day') {
             const d = new Date(this.selectedDayDate);
             d.setDate(d.getDate() + 1);
-            this.selectedMiniCalendarDay.set(d.getDate());
-            const monday = this.getMondayDate(d);
-            this.currentBaseDate.set(monday);
+            this.selectDate(d);
         } else if (this.activeView() === 'week') {
             this.nextWeek();
         } else {
             this.nextMonth();
         }
+    }
+
+    /** Column index used by the week grid: 0 = Monday … 6 = Sunday. */
+    getDayIndex(d: Date): number {
+        const dayOfWeek = d.getDay(); // 0: Sun, 1: Mon...
+        return dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     }
 
     private getMondayDate(d: Date): Date {
@@ -606,61 +753,72 @@ export class PlannerComponent implements OnInit {
         return monday;
     }
 
+    private shiftMonth(delta: number): void {
+        const base = this.selectedDayDate;
+        // Anchor on the 1st before shifting so a 31st never spills into the next month.
+        const shifted = new Date(base.getFullYear(), base.getMonth() + delta, 1);
+        this.selectDate(shifted);
+    }
+
     previousMonth(): void {
-        const d = new Date(this.currentBaseDate());
-        d.setMonth(d.getMonth() - 1);
-        this.currentBaseDate.set(d);
-        this.selectedMiniCalendarDay.set(1);
+        this.shiftMonth(-1);
     }
 
     nextMonth(): void {
-        const d = new Date(this.currentBaseDate());
-        d.setMonth(d.getMonth() + 1);
-        this.currentBaseDate.set(d);
-        this.selectedMiniCalendarDay.set(1);
+        this.shiftMonth(1);
+    }
+
+    private shiftWeek(delta: number): void {
+        const base = new Date(this.currentBaseDate());
+        base.setDate(base.getDate() + delta * 7);
+        this.currentBaseDate.set(base);
+
+        // Keep the same weekday selected instead of snapping back to Monday.
+        const selected = new Date(this.selectedDayDate);
+        selected.setDate(selected.getDate() + delta * 7);
+        this.selectedDateIso.set(this.formatDateToIso(selected));
     }
 
     previousWeek(): void {
-        const d = new Date(this.currentBaseDate());
-        d.setDate(d.getDate() - 7);
-        this.currentBaseDate.set(d);
-        this.selectedMiniCalendarDay.set(d.getDate());
+        this.shiftWeek(-1);
     }
 
     nextWeek(): void {
-        const d = new Date(this.currentBaseDate());
-        d.setDate(d.getDate() + 7);
-        this.currentBaseDate.set(d);
-        this.selectedMiniCalendarDay.set(d.getDate());
+        this.shiftWeek(1);
     }
 
-    selectMiniDay(day?: number): void {
-        if (!day) return;
-        this.selectedMiniCalendarDay.set(day);
-        
-        // Calculate the Monday of the week containing this day in the currently displayed month
-        const currentMonth = this.currentBaseDate().getMonth();
-        const currentYear = this.currentBaseDate().getFullYear();
-        const targetDate = new Date(currentYear, currentMonth, day);
-        
-        const dayOfWeek = targetDate.getDay(); // 0: Sun, 1: Mon, 2: Tue...
-        const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        
-        const mondayDate = new Date(targetDate);
-        mondayDate.setDate(targetDate.getDate() + diffToMonday);
-        mondayDate.setHours(0, 0, 0, 0);
-        this.currentBaseDate.set(mondayDate);
+    /** Select a concrete date and move the week strip to the week containing it. */
+    selectDate(date?: Date | string | null): void {
+        if (!date) return;
+        const target = date instanceof Date ? new Date(date) : this.parseIsoDate(date);
+        if (isNaN(target.getTime())) return;
+        target.setHours(0, 0, 0, 0);
+
+        this.selectedDateIso.set(this.formatDateToIso(target));
+        this.currentBaseDate.set(this.getMondayDate(target));
     }
 
     setView(view: 'day' | 'week' | 'month'): void {
         this.activeView.set(view);
     }
 
-    openCreateScheduleModal(): void {
+    /**
+     * Opens the create dialog pre-filled with the day the user is looking at.
+     * Without this the dialog always defaulted to today, so a schedule created
+     * while browsing another week silently landed outside the visible grid.
+     */
+    openCreateScheduleModal(date?: Date | string | null): void {
+        const targetDate = date
+            ? (date instanceof Date ? this.formatDateToIso(date) : date)
+            : this.formatDateToIso(this.selectedDayDate);
+
         const dialogConfig = this._dialogConfigService.getDialogConfig({
-            dayIndex: 2,
+            dayIndex: this.getDayIndex(this.parseIsoDate(targetDate)),
             category: 'work',
             time: '09:00 ព្រឹក',
+            date: targetDate,
+            startDate: targetDate,
+            endDate: targetDate,
         });
         const dialogRef = this._matDialog.open(CreateScheduleDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((result: any) => {
@@ -706,6 +864,7 @@ export class PlannerComponent implements OnInit {
     openScheduleDetailModal(schedule: PlannerScheduleEvent): void {
         const dialogConfig = this._dialogConfigService.getDialogConfig({
             schedule,
+            canModify: schedule.canModify !== false,
         });
         const dialogRef = this._matDialog.open(ScheduleDetailDialogComponent, dialogConfig);
         dialogRef.afterClosed().subscribe((res: any) => {
@@ -728,12 +887,12 @@ export class PlannerComponent implements OnInit {
     }
 
     // Helper for pastel theme styles
-    getEventThemeClasses(theme: 'peach' | 'lavender' | 'pink' | 'mint'): {
+    getEventThemeClasses(theme?: string): {
         card: string;
         timeTag: string;
         title: string;
     } {
-        switch (theme) {
+        switch (normalizeColorTheme(theme)) {
             case 'peach':
                 return {
                     card: 'bg-[#fff5ee] dark:bg-amber-950/40 border-t-[3px] border-[#f97316] text-slate-800 dark:text-slate-100',
@@ -753,6 +912,7 @@ export class PlannerComponent implements OnInit {
                     title: 'text-slate-900 dark:text-white',
                 };
             case 'mint':
+            default:
                 return {
                     card: 'bg-[#ecfdf5] dark:bg-emerald-950/40 border-t-[3px] border-[#10b981] text-slate-800 dark:text-slate-100',
                     timeTag: 'text-[#059669] dark:text-[#34d399]',
@@ -761,8 +921,84 @@ export class PlannerComponent implements OnInit {
         }
     }
 
-    getEventPillClasses(theme: 'peach' | 'lavender' | 'pink' | 'mint' | string): string {
-        switch (theme) {
+    /**
+     * Day-list styling. Kept separate from getEventThemeClasses, whose card style
+     * carries a top border that collided with the list row's left accent bar.
+     */
+    getEventAccentClasses(theme?: string): { bar: string; time: string; chip: string; ring: string } {
+        switch (normalizeColorTheme(theme)) {
+            case 'lavender':
+                return {
+                    bar: 'bg-[#6366f1]',
+                    time: 'text-[#4f46e5] dark:text-[#818cf8]',
+                    chip: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300',
+                    ring: 'hover:border-indigo-300 dark:hover:border-indigo-800',
+                };
+            case 'pink':
+                return {
+                    bar: 'bg-[#f43f5e]',
+                    time: 'text-[#e11d48] dark:text-[#fb7185]',
+                    chip: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300',
+                    ring: 'hover:border-rose-300 dark:hover:border-rose-800',
+                };
+            case 'mint':
+                return {
+                    bar: 'bg-[#10b981]',
+                    time: 'text-[#059669] dark:text-[#34d399]',
+                    chip: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
+                    ring: 'hover:border-emerald-300 dark:hover:border-emerald-800',
+                };
+            case 'peach':
+            default:
+                return {
+                    bar: 'bg-[#f97316]',
+                    time: 'text-[#ea580c] dark:text-[#fb923c]',
+                    chip: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300',
+                    ring: 'hover:border-amber-300 dark:hover:border-amber-800',
+                };
+        }
+    }
+
+    /** Start / end of an event as separate labels for the day list's time column. */
+    getEventStartLabel(ev: PlannerScheduleEvent): string {
+        if (ev.startTime) return ev.startTime.trim();
+        const parts = (ev.time || '').split('-');
+        return (parts[0] || '').trim();
+    }
+
+    getEventEndLabel(ev: PlannerScheduleEvent): string {
+        if (ev.endTime) return ev.endTime.trim();
+        const parts = (ev.time || '').split('-');
+        return parts.length > 1 ? (parts[1] || '').trim() : '';
+    }
+
+    /** Human duration, e.g. "8 ម៉ោង 30 នាទី". */
+    getEventDuration(ev: PlannerScheduleEvent): string {
+        const { startMinutes, endMinutes } = this.extractTimeRange(ev.time, ev.startTime, ev.endTime);
+        const total = Math.max(0, endMinutes - startMinutes);
+        if (total === 0) return '';
+        const h = Math.floor(total / 60);
+        const m = total % 60;
+        if (h && m) return `${h} ម៉ោង ${m} នាទី`;
+        if (h) return `${h} ម៉ោង`;
+        return `${m} នាទី`;
+    }
+
+    getEventCategoryLabel(category?: string): string {
+        switch (category) {
+            case 'work':
+                return 'ការងារ';
+            case 'myself':
+                return 'ផ្ទាល់ខ្លួន';
+            case 'breaks':
+                return 'ការសម្រាក';
+            default:
+                return 'ទូទៅ';
+        }
+    }
+
+    getEventPillClasses(theme?: string): string {
+        switch (normalizeColorTheme(theme)) {
             case 'lavender':
                 return 'bg-[#8b5cf6] text-white hover:bg-[#7c3aed]';
             case 'mint':

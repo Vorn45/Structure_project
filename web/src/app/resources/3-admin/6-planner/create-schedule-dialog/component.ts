@@ -65,6 +65,7 @@ export class CreateScheduleDialogComponent implements OnInit {
 
     private readonly _plannerService = inject(PlannerService);
     private readonly _userService = inject(UserService, { optional: true });
+    membersError = signal<boolean>(false);
 
     availableMembers = signal<TeamMemberItem[]>([]);
     selectedMemberIds = signal<Array<string | number>>([]);
@@ -85,15 +86,7 @@ export class CreateScheduleDialogComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this._plannerService.getTeamMembers().subscribe({
-            next: (res) => {
-                const members = res?.data || [];
-                if (Array.isArray(members) && members.length > 0) {
-                    this.availableMembers.set(members);
-                }
-            },
-            error: (err) => console.warn('Could not load members for planner dialog:', err),
-        });
+        this.loadMembers();
 
         if (this.data) {
             if (this.data.isEdit && this.data.schedule) {
@@ -138,6 +131,53 @@ export class CreateScheduleDialogComponent implements OnInit {
                 }
             }
         }
+    }
+
+    loadMembers(): void {
+        this.membersError.set(false);
+        this._plannerService.getTeamMembers().subscribe({
+            next: (res) => {
+                const members: TeamMemberItem[] = (res?.data || []).map((m) => ({
+                    id: m.id,
+                    name: m.name,
+                    role: m.role || 'សមាជិកក្រុមការងារ',
+                    initials: m.initials || (m.name || 'U').trim().slice(0, 2).toUpperCase(),
+                    avatar: m.avatar || undefined,
+                    bg: m.bg || 'bg-blue-700 text-white',
+                }));
+                this.availableMembers.set(members);
+                this.mergeSelectedMembersIntoList();
+            },
+            error: (err) => {
+                console.warn('Could not load members for planner dialog:', err);
+                this.membersError.set(true);
+                this.mergeSelectedMembersIntoList();
+            },
+        });
+    }
+
+    /**
+     * When editing, members already attached to the schedule must stay visible even
+     * if they are missing from the fetched list (deactivated account, free-typed name).
+     */
+    private mergeSelectedMembersIntoList(): void {
+        const existing = this.data?.schedule?.members;
+        if (!Array.isArray(existing) || existing.length === 0) return;
+
+        this.availableMembers.update((list) => {
+            const known = new Set(list.map((m) => String(m.id)));
+            const missing = existing
+                .filter((m: any) => m?.id !== undefined && !known.has(String(m.id)))
+                .map((m: any) => ({
+                    id: m.id,
+                    name: m.name,
+                    role: m.role || 'សមាជិកក្រុមការងារ',
+                    initials: m.initials || (m.name || 'U').trim().slice(0, 2).toUpperCase(),
+                    avatar: m.avatar || undefined,
+                    bg: m.bg || 'bg-blue-700 text-white',
+                }));
+            return missing.length > 0 ? [...list, ...missing] : list;
+        });
     }
 
     private formatDateIso(d: Date): string {
@@ -300,6 +340,12 @@ export class CreateScheduleDialogComponent implements OnInit {
         this.customMemberName.set('');
     }
 
+    /** Week-grid column index: 0 = Monday … 6 = Sunday. */
+    private toDayIndex(d: Date): number {
+        const dayOfWeek = d.getDay(); // 0: Sun, 1: Mon...
+        return dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    }
+
     cancel(): void {
         this.dialogRef.close(null);
     }
@@ -308,10 +354,11 @@ export class CreateScheduleDialogComponent implements OnInit {
         const titleVal = this.title().trim();
         if (!titleVal) return;
 
-        const colorMap: Record<string, 'peach' | 'indigo' | 'coral' | 'lime' | 'cyan' | 'purple'> = {
+        // Must stay within the four themes the planner grid knows how to render.
+        const colorMap: Record<string, 'peach' | 'lavender' | 'pink' | 'mint'> = {
             work: 'peach',
-            myself: 'indigo',
-            breaks: 'coral',
+            myself: 'lavender',
+            breaks: 'pink',
         };
 
         const selIds = this.selectedMemberIds();
@@ -350,16 +397,14 @@ export class CreateScheduleDialogComponent implements OnInit {
             ? `${formattedStartTime} - ${formattedEndTime}`
             : formattedStartTime;
 
-        // Calculate start & end day indices (0: Monday, 1: Tuesday, ..., 5: Saturday)
+        // Calculate start & end day indices (0: Monday … 6: Sunday)
         const actualEndDate = curCat === 'work' && endD ? endD : startD;
 
         const dStart = new Date(startD + 'T00:00:00');
-        const dayOfWeekStart = dStart.getDay();
-        const startIdx = dayOfWeekStart === 0 ? 5 : Math.max(0, Math.min(5, dayOfWeekStart - 1));
+        const startIdx = this.toDayIndex(dStart);
 
         const dEnd = new Date(actualEndDate + 'T00:00:00');
-        const dayOfWeekEnd = dEnd.getDay();
-        const endIdx = dayOfWeekEnd === 0 ? 5 : Math.max(0, Math.min(5, dayOfWeekEnd - 1));
+        const endIdx = this.toDayIndex(dEnd);
 
         const result = {
             ...(this.isEdit() && this.scheduleId() ? { id: this.scheduleId(), isEdit: true } : {}),

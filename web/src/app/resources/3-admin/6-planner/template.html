@@ -43,23 +43,49 @@
         <!-- ============================================================== -->
         <div class="lg:col-span-3 space-y-6">
 
-            <!-- 1. All Calendar Dropdown Box -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center justify-between cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+            <!-- 1. Calendar Source Picker (filters the grid by category) -->
+            <button
+                type="button"
+                [matMenuTriggerFor]="calendarSourceMenu"
+                class="w-full p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center justify-between cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-all text-left">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 flex items-center justify-center shrink-0">
-                        <mat-icon svgIcon="mdi:calendar-month" class="icon-size-5 text-rose-500"></mat-icon>
+                        <mat-icon [svgIcon]="activeCalendarSource.icon" class="icon-size-5 text-rose-500"></mat-icon>
                     </div>
                     <div class="min-w-0">
                         <div class="text-[16px] font-normal text-slate-900 dark:text-white truncate">
-                            ប្រតិទិនទាំងអស់
+                            {{ activeCalendarSource.label }}
                         </div>
                         <div class="text-[13.5px] text-slate-500 dark:text-slate-400 truncate font-normal">
-                            ផ្ទាល់ខ្លួន, ក្រុមការងារ
+                            {{ activeCalendarSource.sub }}
                         </div>
                     </div>
                 </div>
                 <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4.5 text-slate-400"></mat-icon>
-            </div>
+            </button>
+
+            <mat-menu #calendarSourceMenu="matMenu" class="font-kantumruy">
+                @for (source of calendarSources; track source.value) {
+                    <button
+                        type="button"
+                        mat-menu-item
+                        (click)="selectCalendarSource(source.value)">
+                        <div class="flex items-center justify-between gap-3 w-full">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <mat-icon
+                                    [svgIcon]="source.icon"
+                                    [class]="selectedCategory() === source.value ? 'icon-size-4.5 text-blue-600 dark:text-blue-400' : 'icon-size-4.5 text-slate-400'"></mat-icon>
+                                <span [class]="selectedCategory() === source.value ? 'text-[14.5px] font-medium text-blue-700 dark:text-blue-300' : 'text-[14.5px] font-normal'">
+                                    {{ source.label }}
+                                </span>
+                            </div>
+                            <span class="text-[12.5px] text-slate-400 shrink-0">
+                                {{ getCalendarSourceCount(source.value) }}
+                            </span>
+                        </div>
+                    </button>
+                }
+            </mat-menu>
 
             <!-- 2. Mini Month Calendar & Accordions Card -->
             <div class="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs space-y-6">
@@ -112,7 +138,7 @@
                                 <div class="h-9 flex items-center justify-center">
                                     <button
                                         type="button"
-                                        (click)="selectMiniDay(cell.dayNum)"
+                                        (click)="selectDate(cell.fullDate)"
                                         [class]="cell.isSelected
                                             ? 'relative w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm shadow-blue-600/30'
                                             : (cell.isToday
@@ -368,7 +394,7 @@
                             <div class="col-span-10 grid grid-cols-7 gap-1">
                                 @for (col of dayColumns; track col.nameKh + col.dateNum) {
                                     <div
-                                        (click)="selectMiniDay(col.dateNum)"
+                                        (click)="selectDate(col.fullDate)"
                                         [class]="col.isCurrent
                                             ? 'px-2 py-1.5 text-center rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 shadow-2xs cursor-pointer transition-all'
                                             : 'px-2 py-1.5 text-center rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all border border-transparent'">
@@ -427,7 +453,7 @@
                                 @for (col of dayColumns; track col.nameKh + col.dateNum; let colIndex = $index) {
                                     <div class="relative h-full">
                                         <!-- Current Time Indicator Line for Today's Column -->
-                                        @if (col.isCurrent && currentTimeTop !== null) {
+                                        @if (col.isToday && currentTimeTop !== null) {
                                             <div
                                                 [style.top.px]="currentTimeTop"
                                                 class="absolute inset-x-0 z-20 flex items-center pointer-events-none">
@@ -441,8 +467,8 @@
                                             @if (isEventInDay(ev, colIndex)) {
                                                 <div
                                                     (click)="openScheduleDetailModal(ev)"
-                                                    [style.top.px]="ev.topPosition"
-                                                    [style.height.px]="ev.height"
+                                                    [style.top.px]="eventTop(ev)"
+                                                    [style.height.px]="eventHeight(ev)"
                                                     [class]="'absolute inset-x-1 p-2.5 rounded-r-xl rounded-l-none shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between overflow-hidden ' + getEventThemeClasses(ev.colorTheme).card">
                                                     
                                                     <!-- Top Title -->
@@ -507,7 +533,7 @@
                             <div class="grid grid-cols-7">
                                 @for (cell of week; track cell.dateIso) {
                                     <div
-                                        (click)="selectMiniDay(cell.dateNum)"
+                                        (click)="selectDate(cell.date)"
                                         [class]="'min-h-[110px] p-2 border-r border-b border-slate-200/90 dark:border-slate-700 flex flex-col justify-between transition-all ' + (cell.isCurrentMonth ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-900/40 text-slate-400')">
                                         
                                         <!-- Top Day Number -->
@@ -593,45 +619,99 @@
                             </button>
                         </div>
                     } @else {
-                        <div class="space-y-3.5 mt-4">
+                        <div class="space-y-2.5 mt-4 max-w-5xl">
                             @for (ev of selectedDayEvents; track ev.id) {
                                 <div
                                     (click)="openScheduleDetailModal(ev)"
-                                    [class]="'p-4.5 rounded-2xl border-l-[6px] shadow-2xs hover:shadow-md flex items-center justify-between cursor-pointer transition-all ' + getEventThemeClasses(ev.colorTheme).card">
-                                    <div class="space-y-1.5 min-w-0 pr-4">
-                                        <div class="flex items-center gap-2">
-                                            <span [class]="'text-[13px] font-medium ' + getEventThemeClasses(ev.colorTheme).timeTag">
-                                                {{ ev.time }}
-                                            </span>
-                                            @if (ev.type) {
-                                                <span class="px-2 py-0.5 rounded-md text-[11.5px] bg-slate-200/70 dark:bg-slate-700/70 text-slate-700 dark:text-slate-300 font-normal">
-                                                    {{ ev.type }}
-                                                </span>
+                                    [class]="'group relative overflow-hidden rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs hover:shadow-md cursor-pointer transition-all ' + getEventAccentClasses(ev.colorTheme).ring">
+
+                                    <!-- Colour accent rail -->
+                                    <span [class]="'absolute inset-y-0 left-0 w-1.5 ' + getEventAccentClasses(ev.colorTheme).bar"></span>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-[120px_minmax(0,1fr)_auto] gap-x-4 gap-y-2.5 items-center py-3 pl-5 pr-3.5">
+
+                                        <!-- Time column -->
+                                        <div class="sm:border-r sm:border-dashed border-slate-200 dark:border-slate-700 sm:pr-5">
+                                            <div [class]="'text-[14.5px] font-semibold leading-tight ' + getEventAccentClasses(ev.colorTheme).time">
+                                                {{ getEventStartLabel(ev) }}
+                                            </div>
+                                            @if (getEventEndLabel(ev)) {
+                                                <div class="text-[12.5px] text-slate-400 dark:text-slate-500 leading-tight mt-0.5">
+                                                    ដល់ {{ getEventEndLabel(ev) }}
+                                                </div>
+                                            }
+                                            @if (getEventDuration(ev)) {
+                                                <div class="mt-1.5 inline-flex items-center gap-1 text-[12px] text-slate-500 dark:text-slate-400">
+                                                    <mat-icon svgIcon="mdi:clock-outline" class="icon-size-3.5"></mat-icon>
+                                                    {{ getEventDuration(ev) }}
+                                                </div>
                                             }
                                         </div>
-                                        <div [class]="'text-[17.5px] font-semibold truncate ' + getEventThemeClasses(ev.colorTheme).title">
-                                            {{ ev.title }}
-                                        </div>
-                                        @if (ev.note) {
-                                            <div class="text-[14px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                                                {{ ev.note }}
-                                            </div>
-                                        }
-                                    </div>
 
-                                    <!-- Avatars -->
-                                    <div class="flex items-center gap-2 shrink-0">
-                                        @if (ev.members && ev.members.length > 0) {
-                                            <div class="flex items-center">
-                                                @for (m of ev.members; track $index) {
-                                                    <div [class]="'w-8.5 h-8.5 rounded-full ' + (m.bg || 'bg-slate-700 text-white') + ' flex items-center justify-center text-[12px] font-semibold ring-2 ring-white dark:ring-slate-800 shadow-2xs ' + ($index > 0 ? '-ml-2' : '')"
-                                                         [matTooltip]="m.name + ' (' + m.role + ')'">
-                                                        {{ m.initials }}
-                                                    </div>
+                                        <!-- Title, tags & note -->
+                                        <div class="min-w-0">
+                                            <div class="text-[15.5px] font-semibold text-slate-900 dark:text-white truncate">
+                                                {{ ev.title }}
+                                            </div>
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                <span [class]="'px-2 py-0.5 rounded-md text-[11.5px] font-medium ' + getEventAccentClasses(ev.colorTheme).chip">
+                                                    {{ getEventCategoryLabel(ev.category) }}
+                                                </span>
+                                                @if (ev.type) {
+                                                    <span class="px-2 py-0.5 rounded-md text-[11.5px] bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300">
+                                                        {{ ev.type }}
+                                                    </span>
+                                                }
+                                                @if (ev.planName) {
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11.5px] bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300">
+                                                        <mat-icon svgIcon="mdi:folder-outline" class="icon-size-3.5"></mat-icon>
+                                                        {{ ev.planName }}
+                                                    </span>
+                                                }
+                                                @if (ev.canModify === false) {
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11.5px] bg-slate-100 dark:bg-slate-700/70 text-slate-400">
+                                                        <mat-icon svgIcon="mdi:eye-outline" class="icon-size-3.5"></mat-icon>
+                                                        មើលបានតែប៉ុណ្ណោះ
+                                                    </span>
                                                 }
                                             </div>
-                                        }
-                                        <mat-icon svgIcon="mdi:chevron-right" class="icon-size-5 text-slate-400"></mat-icon>
+                                            @if (ev.note) {
+                                                <div class="text-[13.5px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5">
+                                                    {{ ev.note }}
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <!-- Members -->
+                                        <div class="flex items-center gap-3 shrink-0 justify-self-start sm:justify-self-end">
+                                            @if (ev.members && ev.members.length > 0) {
+                                                <div class="flex items-center">
+                                                    @for (m of ev.members.slice(0, 4); track $index) {
+                                                        @if (m.avatar) {
+                                                            <img
+                                                                [src]="m.avatar"
+                                                                [alt]="m.name"
+                                                                [matTooltip]="m.name + (m.role ? ' · ' + m.role : '')"
+                                                                [class]="'w-7 h-7 rounded-full object-cover ring-2 ring-white dark:ring-slate-800 ' + ($index > 0 ? '-ml-2' : '')" />
+                                                        } @else {
+                                                            <div
+                                                                [matTooltip]="m.name + (m.role ? ' · ' + m.role : '')"
+                                                                [class]="'w-7 h-7 rounded-full flex items-center justify-center text-[10.5px] font-semibold ring-2 ring-white dark:ring-slate-800 ' + (m.bg || 'bg-slate-600 text-white') + ' ' + ($index > 0 ? '-ml-2' : '')">
+                                                                {{ m.initials }}
+                                                            </div>
+                                                        }
+                                                    }
+                                                    @if (ev.members.length > 4) {
+                                                        <div class="w-7 h-7 rounded-full -ml-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-[10.5px] font-semibold ring-2 ring-white dark:ring-slate-800">
+                                                            +{{ ev.members.length - 4 }}
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                            <mat-icon
+                                                svgIcon="mdi:chevron-right"
+                                                class="icon-size-5 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400 transition-colors"></mat-icon>
+                                        </div>
                                     </div>
                                 </div>
                             }
