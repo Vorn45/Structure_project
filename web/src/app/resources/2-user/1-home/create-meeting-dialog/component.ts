@@ -105,6 +105,8 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
                 const raw = res?.data;
                 if (Array.isArray(raw)) {
                     this.projects = raw;
+                } else if (raw && Array.isArray((raw as any).results)) {
+                    this.projects = (raw as any).results;
                 } else if (raw && Array.isArray((raw as any).items)) {
                     this.projects = (raw as any).items;
                 } else {
