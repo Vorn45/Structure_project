@@ -48,6 +48,12 @@ export class MeetingEntity {
     @Column({ type: 'text', nullable: true })
     agenda: string;
 
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    project_name: string;
+
+    @Column({ type: 'boolean', default: false })
+    notified_on_time: boolean;
+
     @CreateDateColumn({ name: 'created_at' })
     created_at: Date;
 

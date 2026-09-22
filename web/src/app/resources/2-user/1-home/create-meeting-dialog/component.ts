@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserHomeService } from '../home.service';
 import { Router } from '@angular/router';
+import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 
 
 export * from './create-meeting-dialog.types';
@@ -72,6 +73,7 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         @Inject(MAT_DIALOG_DATA) public data: CreateMeetingDialogData,
         private readonly _homeService: UserHomeService,
         private readonly _router: Router,
+        private readonly _snackbarService: SnackbarService,
     ) {
         if (this.data?.projectId) {
             this.selectedProjectId = Number(this.data.projectId);
@@ -232,7 +234,9 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     }
 
     private _finishAndNavigate(meeting: ScheduledMeeting): void {
-        this.successMessage.set(`បានបង្កើតអង្គប្រជុំ «${meeting.title}» ដោយជោគជ័យ!`);
+        const msg = `បានបង្កើតកិច្ចប្រជុំ «${meeting.title}» និងផ្ញើដំណឹងតាម Telegram រួចរាល់!`;
+        this.successMessage.set(msg);
+        this._snackbarService.success(msg, 4000);
         const pId = this.selectedProjectId || this.data?.projectId;
 
         setTimeout(() => {

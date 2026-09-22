@@ -1,5 +1,6 @@
 // ===========================================================================>> Core Library
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import axios from 'axios';
@@ -56,9 +57,13 @@ export class MeetingService implements OnModuleInit {
                     "status" VARCHAR(50) DEFAULT 'upcoming',
                     "participants" JSONB DEFAULT '[]'::jsonb,
                     "agenda" TEXT,
+                    "project_name" VARCHAR(255),
+                    "notified_on_time" BOOLEAN DEFAULT false,
                     "created_at" TIMESTAMP WITH TIME ZONE DEFAULT now(),
                     "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT now()
                 );
+                ALTER TABLE "meeting"."meetings" ADD COLUMN IF NOT EXISTS "project_name" VARCHAR(255);
+                ALTER TABLE "meeting"."meetings" ADD COLUMN IF NOT EXISTS "notified_on_time" BOOLEAN DEFAULT false;
             `);
 
             const count = await this._meetingRepo.count();
@@ -233,6 +238,8 @@ export class MeetingService implements OnModuleInit {
                 { id: user?.id, name: organizer, avatar: (user?.avatar as any)?.uri || null, role: 'Organizer' },
             ],
             agenda: dto.agenda || '',
+            project_name: dto.project_name || null,
+            notified_on_time: false,
         });
 
         const saved = await this._meetingRepo.save(entity);
@@ -252,8 +259,8 @@ export class MeetingService implements OnModuleInit {
             agenda: saved.agenda,
         };
 
-        if (dto.notify_telegram) {
-            this._sendMeetingTelegramNotification(resultItem, dto.project_name).catch((err) => {
+        if (dto.notify_telegram !== false) {
+            this._sendMeetingTelegramNotification(resultItem, dto.project_name, 'created').catch((err) => {
                 console.error('Failed to send Telegram meeting notification:', err);
             });
         }
@@ -265,10 +272,120 @@ export class MeetingService implements OnModuleInit {
         };
     }
 
+    /**
+     * Check every 30 seconds for meetings that should start now and notify participants
+     */
+    @Interval(30000)
+    async checkOnTimeMeetings(): Promise<void> {
+        try {
+            const { dateStr, minutes: nowMinutes } = this._getCambodiaNow();
+
+            const upcomingMeetings = await this._meetingRepo.find({
+                where: {
+                    notified_on_time: false,
+                },
+            });
+
+            for (const m of upcomingMeetings) {
+                if (m.status === 'completed' || m.status === 'cancelled') {
+                    continue;
+                }
+
+                const mDate = (m.date || '').split('T')[0].trim();
+                if (mDate !== dateStr) {
+                    continue;
+                }
+
+                const mMinutes = this._parseTimeToMinutes(m.time);
+                if (mMinutes === null) {
+                    continue;
+                }
+
+                // If within 2 min before start OR up to 15 min after start time
+                const diff = nowMinutes - mMinutes;
+                if (diff >= -2 && diff <= 15) {
+                    m.notified_on_time = true;
+                    await this._meetingRepo.save(m);
+
+                    const item: ScheduledMeetingItem = {
+                        id: m.id,
+                        title: m.title,
+                        type: m.type,
+                        date: m.date,
+                        time: m.time,
+                        duration: m.duration,
+                        roomCode: m.room_code,
+                        roomUrl: m.room_url,
+                        organizer: m.organizer,
+                        status: m.status,
+                        participants: m.participants,
+                        agenda: m.agenda,
+                    };
+
+                    this._sendMeetingTelegramNotification(item, m.project_name, 'starting_now').catch((err) => {
+                        console.error(`Failed to send on-time notification for meeting ${m.id}:`, err);
+                    });
+                }
+            }
+        } catch (err: any) {
+            console.warn('Error in checkOnTimeMeetings interval:', err?.message || err);
+        }
+    }
+
+    private _getCambodiaNow(): { dateStr: string; minutes: number } {
+        const now = new Date();
+        const dateStr = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Phnom_Penh',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).format(now);
+
+        const timeParts = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Phnom_Penh',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        }).formatToParts(now);
+
+        const hour = parseInt(timeParts.find((p) => p.type === 'hour')?.value || '0', 10);
+        const minute = parseInt(timeParts.find((p) => p.type === 'minute')?.value || '0', 10);
+        return { dateStr, minutes: hour * 60 + minute };
+    }
+
+    private _parseTimeToMinutes(timeStr: string): number | null {
+        if (!timeStr) return null;
+        let s = timeStr.trim();
+        const khmerDigits: Record<string, string> = {
+            '០': '0', '១': '1', '២': '2', '៣': '3', '៤': '4',
+            '៥': '5', '៦': '6', '៧': '7', '៨': '8', '៩': '9',
+        };
+        s = s.replace(/[០-៩]/g, (d) => khmerDigits[d] || d);
+
+        const isPM = /pm|ល្ងាច|រសៀល|យប់/i.test(s);
+        const isAM = /am|ព្រឹក/i.test(s);
+
+        const match = s.match(/(\d{1,2})[:.](\d{2})/);
+        if (!match) return null;
+
+        let hour = parseInt(match[1], 10);
+        const minute = parseInt(match[2], 10);
+
+        if (isPM && hour < 12) {
+            hour += 12;
+        } else if (isAM && hour === 12) {
+            hour = 0;
+        }
+
+        return hour * 60 + minute;
+    }
+
     private async _sendMeetingTelegramNotification(
         meeting: ScheduledMeetingItem,
         projectName?: string,
+        notificationType: 'created' | 'starting_now' = 'created',
     ): Promise<void> {
+        const isStartingNow = notificationType === 'starting_now';
         const escapeHtml = (text: string) =>
             (text || '')
                 .replace(/&/g, '&amp;')
@@ -319,15 +436,23 @@ export class MeetingService implements OnModuleInit {
             inline_keyboard: [
                 [
                     {
-                        text: 'ចូលរួមប្រជុំ (Google Meet) 📹',
+                        text: isStartingNow ? 'ចូលរួមប្រជុំឥឡូវនេះ (Join Now) 📹' : 'ចូលរួមប្រជុំ (Google Meet) 📹',
                         url: meeting.roomUrl,
                     },
                 ],
             ],
         };
 
+        const headerTitle = isStartingNow
+            ? '🚨 <b>កិច្ចប្រជុំកំពុងចាប់ផ្តើមឥឡូវនេះ! (Meeting Starting Now!)</b>'
+            : '📅 <b>ការអញ្ជើញចូលរួមប្រជុំគម្រោង (Project Meeting Invitation)</b>';
+
+        const actionText = isStartingNow
+            ? '⚡ <b>សូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលរួមបន្ទប់ប្រជុំភ្លាមៗ!</b>'
+            : 'សូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលរួមប្រជុំ។';
+
         const personalMsg =
-`📅 <b>ការអញ្ជើញចូលរួមប្រជុំគម្រោង (Project Meeting Invitation)</b>
+`${headerTitle}
 
 📌 <b>ប្រធានបទ:</b> ${escapeHtml(meeting.title)}
 ${projectName ? `📂 <b>គម្រោង:</b> ${escapeHtml(projectName)}\n` : ''}
@@ -338,7 +463,7 @@ ${participantNames ? `👥 <b>សមាជិក:</b> ${escapeHtml(participantNa
 ${meeting.agenda ? `📝 <b>របៀបវារៈ:</b> ${escapeHtml(meeting.agenda)}\n` : ''}
 🔗 <b>Google Meet:</b> <a href="${escapeHtml(meeting.roomUrl)}">${escapeHtml(meeting.roomUrl)}</a>
 
-សូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលរួមប្រជុំ។`;
+${actionText}`;
 
         for (const targetChatId of directChatIds) {
             try {
@@ -358,7 +483,10 @@ ${meeting.agenda ? `📝 <b>របៀបវារៈ:</b> ${escapeHtml(meeting.a
         }
 
         // 2. ALSO NOTIFY GROUP / FORUM CHANNEL
-        let groupMsg = `📅 <b>កិច្ចប្រជុំថ្មី (Meeting Scheduled)</b>\n\n`;
+        let groupMsg = isStartingNow
+            ? `🚨 <b>កិច្ចប្រជុំកំពុងចាប់ផ្តើមឥឡូវនេះ! (Meeting Starting Now)</b>\n\n`
+            : `📅 <b>កិច្ចប្រជុំថ្មី (Meeting Scheduled)</b>\n\n`;
+
         groupMsg += `• <b>ចំណងជើង:</b> ${escapeHtml(meeting.title)}\n`;
         if (projectName) {
             groupMsg += `• <b>គម្រោង:</b> ${escapeHtml(projectName)}\n`;
@@ -376,11 +504,11 @@ ${meeting.agenda ? `📝 <b>របៀបវារៈ:</b> ${escapeHtml(meeting.a
 
         try {
             await this._telegramService.sendMessage(groupMsg, TelegramForumTopic.MEETING);
-        } catch (topicErr) {
+        } catch (topicErr: any) {
             console.warn('Telegram topic send failed, sending to main chat:', topicErr?.message || topicErr);
             try {
                 await this._telegramService.sendMessage(groupMsg);
-            } catch (fallbackErr) {
+            } catch (fallbackErr: any) {
                 console.error('Telegram notification fallback also failed:', fallbackErr?.message || fallbackErr);
             }
         }
