@@ -23,4 +23,5 @@ export const TELEGRAM_FORUM_THREAD_IDS: Record<TelegramForumTopic, number> = {
     [TelegramForumTopic.REGISTRATION]: 11,
     [TelegramForumTopic.REGISTER]: 12,
     [TelegramForumTopic.DATA_VERIFICATION]: 13,
+    [TelegramForumTopic.MEETING]: 14,
 };

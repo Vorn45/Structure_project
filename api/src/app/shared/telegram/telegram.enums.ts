@@ -17,4 +17,5 @@ export enum TelegramForumTopic {
     REGISTRATION = 'registration',
     REGISTER = 'register',
     DATA_VERIFICATION = 'data_verification',
+    MEETING = 'meeting',
 }

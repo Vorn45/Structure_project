@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateMeetingDto {
     @IsNotEmpty()
@@ -28,4 +28,16 @@ export class CreateMeetingDto {
     @IsOptional()
     @IsString()
     agenda?: string;
+
+    @IsOptional()
+    @IsNumber()
+    project_id?: number;
+
+    @IsOptional()
+    @IsString()
+    project_name?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    notify_telegram?: boolean;
 }

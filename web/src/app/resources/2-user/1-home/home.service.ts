@@ -82,6 +82,13 @@ export class UserHomeService {
         );
     }
 
+    getProjects(): Observable<{ status_code: number; data: any[] }> {
+        return this._http.get<{ status_code: number; data: any[] }>(
+            `${this.baseUrl}/active-projects`,
+            { withCredentials: true }
+        );
+    }
+
     createProject(dto: any): Observable<{ status_code: number; data: any }> {
         return this._http.post<{ status_code: number; data: any }>(
             `${this.baseUrl}/projects`,

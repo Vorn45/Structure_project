@@ -46,7 +46,6 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
 
     // Form inputs
     formTitle: string = '';
-    formPlatform = signal<'wms' | 'google' | 'zoom'>('wms');
     formDate: string = new Date().toISOString().split('T')[0];
     formTime: string = '09:30';
     formDuration: string = '45 នាទី';
@@ -54,6 +53,15 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
     generatedRoomCode: string = '';
     generatedRoomUrl: string = '';
     joinInputCode: string = '';
+
+    // Project selection
+    projects: any[] = [];
+    selectedProjectId: number | null = null;
+    selectedProjectName: string = '';
+    projectsLoading = signal<boolean>(false);
+
+    // Telegram notification
+    notifyTelegram = signal<boolean>(false);
 
     availableMembers = [
         { id: '1', name: 'សុខ សុភា', role: 'ប្រធានគម្រោង' },
@@ -82,33 +90,50 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             },
             error: (err) => console.error('Failed to load live meetings', err),
         });
+
+        this._loadProjects();
     }
 
     ngOnDestroy(): void {
         this.stopCallTimer();
     }
 
-    setPlatform(platform: 'wms' | 'google' | 'zoom'): void {
-        this.formPlatform.set(platform);
-        this.generateNewRoomCode();
+    private _loadProjects(): void {
+        this.projectsLoading.set(true);
+        this._homeService.getProjects().subscribe({
+            next: (res) => {
+                const raw = res?.data;
+                if (Array.isArray(raw)) {
+                    this.projects = raw;
+                } else if (raw && Array.isArray((raw as any).items)) {
+                    this.projects = (raw as any).items;
+                } else {
+                    this.projects = [];
+                }
+                this.projectsLoading.set(false);
+            },
+            error: () => {
+                this.projects = [];
+                this.projectsLoading.set(false);
+            },
+        });
+    }
+
+    selectProject(project: any): void {
+        if (this.selectedProjectId === project.id) {
+            // Deselect
+            this.selectedProjectId = null;
+            this.selectedProjectName = '';
+        } else {
+            this.selectedProjectId = project.id;
+            this.selectedProjectName = project.name || project.kh_name || project.en_name || '';
+        }
     }
 
     generateNewRoomCode(): void {
         const rand = Math.floor(1000 + Math.random() * 9000);
-        const p = this.formPlatform();
-
-        if (p === 'google') {
-            const seg = () => Math.random().toString(36).substring(2, 5);
-            this.generatedRoomCode = `${seg()}-${seg()}-${seg()}`;
-            this.generatedRoomUrl = `https://meet.google.com/${this.generatedRoomCode}`;
-        } else if (p === 'zoom') {
-            const zoomId = `${Math.floor(100 + Math.random() * 900)} ${Math.floor(100 + Math.random() * 900)} ${Math.floor(1000 + Math.random() * 9000)}`;
-            this.generatedRoomCode = zoomId;
-            this.generatedRoomUrl = `https://zoom.us/j/${zoomId.replace(/\s/g, '')}`;
-        } else {
-            this.generatedRoomCode = `meet-wms-${rand}`;
-            this.generatedRoomUrl = `https://meet.wms.gov.kh/room/${this.generatedRoomCode}`;
-        }
+        this.generatedRoomCode = `meet-wms-${rand}`;
+        this.generatedRoomUrl = `https://meet.wms.gov.kh/room/${this.generatedRoomCode}`;
     }
 
     isMemberSelected(id: string): boolean {
@@ -149,7 +174,7 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         const newMeeting: ScheduledMeeting = {
             id: 'm_' + Date.now(),
             title: this.formTitle.trim(),
-            type: this.formPlatform(),
+            type: 'wms',
             date: this.formDate,
             time: this.formTime,
             duration: this.formDuration,
@@ -161,7 +186,14 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             agenda: this.formAgenda.trim(),
         };
 
-        this._homeService.createMeeting(newMeeting).subscribe({
+        const dto: any = {
+            ...newMeeting,
+            project_id: this.selectedProjectId ?? undefined,
+            project_name: this.selectedProjectName || undefined,
+            notify_telegram: this.notifyTelegram(),
+        };
+
+        this._homeService.createMeeting(dto).subscribe({
             next: (res) => {
                 if (res?.data) {
                     this.scheduledMeetings.update((m) => [res.data, ...m]);
@@ -177,6 +209,9 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         this.successMessage.set(`បានបង្កើតអង្គប្រជុំ «${newMeeting.title}» ដោយជោគជ័យ!`);
         this.formTitle = '';
         this.formAgenda = '';
+        this.selectedProjectId = null;
+        this.selectedProjectName = '';
+        this.notifyTelegram.set(false);
         this.generateNewRoomCode();
         this.activeTab.set('schedule');
 

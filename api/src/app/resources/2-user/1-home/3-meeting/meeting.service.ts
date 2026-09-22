@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { UserPayload } from 'src/app/interface/jwt.interface';
 import { User } from 'src/app/model/user/users.entity';
 import { MeetingEntity } from 'src/app/model/meeting/meeting.entity';
+import { TelegramService } from 'src/app/shared/telegram/telegram.service';
+import { TelegramForumTopic } from 'src/app/shared/telegram/telegram.enums';
 import { CreateMeetingDto } from './meeting.dto';
 
 export interface ScheduledMeetingItem {
@@ -31,6 +33,7 @@ export class MeetingService implements OnModuleInit {
         private readonly _meetingRepo: Repository<MeetingEntity>,
         @InjectRepository(User)
         private readonly _userRepo: Repository<User>,
+        private readonly _telegramService: TelegramService,
     ) {}
 
     async onModuleInit(): Promise<void> {
@@ -237,10 +240,53 @@ export class MeetingService implements OnModuleInit {
             agenda: saved.agenda,
         };
 
+        if (dto.notify_telegram) {
+            this._sendMeetingTelegramNotification(resultItem, dto.project_name).catch(() => {});
+        }
+
         return {
             status_code: 201,
             message: 'Meeting scheduled successfully',
             data: resultItem,
         };
+    }
+
+    private async _sendMeetingTelegramNotification(
+        meeting: ScheduledMeetingItem,
+        projectName?: string,
+    ): Promise<void> {
+        const participantNames = meeting.participants
+            .map((p) => p.name)
+            .join(', ');
+
+        const rows: Array<[string, string]> = [
+            ['DATE', meeting.date],
+            ['TIME', meeting.time],
+            ['DURATION', meeting.duration],
+            ['ORGANIZER', meeting.organizer],
+        ];
+
+        if (projectName) {
+            rows.push(['PROJECT', projectName]);
+        }
+
+        if (participantNames) {
+            rows.push(['MEMBERS', participantNames]);
+        }
+
+        if (meeting.agenda) {
+            rows.push(['AGENDA', meeting.agenda]);
+        }
+
+        rows.push(['ROOM URL', meeting.roomUrl]);
+
+        const maxLen = Math.max(...rows.map(([label]) => label.length));
+        const body = rows
+            .map(([label, value]) => `• ${label.padEnd(maxLen)}: ${value}`)
+            .join('\n');
+
+        const message = `📅 Meeting Scheduled\n${meeting.title}\n\n${body}`;
+
+        await this._telegramService.sendMessage(message, TelegramForumTopic.MEETING);
     }
 }

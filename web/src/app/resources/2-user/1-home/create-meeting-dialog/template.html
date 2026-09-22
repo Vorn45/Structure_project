@@ -115,46 +115,50 @@
                     </div>
                 </div>
 
-                <!-- Platform -->
+                <!-- Project Selection -->
                 <div>
                     <label class="block font-normal text-slate-800 dark:text-slate-200 mb-2 text-[16px]">
-                        ប្រភេទបន្ទប់ប្រជុំ (Platform)
+                        គម្រោង (Project)
                     </label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div
-                            (click)="setPlatform('wms')"
-                            class="p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-1.5 select-none font-kantumruy"
-                            [ngClass]="formPlatform() === 'wms'
-                                ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500'
-                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-                        >
-                            <mat-icon svgIcon="mdi:shield-check" class="icon-size-6 text-purple-600 dark:text-purple-400"></mat-icon>
-                            <p class="font-medium text-[15px]">WMS Room</p>
-                            <p class="text-[12px] text-slate-400">ផ្ទៃក្នុង</p>
-                        </div>
 
-                        <div
-                            (click)="setPlatform('google')"
-                            class="p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-1.5 select-none font-kantumruy"
-                            [ngClass]="formPlatform() === 'google'
-                                ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500'
-                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-                        >
-                            <mat-icon svgIcon="mdi:video" class="icon-size-6 text-blue-600 dark:text-blue-400"></mat-icon>
-                            <p class="font-medium text-[15px]">Google Meet</p>
-                            <p class="text-[12px] text-slate-400">google.com</p>
-                        </div>
+                    <!-- Loading state -->
+                    <div *ngIf="projectsLoading()" class="flex items-center gap-2 py-3 text-slate-400 text-[14px]">
+                        <mat-icon svgIcon="mdi:loading" class="icon-size-4 animate-spin"></mat-icon>
+                        <span>កំពុងផ្ទុក...</span>
+                    </div>
 
+                    <!-- Empty state -->
+                    <div *ngIf="!projectsLoading() && projects.length === 0"
+                        class="py-3 text-slate-400 text-[14px] italic">
+                        មិនមានគម្រោង
+                    </div>
+
+                    <!-- Project grid -->
+                    <div *ngIf="!projectsLoading() && projects.length > 0" class="grid grid-cols-1 gap-2">
                         <div
-                            (click)="setPlatform('zoom')"
-                            class="p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-1.5 select-none font-kantumruy"
-                            [ngClass]="formPlatform() === 'zoom'
-                                ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500'
-                                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
+                            *ngFor="let project of projects"
+                            (click)="selectProject(project)"
+                            class="p-3 rounded-xl border cursor-pointer transition-all flex items-center gap-3 select-none font-kantumruy"
+                            [ngClass]="selectedProjectId === project.id
+                                ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-900 dark:text-purple-200 ring-1 ring-purple-500'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'"
                         >
-                            <mat-icon svgIcon="mdi:laptop" class="icon-size-6 text-sky-600 dark:text-sky-400"></mat-icon>
-                            <p class="font-medium text-[15px]">Zoom Cloud</p>
-                            <p class="text-[12px] text-slate-400">zoom.us</p>
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                [ngClass]="selectedProjectId === project.id
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300'"
+                            >
+                                <mat-icon svgIcon="mdi:briefcase-outline" class="icon-size-4.5"></mat-icon>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[15px] font-medium truncate">{{ project.name || project.kh_name || project.en_name }}</p>
+                                <p *ngIf="project.status" class="text-[12px] text-slate-400 truncate mt-0.5">{{ project.status }}</p>
+                            </div>
+                            <mat-icon
+                                [svgIcon]="selectedProjectId === project.id ? 'mdi:check-circle' : 'mdi:circle-outline'"
+                                class="icon-size-4 shrink-0"
+                                [ngClass]="selectedProjectId === project.id ? 'text-purple-600' : 'text-slate-300'"
+                            ></mat-icon>
                         </div>
                     </div>
                 </div>
@@ -450,15 +454,50 @@
     <!-- ========================================================= -->
     <!-- 4. DIALOG FOOTER (Exact Side Drawer Footer Style)         -->
     <!-- ========================================================= -->
-    <div *ngIf="!inCall() && activeTab() === 'create'" class="w-full flex items-center p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 font-kantumruy">
-        <button
-            type="button"
-            (click)="saveMeeting()"
-            class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] transition-all duration-200 active:scale-[0.98] cursor-pointer"
-        >
-            <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
-            <span>បង្កើតអង្គប្រជុំ</span>
-        </button>
+    <div *ngIf="!inCall() && activeTab() === 'create'" class="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 font-kantumruy">
+
+        <!-- Telegram Notification Toggle -->
+        <div class="px-4 pt-3 pb-2">
+            <div
+                (click)="notifyTelegram.set(!notifyTelegram())"
+                class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all select-none"
+                [ngClass]="notifyTelegram()
+                    ? 'border-sky-400 bg-sky-50/60 dark:bg-sky-950/30 ring-1 ring-sky-400'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-slate-300'"
+            >
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        [ngClass]="notifyTelegram() ? 'bg-sky-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'"
+                    >
+                        <mat-icon svgIcon="mdi:send" class="icon-size-4"></mat-icon>
+                    </div>
+                    <div>
+                        <p class="text-[14px] font-medium"
+                            [ngClass]="notifyTelegram() ? 'text-sky-700 dark:text-sky-300' : 'text-slate-700 dark:text-slate-300'"
+                        >ផ្ញើជូនដំណឹងតាម Telegram</p>
+                        <p class="text-[12px] text-slate-400">Send meeting notification to Telegram channel</p>
+                    </div>
+                </div>
+                <div class="w-10 h-6 rounded-full transition-all flex items-center px-0.5 shrink-0"
+                    [ngClass]="notifyTelegram() ? 'bg-sky-500' : 'bg-slate-300 dark:bg-slate-600'"
+                >
+                    <div class="w-5 h-5 rounded-full bg-white shadow transition-transform"
+                        [ngClass]="notifyTelegram() ? 'translate-x-4' : 'translate-x-0'"
+                    ></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 pt-2">
+            <button
+                type="button"
+                (click)="saveMeeting()"
+                class="w-full h-11 px-4 rounded-xl font-medium font-kantumruy text-[16px] flex items-center justify-center gap-2 text-white bg-[#1c2b6b] hover:bg-[#152254] transition-all duration-200 active:scale-[0.98] cursor-pointer"
+            >
+                <mat-icon svgIcon="mdi:plus" class="!w-5 !h-5 !text-white shrink-0"></mat-icon>
+                <span>បង្កើតអង្គប្រជុំ</span>
+            </button>
+        </div>
     </div>
 
 </div>
