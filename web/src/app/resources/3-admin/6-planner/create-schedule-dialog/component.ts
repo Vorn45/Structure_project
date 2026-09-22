@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, inject, signal } from '@angular/core';
+import { Component, Inject, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -11,7 +11,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SideDialogCloseButtonComponent } from 'app/shared/side-dialog-close-button/component';
 import { UserService } from 'app/core/user/user.service';
 import { PlannerService } from '../planner.service';
-
 
 export * from './create-schedule-dialog.types';
 import { CreateScheduleDialogData, TeamMemberItem } from './create-schedule-dialog.types';
@@ -69,6 +68,16 @@ export class CreateScheduleDialogComponent implements OnInit {
 
     availableMembers = signal<TeamMemberItem[]>([]);
     selectedMemberIds = signal<Array<string | number>>([]);
+
+    filteredMembers = computed(() => {
+        const query = (this.customMemberName() || '').trim().toLowerCase();
+        const all = this.availableMembers();
+        if (!query) return all;
+        return all.filter((m) =>
+            (m.name || '').toLowerCase().includes(query) ||
+            (m.role && m.role.toLowerCase().includes(query))
+        );
+    });
 
     constructor(
         public dialogRef: MatDialogRef<CreateScheduleDialogComponent>,
