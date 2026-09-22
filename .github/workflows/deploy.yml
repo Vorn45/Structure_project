@@ -7,6 +7,7 @@ on:
     paths:
       - "api/**"
       - "web/**"
+      - "file-v3/**"
       - "nginx/**"
       - "docker-compose.yml"
       - ".github/workflows/deploy.yml"
@@ -21,6 +22,8 @@ on:
           - both
           - api
           - web
+          - file_service
+          - all
 
 permissions:
   contents: read
@@ -114,17 +117,21 @@ jobs:
         run: |
           rebuild_api=false
           rebuild_web=false
+          rebuild_file=false
           reload_gateway=false
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             case "$SELECTED_SERVICE" in
               api) rebuild_api=true ;;
               web) rebuild_web=true ;;
+              file_service) rebuild_file=true ;;
               both) rebuild_api=true; rebuild_web=true ;;
+              all) rebuild_api=true; rebuild_web=true; rebuild_file=true ;;
             esac
           elif [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
             rebuild_api=true
             rebuild_web=true
+            rebuild_file=true
             reload_gateway=true
           else
             git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" > "$RUNNER_TEMP/wms-changed-files.txt"
@@ -133,28 +140,30 @@ jobs:
               case "$changed_file" in
                 api/*) rebuild_api=true ;;
                 web/*) rebuild_web=true ;;
+                file-v3/*) rebuild_file=true ;;
                 nginx/*) reload_gateway=true ;;
                 docker-compose.yml)
                   rebuild_api=true
                   rebuild_web=true
+                  rebuild_file=true
                   reload_gateway=true
                   ;;
               esac
             done < "$RUNNER_TEMP/wms-changed-files.txt"
           fi
 
-          if [ "$rebuild_api" = "true" ] && [ "$rebuild_web" = "true" ]; then
-            target="Both (API & Web)"
-          elif [ "$rebuild_api" = "true" ]; then
-            target="API Service (NestJS)"
-          elif [ "$rebuild_web" = "true" ]; then
-            target="Web Frontend (Angular)"
-          else
-            target="Gateway / Config Only"
-          fi
+          target_list=()
+          [ "$rebuild_api" = "true" ] && target_list+=("API")
+          [ "$rebuild_web" = "true" ] && target_list+=("Web")
+          [ "$rebuild_file" = "true" ] && target_list+=("File-V3")
+          [ "$reload_gateway" = "true" ] && [ "${#target_list[@]}" -eq 0 ] && target_list+=("Gateway")
+
+          target=$(IFS=", "; echo "${target_list[*]}")
+          [ -z "$target" ] && target="None"
 
           echo "api=$rebuild_api" >> "$GITHUB_OUTPUT"
           echo "web=$rebuild_web" >> "$GITHUB_OUTPUT"
+          echo "file=$rebuild_file" >> "$GITHUB_OUTPUT"
           echo "gateway=$reload_gateway" >> "$GITHUB_OUTPUT"
           echo "target=$target" >> "$GITHUB_OUTPUT"
           echo "Target: $target"
@@ -223,13 +232,15 @@ jobs:
         env:
           REBUILD_API: ${{ steps.changes.outputs.api }}
           REBUILD_WEB: ${{ steps.changes.outputs.web }}
+          REBUILD_FILE: ${{ steps.changes.outputs.file }}
         run: |
           services=()
           [ "$REBUILD_API" = "true" ] && services+=(api)
           [ "$REBUILD_WEB" = "true" ] && services+=(web)
+          [ "$REBUILD_FILE" = "true" ] && services+=(file_service)
 
           if [ "${#services[@]}" -eq 0 ]; then
-            echo "No API or Web changes require a rebuild."
+            echo "No services require a rebuild."
             exit 0
           fi
 
@@ -273,11 +284,13 @@ jobs:
         env:
           REBUILD_API: ${{ steps.changes.outputs.api }}
           REBUILD_WEB: ${{ steps.changes.outputs.web }}
+          REBUILD_FILE: ${{ steps.changes.outputs.file }}
           RELOAD_GATEWAY: ${{ steps.changes.outputs.gateway }}
         run: |
           services=()
           [ "$REBUILD_API" = "true" ] && services+=(api)
           [ "$REBUILD_WEB" = "true" ] && services+=(web)
+          [ "$REBUILD_FILE" = "true" ] && services+=(file_service)
 
           if [ "${#services[@]}" -eq 0 ] && [ "$RELOAD_GATEWAY" != "true" ]; then
             echo "No services need to be recreated."

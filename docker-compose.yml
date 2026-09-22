@@ -71,6 +71,28 @@ services:
       retries: 3
       start_period: 5s
 
+  # ===================================================
+  # File Service V3 (Express & TypeScript Microservice)
+  # ===================================================
+  file_service:
+    container_name: digitechkh-wms-file-v3
+    build:
+      context: ./file-v3
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - app_network
+    volumes:
+      - uploads_data:/app/public/uploads
+    expose:
+      - "5000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5000/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
 networks:
   app_network:
     driver: bridge
