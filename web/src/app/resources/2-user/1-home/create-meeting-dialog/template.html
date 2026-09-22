@@ -122,7 +122,7 @@
                     </label>
                     <div class="grid grid-cols-3 gap-3">
                         <div
-                            (click)="formPlatform.set('wms')"
+                            (click)="setPlatform('wms')"
                             class="p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-1.5 select-none font-kantumruy"
                             [ngClass]="formPlatform() === 'wms'
                                 ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500'
@@ -134,7 +134,7 @@
                         </div>
 
                         <div
-                            (click)="formPlatform.set('google')"
+                            (click)="setPlatform('google')"
                             class="p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-1.5 select-none font-kantumruy"
                             [ngClass]="formPlatform() === 'google'
                                 ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500'
@@ -146,7 +146,7 @@
                         </div>
 
                         <div
-                            (click)="formPlatform.set('zoom')"
+                            (click)="setPlatform('zoom')"
                             class="p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-1.5 select-none font-kantumruy"
                             [ngClass]="formPlatform() === 'zoom'
                                 ? 'border-purple-500 bg-purple-50/60 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500'
@@ -206,7 +206,7 @@
                             <mat-icon svgIcon="mdi:link-variant" class="icon-size-4.5 text-purple-600"></mat-icon>
                             <span>តំណភ្ជាប់បន្ទប់ប្រជុំ</span>
                         </span>
-                        <span class="text-[13px] text-slate-400 font-mono">កូដ៖ {{ generatedRoomCode }}</span>
+                        <span (click)="generateNewRoomCode()" title="ចុចដើម្បីបង្កើតកូដថ្មី" class="text-[13px] text-slate-400 font-mono hover:text-purple-600 cursor-pointer flex items-center gap-1">កូដ៖ {{ generatedRoomCode }} ↻</span>
                     </div>
                     <div class="flex items-center gap-2.5">
                         <input

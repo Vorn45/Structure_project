@@ -88,10 +88,27 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         this.stopCallTimer();
     }
 
+    setPlatform(platform: 'wms' | 'google' | 'zoom'): void {
+        this.formPlatform.set(platform);
+        this.generateNewRoomCode();
+    }
+
     generateNewRoomCode(): void {
         const rand = Math.floor(1000 + Math.random() * 9000);
-        this.generatedRoomCode = `meet-wms-${rand}`;
-        this.generatedRoomUrl = `https://meet.wms.gov.kh/room/${this.generatedRoomCode}`;
+        const p = this.formPlatform();
+
+        if (p === 'google') {
+            const seg = () => Math.random().toString(36).substring(2, 5);
+            this.generatedRoomCode = `${seg()}-${seg()}-${seg()}`;
+            this.generatedRoomUrl = `https://meet.google.com/${this.generatedRoomCode}`;
+        } else if (p === 'zoom') {
+            const zoomId = `${Math.floor(100 + Math.random() * 900)} ${Math.floor(100 + Math.random() * 900)} ${Math.floor(1000 + Math.random() * 9000)}`;
+            this.generatedRoomCode = zoomId;
+            this.generatedRoomUrl = `https://zoom.us/j/${zoomId.replace(/\s/g, '')}`;
+        } else {
+            this.generatedRoomCode = `meet-wms-${rand}`;
+            this.generatedRoomUrl = `https://meet.wms.gov.kh/room/${this.generatedRoomCode}`;
+        }
     }
 
     isMemberSelected(id: string): boolean {
