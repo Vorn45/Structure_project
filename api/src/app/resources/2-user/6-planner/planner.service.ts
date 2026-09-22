@@ -101,7 +101,15 @@ export class PlannerService {
         memberIds: number[],
         kind: 'created' | 'updated',
     ): void {
-        const targetIds = memberIds.filter((id) => Number(id) && Number(id) !== Number(user?.id));
+        const targetSet = new Set<number>();
+        for (const id of memberIds) {
+            const num = Number(id);
+            if (num > 0) targetSet.add(num);
+        }
+        if (user?.id && Number(user.id) > 0) {
+            targetSet.add(Number(user.id));
+        }
+        const targetIds = Array.from(targetSet);
         if (targetIds.length === 0) return;
 
         const organizer = schedule.created_by_name || user?.name_kh || user?.name_en || '';
@@ -134,7 +142,7 @@ export class PlannerService {
             }
         }
 
-        // Fire-and-forget private Telegram notification to assigned members
+        // Fire-and-forget private Telegram notification to assigned members & creator
         this.sendTelegramScheduleNotification(user, schedule, targetIds, kind).catch((e) => {
             console.warn('[PlannerService] Async Telegram dispatch error:', e);
         });
@@ -159,7 +167,7 @@ export class PlannerService {
                 .createQueryBuilder('user')
                 .where('user.id IN (:...ids)', { ids: targetIds })
                 .andWhere('user.telegram_id IS NOT NULL')
-                .andWhere('user.is_active = 1')
+                .andWhere("LENGTH(TRIM(user.telegram_id)) > 0")
                 .select(['user.id', 'user.name_en', 'user.name_kh', 'user.telegram_id'])
                 .getMany();
 

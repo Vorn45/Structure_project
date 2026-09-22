@@ -1573,9 +1573,17 @@ export class PlanService {
 
         try {
             const rawMembers: any[] = Array.isArray(plan.members) ? plan.members : [];
-            const targetIds: number[] = rawMembers
-                .map((m) => Number(m.id || m.user_id))
-                .filter((id) => Number.isFinite(id) && id > 0 && id !== Number(user?.id));
+            const targetSet = new Set<number>();
+            for (const m of rawMembers) {
+                const id = Number(m.id || m.user_id);
+                if (Number.isFinite(id) && id > 0) {
+                    targetSet.add(id);
+                }
+            }
+            if (user?.id && Number(user.id) > 0) {
+                targetSet.add(Number(user.id));
+            }
+            const targetIds: number[] = Array.from(targetSet);
 
             if (!targetIds.length) return;
 
@@ -1583,7 +1591,7 @@ export class PlanService {
                 .createQueryBuilder('user')
                 .where('user.id IN (:...ids)', { ids: targetIds })
                 .andWhere('user.telegram_id IS NOT NULL')
-                .andWhere('user.is_active = 1')
+                .andWhere("LENGTH(TRIM(user.telegram_id)) > 0")
                 .select(['user.id', 'user.name_en', 'user.name_kh', 'user.telegram_id'])
                 .getMany();
 
