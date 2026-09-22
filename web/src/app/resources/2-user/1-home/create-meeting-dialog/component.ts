@@ -147,11 +147,32 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         const randLetters = (n: number) =>
             Array.from({ length: n }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
         this.generatedRoomCode = `${randLetters(3)}-${randLetters(4)}-${randLetters(3)}`;
-        this.generatedRoomUrl = `https://meet.google.com/${this.generatedRoomCode}`;
+        if (!this.generatedRoomUrl) {
+            this.generatedRoomUrl = `https://meet.google.com/${this.generatedRoomCode}`;
+        }
     }
 
     openGoogleMeetNew(): void {
         window.open('https://meet.google.com/new', '_blank');
+    }
+
+    async pasteFromClipboard(): Promise<void> {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text && text.trim()) {
+                let clean = text.trim();
+                if (clean && !clean.startsWith('http://') && !clean.startsWith('https://')) {
+                    if (clean.includes('meet.google.com')) {
+                        clean = `https://${clean}`;
+                    } else {
+                        clean = `https://meet.google.com/${clean}`;
+                    }
+                }
+                this.generatedRoomUrl = clean;
+            }
+        } catch (e) {
+            console.warn('Could not read from clipboard:', e);
+        }
     }
 
     async copyLink(url: string): Promise<void> {
@@ -192,9 +213,22 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             participants.unshift({ id: this.data?.user?.id || 1, name: orgName, avatar: null, role: 'Organizer' });
         }
 
-        const meetUrl = (this.generatedRoomUrl && this.generatedRoomUrl.trim())
-            ? this.generatedRoomUrl.trim()
-            : `https://meet.google.com/${this.generatedRoomCode}`;
+        let meetUrl = (this.generatedRoomUrl && this.generatedRoomUrl.trim()) ? this.generatedRoomUrl.trim() : '';
+        if (meetUrl && !meetUrl.startsWith('http://') && !meetUrl.startsWith('https://')) {
+            if (meetUrl.includes('meet.google.com')) {
+                meetUrl = `https://${meetUrl}`;
+            } else {
+                meetUrl = `https://meet.google.com/${meetUrl}`;
+            }
+        }
+        if (!meetUrl) {
+            meetUrl = 'https://meet.google.com/new';
+        }
+        this.generatedRoomUrl = meetUrl;
+
+        // Extract code from meet URL if possible
+        const match = meetUrl.match(/meet\.google\.com\/([a-z0-9\-]+)/i);
+        const finalCode = match ? match[1] : (this.generatedRoomCode || 'google-meet');
 
         const newMeeting: ScheduledMeeting = {
             id: 'm_' + Date.now(),
@@ -203,7 +237,7 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
             date: this.formDate,
             time: this.formTime,
             duration: this.formDuration,
-            roomCode: this.generatedRoomCode,
+            roomCode: finalCode,
             roomUrl: meetUrl,
             organizer: orgName,
             status: 'upcoming',

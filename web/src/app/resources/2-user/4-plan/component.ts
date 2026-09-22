@@ -2002,7 +2002,7 @@ export class UserPlanComponent implements OnInit, OnDestroy {
                     description: meeting.agenda || 'កិច្ចប្រជុំគម្រោង',
                     date: meeting.date,
                     time: meeting.time,
-                    platform: meeting.type === 'google' ? 'Google Meet' : (meeting.platform || 'Google Meet'),
+                    platform: meeting.type === 'google' ? 'Google Meet' : 'WMS Conference',
                     link: meeting.roomUrl || meeting.link,
                     status: 'upcoming' as const,
                     attendees: proj.members || [],
@@ -2020,10 +2020,10 @@ export class UserPlanComponent implements OnInit, OnDestroy {
     getMeetingJoinUrl(m: any): string {
         let url = m?.link || m?.roomUrl || m?.room_url || '';
         if (!url && m?.roomCode) {
-            return `https://meet.google.com/${m.roomCode}`;
+            return `https://meet.jit.si/${m.roomCode}`;
         }
         if (!url) {
-            return 'https://meet.google.com/new';
+            return 'https://meet.jit.si/wms-conference';
         }
         url = url.trim();
         if (!url.startsWith('http://') && !url.startsWith('https://')) {

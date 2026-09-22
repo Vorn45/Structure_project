@@ -179,41 +179,55 @@
                     </div>
                 </div>
 
-                <!-- Room Link Preview with Copy & Google Meet Support -->
-                <div class="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20 space-y-2 font-kantumruy">
+                <!-- Google Meet Link Input & Creation Actions -->
+                <div class="p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20 space-y-3 font-kantumruy">
                     <div class="flex items-center justify-between">
-                        <span class="font-normal text-[16px] text-blue-800 dark:text-blue-200 flex items-center gap-1.5">
-                            <mat-icon svgIcon="mdi:video-outline" class="icon-size-4.5 text-blue-600"></mat-icon>
+                        <span class="font-normal text-[16px] text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
+                            <mat-icon svgIcon="mdi:video-outline" class="icon-size-5 text-blue-600"></mat-icon>
                             <span>តំណភ្ជាប់ Google Meet</span>
                             <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300 font-mono">Google Meet</span>
                         </span>
-                        <div class="flex items-center gap-3">
-                            <button type="button" (click)="openGoogleMeetNew()" class="text-[13px] text-blue-600 hover:text-blue-700 underline flex items-center gap-1 cursor-pointer">
-                                <span>បើក Meet ថ្មី</span>
-                                <mat-icon svgIcon="mdi:open-in-new" class="icon-size-3.5"></mat-icon>
-                            </button>
-                            <button type="button" (click)="generateNewRoomCode()" title="ចុចដើម្បីបង្កើតកូដថ្មី" class="text-[13px] text-slate-500 hover:text-blue-600 font-mono cursor-pointer flex items-center gap-1">
-                                <span>កូដ៖ {{ generatedRoomCode }} ↻</span>
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                (click)="openGoogleMeetNew()"
+                                class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium flex items-center gap-1.5 shadow-xs cursor-pointer transition-colors"
+                            >
+                                <mat-icon svgIcon="mdi:open-in-new" class="icon-size-4"></mat-icon>
+                                <span>បង្កើត Meet ថ្មីលើ Google</span>
                             </button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2.5">
+
+                    <div class="flex items-center gap-2">
                         <input
                             type="text"
                             [(ngModel)]="generatedRoomUrl"
                             placeholder="https://meet.google.com/xxx-yyyy-zzz"
-                            class="flex-1 px-3 py-2 text-[15px] rounded-lg border border-blue-200 dark:border-blue-900 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            class="flex-1 px-3.5 py-2.5 text-[15px] rounded-lg border border-blue-200 dark:border-blue-900 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         />
                         <button
                             type="button"
+                            (click)="pasteFromClipboard()"
+                            title="បិទភ្ជាប់ពី Clipboard"
+                            class="px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-200 text-[14px] font-medium flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+                        >
+                            <mat-icon svgIcon="mdi:clipboard-text-outline" class="icon-size-4 text-slate-500"></mat-icon>
+                            <span>បិទភ្ជាប់</span>
+                        </button>
+                        <button
+                            type="button"
                             (click)="copyLink(generatedRoomUrl)"
-                            class="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium font-kantumruy flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                            class="px-3 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[14px] font-medium flex items-center gap-1 cursor-pointer transition-colors shrink-0"
                         >
                             <mat-icon [svgIcon]="copied() ? 'mdi:check' : 'mdi:content-copy'" class="icon-size-4"></mat-icon>
                             <span>{{ copied() ? 'បានចម្លង' : 'ចម្លង' }}</span>
                         </button>
                     </div>
-                    <p class="text-[12.5px] text-slate-400">អ្នកអាចប្រើប្រាស់តំណភ្ជាប់ Google Meet នេះ ឬបិទភ្ជាប់ (Paste) តំណភ្ជាប់ផ្ទាល់ខ្លួនរបស់អ្នកក៏បាន។</p>
+
+                    <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-normal">
+                        💡 ចុចប៊ូតុង <b>«បង្កើត Meet ថ្មីលើ Google»</b> ដើម្បីបើកបន្ទប់ប្រជុំផ្ទាល់ រួច Copy តំណភ្ជាប់នោះមកចុច <b>«បិទភ្ជាប់»</b> ដាក់ក្នុងប្រអប់ខាងលើ។
+                    </p>
                 </div>
 
 

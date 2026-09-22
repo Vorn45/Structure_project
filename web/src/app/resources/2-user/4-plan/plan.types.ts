@@ -65,7 +65,7 @@ export interface ProjectMeetingItem {
     description: string;
     date: string;
     time: string;
-    platform: 'Google Meet' | 'Zoom' | 'Microsoft Teams' | 'Office';
+    platform: 'Google Meet' | 'Zoom' | 'Microsoft Teams' | 'Office' | 'WMS Conference' | string;
     link: string;
     status: 'upcoming' | 'completed' | 'ongoing';
     attendees: TaskMember[];

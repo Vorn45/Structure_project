@@ -208,16 +208,17 @@ export class MeetingService implements OnModuleInit {
     async createMeeting(user: UserPayload, dto: CreateMeetingDto) {
         const id = `meet-${Date.now().toString().slice(-4)}`;
         
-        // Generate valid Google Meet style code and link
-        const letters = 'abcdefghijklmnopqrstuvwxyz';
-        const randLetters = (n: number) =>
-            Array.from({ length: n }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
-        const generatedMeetCode = `${randLetters(3)}-${randLetters(4)}-${randLetters(3)}`;
-
-        const roomCode = dto.room_code || dto.roomCode || generatedMeetCode;
-        let roomUrl = dto.room_url || dto.roomUrl || '';
+        const roomCode = dto.room_code || dto.roomCode || '';
+        let roomUrl = (dto.room_url || dto.roomUrl || '').trim();
+        if (roomUrl && !roomUrl.startsWith('http://') && !roomUrl.startsWith('https://')) {
+            if (roomUrl.includes('meet.google.com')) {
+                roomUrl = `https://${roomUrl}`;
+            } else {
+                roomUrl = `https://meet.google.com/${roomUrl}`;
+            }
+        }
         if (!roomUrl) {
-            roomUrl = `https://meet.google.com/${roomCode}`;
+            roomUrl = roomCode ? `https://meet.google.com/${roomCode}` : 'https://meet.google.com/new';
         }
 
         const organizer = user?.name_en || user?.name_kh || 'User';
@@ -432,11 +433,15 @@ export class MeetingService implements OnModuleInit {
             }
         }
 
+        const btnText = isStartingNow
+            ? 'ចូលរួមប្រជុំឥឡូវនេះ (Google Meet) 📹'
+            : 'ចូលរួមប្រជុំ (Google Meet) 📹';
+
         const replyMarkup = {
             inline_keyboard: [
                 [
                     {
-                        text: isStartingNow ? 'ចូលរួមប្រជុំឥឡូវនេះ (Join Now) 📹' : 'ចូលរួមប្រជុំ (Google Meet) 📹',
+                        text: btnText,
                         url: meeting.roomUrl,
                     },
                 ],

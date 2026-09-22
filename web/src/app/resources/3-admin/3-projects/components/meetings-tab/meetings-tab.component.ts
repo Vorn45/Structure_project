@@ -21,10 +21,12 @@ export class ProjectMeetingsTabComponent {
     getMeetingJoinUrl(m: any): string {
         let url = m?.link || m?.roomUrl || m?.room_url || '';
         if (!url && m?.roomCode) {
-            return `https://meet.google.com/${m.roomCode}`;
+            return m.roomCode.includes('-') && !m.roomCode.startsWith('wms-')
+                ? `https://meet.google.com/${m.roomCode}`
+                : `https://meet.jit.si/${m.roomCode}`;
         }
         if (!url) {
-            return 'https://meet.google.com/new';
+            return 'https://meet.jit.si/wms-conference';
         }
         url = url.trim();
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
