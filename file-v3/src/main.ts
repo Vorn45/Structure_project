@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import fs from 'fs';
 import path from 'path';
 import { appConfig } from './configs/app.config';
 import { FileDatabase } from './database';
@@ -25,7 +26,14 @@ app.use('/uploads', express.static(appConfig.uploadDir));
 
 // 4. Test View / Dashboard
 app.get('/', (req: Request, res: Response) => {
-  res.sendFile(path.resolve(__dirname, 'view/index.html'));
+  const viewPath = path.resolve(__dirname, 'view/index.html');
+  const srcViewPath = path.resolve(process.cwd(), 'src/view/index.html');
+  if (fs.existsSync(viewPath)) {
+    return res.sendFile(viewPath);
+  } else if (fs.existsSync(srcViewPath)) {
+    return res.sendFile(srcViewPath);
+  }
+  return res.json({ status: 'UP', service: appConfig.appName, message: 'File Service V3 Dashboard' });
 });
 
 // 5. API Routes

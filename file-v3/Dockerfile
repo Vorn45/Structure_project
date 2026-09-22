@@ -9,6 +9,7 @@ COPY tsconfig.json ./
 COPY src/ ./src/
 
 RUN npm run build
+RUN cp -r src/view dist/view 2>/dev/null || true
 
 FROM node:20-alpine AS runner
 
@@ -21,7 +22,9 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
-COPY public ./public
+
+# Create public and uploads directories inside container
+RUN mkdir -p /app/public/uploads
 
 EXPOSE 5000
 
