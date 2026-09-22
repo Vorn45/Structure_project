@@ -2017,6 +2017,21 @@ export class UserPlanComponent implements OnInit, OnDestroy {
         });
     }
 
+    getMeetingJoinUrl(m: any): string {
+        let url = m?.link || m?.roomUrl || m?.room_url || '';
+        if (!url && m?.roomCode) {
+            return `https://meet.google.com/${m.roomCode}`;
+        }
+        if (!url) {
+            return 'https://meet.google.com/new';
+        }
+        url = url.trim();
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            return `https://${url}`;
+        }
+        return url;
+    }
+
     deleteMeeting(meetingId: string, event: Event): void {
         event.stopPropagation();
         if (!this.canManageMembers()) return;

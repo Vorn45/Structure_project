@@ -286,7 +286,11 @@ export class MeetingService implements OnModuleInit {
             appConfig.ORGANIZATION_LOG?.TELEGRAM_BOT_TOKEN ||
             '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
 
-        // 1. NOTIFY MEMBERS OF THE PROJECT DIRECTLY VIA TELEGRAM
+        // 1. NOTIFY MEMBERS OF THE PROJECT AND ADMIN DIRECTLY VIA TELEGRAM
+        const directChatIds = new Set<string>();
+        // Always notify primary admin
+        directChatIds.add('8836877586');
+
         const participantIds: number[] = (meeting.participants || [])
             .map((p: any) => Number(p.id))
             .filter((id) => Number.isFinite(id) && id > 0);
@@ -301,51 +305,55 @@ export class MeetingService implements OnModuleInit {
                     .select(['user.id', 'user.name_en', 'user.name_kh', 'user.telegram_id'])
                     .getMany();
 
-                const replyMarkup = {
-                    inline_keyboard: [
-                        [
-                            {
-                                text: 'ចូលរួមប្រជុំ (Google Meet) 📹',
-                                url: meeting.roomUrl,
-                            },
-                        ],
-                    ],
-                };
+                for (const u of assignedUsers) {
+                    if (u.telegram_id) {
+                        directChatIds.add(String(u.telegram_id).trim());
+                    }
+                }
+            } catch (err: any) {
+                console.warn('Failed to query project users for meeting notification:', err?.message || err);
+            }
+        }
 
-                for (const member of assignedUsers) {
-                    if (!member.telegram_id) continue;
-                    const memberName = member.name_kh || member.name_en || 'សមាជិក';
-                    const personalMsg =
+        const replyMarkup = {
+            inline_keyboard: [
+                [
+                    {
+                        text: 'ចូលរួមប្រជុំ (Google Meet) 📹',
+                        url: meeting.roomUrl,
+                    },
+                ],
+            ],
+        };
+
+        const personalMsg =
 `📅 <b>ការអញ្ជើញចូលរួមប្រជុំគម្រោង (Project Meeting Invitation)</b>
 
-ជំរាបសួរ <b>${escapeHtml(memberName)}</b>, អ្នកមានកិច្ចប្រជុំថ្មីសម្រាប់គម្រោង៖
 📌 <b>ប្រធានបទ:</b> ${escapeHtml(meeting.title)}
 ${projectName ? `📂 <b>គម្រោង:</b> ${escapeHtml(projectName)}\n` : ''}
 🗓 <b>កាលបរិច្ឆេទ:</b> ${escapeHtml(meeting.date)}
 ⏰ <b>ម៉ោង:</b> ${escapeHtml(meeting.time)} (${escapeHtml(meeting.duration)})
 👤 <b>អ្នករៀបចំ:</b> ${escapeHtml(meeting.organizer)}
+${participantNames ? `👥 <b>សមាជិក:</b> ${escapeHtml(participantNames)}\n` : ''}
 ${meeting.agenda ? `📝 <b>របៀបវារៈ:</b> ${escapeHtml(meeting.agenda)}\n` : ''}
 🔗 <b>Google Meet:</b> <a href="${escapeHtml(meeting.roomUrl)}">${escapeHtml(meeting.roomUrl)}</a>
 
 សូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលរួមប្រជុំ។`;
 
-                    try {
-                        await axios.post(
-                            `https://api.telegram.org/bot${botToken}/sendMessage`,
-                            {
-                                chat_id: member.telegram_id,
-                                text: personalMsg,
-                                parse_mode: 'HTML',
-                                reply_markup: replyMarkup,
-                            },
-                            { timeout: 10000 },
-                        );
-                    } catch (err: any) {
-                        console.warn(`Failed to send direct meeting telegram to ${member.telegram_id}:`, err?.message || err);
-                    }
-                }
+        for (const targetChatId of directChatIds) {
+            try {
+                await axios.post(
+                    `https://api.telegram.org/bot${botToken}/sendMessage`,
+                    {
+                        chat_id: targetChatId,
+                        text: personalMsg,
+                        parse_mode: 'HTML',
+                        reply_markup: replyMarkup,
+                    },
+                    { timeout: 10000 },
+                );
             } catch (err: any) {
-                console.warn('Failed to query project users for meeting notification:', err?.message || err);
+                console.warn(`Failed to send direct meeting telegram to ${targetChatId}:`, err?.message || err);
             }
         }
 

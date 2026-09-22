@@ -252,31 +252,46 @@ export class CreateMeetingDialogComponent implements OnInit, OnDestroy {
         });
     }
 
+    getValidMeetingUrl(meeting: ScheduledMeeting | any): string {
+        let url = meeting?.roomUrl || meeting?.link || meeting?.room_url || '';
+        if (!url && meeting?.roomCode) {
+            return `https://meet.google.com/${meeting.roomCode}`;
+        }
+        if (!url) {
+            return 'https://meet.google.com/new';
+        }
+        url = url.trim();
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            return `https://${url}`;
+        }
+        return url;
+    }
+
     startInstantMeetingDirectly(): void {
-        const rand = Math.floor(1000 + Math.random() * 9000);
-        this.activeRoomCode.set(`meet-wms-instant-${rand}`);
-        this.activeRoomUrl.set(`https://meet.wms.gov.kh/room/meet-wms-instant-${rand}`);
-        this.inCall.set(true);
-        this.startCallTimer();
+        const letters = 'abcdefghijklmnopqrstuvwxyz';
+        const randLetters = (n: number) =>
+            Array.from({ length: n }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
+        const code = `${randLetters(3)}-${randLetters(4)}-${randLetters(3)}`;
+        window.open(`https://meet.google.com/${code}`, '_blank', 'noopener,noreferrer');
     }
 
     joinScheduledMeeting(meeting: ScheduledMeeting): void {
-        if (meeting.roomUrl && (meeting.roomUrl.includes('meet.google.com') || meeting.roomUrl.startsWith('http'))) {
-            window.open(meeting.roomUrl, '_blank');
-            return;
-        }
-        this.activeRoomCode.set(meeting.roomCode);
-        this.inCall.set(true);
-        this.startCallTimer();
+        const url = this.getValidMeetingUrl(meeting);
+        window.open(url, '_blank', 'noopener,noreferrer');
     }
 
     joinByCode(): void {
         if (!this.joinInputCode.trim()) return;
-        const code = this.joinInputCode.trim();
-        this.activeRoomCode.set(code);
-        this.activeRoomUrl.set(`https://meet.wms.gov.kh/room/${code}`);
-        this.inCall.set(true);
-        this.startCallTimer();
+        let code = this.joinInputCode.trim();
+        if (code.startsWith('http://') || code.startsWith('https://')) {
+            window.open(code, '_blank', 'noopener,noreferrer');
+            return;
+        }
+        if (code.includes('meet.google.com/')) {
+            window.open(`https://${code}`, '_blank', 'noopener,noreferrer');
+            return;
+        }
+        window.open(`https://meet.google.com/${code}`, '_blank', 'noopener,noreferrer');
     }
 
     startCallTimer(): void {

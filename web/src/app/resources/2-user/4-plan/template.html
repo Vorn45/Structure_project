@@ -1543,7 +1543,7 @@
                                     </div>
 
                                     <div class="flex items-center gap-2.5 self-start sm:self-auto">
-                                        <a *ngIf="m.status === 'upcoming'" [href]="m.link" target="_blank"
+                                        <a *ngIf="m.status === 'upcoming'" [href]="getMeetingJoinUrl(m)" target="_blank" rel="noopener noreferrer"
                                             class="h-10 px-4 rounded-xl border border-blue-200 dark:border-blue-800/80 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-[14px] font-medium flex items-center gap-1.5 cursor-pointer transition-colors">
                                             <mat-icon svgIcon="mdi:video-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
                                             <span>ចូលរួមប្រជុំ</span>
