@@ -274,9 +274,16 @@
                                     ? 'p-2.5 rounded-xl border border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 text-blue-950 dark:text-blue-100 flex items-center justify-between cursor-pointer transition-all shadow-2xs'
                                     : 'p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center justify-between cursor-pointer transition-all'">
                                 <div class="flex items-center gap-2.5 min-w-0">
-                                    <div [class]="'w-8.5 h-8.5 rounded-full ' + member.bg + ' flex items-center justify-center text-[12px] font-medium shrink-0 shadow-2xs'">
-                                        {{ member.initials }}
-                                    </div>
+                                    @if (member.avatar) {
+                                        <img
+                                            [src]="member.avatar"
+                                            [alt]="member.name"
+                                            class="w-8.5 h-8.5 rounded-full object-cover shrink-0 shadow-2xs" />
+                                    } @else {
+                                        <div [class]="'w-8.5 h-8.5 rounded-full ' + member.bg + ' flex items-center justify-center text-[12px] font-medium shrink-0 shadow-2xs'">
+                                            {{ member.initials }}
+                                        </div>
+                                    }
                                     <div class="min-w-0">
                                         <div class="text-[14.5px] font-medium truncate leading-tight">
                                             {{ member.name }}
@@ -290,6 +297,20 @@
                                 <mat-icon
                                     [svgIcon]="isMemberSelected(member.id) ? 'mdi:check-circle' : 'mdi:checkbox-blank-circle-outline'"
                                     [class]="isMemberSelected(member.id) ? 'icon-size-5 text-blue-600 shrink-0' : 'icon-size-5 text-slate-300 dark:text-slate-600 shrink-0'"></mat-icon>
+                            </div>
+                        } @empty {
+                            <div class="sm:col-span-2 p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-[13.5px] text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2">
+                                <span>
+                                    {{ membersError() ? 'មិនអាចទាញយកបញ្ជីសមាជិកបានទេ' : 'មិនមានសមាជិកសម្រាប់ជ្រើសរើសទេ' }}
+                                </span>
+                                @if (membersError()) {
+                                    <button
+                                        type="button"
+                                        (click)="loadMembers()"
+                                        class="px-3 py-1.5 rounded-lg text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 transition-all cursor-pointer shrink-0">
+                                        ព្យាយាមម្តងទៀត
+                                    </button>
+                                }
                             </div>
                         }
                     </div>

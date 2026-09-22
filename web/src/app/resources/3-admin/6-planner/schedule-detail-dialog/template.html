@@ -131,26 +131,35 @@
     <!-- ========================================================= -->
     <div class="p-4 px-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 shrink-0 font-kantumruy">
         
-        <!-- Delete Button with Safe Confirmation -->
-        <button
-            type="button"
-            (click)="deleteSchedule()"
-            [class]="confirmDelete()
-                ? 'px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-white bg-rose-600 hover:bg-rose-700 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs'
-                : 'px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 transition-all flex items-center gap-1.5 cursor-pointer'">
-            <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
-            <span>{{ confirmDelete() ? 'ចុចម្តងទៀតដើម្បីលុប' : 'លុបកាលវិភាគ' }}</span>
-        </button>
-
-        <div class="flex items-center gap-2.5">
-            <!-- Edit Button -->
+        <!-- Delete Button with Safe Confirmation (owner / admin only) -->
+        @if (canModify()) {
             <button
                 type="button"
-                (click)="editSchedule()"
-                class="px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 transition-all flex items-center gap-1.5 cursor-pointer">
-                <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
-                <span>កែប្រែ</span>
+                (click)="deleteSchedule()"
+                [class]="confirmDelete()
+                    ? 'px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-white bg-rose-600 hover:bg-rose-700 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs'
+                    : 'px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 transition-all flex items-center gap-1.5 cursor-pointer'">
+                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
+                <span>{{ confirmDelete() ? 'ចុចម្តងទៀតដើម្បីលុប' : 'លុបកាលវិភាគ' }}</span>
             </button>
+        } @else {
+            <span class="text-[13.5px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                <mat-icon svgIcon="mdi:eye-outline" class="icon-size-4.5"></mat-icon>
+                មើលបានតែប៉ុណ្ណោះ
+            </span>
+        }
+
+        <div class="flex items-center gap-2.5">
+            <!-- Edit Button (owner / admin only) -->
+            @if (canModify()) {
+                <button
+                    type="button"
+                    (click)="editSchedule()"
+                    class="px-4 py-2.5 rounded-xl text-[14.5px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 transition-all flex items-center gap-1.5 cursor-pointer">
+                    <mat-icon svgIcon="mdi:pencil-outline" class="icon-size-4.5 text-blue-600 dark:text-blue-400"></mat-icon>
+                    <span>កែប្រែ</span>
+                </button>
+            }
 
             <!-- Close Button -->
             <button

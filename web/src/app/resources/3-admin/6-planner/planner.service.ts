@@ -36,6 +36,8 @@ export interface BackendPlannerSchedule {
     created_by_name?: string;
     created_at?: string;
     updated_at?: string;
+    /** Server-evaluated: may the signed-in user edit or delete this entry? */
+    can_modify?: boolean;
 }
 
 export interface PlannerTeamMember {
@@ -72,7 +74,7 @@ export class PlannerService {
     // =========================================================================
     // 1. GET SCHEDULES
     // =========================================================================
-    getSchedules(params?: { category?: string; search?: string; admin?: string; scope?: string }): Observable<PlannerListResponse> {
+    getSchedules(params?: { category?: string; search?: string }): Observable<PlannerListResponse> {
         return this._http.get<PlannerListResponse>(this.baseUrl, {
             params: params as Record<string, string>,
             withCredentials: true,

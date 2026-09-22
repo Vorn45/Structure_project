@@ -28,12 +28,15 @@ import { ScheduleDetailDialogData } from './schedule-detail-dialog.types';
 export class ScheduleDetailDialogComponent {
     schedule: PlannerScheduleEvent;
     confirmDelete = signal<boolean>(false);
+    /** Edit / delete are hidden unless the viewer owns this schedule (or is an admin). */
+    canModify = signal<boolean>(false);
 
     constructor(
         public dialogRef: MatDialogRef<ScheduleDetailDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: ScheduleDetailDialogData,
     ) {
         this.schedule = data.schedule;
+        this.canModify.set(data.canModify !== false && this.schedule?.canModify !== false);
     }
 
     getCategoryLabel(category: string): string {
