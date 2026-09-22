@@ -15,6 +15,8 @@ class TelegramFromDto {
 class TelegramContactDto {
     @IsString() phone_number: string;
     @IsOptional() @IsString() first_name?: string;
+    @IsOptional() @IsString() last_name?: string;
+    @IsOptional() @IsString() vcard?: string;
     @IsOptional() @IsNumber() user_id?: number;
 }
 

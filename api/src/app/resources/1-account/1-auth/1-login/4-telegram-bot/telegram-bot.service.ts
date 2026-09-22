@@ -726,8 +726,9 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
         contact: NonNullable<TelegramUpdateDto['message']>['contact'],
         username?: string,
     ) {
+        const contactName = `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
         const digits = this._normalizePhone(contact?.phone_number);
-        const matchedUser = digits ? await this._repository.findActiveByPhone(digits) : null;
+        const matchedUser = digits ? await this._repository.findActiveByPhone(digits, contactName) : null;
 
         if (!matchedUser) {
             await this._sendMessage(

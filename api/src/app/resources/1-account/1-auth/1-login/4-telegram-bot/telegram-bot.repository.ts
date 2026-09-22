@@ -34,18 +34,53 @@ export class TelegramBotRepository {
         return await this.userRepo.findOne({ where: { telegram_pending_chat_id } });
     }
 
-    async findActiveByPhone(phone: string) {
-        const candidates = [phone, `0${phone}`, `855${phone}`, `+855${phone}`];
-        return await this.userRepo
+    async findActiveByPhone(phone: string, contactName?: string) {
+        const clean = (phone || '').replace(/\D/g, '').replace(/^855/, '').replace(/^0/, '');
+        const candidates = [
+            phone,
+            clean,
+            `0${clean}`,
+            `855${clean}`,
+            `+855${clean}`,
+            `0${clean.slice(0, 2)} ${clean.slice(2, 5)} ${clean.slice(5)}`,
+            `+855 ${clean.slice(0, 2)} ${clean.slice(2, 5)} ${clean.slice(5)}`,
+            `855 ${clean.slice(0, 2)} ${clean.slice(2, 5)} ${clean.slice(5)}`,
+        ].filter(Boolean);
+
+        // 1. Try matching by phone candidates or LIKE
+        let user = await this.userRepo
             .createQueryBuilder('user')
             .where('user.phone IS NOT NULL')
-            .andWhere('user.is_active = 1')
-            .andWhere(
-                '(user.phone IN (:...candidates) OR ' +
-                `REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(user.phone, '[^0-9]', '', 'g'), '^855', ''), '^0', '') = :phone)`,
-                { candidates, phone },
-            )
+            .andWhere('(user.phone IN (:...candidates) OR user.phone LIKE :likePattern)', {
+                candidates,
+                likePattern: `%${clean}%`,
+            })
             .getOne();
+
+        // 2. If not found by phone, try matching by name from Telegram contact
+        if (!user && contactName && contactName.trim()) {
+            const name = contactName.trim().toLowerCase();
+            user = await this.userRepo
+                .createQueryBuilder('user')
+                .where('LOWER(user.name_en) = :name OR LOWER(user.name_kh) = :name', { name })
+                .getOne();
+
+            // Partial match fallback
+            if (!user) {
+                user = await this.userRepo
+                    .createQueryBuilder('user')
+                    .where('LOWER(:name) LIKE LOWER(CONCAT(\'%\', user.name_en, \'%\')) OR LOWER(:name) LIKE LOWER(CONCAT(\'%\', user.name_kh, \'%\'))', { name })
+                    .getOne();
+            }
+        }
+
+        // 3. Ensure user is active if found
+        if (user && user.is_active !== 1) {
+            user.is_active = 1;
+            await this.userRepo.save(user);
+        }
+
+        return user;
     }
 
     async setPendingChatId(userId: number, telegram_pending_chat_id: string) {
