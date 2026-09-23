@@ -45,31 +45,49 @@ export class TelegramBotRepository {
             `0${clean.slice(0, 2)} ${clean.slice(2, 5)} ${clean.slice(5)}`,
             `+855 ${clean.slice(0, 2)} ${clean.slice(2, 5)} ${clean.slice(5)}`,
             `855 ${clean.slice(0, 2)} ${clean.slice(2, 5)} ${clean.slice(5)}`,
+            `0${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6)}`,
+            `+855 ${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6)}`,
+            `855 ${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6)}`,
         ].filter(Boolean);
 
-        // 1. Try matching by phone candidates or LIKE
-        let user = await this.userRepo
+        // 1. Try matching by phone candidates or normalized DB phone
+        let qb = this.userRepo
             .createQueryBuilder('user')
             .where('user.phone IS NOT NULL')
-            .andWhere('(user.phone IN (:...candidates) OR user.phone LIKE :likePattern)', {
-                candidates,
-                likePattern: `%${clean}%`,
-            })
-            .getOne();
+            .andWhere('user.deleted_at IS NULL');
+
+        if (clean) {
+            qb = qb.andWhere(
+                `(
+                    user.phone IN (:...candidates)
+                    OR regexp_replace(regexp_replace(regexp_replace(user.phone, '[^0-9]', '', 'g'), '^855', ''), '^0', '') = :clean
+                    OR regexp_replace(user.phone, '[^0-9]', '', 'g') LIKE :likeClean
+                )`,
+                {
+                    candidates,
+                    clean,
+                    likeClean: `%${clean}%`,
+                },
+            );
+        }
+
+        let user = await qb.getOne();
 
         // 2. If not found by phone, try matching by name from Telegram contact
         if (!user && contactName && contactName.trim()) {
             const name = contactName.trim().toLowerCase();
             user = await this.userRepo
                 .createQueryBuilder('user')
-                .where('LOWER(user.name_en) = :name OR LOWER(user.name_kh) = :name', { name })
+                .where('user.deleted_at IS NULL')
+                .andWhere('(LOWER(user.name_en) = :name OR LOWER(user.name_kh) = :name)', { name })
                 .getOne();
 
             // Partial match fallback
             if (!user) {
                 user = await this.userRepo
                     .createQueryBuilder('user')
-                    .where('LOWER(:name) LIKE LOWER(CONCAT(\'%\', user.name_en, \'%\')) OR LOWER(:name) LIKE LOWER(CONCAT(\'%\', user.name_kh, \'%\'))', { name })
+                    .where('user.deleted_at IS NULL')
+                    .andWhere('(LOWER(:name) LIKE LOWER(CONCAT(\'%\', user.name_en, \'%\')) OR LOWER(:name) LIKE LOWER(CONCAT(\'%\', user.name_kh, \'%\')))', { name })
                     .getOne();
             }
         }
