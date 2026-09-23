@@ -14,15 +14,18 @@ import { NavigationService } from 'app/core/navigation/navigation.service';
 import { UserService } from 'app/core/user/user.service';
 import { Role, User } from 'app/core/user/user.types';
 import { MobileBottomNavComponent } from 'app/layout/common/mobile-bottom-nav/component';
-import { LayoutChromeService }                     from 'app/layout/common/layout-chrome.service';
+import { LayoutChromeService } from 'app/layout/common/layout-chrome.service';
 import { UserComponent } from 'app/layout/common/user/component';
 import { HelperLoadingBarComponent } from 'helper/components/loading-bar';
-import { HelperNavigationComponent, HelperNavigationItem } from 'helper/components/navigation';
+import {
+    HelperNavigationComponent,
+    HelperNavigationItem,
+} from 'helper/components/navigation';
 import { HelperMediaWatcherService } from 'helper/services/media-watcher';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationsComponent } from '../common/notifications/component';
 
-import { SchemeComponent }             from 'app/layout/common/scheme/component';
+import { SchemeComponent } from 'app/layout/common/scheme/component';
 
 @Component({
     selector: 'thin-layout',
@@ -123,4 +126,3 @@ export class ThinLayoutComponent implements OnInit, OnDestroy {
         this._unsubscribeAll.complete();
     }
 }
-

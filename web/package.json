@@ -75,6 +75,7 @@
         "@angular/cli": "18.2.14",
         "@angular/compiler": "18.2.14",
         "@angular/compiler-cli": "18.2.14",
+        "@angular/language-server": "^18.2.0",
         "@playwright/test": "^1.62.1",
         "@tailwindcss/typography": "0.5.13",
         "@types/canvas-confetti": "^1.9.0",
@@ -99,5 +100,19 @@
         "postcss": "^8.4.38",
         "tailwindcss": "^3.4.3",
         "typescript": "5.4.5"
+    },
+    "allowScripts": {
+        "@firebase/util@1.15.1": true,
+        "bufferutil@4.1.0": true,
+        "canvas@3.2.3": true,
+        "core-js@3.49.0": true,
+        "es5-ext@0.10.64": true,
+        "esbuild@0.23.0": true,
+        "esbuild@0.21.5": true,
+        "lmdb@3.0.13": true,
+        "msgpackr-extract@3.0.4": true,
+        "nice-napi@1.0.2": true,
+        "protobufjs@7.6.5": true,
+        "utf-8-validate@5.0.10": true
     }
 }

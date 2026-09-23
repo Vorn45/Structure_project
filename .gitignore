@@ -50,3 +50,4 @@ express_demo.js
 
 # AI Agents & IDE metadata
 .agents/
+AGENTS.md
