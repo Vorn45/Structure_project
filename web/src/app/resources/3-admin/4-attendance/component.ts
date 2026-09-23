@@ -15,6 +15,7 @@ import { AdminService, AdminAttendanceData, AdminLeaveRequest, AdminUser } from 
 export interface StaffLeaveSummary {
     userId: number;
     userName: string;
+    userEn?: string;
     department: string;
     avatar?: string | null;
     totalRequests: number;
@@ -52,8 +53,9 @@ export class AttendanceLeaveComponent implements OnInit {
     users = signal<AdminUser[]>([]);
     loading = signal<boolean>(true);
 
-    // Active navigation tab
+    // Active navigation tab & view mode
     activeTab = signal<'leaves' | 'attendance' | 'summary'>('leaves');
+    leaveViewMode = signal<'grid' | 'table'>('grid');
 
     // Filters & search
     searchQuery = signal<string>('');
@@ -61,6 +63,55 @@ export class AttendanceLeaveComponent implements OnInit {
     departmentFilter = signal<string>('all');
     leaveTypeFilter = signal<string>('all');
     selectedDate = signal<string>(new Date().toISOString().split('T')[0]);
+    sortBy = signal<'default' | 'name_asc' | 'name_desc'>('default');
+
+    // Filter bar toggle state
+    isFilterOpen = signal<boolean>(false);
+
+    toggleFilterBar(): void {
+        this.isFilterOpen.update((v) => !v);
+    }
+
+    setSort(s: 'default' | 'name_asc' | 'name_desc'): void {
+        this.sortBy.set(s);
+    }
+
+    hasActiveFilters = computed(() => {
+        return (
+            this.statusFilter() !== 'all' ||
+            this.departmentFilter() !== 'all' ||
+            (this.leaveTypeFilter() !== 'all' && this.activeTab() === 'leaves') ||
+            this.sortBy() !== 'default'
+        );
+    });
+
+    // Active filters count
+    activeFiltersCount = computed(() => {
+        let count = 0;
+        if (this.searchQuery().trim()) count++;
+        if (this.statusFilter() !== 'all') count++;
+        if (this.departmentFilter() !== 'all') count++;
+        if (this.leaveTypeFilter() !== 'all' && this.activeTab() === 'leaves') count++;
+        if (this.sortBy() !== 'default') count++;
+        return count;
+    });
+
+    // Today's date formatted in Khmer
+    todayFormattedKh = computed(() => {
+        const d = new Date();
+        const khMonths = [
+            'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+            'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+        ];
+        const toKhmerNum = (num: number) => {
+            const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+            return String(num).split('').map(c => khmerDigits[Number(c)] || c).join('');
+        };
+        const day = toKhmerNum(d.getDate());
+        const month = khMonths[d.getMonth()];
+        const year = toKhmerNum(d.getFullYear());
+        return `ថ្ងៃទី ${day} ${month} ${year}`;
+    });
 
     // Action comment modal (Approve / Reject)
     actionModalOpen = signal<boolean>(false);
@@ -119,6 +170,7 @@ export class AttendanceLeaveComponent implements OnInit {
         const status = this.statusFilter();
         const dept = this.departmentFilter();
         const type = this.leaveTypeFilter();
+        const sort = this.sortBy();
 
         if (q) {
             items = items.filter(
@@ -141,6 +193,12 @@ export class AttendanceLeaveComponent implements OnInit {
             items = items.filter((l) => l.leave_type === type);
         }
 
+        if (sort === 'name_asc') {
+            items = [...items].sort((a, b) => (a.user_name || '').localeCompare(b.user_name || '', 'km'));
+        } else if (sort === 'name_desc') {
+            items = [...items].sort((a, b) => (b.user_name || '').localeCompare(a.user_name || '', 'km'));
+        }
+
         return items;
     });
 
@@ -150,6 +208,7 @@ export class AttendanceLeaveComponent implements OnInit {
         const q = this.searchQuery().trim().toLowerCase();
         const status = this.statusFilter();
         const dept = this.departmentFilter();
+        const sort = this.sortBy();
 
         if (q) {
             logs = logs.filter(
@@ -169,8 +228,39 @@ export class AttendanceLeaveComponent implements OnInit {
             logs = logs.filter((l) => l.department === dept);
         }
 
+        if (sort === 'name_asc') {
+            logs = [...logs].sort((a, b) => (a.user_name || '').localeCompare(b.user_name || '', 'km'));
+        } else if (sort === 'name_desc') {
+            logs = [...logs].sort((a, b) => (b.user_name || '').localeCompare(a.user_name || '', 'km'));
+        }
+
         return logs;
     });
+
+    // Helper filter button label getters
+    getStatusFilterButtonLabel(): string {
+        const s = this.statusFilter();
+        if (s === 'all') return 'ស្ថានភាព';
+        if (this.activeTab() === 'leaves') {
+            if (s === 'pending') return 'កំពុងរង់ចាំ';
+            if (s === 'approved') return 'បានអនុម័ត';
+            if (s === 'rejected') return 'បានបដិសេធ';
+        } else {
+            if (s === 'on_time') return 'ទាន់ពេលវេលា';
+            if (s === 'late') return 'មកយឺត';
+        }
+        return s;
+    }
+
+    getLeaveTypeFilterButtonLabel(): string {
+        const t = this.leaveTypeFilter();
+        if (t === 'all') return 'ប្រភេទច្បាប់';
+        if (t === 'annual') return 'ច្បាប់ប្រចាំឆ្នាំ';
+        if (t === 'sick') return 'ច្បាប់ឈឺ';
+        if (t === 'special') return 'ច្បាប់ពិសេស';
+        if (t === 'maternity') return 'ច្បាប់មាតុភាព';
+        return t;
+    }
 
     // Computed: Quick Statistics
     totalStaff = computed(() => this.attendance()?.total_staff || this.users().length || 6);
@@ -198,6 +288,7 @@ export class AttendanceLeaveComponent implements OnInit {
             map.set(String(u.id), {
                 userId: u.id,
                 userName: u.name_kh || u.name_en,
+                userEn: u.name_en || '',
                 department: u.department || 'ព័ត៌មានវិទ្យា (IT)',
                 avatar: u.avatar || null,
                 totalRequests: 0,
@@ -214,11 +305,13 @@ export class AttendanceLeaveComponent implements OnInit {
             const key = String(l.user_id);
             let item = map.get(key);
             if (!item) {
+                const matchedUser = this.users().find((u) => u.id === l.user_id || u.name_kh === l.user_name || u.name_en === l.user_name);
                 item = {
                     userId: l.user_id,
                     userName: l.user_name,
+                    userEn: matchedUser?.name_en || '',
                     department: l.department || 'ព័ត៌មានវិទ្យា (IT)',
-                    avatar: null,
+                    avatar: matchedUser?.avatar || null,
                     totalRequests: 0,
                     approvedDays: 0,
                     pendingDays: 0,
@@ -243,6 +336,33 @@ export class AttendanceLeaveComponent implements OnInit {
 
         return Array.from(map.values()).sort((a, b) => b.approvedDays - a.approvedDays);
     });
+
+    filterByKpi(type: 'all' | 'present' | 'late' | 'leaves'): void {
+        this.searchQuery.set('');
+        this.departmentFilter.set('all');
+        this.leaveTypeFilter.set('all');
+
+        if (type === 'all') {
+            this.activeTab.set('attendance');
+            this.statusFilter.set('all');
+        } else if (type === 'present') {
+            this.activeTab.set('attendance');
+            this.statusFilter.set('on_time');
+        } else if (type === 'late') {
+            this.activeTab.set('attendance');
+            this.statusFilter.set('late');
+        } else if (type === 'leaves') {
+            this.activeTab.set('leaves');
+            this.statusFilter.set('all');
+        }
+    }
+
+    resetFilters(): void {
+        this.searchQuery.set('');
+        this.statusFilter.set('all');
+        this.departmentFilter.set('all');
+        this.leaveTypeFilter.set('all');
+    }
 
     ngOnInit(): void {
         this.initForms();
@@ -635,30 +755,66 @@ export class AttendanceLeaveComponent implements OnInit {
         return resolveFileUrl(avatar);
     }
 
-    getUserInitials(name?: string | null): string {
-        if (!name) return 'BK';
-        const parts = name.trim().split(/\s+/);
-        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    getStaffEn(userId?: any, userName?: any): string | null {
+        if (userId) {
+            const found = this.users().find((u) => u.id === Number(userId) || String(u.id) === String(userId));
+            if (found?.name_en) return found.name_en;
+        }
+        if (userName) {
+            const found = this.users().find((u) => u.name_kh === userName || u.name_en === userName);
+            if (found?.name_en) return found.name_en;
+        }
+        return null;
+    }
+
+    getUserInitials(nameKh?: string | null, nameEn?: string | null): string {
+        // Priority 1: If explicit English name is provided
+        if (nameEn && nameEn.trim()) {
+            const parts = nameEn.trim().split(/\s+/).filter(Boolean);
+            if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        if (!nameKh || !nameKh.trim()) return 'U';
+        const trimmed = nameKh.trim();
+
+        // Priority 2: If nameKh contains only Latin characters
+        if (!/[\u1780-\u17FF]/.test(trimmed)) {
+            const parts = trimmed.split(/\s+/).filter(Boolean);
+            if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        // Priority 3: Match from user roster to get English initials if available
+        const matched = this.users().find(u => u.name_kh === trimmed || u.name_en === trimmed);
+        if (matched?.name_en && matched.name_en.trim()) {
+            const parts = matched.name_en.trim().split(/\s+/).filter(Boolean);
+            if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        // Fallback: 1 clean Khmer consonant
+        const words = trimmed.split(/\s+/).filter(Boolean);
+        return words[0].slice(0, 1);
     }
 
     getAvatarBg(name?: string | null): string {
-        if (!name) return 'bg-blue-600';
-        const colors = [
-            'bg-blue-600',
-            'bg-emerald-600',
-            'bg-purple-600',
-            'bg-amber-600',
-            'bg-rose-600',
-            'bg-indigo-600',
-            'bg-teal-600',
-            'bg-cyan-600',
+        if (!name) return 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+        const styles = [
+            'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+            'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+            'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+            'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+            'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+            'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+            'bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+            'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
         ];
         let hash = 0;
         for (let i = 0; i < name.length; i++) {
             hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
-        return colors[Math.abs(hash) % colors.length];
+        return styles[Math.abs(hash) % styles.length];
     }
 }
 

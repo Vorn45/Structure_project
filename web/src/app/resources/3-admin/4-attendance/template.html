@@ -1,132 +1,333 @@
-<div class="flex flex-col flex-1 min-w-0 w-full p-4 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
+<div class="flex flex-col flex-1 min-w-0 w-full p-3.5 sm:p-5 bg-slate-100/70 dark:bg-slate-900/60 font-normal text-[16px] box-border relative select-none"
     style="font-family: 'Kantumruy Pro', sans-serif; min-height: 100vh;">
 
     <!-- ===== FRAMED MAIN CONTAINER ===== -->
-    <div class="flex flex-col flex-1 min-w-0 space-y-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 sm:p-6"
-        style="min-height: calc(100vh - 2rem);">
+    <div class="flex flex-col flex-1 min-w-0 space-y-4 sm:space-y-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 shadow-xs p-4 sm:p-6"
+        style="min-height: calc(100vh - 2.5rem);">
 
         <!-- Top Header Row -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-200 dark:border-amber-800 shrink-0">
-                    <mat-icon svgIcon="mdi:calendar-check-outline" class="icon-size-6"></mat-icon>
-                </div>
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                        វត្តមាន និងច្បាប់ឈប់សម្រាក (Attendance & Leaves)
-                    </h1>
-                    <p class="text-[14px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        ពិនិត្យទិន្នន័យវត្តមានបុគ្គលិកប្រចាំថ្ងៃ តាមដានសមតុល្យ និងអនុម័តសំណើរសុំច្បាប់ឈប់សម្រាក
-                    </p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+            <!-- Left: Title & Count -->
+            <div class="flex items-center gap-3 shrink-0">
+                <mat-icon svgIcon="mdi:calendar-check-outline" class="icon-size-5 text-slate-500 dark:text-slate-400 shrink-0"></mat-icon>
+                <span class="text-[17px] font-medium text-slate-800 dark:text-white">វត្តមាន</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    {{ totalStaff() }}
+                </span>
+            </div>
+
+            <!-- Center: Search bar with clickable tune-variant icon on right -->
+            <div class="flex-1 flex items-center justify-center max-w-sm sm:max-w-md mx-auto w-full">
+                <div class="relative w-full flex items-center">
+                    <mat-icon svgIcon="mdi:magnify" class="absolute left-3 text-slate-400 icon-size-4.5 pointer-events-none"></mat-icon>
+                    <input
+                        type="text"
+                        [ngModel]="searchQuery()"
+                        (ngModelChange)="searchQuery.set($event)"
+                        placeholder="ស្វែងរកតាមឈ្មោះបុគ្គលិក, នាយកដ្ឋាន..."
+                        class="w-full pl-9 pr-9 py-1.5 h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13.5px] focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all" />
+
+                    <!-- Filter Toggle Button inside search input -->
+                    <button
+                        type="button"
+                        (click)="toggleFilterBar()"
+                        class="absolute right-1.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                        [ngClass]="(isFilterOpen() || hasActiveFilters()) ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-2xs' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'"
+                        [matTooltip]="isFilterOpen() ? 'លាក់តម្រង' : 'បង្ហាញតម្រង'">
+                        <mat-icon svgIcon="mdi:tune-variant" class="icon-size-4"></mat-icon>
+                        @if (hasActiveFilters()) {
+                            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 border border-white dark:border-slate-800"></span>
+                        }
+                    </button>
                 </div>
             </div>
 
-            <!-- Header Actions -->
+            <!-- Right: Header Actions -->
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <button
-                    type="button"
-                    (click)="loadData()"
-                    matTooltip="ផ្ទុកទិន្នន័យឡើងវិញ"
-                    class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
-                    <mat-icon svgIcon="mdi:refresh" class="icon-size-4.5"></mat-icon>
-                    <span class="hidden sm:inline">ផ្ទុកឡើងវិញ</span>
-                </button>
-
                 <button
                     type="button"
                     (click)="exportToCsv()"
                     matTooltip="ទាញយករបាយការណ៍ជាឯកសារ Excel (CSV)"
-                    class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[14px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
-                    <mat-icon svgIcon="mdi:file-excel-outline" class="icon-size-4.5 text-emerald-600"></mat-icon>
+                    class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-emerald-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-emerald-700 hover:border-emerald-300 dark:hover:border-emerald-700 text-[13px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                    <mat-icon svgIcon="mdi:file-excel-outline" class="icon-size-4 text-emerald-600"></mat-icon>
                     <span>ទាញយក Excel</span>
                 </button>
 
                 <button
                     type="button"
                     (click)="openManualLogDrawer()"
-                    class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[14px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
-                    <mat-icon svgIcon="mdi:clock-check-outline" class="icon-size-4.5 text-blue-600"></mat-icon>
+                    class="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-blue-50/40 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-blue-600 hover:border-blue-300 dark:hover:border-blue-700 text-[13px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.98]">
+                    <mat-icon svgIcon="mdi:clock-check-outline" class="icon-size-4 text-blue-600"></mat-icon>
                     <span>កត់ត្រាវត្តមាន</span>
                 </button>
 
                 <button
                     type="button"
                     (click)="openCreateDrawer()"
-                    class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
-                    <mat-icon svgIcon="mdi:plus" class="icon-size-4.5"></mat-icon>
+                    class="h-9 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-[13px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-xs shadow-blue-500/20 hover:shadow-md hover:shadow-blue-500/25 active:scale-[0.98]">
+                    <mat-icon svgIcon="mdi:plus-circle-outline" class="icon-size-4"></mat-icon>
                     <span>ស្នើសុំច្បាប់ថ្មី</span>
                 </button>
             </div>
         </div>
 
-        <!-- Quick KPI Cards Row -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            <!-- 1. Total Staff -->
-            <div class="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[13px] text-slate-500 dark:text-slate-400 font-medium">បុគ្គលិកសរុប</span>
-                    <mat-icon svgIcon="mdi:account-group" class="icon-size-4 text-slate-400"></mat-icon>
-                </div>
-                <div class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ totalStaff() }} <span class="text-sm font-normal text-slate-400">នាក់</span></div>
-                <div class="mt-1 text-[12px] text-slate-400">កម្លាំងពលកម្មសកម្ម</div>
-            </div>
+        <!-- Expandable Filter Controls Row (Shown directly under header when clicking filter icon) -->
+        @if (isFilterOpen()) {
+            <div class="flex items-center justify-between gap-2 overflow-x-auto pb-3 pt-1 border-b border-slate-100 dark:border-slate-700/60 [scrollbar-width:none] animate-in fade-in slide-in-from-top-1 duration-150">
+                <div class="flex items-center gap-2">
+                    <!-- 1. Sort Button -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="sortMenu"
+                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                        [class.!border-blue-500]="sortBy() !== 'default'"
+                        [class.!text-blue-600]="sortBy() !== 'default'"
+                        matTooltip="តម្រៀប (Sort)">
+                        <mat-icon svgIcon="mdi:swap-vertical" class="icon-size-4.5"></mat-icon>
+                    </button>
+                    <mat-menu #sortMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="setSort('default')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>លំនាំដើម (Default)</span>
+                                @if (sortBy() === 'default') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        <button mat-menu-item (click)="setSort('name_asc')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>ឈ្មោះ (ក - អ)</span>
+                                @if (sortBy() === 'name_asc') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        <button mat-menu-item (click)="setSort('name_desc')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>ឈ្មោះ (អ - ក)</span>
+                                @if (sortBy() === 'name_desc') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                    </mat-menu>
 
-            <!-- 2. Present Today -->
-            <div class="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-800/60 shadow-2xs flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[13px] text-emerald-700 dark:text-emerald-300 font-medium">មានវត្តមានថ្ងៃនេះ</span>
-                    <mat-icon svgIcon="mdi:check-circle-outline" class="icon-size-4 text-emerald-500"></mat-icon>
-                </div>
-                <div class="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ presentToday() }} <span class="text-sm font-normal text-emerald-500/80">នាក់</span></div>
-                <div class="mt-1 text-[12px] text-emerald-600/70 dark:text-emerald-400/70 font-medium">បានស្កេនចូលធ្វើការ</div>
-            </div>
+                    <!-- 2. Layout Button -->
+                    <button
+                        type="button"
+                        (click)="leaveViewMode.set(leaveViewMode() === 'grid' ? 'table' : 'grid')"
+                        class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                        [class.!border-blue-500]="leaveViewMode() === 'grid'"
+                        [class.!text-blue-600]="leaveViewMode() === 'grid'"
+                        [matTooltip]="leaveViewMode() === 'grid' ? 'ប្តូរទៅតារាង (Table View)' : 'ប្តូរទៅកាត (Grid View)'">
+                        <mat-icon [svgIcon]="leaveViewMode() === 'grid' ? 'mdi:view-grid-outline' : 'mdi:format-list-bulleted'" class="icon-size-4.5"></mat-icon>
+                    </button>
 
-            <!-- 3. Late Today -->
-            <div class="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-800/60 shadow-2xs flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[13px] text-amber-700 dark:text-amber-300 font-medium">មកយឺតថ្ងៃនេះ</span>
-                    <mat-icon svgIcon="mdi:clock-alert-outline" class="icon-size-4 text-amber-500"></mat-icon>
-                </div>
-                <div class="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">{{ lateToday() }} <span class="text-sm font-normal text-amber-500/80">នាក់</span></div>
-                <div class="mt-1 text-[12px] text-amber-600/70 dark:text-amber-400/70">លើសពីម៉ោង ០៨:០០</div>
-            </div>
+                    <!-- 3. Status Filter Dropdown -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="statusMenu"
+                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                        [class.!border-blue-500]="statusFilter() !== 'all'"
+                        [class.!text-blue-600]="statusFilter() !== 'all'">
+                        <mat-icon svgIcon="mdi:account-clock-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                            [class.!text-blue-600]="statusFilter() !== 'all'"></mat-icon>
+                        <span>{{ getStatusFilterButtonLabel() }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                    </button>
+                    <mat-menu #statusMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                        <button mat-menu-item (click)="statusFilter.set('all')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>ស្ថានភាពទាំងអស់</span>
+                                @if (statusFilter() === 'all') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        @if (activeTab() === 'leaves') {
+                            <button mat-menu-item (click)="statusFilter.set('pending')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                        <span>កំពុងរង់ចាំ (Pending)</span>
+                                    </div>
+                                    @if (statusFilter() === 'pending') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="statusFilter.set('approved')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span>បានអនុម័ត (Approved)</span>
+                                    </div>
+                                    @if (statusFilter() === 'approved') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="statusFilter.set('rejected')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                        <span>បានបដិសេធ (Rejected)</span>
+                                    </div>
+                                    @if (statusFilter() === 'rejected') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                        } @else if (activeTab() === 'attendance') {
+                            <button mat-menu-item (click)="statusFilter.set('on_time')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span>ទាន់ពេលវេលា (On Time)</span>
+                                    </div>
+                                    @if (statusFilter() === 'on_time') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="statusFilter.set('late')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                        <span>មកយឺត (Late)</span>
+                                    </div>
+                                    @if (statusFilter() === 'late') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                        }
+                    </mat-menu>
 
-            <!-- 4. On Leave -->
-            <div class="p-4 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/70 dark:border-purple-800/60 shadow-2xs flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[13px] text-purple-700 dark:text-purple-300 font-medium">កំពុងឈប់សម្រាក</span>
-                    <mat-icon svgIcon="mdi:calendar-account-outline" class="icon-size-4 text-purple-500"></mat-icon>
-                </div>
-                <div class="mt-2 text-2xl font-bold text-purple-600 dark:text-purple-400">{{ onLeaveToday() }} <span class="text-sm font-normal text-purple-500/80">នាក់</span></div>
-                <div class="mt-1 text-[12px] text-purple-600/70 dark:text-purple-400/70">មានច្បាប់អនុញ្ញាត</div>
-            </div>
+                    <!-- 4. Department Filter Dropdown -->
+                    <button
+                        type="button"
+                        [matMenuTriggerFor]="deptMenu"
+                        class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                        [class.!border-blue-500]="departmentFilter() !== 'all'"
+                        [class.!text-blue-600]="departmentFilter() !== 'all'">
+                        <mat-icon svgIcon="mdi:domain" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                            [class.!text-blue-600]="departmentFilter() !== 'all'"></mat-icon>
+                        <span>{{ departmentFilter() === 'all' ? 'ការិយាល័យ-ផ្នែក' : departmentFilter() }}</span>
+                        <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                    </button>
+                    <mat-menu #deptMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 max-h-72">
+                        <button mat-menu-item (click)="departmentFilter.set('all')" class="!text-[13.5px]">
+                            <div class="flex items-center justify-between w-full">
+                                <span>ការិយាល័យ-ផ្នែកទាំងអស់</span>
+                                @if (departmentFilter() === 'all') {
+                                    <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                }
+                            </div>
+                        </button>
+                        @for (dept of departments(); track dept) {
+                            <button mat-menu-item (click)="departmentFilter.set(dept)" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>{{ dept }}</span>
+                                    @if (departmentFilter() === dept) {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                        }
+                    </mat-menu>
 
-            <!-- 5. Attendance Rate -->
-            <div class="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/70 dark:border-blue-800/60 shadow-2xs flex flex-col justify-between col-span-2 sm:col-span-1">
-                <div class="flex items-center justify-between">
-                    <span class="text-[13px] text-blue-700 dark:text-blue-300 font-medium">អត្រាវត្តមាន</span>
-                    <mat-icon svgIcon="mdi:percent" class="icon-size-4 text-blue-500"></mat-icon>
+                    <!-- 5. Leave Type Filter Dropdown (When on Leaves tab) -->
+                    @if (activeTab() === 'leaves') {
+                        <button
+                            type="button"
+                            [matMenuTriggerFor]="leaveTypeMenu"
+                            class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                            [class.!border-blue-500]="leaveTypeFilter() !== 'all'"
+                            [class.!text-blue-600]="leaveTypeFilter() !== 'all'">
+                            <mat-icon svgIcon="mdi:file-document-outline" class="icon-size-4.5 text-slate-500 dark:text-slate-400"
+                                [class.!text-blue-600]="leaveTypeFilter() !== 'all'"></mat-icon>
+                            <span>{{ getLeaveTypeFilterButtonLabel() }}</span>
+                            <mat-icon svgIcon="mdi:chevron-down" class="icon-size-4 text-slate-400"></mat-icon>
+                        </button>
+                        <mat-menu #leaveTypeMenu="matMenu" yPosition="below" [overlapTrigger]="false" class="rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                            <button mat-menu-item (click)="leaveTypeFilter.set('all')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>ប្រភេទច្បាប់ទាំងអស់</span>
+                                    @if (leaveTypeFilter() === 'all') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="leaveTypeFilter.set('annual')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>ច្បាប់ប្រចាំឆ្នាំ (Annual)</span>
+                                    @if (leaveTypeFilter() === 'annual') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="leaveTypeFilter.set('sick')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>ច្បាប់ឈឺ / ព្យាបាល (Sick)</span>
+                                    @if (leaveTypeFilter() === 'sick') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="leaveTypeFilter.set('special')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>ច្បាប់ពិសេស (Special)</span>
+                                    @if (leaveTypeFilter() === 'special') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                            <button mat-menu-item (click)="leaveTypeFilter.set('maternity')" class="!text-[13.5px]">
+                                <div class="flex items-center justify-between w-full">
+                                    <span>ច្បាប់លំហែមាតុភាព (Maternity)</span>
+                                    @if (leaveTypeFilter() === 'maternity') {
+                                        <mat-icon svgIcon="mdi:check" class="icon-size-4 text-blue-600 ml-3"></mat-icon>
+                                    }
+                                </div>
+                            </button>
+                        </mat-menu>
+                    }
                 </div>
-                <div class="mt-2 text-2xl font-bold text-blue-600 dark:text-blue-400">{{ attendanceRate() }}%</div>
-                <div class="mt-1 w-full bg-blue-200/60 dark:bg-blue-900/50 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" [style.width.%]="attendanceRate()"></div>
+
+                <!-- Right: Reset Button -->
+                <div class="flex items-center gap-2 shrink-0">
+                    @if (hasActiveFilters()) {
+                        <button
+                            type="button"
+                            (click)="resetFilters()"
+                            class="h-9 px-2.5 rounded-xl border border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-[12.5px] font-medium flex items-center gap-1 hover:bg-red-100 dark:hover:bg-red-900/50 transition-all cursor-pointer shadow-2xs"
+                            matTooltip="សម្អាតតម្រងទាំងអស់">
+                            <mat-icon svgIcon="mdi:close" class="icon-size-3.5"></mat-icon>
+                            <span>សម្អាត</span>
+                        </button>
+                    }
                 </div>
             </div>
-        </div>
+        }
 
-        <!-- Filter Tab Buttons Row -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
-            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <!-- Filter Tab Buttons Row & View Switcher -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-700/80 pb-3">
+            <div class="flex items-center gap-1.5 p-1 bg-slate-100/80 dark:bg-slate-900/70 rounded-xl border border-slate-200/60 dark:border-slate-800 overflow-x-auto no-scrollbar">
                 <!-- Tab 1: Leaves -->
                 <button
                     type="button"
                     (click)="activeTab.set('leaves')"
-                    class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                    [ngClass]="activeTab() === 'leaves' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
-                    <mat-icon svgIcon="mdi:file-document-edit-outline" class="icon-size-4.5"></mat-icon>
-                    <span>សំណើរសុំច្បាប់ឈប់សម្រាក</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold"
-                        [ngClass]="activeTab() === 'leaves' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                    class="px-3.5 py-1.5 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer"
+                    [ngClass]="activeTab() === 'leaves'
+                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-semibold'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'">
+                    <mat-icon svgIcon="mdi:file-document-edit-outline" class="icon-size-4"></mat-icon>
+                    <span>សំណើសុំច្បាប់ឈប់សម្រាក</span>
+                    <span class="px-2 py-0.2 rounded-full text-[11px] font-bold transition-colors"
+                        [ngClass]="activeTab() === 'leaves'
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                            : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-400'">
                         {{ leaves().length }}
                     </span>
                 </button>
@@ -135,12 +336,16 @@
                 <button
                     type="button"
                     (click)="activeTab.set('attendance')"
-                    class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                    [ngClass]="activeTab() === 'attendance' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
-                    <mat-icon svgIcon="mdi:format-list-checks" class="icon-size-4.5"></mat-icon>
-                    <span>កំណត់ត្រាវត្តមានប្រចាំថ្ងៃ (Daily Logs)</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold"
-                        [ngClass]="activeTab() === 'attendance' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'">
+                    class="px-3.5 py-1.5 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer"
+                    [ngClass]="activeTab() === 'attendance'
+                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-semibold'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'">
+                    <mat-icon svgIcon="mdi:format-list-checks" class="icon-size-4"></mat-icon>
+                    <span>កំណត់ត្រាវត្តមានប្រចាំថ្ងៃ</span>
+                    <span class="px-2 py-0.2 rounded-full text-[11px] font-bold transition-colors"
+                        [ngClass]="activeTab() === 'attendance'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                            : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-400'">
                         {{ (attendance()?.logs || []).length }}
                     </span>
                 </button>
@@ -149,217 +354,279 @@
                 <button
                     type="button"
                     (click)="activeTab.set('summary')"
-                    class="px-3.5 py-1.5 rounded-xl text-[14px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer"
-                    [ngClass]="activeTab() === 'summary' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
-                    <mat-icon svgIcon="mdi:chart-box-outline" class="icon-size-4.5"></mat-icon>
+                    class="px-3.5 py-1.5 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer"
+                    [ngClass]="activeTab() === 'summary'
+                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs font-semibold'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'">
+                    <mat-icon svgIcon="mdi:chart-box-outline" class="icon-size-4"></mat-icon>
                     <span>សង្ខេបសមតុល្យច្បាប់បុគ្គលិក</span>
                 </button>
             </div>
 
-            <!-- Date Selector for Attendance Logs -->
-            @if (activeTab() === 'attendance') {
-                <div class="flex items-center gap-2 shrink-0">
-                    <label class="text-[13px] text-slate-500 font-medium">កាលបរិច្ឆេទ:</label>
-                    <input
-                        type="date"
-                        [ngModel]="selectedDate()"
-                        (ngModelChange)="selectedDate.set($event); loadData()"
-                        class="h-8 px-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] text-slate-900 dark:text-white outline-none">
-                </div>
-            }
-        </div>
-
-        <!-- Unified Search and Filters Bar -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <!-- Search Bar -->
-            <div class="relative">
-                <mat-icon svgIcon="mdi:magnify" class="icon-size-4.5 absolute left-3 top-2.5 text-slate-400"></mat-icon>
-                <input
-                    type="text"
-                    [ngModel]="searchQuery()"
-                    (ngModelChange)="searchQuery.set($event)"
-                    placeholder="ស្វែងរកតាមឈ្មោះបុគ្គលិក, នាយកដ្ឋាន..."
-                    class="w-full h-9 pl-9 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
-                @if (searchQuery()) {
-                    <button
-                        type="button"
-                        (click)="searchQuery.set('')"
-                        class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer">
-                        <mat-icon svgIcon="mdi:close-circle" class="icon-size-4"></mat-icon>
-                    </button>
-                }
-            </div>
-
-            <!-- Status Filter -->
-            <div>
-                <select
-                    [ngModel]="statusFilter()"
-                    (ngModelChange)="statusFilter.set($event)"
-                    class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] text-slate-900 dark:text-white outline-none cursor-pointer">
-                    <option value="all">ស្ថានភាពទាំងអស់ (All Status)</option>
-                    @if (activeTab() === 'leaves') {
-                        <option value="pending">កំពុងរង់ចាំ (Pending) [{{ pendingLeavesCount() }}]</option>
-                        <option value="approved">បានអនុម័ត (Approved) [{{ approvedLeavesCount() }}]</option>
-                        <option value="rejected">បានបដិសេធ (Rejected) [{{ rejectedLeavesCount() }}]</option>
-                    } @else if (activeTab() === 'attendance') {
-                        <option value="on_time">ទាន់ពេលវេលា (On Time)</option>
-                        <option value="late">មកយឺត (Late)</option>
-                    }
-                </select>
-            </div>
-
-            <!-- Department Filter -->
-            <div>
-                <select
-                    [ngModel]="departmentFilter()"
-                    (ngModelChange)="departmentFilter.set($event)"
-                    class="w-full h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] text-slate-900 dark:text-white outline-none cursor-pointer">
-                    <option value="all">នាយកដ្ឋានទាំងអស់ (All Departments)</option>
-                    @for (dept of departments(); track dept) {
-                        <option [value]="dept">{{ dept }}</option>
-                    }
-                </select>
-            </div>
-
-            <!-- Reset Filters -->
-            <div class="flex items-center gap-2">
+            <!-- Tab Context Tools -->
+            <div class="flex items-center gap-2 shrink-0">
+                <!-- If Leaves Tab: Grid / Table View Switcher -->
                 @if (activeTab() === 'leaves') {
-                    <select
-                        [ngModel]="leaveTypeFilter()"
-                        (ngModelChange)="leaveTypeFilter.set($event)"
-                        class="flex-1 h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] text-slate-900 dark:text-white outline-none cursor-pointer">
-                        <option value="all">ប្រភេទច្បាប់ទាំងអស់</option>
-                        <option value="annual">ច្បាប់ប្រចាំឆ្នាំ</option>
-                        <option value="sick">ច្បាប់ឈឺ / ព្យាបាល</option>
-                        <option value="special">ច្បាប់ពិសេស</option>
-                        <option value="maternity">ច្បាប់លំហែមាតុភាព</option>
-                    </select>
+                    <div class="flex items-center p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <button
+                            type="button"
+                            (click)="leaveViewMode.set('grid')"
+                            matTooltip="ទិដ្ឋភាពកាត (Grid)"
+                            class="p-1.5 rounded-lg transition-colors cursor-pointer"
+                            [ngClass]="leaveViewMode() === 'grid' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-2xs' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'">
+                            <mat-icon svgIcon="mdi:view-grid-outline" class="icon-size-4.5"></mat-icon>
+                        </button>
+                        <button
+                            type="button"
+                            (click)="leaveViewMode.set('table')"
+                            matTooltip="ទិដ្ឋភាពតារាង (Table)"
+                            class="p-1.5 rounded-lg transition-colors cursor-pointer"
+                            [ngClass]="leaveViewMode() === 'table' ? 'bg-white dark:bg-slate-800 text-blue-600 shadow-2xs' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'">
+                            <mat-icon svgIcon="mdi:format-list-bulleted" class="icon-size-4.5"></mat-icon>
+                        </button>
+                    </div>
                 }
-                <button
-                    type="button"
-                    (click)="searchQuery.set(''); statusFilter.set('all'); departmentFilter.set('all'); leaveTypeFilter.set('all')"
-                    matTooltip="កំណត់តម្រងឡើងវិញ"
-                    class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 text-[13px] font-medium transition-all cursor-pointer">
-                    កំណត់ឡើងវិញ
-                </button>
+
+                <!-- If Attendance Tab: Date Picker -->
+                @if (activeTab() === 'attendance') {
+                    <div class="flex items-center gap-1.5">
+                        <div class="flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1 text-[13px] gap-2 shadow-2xs">
+                            <mat-icon svgIcon="mdi:calendar-month-outline" class="icon-size-4 text-blue-600 dark:text-blue-400"></mat-icon>
+                            <span class="text-[12px] text-slate-500 font-medium hidden sm:inline">កាលបរិច្ឆេទ:</span>
+                            <input
+                                type="date"
+                                [ngModel]="selectedDate()"
+                                (ngModelChange)="selectedDate.set($event); loadData()"
+                                class="bg-transparent text-slate-900 dark:text-white outline-none font-medium text-[13px] cursor-pointer">
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 
         <!-- ============================================================= -->
-        <!-- TAB 1: Leaves Review Cards Grid -->
+        <!-- TAB 1: Leaves Review Cards Grid / Table View -->
         <!-- ============================================================= -->
         @if (activeTab() === 'leaves') {
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @for (leave of filteredLeaves(); track leave.id) {
-                    <div class="rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs p-5 flex flex-col justify-between transition-all hover:border-slate-300 dark:hover:border-slate-600">
-                        <div>
-                            <!-- Card Header: Staff and Status -->
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-10 h-10 rounded-full text-white font-bold flex items-center justify-center text-[13px] shrink-0 shadow-2xs"
-                                        [ngClass]="getAvatarBg(leave.user_name)">
-                                        {{ getUserInitials(leave.user_name) }}
+            @if (filteredLeaves().length > 0) {
+                @if (leaveViewMode() === 'grid') {
+                    <!-- Grid View -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @for (leave of filteredLeaves(); track leave.id) {
+                            <div class="rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs hover:shadow-xs p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600">
+                                <div>
+                                    <!-- Card Header: Staff and Status -->
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shadow-2xs font-bold text-[12.5px] leading-none select-none"
+                                                [ngClass]="getAvatarBg(getStaffEn(leave.user_id, leave.user_name) || leave.user_name)">
+                                                {{ getUserInitials(leave.user_name, getStaffEn(leave.user_id, leave.user_name)) }}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="font-bold text-slate-900 dark:text-white text-[14px] leading-snug truncate">{{ leave.user_name }}</div>
+                                                <div class="text-[12px] text-slate-400 truncate">{{ leave.department }}</div>
+                                            </div>
+                                        </div>
+                                        <span [class]="'px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold border shrink-0 ' + getLeaveStatusClass(leave.status)">
+                                            {{ getLeaveStatusLabel(leave.status) }}
+                                        </span>
                                     </div>
-                                    <div class="min-w-0">
-                                        <div class="font-bold text-slate-900 dark:text-white text-[15px] truncate">{{ leave.user_name }}</div>
-                                        <div class="text-[12px] text-slate-400 truncate">{{ leave.department }}</div>
-                                    </div>
-                                </div>
-                                <span [class]="'px-2.5 py-0.5 rounded-full text-[12px] font-medium border shrink-0 ' + getLeaveStatusClass(leave.status)">
-                                    {{ getLeaveStatusLabel(leave.status) }}
-                                </span>
-                            </div>
 
-                            <!-- Leave Metadata Details -->
-                            <div class="mt-4 p-3 bg-slate-50/80 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800/80 space-y-2 text-[13px]">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-slate-400">ប្រភេទច្បាប់:</span>
-                                    <span [class]="'px-2 py-0.5 rounded-md text-[12px] font-medium border ' + getLeaveTypeBadge(leave.leave_type)">
-                                        {{ getLeaveTypeLabel(leave.leave_type) }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-slate-400">កាលបរិច្ឆេទ:</span>
-                                    <span class="font-mono text-slate-700 dark:text-slate-300 text-[12px]">
-                                        {{ leave.start_date }} ដល់ {{ leave.end_date }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-slate-400">ចំនួនថ្ងៃសរុប:</span>
-                                    <span class="font-semibold text-slate-900 dark:text-white text-[13px]">
-                                        {{ leave.duration_days || 1 }} ថ្ងៃ
-                                    </span>
-                                </div>
-                                <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800">
-                                    <span class="text-slate-400 text-[12px]">មូលហេតុ:</span>
-                                    <div class="mt-0.5 text-slate-700 dark:text-slate-300 italic text-[13px] line-clamp-3">
-                                        "{{ leave.reason }}"
+                                    <!-- Leave Metadata Details -->
+                                    <div class="mt-4 p-3.5 bg-slate-50/80 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800/80 space-y-2 text-[13px]">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-slate-400">ប្រភេទច្បាប់:</span>
+                                            <span [class]="'px-2 py-0.5 rounded-md text-[11.5px] font-semibold border ' + getLeaveTypeBadge(leave.leave_type)">
+                                                {{ getLeaveTypeLabel(leave.leave_type) }}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-slate-400">កាលបរិច្ឆេទ:</span>
+                                            <span class="font-mono text-slate-700 dark:text-slate-300 text-[12px] flex items-center gap-1 font-medium">
+                                                <mat-icon svgIcon="mdi:calendar-range" class="icon-size-3.5 text-slate-400"></mat-icon>
+                                                {{ leave.start_date }} ដល់ {{ leave.end_date }}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-slate-400">ចំនួនថ្ងៃសរុប:</span>
+                                            <span class="px-2 py-0.2 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold text-[12.5px] border border-blue-200/60 dark:border-blue-800">
+                                                {{ leave.duration_days || 1 }} ថ្ងៃ
+                                            </span>
+                                        </div>
+                                        <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800">
+                                            <span class="text-slate-400 text-[12px]">មូលហេតុ:</span>
+                                            <div class="mt-1 p-2 bg-white/70 dark:bg-slate-800/70 rounded-lg border-l-2 border-blue-500 text-slate-700 dark:text-slate-300 italic text-[12.5px] line-clamp-3">
+                                                "{{ leave.reason }}"
+                                            </div>
+                                        </div>
+                                        @if (leave.reviewer_comment) {
+                                            <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[12px] text-blue-600 dark:text-blue-400 flex items-start gap-1">
+                                                <mat-icon svgIcon="mdi:comment-check-outline" class="icon-size-3.5 shrink-0 mt-0.5"></mat-icon>
+                                                <span>មតិអ្នកសម្រេច: {{ leave.reviewer_comment }}</span>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
-                                @if (leave.reviewer_comment) {
-                                    <div class="pt-2 border-t border-slate-200/60 dark:border-slate-800 text-[12px] text-blue-600 dark:text-blue-400 flex items-start gap-1">
-                                        <mat-icon svgIcon="mdi:comment-check-outline" class="icon-size-3.5 shrink-0 mt-0.5"></mat-icon>
-                                        <span>មតិអ្នកសម្រេច: {{ leave.reviewer_comment }}</span>
-                                    </div>
-                                }
-                            </div>
-                        </div>
 
-                        <!-- Card Action Buttons -->
-                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
-                            <button
-                                type="button"
-                                (click)="confirmDeleteLeave(leave)"
-                                matTooltip="លុបសំណើរច្បាប់នេះ"
-                                class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center cursor-pointer transition-all">
-                                <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4.5"></mat-icon>
-                            </button>
-
-                            @if (leave.status === 'pending') {
-                                <div class="flex items-center gap-2">
+                                <!-- Card Action Buttons -->
+                                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
                                     <button
                                         type="button"
-                                        (click)="openActionModal(leave, 'rejected')"
-                                        class="h-8 px-3 text-[13px] font-medium rounded-xl border border-rose-200 dark:border-rose-800/80 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-all">
-                                        បដិសេធ
+                                        (click)="confirmDeleteLeave(leave)"
+                                        matTooltip="លុបសំណើរច្បាប់នេះ"
+                                        class="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center cursor-pointer transition-all">
+                                        <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
                                     </button>
-                                    <button
-                                        type="button"
-                                        (click)="openActionModal(leave, 'approved')"
-                                        class="h-8 px-3.5 text-[13px] font-medium rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 cursor-pointer shadow-2xs transition-all">
-                                        <mat-icon svgIcon="mdi:check" class="icon-size-4"></mat-icon>
-                                        <span>អនុម័ត</span>
-                                    </button>
+
+                                    @if (leave.status === 'pending') {
+                                        <div class="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                (click)="openActionModal(leave, 'rejected')"
+                                                class="h-8 px-3 text-[12.5px] font-medium rounded-xl border border-rose-200 dark:border-rose-800/80 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-all">
+                                                បដិសេធ
+                                            </button>
+                                            <button
+                                                type="button"
+                                                (click)="openActionModal(leave, 'approved')"
+                                                class="h-8 px-3.5 text-[12.5px] font-medium rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 cursor-pointer shadow-2xs transition-all">
+                                                <mat-icon svgIcon="mdi:check" class="icon-size-4"></mat-icon>
+                                                <span>អនុម័ត</span>
+                                            </button>
+                                        </div>
+                                    } @else {
+                                        <button
+                                            type="button"
+                                            (click)="openActionModal(leave, leave.status === 'approved' ? 'rejected' : 'approved')"
+                                            class="text-[12px] font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 underline cursor-pointer">
+                                            កែប្រែការសម្រេច
+                                        </button>
+                                    }
                                 </div>
-                            } @else {
-                                <button
-                                    type="button"
-                                    (click)="openActionModal(leave, leave.status === 'approved' ? 'rejected' : 'approved')"
-                                    class="text-[12px] font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 underline cursor-pointer">
-                                    កែប្រែការសម្រេច
-                                </button>
-                            }
-                        </div>
+                            </div>
+                        }
                     </div>
-                } @empty {
-                    <div class="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <mat-icon svgIcon="mdi:calendar-blank-outline" class="icon-size-10 text-slate-300 mx-auto"></mat-icon>
-                        <div class="mt-3 text-[15px] font-medium text-slate-600 dark:text-slate-300">មិនមានសំណើរសុំច្បាប់ឈប់សម្រាកឡើយ</div>
-                        <div class="mt-1 text-[13px] text-slate-400">ពុំមានទិន្នន័យត្រូវតាមតម្រងស្វែងរកបច្ចុប្បន្ន</div>
+                } @else {
+                    <!-- Table View -->
+                    <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-2xs bg-white dark:bg-slate-800">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-[13px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-700/80">
+                                        <th class="py-3 px-4">បុគ្គលិក</th>
+                                        <th class="py-3 px-4">នាយកដ្ឋាន</th>
+                                        <th class="py-3 px-4">ប្រភេទច្បាប់</th>
+                                        <th class="py-3 px-4">កាលបរិច្ឆេទ</th>
+                                        <th class="py-3 px-4 text-center">ចំនួនថ្ងៃ</th>
+                                        <th class="py-3 px-4">មូលហេតុ</th>
+                                        <th class="py-3 px-4">ស្ថានភាព</th>
+                                        <th class="py-3 px-4 text-right">សកម្មភាព</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[13.5px]">
+                                    @for (leave of filteredLeaves(); track leave.id) {
+                                        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
+                                            <td class="py-3 px-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shadow-2xs font-bold text-[12.5px] leading-none select-none"
+                                                        [ngClass]="getAvatarBg(getStaffEn(leave.user_id, leave.user_name) || leave.user_name)">
+                                                        {{ getUserInitials(leave.user_name, getStaffEn(leave.user_id, leave.user_name)) }}
+                                                    </div>
+                                                    <span class="font-medium text-slate-900 dark:text-white">{{ leave.user_name }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 text-[13px] text-slate-600 dark:text-slate-400">{{ leave.department }}</td>
+                                            <td class="py-3 px-4">
+                                                <span [class]="'px-2 py-0.5 rounded-md text-[11.5px] font-semibold border ' + getLeaveTypeBadge(leave.leave_type)">
+                                                    {{ getLeaveTypeLabel(leave.leave_type) }}
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 font-mono text-[12.5px] text-slate-600 dark:text-slate-400">
+                                                {{ leave.start_date }} ដល់ {{ leave.end_date }}
+                                            </td>
+                                            <td class="py-3 px-4 text-center font-bold text-blue-600 dark:text-blue-400">
+                                                {{ leave.duration_days || 1 }}
+                                            </td>
+                                            <td class="py-3 px-4 text-[13px] text-slate-600 dark:text-slate-400 max-w-xs truncate" [matTooltip]="leave.reason">
+                                                {{ leave.reason }}
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span [class]="'px-2.5 py-0.5 rounded-full text-[11.5px] font-semibold border ' + getLeaveStatusClass(leave.status)">
+                                                    {{ getLeaveStatusLabel(leave.status) }}
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 text-right">
+                                                <div class="flex items-center justify-end gap-1.5">
+                                                    @if (leave.status === 'pending') {
+                                                        <button
+                                                            type="button"
+                                                            (click)="openActionModal(leave, 'approved')"
+                                                            matTooltip="អនុម័ត"
+                                                            class="w-7.5 h-7.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center cursor-pointer transition-colors">
+                                                            <mat-icon svgIcon="mdi:check" class="icon-size-4"></mat-icon>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            (click)="openActionModal(leave, 'rejected')"
+                                                            matTooltip="បដិសេធ"
+                                                            class="w-7.5 h-7.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center cursor-pointer transition-colors">
+                                                            <mat-icon svgIcon="mdi:close" class="icon-size-4"></mat-icon>
+                                                        </button>
+                                                    }
+                                                    <button
+                                                        type="button"
+                                                        (click)="confirmDeleteLeave(leave)"
+                                                        matTooltip="លុប"
+                                                        class="w-7.5 h-7.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center cursor-pointer transition-colors">
+                                                        <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-4"></mat-icon>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 }
-            </div>
+            } @else {
+                <!-- Rich Actionable Empty State -->
+                <div class="py-16 px-4 text-center bg-slate-50/50 dark:bg-slate-900/30 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700/80 flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-amber-500/10 dark:from-blue-500/20 dark:to-indigo-500/20 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
+                        <mat-icon svgIcon="mdi:calendar-blank-outline" class="icon-size-8"></mat-icon>
+                    </div>
+                    <div class="mt-4 text-[16px] font-bold text-slate-800 dark:text-slate-200">មិនមានសំណើសុំច្បាប់ឈប់សម្រាកឡើយ</div>
+                    <p class="mt-1 text-[13px] text-slate-500 dark:text-slate-400 max-w-md">
+                        ពុំមានទិន្នន័យសំណើសុំច្បាប់ត្រូវតាមតម្រងស្វែងរកបច្ចុប្បន្នទេ។ អ្នកអាចបង្កើតសំណើសុំច្បាប់ថ្មី ឬកំណត់តម្រងឡើងវិញ។
+                    </p>
+                    <div class="mt-5 flex items-center gap-2.5">
+                        <button
+                            type="button"
+                            (click)="resetFilters()"
+                            class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[13px] font-medium transition-all cursor-pointer">
+                            កំណត់តម្រងឡើងវិញ
+                        </button>
+                        <button
+                            type="button"
+                            (click)="openCreateDrawer()"
+                            class="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs">
+                            <mat-icon svgIcon="mdi:plus" class="icon-size-4"></mat-icon>
+                            <span>បង្កើតសំណើសុំច្បាប់ថ្មី</span>
+                        </button>
+                    </div>
+                </div>
+            }
         }
 
         <!-- ============================================================= -->
         <!-- TAB 2: Attendance Logs Table -->
         <!-- ============================================================= -->
         @if (activeTab() === 'attendance') {
-            <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-2xs">
+            <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-2xs bg-white dark:bg-slate-800">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="text-[13px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-700/80">
+                            <tr class="text-[13px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-700/80">
                                 <th class="py-3 px-4">បុគ្គលិក (Staff)</th>
                                 <th class="py-3 px-4">នាយកដ្ឋាន (Department)</th>
                                 <th class="py-3 px-4">ម៉ោងចូល (Check In)</th>
@@ -368,46 +635,54 @@
                                 <th class="py-3 px-4">ទីតាំងស្កេន (Location)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[13.5px]">
                             @for (log of filteredLogs(); track log.id) {
                                 <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center gap-2.5">
-                                            @if (resolveAvatar(log.avatar); as av) {
-                                                <img [src]="av" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0">
-                                            } @else {
-                                                <div class="w-8 h-8 rounded-full text-white font-bold flex items-center justify-center text-[12px] shrink-0"
-                                                    [ngClass]="getAvatarBg(log.user_name)">
-                                                    {{ getUserInitials(log.user_name) }}
-                                                </div>
-                                            }
-                                            <div>
-                                                <div class="font-medium text-slate-900 dark:text-white">{{ log.user_name }}</div>
-                                                <div class="text-[12px] text-slate-400">{{ log.user_en }}</div>
+                                    <td class="py-3.5 px-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+                                                @if (resolveAvatar(log.avatar); as av) {
+                                                    <img [src]="av" [alt]="log.user_name || log.user_en" class="w-full h-full object-cover block">
+                                                } @else {
+                                                    <div class="w-full h-full rounded-full font-bold flex items-center justify-center text-[12.5px] leading-none select-none"
+                                                        [ngClass]="getAvatarBg(log.user_en || log.user_name)">
+                                                        {{ getUserInitials(log.user_name, log.user_en) }}
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="font-semibold text-slate-900 dark:text-white text-[13.5px] leading-snug truncate">{{ log.user_name }}</div>
+                                                <div class="text-[11.5px] text-slate-400 leading-tight truncate">{{ log.user_en }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3 px-4 text-[13px] text-slate-600 dark:text-slate-400">{{ log.department }}</td>
-                                    <td class="py-3 px-4 text-[13px] font-mono font-medium text-emerald-600 flex items-center gap-1">
-                                        <mat-icon svgIcon="mdi:clock-in" class="icon-size-3.5"></mat-icon>
-                                        <span>{{ log.check_in }}</span>
+                                    <td class="py-3.5 px-4 text-[13px] text-slate-600 dark:text-slate-400">{{ log.department }}</td>
+                                    <td class="py-3.5 px-4 text-[13px] font-mono font-medium text-emerald-600 dark:text-emerald-400">
+                                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800">
+                                            <mat-icon svgIcon="mdi:clock-in" class="icon-size-3.5"></mat-icon>
+                                            <span>{{ log.check_in }}</span>
+                                        </div>
                                     </td>
-                                    <td class="py-3 px-4 text-[13px] font-mono text-slate-400">
+                                    <td class="py-3.5 px-4 text-[13px] font-mono text-slate-500 dark:text-slate-400">
                                         @if (log.check_out) {
-                                            <span class="text-slate-600 dark:text-slate-300 font-medium">{{ log.check_out }}</span>
+                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 border border-slate-200/60 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium">
+                                                <mat-icon svgIcon="mdi:clock-out" class="icon-size-3.5"></mat-icon>
+                                                <span>{{ log.check_out }}</span>
+                                            </div>
                                         } @else {
-                                            <span class="text-slate-400">---</span>
+                                            <span class="text-slate-400 italic">---</span>
                                         }
                                     </td>
-                                    <td class="py-3 px-4">
+                                    <td class="py-3.5 px-4">
                                         <span [class]="log.status === 'on_time'
-                                            ? 'px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-                                            : 'px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'">
-                                            {{ log.status === 'on_time' ? 'ទាន់ពេលវេលា' : 'មកយឺត' }}
+                                            ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                                            : 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'">
+                                            <span class="w-1.5 h-1.5 rounded-full" [ngClass]="log.status === 'on_time' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+                                            <span>{{ log.status === 'on_time' ? 'ទាន់ពេលវេលា' : 'មកយឺត' }}</span>
                                         </span>
                                     </td>
-                                    <td class="py-3 px-4 text-[12px] text-slate-500 dark:text-slate-400 max-w-xs truncate">
-                                        <div class="flex items-center gap-1" [matTooltip]="log.location || 'ការិយាល័យកណ្តាល'">
+                                    <td class="py-3.5 px-4 text-[12.5px] text-slate-500 dark:text-slate-400 max-w-xs truncate">
+                                        <div class="flex items-center gap-1.5" [matTooltip]="log.location || 'ការិយាល័យកណ្តាល'">
                                             <mat-icon svgIcon="mdi:map-marker-outline" class="icon-size-3.5 text-slate-400 shrink-0"></mat-icon>
                                             <span class="truncate">{{ log.location || 'ការិយាល័យកណ្តាល' }}</span>
                                         </div>
@@ -415,9 +690,12 @@
                                 </tr>
                             } @empty {
                                 <tr>
-                                    <td colspan="6" class="py-12 text-center text-slate-400">
-                                        <mat-icon svgIcon="mdi:clock-alert-outline" class="icon-size-8 text-slate-300 mx-auto"></mat-icon>
-                                        <div class="mt-2 text-[14px] font-medium">មិនមានទិន្នន័យវត្តមានសម្រាប់កាលបរិច្ឆេទនេះទេ</div>
+                                    <td colspan="6" class="py-14 text-center text-slate-400">
+                                        <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
+                                            <mat-icon svgIcon="mdi:clock-alert-outline" class="icon-size-6"></mat-icon>
+                                        </div>
+                                        <div class="mt-3 text-[14.5px] font-semibold text-slate-700 dark:text-slate-300">មិនមានទិន្នន័យវត្តមានសម្រាប់កាលបរិច្ឆេទនេះទេ</div>
+                                        <div class="mt-1 text-[13px] text-slate-400">សូមជ្រើសរើសកាលបរិច្ឆេទផ្សេង ឬកត់ត្រាវត្តមានដោយផ្ទាល់</div>
                                     </td>
                                 </tr>
                             }
@@ -431,11 +709,11 @@
         <!-- TAB 3: Staff Leave Balances & Summary Table -->
         <!-- ============================================================= -->
         @if (activeTab() === 'summary') {
-            <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-2xs">
+            <div class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-2xs bg-white dark:bg-slate-800">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="text-[13px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-700/80">
+                            <tr class="text-[13px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-700/80">
                                 <th class="py-3 px-4">បុគ្គលិក (Staff)</th>
                                 <th class="py-3 px-4">នាយកដ្ឋាន (Department)</th>
                                 <th class="py-3 px-4 text-center">សំណើសរុប</th>
@@ -446,20 +724,27 @@
                                 <th class="py-3 px-4 text-center">ច្បាប់ពិសេស</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[14px]">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/40 text-[13.5px]">
                             @for (s of staffSummaryList(); track s.userId) {
                                 <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
                                     <td class="py-3 px-4">
-                                        <div class="flex items-center gap-2.5">
-                                            @if (resolveAvatar(s.avatar); as av) {
-                                                <img [src]="av" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0">
-                                            } @else {
-                                                <div class="w-8 h-8 rounded-full text-white font-bold flex items-center justify-center text-[12px] shrink-0"
-                                                    [ngClass]="getAvatarBg(s.userName)">
-                                                    {{ getUserInitials(s.userName) }}
-                                                </div>
-                                            }
-                                            <div class="font-medium text-slate-900 dark:text-white">{{ s.userName }}</div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="relative w-9 h-9 rounded-full shrink-0 flex items-center justify-center overflow-hidden border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
+                                                @if (resolveAvatar(s.avatar); as av) {
+                                                    <img [src]="av" [alt]="s.userName" class="w-full h-full object-cover block">
+                                                } @else {
+                                                    <div class="w-full h-full rounded-full font-bold flex items-center justify-center text-[12.5px] leading-none select-none"
+                                                        [ngClass]="getAvatarBg(s.userEn || s.userName)">
+                                                        {{ getUserInitials(s.userName, s.userEn) }}
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="font-medium text-slate-900 dark:text-white leading-snug truncate">{{ s.userName }}</div>
+                                                @if (s.userEn) {
+                                                    <div class="text-[11.5px] text-slate-400 leading-tight truncate">{{ s.userEn }}</div>
+                                                }
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="py-3 px-4 text-[13px] text-slate-600 dark:text-slate-400">{{ s.department }}</td>
