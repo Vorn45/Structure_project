@@ -38,9 +38,44 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
     ) {}
 
     async onModuleInit() {
-        if (!appConfig.AUTH.TELEGRAM_BOT_TOKEN) return;
+        await this.syncWebhook();
+    }
+
+    async getBotInfo() {
+        if (!appConfig.AUTH.TELEGRAM_BOT_TOKEN) {
+            return { configured: false, message: 'TELEGRAM_BOT_TOKEN is not set' };
+        }
+
+        try {
+            const [meRes, webhookRes] = await Promise.all([
+                axios.get(`https://api.telegram.org/bot${appConfig.AUTH.TELEGRAM_BOT_TOKEN}/getMe`, { timeout: 15000 }),
+                axios.get(`https://api.telegram.org/bot${appConfig.AUTH.TELEGRAM_BOT_TOKEN}/getWebhookInfo`, { timeout: 15000 }),
+            ]);
+
+            return {
+                configured: true,
+                mode: appConfig.APP.PUBLIC_URL ? 'webhook' : 'polling',
+                is_polling: this._isPolling,
+                public_url: appConfig.APP.PUBLIC_URL || null,
+                expected_webhook_url: appConfig.APP.PUBLIC_URL
+                    ? `${appConfig.APP.PUBLIC_URL}/${appConfig.APP.GLOBAL_PREFIX}/auth/telegram-bot/webhook`
+                    : null,
+                bot: meRes.data?.result,
+                webhook: webhookRes.data?.result,
+            };
+        } catch (error: any) {
+            return {
+                configured: true,
+                error: error?.response?.data || error?.message || String(error),
+            };
+        }
+    }
+
+    async syncWebhook() {
+        if (!appConfig.AUTH.TELEGRAM_BOT_TOKEN) return { ok: false, message: 'No TELEGRAM_BOT_TOKEN' };
 
         if (appConfig.APP.PUBLIC_URL) {
+            this._isPolling = false;
             try {
                 const url = `${appConfig.APP.PUBLIC_URL}/${appConfig.APP.GLOBAL_PREFIX}/auth/telegram-bot/webhook`;
                 await axios.post(
@@ -52,8 +87,10 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
                     },
                     { timeout: 30000 },
                 );
+                this._logger.log(`Telegram webhook registered successfully: ${url}`);
             } catch (error: any) {
                 this._logger.warn(`Telegram setWebhook failed: ${error?.response?.data ? JSON.stringify(error.response.data) : error?.message ?? error}`);
+                return { ok: false, error: error?.response?.data || error?.message };
             }
         } else {
             this._logger.log('PUBLIC_URL is not configured; running Telegram bot in local polling mode');
@@ -77,6 +114,22 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
             );
         } catch (error: any) {
             this._logger.warn(`Telegram setMyCommands failed: ${error?.response?.data ? JSON.stringify(error.response.data) : error?.message ?? error}`);
+        }
+
+        return { ok: true, mode: appConfig.APP.PUBLIC_URL ? 'webhook' : 'polling' };
+    }
+
+    async removeWebhook() {
+        if (!appConfig.AUTH.TELEGRAM_BOT_TOKEN) return { ok: false };
+        try {
+            const { data } = await axios.post(
+                `https://api.telegram.org/bot${appConfig.AUTH.TELEGRAM_BOT_TOKEN}/deleteWebhook`,
+                {},
+                { timeout: 15000 },
+            );
+            return data;
+        } catch (error: any) {
+            return { ok: false, error: error?.response?.data || error?.message };
         }
     }
 
