@@ -1,0 +1,25 @@
+auth-sign-in {
+    display: block;
+    width: 100%;
+
+    input.mat-mdc-input-element {
+        caret-color: #2563eb !important;
+        cursor: text !important;
+    }
+
+    html.dark & input.mat-mdc-input-element,
+    .dark & input.mat-mdc-input-element {
+        caret-color: #60a5fa !important;
+        color: #f8fafc !important;
+        cursor: text !important;
+    }
+
+    .mat-mdc-form-field.mat-focused input.mat-mdc-input-element {
+        caret-color: #2563eb !important;
+    }
+
+    html.dark & .mat-mdc-form-field.mat-focused input.mat-mdc-input-element,
+    .dark & .mat-mdc-form-field.mat-focused input.mat-mdc-input-element {
+        caret-color: #60a5fa !important;
+    }
+}

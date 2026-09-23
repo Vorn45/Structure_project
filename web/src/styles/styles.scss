@@ -1075,13 +1075,46 @@ button.side-dialog-close-button {
     &:hover {
         background-color: #1e293b !important;
         color: #ffffff !important;
-
         .mat-icon {
             color: #ffffff !important;
         }
     }
 }
 
+/* =====================================================================
+   Input Caret & Cursor Focus Visibility Fix
+   Ensures focused cursor (|) is brightly and clearly visible when typing
+   ===================================================================== */
+input,
+textarea,
+[contenteditable="true"],
+.mat-mdc-input-element,
+.mat-input-element {
+    caret-color: #2563eb !important;
+    cursor: text !important;
+}
 
+/* Dark Mode Caret & Text Cursor */
+html.dark input,
+.dark input,
+html.dark textarea,
+.dark textarea,
+html.dark [contenteditable="true"],
+.dark [contenteditable="true"],
+html.dark .mat-mdc-input-element,
+.dark .mat-mdc-input-element,
+html.dark .mat-input-element,
+.dark .mat-input-element {
+    caret-color: #60a5fa !important;
+    cursor: text !important;
+}
 
+/* Angular Material Form Fields focused caret */
+.mat-mdc-form-field.mat-focused .mat-mdc-input-element {
+    caret-color: #2563eb !important;
+}
 
+html.dark .mat-mdc-form-field.mat-focused .mat-mdc-input-element,
+.dark .mat-mdc-form-field.mat-focused .mat-mdc-input-element {
+    caret-color: #60a5fa !important;
+}
