@@ -508,7 +508,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     })
                 );
 
-                // 2. If the chat drawer is currently open for this task, append comment
+                // 2. If the chat drawer is currently open for this task, append or update comment
                 if (currentSelected && String(currentSelected.id) === taskId) {
                     currentSelected.comments_count = evt.comments_count ?? (currentSelected.comments_count || 0) + 1;
                     if (evt.attachments_count !== undefined) {
@@ -518,31 +518,43 @@ export class UserTaskComponent implements OnInit, OnDestroy {
                     const currentUser = this.currentUser() || this._userService.getUser();
                     const isSelf = Boolean(currentUser?.id && evt.comment.sender_id === currentUser.id);
 
-                    const currentMsgs = this.chatMessages();
-                    const alreadyExists = currentMsgs.some((m) =>
-                        (m.id && evt.comment.id && m.id === evt.comment.id) ||
-                        (isSelf && m.text === evt.comment.text && Math.abs(new Date(m.created_at || 0).getTime() - new Date(evt.comment.created_at || 0).getTime()) < 4000)
-                    );
+                    let displayTime = evt.comment.time;
+                    if (evt.comment.created_at) {
+                        const d = new Date(evt.comment.created_at);
+                        if (!isNaN(d.getTime())) {
+                            displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                    }
 
-                    if (!alreadyExists) {
-                        let displayTime = evt.comment.time;
-                        if (evt.comment.created_at) {
-                            const d = new Date(evt.comment.created_at);
-                            if (!isNaN(d.getTime())) {
-                                displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            }
+                    const incomingMsg: TaskChatMessage = {
+                        ...evt.comment,
+                        is_self: isSelf,
+                        time: displayTime || 'ទើបតែផ្ញើ',
+                    };
+
+                    this.chatMessages.update((msgs) => {
+                        const existingIdx = msgs.findIndex((m) =>
+                            (m.id && evt.comment.id && m.id === evt.comment.id) ||
+                            (isSelf && m.text === evt.comment.text && (
+                                !m.created_at ||
+                                Math.abs(new Date(m.created_at).getTime() - new Date(evt.comment.created_at || Date.now()).getTime()) < 30000
+                            ))
+                        );
+
+                        if (existingIdx !== -1) {
+                            const updated = [...msgs];
+                            updated[existingIdx] = {
+                                ...updated[existingIdx],
+                                ...incomingMsg,
+                            };
+                            this.taskChatHistoryMap.set(currentSelected.id, updated);
+                            return updated;
                         }
 
-                        const incomingMsg: TaskChatMessage = {
-                            ...evt.comment,
-                            is_self: isSelf,
-                            time: displayTime || 'ទើបតែផ្ញើ',
-                        };
-
-                        this.chatMessages.update((msgs) => [...msgs, incomingMsg]);
-                        const cached = this.taskChatHistoryMap.get(currentSelected.id) || [];
-                        this.taskChatHistoryMap.set(currentSelected.id, [...cached, incomingMsg]);
-                    }
+                        const updated = [...msgs, incomingMsg];
+                        this.taskChatHistoryMap.set(currentSelected.id, updated);
+                        return updated;
+                    });
                 }
             });
 
@@ -1911,6 +1923,7 @@ export class UserTaskComponent implements OnInit, OnDestroy {
             sender_avatar: userAvatar,
             text: text || (attachments.length > 0 ? 'បានផ្ញើឯកសារ' : ''),
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            created_at: new Date().toISOString(),
             is_self: true,
             attachments: attachments.length > 0 ? [...attachments] : undefined,
             seen_by: [],

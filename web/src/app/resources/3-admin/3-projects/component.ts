@@ -961,31 +961,43 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
                         const currentUser = this._userService.getUser();
                         const isSelf = Boolean(currentUser?.id && evt.comment.sender_id === currentUser.id);
 
-                        const currentMsgs = this.taskDrawerChatMessages();
-                        const alreadyExists = currentMsgs.some((m) =>
-                            (m.id && evt.comment.id && m.id === evt.comment.id) ||
-                            (isSelf && m.text === evt.comment.text && Math.abs(new Date(m.created_at || 0).getTime() - new Date(evt.comment.created_at || 0).getTime()) < 4000)
-                        );
+                        let displayTime = evt.comment.time;
+                        if (evt.comment.created_at) {
+                            const d = new Date(evt.comment.created_at);
+                            if (!isNaN(d.getTime())) {
+                                displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                        }
 
-                        if (!alreadyExists) {
-                            let displayTime = evt.comment.time;
-                            if (evt.comment.created_at) {
-                                const d = new Date(evt.comment.created_at);
-                                if (!isNaN(d.getTime())) {
-                                    displayTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                }
+                        const incomingMsg: TaskChatMessage = {
+                            ...evt.comment,
+                            is_self: isSelf,
+                            time: displayTime || 'ទើបតែផ្ញើ',
+                        };
+
+                        this.taskDrawerChatMessages.update((msgs) => {
+                            const existingIdx = msgs.findIndex((m) =>
+                                (m.id && evt.comment.id && m.id === evt.comment.id) ||
+                                (isSelf && m.text === evt.comment.text && (
+                                    !m.created_at ||
+                                    Math.abs(new Date(m.created_at).getTime() - new Date(evt.comment.created_at || Date.now()).getTime()) < 30000
+                                ))
+                            );
+
+                            if (existingIdx !== -1) {
+                                const updated = [...msgs];
+                                updated[existingIdx] = {
+                                    ...updated[existingIdx],
+                                    ...incomingMsg,
+                                };
+                                this._drawerChatHistoryMap.set(currentModal.id, updated);
+                                return updated;
                             }
 
-                            const incomingMsg: TaskChatMessage = {
-                                ...evt.comment,
-                                is_self: isSelf,
-                                time: displayTime || 'ទើបតែផ្ញើ',
-                            };
-
-                            const updated = [...currentMsgs, incomingMsg];
-                            this.taskDrawerChatMessages.set(updated);
+                            const updated = [...msgs, incomingMsg];
                             this._drawerChatHistoryMap.set(currentModal.id, updated);
-                        }
+                            return updated;
+                        });
                     }
                 }
             });
