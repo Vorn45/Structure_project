@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { env } from 'envs/env';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { TaskMember } from './models/task.types';
 
 export type TaskStatus =
@@ -85,19 +85,36 @@ export interface TaskListResponse {
 @Injectable({ providedIn: 'root' })
 export class UserTaskService {
     private readonly baseUrl = `${env.API_BASE_URL}/user/task`;
+    private _projectsCache$: Observable<{ status_code: number; message: string; data: any[] }> | null = null;
+    private _membersCache$: Observable<{ status_code: number; message: string; data: TaskMember[] }> | null = null;
 
     constructor(private readonly _http: HttpClient) {}
 
-    getProjects(): Observable<{ status_code: number; message: string; data: any[] }> {
-        return this._http.get<{ status_code: number; message: string; data: any[] }>(`${this.baseUrl}/projects`, {
-            withCredentials: true,
-        });
+    getProjects(forceRefresh = false): Observable<{ status_code: number; message: string; data: any[] }> {
+        if (forceRefresh || !this._projectsCache$) {
+            this._projectsCache$ = this._http
+                .get<{ status_code: number; message: string; data: any[] }>(`${this.baseUrl}/projects`, {
+                    withCredentials: true,
+                })
+                .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+        }
+        return this._projectsCache$;
     }
 
-    getMembers(): Observable<{ status_code: number; message: string; data: TaskMember[] }> {
-        return this._http.get<{ status_code: number; message: string; data: TaskMember[] }>(`${this.baseUrl}/members`, {
-            withCredentials: true,
-        });
+    getMembers(forceRefresh = false): Observable<{ status_code: number; message: string; data: TaskMember[] }> {
+        if (forceRefresh || !this._membersCache$) {
+            this._membersCache$ = this._http
+                .get<{ status_code: number; message: string; data: TaskMember[] }>(`${this.baseUrl}/members`, {
+                    withCredentials: true,
+                })
+                .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+        }
+        return this._membersCache$;
+    }
+
+    clearCache(): void {
+        this._projectsCache$ = null;
+        this._membersCache$ = null;
     }
 
     getTasks(params?: { search?: string; status?: string; priority?: string; project_id?: string; member_id?: string; scope?: string }): Observable<TaskListResponse> {

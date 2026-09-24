@@ -17,7 +17,7 @@ import {
 import { PasscodeService } from './passcode.service';
 
 // ======================================= >> Code Starts Here << ========================== //
-@Controller('local-passcode')
+@Controller(['local-passcode', 'profile/local-passcode'])
 export class PasscodeController {
     constructor(private readonly _service: PasscodeService) {}
 

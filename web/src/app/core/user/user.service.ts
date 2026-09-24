@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { User } from 'app/core/user/user.types';
 import { env } from 'envs/env';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject, shareReplay } from 'rxjs';
 
 export interface ProfileOrganizationOption {
     id: string | number;
@@ -34,6 +34,7 @@ export class UserService {
     private _user: ReplaySubject<User> = new ReplaySubject<User>(1);
     private _currentUser: User | null = null;
     private _org: any = null;
+    private _organizationsCache$: Observable<ProfileOrganizationsResponse> | null = null;
 
     constructor(private _http: HttpClient) {}
 
@@ -66,10 +67,19 @@ export class UserService {
         return this._user.asObservable();
     }
 
-    getOrganizations(): Observable<ProfileOrganizationsResponse> {
-        return this._http.get<ProfileOrganizationsResponse>(
-            `${env.API_BASE_URL}/account/profile/organizations`,
-        );
+    getOrganizations(forceRefresh = false): Observable<ProfileOrganizationsResponse> {
+        if (forceRefresh || !this._organizationsCache$) {
+            this._organizationsCache$ = this._http
+                .get<ProfileOrganizationsResponse>(
+                    `${env.API_BASE_URL}/account/profile/organizations`,
+                )
+                .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+        }
+        return this._organizationsCache$;
+    }
+
+    clearOrganizationsCache(): void {
+        this._organizationsCache$ = null;
     }
 
 }

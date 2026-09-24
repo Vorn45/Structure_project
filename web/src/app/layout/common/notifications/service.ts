@@ -18,6 +18,7 @@ import {
     Observable,
     of,
     ReplaySubject,
+    shareReplay,
     Subscription,
     timeout,
 } from 'rxjs';
@@ -92,6 +93,7 @@ export class NotificationsService implements OnDestroy {
     private _audioUnlocked = false;
     /** Last known preferences per scope — kept so the chime can respect them. */
     private _settingCache = new Map<NotificationSettingScope, NotificationSettingData>();
+    private _settingInFlight = new Map<NotificationSettingScope, Observable<NotificationSettingData | null>>();
 
     /**
      * Base path for the shared notification controller. `SharedModule` is mounted
@@ -654,7 +656,12 @@ export class NotificationsService implements OnDestroy {
             this._cacheSetting(scope, stored);
         }
 
-        return this._httpClient
+        const inFlight = this._settingInFlight.get(scope);
+        if (inFlight) {
+            return inFlight;
+        }
+
+        const req$ = this._httpClient
             .get<{ data: NotificationSettingData }>(`${this._baseUrl}/setting`, {
                 params: { scope },
             })
@@ -669,7 +676,11 @@ export class NotificationsService implements OnDestroy {
                     console.warn('Error fetching notification setting, using cached setting:', err?.message || err);
                     return of(stored || this._settingCache.get(scope) || null);
                 }),
+                shareReplay({ bufferSize: 1, refCount: false }),
             );
+
+        this._settingInFlight.set(scope, req$);
+        return req$;
     }
 
     /** PATCH /notification/setting — returns the saved state, persisting locally immediately. */
@@ -677,6 +688,7 @@ export class NotificationsService implements OnDestroy {
         payload: NotificationSettingPayload,
         scope: NotificationSettingScope = 'general',
     ): Observable<NotificationSettingData | null> {
+        this._settingInFlight.delete(scope);
         const current = this._settingCache.get(scope) || this._getStoredSetting(scope) || {
             enabled: true,
             muted_until: null,
