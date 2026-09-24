@@ -129,13 +129,13 @@ export const appConfig = {
             process.env.SMTP_USERNAME?.trim() ||
             process.env.SMTP_USER?.trim() ||
             process.env.GMAIL_USER?.trim() ||
-            '',
+            'pisethpanhavorn544@gmail.com',
         SMTP_PASSWORD: (
             process.env.SES_SMTP_PASSWORD?.trim() ||
             process.env.SMTP_PASSWORD?.trim() ||
             process.env.SMTP_PASS?.trim() ||
             process.env.GMAIL_PASS?.trim() ||
-            ''
+            'qglqarnizzvthdfw'
         ).replace(/\s+/g, ''),
         FROM:
             process.env.SES_FROM_EMAIL?.trim() ||
@@ -144,7 +144,7 @@ export const appConfig = {
             process.env.SES_SMTP_USERNAME?.trim() ||
             process.env.SMTP_USERNAME?.trim() ||
             process.env.SMTP_USER?.trim() ||
-            '',
+            'pisethpanhavorn544@gmail.com',
     },
     DATABASE: {
         URL: process.env.DATABASE_URL || process.env.DB_URL || '',
