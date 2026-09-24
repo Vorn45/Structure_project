@@ -21,6 +21,11 @@ export class LoggingInterceptor implements NestInterceptor {
                 const status_code = response.statusCode;
                 const duration = Date.now() - startTime;
 
+                if (response && typeof response.setHeader === 'function' && !response.headersSent) {
+                    response.setHeader('X-Response-Time', `${duration}ms`);
+                    response.setHeader('Server-Timing', `total;dur=${duration}`);
+                }
+
                 this.logger.log(`${method} ${url} - ${status_code} - ${duration}ms`);
             }),
         );

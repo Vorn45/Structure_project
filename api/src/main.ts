@@ -45,7 +45,7 @@
                 'sec-ch-ua-mobile',
                 'sec-ch-ua-platform',
             ],
-            exposedHeaders: ['Authorization', 'Set-Cookie'],
+            exposedHeaders: ['Authorization', 'Set-Cookie', 'X-Response-Time', 'Server-Timing'],
             preflightContinue: false,
             optionsSuccessStatus: 204,
         });

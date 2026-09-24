@@ -15,7 +15,18 @@ const app = express();
 FileDatabase.initialize();
 
 // 2. Global Middlewares
-app.use(cors({ origin: appConfig.corsOrigin }));
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    if (!res.headersSent) {
+      res.setHeader('X-Response-Time', `${duration}ms`);
+      res.setHeader('Server-Timing', `total;dur=${duration}`);
+    }
+  });
+  next();
+});
+app.use(cors({ origin: appConfig.corsOrigin, exposedHeaders: ['X-Response-Time', 'Server-Timing'] }));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

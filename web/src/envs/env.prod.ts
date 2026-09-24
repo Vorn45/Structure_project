@@ -3,7 +3,7 @@ const origin = isBrowser ? window.location.origin : '';
 
 export const env = {
     production: true,
-    APP_VERSION: '1.0.0',
+    APP_VERSION: '1.0.0',   
     API_BASE_URL: origin ? `${origin}/api` : '/api',
     FILE_BASE_URL: 'https://file-v4-api.uat.camcyber.com',
     SOCKET_URL: origin ? origin : '',
