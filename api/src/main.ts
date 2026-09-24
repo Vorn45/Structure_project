@@ -12,6 +12,7 @@
 
     import session from 'express-session';
 
+    // Application bootstrap
     async function bootstrap() {
         const logger = new Logger(bootstrap.name);
         const app = await NestFactory.create<NestExpressApplication>(AppModule);
