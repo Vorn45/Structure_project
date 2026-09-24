@@ -119,11 +119,32 @@ export const appConfig = {
         SMS_API_TOKEN: process.env.OTP_SMS_API_TOKEN?.trim() || '',
     },
     SES: {
-        SMTP_HOST: process.env.SES_SMTP_HOST?.trim() || 'smtp.gmail.com',
-        SMTP_PORT: toNumber(process.env.SES_SMTP_PORT, 465),
-        SMTP_USERNAME: process.env.SES_SMTP_USERNAME?.trim() || '',
-        SMTP_PASSWORD: (process.env.SES_SMTP_PASSWORD?.trim() || '').replace(/\s+/g, ''),
-        FROM: process.env.SES_FROM_EMAIL?.trim() || '',
+        SMTP_HOST:
+            process.env.SES_SMTP_HOST?.trim() ||
+            process.env.SMTP_HOST?.trim() ||
+            'smtp.gmail.com',
+        SMTP_PORT: toNumber(process.env.SES_SMTP_PORT || process.env.SMTP_PORT, 465),
+        SMTP_USERNAME:
+            process.env.SES_SMTP_USERNAME?.trim() ||
+            process.env.SMTP_USERNAME?.trim() ||
+            process.env.SMTP_USER?.trim() ||
+            process.env.GMAIL_USER?.trim() ||
+            '',
+        SMTP_PASSWORD: (
+            process.env.SES_SMTP_PASSWORD?.trim() ||
+            process.env.SMTP_PASSWORD?.trim() ||
+            process.env.SMTP_PASS?.trim() ||
+            process.env.GMAIL_PASS?.trim() ||
+            ''
+        ).replace(/\s+/g, ''),
+        FROM:
+            process.env.SES_FROM_EMAIL?.trim() ||
+            process.env.SMTP_FROM?.trim() ||
+            process.env.EMAIL_FROM?.trim() ||
+            process.env.SES_SMTP_USERNAME?.trim() ||
+            process.env.SMTP_USERNAME?.trim() ||
+            process.env.SMTP_USER?.trim() ||
+            '',
     },
     DATABASE: {
         URL: process.env.DATABASE_URL || process.env.DB_URL || '',

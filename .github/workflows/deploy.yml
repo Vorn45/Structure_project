@@ -203,6 +203,7 @@ jobs:
 
           umask 077
           printf '%s\n' "$PRODUCTION_ENV_FILE" > .env
+          printf '%s\n' "$PRODUCTION_ENV_FILE" > api/.env
           printf '%s\n' "$PRODUCTION_ENV_FILE" > "$RUNNER_TEMP/wms-production.env"
 
       - name: Validate production Compose configuration
