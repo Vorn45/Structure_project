@@ -1,6 +1,6 @@
 <!-- Same shell as sign-in: renders inside the auth layout's card, one step at a time.
      Pinned to the top so the header sits where sign-in's does, even though these steps are shorter. -->
-<div class="w-full flex flex-col justify-start">
+<div class="w-full flex-1 flex flex-col justify-start">
 
     <!-- Back + Language — the first step has only the language switch, like sign-in -->
     <div class="flex items-center mb-4" [ngClass]="step === 'email' ? 'justify-end' : 'justify-between'">
@@ -46,68 +46,67 @@
     <!-- ============================================================ -->
     <!-- Step 1 — email or phone                                       -->
     <!-- ============================================================ -->
-    <form *ngIf="step === 'email'" class="flex flex-col gap-3" [formGroup]="resetPasswordForm" (ngSubmit)="showOtp($event)">
+    <!-- The field sits centred in the free space; the button is pinned to the bottom. -->
+    <form *ngIf="step === 'email'" class="flex-1 flex flex-col pb-6" [formGroup]="resetPasswordForm" (ngSubmit)="showOtp($event)">
 
-        <mat-form-field appearance="outline" class="w-full">
-            <mat-label>{{ 'Auth.Common.Email' | transloco }}</mat-label>
-            <mat-icon matPrefix class="mat-icon-5 text-slate-400 mr-2" svgIcon="mdi:email"></mat-icon>
-            <input matInput type="text" formControlName="phoneOrEmail" />
-            <mat-error *ngIf="resetPasswordForm.get('phoneOrEmail')?.hasError('required')">
-                {{ 'Auth.Common.EmailRequire' | transloco }}
-            </mat-error>
-            <mat-error *ngIf="!resetPasswordForm.get('phoneOrEmail')?.hasError('required') && resetPasswordForm.get('phoneOrEmail')?.hasError('invalidInput')">
-                {{ 'Auth.Common.EmailPattern' | transloco }}
-            </mat-error>
-        </mat-form-field>
+        <div class="flex-1 flex flex-col justify-center">
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>{{ 'Auth.Common.Email' | transloco }}</mat-label>
+                <mat-icon matPrefix class="mat-icon-5 text-slate-400 mr-2" svgIcon="mdi:email"></mat-icon>
+                <input matInput type="text" formControlName="phoneOrEmail" />
+                <mat-error *ngIf="resetPasswordForm.get('phoneOrEmail')?.hasError('required')">
+                    {{ 'Auth.Common.EmailRequire' | transloco }}
+                </mat-error>
+                <mat-error *ngIf="!resetPasswordForm.get('phoneOrEmail')?.hasError('required') && resetPasswordForm.get('phoneOrEmail')?.hasError('invalidInput')">
+                    {{ 'Auth.Common.EmailPattern' | transloco }}
+                </mat-error>
+            </mat-form-field>
+        </div>
 
         <button type="submit" mat-flat-button [disabled]="isLoading"
                 class="w-full h-11 bg-primary text-white rounded-lg font-medium shadow-md transition-all hover:opacity-95 mt-1">
             <span *ngIf="!isLoading">{{ 'Auth.Common.Next' | transloco }}</span>
             <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'" />
         </button>
-
-        <div class="flex justify-center items-center gap-1 mt-1 text-xs sm:text-sm">
-            <span class="text-slate-500 dark:text-slate-400">{{ 'Auth.ResetPassword.RememberIt' | transloco }}</span>
-            <a class="font-medium text-primary hover:underline cursor-pointer" [routerLink]="['/auth/sign-in']">
-                {{ 'Auth.Sign-In.Action' | transloco }}
-            </a>
-        </div>
     </form>
 
     <!-- ============================================================ -->
     <!-- Step 2 — OTP                                                  -->
     <!-- ============================================================ -->
-    <ng-container *ngIf="step === 'otp'">
+    <!-- Code boxes centred in the free space; the button is pinned to the bottom, as on step 1. -->
+    <div *ngIf="step === 'otp'" class="flex-1 flex flex-col pb-6">
 
-        <div class="otp-inputs-row my-2">
-            <input *ngFor="let digit of digits; let i = index; trackBy: trackByIndex"
-                   #otpBox
-                   class="otp-input"
-                   [class.has-value]="digit"
-                   inputmode="numeric"
-                   maxlength="1"
-                   [value]="digit"
-                   [disabled]="otpExpired"
-                   (input)="onDigitInput(i, $event)"
-                   (keydown)="onDigitKeydown(i, $event)"
-                   (paste)="onDigitPaste($event)" />
-        </div>
+        <div class="flex-1 flex flex-col justify-center">
+            <div class="otp-inputs-row my-2">
+                <input *ngFor="let digit of digits; let i = index; trackBy: trackByIndex"
+                       #otpBox
+                       class="otp-input"
+                       [class.has-value]="digit"
+                       inputmode="numeric"
+                       maxlength="1"
+                       [value]="digit"
+                       [disabled]="otpExpired"
+                       (input)="onDigitInput(i, $event)"
+                       (keydown)="onDigitKeydown(i, $event)"
+                       (paste)="onDigitPaste($event)" />
+            </div>
 
-        <p *ngIf="otpError" class="mt-2 text-center text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
-            {{ 'Auth.Common.InvalidCode' | transloco }}
-        </p>
-        <p *ngIf="otpExpired" class="mt-2 text-center text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
-            {{ 'Auth.Common.CodeExpired' | transloco }}
-        </p>
+            <p *ngIf="otpError" class="mt-2 text-center text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
+                {{ 'Auth.Common.InvalidCode' | transloco }}
+            </p>
+            <p *ngIf="otpExpired" class="mt-2 text-center text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">
+                {{ 'Auth.Common.CodeExpired' | transloco }}
+            </p>
 
-        <!-- Timer / Resend -->
-        <div class="flex justify-center my-4 text-xs sm:text-sm font-medium">
-            <span *ngIf="remainingTime > 0" class="text-slate-400 dark:text-slate-500 underline opacity-60 pointer-events-none select-none">
-                {{ 'Auth.Common.ResendOtp' | transloco }} ({{ remainingTime }})
-            </span>
-            <a *ngIf="remainingTime <= 0" (click)="resendOtp()" class="text-primary cursor-pointer underline hover:opacity-80">
-                {{ 'Auth.Common.ResendOtp' | transloco }}
-            </a>
+            <!-- Timer / Resend -->
+            <div class="flex justify-center my-4 text-xs sm:text-sm font-medium">
+                <span *ngIf="remainingTime > 0" class="text-slate-400 dark:text-slate-500 underline opacity-60 pointer-events-none select-none">
+                    {{ 'Auth.Common.ResendOtp' | transloco }} ({{ remainingTime }})
+                </span>
+                <a *ngIf="remainingTime <= 0" (click)="resendOtp()" class="text-primary cursor-pointer underline hover:opacity-80">
+                    {{ 'Auth.Common.ResendOtp' | transloco }}
+                </a>
+            </div>
         </div>
 
         <button type="button" mat-flat-button [disabled]="!canVerify" (click)="verifyOtp()"
@@ -115,7 +114,7 @@
             <span *ngIf="!isLoading">{{ 'Auth.Common.Verify' | transloco }}</span>
             <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'" />
         </button>
-    </ng-container>
+    </div>
 
     <!-- ============================================================ -->
     <!-- Step 3 — new password                                         -->
@@ -164,7 +163,7 @@
         </ul>
 
         <button type="submit" mat-flat-button [disabled]="isLoading || matchedCount < 4"
-                class="w-full h-11 bg-primary text-white rounded-lg font-medium shadow-md transition-all hover:opacity-95 mt-1">
+                class="w-full h-11 bg-primary text-white rounded-lg font-medium shadow-md transition-all hover:opacity-95">
             <span *ngIf="!isLoading">{{ 'Auth.Common.Done' | transloco }}</span>
             <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'" />
         </button>

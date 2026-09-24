@@ -3,7 +3,8 @@
 // so only the pieces Tailwind can't express live here: the OTP boxes (mirroring
 // sign-in's otp-verify), the strength meter and the password rules.
 app-reset-password {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     // Fill the layout's column instead of being centred in it: sign-in's form is
     // tall enough to fill it, so both headers start at the same height.
@@ -90,7 +91,7 @@ app-reset-password {
     .reset-rules {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
         margin: 0;
         padding: 0;
         list-style: none;
