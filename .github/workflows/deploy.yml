@@ -305,7 +305,7 @@ jobs:
             --project-name "$COMPOSE_PROJECT_NAME" \
             --env-file "$RUNNER_TEMP/wms-production.env" \
             -f docker-compose.yml \
-            up -d --no-build --remove-orphans "${services[@]}"
+            up -d --force-recreate --no-build --remove-orphans "${services[@]}"
 
           # Force Nginx restart so changes in nginx/conf.d take effect immediately
           echo "Restarting Nginx load_balancer..."
