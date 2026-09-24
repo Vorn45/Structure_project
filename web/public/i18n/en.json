@@ -33,7 +33,8 @@
         "ResetPassword": {
             "Title": "Reset your password",
             "EnterAccountEmail": "Enter your account email",
-            "SendCodeNote": "so we can send a 6-digit code to your inbox"
+            "SendCodeNote": "so we can send a 6-digit code to your inbox",
+            "RememberIt": "Remember your password?"
         },
         "TwoFactor": {
             "Title": "Account security verification (2FA)",

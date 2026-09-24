@@ -1,340 +1,139 @@
-// Reset-password card
-// Same card chrome as sign-in — host centring, surface, header (logo +
-// language switch), field treatment, submit button and bottom link bar all
-// come from _auth-card.scss, so the two screens stay identical. Only the
-// pieces unique to this page (back arrow, icon, title, description) live here.
-@use '../../auth-card' as auth;
-
+// Reset-password steps
+// Layout, header, fields and buttons use the same Tailwind classes as sign-in,
+// so only the pieces Tailwind can't express live here: the OTP boxes (mirroring
+// sign-in's otp-verify), the strength meter and the password rules.
 app-reset-password {
-    @include auth.auth-host;
-}
+    display: block;
+    width: 100%;
+    // Fill the layout's column instead of being centred in it: sign-in's form is
+    // tall enough to fill it, so both headers start at the same height.
+    flex: 1 1 auto;
 
-.reset-wrap {
-    @include auth.auth-wrap;
-}
-
-.reset-card {
-    @include auth.auth-card;
-}
-
-.reset-card__head {
-    @include auth.auth-card-head;
-}
-
-// Pinned so it does not push the logo off the optical centre of the header.
-.reset-card__back {
-    position: absolute;
-    left: -4px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    color: #4b5563;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-        background-color: #f3f4f6;
+    input.mat-mdc-input-element {
+        caret-color: #2563eb !important;
+        cursor: text !important;
     }
 
-    mat-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 30px;
-        color: inherit;
-    }
-}
-
-.reset-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    // Pulled up into the slack the logo's own transparent padding leaves behind,
-    // matching the sign-up card.
-    margin: -10px auto 4px;
-    border-radius: 50%;
-    background: #f3f4f5;
-
-    mat-icon {
-        width: 44px;
-        height: 44px;
-        font-size: 44px;
-        color: #1f2937;
-    }
-}
-
-.reset-title {
-    margin: 0;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 500;
-    line-height: 1.6;
-    color: #0f172a;
-}
-
-.reset-description {
-    margin: 6px 0 20px;
-    text-align: center;
-    font-size: 16px;
-    line-height: 1.7;
-    color: #6b7280;
-}
-
-// Step 2 — the address the code went to, then the six boxes. The description
-// above it drops its bottom margin so the two lines read as one block.
-.reset-email {
-    margin: -14px 0 0;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 500;
-    color: #374151;
-}
-
-.reset-otp {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 22px 0 0;
-}
-
-.reset-otp__box {
-    width: 48px;
-    height: 48px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: #1c2978;
-    background-color: #fbfcfd;
-    border: 2px solid #e3e6ec;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-
-    &:focus {
-        border-color: #1c2978;
-        box-shadow: 0 0 0 3px rgba(28, 41, 120, 0.1);
+    .dark & input.mat-mdc-input-element {
+        caret-color: #60a5fa !important;
+        color: #f8fafc !important;
     }
 
-    &:disabled {
-        background-color: #f3f4f6;
-        cursor: not-allowed;
-    }
-}
-
-.reset-otp__error {
-    margin: 10px 0 0;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 500;
-    color: #ef4444;
-}
-
-.reset-resend {
-    display: flex;
-    justify-content: center;
-    margin: 16px 0 14px;
-
-    a {
-        font-size: 16px;
-        color: #1e3a8a; // blue-900, as the other auth links
-        cursor: pointer;
-        text-decoration: underline;
-
-        &:hover {
-            opacity: 0.85;
-        }
-
-        // Locked until the countdown runs out.
-        &.is-disabled {
-            color: #9ca3af;
-            cursor: not-allowed;
-            pointer-events: none;
-            text-decoration: none;
-        }
-    }
-}
-
-// Step 3 — strength meter and the four rules under the password field.
-.reset-meter {
-    display: flex;
-    gap: 10px;
-    margin-top: -6px;
-}
-
-.reset-meter__bar {
-    flex: 1 1 0;
-    height: 5px;
-    border-radius: 999px;
-    background: #e5e7eb;
-    transition: background-color 0.2s;
-
-    &.is-weak   { background: #ef4444; }
-    &.is-medium { background: #f59e0b; }
-    &.is-strong { background: #22c55e; }
-}
-
-.reset-rules {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: -4px 0 0;
-    padding: 0;
-    list-style: none;
-
-    li {
+    // Step 2 — six code boxes, same as the sign-in OTP screen.
+    .otp-inputs-row {
         display: flex;
+        gap: 0.5rem;
         align-items: center;
-        gap: 10px;
-        font-size: 13px;
-        color: #4b5563;
-
-        mat-icon {
-            flex: 0 0 auto;
-            width: 20px;
-            height: 20px;
-            font-size: 20px;
-            color: #9ca3af;
-        }
-
-        &.is-met {
-            color: #16a34a;
-
-            mat-icon {
-                color: #16a34a;
-            }
-        }
-    }
-}
-
-// The generate-password affordance reads as an accent next to the eye toggle.
-.reset-generate {
-    color: #1c2978;
-}
-
-.reset-form {
-    @include auth.auth-form;
-}
-
-.reset-submit.mat-mdc-button-base {
-    @include auth.auth-submit;
-}
-
-// Matches the 24px the form puts above the submit button, so the button sits
-// with equal space on both sides.
-.reset-links {
-    @include auth.auth-links;
-    margin-top: 24px;
-}
-
-// Dark mode — page-specific pieces only; the shared card chrome brings its own
-// dark rules. ViewEncapsulation.None, so scope through the <body> class.
-body.dark {
-    .reset-card__back {
-        color: auth.$dark-muted;
-
-        &:hover {
-            background-color: rgba(76, 141, 255, 0.10);
-            color: auth.$dark-accent;
-        }
+        justify-content: center;
     }
 
-    // A tinted disc rather than a white wash, so it belongs to the blue family.
-    .reset-icon {
-        background: rgba(76, 141, 255, 0.10);
+    .otp-input {
+        width: 3.25rem;
+        height: 3.25rem;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background-color: #f8fafc;
+        color: #1e293b;
+        caret-color: var(--helper-primary);
+        outline: none;
+        transition: all 0.2s ease-in-out;
 
-        mat-icon {
-            color: auth.$dark-accent;
-        }
-    }
-
-    .reset-title {
-        color: auth.$dark-text;
-    }
-
-    .reset-description {
-        color: auth.$dark-muted;
-    }
-
-    .reset-email {
-        color: auth.$dark-text;
-    }
-
-    .reset-otp__box {
-        background-color: auth.$dark-sunken;
-        border-color: auth.$dark-hairline;
-        color: auth.$dark-text;
-
-        &:focus {
-            border-color: auth.$dark-accent;
-            box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.22);
+        &:focus,
+        &.has-value {
+            border-color: var(--helper-primary);
+            color: var(--helper-primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(var(--helper-primary-rgb), 0.15);
         }
 
         &:disabled {
-            background-color: #070c18;
-            color: #55688c;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .dark & {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #f8fafc;
+
+            &:focus,
+            &.has-value {
+                border-color: var(--helper-primary);
+                color: var(--helper-primary);
+                background-color: #0f172a;
+                box-shadow: 0 0 0 3px rgba(var(--helper-primary-rgb), 0.25);
+            }
         }
     }
 
-    .reset-resend a {
-        color: auth.$dark-accent;
-
-        &.is-disabled {
-            color: #55688c;
-        }
-    }
-
+    // Step 3 — strength meter and the four rules under the password field.
     .reset-meter__bar {
-        background: auth.$dark-hairline;
+        flex: 1 1 0;
+        height: 5px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        transition: background-color 0.2s;
 
-        &.is-weak   { background: #f87171; }
-        &.is-medium { background: #fbbf24; }
-        &.is-strong { background: #34d399; }
+        &.is-weak   { background: #ef4444; }
+        &.is-medium { background: #f59e0b; }
+        &.is-strong { background: #22c55e; }
+
+        .dark & { background: #334155; }
+        .dark &.is-weak   { background: #f87171; }
+        .dark &.is-medium { background: #fbbf24; }
+        .dark &.is-strong { background: #34d399; }
     }
 
-    .reset-rules li {
-        color: auth.$dark-muted;
+    .reset-rules {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
 
-        mat-icon {
-            color: #55688c;
-        }
-
-        &.is-met {
-            color: #34d399;
+        li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #64748b;
 
             mat-icon {
+                flex: 0 0 auto;
+                width: 18px;
+                height: 18px;
+                font-size: 18px;
+                color: #94a3b8;
+            }
+
+            &.is-met,
+            &.is-met mat-icon {
+                color: #16a34a;
+            }
+        }
+
+        .dark & li {
+            color: #94a3b8;
+
+            mat-icon { color: #475569; }
+
+            &.is-met,
+            &.is-met mat-icon {
                 color: #34d399;
             }
         }
     }
-
-    .reset-generate {
-        color: auth.$dark-accent;
-    }
-
-    // #ef4444 reads too heavy against a dark surface.
-    .reset-otp__error {
-        color: #f87171;
-    }
 }
 
-@media (max-width: 640px) {
-    .reset-title {
-        font-size: 20px;
-    }
-
-    .reset-otp {
-        gap: 8px;
-    }
-
-    .reset-otp__box {
-        width: 42px;
-        height: 42px;
-        font-size: 18px;
+@media (max-width: 480px) {
+    app-reset-password .otp-input {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1.25rem;
+        border-radius: 0.375rem;
     }
 }

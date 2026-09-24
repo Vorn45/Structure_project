@@ -81,9 +81,13 @@ export class ForgetPasswordService {
     async forgetPassword(dto: ForgetPasswordDto) {
         const user = await this.getUser(dto);
         const contact = this.getContact(dto);
-        const channels = await this.otpService.getEnabledChannelsByUser(
-            user.id,
-        );
+
+        // The reset code always goes to the email on the account, whichever
+        // OTP channels the user has turned on for login.
+        if (!user.email)
+            throw new BadRequestException(
+                'This account has no email address. Please contact your administrator.',
+            );
 
         const challenge = await this.otpService.createChallenge(
             user.id,
@@ -91,20 +95,10 @@ export class ForgetPasswordService {
             5,
         );
 
-        // Reset password has no channel-picker UI (unlike login), so send
-        // straight away — prefer email since that's what the user typed in.
-        const channel = channels.includes(OtpChannel.EMAIL)
-            ? OtpChannel.EMAIL
-            : channels[0];
-
         // Delivery is not awaited: the challenge is already stored, and waiting
         // on SMTP is what kept the code screen from appearing for seconds. A
         // failure is logged — the screen offers a resend.
-        const delivery = channel
-            ? this.otpService.sendChallenge(user, challenge.otp_token, channel)
-            : this.sendWithoutChannel(user, challenge.otp_token);
-
-        void delivery.catch((err: any) => {
+        void this.sendEmail(user, challenge.otp_token).catch((err: any) => {
             console.error(
                 `[forgot-password] could not send the code to user ${user.id}:`,
                 err?.message || err,
@@ -116,47 +110,42 @@ export class ForgetPasswordService {
             requires_otp: true,
             go_to_reset_password: true,
             otp_token: challenge.otp_token,
-            channel: channel ?? OtpChannel.EMAIL,
-            channels,
+            channel: OtpChannel.EMAIL,
+            sent_to: this.maskEmail(user.email),
             expires_at: challenge.expires_at,
             contact,
             message: 'OTP is required',
         };
     }
 
-    private async sendWithoutChannel(user: User, otpToken: string) {
-        const otpRepo = this._dataSource.getRepository(UserOTP);
-        const otpData = await otpRepo.findOne({
-            where: { otp_token: otpToken },
-        });
+    private async sendEmail(user: User, otpToken: string) {
+        const otpData = await this._dataSource
+            .getRepository(UserOTP)
+            .findOne({ where: { otp_token: otpToken } });
 
         const { SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, FROM } = appConfig.SES;
-        const emailConfigured = !!(
-            SMTP_HOST &&
-            SMTP_USERNAME &&
-            SMTP_PASSWORD &&
-            FROM
-        );
-
-        if (user.email && emailConfigured) {
-            await this.otpDeliveryService.send(
-                user,
-                OtpChannel.EMAIL,
-                otpData.otp,
-                OtpPurpose.FORGOT_PASSWORD,
-            );
-        } else {
+        if (!(SMTP_HOST && SMTP_USERNAME && SMTP_PASSWORD && FROM)) {
             console.warn(
-                `[forgot-password] no OTP channel to deliver on; use the code ${otpData.otp} for user ${user.id}`,
+                `[forgot-password] SMTP is not configured; use the code ${otpData.otp} for user ${user.id}`,
             );
+            return;
         }
 
-        return {
-            otp_token: otpToken,
-            channel: OtpChannel.EMAIL,
-            expires_at: otpData.expires_at,
-        };
+        await this.otpDeliveryService.send(
+            user,
+            OtpChannel.EMAIL,
+            otpData.otp,
+            OtpPurpose.FORGOT_PASSWORD,
+        );
     }
+
+    // "sokha.dara@gmail.com" -> "so*******@gmail.com"
+    private maskEmail(email: string) {
+        const [name, domain] = email.split('@');
+        const visible = name.slice(0, Math.min(2, name.length));
+        return `${visible}${'*'.repeat(Math.max(name.length - visible.length, 3))}@${domain}`;
+    }
+
     async verifyOtp(dto: VerifyResetOtpDto) {
         const user = await this.getUser(dto);
         const otpUser = await this.otpService.checkChallenge(

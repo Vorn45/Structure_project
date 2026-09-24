@@ -532,7 +532,7 @@ export class AuthService {
     }
 
     // ADDED: calls POST /auth/forget-password to generate and store OTP in DB
-    forgetPassword(username: string): Observable<{ status_code: number; go_to_reset_password: boolean; contact: string; message: string }> {
+    forgetPassword(username: string): Observable<{ status_code: number; go_to_reset_password: boolean; otp_token: string; sent_to: string; contact: string; message: string }> {
         return this._httpClient.post<any>(`${env.API_BASE_URL}/auth/forget-password`, { username });
     }
     verifyResetPasswordOtp(body: { username: string; otp: string; otp_token: string }): Observable<any> {

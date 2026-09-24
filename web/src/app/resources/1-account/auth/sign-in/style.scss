@@ -1,6 +1,9 @@
 auth-sign-in {
     display: block;
     width: 100%;
+    // Fill the layout's column rather than being centred in it, like the
+    // forgot-password steps, so the header sits at the same height on both.
+    flex: 1 1 auto;
 
     input.mat-mdc-input-element {
         caret-color: #2563eb !important;

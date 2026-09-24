@@ -50,6 +50,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
 
     // ===>> OTP step
     public username     = '';
+    public sentTo       = '';
     public otpToken     = '';
     public digits       : string[] = ['', '', '', '', '', ''];
     public remainingTime = 0;
@@ -73,7 +74,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
         // The password step validates through the four strength rules below, so
         // the control itself only carries the baseline requirements.
         this.resetPasswordForm = this._formBuilder.group({
-            phoneOrEmail: ['', [this.phoneOrEmailValidator.bind(this)]],
+            phoneOrEmail: ['', [Validators.required, this.phoneOrEmailValidator.bind(this)]],
             newPassword : ['', [Validators.required, Validators.minLength(6)]]
         });
     }
@@ -145,11 +146,9 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
             // The code step is never skipped: the backend issues a challenge
             // for every reset, including accounts with no OTP channel enabled.
             next : (response: any) => {
+                this.sentTo = response?.sent_to || payloadValue;
                 this.goToOtpStep(payloadValue, response?.otp_token || '');
-                const msg = payloadValue.includes('@')
-                    ? 'បានផ្ញើលេខកូដ OTP ទៅកាន់អ៊ីមែលរបស់អ្នក'
-                    : 'បានផ្ញើលេខកូដ OTP ទៅកាន់លេខទូរស័ព្ទរបស់អ្នក';
-                this._snackbarService.openSnackBar(msg, GlobalConstants.success);
+                this._snackbarService.openSnackBar('បានផ្ញើលេខកូដ OTP ទៅកាន់អ៊ីមែលរបស់អ្នក', GlobalConstants.success);
             },
             error: (err) => {
                 this.isLoading = false;
@@ -281,10 +280,8 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
         this._authService.forgetPassword(this.username).subscribe({
             next : (response: any) => {
                 this.otpToken = response?.otp_token || this.otpToken;
-                const msg = this.username.includes('@')
-                    ? 'បានផ្ញើលេខកូដ OTP ទៅកាន់អ៊ីមែលរបស់អ្នក'
-                    : 'បានផ្ញើលេខកូដ OTP ទៅកាន់លេខទូរស័ព្ទរបស់អ្នក';
-                this._snackbarService.openSnackBar(msg, GlobalConstants.success);
+                this.sentTo   = response?.sent_to || this.sentTo;
+                this._snackbarService.openSnackBar('បានផ្ញើលេខកូដ OTP ទៅកាន់អ៊ីមែលរបស់អ្នក', GlobalConstants.success);
             },
             error: (err) => this._errorHandleService.handleAuthError(
                 GlobalConstants.authError(err?.error?.message, GlobalConstants.otpSendFailed)
