@@ -14,6 +14,7 @@ import { UserService } from 'app/core/user/user.service';
 import { TaskSocketService } from 'app/core/realtime/task-socket.service';
 import { UserTaskService } from '../task.service';
 import { resolveFileUrl } from 'helper/shared/file-url';
+import { DEFAULT_PROJECT_LOGO, getProjectFallbackLogo } from 'app/resources/2-user/4-plan/plan.types';
 import {
     TASK_TYPES_LIST,
     TaskAttachment,
@@ -48,6 +49,7 @@ import {
 })
 export class TaskDrawerComponent implements OnDestroy {
     task = input<TaskItem | null>(null);
+    projects = input<any[]>([]);
     show = input<boolean>(false);
     messages = input<TaskChatMessage[]>([]);
     teamMembers = input<TaskMember[]>([]);
@@ -1061,5 +1063,106 @@ export class TaskDrawerComponent implements OnDestroy {
         this.newChatMessage = '';
         this.pendingAttachments.set([]);
         setTimeout(() => this.scrollToBottom(true), 50);
+    }
+
+    getProjectLogo(taskItem: TaskItem | null | undefined): string {
+        if (!taskItem) return DEFAULT_PROJECT_LOGO;
+
+        // 1. Direct project logo on task object
+        const raw =
+            (taskItem as any).project_logo ||
+            (taskItem as any).project_image ||
+            (taskItem as any).project?.logo ||
+            (taskItem as any).project?.image ||
+            (taskItem as any).logo ||
+            (taskItem as any).image;
+
+        if (
+            raw &&
+            typeof raw === 'string' &&
+            raw.trim() !== '' &&
+            raw !== 'null' &&
+            raw !== 'undefined' &&
+            !raw.includes('placeholder') &&
+            !raw.includes('/images/logo/logo.png') &&
+            !raw.includes('/images/logo/wfm_logo.png')
+        ) {
+            if (raw.startsWith('data:') || raw.startsWith('blob:')) {
+                return raw;
+            }
+            const resolved = resolveFileUrl(raw);
+            if (resolved) return resolved;
+        }
+
+        // 2. Look up from projects list input if available
+        const projectList = this.projects();
+        if (projectList && projectList.length > 0) {
+            const pid = String(taskItem.project_id || '').toLowerCase();
+            const pname = String(taskItem.project_name || '').toLowerCase();
+            const pcode = String((taskItem as any).project_code || '').toLowerCase();
+
+            const found = projectList.find((p: any) => {
+                const id = String(p.id || '').toLowerCase();
+                const name = String(p.name || '').toLowerCase();
+                const code = String(p.code || '').toLowerCase();
+                return (
+                    (pid && id === pid) ||
+                    (pname && name === pname) ||
+                    (pcode && code === pcode)
+                );
+            });
+
+            if (found) {
+                const foundLogo = found.logo || found.image;
+                if (
+                    foundLogo &&
+                    typeof foundLogo === 'string' &&
+                    foundLogo.trim() !== '' &&
+                    foundLogo !== 'null' &&
+                    foundLogo !== 'undefined' &&
+                    !foundLogo.includes('placeholder') &&
+                    !foundLogo.includes('/images/logo/logo.png') &&
+                    !foundLogo.includes('/images/logo/wfm_logo.png')
+                ) {
+                    if (foundLogo.startsWith('data:') || foundLogo.startsWith('blob:')) {
+                        return foundLogo;
+                    }
+                    const resolved = resolveFileUrl(foundLogo);
+                    if (resolved) return resolved;
+                }
+            }
+        }
+
+        // 3. Fallback dynamically generated project logo
+        const code =
+            (taskItem as any).project_code ||
+            (taskItem as any).project?.code ||
+            (taskItem.code ? taskItem.code.split('-')[0].replace(/^#/, '') : '') ||
+            taskItem.project_id;
+        const name =
+            taskItem.project_name ||
+            (taskItem as any).project?.name ||
+            taskItem.project_id ||
+            'Project';
+
+        return getProjectFallbackLogo(code, name);
+    }
+
+    onProjectLogoError(event: Event, taskItem: TaskItem | null | undefined): void {
+        const target = event.target as HTMLImageElement;
+        const code =
+            (taskItem as any)?.project_code ||
+            (taskItem as any)?.project?.code ||
+            (taskItem?.code ? taskItem.code.split('-')[0].replace(/^#/, '') : '') ||
+            taskItem?.project_id;
+        const name =
+            taskItem?.project_name ||
+            (taskItem as any)?.project?.name ||
+            taskItem?.project_id ||
+            'Project';
+        const fallback = getProjectFallbackLogo(code, name);
+        if (target && target.src !== fallback) {
+            target.src = fallback;
+        }
     }
 }

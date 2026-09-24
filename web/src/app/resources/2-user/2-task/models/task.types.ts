@@ -73,6 +73,18 @@ export interface TaskItem {
     due_date: string | null;
     project_id: string;
     project_name: string;
+    project_code?: string;
+    project_logo?: string | null;
+    project_image?: string | null;
+    logo?: string | null;
+    image?: string | null;
+    project?: {
+        id?: string | number;
+        code?: string;
+        name?: string;
+        logo?: string | null;
+        image?: string | null;
+    };
     reporter?: TaskMember;
     assignee: TaskMember;
     assignees?: TaskMember[];

@@ -1419,6 +1419,8 @@ export class ProjectManagementComponent implements OnInit, AfterViewInit, OnDest
             due_date: task.due_date || null,
             project_id: proj ? String(proj.id) : '1',
             project_name: proj ? proj.name : 'Project',
+            project_code: proj?.code,
+            project_logo: proj ? (proj.logo || proj.image) : null,
             reporter: reporterMember,
             assignee: assigneeMember,
             assignees: assigneesList,

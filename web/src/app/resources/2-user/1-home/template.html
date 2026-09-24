@@ -771,6 +771,7 @@
     <!-- Unified Task Drawer & File Preview Modal matching /member/tasks Image 1 -->
     <task-drawer
         [task]="selectedTaskDrawerItem()"
+        [projects]="overview()?.projects || []"
         [show]="showTaskDrawer()"
         [dialogMode]="taskDrawerDialogMode()"
         [messages]="taskDrawerChatMessages()"
