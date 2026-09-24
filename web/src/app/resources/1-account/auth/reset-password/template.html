@@ -2,9 +2,9 @@
      Pinned to the top so the header sits where sign-in's does, even though these steps are shorter. -->
 <div class="w-full flex-1 flex flex-col justify-start">
 
-    <!-- Back + Language — the first step has only the language switch, like sign-in -->
-    <div class="flex items-center mb-4" [ngClass]="step === 'email' ? 'justify-end' : 'justify-between'">
-        <button *ngIf="step !== 'email'" type="button" mat-icon-button (click)="goBack()" aria-label="Back"
+    <!-- Back + Language — held at the language switch's height so the header lines up with sign-in -->
+    <div class="flex items-center justify-between h-10 mb-4">
+        <button type="button" mat-icon-button (click)="goBack()" aria-label="Back"
                 class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
             <mat-icon svgIcon="mdi:arrow-left"></mat-icon>
         </button>
