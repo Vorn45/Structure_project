@@ -274,7 +274,7 @@
             </div>
 
             <!-- Dropdown Menu for Project Lead -->
-            <mat-menu #leadMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
+            <mat-menu #leadMenu="matMenu" [overlapTrigger]="false" xPosition="after" yPosition="below" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
                 <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
                     <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសប្រធានគម្រោង</span>
                     <span *ngIf="leadName" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
@@ -315,33 +315,36 @@
             </mat-menu>
 
             <!-- Multi-Select Menu for Team Members -->
-            <mat-menu #membersMenu="matMenu" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
+            <mat-menu #membersMenu="matMenu" [overlapTrigger]="false" xPosition="after" yPosition="below" panelClass="task-dropdown-menu" class="font-kantumruy !min-w-[280px] !p-1.5">
                 <div (click)="$event.stopPropagation()" class="px-2.5 py-2 border-b border-slate-100 dark:border-slate-700/80 mb-1 flex items-center justify-between">
                     <span class="text-[12.5px] font-semibold text-slate-800 dark:text-slate-200">ជ្រើសរើសសមាជិកក្រុមការងារ</span>
                     <span *ngIf="selectedMembers.length > 0" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800/60">
                         {{ selectedMembers.length }} នាក់
                     </span>
                 </div>
-                <div (click)="$event.stopPropagation()" class="max-h-60 overflow-y-auto space-y-0.5">
-                    <div *ngFor="let m of availableMembers"
-                        (click)="toggleMember(m.id)"
-                        class="flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors font-kantumruy select-none my-0.5">
-                        <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
-                            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
-                                <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
-                                <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                <div class="max-h-60 overflow-y-auto space-y-0.5">
+                    <button *ngFor="let m of availableMembers"
+                        mat-menu-item
+                        (click)="toggleMember(m.id); $event.stopPropagation()"
+                        class="!text-[13px] !rounded-xl !h-auto !py-1.5 my-0.5">
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+                                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                    <img *ngIf="m.avatar" [src]="m.avatar" class="w-full h-full object-cover" />
+                                    <mat-icon *ngIf="!m.avatar" svgIcon="mdi:account" class="!w-4 !h-4 !m-0 !p-0 flex items-center justify-center text-slate-500 dark:text-slate-400"></mat-icon>
+                                </div>
+                                <div class="min-w-0 text-left flex-1">
+                                    <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">
+                                        {{ m.name }}
+                                    </p>
+                                    <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate leading-tight">
+                                        {{ m.role || 'សមាជិកក្រុមការងារ' }}
+                                    </p>
+                                </div>
                             </div>
-                            <div class="min-w-0 text-left flex-1">
-                                <p class="text-[12.5px] font-medium text-slate-800 dark:text-slate-200 truncate leading-snug">
-                                    {{ m.name }}
-                                </p>
-                                <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate leading-tight">
-                                    {{ m.role || 'សមាជិកក្រុមការងារ' }}
-                                </p>
-                            </div>
+                            <mat-icon *ngIf="isMemberSelected(m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 text-blue-500 shrink-0 ml-auto"></mat-icon>
                         </div>
-                        <mat-icon *ngIf="isMemberSelected(m.id)" svgIcon="mdi:check" class="!w-4 !h-4 !m-0 text-blue-500 shrink-0 ml-auto"></mat-icon>
-                    </div>
+                    </button>
 
                     <div *ngIf="availableMembers.length === 0" class="py-4 text-center text-xs text-slate-400">
                         រកមិនឃើញសមាជិកទេ
