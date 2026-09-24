@@ -910,6 +910,8 @@ export class UserHomeComponent implements OnInit, OnDestroy {
             due_date: task.due_date || null,
             project_id: task.project_id || 'bms-digitech',
             project_name: task.project_name || 'BMS Digitech',
+            project_code: task.project_code || (task.code ? task.code.split('-')[0].replace(/^#/, '') : undefined),
+            project_logo: task.project_logo || task.project_image || task.logo || task.image || null,
             reporter: task.reporter || {
                 id: 1,
                 name: 'ពិសិដ្ឋ បញ្ញាវ័ន្ត',

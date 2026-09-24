@@ -1535,6 +1535,8 @@ export class UserPlanComponent implements OnInit, OnDestroy {
             due_date: task.due_date || null,
             project_id: this.selectedProject()?.id || 'bms-digitech',
             project_name: this.selectedProject()?.name || 'BMS Digitech',
+            project_code: this.selectedProject()?.code,
+            project_logo: this.selectedProject()?.logo || this.selectedProject()?.image,
             reporter: task.reporter ? {
                 id: task.reporter.id,
                 name: task.reporter.name,

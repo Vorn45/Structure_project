@@ -69,9 +69,9 @@
             <!-- Left Pane Header -->
             <div class="h-14 px-5 flex items-center justify-between border-b border-slate-200/90 dark:border-slate-800/60 bg-white dark:bg-[#0c1527] shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <!-- WMS DIGITECHKH Logo -->
-                    <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#162238] border border-slate-200 dark:border-slate-750 p-1 flex items-center justify-center shrink-0 shadow-2xs">
-                        <img src="images/logo/default_logo.png" alt="WMS DIGITECHKH" class="w-full h-full object-contain" />
+                    <!-- Dynamic Project Logo -->
+                    <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#162238] border border-slate-200 dark:border-slate-750 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                        <img [src]="getProjectLogo(task())" (error)="onProjectLogoError($event, task())" [alt]="task()?.project_name || 'Project'" class="w-full h-full object-contain rounded-full" />
                     </div>
 
                     <!-- Task Code -->
