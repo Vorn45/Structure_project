@@ -19,18 +19,19 @@ export class RedirectGuard implements CanActivate {
         private authService: AuthService,
     ) {}
 
-    canActivate(_route: ActivatedRouteSnapshot): UrlTree {
         if (typeof window !== 'undefined') {
             const pathname = window.location.pathname || '';
             const search = window.location.search || '';
+            const tg = (window as any).Telegram?.WebApp;
+
+            if (tg?.initData || pathname.includes('/mini-app') || pathname.includes('/tma')) {
+                return this.router.parseUrl(`/mini-app${search}`);
+            }
             if (pathname.includes('/attendance/scan') || pathname.includes('/attendance')) {
                 return this.router.parseUrl(`/attendance/scan${search}`);
             }
             if (pathname.includes('/verify/member')) {
                 return this.router.parseUrl(`/verify/member${search}`);
-            }
-            if (pathname.includes('/mini-app') || pathname.includes('/tma')) {
-                return this.router.parseUrl(`/mini-app${search}`);
             }
         }
 
