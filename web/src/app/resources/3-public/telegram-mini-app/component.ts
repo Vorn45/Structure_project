@@ -289,14 +289,15 @@ export class TelegramMiniAppComponent implements OnInit, OnDestroy {
                 // If Telegram initData is available, authenticate with backend
                 if (tg.initData) {
                     this._http
-                        .post<{ data: { token: string; user?: any } }>(
-                            `${this.apiBaseUrl}/auth/login/mini-app`,
+                        .post<any>(
+                            `${this.apiBaseUrl}/auth/mini-app`,
                             { init_data: tg.initData },
                         )
                         .subscribe({
                             next: (res) => {
-                                if (res?.data?.token) {
-                                    localStorage.setItem('accessToken', res.data.token);
+                                const token = res?.token || res?.data?.token || res?.access_token;
+                                if (token) {
+                                    localStorage.setItem('accessToken', token);
                                     this.isLiveConnected.set(true);
                                     this.fetchRealUserProfile();
                                     this.fetchRealTasks();

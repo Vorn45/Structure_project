@@ -22,16 +22,17 @@ export class RedirectGuard implements CanActivate {
     canActivate(_route: ActivatedRouteSnapshot): UrlTree {
         if (typeof window !== 'undefined') {
             const pathname = window.location.pathname || '';
+            const hash = window.location.hash || '';
             const search = window.location.search || '';
             const tg = (window as any).Telegram?.WebApp;
 
-            if (tg?.initData || pathname.includes('/mini-app') || pathname.includes('/tma')) {
+            if (tg?.initData || pathname.includes('/mini-app') || hash.includes('mini-app') || pathname.includes('/tma') || hash.includes('tma')) {
                 return this.router.parseUrl(`/mini-app${search}`);
             }
-            if (pathname.includes('/attendance/scan') || pathname.includes('/attendance')) {
+            if (pathname.includes('/attendance/scan') || hash.includes('/attendance') || pathname.includes('/attendance')) {
                 return this.router.parseUrl(`/attendance/scan${search}`);
             }
-            if (pathname.includes('/verify/member')) {
+            if (pathname.includes('/verify/member') || hash.includes('verify/member')) {
                 return this.router.parseUrl(`/verify/member${search}`);
             }
         }

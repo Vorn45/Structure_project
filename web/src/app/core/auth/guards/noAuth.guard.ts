@@ -11,6 +11,14 @@ export const NoAuthGuard: CanActivateFn | CanActivateChildFn = (_route, _state) 
 
     const router: Router = inject(Router);
     const authService = inject(AuthService);
+
+    if (typeof window !== 'undefined') {
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg && (tg.initData || tg.initDataUnsafe?.user)) {
+            return of(router.parseUrl('/mini-app'));
+        }
+    }
+
     const token = authService?.accessToken;
     if (token) {
         try {
