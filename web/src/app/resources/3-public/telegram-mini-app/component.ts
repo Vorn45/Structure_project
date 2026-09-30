@@ -491,6 +491,14 @@ export class TelegramMiniAppComponent implements OnInit, OnDestroy {
             });
     }
 
+    onProgressSliderChange(event: Event): void {
+        const target = event.target as HTMLInputElement;
+        const task = this.selectedTask();
+        if (target && task) {
+            this.updateProgress(task.id, Number(target.value));
+        }
+    }
+
     updateProgress(taskId: string | number, progress: number): void {
         this.triggerHaptic('light');
         const newStatus: TaskStatus = progress === 100 ? 'done' : progress > 0 ? 'in_progress' : 'todo';
