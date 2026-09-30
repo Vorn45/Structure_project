@@ -1,5 +1,6 @@
 // ================================================================================>> Main Library
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -158,6 +159,7 @@ export class AuthSignInComponent implements OnInit, AfterViewInit, OnDestroy {
         private _snackbarService: SnackbarService,
         private _matDialog: MatDialog,
         private _dialogConfigService: DialogConfigService,
+        private _httpClient: HttpClient,
     ) { }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -166,6 +168,31 @@ export class AuthSignInComponent implements OnInit, AfterViewInit, OnDestroy {
             username: ['', Validators.required],
             password: ['', Validators.required],
         });
+
+        // 🌟 Automatic Telegram Mini App Login
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg && tg.initData) {
+            this.form.disable();
+            this._authService.signInWithMiniApp(tg.initData).subscribe({
+                next: () => {
+                    this._router.navigateByUrl('/mini-app');
+                },
+                error: () => {
+                    // Try fallback endpoint
+                    this._httpClient?.post<any>(`${env.API_BASE_URL}/auth/login/mini-app`, { init_data: tg.initData }).subscribe({
+                        next: (res: any) => {
+                            if (res?.data?.token) {
+                                this._authService.accessToken = res.data.token;
+                                this._router.navigateByUrl('/mini-app');
+                            }
+                        },
+                        error: () => {
+                            this.form.enable();
+                        }
+                    });
+                }
+            });
+        }
     }
 
     ngAfterViewInit(): void {

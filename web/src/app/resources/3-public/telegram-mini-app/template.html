@@ -1,0 +1,455 @@
+<!-- Telegram Mini App Root -->
+<div class="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col justify-between max-w-md mx-auto relative antialiased select-none">
+
+    <!-- 🌟 Splash Loading Screen (Matches Screenshot) -->
+    <div *ngIf="isLoading()" class="fixed inset-0 bg-[#0b0f19] flex flex-col items-center justify-center p-6 text-center z-50 animate-fade-out">
+        <div class="relative mb-6">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-2xl shadow-emerald-950/60 animate-pulse">
+                <div class="w-full h-full bg-[#0b0f19] rounded-[14px] flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" class="w-12 h-12 fill-none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M25 20H55C71.5685 20 85 33.4315 85 50C85 66.5685 71.5685 80 55 80H25V20Z" stroke="#10b981" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M45 38H54C60.6274 38 66 43.3726 66 50C66 56.6274 60.6274 62 54 62H45V38Z" fill="#10b981"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <h1 class="text-xl font-black text-slate-100 tracking-wider">
+            DIGITECH <span class="text-emerald-400">WFM</span>
+        </h1>
+        <p class="text-xs text-slate-400 mt-1 font-medium">Workforce Management System</p>
+        <div class="flex space-x-1.5 mt-8">
+            <div class="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div class="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div class="w-2 h-2 bg-emerald-300 rounded-full animate-bounce"></div>
+        </div>
+    </div>
+
+    <!-- 🔝 Header -->
+    <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="relative">
+                <img [src]="user().avatar" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/50">
+                <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+            </div>
+            <div>
+                <div class="flex items-center space-x-1.5">
+                    <h1 class="font-bold text-sm text-slate-100 leading-tight">{{ user().name }}</h1>
+                    <span *ngIf="isLiveConnected()" class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded font-semibold flex items-center space-x-0.5">
+                        <span>● ភ្ជាប់រួច</span>
+                    </span>
+                    <span *ngIf="!isLiveConnected()" class="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.2 rounded font-semibold">WFM</span>
+                </div>
+                <p class="text-xs text-slate-400 font-medium">{{ user().role }}</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button (click)="toggleLanguage()" class="px-2.5 py-1.5 bg-slate-800 active:scale-95 text-xs font-semibold rounded-lg text-slate-200 border border-slate-700">
+                <span>{{ language() === 'km' ? 'ខ្មែរ 🇰🇭' : 'EN 🇬🇧' }}</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 📱 Main Screen Content -->
+    <main class="flex-1 overflow-y-auto pb-24">
+
+        <!-- TAB 1: HOME -->
+        <div *ngIf="activeTab() === 'home'" class="p-4 space-y-4">
+            <!-- Attendance Punch Widget -->
+            <div class="rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/70 p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div [ngClass]="isClockedIn() ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-slate-400'" class="p-2 rounded-xl">
+                            <mat-icon class="!w-5 !h-5 !text-[20px]">schedule</mat-icon>
+                        </div>
+                        <div>
+                            <h2 class="text-xs uppercase tracking-wider font-semibold text-slate-400">វត្តមាន (Attendance)</h2>
+                            <p class="text-sm font-bold text-slate-100">
+                                {{ isClockedIn() ? 'កំពុងស្ថិតក្នុងម៉ោងធ្វើការ' : 'មិនទាន់ចូលធ្វើការ' }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-full text-xs text-slate-300 flex items-center space-x-1">
+                        <mat-icon class="!w-3.5 !h-3.5 !text-[14px] text-rose-400">location_on</mat-icon>
+                        <span>Phnom Penh HQ</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/70 rounded-xl p-3 border border-slate-800 mb-3 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-400">ម៉ោងធ្វើការថ្ងៃនេះ (Worked Today)</span>
+                        <div class="text-2xl font-black text-emerald-400 font-mono tracking-wider">
+                            {{ formatTimer(elapsedSeconds()) }}
+                        </div>
+                    </div>
+                    <div *ngIf="isClockedIn()" class="text-right">
+                        <span class="text-xs text-slate-400">Check In</span>
+                        <div class="text-sm font-bold text-slate-200">{{ clockInTime() }}</div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2">
+                    <button *ngIf="!isClockedIn()" (click)="clockIn()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-bold rounded-xl shadow transition">
+                        🟢 ចូលធ្វើការ (Clock In)
+                    </button>
+                    <button *ngIf="isClockedIn()" (click)="clockOut()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 active:scale-98 text-white font-bold rounded-xl shadow transition">
+                        🔴 ចេញធ្វើការ (Clock Out)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Metrics Grid -->
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-slate-800/70 border border-slate-700/60 p-3 rounded-2xl">
+                    <span class="text-[10px] text-slate-400 font-semibold block">ការងារសរុប</span>
+                    <span class="text-lg font-black text-slate-100">{{ tasks().length }}</span>
+                </div>
+                <div class="bg-slate-800/70 border border-slate-700/60 p-3 rounded-2xl">
+                    <span class="text-[10px] text-blue-400 font-semibold block">កំពុងធ្វើ</span>
+                    <span class="text-lg font-black text-blue-400">{{ inProgressCount }}</span>
+                </div>
+                <div class="bg-slate-800/70 border border-slate-700/60 p-3 rounded-2xl">
+                    <span class="text-[10px] text-emerald-400 font-semibold block">បញ្ចប់</span>
+                    <span class="text-lg font-black text-emerald-400">{{ doneCount }}</span>
+                </div>
+            </div>
+
+            <!-- Urgent Tasks Section -->
+            <div>
+                <div class="flex items-center justify-between mb-2.5">
+                    <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center space-x-1.5">
+                        <mat-icon class="!w-4 !h-4 !text-[16px] text-orange-400">warning</mat-icon>
+                        <span>ការងារបន្ទាន់ (Priority Tasks)</span>
+                    </h2>
+                    <button (click)="setTab('tasks')" class="text-[11px] text-emerald-400 font-bold hover:underline">
+                        មើលទាំងអស់ →
+                    </button>
+                </div>
+
+                <div class="space-y-2.5">
+                    <div *ngFor="let task of urgentTasks.slice(0, 3)" (click)="openTask(task)" class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4 active:scale-[0.99] cursor-pointer transition">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-slate-700">
+                                {{ task.code }}
+                            </span>
+                            <span [ngClass]="{
+                                'bg-blue-500/20 text-blue-400 border-blue-500/30': task.status === 'in_progress',
+                                'bg-emerald-500/20 text-emerald-400 border-emerald-500/30': task.status === 'done',
+                                'bg-slate-700 text-slate-300 border-slate-600': task.status === 'todo'
+                            }" class="text-[10px] font-bold px-2 py-0.5 rounded-full border">
+                                {{ task.status === 'in_progress' ? 'កំពុងធ្វើ' : task.status === 'done' ? 'បញ្ចប់' : 'មិនទាន់ធ្វើ' }}
+                            </span>
+                        </div>
+                        <h3 class="font-bold text-slate-100 text-sm leading-snug mb-1">{{ task.title_kh || task.title }}</h3>
+                        <p class="text-xs text-slate-400 line-clamp-2 mb-3">{{ task.description }}</p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-700/50 mb-3">
+                            <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all" [style.width.%]="task.progress"></div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-700/40">
+                            <span class="text-[11px]">{{ task.assignee_name }}</span>
+                            <button class="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-[11px] font-bold border border-emerald-500/30">
+                                មើលការងារលម្អិត 🔍
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: TASKS -->
+        <div *ngIf="activeTab() === 'tasks'" class="p-4 space-y-3.5">
+            <div class="flex space-x-2">
+                <input type="text" [(ngModel)]="searchQuery" placeholder="ស្វែងរកការងារ (Search tasks)..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+                <button (click)="isCreateTaskModalOpen.set(true)" class="px-3 bg-emerald-600 active:scale-95 text-white font-bold rounded-xl text-xs">
+                    + បង្កើត
+                </button>
+            </div>
+
+            <!-- Filter Pills -->
+            <div class="flex space-x-1.5 overflow-x-auto no-scrollbar py-1">
+                <button (click)="taskFilter.set('all')" [ngClass]="taskFilter() === 'all' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700/40'" class="px-3 py-1.5 rounded-xl text-xs font-bold border whitespace-nowrap">
+                    ទាំងអស់ ({{ tasks().length }})
+                </button>
+                <button (click)="taskFilter.set('todo')" [ngClass]="taskFilter() === 'todo' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700/40'" class="px-3 py-1.5 rounded-xl text-xs font-bold border whitespace-nowrap">
+                    មិនទាន់ធ្វើ
+                </button>
+                <button (click)="taskFilter.set('in_progress')" [ngClass]="taskFilter() === 'in_progress' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700/40'" class="px-3 py-1.5 rounded-xl text-xs font-bold border whitespace-nowrap">
+                    កំពុងធ្វើ
+                </button>
+                <button (click)="taskFilter.set('done')" [ngClass]="taskFilter() === 'done' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-slate-800/60 text-slate-400 border-slate-700/40'" class="px-3 py-1.5 rounded-xl text-xs font-bold border whitespace-nowrap">
+                    បញ្ចប់
+                </button>
+            </div>
+
+            <div class="space-y-2.5">
+                <div *ngFor="let task of filteredTasks" (click)="openTask(task)" class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4 active:scale-[0.99] cursor-pointer transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-slate-700">
+                            {{ task.code }}
+                        </span>
+                        <span [ngClass]="{
+                            'bg-blue-500/20 text-blue-400 border-blue-500/30': task.status === 'in_progress',
+                            'bg-emerald-500/20 text-emerald-400 border-emerald-500/30': task.status === 'done',
+                            'bg-slate-700 text-slate-300 border-slate-600': task.status === 'todo'
+                        }" class="text-[10px] font-bold px-2 py-0.5 rounded-full border">
+                            {{ task.status === 'in_progress' ? 'កំពុងធ្វើ' : task.status === 'done' ? 'បញ្ចប់' : 'មិនទាន់ធ្វើ' }}
+                        </span>
+                    </div>
+                    <h3 class="font-bold text-slate-100 text-sm leading-snug mb-1">{{ task.title_kh || task.title }}</h3>
+                    <p class="text-xs text-slate-400 line-clamp-2 mb-3">{{ task.description }}</p>
+                    
+                    <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-700/50 mb-3">
+                        <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all" [style.width.%]="task.progress"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-700/40">
+                        <span class="text-[11px]">{{ task.assignee_name }}</span>
+                        <button class="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-[11px] font-bold border border-emerald-500/30">
+                            មើលការងារលម្អិត 🔍
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ATTENDANCE -->
+        <div *ngIf="activeTab() === 'attendance'" class="p-4 space-y-4">
+            <div class="rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/70 p-4">
+                <div class="text-center py-2">
+                    <span class="text-xs text-slate-400">ម៉ោងធ្វើការបច្ចុប្បន្ន</span>
+                    <div class="text-3xl font-black text-emerald-400 font-mono my-2">
+                        {{ formatTimer(elapsedSeconds()) }}
+                    </div>
+                    <p class="text-xs text-slate-300 font-semibold">📍 ទីតាំង៖ Phnom Penh HQ</p>
+                </div>
+            </div>
+
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">ប្រវត្តិវត្តមានថ្មីៗ</h3>
+            <div class="space-y-2">
+                <div *ngFor="let record of attendanceHistory()" class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-3 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-slate-100">{{ record.date }}</div>
+                        <div class="text-[11px] text-slate-400">{{ record.location }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-semibold text-slate-200">{{ record.check_in_time }}</div>
+                        <div class="text-emerald-400 text-[11px] font-mono font-bold">{{ record.total_hours }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: ACTIVITY -->
+        <div *ngIf="activeTab() === 'activity'" class="p-4 space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-100">កំណត់ត្រាការងារប្រចាំថ្ងៃ</h2>
+                    <p class="text-xs text-slate-400">Daily Activity Logs</p>
+                </div>
+                <button (click)="isLogActivityOpen.set(!isLogActivityOpen())" class="px-3 py-1.5 bg-emerald-600 active:scale-95 text-white font-bold text-xs rounded-xl">
+                    {{ isLogActivityOpen() ? 'បិទ' : '+ កត់ត្រា' }}
+                </button>
+            </div>
+
+            <form *ngIf="isLogActivityOpen()" (ngSubmit)="logActivity()" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 space-y-3">
+                <div>
+                    <label class="text-xs text-slate-300 block mb-1">សកម្មភាពដែលបានធ្វើ *</label>
+                    <input type="text" [(ngModel)]="newActivity.title" name="actTitle" required placeholder="ឧ. ដំឡើង POS និងផ្ទៀងផ្ទាត់ Stock..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">គម្រោង</label>
+                        <select [(ngModel)]="newActivity.project_name" name="actProj" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
+                            <option value="Cashier / POS System V2">Cashier / POS System V2</option>
+                            <option value="Sales Management V2">Sales Management V2</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">ចំណាយពេល (ម៉ោង)</label>
+                        <input type="number" step="0.5" [(ngModel)]="newActivity.hours_spent" name="actHours" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">
+                    បញ្ជូនកំណត់ត្រា (Submit)
+                </button>
+            </form>
+
+            <div class="space-y-2.5">
+                <div *ngFor="let act of activities()" class="bg-slate-800/70 border border-slate-700/60 rounded-2xl p-3.5 space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-100">{{ act.title }}</span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
+                            {{ act.hours_spent }}h
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400">{{ act.description }}</p>
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-700/40">
+                        <span>{{ act.project_name }}</span>
+                        <span>{{ act.created_at }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: PROFILE -->
+        <div *ngIf="activeTab() === 'profile'" class="p-4 space-y-4">
+            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-5 text-center shadow-xl">
+                <img [src]="user().avatar" alt="Avatar" class="w-20 h-20 rounded-full object-cover border-4 border-emerald-500/40 mx-auto mb-3">
+                <h2 class="text-base font-bold text-slate-100">{{ user().name }}</h2>
+                <p class="text-xs text-emerald-400 font-semibold">{{ user().role }}</p>
+                <div class="mt-3.5 inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-400 text-xs font-semibold">
+                    <span>@{{ user().telegram_username }} (Linked)</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 📱 Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/80 px-2 py-1.5 flex justify-around items-center">
+        <button (click)="setTab('home')" [ngClass]="activeTab() === 'home' ? 'text-emerald-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center flex-1 py-1">
+            <mat-icon class="!w-5 !h-5 !text-[20px]">dashboard</mat-icon>
+            <span class="text-[10px] mt-0.5">ទំព័រដើម</span>
+        </button>
+        <button (click)="setTab('tasks')" [ngClass]="activeTab() === 'tasks' ? 'text-emerald-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center flex-1 py-1">
+            <mat-icon class="!w-5 !h-5 !text-[20px]">check_box</mat-icon>
+            <span class="text-[10px] mt-0.5">ការងារ</span>
+        </button>
+        <button (click)="setTab('attendance')" [ngClass]="activeTab() === 'attendance' ? 'text-emerald-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center flex-1 py-1">
+            <mat-icon class="!w-5 !h-5 !text-[20px]">timer</mat-icon>
+            <span class="text-[10px] mt-0.5">វត្តមាន</span>
+        </button>
+        <button (click)="setTab('activity')" [ngClass]="activeTab() === 'activity' ? 'text-emerald-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center flex-1 py-1">
+            <mat-icon class="!w-5 !h-5 !text-[20px]">receipt_long</mat-icon>
+            <span class="text-[10px] mt-0.5">សកម្មភាព</span>
+        </button>
+        <button (click)="setTab('profile')" [ngClass]="activeTab() === 'profile' ? 'text-emerald-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center flex-1 py-1">
+            <mat-icon class="!w-5 !h-5 !text-[20px]">person</mat-icon>
+            <span class="text-[10px] mt-0.5">គណនី</span>
+        </button>
+    </nav>
+
+    <!-- 🔍 TASK DETAIL MODAL ("មើលការងារលម្អិត 🔍") -->
+    <div *ngIf="selectedTask()" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex flex-col justify-end">
+        <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl max-h-[90vh] overflow-y-auto flex flex-col animate-slide-up">
+            <div class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-800 text-emerald-400 border border-slate-700">
+                        {{ selectedTask()?.code }}
+                    </span>
+                    <span class="text-xs text-slate-400">{{ selectedTask()?.project_name }}</span>
+                </div>
+                <button (click)="closeTaskModal()" class="p-1 rounded-full bg-slate-800 text-slate-400">
+                    <mat-icon class="!w-5 !h-5 !text-[20px]">close</mat-icon>
+                </button>
+            </div>
+
+            <div class="p-4 space-y-4">
+                <div>
+                    <h2 class="text-base font-bold text-slate-100">{{ selectedTask()?.title_kh || selectedTask()?.title }}</h2>
+                    <p class="text-xs text-slate-300 mt-2 bg-slate-800/40 p-3 rounded-xl border border-slate-800">{{ selectedTask()?.description }}</p>
+                </div>
+
+                <!-- Status Selector Grid -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">ប្តូរស្ថានភាពការងារ (Change Status)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button (click)="updateStatus(selectedTask()!.id, 'todo')" [ngClass]="selectedTask()?.status === 'todo' ? 'bg-slate-700 text-white font-bold border-emerald-400' : 'bg-slate-800/80 text-slate-400 border-slate-700'" class="py-2.5 px-3 rounded-xl text-xs border">
+                            ⏳ មិនទាន់ធ្វើ
+                        </button>
+                        <button (click)="updateStatus(selectedTask()!.id, 'in_progress')" [ngClass]="selectedTask()?.status === 'in_progress' ? 'bg-blue-600 text-white font-bold border-transparent shadow' : 'bg-slate-800/80 text-slate-400 border-slate-700'" class="py-2.5 px-3 rounded-xl text-xs border">
+                            🔄 កំពុងធ្វើ (In Progress)
+                        </button>
+                        <button (click)="updateStatus(selectedTask()!.id, 'in_review')" [ngClass]="selectedTask()?.status === 'in_review' ? 'bg-amber-600 text-white font-bold border-transparent shadow' : 'bg-slate-800/80 text-slate-400 border-slate-700'" class="py-2.5 px-3 rounded-xl text-xs border">
+                            🔍 ត្រួតពិនិត្យ (Review)
+                        </button>
+                        <button (click)="updateStatus(selectedTask()!.id, 'done')" [ngClass]="selectedTask()?.status === 'done' ? 'bg-emerald-600 text-white font-bold border-transparent shadow' : 'bg-slate-800/80 text-slate-400 border-slate-700'" class="py-2.5 px-3 rounded-xl text-xs border">
+                            ✅ បញ្ចប់ (Done)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Slider -->
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold text-slate-300">វឌ្ឍនភាព (Progress)</span>
+                        <span class="text-sm font-black text-emerald-400">{{ selectedTask()?.progress }}%</span>
+                    </div>
+                    <input type="range" min="0" max="100" step="5" [value]="selectedTask()?.progress" (input)="updateProgress(selectedTask()!.id, +$any($event.target).value)" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                </div>
+
+                <!-- Comments -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                        មតិយោបល់ (Comments: {{ selectedTask()?.comments?.length || 0 }})
+                    </label>
+                    <div class="space-y-2 mb-3 max-h-40 overflow-y-auto">
+                        <div *ngFor="let c of selectedTask()?.comments" class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/40 text-xs">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-emerald-400">{{ c.author_name }}</span>
+                                <span class="text-[10px] text-slate-500">{{ c.created_at }}</span>
+                            </div>
+                            <p class="text-slate-200">{{ c.content }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <input type="text" [(ngModel)]="commentInput" placeholder="សរសេរមតិយោបល់..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                        <button (click)="addComment(selectedTask()!.id)" class="px-3 bg-emerald-600 text-white rounded-xl text-xs font-bold">
+                            ផ្ញើ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-800">
+                <button (click)="closeTaskModal()" class="w-full py-3 bg-slate-800 text-slate-200 font-bold text-xs rounded-xl border border-slate-700">
+                    បិទ (Close)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ➕ CREATE TASK MODAL -->
+    <div *ngIf="isCreateTaskModalOpen()" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex flex-col justify-end">
+        <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl max-h-[90vh] overflow-y-auto flex flex-col animate-slide-up p-4 space-y-3.5">
+            <div class="flex items-center justify-between">
+                <h2 class="font-bold text-sm text-slate-100">+ បង្កើតការងារថ្មី (New Task)</h2>
+                <button (click)="isCreateTaskModalOpen.set(false)" class="p-1 rounded-full bg-slate-800 text-slate-400">
+                    <mat-icon class="!w-5 !h-5 !text-[20px]">close</mat-icon>
+                </button>
+            </div>
+
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">ចំណងជើងការងារ *</label>
+                <input type="text" [(ngModel)]="newTask.title" placeholder="ឧ. រៀបចំរបាយការណ៍ POS..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">គម្រោង</label>
+                    <select [(ngModel)]="newTask.project_name" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
+                        <option value="Cashier / POS System V2">Cashier / POS System V2</option>
+                        <option value="Sales Management V2">Sales Management V2</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">កាលបរិច្ឆេទ</label>
+                    <input type="date" [(ngModel)]="newTask.due_date" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">សេចក្តីពិពណ៌នា</label>
+                <textarea rows="3" [(ngModel)]="newTask.description" placeholder="ព័ត៌មានបន្ថែម..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 resize-none"></textarea>
+            </div>
+
+            <button (click)="createTask()" class="w-full py-3 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">
+                + បង្កើតការងារ (Create Task)
+            </button>
+        </div>
+    </div>
+
+</div>

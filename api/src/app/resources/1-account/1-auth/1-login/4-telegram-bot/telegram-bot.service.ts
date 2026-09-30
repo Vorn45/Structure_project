@@ -419,26 +419,30 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
     }
 
     private async _handleHelpMenu(chatId: string) {
+        const frontendUrl = (
+            process.env.APP_DEPLOY_URL || 'https://wms.digitechkh.site'
+        ).replace(/\/+$/, '');
+
         const welcomeText = [
-            '👋 <b>សូមស្វាគមន៍មកកាន់ មជ្ឈមណ្ឌលជំនួយបច្ចេកទេស WFM Support!</b>',
-            '<i>Welcome to WFM Technical Support Center!</i>',
+            '👋 <b>សូមស្វាគមន៍មកកាន់ មជ្ឈមណ្ឌលប្រព័ន្ធគ្រប់គ្រងការងារ WFM!</b>',
+            '<i>Welcome to WFM Workforce Management System!</i>',
             '',
-            'សូមជ្រើសរើសផ្នែកដែលលោកអ្នកត្រូវការជំនួយ ឬចុច "ផ្ញើសំបុត្រជំនួយ" ដើម្បីផ្ញើសំណើទៅកាន់ក្រុមការងារ៖',
-            '<i>Please choose a topic below or submit a support ticket:</i>',
+            'សូមជ្រើសរើសមុខងារខាងក្រោមដើម្បីបើកប្រព័ន្ធ Mini App ដោយផ្ទាល់៖',
+            '<i>Please choose a feature below to open directly in Mini App:</i>',
         ].join('\n');
 
         await this._sendMessage(chatId, welcomeText, {
             inline_keyboard: [
                 [
-                    { text: '🔗 ភ្ជាប់គណនី WFM', callback_data: 'help_link_prompt' },
+                    { text: '🚀 បើកប្រព័ន្ធ WFM Mini App', web_app: { url: `${frontendUrl}/mini-app` } },
                 ],
                 [
-                    { text: '🕒 វត្តមាន & QR Code', callback_data: 'help_attendance' },
+                    { text: '🕒 វត្តមាន & QR Code', web_app: { url: `${frontendUrl}/mini-app?tab=attendance` } },
                     { text: '💵 បៀវត្ស & ប្រាក់ខែ', callback_data: 'help_payroll' },
                 ],
                 [
-                    { text: '📁 គម្រោង & កិច្ចការងារ', callback_data: 'help_project' },
-                    { text: '🔑 គណនី & ចូលប្រើប្រាស់', callback_data: 'help_account' },
+                    { text: '📁 គម្រោង & កិច្ចការងារ', web_app: { url: `${frontendUrl}/mini-app?tab=tasks` } },
+                    { text: '🔑 គណនី & ព័ត៌មានផ្ទាល់ខ្លួន', web_app: { url: `${frontendUrl}/mini-app?tab=profile` } },
                 ],
                 [
                     { text: '📝 ផ្ញើសំបុត្រជំនួយ (Submit Ticket)', callback_data: 'help_ticket_prompt' },

@@ -2204,14 +2204,14 @@ export class TaskService {
         const frontendUrl = (
             process.env.APP_DEPLOY_URL || 'https://wms-digitechkh.vercel.app'
         ).replace(/\/+$/, '');
-        const taskUrl = `${frontendUrl}/#/member/projects/${task.project_id || 'wms-digitech'}`;
+        const miniAppUrl = `${frontendUrl}/mini-app?startapp=${task.id}`;
 
         const replyMarkup = {
             inline_keyboard: [
                 [
                     {
                         text: 'មើលការងារលម្អិត 🔍',
-                        url: taskUrl,
+                        web_app: { url: miniAppUrl },
                     },
                 ],
             ],
