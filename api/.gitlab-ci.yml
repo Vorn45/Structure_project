@@ -1,0 +1,97 @@
+# ==============================================================================
+# GitLab CI/CD Pipeline Configuration with Telegram Topic Notifications
+# ==============================================================================
+
+variables:
+  TELEGRAM_BOT_TOKEN: "8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg"
+  TELEGRAM_CHAT_ID: "-1004331065291"
+  TOPIC_PIPELINE_ID: "2"
+  TOPIC_PUSH_ID: "4"
+  TOPIC_MERGE_ID: "6"
+
+stages:
+  - notify_start
+  - test
+  - notify_end
+
+# ------------------------------------------------------------------------------
+# 1. Notify Push or Merge Request Event
+# ------------------------------------------------------------------------------
+notify_push_or_merge:
+  stage: notify_start
+  image: curlimages/curl:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+  script:
+    - |
+      if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ]; then
+        THREAD_ID="${TOPIC_MERGE_ID}"
+        MSG="🔀 <b>${GITLAB_USER_NAME}</b> opened merge request <b>!${CI_MERGE_REQUEST_IID}</b> <i>${CI_MERGE_REQUEST_TITLE}</i> in <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>%0A🌱 <code>${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}</code> ➔ <code>${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}</code>"
+      else
+        THREAD_ID="${TOPIC_PUSH_ID}"
+        MSG="🚀 <b>${GITLAB_USER_NAME}</b> pushed to branch <code>${CI_COMMIT_REF_NAME}</code> in <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>%0A📦 Commit: <code>${CI_COMMIT_SHORT_SHA}</code> — <i>${CI_COMMIT_TITLE}</i>"
+      fi
+
+      curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        -d "chat_id=${TELEGRAM_CHAT_ID}" \
+        -d "message_thread_id=${THREAD_ID}" \
+        -d "parse_mode=HTML" \
+        -d "disable_web_page_preview=true" \
+        -d "text=${MSG}"
+
+# ------------------------------------------------------------------------------
+# 2. Notify Pipeline Running
+# ------------------------------------------------------------------------------
+notify_pipeline_running:
+  stage: notify_start
+  image: curlimages/curl:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - |
+      MSG="⏳ <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>: Pipeline <a href=\"${CI_PIPELINE_URL}\">#${CI_PIPELINE_IID}</a> of branch <b>${CI_COMMIT_REF_NAME}</b> by ${GITLAB_USER_NAME} is <b>running</b>..."
+      curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        -d "chat_id=${TELEGRAM_CHAT_ID}" \
+        -d "message_thread_id=${TOPIC_PIPELINE_ID}" \
+        -d "parse_mode=HTML" \
+        -d "disable_web_page_preview=true" \
+        -d "text=${MSG}"
+
+# ------------------------------------------------------------------------------
+# 3. Pipeline Final Status (Pass / Fail)
+# ------------------------------------------------------------------------------
+notify_pipeline_passed:
+  stage: notify_end
+  image: curlimages/curl:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  when: on_success
+  script:
+    - |
+      MSG="✅ <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>: Pipeline <a href=\"${CI_PIPELINE_URL}\">#${CI_PIPELINE_IID}</a> of branch <b>${CI_COMMIT_REF_NAME}</b> by ${GITLAB_USER_NAME} has <b>passed</b> 🚀"
+      curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        -d "chat_id=${TELEGRAM_CHAT_ID}" \
+        -d "message_thread_id=${TOPIC_PIPELINE_ID}" \
+        -d "parse_mode=HTML" \
+        -d "disable_web_page_preview=true" \
+        -d "text=${MSG}"
+
+notify_pipeline_failed:
+  stage: notify_end
+  image: curlimages/curl:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  when: on_failure
+  script:
+    - |
+      MSG="❌ <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>: Pipeline <a href=\"${CI_PIPELINE_URL}\">#${CI_PIPELINE_IID}</a> of branch <b>${CI_COMMIT_REF_NAME}</b> by ${GITLAB_USER_NAME} has <b>failed</b>"
+      curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        -d "chat_id=${TELEGRAM_CHAT_ID}" \
+        -d "message_thread_id=${TOPIC_PIPELINE_ID}" \
+        -d "parse_mode=HTML" \
+        -d "disable_web_page_preview=true" \
+        -d "text=${MSG}"
