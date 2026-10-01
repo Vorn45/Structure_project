@@ -55,10 +55,10 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
-          TOPIC_PUSH_ID: ${{ secrets.TELEGRAM_TOPIC_PUSH_ID || '4' }}
-          TOPIC_MERGE_ID: ${{ secrets.TELEGRAM_TOPIC_MERGE_ID || '6' }}
+          TELEGRAM_BOT_TOKEN: "8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg"
+          TELEGRAM_CHAT_ID: "-1004331065291"
+          TOPIC_PUSH_ID: "4"
+          TOPIC_MERGE_ID: "6"
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "::warning::Telegram notification skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing."
@@ -180,9 +180,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
-          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
+          TELEGRAM_BOT_TOKEN: "8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg"
+          TELEGRAM_CHAT_ID: "-1004331065291"
+          TOPIC_PIPELINE_ID: "2"
           TARGET: ${{ steps.changes.outputs.target }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -378,9 +378,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
-          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
+          TELEGRAM_BOT_TOKEN: "8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg"
+          TELEGRAM_CHAT_ID: "-1004331065291"
+          TOPIC_PIPELINE_ID: "2"
           DURATION: ${{ steps.duration.outputs.formatted || '00:00' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -404,9 +404,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
-          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
+          TELEGRAM_BOT_TOKEN: "8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg"
+          TELEGRAM_CHAT_ID: "-1004331065291"
+          TOPIC_PIPELINE_ID: "2"
           DURATION: ${{ steps.duration.outputs.formatted || '00:00' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -430,9 +430,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
-          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
+          TELEGRAM_BOT_TOKEN: "8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg"
+          TELEGRAM_CHAT_ID: "-1004331065291"
+          TOPIC_PIPELINE_ID: "2"
           DURATION: ${{ steps.duration.outputs.formatted || '00:00' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
