@@ -27,10 +27,10 @@ notify_push_or_merge:
     - |
       if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ]; then
         THREAD_ID="${TOPIC_MERGE_ID}"
-        MSG="🔀 <b>${GITLAB_USER_NAME}</b> opened merge request <b>!${CI_MERGE_REQUEST_IID}</b> <i>${CI_MERGE_REQUEST_TITLE}</i> in <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>%0A🌱 <code>${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}</code> ➔ <code>${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}</code>"
+        MSG="🔀 <b>${GITLAB_USER_NAME}</b> opened merge request <a href=\"${CI_PROJECT_URL}/-/merge_requests/${CI_MERGE_REQUEST_IID}\">!${CI_MERGE_REQUEST_IID}</a> <i>${CI_MERGE_REQUEST_TITLE}</i> in <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>%0A🌱 <code>${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}</code> ➔ <code>${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}</code>"
       else
         THREAD_ID="${TOPIC_PUSH_ID}"
-        MSG="🚀 <b>${GITLAB_USER_NAME}</b> pushed to branch <code>${CI_COMMIT_REF_NAME}</code> in <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>%0A📦 Commit: <code>${CI_COMMIT_SHORT_SHA}</code> — <i>${CI_COMMIT_TITLE}</i>"
+        MSG="<b>${GITLAB_USER_NAME}</b> pushed to branch <a href=\"${CI_PROJECT_URL}/-/tree/${CI_COMMIT_REF_NAME}\">${CI_COMMIT_REF_NAME}</a> of <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_NAME}</a>%0A📦 1 commit(s) — <a href=\"${CI_PROJECT_URL}/-/commit/${CI_COMMIT_SHA}\">Compare changes</a>"
       fi
 
       curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
