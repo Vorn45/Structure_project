@@ -2202,16 +2202,16 @@ export class TaskService {
         const fullMessage = `${escapedFirstLine}\n${secondLine}`;
 
         const frontendUrl = (
-            process.env.APP_DEPLOY_URL || 'https://wms-digitechkh.vercel.app'
+            process.env.APP_DEPLOY_URL || 'https://wms.digitechkh.site'
         ).replace(/\/+$/, '');
-        const miniAppUrl = `${frontendUrl}/mini-app?startapp=${task.id}`;
+        const webTaskUrl = `${frontendUrl}/member/task`;
 
         const replyMarkup = {
             inline_keyboard: [
                 [
                     {
                         text: 'មើលការងារលម្អិត 🔍',
-                        web_app: { url: miniAppUrl },
+                        web_app: { url: webTaskUrl },
                     },
                 ],
             ],

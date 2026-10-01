@@ -9,14 +9,14 @@ const botToken =
     process.env.TELEGRAM_BOT_TOKEN ||
     '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
 
-const miniAppUrl = 'https://wms.digitechkh.site/mini-app';
+const miniAppUrl = 'https://wms.digitechkh.site';
 
 console.log('🤖 Updating Telegram Bot Menu Button...');
 
 const payload = {
     menu_button: {
         type: 'web_app',
-        text: 'WFM App',
+        text: 'WFM Web',
         web_app: {
             url: miniAppUrl
         }

@@ -26,9 +26,6 @@ export class RedirectGuard implements CanActivate {
             const search = window.location.search || '';
             const tg = (window as any).Telegram?.WebApp;
 
-            if (tg?.initData || pathname.includes('/mini-app') || hash.includes('mini-app') || pathname.includes('/tma') || hash.includes('tma')) {
-                return this.router.parseUrl(`/mini-app${search}`);
-            }
             if (pathname.includes('/attendance/scan') || hash.includes('/attendance') || pathname.includes('/attendance')) {
                 return this.router.parseUrl(`/attendance/scan${search}`);
             }
@@ -54,34 +51,6 @@ export const appRoutes: Route[] = [
         path: 'redirect',
         canActivate: [RedirectGuard],
         component: LayoutComponent,
-    },
-    {
-        path: 'mini-app',
-        component: LayoutComponent,
-        data: { layout: 'empty' },
-        children: [
-            {
-                path: '',
-                loadComponent: () =>
-                    import(
-                        'app/resources/3-public/telegram-mini-app/component'
-                    ).then((m) => m.TelegramMiniAppComponent),
-            },
-        ],
-    },
-    {
-        path: 'tma',
-        component: LayoutComponent,
-        data: { layout: 'empty' },
-        children: [
-            {
-                path: '',
-                loadComponent: () =>
-                    import(
-                        'app/resources/3-public/telegram-mini-app/component'
-                    ).then((m) => m.TelegramMiniAppComponent),
-            },
-        ],
     },
     {
         path: 'verify',

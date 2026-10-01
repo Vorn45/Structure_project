@@ -13,7 +13,7 @@ const botToken =
 const targetChatIds = ['1495035256', '8836877586'];
 
 const frontendUrl = 'https://wms.digitechkh.site';
-const miniAppUrl = `${frontendUrl}/mini-app?startapp=WMS-101`;
+const miniAppUrl = `${frontendUrl}/member/task`;
 
 console.log('🤖 Telegram Real WFM Notification & Menu Dispatcher');
 console.log('--------------------------------------------------');
@@ -32,8 +32,8 @@ const taskPayload = {
         inline_keyboard: [
             [
                 {
-                    text: 'មើលការងារលម្អិត 🔍',
-                    web_app: { url: miniAppUrl }
+                    text: 'មើលការងារលើ Web 🔍',
+                    web_app: { url: `${frontendUrl}/member/task` }
                 }
             ]
         ]
@@ -44,8 +44,8 @@ const taskPayload = {
 const menuMessageText = `👋 <b>សូមស្វាគមន៍មកកាន់ មជ្ឈមណ្ឌលប្រព័ន្ធគ្រប់គ្រងការងារ WFM!</b>
 <i>Welcome to WFM Workforce Management System!</i>
 
-សូមជ្រើសរើសមុខងារខាងក្រោមដើម្បីបើកប្រព័ន្ធ Mini App ដោយផ្ទាល់៖
-<i>Please choose a feature below to open directly in Mini App:</i>`;
+សូមជ្រើសរើសមុខងារខាងក្រោមដើម្បីបើកប្រព័ន្ធ Web App ដោយផ្ទាល់៖
+<i>Please choose a feature below to open directly in Web App:</i>`;
 
 const menuPayload = {
     text: menuMessageText,
@@ -54,24 +54,24 @@ const menuPayload = {
         inline_keyboard: [
             [
                 {
-                    text: '🚀 បើកប្រព័ន្ធ WFM Mini App',
-                    web_app: { url: `${frontendUrl}/mini-app` }
+                    text: '🌐 បើកប្រព័ន្ធ WFM Web',
+                    web_app: { url: `${frontendUrl}` }
                 }
             ],
             [
                 {
-                    text: '🕒 វត្តមាន & QR Code',
-                    web_app: { url: `${frontendUrl}/mini-app?tab=attendance` }
+                    text: '🕒 វត្តមាន (Attendance)',
+                    web_app: { url: `${frontendUrl}/member/home` }
                 },
                 {
-                    text: '📁 គម្រោង & កិច្ចការងារ',
-                    web_app: { url: `${frontendUrl}/mini-app?tab=tasks` }
+                    text: '📁 កិច្ចការងារ (Tasks)',
+                    web_app: { url: `${frontendUrl}/member/task` }
                 }
             ],
             [
                 {
-                    text: '🔑 គណនី & ព័ត៌មានផ្ទាល់ខ្លួន',
-                    web_app: { url: `${frontendUrl}/mini-app?tab=profile` }
+                    text: '🔑 ព័ត៌មានផ្ទាល់ខ្លួន (Profile)',
+                    web_app: { url: `${frontendUrl}/profile` }
                 }
             ]
         ]

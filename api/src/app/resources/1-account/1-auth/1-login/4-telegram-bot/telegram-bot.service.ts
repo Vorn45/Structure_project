@@ -112,8 +112,26 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
                 },
                 { timeout: 30000 },
             );
+
+            const frontendUrl = (
+                process.env.APP_DEPLOY_URL || 'https://wms.digitechkh.site'
+            ).replace(/\/+$/, '');
+
+            await axios.post(
+                `https://api.telegram.org/bot${appConfig.AUTH.TELEGRAM_BOT_TOKEN}/setChatMenuButton`,
+                {
+                    menu_button: {
+                        type: 'web_app',
+                        text: 'WFM Web',
+                        web_app: {
+                            url: `${frontendUrl}`,
+                        },
+                    },
+                },
+                { timeout: 30000 },
+            );
         } catch (error: any) {
-            this._logger.warn(`Telegram setMyCommands failed: ${error?.response?.data ? JSON.stringify(error.response.data) : error?.message ?? error}`);
+            this._logger.warn(`Telegram command/menu setup failed: ${error?.response?.data ? JSON.stringify(error.response.data) : error?.message ?? error}`);
         }
 
         return { ok: true, mode: appConfig.APP.PUBLIC_URL ? 'webhook' : 'polling' };
@@ -427,22 +445,21 @@ export class TelegramBotService implements OnModuleInit, OnModuleDestroy {
             '👋 <b>សូមស្វាគមន៍មកកាន់ មជ្ឈមណ្ឌលប្រព័ន្ធគ្រប់គ្រងការងារ WFM!</b>',
             '<i>Welcome to WFM Workforce Management System!</i>',
             '',
-            'សូមជ្រើសរើសមុខងារខាងក្រោមដើម្បីបើកប្រព័ន្ធ Mini App ដោយផ្ទាល់៖',
-            '<i>Please choose a feature below to open directly in Mini App:</i>',
+            'សូមជ្រើសរើសមុខងារខាងក្រោមដើម្បីបើកប្រព័ន្ធ Web App ដោយផ្ទាល់៖',
+            '<i>Please choose a feature below to open directly in Web App:</i>',
         ].join('\n');
 
         await this._sendMessage(chatId, welcomeText, {
             inline_keyboard: [
                 [
-                    { text: '🚀 បើកប្រព័ន្ធ WFM Mini App', web_app: { url: `${frontendUrl}/mini-app` } },
+                    { text: '🌐 បើកប្រព័ន្ធ WFM Web', web_app: { url: `${frontendUrl}` } },
                 ],
                 [
-                    { text: '🕒 វត្តមាន & QR Code', web_app: { url: `${frontendUrl}/mini-app?tab=attendance` } },
-                    { text: '💵 បៀវត្ស & ប្រាក់ខែ', callback_data: 'help_payroll' },
+                    { text: '🕒 វត្តមាន (Attendance)', web_app: { url: `${frontendUrl}/member/home` } },
+                    { text: '📁 កិច្ចការងារ (Tasks)', web_app: { url: `${frontendUrl}/member/task` } },
                 ],
                 [
-                    { text: '📁 គម្រោង & កិច្ចការងារ', web_app: { url: `${frontendUrl}/mini-app?tab=tasks` } },
-                    { text: '🔑 គណនី & ព័ត៌មានផ្ទាល់ខ្លួន', web_app: { url: `${frontendUrl}/mini-app?tab=profile` } },
+                    { text: '🔑 គណនី & ព័ត៌មានផ្ទាល់ខ្លួន', web_app: { url: `${frontendUrl}/profile` } },
                 ],
                 [
                     { text: '📝 ផ្ញើសំបុត្រជំនួយ (Submit Ticket)', callback_data: 'help_ticket_prompt' },
