@@ -3,15 +3,7 @@ name: Deploy main to NAS
 on:
   push:
     branches:
-      - main
-      - dev-vorn
-    paths:
-      - "api/**"
-      - "web/**"
-      - "file-v3/**"
-      - "nginx/**"
-      - "docker-compose.yml"
-      - ".github/workflows/deploy.yml"
+      - '**'
   workflow_dispatch:
     inputs:
       service:
