@@ -402,7 +402,7 @@ export class MeetingService implements OnModuleInit {
             process.env.TELEGRAM_BOT_TOKEN ||
             appConfig.AUTH?.TELEGRAM_BOT_TOKEN ||
             appConfig.ORGANIZATION_LOG?.TELEGRAM_BOT_TOKEN ||
-            '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
+            '8884371111:AAG3DkDG61rKvCbOFrl88FQ4nNNS-8XzzZI';
 
         // 1. NOTIFY MEMBERS OF THE PROJECT AND ADMIN DIRECTLY VIA TELEGRAM
         const directChatIds = new Set<string>();

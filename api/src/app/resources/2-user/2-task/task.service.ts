@@ -2194,7 +2194,7 @@ export class TaskService {
         const botToken =
             process.env.TELEGRAM_BOT_TOKEN ||
             appConfig.ORGANIZATION_LOG?.TELEGRAM_BOT_TOKEN ||
-            '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
+            '8884371111:AAG3DkDG61rKvCbOFrl88FQ4nNNS-8XzzZI';
         if (!botToken) return;
 
         const secondLine = this.escapeHtml(this.getTaskContextLine(task));

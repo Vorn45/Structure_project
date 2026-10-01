@@ -7,7 +7,7 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 const botToken =
     process.env.TELEGRAM_BOT_TASK_TOKEN ||
     process.env.TELEGRAM_BOT_TOKEN ||
-    '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
+    '8884371111:AAG3DkDG61rKvCbOFrl88FQ4nNNS-8XzzZI';
 
 // Real Telegram user IDs
 const targetChatIds = ['1495035256', '8836877586'];

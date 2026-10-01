@@ -4,14 +4,14 @@ const path = require('path');
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-const botToken =
-    process.env.TELEGRAM_BOT_TASK_TOKEN ||
-    process.env.TELEGRAM_BOT_TOKEN ||
-    '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ';
+const botTokens = [
+    '8884371111:AAG3DkDG61rKvCbOFrl88FQ4nNNS-8XzzZI',
+    '8680838714:AAHCMGOEmtoVZxzSUD9nxHrew0BazYGshXQ'
+];
 
-const miniAppUrl = 'https://wms.digitechkh.site';
+const miniAppUrl = 'https://wms.digitechkh.site/?app=wfm_web';
 
-console.log('🤖 Updating Telegram Bot Menu Button...');
+console.log('🤖 Updating Telegram Bot Menu Buttons...');
 
 const payload = {
     menu_button: {
@@ -23,12 +23,15 @@ const payload = {
     }
 };
 
-axios
-    .post(`https://api.telegram.org/bot${botToken}/setChatMenuButton`, payload)
-    .then((res) => {
-        console.log('✅ Success! Bot Menu Button updated to:', miniAppUrl);
-        console.log('Telegram API Response:', res.data);
-    })
-    .catch((err) => {
-        console.error('❌ Error updating menu button:', err.response?.data || err.message);
-    });
+async function updateAll() {
+    for (const token of botTokens) {
+        try {
+            const res = await axios.post(`https://api.telegram.org/bot${token}/setChatMenuButton`, payload);
+            console.log(`✅ Success for bot token ...${token.slice(-8)}: Menu Button updated to: ${miniAppUrl}`);
+        } catch (err) {
+            console.error(`❌ Error updating menu button for ...${token.slice(-8)}:`, err.response?.data || err.message);
+        }
+    }
+}
+
+updateAll();
