@@ -55,23 +55,28 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
+          TOPIC_PUSH_ID: ${{ secrets.TELEGRAM_TOPIC_PUSH_ID || '4' }}
+          TOPIC_MERGE_ID: ${{ secrets.TELEGRAM_TOPIC_MERGE_ID || '6' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo "::warning::Telegram notification skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing in GitHub secrets."
+            echo "::warning::Telegram notification skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing."
             exit 0
           fi
           COMMIT_MSG="${{ github.event.head_commit.message }}"
           ICON="🚀"
           ACTION="pushed to"
+          THREAD_ID="$TOPIC_PUSH_ID"
           if [[ "$COMMIT_MSG" == *"Merge"* ]]; then
             ICON="🔀"
             ACTION="merged into"
+            THREAD_ID="$TOPIC_MERGE_ID"
           fi
           MSG="${ICON} <b>${{ github.actor }}</b> ${ACTION} <code>${{ github.ref_name }}</code> in <a href=\"${{ github.server_url }}/${{ github.repository }}\">${{ github.event.repository.name }}</a>%0A📦 Commit: <a href=\"${{ github.event.compare || format('{0}/{1}/commit/{2}', github.server_url, github.repository, github.sha) }}\">${{ github.sha }}</a>"
           RESPONSE=$(curl -4 -sS --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 20 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "message_thread_id=${THREAD_ID}" \
             -d "parse_mode=HTML" \
             -d "disable_web_page_preview=true" \
             -d "text=${MSG}" 2>&1 || echo "Telegram notification request failed")
@@ -175,8 +180,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
+          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
           TARGET: ${{ steps.changes.outputs.target }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -186,6 +192,7 @@ jobs:
           MSG="⏳ <a href=\"${{ github.server_url }}/${{ github.repository }}\">${{ github.event.repository.name }}</a>: Pipeline <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} is <b>running</b> (<code>${TARGET}</code>)..."
           RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "message_thread_id=${TOPIC_PIPELINE_ID}" \
             -d "parse_mode=HTML" \
             -d "disable_web_page_preview=true" \
             -d "text=${MSG}")
@@ -371,8 +378,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
+          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
           DURATION: ${{ steps.duration.outputs.formatted || '00:00' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -382,6 +390,7 @@ jobs:
           MSG="✅ <a href=\"${{ github.server_url }}/${{ github.repository }}\">${{ github.event.repository.name }}</a>: Pipeline <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>passed</b> in ${DURATION} 🚀"
           RESPONSE=$(curl -4 -sS --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 20 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "message_thread_id=${TOPIC_PIPELINE_ID}" \
             -d "parse_mode=HTML" \
             -d "disable_web_page_preview=true" \
             -d "text=${MSG}" 2>&1 || echo "Telegram notification request failed")
@@ -395,8 +404,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
+          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
           DURATION: ${{ steps.duration.outputs.formatted || '00:00' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -406,6 +416,7 @@ jobs:
           MSG="❌ <a href=\"${{ github.server_url }}/${{ github.repository }}\">${{ github.event.repository.name }}</a>: Pipeline <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} has <b>failed</b> in ${DURATION}"
           RESPONSE=$(curl -4 -sS --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 20 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "message_thread_id=${TOPIC_PIPELINE_ID}" \
             -d "parse_mode=HTML" \
             -d "disable_web_page_preview=true" \
             -d "text=${MSG}" 2>&1 || echo "Telegram notification failed to send")
@@ -419,8 +430,9 @@ jobs:
         continue-on-error: true
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || '8743624319:AAG5B0eitDPCBmUKcCjIan9dYvDF3vKgJmg' }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.TELEGRAM_TO || '-1004331065291' }}
+          TOPIC_PIPELINE_ID: ${{ secrets.TELEGRAM_TOPIC_PIPELINE_ID || '2' }}
           DURATION: ${{ steps.duration.outputs.formatted || '00:00' }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -430,6 +442,7 @@ jobs:
           MSG="⚠️ <a href=\"${{ github.server_url }}/${{ github.repository }}\">${{ github.event.repository.name }}</a>: Pipeline <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">#${{ github.run_number }}</a> of branch <b>${{ github.ref_name }}</b> by ${{ github.actor }} was <b>cancelled</b> after ${DURATION}"
           RESPONSE=$(curl -4 -sS --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 20 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "message_thread_id=${TOPIC_PIPELINE_ID}" \
             -d "parse_mode=HTML" \
             -d "disable_web_page_preview=true" \
             -d "text=${MSG}" 2>&1 || echo "Telegram notification failed to send")
